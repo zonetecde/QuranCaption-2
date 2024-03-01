@@ -1,0 +1,42 @@
+@font-face {
+	font-family: 'Molengo';
+	src: url('fonts/Molengo-Regular.ttf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'SchibstedGrotesk';
+	src: url('fonts/SchibstedGrotesk-VariableFont_wght.ttf');
+	font-weight: 100 900;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'OpenSans';
+	src: url('fonts/OpenSans-VariableFont_wdth,wght.ttf');
+	font-weight: 100 900;
+	font-style: normal;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.schibstedGrotesk {
+	font-family: 'SchibstedGrotesk', 'Molengo', 'sans-serif';
+}
+
+.molengo {
+	font-family: 'Molengo', 'sans-serif';
+}
+
+body {
+	font-family: 'OpenSans', 'SchibstedGrotesk', 'Molengo', 'sans-serif';
+	background-color: #171717;
+	color: white;
+}
+
+.bg-default {
+	background-color: #171717;
+}
