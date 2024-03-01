@@ -1,20 +1,20 @@
 @font-face {
 	font-family: 'Molengo';
-	src: url('fonts/Molengo-Regular.ttf');
+	src: url('/fonts/Molengo-Regular.ttf');
 	font-weight: normal;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'SchibstedGrotesk';
-	src: url('fonts/SchibstedGrotesk-VariableFont_wght.ttf');
+	src: url('/fonts/SchibstedGrotesk-VariableFont_wght.ttf');
 	font-weight: 100 900;
 	font-style: normal;
 }
 
 @font-face {
 	font-family: 'OpenSans';
-	src: url('fonts/OpenSans-VariableFont_wdth,wght.ttf');
+	src: url('/fonts/OpenSans-VariableFont_wdth,wght.ttf');
 	font-weight: 100 900;
 	font-style: normal;
 }
@@ -33,8 +33,20 @@
 
 body {
 	font-family: 'OpenSans', 'SchibstedGrotesk', 'Molengo', 'sans-serif';
-	background-color: #171717;
 	color: white;
+
+	background-color: #171717;
+
+	--s: 200px; /* control the size */
+	--c1: #171717;
+	--c2: #1b1b1b;
+	--c3: #1b1a1a;
+
+	background:
+		repeating-conic-gradient(from 30deg, #0000 0 120deg, var(--c3) 0 180deg) calc(0.5 * var(--s))
+			calc(0.5 * var(--s) * 0.577),
+		repeating-conic-gradient(from 30deg, var(--c1) 0 60deg, var(--c2) 0 120deg, var(--c3) 0 180deg);
+	background-size: var(--s) calc(var(--s) * 0.577);
 }
 
 .bg-default {
