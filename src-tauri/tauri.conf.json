@@ -12,7 +12,20 @@
 	},
 	"tauri": {
 		"allowlist": {
-			"all": false
+			"all": false,
+			"dialog": {
+				"all": false,
+				"ask": false,
+				"confirm": false,
+				"message": false,
+				"open": true,
+				"save": true
+			},
+			"protocol": {
+				"all": true,
+				"asset": true,
+				"assetScope": ["**"]
+			}
 		},
 		"bundle": {
 			"active": true,
@@ -38,7 +51,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": [],
+			"resources": ["assets/quran_en.json"],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {
@@ -48,7 +61,7 @@
 			}
 		},
 		"security": {
-			"csp": null
+			"csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost;"
 		},
 		"updater": {
 			"active": false

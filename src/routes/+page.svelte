@@ -58,7 +58,7 @@
 			<div class="mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3">
 				{#each userProjects as project}
 					<button
-						class="w-56 h-full bg-[#1c2031] flex flex-col justify-between p-3 rounded-xl"
+						class="w-56 h-full bg-[#2e2f36] flex flex-col justify-between p-3 rounded-xl"
 						on:click={() => openProject(project.id)}
 					>
 						<p>{project.name}</p>

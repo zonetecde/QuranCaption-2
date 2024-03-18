@@ -1,18 +1,35 @@
 <script lang="ts">
 	import type Project from '$lib/Project';
+	import type { Surah } from '$lib/Quran';
+	import ClipManager from '$lib/components/clipmanager/ClipManager.svelte';
 
 	export let data: Project;
 </script>
 
-<div class="w-screen h-screen flex flex-row divide-x-4 divide-[#413f3f]" id="container">
-	<section class="w-[15%] min-w-[220px] relative"></section>
-	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
-		<!-- Editor -->
-		<section class="w-[70%]"></section>
+<div class="w-screen h-screen flex flex-col" id="container">
+	<!-- Top bar -->
+	<header class="w-full h-10 border-b-2 border-[#413f3f]"></header>
 
-		<!-- Video preview & subtitles -->
-		<section class="flex-grow flex" id="preview"></section>
-	</section>
+	<div class="flex-row w-full h-full flex divide-x-4 divide-[#413f3f]">
+		<!-- Quran and clip explorer -->
+		<section class="w-[15%] min-w-[220px] relative overflow-hidden">
+			<ClipManager />
+		</section>
+
+		<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
+			<!-- Editor -->
+			<section class="w-[70%] divide-y-4 divide-[#413f3f]">
+				<!-- Words selector -->
+				<section class="h-[75%]"></section>
+
+				<!-- Timeline -->
+				<section class="h-[25%]"></section>
+			</section>
+
+			<!-- Video preview & subtitles -->
+			<section class="flex-grow flex" id="preview"></section>
+		</section>
+	</div>
 </div>
 
 <style>
