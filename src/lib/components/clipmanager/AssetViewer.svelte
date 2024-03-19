@@ -35,5 +35,5 @@
 		<p class="text-white">Unsupported file type</p>
 	{/if}
 
-	<p class="text-white mt-4 text-center">{asset.fileName}</p>
+	<p class="text-white mt-4 text-center xl:text-sm text-base truncate w-full">{asset.fileName}</p>
 </div>

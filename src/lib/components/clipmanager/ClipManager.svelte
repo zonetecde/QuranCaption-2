@@ -41,7 +41,7 @@
 	</div>
 
 	<div class="bg-[#1f1f1f] flex flex-col flex-grow">
-		<div class="flex flex-col gap-2 px-3 py-4">
+		<div class="gap-2 px-3 py-4 xl:grid xl:grid-cols-2 flex flex-col">
 			{#if $assets.length === 0}
 				<p class="text-white text-center mt-5 px-4 text-sm">
 					Click the button above to import videos, audios and images for your project.

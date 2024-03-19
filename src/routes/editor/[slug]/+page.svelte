@@ -11,12 +11,9 @@
 	<!-- There's an issue with the top bar, it's making the main window have a scroll bar -->
 	<header class="w-full min-h-8 h-8 border-b-2 border-[#413f3f]"></header>
 
-	<div
-		class="flex-row w-full flex divide-x-4 divide-[#413f3f] first:divide-none"
-		style="height: calc(100% - 2rem);"
-	>
+	<div class="flex-row w-full flex" style="height: calc(100% - 2rem);">
 		<!-- Quran and clip explorer -->
-		<section class="w-[15%] min-w-[220px]">
+		<section class="w-[25%] min-w-[220px]">
 			<ClipManager />
 		</section>
 
