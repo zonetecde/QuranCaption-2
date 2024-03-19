@@ -6,13 +6,13 @@
 	export let data: Project;
 </script>
 
-<div class="w-screen h-screen flex flex-col" id="container">
+<div class="h-screen flex flex-col" id="container">
 	<!-- Top bar -->
-	<header class="w-full h-10 border-b-2 border-[#413f3f]"></header>
+	<!-- <header class="w-full min-h-8 h-8 border-b-2 border-[#413f3f]"></header> -->
 
-	<div class="flex-row w-full h-full flex divide-x-4 divide-[#413f3f]">
+	<div class="flex-row w-full flex divide-x-4 divide-[#413f3f] first:divide-none h-full">
 		<!-- Quran and clip explorer -->
-		<section class="w-[15%] min-w-[220px] relative overflow-hidden">
+		<section class="w-[15%] min-w-[220px]">
 			<ClipManager />
 		</section>
 

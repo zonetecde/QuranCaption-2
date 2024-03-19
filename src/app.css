@@ -62,3 +62,17 @@ h5,
 h6 {
 	user-select: none;
 }
+
+::-webkit-scrollbar {
+	width: 8px;
+}
+::-webkit-scrollbar-track {
+	background: #353232;
+}
+::-webkit-scrollbar-thumb {
+	background: #777070;
+	border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: #4b4646;
+}
