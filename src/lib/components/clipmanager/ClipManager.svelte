@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { addAssets, assets } from '$lib/Store';
 	import { open } from '@tauri-apps/api/dialog';
 	import IconButton from '../common/IconButton.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/FileExt';
 	import AssetViewer from './AssetViewer.svelte';
+	import { addAssets, assets } from '$lib/stores/AssetsStore';
 
 	function uploadAssets() {
 		open({
@@ -43,7 +43,7 @@
 	<div class="bg-[#1f1f1f] flex flex-col flex-grow">
 		<div class="gap-2 px-3 py-4 xl:grid xl:grid-cols-2 flex flex-col">
 			{#if $assets.length === 0}
-				<p class="text-white text-center mt-5 px-4 text-sm">
+				<p class="text-white text-center mt-5 px-4 text-sm absolute">
 					Click the button above to import videos, audios and images for your project.
 				</p>
 			{:else}

@@ -2,6 +2,7 @@
 	import type Project from '$lib/Project';
 	import type { Surah } from '$lib/Quran';
 	import ClipManager from '$lib/components/clipmanager/ClipManager.svelte';
+	import Header from '$lib/components/header/Header.svelte';
 
 	export let data: Project;
 </script>
@@ -9,9 +10,11 @@
 <div class="h-screen flex flex-col" id="container">
 	<!-- Top bar -->
 	<!-- There's an issue with the top bar, it's making the main window have a scroll bar -->
-	<header class="w-full min-h-8 h-8 border-b-2 border-[#413f3f]"></header>
+	<header class="w-full min-h-14 border-b-2 border-[#413f3f]">
+		<Header />
+	</header>
 
-	<div class="flex-row w-full flex" style="height: calc(100% - 2rem);">
+	<div class="flex-row w-full flex" style="height: calc(100% - 3.5rem);">
 		<!-- Quran and clip explorer -->
 		<section class="w-[25%] min-w-[220px]">
 			<ClipManager />

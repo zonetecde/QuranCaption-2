@@ -1,6 +1,6 @@
+import type Asset from '$lib/classes/Asset';
+import { getFileNameFromPath, getFileType } from '$lib/FileExt';
 import { writable, type Writable } from 'svelte/store';
-import type Asset from './classes/Asset';
-import { getFileNameFromPath, getFileType } from './FileExt';
 
 export const assets: Writable<Asset[]> = writable([]);
 
@@ -40,4 +40,8 @@ export function addAssets(filePaths: string | string[]) {
 			return index === self.findIndex((c) => c.filePath === clip.filePath);
 		});
 	});
+}
+
+export function removeAsset(filePath: string) {
+	assets.update((v) => v.filter((c) => c.filePath !== filePath));
 }
