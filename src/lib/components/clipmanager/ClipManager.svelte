@@ -29,7 +29,7 @@
 	<div
 		class="w-full h-12 bg-black bg-opacity-45 border-b-2 border-[#1f1f1f] flex items-center px-4"
 	>
-		<h1 class="text-white select-none">Video clips</h1>
+		<h1 class="text-white">Video clips</h1>
 		<Button text="Import" on:click={selectVideoClip} classes="ml-auto">
 			<path
 				stroke-linecap="round"
