@@ -76,3 +76,7 @@ h6 {
 ::-webkit-scrollbar-thumb:hover {
 	background: #4b4646;
 }
+
+audio::-webkit-media-controls-panel {
+	background-color: #2f5045;
+}
