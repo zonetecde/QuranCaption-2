@@ -26,9 +26,9 @@
 	}
 </script>
 
-<div class="flex flex-col h-full overflow-x-hidden overflow-y-visible relative">
+<div class="flex flex-col h-full overflow-x-hidden overflow-y-scroll relative">
 	<div
-		class="w-full min-h-12 bg-[#302f2f] border-b-2 border-[#534c4c] flex items-center px-4 sticky top-0 z-20"
+		class="w-full min-h-12 bg-[#302f2f] border-b-2 border-[#534c4c] flex items-center pl-4 pr-2 sticky top-0 z-20"
 	>
 		<h1 class="text-white">Assets</h1>
 		<IconButton text="Import" on:click={uploadAssets} classes="ml-auto">
@@ -43,7 +43,7 @@
 	<div class="bg-[#1f1f1f] flex flex-col flex-grow">
 		<div class="gap-2 px-3 py-4 xl:grid xl:grid-cols-2 flex flex-col">
 			{#if $assets.length === 0}
-				<p class="text-white text-center mt-5 px-4 text-sm absolute">
+				<p class="text-white text-center mt-5 pr-4 text-sm absolute">
 					Click the button above to import videos, audios and images for your project.
 				</p>
 			{:else}

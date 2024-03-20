@@ -17,7 +17,7 @@
 			on:click={() => handlePageChange(page)}
 		>
 			<img src="/icons/{i + 1}.png" alt="1" class="h-10" />
-			<p>Video editor</p></button
+			<p>{page}</p></button
 		>
 	{/each}
 </div>
