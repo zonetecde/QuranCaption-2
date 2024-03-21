@@ -3,15 +3,19 @@
 	import { blur, fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
-	import Id from '$lib/ext/Id';
+	import { createBlankProject, getUserProjects, updateUsersProjects } from '$lib/Project';
+	import { currentProject } from '$lib/stores/ProjectStore';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
 
 	let userProjects: Project[] = [];
+
 	onMount(async () => {
-		const projectsJson = localStorage.getItem('projects');
-		userProjects = projectsJson ? JSON.parse(projectsJson) : [];
+		userProjects = getUserProjects();
+
+		// delete all projects from the local storage
+		// localStorage.removeItem('projects');
 	});
 
 	/**
@@ -24,51 +28,20 @@
 			return;
 		}
 
-		createProjectVisibility = true;
+		const project = createBlankProject(projectName);
 
-		let uniqueId = 0;
-		while (userProjects.some((project) => project.id === uniqueId)) {
-			uniqueId++;
-		}
+		updateUsersProjects(project); // Save the project to the local storage
 
-		userProjects.push({
-			id: uniqueId,
-			name: projectName,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-			description: '',
-			timeline: {
-				audiosTracks: [
-					{
-						id: Id.generate(),
-						name: 'Quran',
-						clips: []
-					}
-				],
-				videosTracks: [
-					{
-						id: Id.generate(),
-						name: 'Background Video',
-						clips: []
-					}
-				],
-				subtitlesTracks: [
-					{
-						id: Id.generate(),
-						name: 'Subtitles',
-						clips: []
-					}
-				]
-			}
-		});
-
-		localStorage.setItem('projects', JSON.stringify(userProjects));
-
-		openProject(uniqueId);
+		openProject(project); // Open the project
 	}
 
-	function openProject(id: number): any {
-		window.location.href = `/editor/${id}`;
+	/**
+	 * Open a project
+	 */
+	function openProject(project: Project) {
+		currentProject.set(project);
+
+		window.location.href = `/editor/${project.id}`; // Redirect to the editor page
 	}
 </script>
 
@@ -79,11 +52,11 @@
 		<div class="mt-10">
 			<p class="text-xl pl-3">Recent project :</p>
 
-			<div class="mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3">
+			<div class="mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-x-4">
 				{#each userProjects as project}
 					<button
 						class="w-56 h-full bg-[#2e2f36] flex flex-col justify-between p-3 rounded-xl"
-						on:click={() => openProject(project.id)}
+						on:click={() => openProject(project)}
 					>
 						<p>{project.name}</p>
 						<p>{new Date(project.createdAt).toLocaleString()}</p>

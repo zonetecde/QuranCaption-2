@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { updateUsersProjects } from '$lib/Project';
 	import { currentPage, setCurrentPage } from '$lib/stores/LayoutStore';
+	import { currentProject } from '$lib/stores/ProjectStore';
 
 	let pages: string[] = ['Video editor', 'Subtitle editor', 'Export'];
 
@@ -11,6 +13,14 @@
 <div
 	class="w-full h-full bg-black bg-opacity-30 flex items-center justify-center pt-0.5 text-xl gap-x-[10%]"
 >
+	<button
+		class="absolute top-0 left-0"
+		on:click={() => {
+			updateUsersProjects($currentProject);
+			window.location.href = '/';
+		}}>Save&back</button
+	>
+
 	{#each pages as page, i}
 		<button
 			class="flex items-center gap-x-2 {$currentPage === page ? 'cursor-default' : 'opacity-35'}"

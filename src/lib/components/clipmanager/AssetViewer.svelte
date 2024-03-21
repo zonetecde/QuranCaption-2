@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type Asset from '$lib/classes/Asset';
-	import { removeAsset } from '$lib/stores/AssetsStore';
+	import { removeAsset } from '$lib/classes/Asset';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
 	export let asset: Asset;
@@ -11,7 +11,7 @@
 	 * Remove the asset from the store
 	 */
 	function handleDeleteAssetButtonClicked() {
-		removeAsset(asset.filePath);
+		removeAsset(asset.id);
 	}
 </script>
 

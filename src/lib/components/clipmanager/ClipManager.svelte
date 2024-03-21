@@ -4,7 +4,9 @@
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/FileExt';
 	import AssetViewer from './AssetViewer.svelte';
-	import { addAssets, assets } from '$lib/stores/AssetsStore';
+	import { addAssets } from '$lib/classes/Asset';
+	import { currentProject } from '$lib/stores/ProjectStore';
+	import { assets } from '$app/paths';
 
 	function uploadAssets() {
 		open({
@@ -42,14 +44,16 @@
 
 	<div class="bg-[#1f1f1f] flex flex-col flex-grow">
 		<div class="gap-2 px-3 py-4 xl:grid xl:grid-cols-2 flex flex-col">
-			{#if $assets.length === 0}
-				<p class="text-white text-center mt-5 pr-4 text-sm absolute">
-					Click the button above to import videos, audios and images for your project.
-				</p>
-			{:else}
-				{#each $assets as asset}
-					<AssetViewer {asset} />
-				{/each}
+			{#if $currentProject}
+				{#if $currentProject.assets.length === 0}
+					<p class="text-white text-center mt-5 pr-4 text-sm absolute">
+						Click the button above to import videos, audios and images for your project.
+					</p>
+				{:else}
+					{#each $currentProject.assets as asset}
+						<AssetViewer {asset} />
+					{/each}
+				{/if}
 			{/if}
 		</div>
 	</div>
