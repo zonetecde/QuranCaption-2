@@ -44,16 +44,14 @@
 
 	<div class="bg-[#1f1f1f] flex flex-col flex-grow">
 		<div class="gap-2 px-3 py-4 xl:grid xl:grid-cols-2 flex flex-col">
-			{#if $currentProject}
-				{#if $currentProject.assets.length === 0}
-					<p class="text-white text-center mt-5 pr-4 text-sm absolute">
-						Click the button above to import videos, audios and images for your project.
-					</p>
-				{:else}
-					{#each $currentProject.assets as asset}
-						<AssetViewer {asset} />
-					{/each}
-				{/if}
+			{#if $currentProject.assets.length === 0}
+				<p class="text-white text-center mt-5 pr-4 text-sm absolute">
+					Click the button above to import videos, audios and images for your project.
+				</p>
+			{:else}
+				{#each $currentProject.assets as asset}
+					<AssetViewer {asset} />
+				{/each}
 			{/if}
 		</div>
 	</div>

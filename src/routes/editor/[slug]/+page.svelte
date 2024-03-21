@@ -1,18 +1,8 @@
 <script lang="ts">
-	import type Project from '$lib/Project';
 	import Header from '$lib/components/header/Header.svelte';
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
 	import { currentPage } from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
-	import { onMount } from 'svelte';
-
-	export let data: Project;
-
-	onMount(() => {
-		// Initialize the current project
-		currentProject.set(data);
-	});
 </script>
 
 <div class="h-screen flex flex-col" id="container">

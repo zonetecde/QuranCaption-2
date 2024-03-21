@@ -1,5 +1,6 @@
 import type Project from '$lib/Project.js';
 import { getProjectById, getUserProjects } from '$lib/Project.js';
+import { currentProject } from '$lib/stores/ProjectStore.js';
 import { error } from '@sveltejs/kit';
 
 export function load({ params }) {
@@ -11,5 +12,6 @@ export function load({ params }) {
 		return error(404, 'Project not found');
 	}
 
-	return project;
+	// Load the project into the store
+	currentProject.set(project);
 }
