@@ -1,4 +1,5 @@
 import type Project from '$lib/Project.js';
+import { timeline } from '$lib/stores/TimelineStore.js';
 import { error } from '@sveltejs/kit';
 
 export function load({ params }) {
@@ -17,6 +18,9 @@ export function load({ params }) {
 	if (!project) {
 		return error(404, 'Project not found');
 	}
+
+	// Load all the project's data
+	timeline.set(project.timeline);
 
 	return project;
 }

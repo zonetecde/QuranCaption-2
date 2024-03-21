@@ -3,6 +3,7 @@
 	import { blur, fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
+	import Id from '$lib/ext/Id';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -35,7 +36,30 @@
 			name: projectName,
 			createdAt: new Date(),
 			updatedAt: new Date(),
-			description: ''
+			description: '',
+			timeline: {
+				audiosTracks: [
+					{
+						id: Id.generate(),
+						name: 'Quran',
+						clips: []
+					}
+				],
+				videosTracks: [
+					{
+						id: Id.generate(),
+						name: 'Background Video',
+						clips: []
+					}
+				],
+				subtitlesTracks: [
+					{
+						id: Id.generate(),
+						name: 'Subtitles',
+						clips: []
+					}
+				]
+			}
 		});
 
 		localStorage.setItem('projects', JSON.stringify(userProjects));

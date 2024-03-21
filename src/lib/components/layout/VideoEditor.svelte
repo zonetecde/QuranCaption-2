@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ClipManager from '../clipmanager/ClipManager.svelte';
+	import Timeline from '../timeline/Timeline.svelte';
 </script>
 
 <div class="flex-row flex w-full h-full">
@@ -16,7 +17,9 @@
 			<section class="h-[65%]"></section>
 
 			<!-- Timeline -->
-			<section class="h-[35%]"></section>
+			<section class="h-[35%]">
+				<Timeline />
+			</section>
 		</section>
 	</section>
 </div>
