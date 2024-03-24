@@ -15,6 +15,8 @@ export type AudioClip = {
 	start: number;
 	end: number;
 	audioId: string;
+	fileStartTime: number;
+	fileEndTime: number;
 };
 
 export type VideoTrack = {
@@ -28,6 +30,8 @@ export type VideoClip = {
 	start: number;
 	end: number;
 	videoId: string;
+	fileStartTime: number;
+	fileEndTime: number;
 };
 
 export type SubtitleTrack = {
@@ -41,4 +45,6 @@ export type SubtitleClip = {
 	start: number;
 	end: number;
 	subtitleId: string;
+	fileStartTime: number;
+	fileEndTime: number;
 };

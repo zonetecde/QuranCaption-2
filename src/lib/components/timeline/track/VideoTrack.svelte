@@ -16,4 +16,8 @@
 			class="bg-transparent text-white outline-none w-full"
 		/>
 	</div>
+
+	<div class="flex flex-col w-full">
+		<div class="flex flex-row w-full h-full"></div>
+	</div>
 </div>

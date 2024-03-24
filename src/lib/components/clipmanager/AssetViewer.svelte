@@ -2,6 +2,7 @@
 	import type Asset from '$lib/classes/Asset';
 	import { removeAsset } from '$lib/classes/Asset';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import AssetTimelineDrag from '../timeline/AssetTimelineDrag.svelte';
 
 	export let asset: Asset;
 
@@ -13,12 +14,36 @@
 	function handleDeleteAssetButtonClicked() {
 		removeAsset(asset.id);
 	}
+
+	/**
+	 * Start dragging the asset
+	 */
+	function handleStartDrag(evt: MouseEvent) {
+		if (evt.button !== 0) return;
+
+		let cursorX = evt.clientX;
+		let cursorY = evt.clientY;
+
+		const assetTimeline = new AssetTimelineDrag({
+			target: document.body,
+			props: {
+				asset: asset,
+				startX: cursorX,
+				startY: cursorY,
+				destroy: () => {
+					assetTimeline.$destroy();
+				}
+			}
+		});
+	}
 </script>
 
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div
 	class="group flex items-center justify-between p-2 border-b-2 flex-col max-w-full border-4 border-[#423f3f] rounded-2xl py-4 bg-[#0f0e0e] relative"
 	on:mouseenter={() => (isHovered = true)}
 	on:mouseleave={() => (isHovered = false)}
+	on:mousedown={handleStartDrag}
 	role="contentinfo"
 >
 	<div class="flex items-center h-[65%]">
