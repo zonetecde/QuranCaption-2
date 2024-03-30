@@ -1,8 +1,37 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::process::Command;
+
+
 fn main() {
   tauri::Builder::default()
+    .invoke_handler(tauri::generate_handler![get_video_duration])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn get_video_duration(path: String) -> Result<i32, String> {
+  // get video duration
+  let output = Command::new("./ffprobe")
+    .arg("-v")
+    .arg("error")
+    .arg("-show_entries")
+    .arg("format=duration")
+    .arg("-of")
+    .arg("default=noprint_wrappers=1:nokey=1")
+    .arg(&path)
+    .output()
+    .expect("failed to execute process");
+   
+   // convert output to string
+  let duration = String::from_utf8_lossy(&output.stdout);
+  // remove new line
+  let duration = duration.trim().parse::<f64>().unwrap();
+
+  // to ms
+  let duration = duration * 1000.0;
+  Ok(duration as i32)
+
 }

@@ -1,19 +1,21 @@
 import Id from '$lib/ext/Id';
 import { getFileNameFromPath, getFileType } from '$lib/FileExt';
 import { currentProject } from '$lib/stores/ProjectStore';
+import { invoke } from '@tauri-apps/api';
 
 export default interface Asset {
 	fileName: string;
 	filePath: string;
 	type: 'audio' | 'video' | 'image' | 'unknown';
 	id: string;
+	duration: number; // In milliseconds
 }
 
 /**
  * Add videos to the store and remove duplicates
  * @param filePaths - The file names to add
  */
-export function addAssets(filePaths: string | string[]) {
+export async function addAssets(filePaths: string | string[]) {
 	let _assets: Asset[] = [];
 	let _filePaths: string[];
 
@@ -25,18 +27,32 @@ export function addAssets(filePaths: string | string[]) {
 	}
 
 	// Add to clips
-	_filePaths.forEach((filePath) => {
-		if (filePath === '') return;
-		const fileType = getFileType(filePath);
-		if (fileType === 'unknown') return;
+	await Promise.all(
+		_filePaths.map(async (filePath) => {
+			if (filePath === '') return;
+			const fileType = getFileType(filePath);
+			if (fileType === 'unknown') return;
 
-		_assets.push({
-			fileName: getFileNameFromPath(filePath),
-			filePath: filePath,
-			type: fileType,
-			id: Id.generate()
-		});
-	});
+			// If it is a video, get its duration
+			let duration = 5000;
+			if (fileType === 'video' || fileType === 'audio') {
+				try {
+					const result = await invoke('get_video_duration', { path: filePath });
+					if (typeof result === 'number') duration = result as number;
+				} catch (e) {
+					console.error(e);
+				}
+			}
+
+			_assets.push({
+				fileName: getFileNameFromPath(filePath),
+				filePath: filePath,
+				type: fileType,
+				duration: duration,
+				id: Id.generate()
+			});
+		})
+	);
 
 	currentProject.update((v) => {
 		v.assets = [...v.assets, ..._assets];
@@ -50,6 +66,8 @@ export function addAssets(filePaths: string | string[]) {
 		);
 		return v;
 	});
+
+	console.log(_assets);
 }
 
 export function removeAsset(id: string) {

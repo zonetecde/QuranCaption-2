@@ -1,5 +1,4 @@
 <script lang="ts">
-	import ClipManager from '../clipmanager/ClipManager.svelte';
 </script>
 
 <div class="flex-row flex w-full h-full">

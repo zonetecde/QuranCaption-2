@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ClipManager from '../clipmanager/ClipManager.svelte';
+	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
 </script>
 
 <div class="flex-row flex w-full h-full">
 	<!-- Quran and clip explorer -->
 	<section class="w-[25%] min-w-[220px]">
-		<ClipManager />
+		<AssetsManager />
 	</section>
 
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
