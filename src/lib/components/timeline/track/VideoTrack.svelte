@@ -16,7 +16,7 @@
 		/>
 	</LeftPart>
 
-	<div class="flex flex-col flex-grow z-10 bg-[#2d2b2b]">
+	<div class="flex flex-col w-full z-10 bg-[#2d2b2b]">
 		<div class="flex flex-row h-full"></div>
 	</div>
 </div>

@@ -4,6 +4,7 @@
 	import { zoom } from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
+	import { secondsToMMSS } from '$lib/classes/Timeline';
 
 	onMount(() => {});
 </script>
@@ -18,7 +19,7 @@
 				style="width: {$zoom}px; background-color:  {i % 2 === 0 ? '#1a1d1d' : '#1d1d1d'}
 			"
 			>
-				<p class="text-xs opacity-30">{i}</p>
+				<p class="text-[0.6rem] opacity-30">{secondsToMMSS(i)}</p>
 			</div>
 		{/each}
 	</div>
