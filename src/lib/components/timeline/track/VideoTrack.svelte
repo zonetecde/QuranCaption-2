@@ -12,7 +12,7 @@
 		<input
 			type="text"
 			bind:value={track.name}
-			class="bg-transparent text-white outline-none w-full select-none"
+			class="bg-transparent text-white outline-none select-none"
 		/>
 	</LeftPart>
 

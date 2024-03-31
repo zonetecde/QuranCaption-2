@@ -4,9 +4,9 @@
 	import Timeline from '../timeline/Timeline.svelte';
 </script>
 
-<div class="flex-row flex w-full h-full">
+<div class="flex-row w-full h-full grid grid-cols-2-template">
 	<!-- Quran and clip explorer -->
-	<section class="w-[25%] min-w-[220px]">
+	<section class="min-w-[220px]">
 		<AssetsManager />
 	</section>
 
@@ -17,9 +17,18 @@
 			<section class="h-[65%]"></section>
 
 			<!-- Timeline -->
-			<section class="h-[35%] w-full">
+			<section class="h-[35%]">
 				<Timeline />
 			</section>
 		</section>
 	</section>
 </div>
+
+<style>
+	/* grid cols 2 : first col 25% the second col 75% */
+	.grid-cols-2-template {
+		grid-template-columns: 25% 75%;
+
+		/* make it  */
+	}
+</style>
