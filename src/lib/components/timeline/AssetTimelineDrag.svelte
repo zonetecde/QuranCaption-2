@@ -4,6 +4,7 @@
 
 <script lang="ts">
 	import type Asset from '$lib/classes/Asset';
+	import { zoom } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 
 	let elt: HTMLDivElement; // This element
@@ -38,7 +39,7 @@
 	 * Place the element at the cursor position
 	 */
 	function placeElement({ clientX, clientY }: MouseEvent) {
-		elt.style.left = `${clientX - elt.clientWidth / 10}px`;
+		elt.style.left = `${clientX - elt.clientWidth / 40}px`;
 		elt.style.top = `${clientY - elt.clientHeight / 2}px`;
 	}
 
@@ -52,4 +53,8 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="w-[300px] h-16 bg-red-500 absolute cursor-grabbing" bind:this={elt}></div>
+<div
+	class="h-16 bg-red-300 absolute cursor-grabbing z-40"
+	style="width: {($zoom * asset.duration) / 1000}px;"
+	bind:this={elt}
+></div>
