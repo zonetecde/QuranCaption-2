@@ -17,7 +17,7 @@
 			<section class="h-[65%]"></section>
 
 			<!-- Timeline -->
-			<section class="h-[35%]">
+			<section class="h-[35%] w-full">
 				<Timeline />
 			</section>
 		</section>

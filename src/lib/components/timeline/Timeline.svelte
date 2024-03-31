@@ -9,7 +9,7 @@
 	onMount(() => {});
 </script>
 
-<div class="w-full h-full bg-[#1f1d1d] overflow-x-scroll relative">
+<div class="h-full bg-[#1f1d1d] overflow-x-scroll relative w-max min-w-full">
 	<div class="w-24 lg:w-40 h-full bg-[#0e0e0e] border-r-2 border-[#1d1b1b] absolute"></div>
 
 	<div class="absolute top-0 left-24 lg:left-40 h-full flex">

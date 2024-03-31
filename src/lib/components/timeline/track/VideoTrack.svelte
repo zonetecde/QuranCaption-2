@@ -5,7 +5,7 @@
 	export let track: VideoTrack;
 </script>
 
-<div class="h-20 flex flex-row border-y-2 border-[#1d1b1b] text-xs">
+<div class="h-20 flex flex-row border-y-2 border-[#1d1b1b] text-xs w-max min-w-full">
 	<LeftPart>
 		<p>Video track</p>
 		<p class="mt-auto underline">Name:</p>
