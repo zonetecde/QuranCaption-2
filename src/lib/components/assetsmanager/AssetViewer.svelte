@@ -3,6 +3,7 @@
 	import { removeAsset } from '$lib/classes/Asset';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import AssetTimelineDrag from '../timeline/AssetTimelineDrag.svelte';
+	import { draggedAssetId } from '$lib/stores/TimelineStore';
 
 	export let asset: Asset;
 
@@ -32,9 +33,12 @@
 				startY: cursorY,
 				destroy: () => {
 					assetTimeline.$destroy();
+					draggedAssetId.set(undefined);
 				}
 			}
 		});
+
+		draggedAssetId.set(asset.id);
 	}
 </script>
 
