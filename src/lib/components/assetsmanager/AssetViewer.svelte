@@ -2,8 +2,9 @@
 	import type Asset from '$lib/classes/Asset';
 	import { removeAsset } from '$lib/classes/Asset';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
-	import AssetTimelineDrag from '../timeline/AssetTimelineDrag.svelte';
-	import { draggedAssetId } from '$lib/stores/TimelineStore';
+	import { draggedAssetId as selectedAssetId } from '$lib/stores/TimelineStore';
+	import { currentProject } from '$lib/stores/ProjectStore';
+	import Id from '$lib/ext/Id';
 
 	export let asset: Asset;
 
@@ -16,29 +17,48 @@
 		removeAsset(asset.id);
 	}
 
-	/**
-	 * Start dragging the asset
-	 */
-	function handleStartDrag(evt: MouseEvent) {
-		if (evt.button !== 0) return;
+	function handleAddInTheTimelineButtonClicked() {
+		selectedAssetId.set(asset.id);
+		switch (asset.type) {
+			case 'video' || 'image':
+				const lastAssetEndTime =
+					$currentProject.timeline.videosTracks[0].clips.length > 0
+						? $currentProject.timeline.videosTracks[0].clips[
+								$currentProject.timeline.videosTracks[0].clips.length - 1
+							].end
+						: 0;
 
-		let cursorX = evt.clientX;
-		let cursorY = evt.clientY;
+				$currentProject.timeline.videosTracks[0].clips.push({
+					id: Id.generate(),
+					start: 0,
+					duration: asset.duration,
+					end: lastAssetEndTime + asset.duration,
+					videoId: asset.id,
+					fileStartTime: 0,
+					fileEndTime: asset.duration
+				});
+				break;
+			case 'audio':
+				const lastAudioClipEndTime =
+					$currentProject.timeline.audiosTracks[0].clips.length > 0
+						? $currentProject.timeline.audiosTracks[0].clips[
+								$currentProject.timeline.audiosTracks[0].clips.length - 1
+							].end
+						: 0;
 
-		const assetTimeline = new AssetTimelineDrag({
-			target: document.body,
-			props: {
-				asset: asset,
-				startX: cursorX,
-				startY: cursorY,
-				destroy: () => {
-					assetTimeline.$destroy();
-					draggedAssetId.set(undefined);
-				}
-			}
-		});
+				$currentProject.timeline.audiosTracks[0].clips.push({
+					id: Id.generate(),
+					start: 0,
+					duration: asset.duration,
+					end: lastAudioClipEndTime + asset.duration,
+					audioId: asset.id,
+					fileStartTime: 0,
+					fileEndTime: asset.duration
+				});
+				break;
+		}
 
-		draggedAssetId.set(asset.id);
+		$currentProject = $currentProject; // Trigger the store update
 	}
 </script>
 
@@ -47,7 +67,6 @@
 	class="group flex items-center justify-between p-2 border-b-2 flex-col max-w-full border-4 border-[#423f3f] rounded-2xl py-4 bg-[#0f0e0e] relative"
 	on:mouseenter={() => (isHovered = true)}
 	on:mouseleave={() => (isHovered = false)}
-	on:mousedown={handleStartDrag}
 	role="contentinfo"
 >
 	<div class="flex items-center h-[65%]">
@@ -98,4 +117,11 @@
 			/>
 		</svg>
 	</button>
+
+	{#if isHovered}
+		<button
+			class="absolute w-full bg-[#1b422a] py-2 -bottom-8 rounded-b-xl border-x-4 border-b-4 border-[#423f3f]"
+			on:click={handleAddInTheTimelineButtonClicked}>Add in the timeline</button
+		>
+	{/if}
 </div>

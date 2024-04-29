@@ -5,11 +5,20 @@
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToMMSS } from '$lib/classes/Timeline';
+	import { isCtrlPressed } from '$lib/stores/ShortcutStore';
 
-	onMount(() => {});
+	function handleMouseWheelWheeling(event: WheelEvent) {
+		if (!$isCtrlPressed) return;
+
+		if (event.deltaY > 0 && $zoom > 13) {
+			zoom.update((value) => value - 3);
+		} else if ($zoom < 100) {
+			zoom.update((value) => value + 3);
+		}
+	}
 </script>
 
-<div class="overflow-scroll h-full">
+<div class="overflow-scroll h-full" on:wheel={handleMouseWheelWheeling}>
 	<div class="h-full bg-[#1f1d1d] relative w-max">
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
 			{#each Array.from({ length: 110 }, (_, i) => i) as i}
