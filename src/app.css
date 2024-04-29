@@ -6,6 +6,13 @@
 }
 
 @font-face {
+	font-family: 'Space Mono';
+	src: url('/fonts/SpaceMono-Regular.ttf');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
 	font-family: 'SchibstedGrotesk';
 	src: url('/fonts/SchibstedGrotesk-VariableFont_wght.ttf');
 	font-weight: 100 900;
@@ -29,6 +36,10 @@
 
 .molengo {
 	font-family: 'Molengo', 'sans-serif';
+}
+
+.monospace {
+	font-family: 'Space Mono', 'sans-serif';
 }
 
 body {

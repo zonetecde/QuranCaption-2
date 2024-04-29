@@ -21,15 +21,28 @@ export type Clip = {
 	fileEndTime: number;
 };
 
-export function secondsToMMSS(seconds: number): string {
-	if (seconds < 60) return seconds.toString();
+export function secondsToHHMMSS(
+	seconds: number,
+	removeLeadingZero: boolean = false
+): [string, string] {
+	if (seconds < 60) {
+		let firstStr = (removeLeadingZero ? '' : '00:') + seconds.toFixed(0).padStart(2, '0');
+		let secondStr = seconds.toFixed(2).split('.')[1];
+
+		return [firstStr, secondStr];
+	}
 
 	const date = new Date(0);
 	date.setSeconds(seconds);
-	const str = date.toISOString().substr(14, 5);
+	const hours = date.getUTCHours();
+	const minutes = date.getUTCMinutes();
+	const _seconds = date.getUTCSeconds();
+	const milliseconds = seconds.toFixed(2).split('.')[1];
+	let str = `${hours > 0 ? hours.toString().padStart(2, '0') + ':' : ''}${minutes.toString().padStart(2, '0')}:${_seconds.toString().padStart(2, '0')}`;
 
-	// Remove leading 0
-	if (str.startsWith('0')) return str.substr(1);
+	if (removeLeadingZero) {
+		str = str.replace(/^0+/, '');
+	}
 
-	return str;
+	return [str, milliseconds];
 }

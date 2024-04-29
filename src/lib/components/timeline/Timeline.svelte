@@ -4,7 +4,7 @@
 	import { cursorPosition, getTimelineTotalDuration, zoom } from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
-	import { secondsToMMSS } from '$lib/classes/Timeline';
+	import { secondsToHHMMSS } from '$lib/classes/Timeline';
 	import { isCtrlPressed } from '$lib/stores/ShortcutStore';
 
 	$: timeLineTotalDuration = getTimelineTotalDuration($currentProject.timeline);
@@ -17,6 +17,15 @@
 		} else if ($zoom < 100) {
 			zoom.update((value) => (value >= 1 ? value + 0.75 : value + 0.1));
 		}
+	}
+
+	function moveCursorToPosition(e: any, i: number) {
+		let rect = e.currentTarget.getBoundingClientRect();
+		const positionClickedWithin = e.clientX - rect.left;
+		const totalSize = $zoom;
+		const toAdd = (positionClickedWithin / totalSize) * 1000;
+
+		cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000 + toAdd);
 	}
 </script>
 
@@ -33,23 +42,17 @@
 				>
 					{#if $zoom > 16 || ($zoom < 16 && $zoom > 12 && i % 10 === 0) || ($zoom < 12 && i % 30 === 0)}
 						<p class="text-[0.6rem] opacity-30 -translate-x-1/2 w-fit">
-							{secondsToMMSS(i)}
+							{secondsToHHMMSS(i, true)[0]}
 						</p>
 					{/if}
 
 					<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 					<button
 						class="w-full h-6 absolute top-0 z-10"
-						on:click={(e) => {
-							let rect = e.currentTarget.getBoundingClientRect();
-
-							cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000);
-						}}
-						on:mouseover={(e) => {
+						on:click={(e) => moveCursorToPosition(e, i)}
+						on:mousemove={(e) => {
 							if (e.buttons !== 1) return;
-							let rect = e.currentTarget.getBoundingClientRect();
-
-							cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000);
+							moveCursorToPosition(e, i);
 						}}
 					></button>
 				</div>

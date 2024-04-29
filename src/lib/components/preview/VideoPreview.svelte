@@ -1,5 +1,10 @@
 <script lang="ts">
+	import { secondsToHHMMSS } from '$lib/classes/Timeline';
+	import { currentProject } from '$lib/stores/ProjectStore';
+	import { cursorPosition, getTimelineTotalDuration } from '$lib/stores/TimelineStore';
+
 	let isPlaying = false;
+	$: currentTime = secondsToHHMMSS($cursorPosition / 1000);
 
 	function handlePlayVideoButtonClicked(
 		event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }
@@ -14,7 +19,13 @@
 	</div>
 
 	<section id="controles" class="h-16 w-full bg-[#141616] border-t-2 border-[#363232]">
-		<div class="flex flex-row items-center justify-center h-full w-full">
+		<div class="flex flex-row items-center justify-center h-full w-full relative">
+			<p class="monospace text-lg absolute left-4 rounded-xl bg-[#110f0f] px-3 py-1">
+				{currentTime[0]}<span class="text-xs">.{currentTime[1]}</span> / {secondsToHHMMSS(
+					getTimelineTotalDuration($currentProject.timeline)
+				)[0]}
+			</p>
+
 			<button class="bg-slate-950 w-10 p-1 rounded-full" on:click={handlePlayVideoButtonClicked}>
 				{#if isPlaying}
 					<svg
