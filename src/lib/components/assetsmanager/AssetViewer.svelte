@@ -32,7 +32,7 @@
 
 				$currentProject.timeline.videosTracks[0].clips.push({
 					id: Id.generate(),
-					start: 0,
+					start: lastAssetEndTime,
 					duration: asset.duration,
 					end: lastAssetEndTime + asset.duration,
 					assetId: asset.id,

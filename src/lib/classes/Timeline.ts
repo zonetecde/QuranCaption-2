@@ -21,6 +21,12 @@ export type Clip = {
 	fileEndTime: number;
 };
 
+/**
+ * From seconds to HH:MM:SS, with the milliseconds in a separate string
+ * @param seconds The seconds to convert
+ * @param removeLeadingZero If true, removes the leading zero from the string
+ * @returns A tuple with the first string being the HH:MM:SS and the second string being the milliseconds
+ */
 export function secondsToHHMMSS(
 	seconds: number,
 	removeLeadingZero: boolean = false
