@@ -23,7 +23,6 @@
 		switch (asset.type) {
 			case 'video':
 			case 'image':
-				console.log('t');
 				const lastAssetEndTime =
 					$currentProject.timeline.videosTracks[0].clips.length > 0
 						? $currentProject.timeline.videosTracks[0].clips[

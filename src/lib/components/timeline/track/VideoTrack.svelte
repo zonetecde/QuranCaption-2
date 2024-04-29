@@ -25,8 +25,11 @@
 
 				{#if asset}
 					<div
-						class="h-full bg-[#538c96] border-r-2 border-[#1d1b1b] cursor-pointer p-1 overflow-hidden"
-						style="width: {($zoom * clip.duration) / 1000}px;"
+						class="h-full border-r-2 border-[#1d1b1b] cursor-pointer p-1 overflow-hidden"
+						style="width: {($zoom * clip.duration) / 1000}px; background-color: {asset.type ===
+						'video'
+							? '#538c96'
+							: '#a8659f'}"
 					>
 						<p class="text-white text-xs">{asset.fileName}</p>
 					</div>

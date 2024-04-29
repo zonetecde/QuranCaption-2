@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
+	import VideoPreview from '../preview/VideoPreview.svelte';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-2-template">
@@ -13,8 +14,10 @@
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
 		<!-- Editor -->
 		<section class="w-full divide-y-4 divide-[#413f3f]">
-			<!-- Words selector -->
-			<section class="h-[65%]"></section>
+			<!-- Video preview -->
+			<section class="h-[65%] max-h-[65%]">
+				<VideoPreview />
+			</section>
 
 			<!-- Timeline -->
 			<section class="h-[35%]">

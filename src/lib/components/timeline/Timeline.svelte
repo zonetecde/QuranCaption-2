@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TrackComponent from './track/VideoTrack.svelte';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { getTimelineTotalDuration, zoom } from '$lib/stores/TimelineStore';
+	import { cursorPosition, getTimelineTotalDuration, zoom } from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToMMSS } from '$lib/classes/Timeline';
@@ -20,7 +20,7 @@
 	}
 </script>
 
-<div class="overflow-scroll h-full" on:wheel={handleMouseWheelWheeling}>
+<div class="overflow-x-scroll h-full" on:wheel={handleMouseWheelWheeling}>
 	<div class="h-full bg-[#1f1d1d] relative w-max">
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
 			{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}
@@ -36,8 +36,31 @@
 							{secondsToMMSS(i)}
 						</p>
 					{/if}
+
+					<!-- svelte-ignore a11y-mouse-events-have-key-events -->
+					<button
+						class="w-full h-6 absolute top-0 z-10"
+						on:click={(e) => {
+							let rect = e.currentTarget.getBoundingClientRect();
+
+							cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000);
+						}}
+						on:mouseover={(e) => {
+							if (e.buttons !== 1) return;
+							let rect = e.currentTarget.getBoundingClientRect();
+
+							cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000);
+						}}
+					></button>
 				</div>
 			{/each}
+
+			<!-- Cursor -->
+			<!-- The `- 1` in the calcul is because the cursor is 2px thick -->
+			<div
+				class="absolute top-0 left-24 lg:left-40 h-full w-0.5 bg-[#fd322b] z-20"
+				style="transform: translateX({($cursorPosition / 1000) * $zoom - 1}px);"
+			></div>
 		</div>
 
 		<div class="absolute top-0 left-0 w-full h-full">
