@@ -19,8 +19,11 @@
 
 	function handleAddInTheTimelineButtonClicked() {
 		selectedAssetId.set(asset.id);
+
 		switch (asset.type) {
-			case 'video' || 'image':
+			case 'video':
+			case 'image':
+				console.log('t');
 				const lastAssetEndTime =
 					$currentProject.timeline.videosTracks[0].clips.length > 0
 						? $currentProject.timeline.videosTracks[0].clips[
@@ -33,13 +36,13 @@
 					start: 0,
 					duration: asset.duration,
 					end: lastAssetEndTime + asset.duration,
-					videoId: asset.id,
+					assetId: asset.id,
 					fileStartTime: 0,
 					fileEndTime: asset.duration
 				});
 				break;
 			case 'audio':
-				const lastAudioClipEndTime =
+				const lastAudioEndTime =
 					$currentProject.timeline.audiosTracks[0].clips.length > 0
 						? $currentProject.timeline.audiosTracks[0].clips[
 								$currentProject.timeline.audiosTracks[0].clips.length - 1
@@ -50,8 +53,8 @@
 					id: Id.generate(),
 					start: 0,
 					duration: asset.duration,
-					end: lastAudioClipEndTime + asset.duration,
-					audioId: asset.id,
+					end: lastAudioEndTime + asset.duration,
+					assetId: asset.id,
 					fileStartTime: 0,
 					fileEndTime: asset.duration
 				});

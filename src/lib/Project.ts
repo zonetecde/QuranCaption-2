@@ -29,25 +29,28 @@ export function createBlankProject(name: string): Project {
 		description: '',
 		assets: [],
 		timeline: {
-			audiosTracks: [
-				{
-					id: Id.generate(),
-					name: 'Quran',
-					clips: []
-				}
-			],
 			videosTracks: [
 				{
 					id: Id.generate(),
 					name: 'Background Video',
-					clips: []
+					clips: [],
+					type: 'Video track'
+				}
+			],
+			audiosTracks: [
+				{
+					id: Id.generate(),
+					name: 'Quran Recitation',
+					clips: [],
+					type: 'Audio track'
 				}
 			],
 			subtitlesTracks: [
 				{
 					id: Id.generate(),
 					name: 'Subtitles',
-					clips: []
+					clips: [],
+					type: 'Subtitles track'
 				}
 			]
 		}
@@ -76,6 +79,8 @@ export function getProjectById(id: string): Project | undefined {
  * @param project - The project to update.
  */
 export function updateUsersProjects(project: Project): void {
+	if (project === undefined) return; // No project is open
+
 	const projects = getUserProjects();
 
 	const index = projects.findIndex((p) => p.id === project.id);
@@ -85,5 +90,6 @@ export function updateUsersProjects(project: Project): void {
 		projects[index] = project;
 	}
 
+	//localStorage.removeItem('projects');
 	localStorage.setItem('projects', JSON.stringify(projects));
 }

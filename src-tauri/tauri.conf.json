@@ -69,12 +69,12 @@
 		"windows": [
 			{
 				"fullscreen": false,
-				"height": 600,
+				"height": 768,
 				"resizable": true,
 				"title": "QuranCaption 2",
-				"width": 800,
-				"minWidth": 800,
-				"minHeight": 600
+				"width": 1024,
+				"minWidth": 1024,
+				"minHeight": 768
 			}
 		]
 	}
