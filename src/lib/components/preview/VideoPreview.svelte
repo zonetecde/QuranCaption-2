@@ -2,6 +2,7 @@
 	import { secondsToHHMMSS } from '$lib/classes/Timeline';
 	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
+	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { cursorPosition, getTimelineTotalDuration } from '$lib/stores/TimelineStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
@@ -13,11 +14,16 @@
 			(video.start > 0 && video.start - 1000 < $cursorPosition && video.end >= $cursorPosition)
 	);
 
+	$: if ($spaceBarPressed) {
+		handlePlayVideoButtonClicked();
+		spaceBarPressed.set(false);
+	}
+
 	let videoComponent: HTMLVideoElement;
 
 	$: if ($cursorPosition) {
 		if (!isPlaying && currentVideo && videoComponent) {
-			// Update the video
+			// Update the video to the cursor position. When playing the video will start from the cursor position
 			videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
 		}
 	}
@@ -25,42 +31,21 @@
 	function handlePlayVideoButtonClicked() {
 		isPlaying = !isPlaying;
 
-		setTimeout(() => {
-			if (currentVideo && videoComponent) {
-				if (isPlaying) {
-					// Set the video components to play where the cursor position is
-					videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
-					videoComponent.play();
+		if (isPlaying) {
+			playVideo();
+		}
+	}
 
-					// While the video is playing, update the cursor position
-					const interval = setInterval(() => {
-						if (videoComponent && videoComponent.ended) {
-							// Look if there's a video after this one in the timeline
-							const nextVideo = $currentProject.timeline.videosTracks[0].clips.find(
-								(video) => video.start > currentVideo.end
-							);
-
-							if (nextVideo) {
-								cursorPosition.set(nextVideo.start);
-							} else {
-								isPlaying = false;
-								clearInterval(interval);
-							}
-						} else if (videoComponent === null) {
-							clearInterval(interval);
-						} else {
-							if (videoComponent.currentTime * 1000 + currentVideo.start >= currentVideo.end) {
-								const nextVideo = $currentProject.timeline.videosTracks[0].clips.find(
-									(video) => video.start > currentVideo.end
-								);
-							}
-
-							cursorPosition.set(videoComponent.currentTime * 1000 + currentVideo.start);
-						}
-					}, 10);
-				} else {
-					videoComponent.pause();
-				}
+	function playVideo() {
+		const interval = setInterval(() => {
+			if (isPlaying && videoComponent) {
+				$cursorPosition += 10;
+				// Play the video
+				videoComponent.play();
+			} else {
+				// Pause the video
+				videoComponent.pause();
+				clearInterval(interval);
 			}
 		}, 10);
 	}
