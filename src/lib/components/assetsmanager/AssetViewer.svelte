@@ -2,7 +2,6 @@
 	import type Asset from '$lib/classes/Asset';
 	import { removeAsset } from '$lib/classes/Asset';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
-	import { draggedAssetId as selectedAssetId } from '$lib/stores/TimelineStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import Id from '$lib/ext/Id';
 
@@ -17,9 +16,7 @@
 		removeAsset(asset.id);
 	}
 
-	function handleAddInTheTimelineButtonClicked() {
-		selectedAssetId.set(asset.id);
-
+	function handleAddInTheTimelineButtonClicked(withAudio = true) {
 		switch (asset.type) {
 			case 'video':
 			case 'image':
@@ -37,8 +34,10 @@
 					end: lastAssetEndTime + asset.duration,
 					assetId: asset.id,
 					fileStartTime: 0,
-					fileEndTime: asset.duration
+					fileEndTime: asset.duration,
+					isMuted: !withAudio
 				});
+
 				break;
 			case 'audio':
 				const lastAudioEndTime =
@@ -55,7 +54,8 @@
 					end: lastAudioEndTime + asset.duration,
 					assetId: asset.id,
 					fileStartTime: 0,
-					fileEndTime: asset.duration
+					fileEndTime: asset.duration,
+					isMuted: !withAudio
 				});
 				break;
 		}
@@ -122,8 +122,15 @@
 
 	{#if isHovered}
 		<button
-			class="absolute w-full bg-[#1b422a] py-2 -bottom-8 rounded-b-xl border-x-4 border-b-4 border-[#423f3f]"
-			on:click={handleAddInTheTimelineButtonClicked}>Add in the timeline</button
+			class="absolute w-full bg-[#1b422a] py-2 -bottom-8 rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b]"
+			on:click={() => handleAddInTheTimelineButtonClicked()}>Add in the timeline</button
 		>
+		{#if asset.type === 'video'}
+			<button
+				class="absolute w-full bg-[#1b422a] py-2 -bottom-[5.3rem] px-1 rounded-b-xl text-sm border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b]"
+				on:click={() => handleAddInTheTimelineButtonClicked(false)}
+				>Add in the timeline without the audio</button
+			>
+		{/if}
 	{/if}
 </div>

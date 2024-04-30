@@ -60,6 +60,7 @@
 					class="bg-red-black w-full h-full object-contain"
 					src={convertFileSrc(video.filePath)}
 					bind:this={videoComponent}
+					muted={currentVideo.isMuted}
 				>
 					<track kind="captions" src="vtt" srclang="en" label="English" default />
 				</video>

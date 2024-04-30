@@ -46,11 +46,6 @@
 	 * Open a project
 	 */
 	function openProject(project: Project) {
-		currentProject.set(project);
-
-		cursorPosition.set(project.projectSettings.cursorPosition);
-		zoom.set(project.projectSettings.zoom);
-
 		window.location.href = `/editor/${project.id}`; // Redirect to the editor page
 	}
 

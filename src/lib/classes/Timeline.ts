@@ -19,6 +19,7 @@ export type Clip = {
 	assetId: string;
 	fileStartTime: number;
 	fileEndTime: number;
+	isMuted: boolean;
 };
 
 /**

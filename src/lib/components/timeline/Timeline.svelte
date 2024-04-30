@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TrackComponent from './track/VideoTrack.svelte';
+	import TrackComponent from './track/TrackComponent.svelte';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { cursorPosition, getTimelineTotalDuration, zoom } from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
