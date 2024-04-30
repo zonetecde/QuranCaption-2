@@ -40,7 +40,7 @@
 						: '#1d1d1d'};
 					"
 				>
-					{#if $zoom > 30 || ($zoom > 20 && i % 5 === 0 && $zoom < 30) || ($zoom > 10 && i % 3 === 0 && $zoom < 20) || ($zoom > 5 && i % 5 === 0 && $zoom < 10) || ($zoom > 3 && i % 10 === 0 && $zoom < 5) || ($zoom > 1.5 && i % 20 === 0 && $zoom < 3) || ($zoom > 1 && i % 50 === 0 && $zoom < 1.5)}
+					{#if $zoom >= 30 || ($zoom > 20 && i % 5 === 0 && $zoom < 30) || ($zoom > 10 && i % 3 === 0 && $zoom < 20) || ($zoom > 5 && i % 5 === 0 && $zoom < 10) || ($zoom > 3 && i % 10 === 0 && $zoom < 5) || ($zoom > 1.5 && i % 20 === 0 && $zoom < 3) || ($zoom > 1 && i % 50 === 0 && $zoom < 1.5)}
 						<p class="text-[0.6rem] opacity-30 -translate-x-1/2 w-fit">
 							{secondsToHHMMSS(i, true)[0]}
 						</p>

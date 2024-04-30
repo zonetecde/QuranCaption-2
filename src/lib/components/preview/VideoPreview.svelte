@@ -53,22 +53,20 @@
 
 <div class="w-full h-full flex flex-col relative">
 	<div class="h-full relative bg-[#0f0d0d] pb-16">
-		{#if isPlaying || !isPlaying}
-			{#if currentVideo && currentVideo.assetId}
-				{@const video = getAssetFromId(currentVideo.assetId)}
-				{#if video}
-					<video
-						class="bg-red-black w-full h-full object-contain"
-						src={convertFileSrc(video.filePath)}
-						bind:this={videoComponent}
-					>
-						<track kind="captions" src="vtt" srclang="en" label="English" default />
-					</video>
-				{:else}
-					<p>Video does not exist</p>
-				{/if}
-			{:else}{/if}
-		{/if}
+		{#if currentVideo && currentVideo.assetId}
+			{@const video = getAssetFromId(currentVideo.assetId)}
+			{#if video}
+				<video
+					class="bg-red-black w-full h-full object-contain"
+					src={convertFileSrc(video.filePath)}
+					bind:this={videoComponent}
+				>
+					<track kind="captions" src="vtt" srclang="en" label="English" default />
+				</video>
+			{:else}
+				<p>Video does not exist</p>
+			{/if}
+		{:else}{/if}
 	</div>
 
 	<section

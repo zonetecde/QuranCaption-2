@@ -1,6 +1,8 @@
+import { get } from 'svelte/store';
 import type Asset from './classes/Asset';
 import type Timeline from './classes/Timeline';
 import Id from './ext/Id';
+import { cursorPosition, zoom } from './stores/TimelineStore';
 
 /**
  * Represents a project.
@@ -13,6 +15,15 @@ export default interface Project {
 	updatedAt: Date;
 	timeline: Timeline;
 	assets: Asset[];
+	projectSettings: ProjectSettings;
+}
+
+/**
+ * Represents the settings of a project.
+ */
+export interface ProjectSettings {
+	cursorPosition: number;
+	zoom: number;
 }
 
 /**
@@ -53,8 +64,31 @@ export function createBlankProject(name: string): Project {
 					type: 'Subtitles track'
 				}
 			]
+		},
+		projectSettings: {
+			cursorPosition: 0,
+			zoom: 30
 		}
 	};
+}
+
+/**
+ * Deletes a project by its ID.
+ * @param id - The ID of the project to delete.
+ * @returns An array of user projects.
+ */
+export function delProject(id: string): Project[] {
+	const projects = getUserProjects();
+	const index = projects.findIndex((p) => p.id === id);
+
+	if (index !== -1) {
+		console.log(projects.length);
+
+		projects.splice(index, 1);
+		localStorage.setItem('projects', JSON.stringify(projects));
+	}
+
+	return projects;
 }
 
 /**
@@ -80,6 +114,9 @@ export function getProjectById(id: string): Project | undefined {
  */
 export function updateUsersProjects(project: Project): void {
 	if (project === undefined) return; // No project is open
+
+	project.projectSettings.zoom = get(zoom);
+	project.projectSettings.cursorPosition = get(cursorPosition);
 
 	const projects = getUserProjects();
 
