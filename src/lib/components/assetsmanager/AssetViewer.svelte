@@ -122,12 +122,12 @@
 
 	{#if isHovered}
 		<button
-			class="absolute w-full bg-[#1b422a] py-2 -bottom-8 rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b]"
+			class="absolute w-full bg-[#1b422a] py-2 -bottom-8 rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] z-40"
 			on:click={() => handleAddInTheTimelineButtonClicked()}>Add in the timeline</button
 		>
 		{#if asset.type === 'video'}
 			<button
-				class="absolute w-full bg-[#1b422a] py-2 -bottom-[5.3rem] px-1 rounded-b-xl text-sm border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b]"
+				class="absolute w-full bg-[#1b422a] py-2 -bottom-[5.3rem] px-1 rounded-b-xl text-sm border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] z-40"
 				on:click={() => handleAddInTheTimelineButtonClicked(false)}
 				>Add in the timeline without the audio</button
 			>

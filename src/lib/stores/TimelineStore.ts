@@ -19,3 +19,13 @@ export function getTimelineTotalDuration(timeline: Timeline) {
 
 	return maxEnd + marge;
 }
+
+export function getLastClipEnd(timeline: Timeline) {
+	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks, ...timeline.subtitlesTracks];
+	let maxEnd =
+		tracks.reduce((max, track) => {
+			return Math.max(max, track.clips.length === 0 ? 0 : track.clips[track.clips.length - 1].end);
+		}, 0) / 1000;
+
+	return maxEnd;
+}
