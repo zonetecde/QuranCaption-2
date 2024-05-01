@@ -95,3 +95,12 @@ a {
 audio::-webkit-media-controls-panel {
 	background-color: #2f5045;
 }
+
+:root {
+	--ctx-menu-background: #222727;
+	--ctx-menu-border: 1px solid #aaaaaa;
+	--ctx-menu-border-radius: 0.5rem;
+	--ctx-menu-hover-bg: #1b1717;
+	--ctx-menu-font-size: 0.9rem;
+	--ctx-menu-padding: 0.375rem 0.5rem;
+}
