@@ -1,8 +1,23 @@
-export default class QuranApi {
-	static getQuran(lang: string) {
-		const url = 'https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran_' + lang + '.json';
+import { writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 
-		return fetch(url).then((res) => res.json());
+export async function loadQuran() {
+	try {
+		const response = await fetch('/quran/editions.json');
+		const editions = await response.json();
+
+		// for (var key in editions) {
+		// 	if (editions.hasOwnProperty(key)) {
+		// 		var value = editions[key];
+		// 		console.log(value.link);
+		// 		// Download
+		// 		const content = await (await fetch(value.link)).text();
+
+		// 		await writeTextFile(value.name + '.json', content, { dir: BaseDirectory.Download });
+		// 		console.log('Downloaded ' + value.name);
+		// 	}
+		// }
+	} catch (e) {
+		console.error(e);
 	}
 }
 

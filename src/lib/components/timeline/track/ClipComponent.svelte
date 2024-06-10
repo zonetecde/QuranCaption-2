@@ -2,6 +2,7 @@
 	import type Asset from '$lib/classes/Asset';
 	import type { Clip, Track } from '$lib/classes/Timeline';
 	import { generateBlueColor, generatePinkColor } from '$lib/ext/Color';
+	import { trimDialog } from '$lib/stores/LayoutStore';
 	import { zoom } from '$lib/stores/TimelineStore';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
 
@@ -60,7 +61,9 @@
 	}
 
 	function handleTrimClipButtonClicked() {
-		console.log('Trim clip button clicked');
+		// Open the trim dialog
+		// trimDialog.set(clip.id);
+		// console.log(clip.id);
 	}
 
 	let myMenu: ContextMenu;
@@ -208,7 +211,7 @@
 			<p>Remove from track</p>
 		</div></Item
 	>
-	<Item on:click={handleTrimClipButtonClicked}>
+	<!-- <Item on:click={handleTrimClipButtonClicked}>
 		<div class="flex flex-row items-center gap-x-2">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -227,7 +230,7 @@
 
 			<p>Trim</p>
 		</div></Item
-	>
+	> -->
 </ContextMenu>
 
 <style>

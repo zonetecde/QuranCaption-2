@@ -5,6 +5,7 @@
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { updateUsersProjects } from '$lib/Project';
 	import { currentProject } from '$lib/stores/ProjectStore';
+	import { loadQuran } from '$lib/Quran';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
@@ -34,6 +35,8 @@
 				isCtrlPressed.set(false);
 			}
 		};
+
+		loadQuran();
 	});
 </script>
 

@@ -2,7 +2,7 @@
 	import Header from '$lib/components/header/Header.svelte';
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
-	import { currentPage } from '$lib/stores/LayoutStore';
+	import { currentPage, trimDialog } from '$lib/stores/LayoutStore';
 </script>
 
 <div class="h-screen flex flex-col" id="container">
@@ -22,6 +22,12 @@
 		{/if}
 	</div>
 </div>
+
+{#if $trimDialog !== undefined}
+	<div class="absolute inset-0">
+		<div class="w-10/12 h-4/6"></div>
+	</div>
+{/if}
 
 <style>
 	#container {

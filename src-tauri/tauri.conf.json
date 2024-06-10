@@ -25,6 +25,19 @@
 				"all": true,
 				"asset": true,
 				"assetScope": ["**"]
+			},
+			"fs": {
+				"all": false,
+				"copyFile": false,
+				"createDir": false,
+				"exists": false,
+				"readDir": true,
+				"readFile": true,
+				"removeDir": false,
+				"removeFile": false,
+				"renameFile": false,
+				"scope": ["**"],
+				"writeFile": true
 			}
 		},
 		"bundle": {
