@@ -1,5 +1,5 @@
+import { getFileNameFromPath, getFileType } from '$lib/ext/File';
 import Id from '$lib/ext/Id';
-import { getFileNameFromPath, getFileType } from '$lib/FileExt';
 import { currentProject } from '$lib/stores/ProjectStore';
 import { invoke } from '@tauri-apps/api';
 

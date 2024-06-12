@@ -3,9 +3,8 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { updateUsersProjects } from '$lib/Project';
-	import { currentProject } from '$lib/stores/ProjectStore';
-	import { loadQuran } from '$lib/Quran';
+	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
+	import { Mushaf, getQuran } from '$lib/stores/QuranStore';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
@@ -36,7 +35,7 @@
 			}
 		};
 
-		loadQuran();
+		getQuran();
 	});
 </script>
 

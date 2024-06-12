@@ -1,17 +1,15 @@
 <script lang="ts">
-	import type Project from '$lib/Project';
 	import { blur, fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
+
 	import {
 		createBlankProject,
 		delProject,
 		getUserProjects,
 		updateUsersProjects
-	} from '$lib/Project';
-	import { currentProject } from '$lib/stores/ProjectStore';
-	import { cursorPosition, zoom } from '$lib/stores/TimelineStore';
-	import Error from './+error.svelte';
+	} from '$lib/stores/ProjectStore';
+	import type Project from '$lib/models/Project';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';

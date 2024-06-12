@@ -1,4 +1,11 @@
 @font-face {
+	font-family: 'Hafs';
+	src: url('./fonts/Hafs.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
 	font-family: 'Molengo';
 	src: url('/fonts/Molengo-Regular.ttf');
 	font-weight: normal;
@@ -29,6 +36,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.arabic {
+	font-family: 'Hafs', 'sans-serif';
+}
 
 .schibstedGrotesk {
 	font-family: 'SchibstedGrotesk', 'Molengo', 'sans-serif';

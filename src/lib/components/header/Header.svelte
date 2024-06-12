@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { updateUsersProjects } from '$lib/Project';
 	import { currentPage, setCurrentPage } from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 
 	let pages: string[] = ['Video editor', 'Subtitle editor', 'Export'];
 

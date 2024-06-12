@@ -1,6 +1,5 @@
-import type Project from '$lib/Project.js';
-import { getProjectById, getUserProjects } from '$lib/Project.js';
-import { currentProject } from '$lib/stores/ProjectStore.js';
+import type Project from '$lib/models/Project.js';
+import { currentProject, getProjectById } from '$lib/stores/ProjectStore.js';
 import { cursorPosition, zoom } from '$lib/stores/TimelineStore';
 import { error } from '@sveltejs/kit';
 

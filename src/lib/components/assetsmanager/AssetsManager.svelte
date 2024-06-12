@@ -2,11 +2,11 @@
 	import { open } from '@tauri-apps/api/dialog';
 	import IconButton from '../common/IconButton.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
-	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/FileExt';
 	import AssetViewer from './AssetViewer.svelte';
 	import { addAssets } from '$lib/classes/Asset';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { assets } from '$app/paths';
+	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
 
 	function uploadAssets() {
 		open({
