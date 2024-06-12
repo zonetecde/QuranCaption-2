@@ -7,7 +7,7 @@
 
 <div class="flex-row w-full h-full grid grid-cols-2-template">
 	<!-- Quran and clip explorer -->
-	<section class="min-w-[220px]">
+	<section class="min-w-[220px] max-h-full overflow-hidden">
 		<AssetsManager />
 	</section>
 
@@ -31,7 +31,5 @@
 	/* grid cols 2 : first col 25% the second col 75% */
 	.grid-cols-2-template {
 		grid-template-columns: 25% 75%;
-
-		/* make it  */
 	}
 </style>
