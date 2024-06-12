@@ -1,0 +1,2 @@
+Dans `Video Editor`, si on met notre curseur sur un clip autre que celui où le curseur est actuellement,
+alors la vidéo va commencer depuis le début et non pas depuis là où est le curseur

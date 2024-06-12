@@ -5,7 +5,8 @@
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToHHMMSS } from '$lib/classes/Timeline';
-	import { isCtrlPressed } from '$lib/stores/ShortcutStore';
+	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
 	$: timeLineTotalDuration = getTimelineTotalDuration($currentProject.timeline);
 
@@ -24,6 +25,9 @@
 		const positionClickedWithin = e.clientX - rect.left;
 		const totalSize = $zoom;
 		const toAdd = (positionClickedWithin / totalSize) * 1000;
+
+		// Pause la vidéo au cas où elle est en cours de lecture
+		isPreviewPlaying.set(false);
 
 		cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000 + toAdd);
 	}

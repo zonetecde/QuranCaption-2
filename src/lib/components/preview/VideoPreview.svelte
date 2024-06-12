@@ -8,10 +8,10 @@
 		getLastClipEnd,
 		getTimelineTotalDuration
 	} from '$lib/stores/TimelineStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
 	export let hideControls = false;
-	let isPlaying = false;
 
 	$: currentTime = secondsToHHMMSS($cursorPosition / 1000); // [0] = HH:MM:SS, [1] = milliseconds
 	$: currentVideo = $currentProject.timeline.videosTracks[0].clips.find(
@@ -34,28 +34,28 @@
 	let audioComponent: HTMLAudioElement;
 
 	$: if ($cursorPosition) {
-		if (!isPlaying && currentVideo && videoComponent) {
+		if (!$isPreviewPlaying && currentVideo && videoComponent) {
 			// Update the video to the cursor position. When playing the video will start from the cursor position
 			videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
 		}
 
-		if (!isPlaying && currentAudio && audioComponent) {
+		if (!$isPreviewPlaying && currentAudio && audioComponent) {
 			// Update the audio to the cursor position. When playing the audio will start from the cursor position
 			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
 		}
 	}
 
 	function handlePlayVideoButtonClicked() {
-		isPlaying = !isPlaying;
+		isPreviewPlaying.set(!$isPreviewPlaying);
 
-		if (isPlaying) {
+		if ($isPreviewPlaying) {
 			playVideo();
 		}
 	}
 
 	function playVideo() {
 		const interval = setInterval(() => {
-			if (isPlaying && (videoComponent || audioComponent)) {
+			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
 				$cursorPosition += 10;
 				// Play the video
 				if (videoComponent) videoComponent.play();
@@ -117,7 +117,7 @@
 				</p>
 
 				<button class="bg-slate-950 w-10 p-1 rounded-full" on:click={handlePlayVideoButtonClicked}>
-					{#if isPlaying}
+					{#if $isPreviewPlaying}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
