@@ -5,6 +5,7 @@
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import {
 		cursorPosition,
+		forceUpdateCurrentPlayingMedia,
 		getLastClipEnd,
 		getTimelineTotalDuration
 	} from '$lib/stores/TimelineStore';
@@ -33,6 +34,12 @@
 
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
+
+	$: if ($forceUpdateCurrentPlayingMedia && currentAudio && currentVideo) {
+		forceUpdateCurrentPlayingMedia.set(false);
+		videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
+		audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
+	}
 
 	let lastTime = 0;
 	$: if ($cursorPosition || $isPreviewPlaying) {

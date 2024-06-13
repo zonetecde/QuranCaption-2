@@ -5,6 +5,8 @@
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { Mushaf, getQuran } from '$lib/stores/QuranStore';
+	import { cursorPosition, forceUpdateCurrentPlayingMedia } from '$lib/stores/TimelineStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
@@ -12,20 +14,29 @@
 				e.preventDefault();
 				updateUsersProjects($currentProject);
 				toast.success('Project saved');
-			}
-
-			if (e.key === 'Control') {
+			} else if (e.key === 'Control') {
 				isCtrlPressed.set(true);
 			}
 
 			// space bar
-			if (e.key === ' ') {
+			else if (e.key === ' ') {
 				// if we are not in a input
 				if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
 					// play/pause the video
 					e.preventDefault();
 					spaceBarPressed.set(true);
 				}
+			}
+
+			// Flèche gauche/droite pour controler le curseur
+			else if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				cursorPosition.update((value) => value - 3000);
+				if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
+			} else if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				cursorPosition.update((value) => value + 3000);
+				if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
 			}
 		};
 

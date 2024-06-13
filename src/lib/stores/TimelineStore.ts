@@ -5,6 +5,7 @@ import type Timeline from '$lib/classes/Timeline';
 
 export const zoom: Writable<number> = writable(30); // 30 px per second
 export const cursorPosition: Writable<number> = writable(0); // in milliseconds, current moment in the timeline / video preview
+export const forceUpdateCurrentPlayingMedia: Writable<boolean> = writable(false);
 
 export function getTimelineTotalDuration(timeline: Timeline) {
 	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks, ...timeline.subtitlesTracks];
