@@ -14,6 +14,7 @@
 	export let hideControls = false;
 
 	$: currentTime = secondsToHHMMSS($cursorPosition / 1000); // [0] = HH:MM:SS, [1] = milliseconds
+
 	$: currentVideo = $currentProject.timeline.videosTracks[0].clips.find(
 		(video) =>
 			(video.start === 0 && video.start <= $cursorPosition && video.end >= $cursorPosition) ||
@@ -33,15 +34,28 @@
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
 
+	let lastTime = 0;
 	$: if ($cursorPosition) {
-		if (!$isPreviewPlaying && currentVideo && videoComponent) {
-			// Update the video to the cursor position. When playing the video will start from the cursor position
-			videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
-		}
+		const currentTime = new Date().getTime();
+		// < 100 ms ?
+		if (currentTime - lastTime > 10) {
+			lastTime = currentTime;
 
-		if (!$isPreviewPlaying && currentAudio && audioComponent) {
-			// Update the audio to the cursor position. When playing the audio will start from the cursor position
-			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
+			if (!$isPreviewPlaying && currentVideo && videoComponent) {
+				// Update the video to the cursor position. When playing the video will start from the cursor position
+				// Le timeout est nécessaire : c'est un fix du bug 1
+				setTimeout(() => {
+					videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
+				}, 0);
+			}
+
+			if (!$isPreviewPlaying && currentAudio && audioComponent) {
+				// Update the audio to the cursor position. When playing the audio will start from the cursor position
+				// Le timeout est nécessaire : c'est un fix du bug 1
+				setTimeout(() => {
+					audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
+				}, 0);
+			}
 		}
 	}
 

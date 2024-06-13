@@ -19,7 +19,12 @@
 	let endWordIndex = 0;
 
 	onMount(() => {
-		window.onkeydown = onKeyDown;
+		// Le met sur le document car le window.onkeydown est déjà pris dans +layout.svelte
+		window.document.onkeydown = onKeyDown;
+	});
+
+	onDestroy(() => {
+		window.document.onkeydown = null;
 	});
 
 	function onKeyDown(event: KeyboardEvent) {
@@ -61,6 +66,27 @@
 			}
 		}
 	}
+
+	/**
+	 * Gère le clic sur un mot
+	 * @param index Index du mot dans le verset
+	 * @param isHighlighted Si le mot est déjà sélectionné
+	 */
+	function handleWordClicked(index: number, isHighlighted: boolean): any {
+		// Si le mot est après l'index de départ et que le mot n'est pas déjà sélectionné
+		if (index > startWordIndex && !isHighlighted) {
+			endWordIndex = index;
+		}
+		// Si le mot est avant l'index de départ et que le mot n'est pas déjà sélectionné
+		else if (index < startWordIndex && !isHighlighted) {
+			startWordIndex = index;
+		}
+		// Sinon, si le mot est déjà sélectionné alors on ne sélectionne que ce mot
+		else if (isHighlighted) {
+			startWordIndex = index;
+			endWordIndex = index;
+		}
+	}
 </script>
 
 <div
@@ -68,10 +94,11 @@
 >
 	{#each wordsInSelectedVerse as word, index}
 		{@const isHighlighted = index >= startWordIndex && index <= endWordIndex}
-		<span
-			class={'px-1.5 cursor-pointer ' +
-				(isHighlighted ? 'bg-[#fbff0027] hover:bg-[#5f5b2049]' : 'hover:bg-[#ffffff2f]')}
-			>{word}</span
+		<button
+			on:click={() => handleWordClicked(index, isHighlighted)}
+			class={'px-1.5 ' +
+				(isHighlighted ? 'bg-[#fbff0027] hover:bg-[#5f5b20e1]' : 'hover:bg-[#ffffff2f]')}
+			>{word}</button
 		>
 	{/each}
 </div>
