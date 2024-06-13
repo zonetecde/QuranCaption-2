@@ -1,7 +1,12 @@
 <script lang="ts">
 	import TrackComponent from './track/TrackComponent.svelte';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { cursorPosition, getTimelineTotalDuration, zoom } from '$lib/stores/TimelineStore';
+	import {
+		cursorPosition,
+		forceUpdateCurrentPlayingMedia,
+		getTimelineTotalDuration,
+		zoom
+	} from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToHHMMSS } from '$lib/classes/Timeline';
@@ -27,9 +32,14 @@
 		const toAdd = (positionClickedWithin / totalSize) * 1000;
 
 		// Pause la vidéo au cas où elle est en cours de lecture
-		isPreviewPlaying.set(false);
+		//isPreviewPlaying.set(false);
 
 		cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000 + toAdd);
+
+		// Permet de forcer la mise à jour du clip en cours de lecture
+		setTimeout(() => {
+			forceUpdateCurrentPlayingMedia.set(true);
+		}, 0);
 	}
 </script>
 

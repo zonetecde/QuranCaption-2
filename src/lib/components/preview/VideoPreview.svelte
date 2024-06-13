@@ -35,10 +35,12 @@
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
 
-	$: if ($forceUpdateCurrentPlayingMedia && currentAudio && currentVideo) {
+	$: if ($forceUpdateCurrentPlayingMedia) {
 		forceUpdateCurrentPlayingMedia.set(false);
-		videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
-		audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
+		if (currentVideo && videoComponent)
+			videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
+		if (currentAudio && audioComponent)
+			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
 	}
 
 	let lastTime = 0;
