@@ -1,5 +1,8 @@
 <script lang="ts">
+	import Id from '$lib/ext/Id';
+	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf, getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
+	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 
 	export let verseNumber: number;
@@ -27,43 +30,71 @@
 		window.document.onkeydown = null;
 	});
 
+	/**
+	 * Sélectionne le mot suivant
+	 * Ou, s'il n'y a plus de mots, passe au verset suivant
+	 * @param removeAllSection Si vrai, supprime la sélection actuelle pour ne sélectionner que le prochain mot
+	 */
+	function selectNextWord(removeAllSection: boolean = false) {
+		// Dans le cas où on veut avancer le curseur (plusieurs mots sélectionnés)
+		if (endWordIndex < wordsInSelectedVerse.length - 1) {
+			endWordIndex += 1;
+
+			if (removeAllSection) startWordIndex = endWordIndex;
+		} else {
+			// Verset suivant s'il existe
+			if (verseNumber < getNumberOfVerses(surahNumber)) {
+				verseNumber += 1;
+			}
+		}
+	}
+
+	/**
+	 * Sélectionne le mot précédent
+	 * Ou, s'il n'y a plus de mots, passe au verset précédent
+	 */
+	function selectPreviousWord() {
+		// Dans le cas où on veut reculer le curseur (plusieurs mots sélectionnés)
+		if (endWordIndex > startWordIndex) {
+			endWordIndex -= 1;
+		} else {
+			// Dans le cas où on veut reculer le curseur (le mot sélectionné est au milieu du verset)
+			if (startWordIndex > 0) {
+				// Recule les deux curseurs
+				startWordIndex -= 1;
+				endWordIndex -= 1;
+			} else {
+				// Verset précédent s'il existe
+				if (verseNumber > 1) {
+					verseNumber -= 1;
+					// Bypass la remise à zéro des curseurs pour le mettre à la fin du verset précédent
+					setTimeout(() => {
+						startWordIndex = getVerse(surahNumber, verseNumber).text.split(' ').length - 1;
+						endWordIndex = startWordIndex;
+					}, 0);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Gère les événements de touche clavier
+	 * @param event Événement de touche clavier
+	 */
 	function onKeyDown(event: KeyboardEvent) {
 		if (event.key === 'ArrowUp') {
 			event.preventDefault();
-			// Dans le cas où on veut avancer le curseur (plusieurs mots sélectionnés)
-			if (endWordIndex < wordsInSelectedVerse.length - 1) {
-				endWordIndex += 1;
-			} else {
-				// Verset suivant s'il existe
-				if (verseNumber < getNumberOfVerses(surahNumber)) {
-					verseNumber += 1;
-				}
-			}
+			selectNextWord();
 		}
 
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
-			// Dans le cas où on veut reculer le curseur (plusieurs mots sélectionnés)
-			if (endWordIndex > startWordIndex) {
-				endWordIndex -= 1;
-			} else {
-				// Dans le cas où on veut reculer le curseur (le mot sélectionné est au milieu du verset)
-				if (startWordIndex > 0) {
-					// Recule les deux curseurs
-					startWordIndex -= 1;
-					endWordIndex -= 1;
-				} else {
-					// Verset précédent s'il existe
-					if (verseNumber > 1) {
-						verseNumber -= 1;
-						// Bypass la remise à zéro des curseurs pour le mettre à la fin du verset précédent
-						setTimeout(() => {
-							startWordIndex = getVerse(surahNumber, verseNumber).text.split(' ').length - 1;
-							endWordIndex = startWordIndex;
-						}, 0);
-					}
-				}
-			}
+			selectPreviousWord();
+		}
+
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			addSelectedWordAsSubtitle();
 		}
 	}
 
@@ -86,6 +117,27 @@
 			startWordIndex = index;
 			endWordIndex = index;
 		}
+	}
+
+	function addSelectedWordAsSubtitle() {
+		const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
+		// Ajoute le sous-titre à la liste des sous-titres
+		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+
+		const lastSubtitleEndTime =
+			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
+
+		subtitleClips.push({
+			id: Id.generate(),
+			start: lastSubtitleEndTime,
+			end: $cursorPosition,
+			text: selectedWords
+		});
+
+		// Met à jour la liste des sous-titres
+		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
+
+		selectNextWord(true);
 	}
 </script>
 

@@ -62,7 +62,7 @@
 
 					<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 					<button
-						class="w-full h-6 absolute top-0 z-10"
+						class="w-full h-6 absolute top-0 z-10 select-none"
 						on:click={(e) => moveCursorToPosition(e, i)}
 						on:mousemove={(e) => {
 							if (e.buttons !== 1) return;

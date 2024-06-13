@@ -1,14 +1,29 @@
 export default interface Timeline {
 	audiosTracks: Track[];
 	videosTracks: Track[];
-	subtitlesTracks: Track[];
+	subtitlesTracks: SubtitleTrack[];
 }
 
 export type Track = {
 	id: string;
 	name: string;
-	type: 'Video track' | 'Audio track' | 'Subtitles track';
+	type: 'Video track' | 'Audio track';
 	clips: Clip[];
+};
+
+export type SubtitleTrack = {
+	id: string;
+	language: string;
+	type: 'Subtitles track';
+	name: string;
+	clips: SubtitleClip[];
+};
+
+export type SubtitleClip = {
+	id: string;
+	start: number;
+	end: number;
+	text: string;
 };
 
 export type Clip = {

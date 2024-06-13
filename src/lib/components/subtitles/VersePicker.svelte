@@ -15,6 +15,7 @@
 
 	function onSurahChange(event: any) {
 		verseNumber = 1;
+		verseNumberInInput = 1;
 		surahNumber = parseInt(event.target.value);
 	}
 </script>
