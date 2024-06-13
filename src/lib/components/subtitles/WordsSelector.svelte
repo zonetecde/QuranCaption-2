@@ -124,8 +124,15 @@
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
-		const lastSubtitleEndTime =
+		let lastSubtitleEndTime =
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
+
+		// Vérifie que la fin > début
+		if (lastSubtitleEndTime >= $cursorPosition) {
+			console.error(
+				'La fin du sous-titre précédent est supérieure ou égale au début du nouveau sous-titre'
+			);
+		}
 
 		subtitleClips.push({
 			id: Id.generate(),

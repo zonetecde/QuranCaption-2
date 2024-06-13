@@ -35,6 +35,9 @@
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
 
+	/**
+	 * Force la mise à jour de la vidéo et de l'audio en cours de lecture par rapport à la position du curseur.
+	 */
 	$: if ($forceUpdateCurrentPlayingMedia) {
 		forceUpdateCurrentPlayingMedia.set(false);
 		if (currentVideo && videoComponent)
@@ -43,6 +46,9 @@
 			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
 	}
 
+	/**
+	 * Se charge de bien placer le bon moment dans la vidéo et l'audio en fonction de la position du curseur.
+	 */
 	let lastTime = 0;
 	$: if ($cursorPosition || $isPreviewPlaying) {
 		const currentTime = new Date().getTime();
@@ -68,6 +74,10 @@
 		}
 	}
 
+	/**
+	 * Handles the click event of the play video button.
+	 * Toggles the value of `isPreviewPlaying` and calls `playVideo()` if `isPreviewPlaying` is true.
+	 */
 	function handlePlayVideoButtonClicked() {
 		isPreviewPlaying.set(!$isPreviewPlaying);
 
@@ -76,13 +86,20 @@
 		}
 	}
 
+	/**
+	 * Plays the video and audio components in the preview.
+	 * The function continuously updates the cursor position and checks if the preview is still playing.
+	 * If the preview is playing and there are video or audio components, the cursor position is incremented by 10.
+	 * The video and audio components are then played.
+	 * If the preview is not playing or there are no video or audio components, the video and audio components are paused.
+	 * The function is executed every 10 milliseconds using setInterval.
+	 */
 	function playVideo() {
 		const interval = setInterval(() => {
 			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
 				$cursorPosition += 10;
 				// Play the video
 				if (videoComponent) videoComponent.play();
-
 				if (audioComponent) audioComponent.play();
 			} else {
 				// Pause the video
