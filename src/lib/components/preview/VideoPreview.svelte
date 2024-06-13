@@ -35,9 +35,9 @@
 	let audioComponent: HTMLAudioElement;
 
 	let lastTime = 0;
-	$: if ($cursorPosition) {
+	$: if ($cursorPosition || $isPreviewPlaying) {
 		const currentTime = new Date().getTime();
-		// < 100 ms ?
+		// < 100 ms ? (permet de ne pas spam la reactivity après le setTimeout)
 		if (currentTime - lastTime > 10) {
 			lastTime = currentTime;
 
