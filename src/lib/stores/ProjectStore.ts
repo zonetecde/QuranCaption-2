@@ -49,6 +49,7 @@ export function createBlankProject(name: string): Project {
 			cursorPosition: 0,
 			zoom: 30,
 			subtitleSettings: {
+				enableSubtitles: true,
 				fontSize: 24,
 				fontFamilyArabic: 'Hafs',
 				fontFamilyLatin: 'Arial',

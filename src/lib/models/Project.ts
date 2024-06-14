@@ -31,6 +31,7 @@ export interface ProjectSettings {
  * Represents the settings of subtitles.
  */
 export interface SubtitleSettings {
+	enableSubtitles: boolean;
 	fontSize: number;
 	fontFamilyArabic: string;
 	fontFamilyLatin: string;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { secondsToHHMMSS } from '$lib/classes/Timeline';
+	import { getDisplayedVideoSize } from '$lib/ext/HtmlExt';
 	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
@@ -44,7 +45,7 @@
 
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
-	let subtitleTextSize = 40;
+	let subtitleTextSize = 1;
 
 	onMount(() => {
 		window.addEventListener('resize', calculateSubtitleTextSize);
@@ -55,10 +56,14 @@
 		window.removeEventListener('resize', calculateSubtitleTextSize);
 	});
 
+	$: $currentProject.projectSettings.subtitleSettings.fontSize, calculateSubtitleTextSize();
+
 	function calculateSubtitleTextSize() {
 		if (videoComponent && videoComponent.offsetWidth) {
 			// Calcul la taille de la police pour les sous-titres
-			subtitleTextSize = videoComponent.offsetWidth / 35;
+			subtitleTextSize =
+				getDisplayedVideoSize(videoComponent).displayedWidth /
+				(140 - $currentProject.projectSettings.subtitleSettings.fontSize);
 		}
 	}
 
@@ -171,9 +176,16 @@
 				{/if}
 			{/if}
 
+			{#if $currentProject.projectSettings.subtitleSettings.background}
+				<div
+					class="absolute inset-0"
+					style={`opacity: ${$currentProject.projectSettings.subtitleSettings.backgroundOpacity}; background-color: ${$currentProject.projectSettings.subtitleSettings.backgroundColor};`}
+				></div>
+			{/if}
+
 			{#if currentSubtitle && currentSubtitle.text !== ''}
 				<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
-				<div class={'inset-0 absolute ' + (hideControls ? '' : 'bottom-16')}>
+				<div class={'inset-0 absolute overflow-hidden ' + (hideControls ? '' : 'bottom-16')}>
 					<div class="flex items-center justify-center h-full">
 						<p class="arabic text-center" style="font-size: {subtitleTextSize}px;">
 							{currentSubtitle.text}
