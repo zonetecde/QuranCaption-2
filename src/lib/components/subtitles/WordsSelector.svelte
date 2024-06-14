@@ -4,6 +4,7 @@
 	import { Mushaf, getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
+	import toast from 'svelte-french-toast';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
@@ -78,27 +79,6 @@
 	}
 
 	/**
-	 * Gère les événements de touche clavier
-	 * @param event Événement de touche clavier
-	 */
-	function onKeyDown(event: KeyboardEvent) {
-		if (event.key === 'ArrowUp') {
-			event.preventDefault();
-			selectNextWord();
-		}
-
-		if (event.key === 'ArrowDown') {
-			event.preventDefault();
-			selectPreviousWord();
-		}
-
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			addSelectedWordAsSubtitle();
-		}
-	}
-
-	/**
 	 * Gère le clic sur un mot
 	 * @param index Index du mot dans le verset
 	 * @param isHighlighted Si le mot est déjà sélectionné
@@ -119,32 +99,79 @@
 		}
 	}
 
-	function addSelectedWordAsSubtitle() {
-		const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
+	/**
+	 * Gère les événements de touche clavier
+	 * @param event Événement de touche clavier
+	 */
+	function onKeyDown(event: KeyboardEvent) {
+		if (event.key === 'ArrowUp') {
+			selectNextWord();
+		} else if (event.key === 'ArrowDown') {
+			selectPreviousWord();
+		} else if (event.key === 'Enter') {
+			const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
+			addSubtitle(selectedWords);
+			selectNextWord(true);
+		} else if (event.key === 'b') {
+			// Ajoute la basmallah
+			addSubtitle('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ');
+		} else if (event.key === 'a') {
+			// Ajoute la protection
+			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ');
+		} else if (event.key === 's' && !event.ctrlKey) {
+			// Ajoute un silence
+			addSubtitle('');
+		} else if (event.key === 'a') {
+			// Ajoute la protection
+			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ');
+		} else if (event.key === 'Backspace') {
+			removeLastSubtitle();
+		}
+	}
+
+	/**
+	 * Supprime le dernier sous-titre
+	 */
+	function removeLastSubtitle() {
+		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+
+		if (subtitleClips.length > 0) {
+			subtitleClips.pop();
+		}
+
+		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
+	}
+
+	function addSubtitle(subtitleText: string) {
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
 		let lastSubtitleEndTime =
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
+		// Vérifie qu'on est pas au 0
+		if ($cursorPosition < 100) {
+			toast.error('Jouer la vidéo pour ajouter un sous-titre');
+			return;
+		}
 		// Vérifie que la fin > début
+		// TODO 2
 		if (lastSubtitleEndTime >= $cursorPosition) {
-			console.error(
+			toast.error(
 				'La fin du sous-titre précédent est supérieure ou égale au début du nouveau sous-titre'
 			);
+			return;
 		}
 
 		subtitleClips.push({
 			id: Id.generate(),
 			start: lastSubtitleEndTime,
 			end: $cursorPosition,
-			text: selectedWords
+			text: subtitleText
 		});
 
 		// Met à jour la liste des sous-titres
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
-
-		selectNextWord(true);
 	}
 </script>
 

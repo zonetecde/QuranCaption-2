@@ -40,13 +40,25 @@ export function createBlankProject(name: string): Project {
 					id: Id.generate(),
 					name: 'Subtitles',
 					clips: [],
-					type: 'Subtitles track'
+					type: 'Subtitles track',
+					language: 'arabic'
 				}
 			]
 		},
 		projectSettings: {
 			cursorPosition: 0,
-			zoom: 30
+			zoom: 30,
+			subtitleSettings: {
+				fontSize: 24,
+				fontFamilyArabic: 'Hafs',
+				fontFamilyLatin: 'Arial',
+				color: '#ffffff',
+				outline: true,
+				outlineSize: 2,
+				background: true,
+				backgroundColor: '#000000',
+				backgroundOpacity: 0.5
+			}
 		}
 	};
 }

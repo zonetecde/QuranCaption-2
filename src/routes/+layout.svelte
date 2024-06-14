@@ -5,7 +5,11 @@
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { Mushaf, getQuran } from '$lib/stores/QuranStore';
-	import { cursorPosition, forceUpdateCurrentPlayingMedia } from '$lib/stores/TimelineStore';
+	import {
+		cursorPosition,
+		forceUpdateCurrentPlayingMedia,
+		getTimelineTotalDuration
+	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
 	onMount(() => {
@@ -32,6 +36,7 @@
 			else if (e.key === 'ArrowLeft') {
 				e.preventDefault();
 				cursorPosition.update((value) => value - 3000);
+				if ($cursorPosition < 0) cursorPosition.set(0);
 				if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
 			} else if (e.key === 'ArrowRight') {
 				e.preventDefault();

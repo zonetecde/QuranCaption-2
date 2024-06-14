@@ -17,5 +17,5 @@
 	on:click={handleClipClicked}
 	style="width: {($zoom * (clip.end - clip.start)) / 1000}px;"
 >
-	<p class="arabic text-right">{clip.text}</p>
+	<p class="arabic text-right">{clip.text === '' ? 'silence' : clip.text}</p>
 </div>

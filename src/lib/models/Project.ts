@@ -24,4 +24,20 @@ export default interface Project {
 export interface ProjectSettings {
 	cursorPosition: number;
 	zoom: number;
+	subtitleSettings: SubtitleSettings;
+}
+
+/**
+ * Represents the settings of subtitles.
+ */
+export interface SubtitleSettings {
+	fontSize: number;
+	fontFamilyArabic: string;
+	fontFamilyLatin: string;
+	color: string;
+	outline: boolean;
+	outlineSize: number;
+	background: boolean;
+	backgroundColor: string;
+	backgroundOpacity: number;
 }

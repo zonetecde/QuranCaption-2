@@ -11,6 +11,7 @@
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { onDestroy, onMount } from 'svelte';
 
 	export let hideControls = false;
 
@@ -26,6 +27,15 @@
 			(audio.start === 0 && audio.start <= $cursorPosition && audio.end >= $cursorPosition) ||
 			(audio.start > 0 && audio.start - 1000 < $cursorPosition && audio.end >= $cursorPosition)
 	);
+	$: currentSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
+		(subtitle) =>
+			(subtitle.start === 0 &&
+				subtitle.start <= $cursorPosition &&
+				subtitle.end >= $cursorPosition) ||
+			(subtitle.start > 0 &&
+				subtitle.start - 1000 < $cursorPosition &&
+				subtitle.end >= $cursorPosition)
+	);
 
 	$: if ($spaceBarPressed) {
 		handlePlayVideoButtonClicked();
@@ -34,6 +44,23 @@
 
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
+	let subtitleTextSize = 40;
+
+	onMount(() => {
+		window.addEventListener('resize', calculateSubtitleTextSize);
+		calculateSubtitleTextSize();
+	});
+
+	onDestroy(() => {
+		window.removeEventListener('resize', calculateSubtitleTextSize);
+	});
+
+	function calculateSubtitleTextSize() {
+		if (videoComponent && videoComponent.offsetWidth) {
+			// Calcul la taille de la police pour les sous-titres
+			subtitleTextSize = videoComponent.offsetWidth / 35;
+		}
+	}
 
 	/**
 	 * Force la mise à jour de la vidéo et de l'audio en cours de lecture par rapport à la position du curseur.
@@ -114,7 +141,7 @@
 
 <div class="w-full h-full flex flex-col relative">
 	<div class={'h-full relative bg-[#0f0d0d] ' + (hideControls ? '' : 'pb-16')}>
-		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId)}
+		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId) || currentSubtitle}
 			{#if currentVideo}
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
@@ -129,6 +156,8 @@
 				{:else}
 					<p>Video does not exist</p>
 				{/if}
+			{:else}
+				<div class="w-full h-full bg-black"></div>
 			{/if}
 			{#if currentAudio}
 				{@const audio = getAssetFromId(currentAudio.assetId)}
@@ -141,7 +170,18 @@
 					></audio>
 				{/if}
 			{/if}
-		{:else}{/if}
+
+			{#if currentSubtitle && currentSubtitle.text !== ''}
+				<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
+				<div class={'inset-0 absolute ' + (hideControls ? '' : 'bottom-16')}>
+					<div class="flex items-center justify-center h-full">
+						<p class="arabic text-center" style="font-size: {subtitleTextSize}px;">
+							{currentSubtitle.text}
+						</p>
+					</div>
+				</div>
+			{/if}
+		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
 
 	{#if hideControls === false}
