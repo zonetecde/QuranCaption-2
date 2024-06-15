@@ -29,11 +29,11 @@
 	</section>
 
 	<!-- Preview + Subtitles -->
-	<section class="min-w-[120px] flex flex-col">
-		<div class="h-fit">
+	<section class="min-w-[120px] flex flex-col overflow-hidden">
+		<div class="h-fit min-h-40">
 			<VideoPreview hideControls />
 		</div>
-		<div class="h-full max-h-full overflow-hidden">
+		<div class="overflow-hidden">
 			<SubtitlesList />
 		</div>
 	</section>

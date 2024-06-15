@@ -68,3 +68,11 @@ export function secondsToHHMMSS(
 
 	return [str, milliseconds];
 }
+
+export function milisecondsToMMSS(milliseconds: number): string {
+	const date = new Date(0);
+	date.setMilliseconds(milliseconds);
+	const minutes = date.getUTCMinutes();
+	const seconds = date.getUTCSeconds();
+	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}

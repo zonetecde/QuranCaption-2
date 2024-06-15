@@ -2,7 +2,7 @@
 	import { currentPage, setCurrentPage } from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 
-	let pages: string[] = ['Video editor', 'Subtitle editor', 'Export'];
+	let pages: string[] = ['Video editor', 'Subtitles editor', 'Export'];
 
 	function handlePageChange(page: any) {
 		setCurrentPage(page);

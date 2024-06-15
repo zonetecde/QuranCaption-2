@@ -15,7 +15,7 @@
 	<div style="height: calc(100% - 3.5rem);">
 		{#if $currentPage === 'Video editor'}
 			<VideoEditor />
-		{:else if $currentPage === 'Subtitle editor'}
+		{:else if $currentPage === 'Subtitles editor'}
 			<SubtitleEditor />
 		{:else if $currentPage === 'Export'}
 			<!-- <Export /> -->
