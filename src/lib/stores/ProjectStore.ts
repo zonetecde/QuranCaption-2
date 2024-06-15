@@ -54,11 +54,12 @@ export function createBlankProject(name: string): Project {
 				fontFamilyArabic: 'Hafs',
 				fontFamilyLatin: 'Arial',
 				color: '#ffffff',
-				outline: true,
-				outlineSize: 2,
+				outlineColor: '#000000',
+				outlineWidth: 2,
 				background: true,
 				backgroundColor: '#000000',
-				backgroundOpacity: 0.5
+				backgroundOpacity: 0.5,
+				fadeDuration: 300
 			}
 		}
 	};

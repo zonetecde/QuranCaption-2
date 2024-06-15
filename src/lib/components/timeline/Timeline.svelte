@@ -31,8 +31,13 @@
 		const totalSize = $zoom;
 		const toAdd = (positionClickedWithin / totalSize) * 1000;
 
-		// Pause la vidéo au cas où elle est en cours de lecture
-		//isPreviewPlaying.set(false);
+		// Enlève temporairement l'effet de fade (car on ne veut pas que le fade soit visible lors du déplacement du curseur, juste
+		// lors de la lecture)
+		const temp = $currentProject.projectSettings.subtitleSettings.fadeDuration;
+		$currentProject.projectSettings.subtitleSettings.fadeDuration = 0;
+		setTimeout(() => {
+			$currentProject.projectSettings.subtitleSettings.fadeDuration = temp;
+		}, 0);
 
 		cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000 + toAdd);
 

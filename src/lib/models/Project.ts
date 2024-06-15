@@ -36,9 +36,10 @@ export interface SubtitleSettings {
 	fontFamilyArabic: string;
 	fontFamilyLatin: string;
 	color: string;
-	outline: boolean;
-	outlineSize: number;
+	outlineWidth: number;
+	outlineColor: string;
 	background: boolean;
 	backgroundColor: string;
 	backgroundOpacity: number;
+	fadeDuration: number;
 }

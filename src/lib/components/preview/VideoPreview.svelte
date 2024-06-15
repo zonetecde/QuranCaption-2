@@ -13,6 +13,7 @@
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { onDestroy, onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 
 	export let hideControls = false;
 
@@ -184,14 +185,49 @@
 			{/if}
 
 			{#if currentSubtitle && currentSubtitle.text !== ''}
-				<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
-				<div class={'inset-0 absolute overflow-hidden ' + (hideControls ? '' : 'bottom-16')}>
-					<div class="flex items-center justify-center h-full">
-						<p class="arabic text-center" style="font-size: {subtitleTextSize}px;">
-							{currentSubtitle.text}
-						</p>
+				<!-- Ne pas créer de variable pour sibtitleFadeDuration, car on ne veut pas
+			 une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeline)  -->
+				{@const subtitleOutlineWidth =
+					$currentProject.projectSettings.subtitleSettings.outlineWidth}
+				{@const subtitleOutlineColor =
+					$currentProject.projectSettings.subtitleSettings.outlineColor}
+
+				{#key currentSubtitle.id}
+					<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
+					<div
+						class={'inset-0 absolute overflow-hidden ' + (hideControls ? '' : 'bottom-16')}
+						in:fade={{
+							duration: $currentProject.projectSettings.subtitleSettings.fadeDuration,
+							delay: $currentProject.projectSettings.subtitleSettings.fadeDuration
+						}}
+						out:fade={{ duration: $currentProject.projectSettings.subtitleSettings.fadeDuration }}
+					>
+						<div class="flex items-center justify-center h-full">
+							<p
+								class="arabic text-center"
+								style="font-size: {subtitleTextSize}px;
+							
+							text-shadow: 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
+								0 0 {subtitleOutlineWidth}px {subtitleOutlineColor};
+							"
+							>
+								{currentSubtitle.text}
+							</p>
+						</div>
 					</div>
-				</div>
+				{/key}
 			{/if}
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
