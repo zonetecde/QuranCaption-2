@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/classes/Timeline';
 	import { getDisplayedVideoSize } from '$lib/ext/HtmlExt';
+	import { showSubtitlesPadding } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
@@ -70,10 +71,16 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineWidth}
 	{@const subtitleOutlineColor =
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineColor}
+	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
 	{@const subtitleVerticalPosition =
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition}
+		videoHeight *
+		($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition /
+			100)}
+	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding}
+		videoWidth *
+		($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding /
+			100)}
 
 	{#key currentSubtitle.id}
 		<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
@@ -87,7 +94,10 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 			}}
 			out:fade={{ duration: $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration }}
 		>
-			<div class="flex items-center justify-center h-full">
+			<div
+				class={'flex items-center justify-center h-full ' +
+					($showSubtitlesPadding ? ' bg-blue-500 bg-opacity-30' : '')}
+			>
 				<p
 					class="arabic text-center"
 					style="font-size: {subtitleTextSize}px;

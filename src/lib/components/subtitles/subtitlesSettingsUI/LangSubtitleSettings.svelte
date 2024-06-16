@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Toggle from '$lib/components/general/Toggle.svelte';
+	import { showSubtitlesPadding } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 
 	export let subtitleLanguage = 'arabic';
@@ -57,18 +58,18 @@
 		<div class="flex">
 			<input
 				type="range"
-				min="-1000"
-				max="1000"
-				step="1"
+				min="-100"
+				max="100"
+				step="0.1"
 				class="ml-1 bg-slate-600"
 				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 					.verticalPosition}
 			/>
 			<input
 				type="number"
-				min="-1000"
-				max="1000"
-				step="1"
+				min="-100"
+				max="100"
+				step="0.1"
 				class="ml-1 bg-transparent bg-slate-600 px-2 py-1 w-20"
 				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 					.verticalPosition}
@@ -79,19 +80,23 @@
 		<span>Horizontal Padding :</span>
 		<div class="flex">
 			<input
+				on:focus={() => showSubtitlesPadding.set(true)}
+				on:blur={() => showSubtitlesPadding.set(false)}
 				type="range"
 				min="0"
-				max="600"
-				step="1"
+				max="50"
+				step="0.1"
 				class="ml-1 bg-transparent bg-slate-600"
 				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 					.horizontalPadding}
 			/>
 			<input
+				on:focus={() => showSubtitlesPadding.set(true)}
+				on:blur={() => showSubtitlesPadding.set(false)}
 				type="number"
 				min="0"
-				max="600"
-				step="1"
+				max="50"
+				step="0.1"
 				class="ml-1 bg-transparent bg-slate-600 px-2 py-1 w-20"
 				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 					.horizontalPadding}

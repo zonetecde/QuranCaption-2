@@ -3,14 +3,14 @@
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleCreator from '../subtitles/SubtitleCreator.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
-	import SubtitleSettings from '../subtitles/subtitlesSettingsUI/SubtitleSettings.svelte';
+	import SubtitleSettingsContainer from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-3-template">
 	<!-- Quran and clip explorer -->
 	<section class="min-w-[220px] max-h-full overflow-hidden">
-		<SubtitleSettings />
+		<SubtitleSettingsContainer />
 	</section>
 
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
