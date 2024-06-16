@@ -5,7 +5,7 @@
 	import { currentPage, trimDialog } from '$lib/stores/LayoutStore';
 </script>
 
-<div class="h-screen flex flex-col" id="container">
+<div class="h-screen flex flex-col overflow-x-hidden" id="container">
 	<!-- Top bar -->
 	<!-- There's an issue with the top bar, it's making the main window have a scroll bar -->
 	<header class="w-full min-h-14 border-b-2 border-[#413f3f]">

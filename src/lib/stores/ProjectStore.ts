@@ -61,7 +61,9 @@ export function createBlankProject(name: string): Project {
 					fontFamily: 'Hafs',
 					color: '#ffffff',
 					outlineColor: '#000000',
-					outlineWidth: 2
+					outlineWidth: 2,
+					verticalPosition: 0,
+					horizontalPadding: 0
 				}
 			}
 		}

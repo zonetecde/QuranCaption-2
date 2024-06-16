@@ -11,6 +11,8 @@
 	export let videoComponent: HTMLVideoElement;
 	export let subtitleLanguage: string;
 
+	let videoWidth = 0;
+
 	$: currentSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
 		(subtitle) =>
 			(subtitle.start === 0 &&
@@ -43,9 +45,11 @@
 
 	function calculateSubtitleTextSize() {
 		if (videoComponent && videoComponent.offsetWidth) {
+			videoWidth = getDisplayedVideoSize(videoComponent).displayedWidth;
+
 			// Calcul la taille de la police pour les sous-titres
 			subtitleTextSize =
-				getDisplayedVideoSize(videoComponent).displayedWidth /
+				videoWidth /
 				(140 - $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize);
 		}
 	}
@@ -55,16 +59,20 @@
 	<!-- Ne pas créer de variable pour sibtitleFadeDuration, car on ne veut pas
 une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeline)  -->
 	{@const subtitleOutlineWidth =
-		// @ts-ignore
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineWidth}
 	{@const subtitleOutlineColor =
-		// @ts-ignore
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineColor}
+	{@const subtitleVerticalPosition =
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition}
+	{@const subtitleHorizontalPadding =
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding}
 
 	{#key currentSubtitle.id}
 		<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
 		<div
-			class={'inset-0 absolute overflow-hidden ' + (hideControls ? '' : 'bottom-16')}
+			class={'inset-0 absolute overflow-hidden left-1/2 -translate-x-1/2 ' +
+				(hideControls ? '' : 'bottom-16')}
+			style={`width: ${videoWidth}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 			in:fade={{
 				duration: $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration,
 				delay: $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration

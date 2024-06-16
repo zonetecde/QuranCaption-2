@@ -49,4 +49,6 @@ export interface SubtitleTrackSettings {
 	color: string;
 	outlineWidth: number;
 	outlineColor: string;
+	verticalPosition: number;
+	horizontalPadding: number;
 }
