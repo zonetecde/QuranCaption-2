@@ -2,6 +2,7 @@
 	import Toggle from '$lib/components/general/Toggle.svelte';
 	import { showSubtitlesPadding } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
+	import Slider from './Slider.svelte';
 
 	export let subtitleLanguage = 'arabic';
 </script>
@@ -13,21 +14,25 @@
 />
 
 <!-- Font size -->
-<label for="font-size" class="flex items-center">
-	<span>Font Size :</span>
-	<input
-		type="range"
-		min="1"
-		max="140"
-		step="1"
-		class="ml-1 bg-transparent"
-		bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize}
+<div class="-my-3">
+	<Slider
+		title="Font Size"
+		min={1}
+		max={140}
+		step={1}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.fontSize}
 	/>
-</label>
+</div>
 
-<div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
+<div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">
 	<h1 class="text-lg font-bold mb-2">Subtitle Outline</h1>
-	<label for="background-color"
+	<Toggle
+		text="Enable outline"
+		bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.enableOutline}
+	/>
+	<label for="background-color" class="mt-2"
 		><span>Outline Color :</span>
 		<input
 			type="color"
@@ -37,72 +42,37 @@
 		/>
 	</label>
 
-	<label class="flex mt-2"
-		><span>Outline width :</span>
-		<input
-			type="range"
-			min="1"
-			max="40"
-			step="0.5"
-			class="ml-1 bg-transparent"
-			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.outlineWidth}
-		/>
-	</label>
+	<Slider
+		title="Outline Thickness"
+		min={1}
+		max={40}
+		step={0.5}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.outlineThickness}
+	/>
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
 	<h1 class="text-lg font-bold mb-2">Position</h1>
-	<label class="flex mt-2 items-center flex-wrap overflow-x-auto">
-		<span>Vertical Position :</span>
-		<div class="flex">
-			<input
-				type="range"
-				min="-100"
-				max="100"
-				step="0.1"
-				class="ml-1 bg-slate-600"
-				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-					.verticalPosition}
-			/>
-			<input
-				type="number"
-				min="-100"
-				max="100"
-				step="0.1"
-				class="ml-1 bg-transparent bg-slate-600 px-2 py-1 w-20"
-				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-					.verticalPosition}
-			/>
-		</div>
-	</label>
-	<label class="flex mt-2 items-center flex-wrap overflow-x-auto">
-		<span>Horizontal Padding :</span>
-		<div class="flex">
-			<input
-				on:focus={() => showSubtitlesPadding.set(true)}
-				on:blur={() => showSubtitlesPadding.set(false)}
-				type="range"
-				min="0"
-				max="50"
-				step="0.1"
-				class="ml-1 bg-transparent bg-slate-600"
-				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-					.horizontalPadding}
-			/>
-			<input
-				on:focus={() => showSubtitlesPadding.set(true)}
-				on:blur={() => showSubtitlesPadding.set(false)}
-				type="number"
-				min="0"
-				max="50"
-				step="0.1"
-				class="ml-1 bg-transparent bg-slate-600 px-2 py-1 w-20"
-				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-					.horizontalPadding}
-			/>
-		</div>
-	</label>
+	<Slider
+		title="Vertical Position"
+		min={-100}
+		max={100}
+		step={0.1}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.verticalPosition}
+	/>
+
+	<Slider
+		on:focus={() => showSubtitlesPadding.set(true)}
+		on:blur={() => showSubtitlesPadding.set(false)}
+		title="Horizontal Padding"
+		min={0}
+		max={50}
+		step={0.1}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.horizontalPadding}
+	/>
 </div>
 
 <br />

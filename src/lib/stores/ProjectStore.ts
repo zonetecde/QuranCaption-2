@@ -60,8 +60,9 @@ export function createBlankProject(name: string): Project {
 					fontSize: 24,
 					fontFamily: 'Hafs',
 					color: '#ffffff',
+					enableOutline: true,
 					outlineColor: '#000000',
-					outlineWidth: 2,
+					outlineThickness: 2,
 					verticalPosition: 0,
 					horizontalPadding: 0
 				}

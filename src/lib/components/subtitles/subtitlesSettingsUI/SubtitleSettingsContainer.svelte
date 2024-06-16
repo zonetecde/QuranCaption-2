@@ -21,8 +21,8 @@
 		class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
 		bind:value={_selectedSubtitlesLanguage}
 	>
-		<option class="bg-slate-800" value="global">Global</option>
-		<option class="bg-slate-800" value="arabic">Arabic</option>
+		<option class="bg-slate-300 text-black" value="global">Global</option>
+		<option class="bg-slate-300 text-black" value="arabic">Arabic</option>
 	</select>
 
 	{#if _selectedSubtitlesLanguage === 'global'}

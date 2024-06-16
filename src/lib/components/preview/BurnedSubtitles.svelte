@@ -19,10 +19,12 @@
 		(subtitle) =>
 			(subtitle.start === 0 &&
 				subtitle.start <= $cursorPosition &&
-				subtitle.end >= $cursorPosition) ||
+				subtitle.end - $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration >= // On enlève un peu du temps de fin pour que le fade soit plus fluide (qu'il commence à disparaître avant la fin)
+					$cursorPosition) ||
 			(subtitle.start > 0 &&
 				subtitle.start - 1000 < $cursorPosition &&
-				subtitle.end >= $cursorPosition)
+				subtitle.end - $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration >= // On enlève un peu du temps de fin pour que le fade soit plus fluide (qu'il commence à disparaître avant la fin)
+					$cursorPosition)
 	) || {
 		// Permet de garder le sous-titre affiché avec un fondu de dispiration lorsqu'il n'y a plus de sous-titre
 		id: '-1',
@@ -30,6 +32,14 @@
 		end: 0,
 		text: ''
 	};
+
+	$: if (
+		currentSubtitle &&
+		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration > 0
+	) {
+		// Enlève un peu du temps de fin pour que le fade soit plus fluide
+		//currentSubtitle.end -= $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
+	}
 
 	let subtitleTextSize = 1;
 
@@ -68,7 +78,9 @@
 	<!-- Ne pas créer de variable pour sibtitleFadeDuration, car on ne veut pas
 une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeline)  -->
 	{@const subtitleOutlineWidth =
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineWidth}
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineThickness}
+	{@const enableOutline =
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableOutline}
 	{@const subtitleOutlineColor =
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineColor}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
@@ -85,8 +97,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 	{#key currentSubtitle.id}
 		<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
 		<div
-			class={'inset-0  absolute overflow-hidden left-1/2 -translate-x-1/2 ' +
-				(hideControls ? '' : 'bottom-16')}
+			class={'inset-0  absolute left-1/2 -translate-x-1/2 ' + (hideControls ? '' : 'bottom-16')}
 			style={`width: ${videoWidth}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 			in:fade={{
 				duration: $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration,
@@ -100,23 +111,14 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 			>
 				<p
 					class="arabic text-center"
-					style="font-size: {subtitleTextSize}px;
-            
-            text-shadow: 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor}, 
-                0 0 {subtitleOutlineWidth}px {subtitleOutlineColor};
-            "
+					style={`font-size: ${subtitleTextSize}px; ${
+						enableOutline
+							? `text-shadow: ` +
+								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor},`.repeat(12) +
+								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor}`
+							: ``
+					}
+						`}
 				>
 					{currentSubtitle.text}
 				</p>

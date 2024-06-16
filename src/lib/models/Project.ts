@@ -47,7 +47,8 @@ export interface SubtitleTrackSettings {
 	fontSize: number;
 	fontFamily: string;
 	color: string;
-	outlineWidth: number;
+	enableOutline: boolean;
+	outlineThickness: number;
 	outlineColor: string;
 	verticalPosition: number;
 	horizontalPadding: number;
