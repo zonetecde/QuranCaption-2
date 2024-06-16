@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/classes/Timeline';
 	import { getDisplayedVideoSize } from '$lib/ext/HtmlExt';
-	import { showSubtitlesPadding } from '$lib/stores/LayoutStore';
+	import { currentPage, showSubtitlesPadding } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
@@ -32,14 +32,6 @@
 		end: 0,
 		text: ''
 	};
-
-	$: if (
-		currentSubtitle &&
-		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration > 0
-	) {
-		// Enlève un peu du temps de fin pour que le fade soit plus fluide
-		//currentSubtitle.end -= $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
-	}
 
 	let subtitleTextSize = 1;
 

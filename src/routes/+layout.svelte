@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
-	import { Mushaf, getQuran } from '$lib/stores/QuranStore';
+	import { Mushaf, getEditions, getQuran } from '$lib/stores/QuranStore';
 	import {
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
@@ -52,6 +52,7 @@
 		};
 
 		getQuran();
+		getEditions();
 	});
 </script>
 

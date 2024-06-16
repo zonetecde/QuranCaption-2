@@ -1,7 +1,9 @@
 import { get, writable, type Writable } from 'svelte/store';
 import { type Quran } from '$lib/models/Quran';
+import type { Edition } from '$lib/models/Edition';
 
 export const Mushaf: Writable<Quran> = writable();
+export const editions: Writable<Edition[]> = writable();
 
 /**
  * Load the Quran from the local file system
@@ -20,6 +22,37 @@ export async function getQuran() {
 		Mushaf.set({
 			surahs
 		});
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+/**
+ * Get editions
+ * @returns All the Quran editions (translations)
+ */
+export async function getEditions() {
+	if (get(editions)) {
+		return; // Already loaded
+	}
+
+	try {
+		const response = await fetch('/quran/editions.json');
+		const editionsJson = await response.json();
+
+		let _editions: Edition[] = [];
+		// for each keys in the object
+		for (const key in editionsJson) {
+			_editions.push(editionsJson[key]);
+		}
+
+		// distinct the editions by author
+		const distinct = (value: Edition, index: number, self: Edition[]) => {
+			return self.findIndex((e) => e.author === value.author) === index;
+		};
+		_editions = _editions.filter(distinct);
+
+		editions.set(_editions);
 	} catch (e) {
 		console.error(e);
 	}

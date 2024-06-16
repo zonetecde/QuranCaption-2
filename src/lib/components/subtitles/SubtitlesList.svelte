@@ -10,7 +10,7 @@
 	}
 </script>
 
-<div class="h-full w-full bg-black overflow-y-scroll" bind:this={div}>
+<div class="h-full w-full bg-[#1f1f1f] overflow-y-scroll" bind:this={div}>
 	{#each $currentProject.timeline.subtitlesTracks[0].clips as subtitle}
 		<div
 			class="flex justify-between xl:items-center p-2 bg-[#1f1f1f] border-b-2 border-[#413f3f] flex-col xl:flex-row"

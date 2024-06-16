@@ -5,6 +5,7 @@
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
 	import SubtitleSettingsContainer from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
+	import TranslationsCreator from '../translations/TranslationsCreator.svelte';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-3-template">
@@ -17,12 +18,12 @@
 		<!-- Editor -->
 		<section class="w-full divide-y-4 divide-[#413f3f]">
 			<!-- Subtitle Editor -->
-			<section class="h-[65%] max-h-[65%]">
-				<SubtitleCreator />
+			<section class="h-[85%] max-h-[85%]">
+				<TranslationsCreator />
 			</section>
 
 			<!-- Timeline -->
-			<section class="h-[35%]">
+			<section class="h-[15%]">
 				<Timeline />
 			</section>
 		</section>

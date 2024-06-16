@@ -57,7 +57,7 @@ export function createBlankProject(name: string): Project {
 			subtitlesTracksSettings: {
 				arabic: {
 					enableSubtitles: true,
-					fontSize: 24,
+					fontSize: 100,
 					fontFamily: 'Hafs',
 					color: '#ffffff',
 					enableOutline: true,
