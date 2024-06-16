@@ -48,18 +48,21 @@ export function createBlankProject(name: string): Project {
 		projectSettings: {
 			cursorPosition: 0,
 			zoom: 30,
-			subtitleSettings: {
-				enableSubtitles: true,
-				fontSize: 24,
-				fontFamilyArabic: 'Hafs',
-				fontFamilyLatin: 'Arial',
-				color: '#ffffff',
-				outlineColor: '#000000',
-				outlineWidth: 2,
+			globalSubtitlesSettings: {
 				background: true,
 				backgroundColor: '#000000',
 				backgroundOpacity: 0.5,
 				fadeDuration: 300
+			},
+			subtitlesTracksSettings: {
+				arabic: {
+					enableSubtitles: true,
+					fontSize: 24,
+					fontFamily: 'Hafs',
+					color: '#ffffff',
+					outlineColor: '#000000',
+					outlineWidth: 2
+				}
 			}
 		}
 	};

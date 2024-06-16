@@ -33,10 +33,10 @@
 
 		// Enlève temporairement l'effet de fade (car on ne veut pas que le fade soit visible lors du déplacement du curseur, juste
 		// lors de la lecture)
-		const temp = $currentProject.projectSettings.subtitleSettings.fadeDuration;
-		$currentProject.projectSettings.subtitleSettings.fadeDuration = 0;
+		const temp = $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
+		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = 0;
 		setTimeout(() => {
-			$currentProject.projectSettings.subtitleSettings.fadeDuration = temp;
+			$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = temp;
 		}, 0);
 
 		cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000 + toAdd);

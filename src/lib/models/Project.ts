@@ -24,22 +24,29 @@ export default interface Project {
 export interface ProjectSettings {
 	cursorPosition: number;
 	zoom: number;
-	subtitleSettings: SubtitleSettings;
+	globalSubtitlesSettings: SubtitleSettings;
+	// Dictionnaire contenant les paramères de chaque track
+	subtitlesTracksSettings: { [key: string]: SubtitleTrackSettings };
 }
 
 /**
  * Represents the settings of subtitles.
  */
 export interface SubtitleSettings {
-	enableSubtitles: boolean;
-	fontSize: number;
-	fontFamilyArabic: string;
-	fontFamilyLatin: string;
-	color: string;
-	outlineWidth: number;
-	outlineColor: string;
 	background: boolean;
 	backgroundColor: string;
 	backgroundOpacity: number;
 	fadeDuration: number;
+}
+
+/**
+ * Represents the settings of a track.
+ */
+export interface SubtitleTrackSettings {
+	enableSubtitles: boolean;
+	fontSize: number;
+	fontFamily: string;
+	color: string;
+	outlineWidth: number;
+	outlineColor: string;
 }

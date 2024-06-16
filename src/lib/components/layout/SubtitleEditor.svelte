@@ -2,8 +2,8 @@
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleCreator from '../subtitles/SubtitleCreator.svelte';
-	import SubtitleSettings from '../subtitles/SubtitleSettings.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
+	import SubtitleSettings from '../subtitles/subtitlesSettingsUI/SubtitleSettings.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
 </script>
 
