@@ -117,7 +117,7 @@
 	}
 </script>
 
-<div class="w-full h-full flex flex-col relative">
+<div class="w-full h-full flex flex-col relative overflow-hidden">
 	<div class={'h-full relative bg-[#0f0d0d] ' + (hideControls ? '' : 'pb-16')}>
 		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId) || currentSubtitle}
 			{#if currentVideo}

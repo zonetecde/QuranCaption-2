@@ -11,7 +11,8 @@
 	export let videoComponent: HTMLVideoElement;
 	export let subtitleLanguage: string;
 
-	let videoWidth = 0;
+	let videoWidth = 1920;
+	let videoHeight = 1080;
 
 	$: currentSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
 		(subtitle) =>
@@ -43,9 +44,16 @@
 	$: $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize,
 		calculateSubtitleTextSize();
 
-	function calculateSubtitleTextSize() {
+	async function calculateSubtitleTextSize() {
 		if (videoComponent && videoComponent.offsetWidth) {
-			videoWidth = getDisplayedVideoSize(videoComponent).displayedWidth;
+			// tant que videoComponent.videoWidth === 0 on attend que la vidéo charge
+			while (videoComponent.videoWidth === 0) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+
+			const videoDimensions = getDisplayedVideoSize(videoComponent);
+			videoWidth = videoDimensions.displayedWidth;
+			videoHeight = videoDimensions.displayedHeight;
 
 			// Calcul la taille de la police pour les sous-titres
 			subtitleTextSize =
@@ -70,7 +78,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 	{#key currentSubtitle.id}
 		<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
 		<div
-			class={'inset-0 absolute overflow-hidden left-1/2 -translate-x-1/2 ' +
+			class={'inset-0  absolute overflow-hidden left-1/2 -translate-x-1/2 ' +
 				(hideControls ? '' : 'bottom-16')}
 			style={`width: ${videoWidth}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 			in:fade={{
