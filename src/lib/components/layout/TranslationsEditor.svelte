@@ -23,7 +23,7 @@
 			</section>
 
 			<!-- Timeline -->
-			<section class="h-[15%]">
+			<section class="h-[15%] max-h-[15%]">
 				<Timeline />
 			</section>
 		</section>
