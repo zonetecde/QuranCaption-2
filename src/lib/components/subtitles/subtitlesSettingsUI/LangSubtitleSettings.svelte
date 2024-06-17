@@ -23,6 +23,25 @@
 		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 			.fontSize}
 	/>
+
+	<!-- Opacity -->
+	<Slider
+		title="Opacity"
+		min={0}
+		max={1}
+		step={0.01}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.opacity}
+	/>
+
+	<label for="background-color" class="mt-2"
+		><span>Color :</span>
+		<input
+			type="color"
+			class="ml-1 bg-transparent"
+			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].color}
+		/>
+	</label>
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">

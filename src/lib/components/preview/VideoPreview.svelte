@@ -157,6 +157,15 @@
 				{videoComponent}
 				subtitleLanguage="arabic"
 			/>
+
+			{#each $currentProject.projectSettings.addedTranslations as translation}
+				<BurnedSubtitles
+					bind:currentSubtitle
+					{hideControls}
+					{videoComponent}
+					subtitleLanguage={translation}
+				/>
+			{/each}
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
 

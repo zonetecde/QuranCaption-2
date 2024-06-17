@@ -107,12 +107,20 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 						enableOutline
 							? `text-shadow: ` +
 								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor},`.repeat(12) +
-								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor}`
+								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor};`
 							: ``
-					}
+					} opacity: ${
+						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].opacity
+					}; color: ${
+						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].color
+					};
 						`}
 				>
-					{currentSubtitle.text}
+					{#if subtitleLanguage === 'arabic'}
+						{currentSubtitle.text}
+					{:else if currentSubtitle.translations !== undefined}
+						{currentSubtitle.translations[subtitleLanguage]}
+					{/if}
 				</p>
 			</div>
 		</div>

@@ -83,7 +83,8 @@
 			horizontalPadding: 0,
 			enableSubtitles: true,
 			fontFamily: 'Constantine',
-			color: '#ffffff'
+			color: '#ffffff',
+			opacity: 1
 		};
 
 		// Pour chaque verset, ajoute la traduction

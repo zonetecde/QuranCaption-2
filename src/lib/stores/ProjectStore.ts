@@ -65,7 +65,8 @@ export function createBlankProject(name: string): Project {
 					outlineColor: '#000000',
 					outlineThickness: 2,
 					verticalPosition: 0,
-					horizontalPadding: 0
+					horizontalPadding: 0,
+					opacity: 1
 				}
 			}
 		}
