@@ -3,11 +3,7 @@
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
-	import {
-		addNewTranslationPopupVisibility,
-		currentPage,
-		trimDialog
-	} from '$lib/stores/LayoutStore';
+	import { currentPage, trimDialog } from '$lib/stores/LayoutStore';
 	import { editions } from '$lib/stores/QuranStore';
 </script>
 
@@ -34,31 +30,6 @@
 {#if $trimDialog !== undefined}
 	<div class="absolute inset-0">
 		<div class="w-10/12 h-4/6"></div>
-	</div>
-{/if}
-
-{#if $addNewTranslationPopupVisibility}
-	<div class="absolute inset-0 z-50">
-		<div class="w-full h-full flex items-center justify-center backdrop-blur-sm">
-			<div
-				class="w-[400px] h-[500px] rounded-2xl bg-[#1b1a1a] border-2 border-[#2e2b2b] shadow-black shadow-2xl flex flex-col items-center"
-			>
-				{#if $editions}
-					<select
-						class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
-					>
-						{#each $editions as edition}
-							<option value={edition.name} class="bg-slate-300 text-black"
-								>{edition.language +
-									' - ' +
-									edition.author.slice(0, 30) +
-									(edition.author.length > 30 ? '...' : '')}</option
-							>
-						{/each}
-					</select>
-				{/if}
-			</div>
-		</div>
 	</div>
 {/if}
 

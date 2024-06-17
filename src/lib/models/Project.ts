@@ -27,6 +27,7 @@ export interface ProjectSettings {
 	globalSubtitlesSettings: SubtitleSettings;
 	// Dictionnaire contenant les paramères de chaque track
 	subtitlesTracksSettings: { [key: string]: SubtitleTrackSettings };
+	addedTranslations: string[];
 }
 
 /**

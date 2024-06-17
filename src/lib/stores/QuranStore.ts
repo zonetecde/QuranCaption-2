@@ -78,3 +78,39 @@ export function getNumberOfVerses(surahId: number) {
 	const quran = get(Mushaf);
 	return quran.surahs[surahId - 1].total_verses;
 }
+
+/**
+ * Get the translation of a verse
+ * @param surah The ID of the surah
+ * @param verse The ID of the verse
+ * @param editionName The name of the edition
+ * @returns The translation or 'No translation found' if not found
+ */
+export async function downloadTranslationForVerse(
+	editionName: string,
+	surah: number,
+	verse: number,
+	removeLatin: boolean = true
+) {
+	const edition = get(editions).find((edition) => edition.name === editionName);
+	if (!edition) return 'No translation found';
+
+	let url = edition.link.replace('.json', ''); // remove the "-la" from the link because we want the accents.
+	if (removeLatin) url = url.replace('-la', '');
+
+	const response = await fetch(url + '/' + surah + '/' + verse + '.json');
+
+	if (response.ok) {
+		const translation = await response.json();
+		let text = translation.text;
+
+		// Enlève les nombres entre crochets
+		text = text.replace(/\[\d+\]/g, '');
+
+		return text;
+	} else if (removeLatin) {
+		return await downloadTranslationForVerse(editionName, surah, verse, false);
+	} else {
+		return 'No translation found';
+	}
+}

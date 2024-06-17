@@ -48,6 +48,7 @@ export function createBlankProject(name: string): Project {
 		projectSettings: {
 			cursorPosition: 0,
 			zoom: 30,
+			addedTranslations: [],
 			globalSubtitlesSettings: {
 				background: true,
 				backgroundColor: '#000000',

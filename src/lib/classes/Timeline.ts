@@ -24,6 +24,9 @@ export type SubtitleClip = {
 	start: number;
 	end: number;
 	text: string;
+	surah: number;
+	verse: number;
+	translations: { [key: string]: string };
 };
 
 export type Clip = {

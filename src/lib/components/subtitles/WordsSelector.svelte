@@ -167,7 +167,10 @@
 			id: Id.generate(),
 			start: lastSubtitleEndTime,
 			end: $cursorPosition,
-			text: subtitleText
+			text: subtitleText,
+			surah: surahNumber,
+			verse: verseNumber,
+			translations: {}
 		});
 
 		// Met à jour la liste des sous-titres

@@ -5,6 +5,7 @@
 	import Toggle from '../../general/Toggle.svelte';
 	import GlobalSubtitleSettings from './GlobalSubtitleSettings.svelte';
 	import LangSubtitleSettings from './LangSubtitleSettings.svelte';
+	import { editions } from '$lib/stores/QuranStore';
 
 	let _selectedSubtitlesLanguage = $selectedSubtitlesLanguage;
 
@@ -23,6 +24,14 @@
 	>
 		<option class="bg-slate-300 text-black" value="global">Global</option>
 		<option class="bg-slate-300 text-black" value="arabic">Arabic</option>
+
+		<!-- Ajoute tout les autres langages -->
+		{#each $currentProject.projectSettings.addedTranslations as lang}
+			{@const edition = $editions.find((edition) => edition.name === lang)}
+			<option class="bg-slate-300 text-black" value={lang}
+				>{edition?.language + ' - ' + edition?.author}</option
+			>
+		{/each}
 	</select>
 
 	{#if _selectedSubtitlesLanguage === 'global'}

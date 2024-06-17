@@ -18,6 +18,8 @@ export enum Type {
 export interface Verse {
 	id: number;
 	text: string;
+
+	translations: { [key: string]: string };
 }
 
 export interface Quran {
