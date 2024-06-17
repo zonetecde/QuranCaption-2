@@ -5,6 +5,7 @@
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
+	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
@@ -142,7 +143,7 @@
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
 	}
 
-	function addSubtitle(subtitleText: string) {
+	async function addSubtitle(subtitleText: string) {
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
@@ -163,6 +164,20 @@
 			return;
 		}
 
+		// Si il y a des translations, les ajoutes
+		let translations: { [key: string]: string } = {};
+
+		await Promise.all(
+			$currentProject.projectSettings.addedTranslations.map(async (translation: string) => {
+				let translationText = await downloadTranslationForVerse(
+					translation,
+					surahNumber,
+					verseNumber
+				);
+				translations[translation] = translationText;
+			})
+		);
+
 		subtitleClips.push({
 			id: Id.generate(),
 			start: lastSubtitleEndTime,
@@ -170,7 +185,7 @@
 			text: subtitleText,
 			surah: surahNumber,
 			verse: verseNumber,
-			translations: {}
+			translations: translations
 		});
 
 		// Met à jour la liste des sous-titres
