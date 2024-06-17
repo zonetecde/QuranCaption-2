@@ -41,8 +41,15 @@
 </div>
 
 <style>
-	/* grid cols 2 : first col 25% the second col 75% */
-	.grid-cols-3-template {
-		grid-template-columns: 15% 70% 15%;
+	@media (min-width: 1280px) {
+		.grid-cols-3-template {
+			grid-template-columns: 15% 70% 15%;
+		}
+	}
+
+	@media (max-width: 1279px) {
+		.grid-cols-3-template {
+			grid-template-columns: 23% 62% 15%;
+		}
 	}
 </style>

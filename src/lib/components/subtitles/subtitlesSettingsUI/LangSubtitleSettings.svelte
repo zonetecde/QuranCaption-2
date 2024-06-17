@@ -76,11 +76,3 @@
 </div>
 
 <br />
-
-<style>
-	/* Horizontal scrollbar thickness */
-	::-webkit-scrollbar {
-		width: 12px;
-		height: 9px;
-	}
-</style>

@@ -144,6 +144,9 @@
 	}
 
 	async function addSubtitle(subtitleText: string) {
+		// Fait une copie car le temps de l'ajout du sous-titre le curseur bouge
+		const _cursorPosition: number = $cursorPosition;
+
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
@@ -151,13 +154,13 @@
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
 		// Vérifie qu'on est pas au 0
-		if ($cursorPosition < 100) {
+		if (_cursorPosition < 100) {
 			toast.error('Jouer la vidéo pour ajouter un sous-titre');
 			return;
 		}
 		// Vérifie que la fin > début
 		// TODO 2
-		if (lastSubtitleEndTime >= $cursorPosition) {
+		if (lastSubtitleEndTime >= _cursorPosition) {
 			toast.error(
 				'La fin du sous-titre précédent est supérieure ou égale au début du nouveau sous-titre'
 			);
@@ -181,7 +184,7 @@
 		subtitleClips.push({
 			id: Id.generate(),
 			start: lastSubtitleEndTime,
-			end: $cursorPosition,
+			end: _cursorPosition,
 			text: subtitleText,
 			surah: surahNumber,
 			verse: verseNumber,

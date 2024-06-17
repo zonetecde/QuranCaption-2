@@ -115,3 +115,9 @@ audio::-webkit-media-controls-panel {
 	--ctx-menu-font-size: 0.9rem;
 	--ctx-menu-padding: 0.375rem 0.5rem;
 }
+
+/* Horizontal scrollbar thickness */
+::-webkit-scrollbar {
+	width: 12px;
+	height: 9px;
+}

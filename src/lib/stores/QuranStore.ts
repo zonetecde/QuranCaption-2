@@ -92,7 +92,7 @@ export async function downloadTranslationForVerse(
 	verse: number,
 	removeLatin: boolean = true
 ) {
-	const edition = get(editions).find((edition) => edition.name === editionName);
+	const edition = getEditionFromName(editionName);
 	if (!edition) return 'No translation found';
 
 	let url = edition.link.replace('.json', ''); // remove the "-la" from the link because we want the accents.
@@ -113,4 +113,13 @@ export async function downloadTranslationForVerse(
 	} else {
 		return 'No translation found';
 	}
+}
+
+/**
+ * Get the edition from its name
+ * @param name The name of the edition
+ * @returns The edition or undefined if not found
+ */
+export function getEditionFromName(name: string) {
+	return get(editions).find((edition) => edition.name === name);
 }
