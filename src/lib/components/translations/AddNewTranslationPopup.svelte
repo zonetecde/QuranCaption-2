@@ -75,11 +75,11 @@
 		];
 
 		$currentProject.projectSettings.subtitlesTracksSettings[selectedEditionName] = {
-			fontSize: 20,
+			fontSize: 91,
 			enableOutline: true,
 			outlineColor: '#000000',
 			outlineThickness: 2,
-			verticalPosition: 0,
+			verticalPosition: 25,
 			horizontalPadding: 0,
 			enableSubtitles: true,
 			fontFamily: 'Constantine',
