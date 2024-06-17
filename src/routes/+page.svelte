@@ -10,6 +10,7 @@
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
 	import type Project from '$lib/models/Project';
+	import { invoke } from '@tauri-apps/api';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';

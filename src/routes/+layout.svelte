@@ -11,7 +11,7 @@
 		getTimelineTotalDuration
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import { currentPage } from '$lib/stores/LayoutStore';
+	import { currentPage, getFonts } from '$lib/stores/LayoutStore';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
@@ -58,6 +58,7 @@
 
 		getQuran();
 		getEditions();
+		getFonts();
 	});
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Toggle from '$lib/components/general/Toggle.svelte';
-	import { showSubtitlesPadding } from '$lib/stores/LayoutStore';
+	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import Slider from './Slider.svelte';
 
@@ -15,6 +15,21 @@
 
 <!-- Font size -->
 <div class="-my-3">
+	<label for="font-family" class="mt-2 flex items-center"
+		><span class="w-32">Font Family :</span>
+		<select
+			class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
+			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+				.fontFamily}
+		>
+			<option class="bg-slate-300 text-black" value="Hafs">Hafs</option>
+
+			{#each $userFonts as font}
+				<option class="bg-slate-300 text-black" value={font}>{font}</option>
+			{/each}
+		</select>
+	</label>
+
 	<Slider
 		title="Font Size"
 		min={1}
@@ -22,16 +37,6 @@
 		step={1}
 		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 			.fontSize}
-	/>
-
-	<!-- Opacity -->
-	<Slider
-		title="Opacity"
-		min={0}
-		max={1}
-		step={0.01}
-		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-			.opacity}
 	/>
 
 	<label for="background-color" class="mt-2"
@@ -42,6 +47,16 @@
 			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].color}
 		/>
 	</label>
+
+	<!-- Opacity -->
+	<Slider
+		title="Opacity"
+		min={0}
+		max={1}
+		step={0.01}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.opacity}
+	/>
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">

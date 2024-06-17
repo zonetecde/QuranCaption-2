@@ -82,7 +82,7 @@
 			verticalPosition: 25,
 			horizontalPadding: 0,
 			enableSubtitles: true,
-			fontFamily: 'Constantine',
+			fontFamily: 'Verdana',
 			color: '#ffffff',
 			opacity: 1
 		};

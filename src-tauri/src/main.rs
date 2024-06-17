@@ -2,11 +2,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::process::Command;
-
+use std::{ format, vec };
+use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -33,5 +34,20 @@ fn get_video_duration(path: String) -> Result<i32, String> {
   // to ms
   let duration = duration * 1000.0;
   Ok(duration as i32)
+}
 
+#[tauri::command]
+async fn all_families() -> Vec<std::string::String> {
+     //Create a system font source
+     let source = SystemSource::new();
+
+     // Get all fonts in the system
+     let fonts: Result<Vec<String>, SelectionError> = source.all_families();
+
+     //return font
+     if let Ok(font) = fonts {
+         font
+     } else {
+         vec![]
+     }
 }

@@ -15,6 +15,7 @@
 	let videoWidth = 1920;
 	let videoHeight = 1080;
 
+	// @ts-ignore
 	$: currentSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
 		(subtitle) =>
 			(subtitle.start === 0 &&
@@ -114,7 +115,12 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 					}; color: ${
 						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].color
 					};
-						`}
+					${
+						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily ===
+						'Hafs'
+							? ''
+							: `font-family: ${$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily}`
+					}`}
 				>
 					{#if subtitleLanguage === 'arabic'}
 						{currentSubtitle.text}
