@@ -11,6 +11,7 @@
 		getTimelineTotalDuration
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import { currentPage } from '$lib/stores/LayoutStore';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
@@ -18,7 +19,11 @@
 				e.preventDefault();
 				updateUsersProjects($currentProject);
 				toast.success('Project saved');
-			} else if (e.key === 'Control') {
+			}
+
+			if ($currentPage === 'Translations') return;
+
+			if (e.key === 'Control') {
 				isCtrlPressed.set(true);
 			}
 

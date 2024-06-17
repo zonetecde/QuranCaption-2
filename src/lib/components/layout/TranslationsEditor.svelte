@@ -14,29 +14,12 @@
 		<SubtitleSettingsContainer />
 	</section>
 
-	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
-		<!-- Editor -->
-		<section class="w-full divide-y-4 divide-[#413f3f]">
-			<!-- Subtitle Editor -->
-			<section class="h-[85%] max-h-[85%]">
-				<TranslationsCreator />
-			</section>
-
-			<!-- Timeline -->
-			<section class="h-[15%] max-h-[15%]">
-				<Timeline />
-			</section>
-		</section>
-	</section>
+	<!-- Translations  Editor -->
+	<TranslationsCreator />
 
 	<!-- Preview + Subtitles -->
 	<section class="min-w-[120px] flex flex-col overflow-hidden border-l-2 border-[#413f3f]">
-		<div class="h-fit min-h-40">
-			<VideoPreview hideControls />
-		</div>
-		<div class="overflow-hidden h-full">
-			<SubtitlesList />
-		</div>
+		<SubtitlesList />
 	</section>
 </div>
 
