@@ -4,6 +4,7 @@
 	import Timeline from '../timeline/Timeline.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleSettings from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
+	import { videoEditorSelectedTab } from '$lib/stores/LayoutStore';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-2-template">
@@ -11,9 +12,27 @@
 	<section
 		class="min-w-[220px] divide-y-2 divide-[#413f3f] max-h-full overflow-hidden flex flex-col"
 	>
-		<AssetsManager />
-
-		<SubtitleSettings />
+		<section class="flex divide-x-2 divide-[#413f3f]">
+			<button
+				class="w-full py-2 bg-[#1f1d1d] text-white duration-100"
+				class:selected={$videoEditorSelectedTab === 'assets manager'}
+				on:click={() => videoEditorSelectedTab.set('assets manager')}
+			>
+				Assets Manager
+			</button>
+			<button
+				class="w-full py-2 bg-[#1f1d1d] text-white duration-100"
+				class:selected={$videoEditorSelectedTab === 'subtitles settings'}
+				on:click={() => videoEditorSelectedTab.set('subtitles settings')}
+			>
+				Subtitles Settings
+			</button>
+		</section>
+		{#if $videoEditorSelectedTab === 'assets manager'}
+			<AssetsManager />
+		{:else}
+			<SubtitleSettings />
+		{/if}
 	</section>
 
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
@@ -36,5 +55,10 @@
 	/* grid cols 2 : first col 25% the second col 75% */
 	.grid-cols-2-template {
 		grid-template-columns: 25% 75%;
+	}
+
+	.selected {
+		background-color: #202c1c;
+		color: white;
 	}
 </style>

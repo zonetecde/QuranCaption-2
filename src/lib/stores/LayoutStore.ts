@@ -7,6 +7,8 @@ export const trimDialog: Writable<string | undefined> = writable(undefined); // 
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
 export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
 export const userFonts: Writable<string[]> = writable([]); // Les polices de l'utilisateur
+export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles settings'> =
+	writable('assets manager'); // L'onglet sélectionné dans l'éditeur vidéo
 
 export function setCurrentPage(page: PageType) {
 	currentPage.set(page);

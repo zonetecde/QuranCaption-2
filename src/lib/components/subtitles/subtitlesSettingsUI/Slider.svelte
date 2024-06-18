@@ -5,9 +5,12 @@
 	export let step: number;
 	export let bindValue: number;
 	export let unit: string = '';
+
+	let isMouseDown = false;
+	let yAxis = 0;
 </script>
 
-<label class="flex mt-2 items-center flex-wrap overflow-x-auto">
+<label class="flex mt-2 min-h-24 xl:min-h-0 items-center flex-wrap overflow-x-auto">
 	<span>{title} :</span>
 	<div class="flex">
 		<input
@@ -30,6 +33,20 @@
 				{step}
 				class="ml-1 bg-transparent bg-slate-600 px-2 py-1 w-20 border border-slate-700 rounded-lg outline-none"
 				bind:value={bindValue}
+				on:mousedown={(e) => {
+					isMouseDown = true;
+					yAxis = e.clientY;
+
+					window.onmousemove = (e) => {
+						if (!isMouseDown) return;
+						bindValue = Math.min(max, Math.max(min, bindValue + (yAxis - e.clientY) * step));
+						yAxis = e.clientY;
+					};
+				}}
+				on:mouseup={() => {
+					isMouseDown = false;
+					window.onmousemove = null;
+				}}
 			/>
 			<span class="ml-1">{unit}</span>
 		</div>

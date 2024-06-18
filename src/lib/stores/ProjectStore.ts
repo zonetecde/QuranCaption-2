@@ -53,7 +53,8 @@ export function createBlankProject(name: string): Project {
 				background: true,
 				backgroundColor: '#000000',
 				backgroundOpacity: 0.5,
-				fadeDuration: 300
+				fadeDuration: 300,
+				horizontalPadding: 0
 			},
 			subtitlesTracksSettings: {
 				arabic: {

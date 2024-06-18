@@ -84,7 +84,8 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
 		videoWidth *
-		($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding /
+		(($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding +
+			$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding) /
 			100)}
 
 	{#key currentSubtitle.id}
