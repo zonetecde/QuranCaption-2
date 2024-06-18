@@ -22,7 +22,7 @@
 			</div>
 
 			<div class="flex flex-col mt-1">
-				{#each Object.keys(subtitle.translations) as translation}
+				{#each $currentProject.projectSettings.addedTranslations as translation}
 					<p class="text-xs text-justify text-[#c5d4c4]">
 						<span class="text-[#8cbb8a] font-bold"
 							>{getEditionFromName(translation)?.language}:</span

@@ -9,6 +9,7 @@
 	import toast from 'svelte-french-toast';
 
 	export let subtitle: SubtitleClip;
+	export let subtitleIndex: number;
 	let wbwTranslation: string[] = [];
 
 	onMount(async () => {
@@ -38,22 +39,34 @@
 	}
 
 	function handleValidation(e: any) {
-		const textareas = document.querySelectorAll('.textarea-translation');
-		// @ts-ignore
-		const index = Array.from(textareas).indexOf(e.target);
-		if (index < textareas.length - 1) {
-			// @ts-ignore
-			textareas[index + 1].focus();
-			// Met le curseur à la fin du texte
-			const range = document.createRange();
-			const sel = window.getSelection();
-			range.setStart(textareas[index + 1], 1);
-			range.collapse(true);
-			// @ts-ignore
-			sel.removeAllRanges();
-			// @ts-ignore
-			sel.addRange(range);
+		// Mets la même traduction à toutes les inputs qui ont le même texte arabe et qui viennent après ce sous-titre
+		for (
+			let i = subtitleIndex + 1;
+			i < $currentProject.timeline.subtitlesTracks[0].clips.length;
+			i++
+		) {
+			const clip = $currentProject.timeline.subtitlesTracks[0].clips[i];
+			if (clip.text === subtitle.text) {
+				clip.translations = subtitle.translations;
+			}
 		}
+
+		// const textareas = document.querySelectorAll('.textarea-translation');
+		// // @ts-ignore
+		// const index = Array.from(textareas).indexOf(e.target);
+		// if (index < textareas.length - 1) {
+		// 	// @ts-ignore
+		// 	textareas[index + 1].focus();
+		// 	// Met le curseur à la fin du texte
+		// 	const range = document.createRange();
+		// 	const sel = window.getSelection();
+		// 	range.setStart(textareas[index + 1], 1);
+		// 	range.collapse(true);
+		// 	// @ts-ignore
+		// 	sel.removeAllRanges();
+		// 	// @ts-ignore
+		// 	sel.addRange(range);
+		// }
 	}
 
 	async function askAiForTranslation(translation: string) {
@@ -127,8 +140,11 @@
 
 <div class="p-2 border-b-2 px-10 border-[#413f3f]">
 	<div class="flex justify-between items-start flex-col w-full">
-		<p class="text-xs -mt-1 text-left">
-			{milisecondsToMMSS(subtitle.start)} - {milisecondsToMMSS(subtitle.end)}
+		<p class="text-lg text-left">
+			{subtitle.surah}:{subtitle.verse}
+			<span class="text-xs">
+				{milisecondsToMMSS(subtitle.start)}-{milisecondsToMMSS(subtitle.end)}</span
+			>
 		</p>
 		<div class="w-full text-4xl mt-4 leading-[3.5rem] flex flex-row-reverse flex-wrap">
 			{#each subtitle.text.split(' ') as word, i}
