@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/classes/Timeline';
 	import { GPT_URL } from '$lib/ext/PrivateVariable';
+	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { text } from '@sveltejs/kit';
@@ -146,7 +147,7 @@
 	</div>
 
 	<div class="flex flex-col mt-1 gap-y-3">
-		{#each Object.keys(subtitle.translations) as translationId}
+		{#each $currentProject.projectSettings.addedTranslations as translationId}
 			<div>
 				<p class="font-bold w-full">{getEditionFromName(translationId)?.language}:</p>
 

@@ -4,6 +4,10 @@
 	//@ts-ignore
 	import { check_outros, group_outros, transition_out } from 'svelte/internal';
 	import AddNewTranslationPopup from '$lib/components/translations/AddNewTranslationPopup.svelte';
+	import { fade } from 'svelte/transition';
+	import type { Edition } from '$lib/models/Edition';
+
+	let translationToDelete: Edition | undefined = undefined;
 
 	function handleAddNewTranslationButtonClick() {
 		const popup = new AddNewTranslationPopup({
@@ -23,6 +27,12 @@
 			}
 		});
 	}
+
+	function handleTranslationHeaderClicked(lang: string) {
+		// Confirm dialog pour suppression
+		const edition = getEditionFromName(lang);
+		translationToDelete = edition;
+	}
 </script>
 
 <header class="flex flex-row bg-[#111d0e]">
@@ -30,11 +40,12 @@
 		{#each $currentProject.projectSettings.addedTranslations as lang, i}
 			{@const edition = getEditionFromName(lang)}
 			<button
-				class={'bg-[#214627] text-white p-1 xl:p-2 flex gap-x-2 hover:bg-[#17311b] duration-100 border-2 text-xs xl:text-base border-[#173619] ' +
+				class={'bg-[#214627] text-white p-1 xl:p-2 flex gap-x-2 border-2 text-xs xl:text-base border-[#173619] hover:bg-[#b86461] duration-200 ' +
 					(i === $currentProject.projectSettings.addedTranslations.length - 1
 						? 'rounded-br-lg border-r-2'
 						: 'border-r-0')}
-				on:click={() => console.log('clicked')}>{edition?.language} - {edition?.author}</button
+				on:click={() => handleTranslationHeaderClicked(lang)}
+				>{edition?.language} - {edition?.author}</button
 			>
 		{/each}
 	</div>
@@ -55,3 +66,35 @@
 		Add a new translation</button
 	>
 </header>
+
+{#if translationToDelete}
+	<div class="absolute inset-0 backdrop-blur-sm z-50" transition:fade>
+		<div class="w-full h-full flex items-center justify-center">
+			<div
+				class="w-[300px] h-[200px] bg-[#413f3f] border-4 border-[#161616] rounded-lg flex flex-col items-center justify-center gap-y-5 p-5 shadow-lg shadow-black"
+			>
+				<h1>
+					Do you really want to delete the {translationToDelete.language} - {translationToDelete.author}
+					translation?
+				</h1>
+
+				<button
+					class="hover:font-bold w-28 py-1 rounded-lg border-2 border-black bg-[#161616]"
+					on:click={() => {
+						// Delete translation
+						$currentProject.projectSettings.addedTranslations =
+							$currentProject.projectSettings.addedTranslations.filter(
+								(lang) => lang !== translationToDelete?.name
+							);
+						translationToDelete = undefined;
+					}}>Yes</button
+				>
+				<button
+					class="hover:font-bold w-28 -mt-3 py-1 rounded-lg border-2 border-black bg-[#161616]"
+					on:click={() => {
+						translationToDelete = undefined;
+					}}>No</button
+				>
+			</div>
+		</div>
+	</div>{/if}

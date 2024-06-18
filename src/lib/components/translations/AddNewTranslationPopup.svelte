@@ -95,6 +95,9 @@
 
 			if (!translation) return;
 
+			// Vérifie si l'élément a déjà la traduction là
+			if (selectedEditionName in element.translations) return;
+
 			element.translations[selectedEditionName] = translation.text;
 		});
 

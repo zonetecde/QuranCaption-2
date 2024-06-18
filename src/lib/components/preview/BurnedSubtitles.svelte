@@ -20,11 +20,11 @@
 		(subtitle) =>
 			(subtitle.start === 0 &&
 				subtitle.start <= $cursorPosition &&
-				subtitle.end - $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration >= // On enlève un peu du temps de fin pour que le fade soit plus fluide (qu'il commence à disparaître avant la fin)
+				subtitle.end >= // // .end - $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration On enlève un peu du temps de fin pour que le fade soit plus fluide (qu'il commence à disparaître avant la fin)
 					$cursorPosition) ||
 			(subtitle.start > 0 &&
 				subtitle.start - 1000 < $cursorPosition &&
-				subtitle.end - $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration >= // On enlève un peu du temps de fin pour que le fade soit plus fluide (qu'il commence à disparaître avant la fin)
+				subtitle.end >= // // .end - $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration On enlève un peu du temps de fin pour que le fade soit plus fluide (qu'il commence à disparaître avant la fin)
 					$cursorPosition)
 	) || {
 		// Permet de garder le sous-titre affiché avec un fondu de dispiration lorsqu'il n'y a plus de sous-titre
