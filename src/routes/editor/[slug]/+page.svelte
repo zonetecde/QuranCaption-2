@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/header/Header.svelte';
+	import ExportPage from '$lib/components/layout/ExportPage.svelte';
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
@@ -22,7 +23,7 @@
 		{:else if $currentPage === 'Translations'}
 			<TranslationsEditor />
 		{:else if $currentPage === 'Export'}
-			<!-- <Export /> -->
+			<ExportPage />
 		{/if}
 	</div>
 </div>

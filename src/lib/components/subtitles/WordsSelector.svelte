@@ -23,7 +23,7 @@
 	let startWordIndex = 0;
 	let endWordIndex = 0;
 
-	onMount(() => {
+	onMount(async () => {
 		// Le met sur le document car le window.onkeydown est déjà pris dans +layout.svelte
 		window.document.onkeydown = onKeyDown;
 	});
@@ -144,9 +144,6 @@
 	}
 
 	async function addSubtitle(subtitleText: string) {
-		// Fait une copie car le temps de l'ajout du sous-titre le curseur bouge
-		const _cursorPosition: number = $cursorPosition;
-
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
@@ -154,18 +151,34 @@
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
 		// Vérifie qu'on est pas au 0
-		if (_cursorPosition < 100) {
+		if ($cursorPosition < 100) {
 			toast.error('Jouer la vidéo pour ajouter un sous-titre');
 			return;
 		}
 		// Vérifie que la fin > début
 		// TODO 2
-		if (lastSubtitleEndTime >= _cursorPosition) {
+		if (lastSubtitleEndTime >= $cursorPosition) {
 			toast.error(
 				'La fin du sous-titre précédent est supérieure ou égale au début du nouveau sous-titre'
 			);
 			return;
 		}
+
+		const subtitleId = Id.generate();
+		subtitleClips.push({
+			id: subtitleId,
+			start: lastSubtitleEndTime,
+			end: $cursorPosition,
+			text: subtitleText,
+			surah: surahNumber,
+			verse: verseNumber,
+			translations: {},
+			firstWordIndexInVerse: startWordIndex,
+			lastWordIndexInVerse: endWordIndex
+		});
+
+		// Met à jour la liste des sous-titres
+		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
 
 		// Si il y a des translations, les ajoutes
 		let translations: { [key: string]: string } = {};
@@ -181,18 +194,8 @@
 			})
 		);
 
-		subtitleClips.push({
-			id: Id.generate(),
-			start: lastSubtitleEndTime,
-			end: _cursorPosition,
-			text: subtitleText,
-			surah: surahNumber,
-			verse: verseNumber,
-			translations: translations
-		});
-
-		// Met à jour la liste des sous-titres
-		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
+		// Met à jour les translations
+		subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
 	}
 </script>
 
