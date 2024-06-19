@@ -86,58 +86,91 @@
 		// }
 	}
 
-	async function askAiForTranslation(translation: string) {
-		let selectedWordsArray: string[] = [];
-
+	/**
+	 * Asks the AI for word-by-word translation of a verse in a specific language.
+	 * @param translation The ID of the translation language.
+	 */
+	async function getGptWordByWordTranslation(translation: string) {
 		const edition = getEditionFromName(translation);
 
-		if (subtitle.verse === -1 || subtitle.surah === -1) {
-			selectedWordsArray = subtitle.text.split(' ');
-		} else {
-			for (let i = 0; i < wbwTranslation.length; i++) {
-				if (i >= subtitle.firstWordIndexInVerse && i <= subtitle.lastWordIndexInVerse)
-					selectedWordsArray.push(wbwTranslation[i]);
+		const savedInLocalStorage = localStorage.getItem('gptWbwTranslations') || '[]';
+		const parsedSavedInLocalStorage = JSON.parse(savedInLocalStorage);
+
+		if (savedInLocalStorage) {
+			const gptWbwTranslations = parsedSavedInLocalStorage.find(
+				(item: any) => item.surah === subtitle.surah && item.verse === subtitle.verse
+			);
+			if (gptWbwTranslations) {
+				return gptWbwTranslations.translation;
 			}
+		} else if (savedInLocalStorage === '[]') {
+			localStorage.setItem('gptWbwTranslations', JSON.stringify([]));
 		}
 
-		const prompt =
-			`Translate me in the ${edition?.language} this text :` +
-			'\n\n' +
-			selectedWordsArray.join(' ') +
-			'\n\nGive me a json formatted response only-I am using you as an API :\n{ "translation":"your translation"}';
+		const prompt = `You are granted the precious job of translating the quran word by word in ${edition?.language} !\nFor exemple, in english, the verse : \"اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِیْنَ\" is translated word by word as this dictionary :\n\n{\n\"اَلْحَمْدُ\": \"In (the) name\",\n\" لِلّٰهِ \": \"of Allah\",\n\"رَبِّ\": \"the Most Gracious\",\n\"الْعٰلَمِیْنَ\": \"the Most Merciful\"\n}\n\nNow give me translations word by word in ${edition?.language} of this verse : \n\n${$Mushaf.surahs[subtitle.surah - 1].verses[subtitle.verse - 1].text}\n\nPlease, inspire your transition by the real translation of the verse - you need to give me same words as the exisiting translations :\n\n${await downloadTranslationForVerse(translation, subtitle.surah, subtitle.verse)}\n\nGive me a json formated response only - I am using you as an api`;
 
-		const response = await fetch(GPT_URL + encodeURI(prompt), {
-			method: 'GET'
-		});
-
-		if (response.ok) {
-			const data = await response.json();
-
-			let json = data.replace('```json', '').replace('```', '').trim();
-
-			console.log(json);
-			const gptTranslation = JSON.parse(json).translation;
-
-			subtitle.translations[translation] = gptTranslation;
-
-			const textarea = document.getElementById(
-				'textarea-translation-' + subtitle.id + '-' + translation
-			);
-
-			textarea!.textContent = subtitle.translations[translation];
-
-			toast.success('The AI has successfully translated the text', {
-				position: 'bottom-left',
-				style: 'background-color: #333; color: white;',
-				icon: '🤖'
+		try {
+			const response = await fetch(GPT_URL + encodeURI(prompt), {
+				method: 'GET'
 			});
-		} else {
+			const data = (await response.json()) as string;
+			let json = data.replace('```json', '').replace('```', '').trim();
+			const gptWbwTranslations = JSON.parse(json);
+
+			// Save the chatgpt response in localStorage
+			if (savedInLocalStorage) {
+				parsedSavedInLocalStorage.push({
+					surah: subtitle.surah,
+					verse: subtitle.verse,
+					translation: gptWbwTranslations
+				});
+				localStorage.setItem('gptWbwTranslations', JSON.stringify(parsedSavedInLocalStorage));
+			}
+
+			return gptWbwTranslations;
+		} catch (e) {
 			toast.error('An error occured while asking the AI for translation', {
 				position: 'bottom-left',
 				style: 'background-color: #333; color: white;',
 				icon: '🤖'
 			});
+			return;
 		}
+	}
+
+	async function askAiForTranslation(translation: string) {
+		/**
+		 * Asks the AI for word-by-word translation of a verse in a specific language.
+		 * @param {string} translation - The ID of the translation language.
+		 * @returns {Promise<void>}
+		 */
+
+		const gptWbwTranslations = await getGptWordByWordTranslation(translation);
+
+		let gptTranslation = '';
+
+		for (let i = 0; i < Object.keys(gptWbwTranslations).length; i++) {
+			if (i >= subtitle.firstWordIndexInVerse && i <= subtitle.lastWordIndexInVerse) {
+				const element = Object.keys(gptWbwTranslations)[i];
+				gptTranslation += gptWbwTranslations[element] + ' ';
+			}
+		}
+
+		gptTranslation = gptTranslation.trim();
+
+		subtitle.translations[translation] = gptTranslation;
+
+		const textarea = document.getElementById(
+			'textarea-translation-' + subtitle.id + '-' + translation
+		);
+
+		textarea!.textContent = subtitle.translations[translation];
+
+		toast.success('The AI has successfully translated the text', {
+			position: 'bottom-left',
+			style: 'background-color: #333; color: white;',
+			icon: '🤖'
+		});
 	}
 </script>
 
