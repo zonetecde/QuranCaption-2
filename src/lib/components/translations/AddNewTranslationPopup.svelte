@@ -25,6 +25,8 @@
 		downloadCompleted = false;
 		await Promise.all(
 			$currentProject.timeline.subtitlesTracks[0].clips.map(async (element) => {
+				if (element.verse === -1 || element.surah === -1) return; // Skip if it's not a verse (silence, basmala, etc.
+
 				// Download the translation for the verse
 				let translation = await downloadTranslationForVerse(
 					selectedEditionName,

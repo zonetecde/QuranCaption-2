@@ -5,24 +5,34 @@
 	import { currentProject } from '$lib/stores/ProjectStore';
 </script>
 
-<Slider
-	title="Subtitles fade duration"
-	unit="ms"
-	min={0}
-	max={1000}
-	step={50}
-	bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration}
-/>
+<div class="flex flex-col">
+	<Slider
+		title="Subtitles fade duration"
+		unit="ms"
+		min={0}
+		max={1000}
+		step={50}
+		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration}
+	/>
 
-<Slider
-	on:focus={() => showSubtitlesPadding.set(true)}
-	on:blur={() => showSubtitlesPadding.set(false)}
-	title="Horizontal global Padding"
-	min={0}
-	max={50}
-	step={0.1}
-	bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
-/>
+	<Slider
+		on:focus={() => showSubtitlesPadding.set(true)}
+		on:blur={() => showSubtitlesPadding.set(false)}
+		title="Horizontal global Padding"
+		min={0}
+		max={50}
+		step={0.1}
+		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
+	/>
+
+	<Slider
+		title="Video Scale"
+		min={0.05}
+		max={2}
+		step={0.05}
+		bind:bindValue={$currentProject.projectSettings.videoScale}
+	/>
+</div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
 	<h1 class="text-lg font-bold mb-2">Subtitle Background</h1>

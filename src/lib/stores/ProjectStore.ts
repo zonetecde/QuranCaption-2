@@ -49,6 +49,8 @@ export function createBlankProject(name: string): Project {
 			cursorPosition: 0,
 			zoom: 30,
 			addedTranslations: [],
+			videoScale: 1,
+
 			globalSubtitlesSettings: {
 				background: true,
 				backgroundColor: '#000000',
@@ -57,6 +59,7 @@ export function createBlankProject(name: string): Project {
 				horizontalPadding: 0,
 
 				creatorText: {
+					outline: true,
 					enable: true,
 					text: 'QuranCaption 2',
 					fontFamily: 'Verdana',
