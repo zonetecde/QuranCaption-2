@@ -45,7 +45,7 @@
 	 * Open a project
 	 */
 	function openProject(project: Project) {
-		window.location.href = `/editor/${project.id}`; // Redirect to the editor page
+		window.location.href = `/editor?${project.id}`; // Redirect to the editor page
 	}
 
 	/**
