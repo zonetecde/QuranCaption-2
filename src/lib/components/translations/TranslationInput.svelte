@@ -115,7 +115,6 @@
 
 			let json = data.replace('```json', '').replace('```', '').trim();
 
-			console.log(json);
 			const gptTranslation = JSON.parse(json).translation;
 
 			subtitle.translations[translation] = gptTranslation;

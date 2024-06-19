@@ -25,6 +25,8 @@ export interface ProjectSettings {
 	cursorPosition: number;
 	zoom: number;
 	globalSubtitlesSettings: SubtitleSettings;
+	selectedSurah: number; // Dans l'éditeur de sous-titre
+	selectedVerse: number;
 	// Dictionnaire contenant les paramères de chaque track
 	subtitlesTracksSettings: { [key: string]: SubtitleTrackSettings };
 	addedTranslations: string[];

@@ -49,6 +49,8 @@ export function createBlankProject(name: string): Project {
 			cursorPosition: 0,
 			zoom: 30,
 			addedTranslations: [],
+			selectedSurah: 1,
+			selectedVerse: 1,
 			globalSubtitlesSettings: {
 				background: true,
 				backgroundColor: '#000000',

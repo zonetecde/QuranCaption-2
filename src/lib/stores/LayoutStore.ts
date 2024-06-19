@@ -13,6 +13,8 @@ export const trimDialog: Writable<string | undefined> = writable(undefined); // 
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
 export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
+export const selectedSurah: Writable<number> = writable(1); // La sourate sélectionnée dans l'éditeur de sous-titres
+export const selectedVerse: Writable<number> = writable(1); // Le verset sélectionné dans l'éditeur de sous-titres
 
 // Video editor
 export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles settings'> =

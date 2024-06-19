@@ -1,4 +1,5 @@
 import type Project from '$lib/models/Project.js';
+import { selectedSurah, selectedVerse } from '$lib/stores/LayoutStore.js';
 import { currentProject, getProjectById } from '$lib/stores/ProjectStore.js';
 import { cursorPosition, zoom } from '$lib/stores/TimelineStore';
 import { error } from '@sveltejs/kit';
@@ -14,6 +15,8 @@ export function load({ params }) {
 
 	cursorPosition.set(project.projectSettings.cursorPosition);
 	zoom.set(project.projectSettings.zoom);
+	selectedSurah.set(project.projectSettings.selectedSurah ?? 1);
+	selectedVerse.set(project.projectSettings.selectedVerse ?? 1);
 
 	// Load the project into the store
 	currentProject.set(project);

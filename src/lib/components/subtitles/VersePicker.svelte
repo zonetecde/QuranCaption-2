@@ -1,8 +1,17 @@
 <script lang="ts">
+	import { selectedSurah } from '$lib/stores/LayoutStore';
+	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';
+	import { onMount } from 'svelte';
 
 	export let verseNumberInInput = 1;
 	export let verseNumber = 1;
+
+	onMount(() => {
+		verseNumber = $currentProject.projectSettings.selectedVerse;
+		verseNumberInInput = $currentProject.projectSettings.selectedVerse;
+		surahNumber = $currentProject.projectSettings.selectedSurah;
+	});
 
 	$: if (
 		verseNumberInInput >= 1 &&
@@ -17,6 +26,11 @@
 		verseNumber = 1;
 		verseNumberInInput = 1;
 		surahNumber = parseInt(event.target.value);
+	}
+
+	$: if (verseNumber || surahNumber) {
+		$currentProject.projectSettings.selectedSurah = surahNumber;
+		$currentProject.projectSettings.selectedVerse = verseNumber;
 	}
 </script>
 
