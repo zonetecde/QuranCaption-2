@@ -42,10 +42,12 @@
 						bindValue = Math.min(max, Math.max(min, bindValue + (yAxis - e.clientY) * step));
 						yAxis = e.clientY;
 					};
-				}}
-				on:mouseup={() => {
-					isMouseDown = false;
-					window.onmousemove = null;
+
+					window.onmouseup = () => {
+						isMouseDown = false;
+						window.onmousemove = null;
+						window.onmouseup = null;
+					};
 				}}
 			/>
 			<span class="ml-1">{unit}</span>

@@ -13,6 +13,15 @@
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
+	export let useInPlayer = false; // Est-ce que c'est utilisé en tant que barrre de temps dans le lecteur vidéo ?
+	onMount(() => {
+		if (useInPlayer) {
+			// Si c'est utilisé dans le lecteur vidéo, on veut que le zoom soit pile poile
+			// la longueur de la vidéo
+			$cursorPosition = 0;
+		}
+	});
+
 	$: timeLineTotalDuration = getTimelineTotalDuration($currentProject.timeline);
 
 	function handleMouseWheelWheeling(event: WheelEvent) {
@@ -22,6 +31,11 @@
 			zoom.update((value) => (value - 1 > 0 ? value - 0.75 : value - 0.1));
 		} else if ($zoom < 100) {
 			zoom.update((value) => (value >= 1 ? value + 0.75 : value + 0.1));
+		}
+
+		if ($zoom === 10) {
+			// Valeur interdite qui fait beuguer le rendu
+			$zoom = 10.01;
 		}
 	}
 
@@ -50,7 +64,10 @@
 	}
 </script>
 
-<div class="overflow-x-scroll h-full" on:wheel={handleMouseWheelWheeling}>
+<div
+	class={'overflow-x-scroll h-full ' + (useInPlayer ? 'overflow-y-hidden' : '')}
+	on:wheel={handleMouseWheelWheeling}
+>
 	<div class="h-full bg-[#1f1d1d] relative w-max">
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
 			{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}

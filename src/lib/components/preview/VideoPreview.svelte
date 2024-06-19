@@ -37,6 +37,11 @@
 		spaceBarPressed.set(false);
 	}
 
+	$: if (currentVideo === undefined && $isPreviewPlaying) {
+		// Stop the preview if there is no video to play
+		isPreviewPlaying.set(false);
+	}
+
 	let videoComponent: HTMLVideoElement;
 	let audioComponent: HTMLAudioElement;
 

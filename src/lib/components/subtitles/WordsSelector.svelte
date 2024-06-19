@@ -111,20 +111,21 @@
 			selectPreviousWord();
 		} else if (event.key === 'Enter') {
 			const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
-			addSubtitle(selectedWords);
-			selectNextWord(true);
+			if (selectedWords.length > 0) {
+				const temp = $currentProject.timeline.subtitlesTracks[0].clips.length;
+				addSubtitle(selectedWords);
+				// Vérifie qu'il n'y a pas eu d'erreur lors de l'ajout
+				if (temp < $currentProject.timeline.subtitlesTracks[0].clips.length) selectNextWord(true);
+			}
 		} else if (event.key === 'b') {
 			// Ajoute la basmallah
-			addSubtitle('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ');
+			addSubtitle('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', true);
 		} else if (event.key === 'a') {
 			// Ajoute la protection
-			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ');
+			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', true);
 		} else if (event.key === 's' && !event.ctrlKey) {
 			// Ajoute un silence
-			addSubtitle('');
-		} else if (event.key === 'a') {
-			// Ajoute la protection
-			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ');
+			addSubtitle('', true);
 		} else if (event.key === 'Backspace') {
 			removeLastSubtitle();
 		}
@@ -143,7 +144,12 @@
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
 	}
 
-	async function addSubtitle(subtitleText: string) {
+	/**
+	 * Ajoute un sous-titre
+	 * @param subtitleText Texte du sous-titre
+	 * @param isNotVerse Si vrai, le sous-titre n'est pas un verset (la basmallah, la protection, etc.)
+	 */
+	async function addSubtitle(subtitleText: string, isNotVerse: boolean = false) {
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
@@ -170,11 +176,12 @@
 			start: lastSubtitleEndTime,
 			end: $cursorPosition,
 			text: subtitleText,
-			surah: surahNumber,
-			verse: verseNumber,
+			surah: isNotVerse ? -1 : surahNumber,
+			verse: isNotVerse ? -1 : verseNumber,
 			translations: {},
 			firstWordIndexInVerse: startWordIndex,
-			lastWordIndexInVerse: endWordIndex
+			lastWordIndexInVerse: endWordIndex,
+			isSilence: subtitleText === ''
 		});
 
 		// Met à jour la liste des sous-titres
@@ -185,17 +192,17 @@
 
 		await Promise.all(
 			$currentProject.projectSettings.addedTranslations.map(async (translation: string) => {
-				let translationText = await downloadTranslationForVerse(
-					translation,
-					surahNumber,
-					verseNumber
-				);
+				let translationText = isNotVerse
+					? ''
+					: await downloadTranslationForVerse(translation, surahNumber, verseNumber);
+
 				translations[translation] = translationText;
 			})
 		);
 
 		// Met à jour les translations
 		subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
+		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips; // Force l'update du component SubtitlesList
 	}
 </script>
 

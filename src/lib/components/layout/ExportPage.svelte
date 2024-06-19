@@ -7,4 +7,4 @@
 </script>
 
 <VideoPreview />
-<div class="-mt-16"><Timeline /></div>
+<div class="-mt-16"><Timeline useInPlayer={true} /></div>

@@ -1,8 +1,8 @@
 <script lang="ts">
+	import Slider from '$lib/components/general/Slider.svelte';
 	import Toggle from '$lib/components/general/Toggle.svelte';
 	import { showSubtitlesPadding } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import Slider from './Slider.svelte';
 </script>
 
 <Slider

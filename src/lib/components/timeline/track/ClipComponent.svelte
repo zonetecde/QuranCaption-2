@@ -93,7 +93,7 @@
 			(i > 0 ? 'group-hover:pl-8 ' : '') +
 			(i < track.clips.length - 1 ? 'group-hover:pr-8' : '')}
 	>
-		<p class="text-white text-xs h-10 overflow-y-hidden">{asset.fileName}</p>
+		<p class="text-white text-xs h-10 overflow-hidden">{asset.fileName}</p>
 
 		{#if ((clip.isMuted !== undefined && asset.type === 'audio') || asset.type === 'video') && clip.isMuted}
 			<button

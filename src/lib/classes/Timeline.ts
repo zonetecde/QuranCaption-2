@@ -26,6 +26,7 @@ export type SubtitleClip = {
 	text: string;
 	surah: number;
 	verse: number;
+	isSilence: boolean;
 	firstWordIndexInVerse: number;
 	lastWordIndexInVerse: number;
 	translations: { [key: string]: string };

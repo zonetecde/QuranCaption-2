@@ -6,12 +6,13 @@
 	import SubtitleSettingsContainer from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
 	import TranslationsCreator from '../translations/TranslationsCreator.svelte';
+	import TranslationsSettings from '../translations/TranslationsSettings.svelte';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-3-template">
 	<!-- Quran and clip explorer -->
 	<section class="min-w-[220px] max-h-full overflow-hidden">
-		<SubtitleSettingsContainer />
+		<TranslationsSettings />
 	</section>
 
 	<!-- Translations  Editor -->

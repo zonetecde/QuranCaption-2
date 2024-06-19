@@ -22,14 +22,18 @@
 			</div>
 
 			<div class="flex flex-col mt-1">
-				{#each $currentProject.projectSettings.addedTranslations as translation}
-					<p class="text-xs text-justify text-[#c5d4c4]">
-						<span class="text-[#8cbb8a] font-bold"
-							>{getEditionFromName(translation)?.language}:</span
-						>
-						{subtitle.translations[translation]}
-					</p>
-				{/each}
+				{#if !subtitle.isSilence}
+					{#each $currentProject.projectSettings.addedTranslations as translation}
+						<p class="text-xs text-justify text-[#c5d4c4]">
+							<span class="text-[#8cbb8a] font-bold"
+								>{getEditionFromName(translation)?.language}:</span
+							>
+							{subtitle.translations[translation] ?? 'Downloading...'}
+						</p>
+					{/each}
+				{:else}
+					<i class="text-xs text-justify text-[#c5d4c4]">Silence</i>
+				{/if}
 			</div>
 		</div>
 	{/each}

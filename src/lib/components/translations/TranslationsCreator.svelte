@@ -14,7 +14,9 @@
 
 	<div class="mt-0 flex flex-grow flex-col py-4 bg-[#1f1f1f]">
 		{#each $currentProject.timeline.subtitlesTracks[0].clips as subtitle, i}
-			<TranslationInput bind:subtitle subtitleIndex={i} />
+			{#if !subtitle.isSilence}
+				<TranslationInput bind:subtitle subtitleIndex={i} />
+			{/if}
 		{/each}
 	</div>
 </div>
