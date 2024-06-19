@@ -54,7 +54,17 @@ export function createBlankProject(name: string): Project {
 				backgroundColor: '#000000',
 				backgroundOpacity: 0.5,
 				fadeDuration: 300,
-				horizontalPadding: 0
+				horizontalPadding: 0,
+
+				creatorText: {
+					enable: true,
+					text: 'QuranCaption 2',
+					fontFamily: 'Verdana',
+					fontSize: 60,
+					verticalPosition: 75,
+					color: '#ffffff',
+					opacity: 1
+				}
 			},
 			subtitlesTracksSettings: {
 				arabic: {

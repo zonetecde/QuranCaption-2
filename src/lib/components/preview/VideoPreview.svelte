@@ -15,8 +15,39 @@
 	import BurnedSubtitles from './BurnedSubtitles.svelte';
 	import BackgroundOverlay from './BackgroundOverlay.svelte';
 	import ControlBar from './ControlBar.svelte';
+	import { getDisplayedVideoSize } from '$lib/ext/HtmlExt';
+	import Page from '../../../routes/+page.svelte';
+	import { videoDimensions } from '$lib/stores/LayoutStore';
+	import { onDestroy, onMount } from 'svelte';
+	import BurnedCreatorText from './BurnedCreatorText.svelte';
 
 	export let hideControls = false;
+
+	onMount(async () => {
+		window.onresize = calculateVideoDimensions;
+		calculateVideoDimensions();
+	});
+
+	onDestroy(() => {
+		window.onresize = null;
+	});
+
+	$: $currentProject.projectSettings.subtitlesTracksSettings, calculateVideoDimensions();
+
+	async function calculateVideoDimensions() {
+		// tant que la vidéo n'a pas chargé
+		while (videoComponent === undefined || videoComponent.videoWidth === 0) {
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+
+		if (videoComponent) {
+			const _videoDimensions = getDisplayedVideoSize(videoComponent);
+			videoDimensions.set({
+				width: _videoDimensions.displayedWidth,
+				height: _videoDimensions.displayedHeight
+			});
+		}
+	}
 
 	$: currentTime = secondsToHHMMSS($cursorPosition / 1000); // [0] = HH:MM:SS, [1] = milliseconds
 
@@ -30,6 +61,7 @@
 			(audio.start === 0 && audio.start <= $cursorPosition && audio.end >= $cursorPosition) ||
 			(audio.start > 0 && audio.start - 1000 < $cursorPosition && audio.end >= $cursorPosition)
 	);
+
 	let currentSubtitle: SubtitleClip;
 
 	$: if ($spaceBarPressed) {
@@ -50,8 +82,9 @@
 	 */
 	$: if ($forceUpdateCurrentPlayingMedia) {
 		forceUpdateCurrentPlayingMedia.set(false);
-		if (currentVideo && videoComponent)
+		if (currentVideo && videoComponent) {
 			videoComponent.currentTime = ($cursorPosition - currentVideo.start) / 1000;
+		}
 		if (currentAudio && audioComponent)
 			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
 	}
@@ -59,12 +92,12 @@
 	/**
 	 * Se charge de bien placer le bon moment dans la vidéo et l'audio en fonction de la position du curseur.
 	 */
-	let lastTime = 0;
+	let lastTimeFirstInterval = 0;
 	$: if ($cursorPosition || $isPreviewPlaying) {
 		const currentTime = new Date().getTime();
 		// < 100 ms ? (permet de ne pas spam la reactivity après le setTimeout)
-		if (currentTime - lastTime > 10) {
-			lastTime = currentTime;
+		if (currentTime - lastTimeFirstInterval > 10) {
+			lastTimeFirstInterval = currentTime;
 
 			if (!$isPreviewPlaying && currentVideo && videoComponent) {
 				// Update the video to the cursor position. When playing the video will start from the cursor position
@@ -156,21 +189,13 @@
 
 			<BackgroundOverlay />
 
-			<BurnedSubtitles
-				bind:currentSubtitle
-				{hideControls}
-				{videoComponent}
-				subtitleLanguage="arabic"
-			/>
+			<BurnedSubtitles bind:currentSubtitle {hideControls} subtitleLanguage="arabic" />
 
 			{#each $currentProject.projectSettings.addedTranslations as translation}
-				<BurnedSubtitles
-					bind:currentSubtitle
-					{hideControls}
-					{videoComponent}
-					subtitleLanguage={translation}
-				/>
+				<BurnedSubtitles bind:currentSubtitle {hideControls} subtitleLanguage={translation} />
 			{/each}
+
+			<BurnedCreatorText />
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
 

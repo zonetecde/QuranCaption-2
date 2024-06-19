@@ -39,7 +39,7 @@
 			.fontSize}
 	/>
 
-	<label for="background-color" class="mt-2"
+	<label class="mt-2"
 		><span>Color :</span>
 		<input
 			type="color"

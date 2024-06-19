@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/classes/Timeline';
-	import { getDisplayedVideoSize } from '$lib/ext/HtmlExt';
-	import { currentPage, showSubtitlesPadding } from '$lib/stores/LayoutStore';
+	import { getDisplayedVideoSize, calculateFontSize as calculateFontSize } from '$lib/ext/HtmlExt';
+	import { currentPage, showSubtitlesPadding, videoDimensions } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
@@ -9,11 +9,7 @@
 
 	export let currentSubtitle: SubtitleClip;
 	export let hideControls = false;
-	export let videoComponent: HTMLVideoElement;
 	export let subtitleLanguage: string;
-
-	let videoWidth = 1920;
-	let videoHeight = 1080;
 
 	// @ts-ignore
 	$: currentSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
@@ -36,34 +32,13 @@
 
 	let subtitleTextSize = 1;
 
-	onMount(() => {
-		window.addEventListener('resize', calculateSubtitleTextSize);
-		calculateSubtitleTextSize();
-	});
-
-	onDestroy(() => {
-		window.removeEventListener('resize', calculateSubtitleTextSize);
-	});
-
-	$: $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize,
-		calculateSubtitleTextSize();
+	$: $videoDimensions, calculateSubtitleTextSize();
 
 	async function calculateSubtitleTextSize() {
-		if (videoComponent && videoComponent.offsetWidth) {
-			// tant que videoComponent.videoWidth === 0 on attend que la vidéo charge
-			while (videoComponent.videoWidth === 0) {
-				await new Promise((resolve) => setTimeout(resolve, 100));
-			}
-
-			const videoDimensions = getDisplayedVideoSize(videoComponent);
-			videoWidth = videoDimensions.displayedWidth;
-			videoHeight = videoDimensions.displayedHeight;
-
-			// Calcul la taille de la police pour les sous-titres
-			subtitleTextSize =
-				videoWidth /
-				(140 - $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize);
-		}
+		// Calcul la taille de la police pour les sous-titres
+		subtitleTextSize = calculateFontSize(
+			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize
+		);
 	}
 </script>
 
@@ -78,12 +53,12 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineColor}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
 	{@const subtitleVerticalPosition =
-		videoHeight *
+		$videoDimensions.height *
 		($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition /
 			100)}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
-		videoWidth *
+		$videoDimensions.width *
 		(($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding +
 			$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding) /
 			100)}
@@ -92,7 +67,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 		<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->
 		<div
 			class={'inset-0  absolute left-1/2 -translate-x-1/2 ' + (hideControls ? '' : 'bottom-16')}
-			style={`width: ${videoWidth}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
+			style={`width: ${$videoDimensions.width}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 			in:fade={{
 				duration: $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration,
 				delay: $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration

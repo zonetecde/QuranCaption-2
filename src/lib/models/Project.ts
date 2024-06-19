@@ -39,6 +39,19 @@ export interface SubtitleSettings {
 	backgroundOpacity: number;
 	fadeDuration: number;
 	horizontalPadding: number;
+
+	creatorText: CreatorText;
+}
+
+export interface CreatorText {
+	enable: boolean;
+	text: string;
+	fontFamily: string;
+	fontSize: number;
+	color: string;
+	verticalPosition: number;
+	opacity: number;
+	outline: boolean;
 }
 
 /**

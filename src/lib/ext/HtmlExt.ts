@@ -1,3 +1,6 @@
+import { videoDimensions } from '$lib/stores/LayoutStore';
+import { get } from 'svelte/store';
+
 /**
  * Récupère la taille de la vidéo affichée dans le composant.
  * Ne prend pas en compte les marges et les paddings.
@@ -23,4 +26,9 @@ export function getDisplayedVideoSize(videoComponent: HTMLVideoElement) {
 	}
 
 	return { displayedWidth, displayedHeight };
+}
+
+export function calculateFontSize(fontSize: number) {
+	// Calcul la taille de la police pour les sous-titres
+	return get(videoDimensions).width / (140 - fontSize);
 }

@@ -39,14 +39,20 @@
 
 			// Flèche gauche/droite pour controler le curseur
 			else if (e.key === 'ArrowLeft') {
-				e.preventDefault();
-				cursorPosition.update((value) => value - 3000);
-				if ($cursorPosition < 0) cursorPosition.set(0);
-				if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
+				// Vérifie qu'on est pas dans un input
+				if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
+					e.preventDefault();
+					cursorPosition.update((value) => value - 3000);
+					if ($cursorPosition < 0) cursorPosition.set(0);
+					if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
+				}
 			} else if (e.key === 'ArrowRight') {
-				e.preventDefault();
-				cursorPosition.update((value) => value + 3000);
-				if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
+				// Vérifie qu'on est pas dans un input
+				if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
+					e.preventDefault();
+					cursorPosition.update((value) => value + 3000);
+					if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
+				}
 			}
 		};
 
