@@ -5,6 +5,7 @@ export type PageType = 'Video editor' | 'Subtitles editor' | 'Translations' | 'E
 
 // System
 export const userFonts: Writable<string[]> = writable([]); // Les polices de l'utilisateur
+export const newUpdateAvailable: Writable<boolean> = writable(false); // Indique si une nouvelle version est disponible
 
 // Layout
 export const currentPage: Writable<PageType> = writable('Video editor');

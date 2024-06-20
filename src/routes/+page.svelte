@@ -11,6 +11,13 @@
 	} from '$lib/stores/ProjectStore';
 	import type Project from '$lib/models/Project';
 	import { invoke } from '@tauri-apps/api';
+	import {
+		GITHUB_API_URL as GITHUB_API_URL,
+		GITHUB_DOWNLOAD_LINK,
+		SOFTWARE_VERSION
+	} from '$lib/ext/GlobalVariables';
+	import { newUpdateAvailable } from '$lib/stores/LayoutStore';
+	import { open as openLink } from '@tauri-apps/api/shell';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -20,8 +27,14 @@
 	onMount(async () => {
 		userProjects = getUserProjects();
 
-		// delete all projects from the local storage
-		// localStorage.removeItem('projects');
+		// Check if a new version is available
+		const response = await fetch(GITHUB_API_URL);
+		if (response.ok) {
+			const data = await response.json();
+			if (data.tag_name !== SOFTWARE_VERSION) {
+				newUpdateAvailable.set(true);
+			}
+		}
 	});
 
 	/**
@@ -172,6 +185,38 @@
 				on:click={handleCreateProjectButtonClicked}
 			>
 				Create
+			</button>
+		</div>
+	</div>
+{/if}
+
+{#if $newUpdateAvailable}
+	<div transition:fade class="absolute inset-0 backdrop-blur-sm flex items-center justify-center">
+		<div
+			class="relative w-[400px] bg-default border-2 border-black rounded-xl p-4 flex flex-col items-center"
+		>
+			<button
+				class="w-6 h-6 absolute top-2 right-2 cursor-pointer border rounded-full"
+				on:click={() => newUpdateAvailable.set(false)}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="gray"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+				</svg>
+			</button>
+
+			<p class="self-start text-center">A new version of QuranCaption 2 is available</p>
+
+			<button
+				class="w-1/2 h-10 bg-[#186435] hover:bg-[#163a23] duration-150 text-white mt-4 rounded-md"
+				on:click={() => openLink(GITHUB_DOWNLOAD_LINK)}
+			>
+				Update
 			</button>
 		</div>
 	</div>

@@ -13,6 +13,9 @@
 	"tauri": {
 		"allowlist": {
 			"all": false,
+			"shell": {
+				"open": true
+			},
 			"dialog": {
 				"all": false,
 				"ask": false,

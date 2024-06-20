@@ -3,6 +3,7 @@
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import { open as openLink } from '@tauri-apps/api/shell';
 
 	let fullScreen: boolean = false;
 
@@ -39,7 +40,10 @@
 				<h1 class="text-center text-lg">How to save the video :</h1>
 				<br />
 				<p style="color: white;">
-					1. Start OBS (or download it from <i>obsproject.com</i>)
+					1. Start OBS (or download it from <button
+						class="text-blue-400"
+						on:click={() => openLink('https://www.obsproject.com')}>obsproject.com</button
+					>)
 				</p>
 				<p style="color: white;">
 					2. Add a new Source by selecting <code style="color: yellow;">Record a window</code> and choosing
