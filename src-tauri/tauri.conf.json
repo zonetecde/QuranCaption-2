@@ -7,7 +7,7 @@
 		"distDir": "../build"
 	},
 	"package": {
-		"productName": "QuranCaption-2",
+		"productName": "QuranCaption 2",
 		"version": "0.1.0"
 	},
 	"tauri": {
