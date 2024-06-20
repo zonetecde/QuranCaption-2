@@ -9,7 +9,7 @@
 	import TranslationsSettings from '../translations/TranslationsSettings.svelte';
 </script>
 
-<div class="flex-row w-full h-full grid grid-cols-3-template">
+<div class="flex-row w-full h-full grid grid-cols-3-template overflow-y-scroll">
 	<!-- Quran and clip explorer -->
 	<section class="min-w-[220px] max-h-full overflow-hidden">
 		<TranslationsSettings />

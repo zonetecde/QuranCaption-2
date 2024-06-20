@@ -16,7 +16,10 @@
 		<div class="p-2 bg-[#1f1f1f] border-b-2 border-[#413f3f]">
 			<div class="flex flex-col w-full">
 				<p class="text-xs text-left">
-					{milisecondsToMMSS(subtitle.start)} - {milisecondsToMMSS(subtitle.end)}
+					{#if subtitle.surah !== -1 && subtitle.verse !== -1}
+						<span class="monospace">{subtitle.surah}:{subtitle.verse}</span>
+					{/if}
+					<small>{milisecondsToMMSS(subtitle.start)} - {milisecondsToMMSS(subtitle.end)}</small>
 				</p>
 				<p class="arabic text-right w-full">{subtitle.text}</p>
 			</div>

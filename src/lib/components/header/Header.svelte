@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { downloadFile } from '$lib/ext/Utilities';
 	import { currentPage, setCurrentPage } from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
@@ -65,14 +66,7 @@
 		class="absolute right-3 top-1/2 -translate-y-1/2 pt-1"
 		on:click={() => {
 			// export the project
-			const json = JSON.stringify($currentProject);
-			const blob = new Blob([json], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `${$currentProject.name}.qc2`;
-			a.click();
-			URL.revokeObjectURL(url);
+			downloadFile(JSON.stringify($currentProject, null, 2), `${$currentProject.name}.qc2`);
 		}}
 		><svg
 			fill="white"

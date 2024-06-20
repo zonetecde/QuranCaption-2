@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/classes/Timeline';
-	import {
-		getDisplayedVideoSize,
-		calculateFontSize as calculateFontSize,
-		latinNumberToArabic
-	} from '$lib/ext/HtmlExt';
+	import { calculateFontSize, latinNumberToArabic } from '$lib/ext/Utilities';
+
 	import { currentPage, showSubtitlesPadding, videoDimensions } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';

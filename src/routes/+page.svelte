@@ -2,7 +2,6 @@
 	import { blur, fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
-	import { open } from '@tauri-apps/api/dialog';
 	import {
 		createBlankProject,
 		delProject,
@@ -10,7 +9,6 @@
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
 	import type Project from '$lib/models/Project';
-	import { invoke } from '@tauri-apps/api';
 	import {
 		GITHUB_API_URL as GITHUB_API_URL,
 		GITHUB_DOWNLOAD_LINK,
@@ -18,6 +16,8 @@
 	} from '$lib/ext/GlobalVariables';
 	import { newUpdateAvailable } from '$lib/stores/LayoutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
+	import { importAndReadFile } from '$lib/ext/Utilities';
+	import Id from '$lib/ext/Id';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -72,22 +72,12 @@
 	 * Handle import project button clicked
 	 */
 	async function handleImportProjectButtonClicked() {
-		const selected = await open({
-			multiple: false,
-			filters: [
-				{
-					name: 'QuranCaption 2 Project (*.qc2)',
-					extensions: ['qc2']
-				}
-			]
-		});
-		if (!Array.isArray(selected) && selected !== null) {
-			// Read the file's content
-			const content: string = await invoke('get_file_content', {
-				path: selected
-			});
+		const content = await importAndReadFile('QuranCaption 2 Project (*.qc2)');
 
+		if (content) {
 			const project = JSON.parse(content);
+
+			project.id = Id.generate(); // Generate a new id for the project
 
 			updateUsersProjects(project); // Save the project to the local storage
 

@@ -18,6 +18,7 @@
 		// Remets là où on était
 		const lastSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.slice(-1)[0];
 		if (lastSubtitle) {
+			if (lastSubtitle.surah === -1 || lastSubtitle.verse === -1) return;
 			verseNumber = lastSubtitle.verse;
 			verseNumberInInput = lastSubtitle.surah;
 			surahNumber = lastSubtitle.surah;

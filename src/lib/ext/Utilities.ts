@@ -1,5 +1,7 @@
 import { videoDimensions } from '$lib/stores/LayoutStore';
+import { invoke } from '@tauri-apps/api/tauri';
 import { get } from 'svelte/store';
+import { open } from '@tauri-apps/api/dialog';
 
 /**
  * Récupère la taille de la vidéo affichée dans le composant.
@@ -35,4 +37,37 @@ export function calculateFontSize(fontSize: number) {
 
 export function latinNumberToArabic(number: string) {
 	return number.replace(/[0-9]/g, (d) => String.fromCharCode(d.charCodeAt(0) + 1584));
+}
+
+export function downloadFile(content: string, filename: string) {
+	const blob = new Blob([content], { type: 'application/json' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+	a.click();
+	URL.revokeObjectURL(url);
+}
+
+export async function importAndReadFile(fileName: string): Promise<string | null> {
+	const selected = await open({
+		multiple: false,
+		filters: [
+			{
+				name: fileName,
+				extensions: ['qc2']
+			}
+		]
+	});
+
+	if (!Array.isArray(selected) && selected !== null) {
+		// Read the file's content
+		const content: string = await invoke('get_file_content', {
+			path: selected
+		});
+
+		return content;
+	}
+
+	return null;
 }

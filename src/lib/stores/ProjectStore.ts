@@ -13,7 +13,7 @@ export const currentProject: Writable<Project> = writable();
 export function createBlankProject(name: string): Project {
 	return {
 		id: Id.generate(),
-		name: name,
+		name: name.trim(),
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		description: '',
@@ -138,6 +138,10 @@ export function updateUsersProjects(project: Project): void {
 
 	const index = projects.findIndex((p) => p.id === project.id);
 	if (index === -1) {
+		if (projects.find((p) => p.name === project.name)) {
+			project.name = project.name + ' New';
+		}
+
 		projects.push(project);
 	} else {
 		projects[index] = project;
