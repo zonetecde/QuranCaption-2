@@ -1,10 +1,71 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
+	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 
-	onMount(() => {});
+	let fullScreen: boolean = false;
+
+	onMount(() => {
+		document.onkeydown = onKeyDown;
+	});
+
+	function onKeyDown(key: any) {
+		// if key is F11
+		if (key.keyCode === 122) {
+			toggleFullScreen();
+		}
+
+		// if ctrl + k, play the video and start obs recording
+		if (key.ctrlKey && key.keyCode === 75) {
+			spaceBarPressed.set(true);
+		}
+	}
+
+	function toggleFullScreen() {
+		fullScreen = !fullScreen;
+	}
 </script>
 
-<VideoPreview />
+<div class={fullScreen ? 'absolute inset-0' : 'w-full h-full'}>
+	<VideoPreview hideControls={fullScreen} />
+</div>
 <div class="-mt-16"><Timeline useInPlayer={true} /></div>
+
+{#if !fullScreen}
+	<section class="absolute inset-20">
+		<div class="w-full h-full flex items-center justify-center">
+			<div class="w-[500px] h-[400px] bg-[#2f2d35] p-3 rounded-lg border-2 border-[#19181d]">
+				<h1 class="text-center text-lg">How to save the video :</h1>
+				<br />
+				<p style="color: white;">
+					1. Start OBS (or download it from <i>obsproject.com</i>)
+				</p>
+				<p style="color: white;">
+					2. Add a new Source by selecting <code style="color: yellow;">Record a window</code> and choosing
+					QuranCaption 2
+				</p>
+				<p style="color: white;">
+					3. In OBS, go to File -> Settings -> Keyboard Shortcuts and set the <code
+						style="color: yellow;">Start Recording</code
+					>
+					and
+					<code style="color: yellow;">Stop Recording</code> keys to
+					<code style="color: yellow;">CTRL + K</code>
+				</p>
+				<p style="color: white;">
+					4. Press <code style="color: yellow;">F11</code> in QuranCaption 2 to enter full screen mode
+				</p>
+				<p style="color: white;">
+					5. Adjust the video size in OBS (hold ALT if you need to crop the recording size)
+				</p>
+				<p style="color: white;">
+					6. Press <code style="color: yellow;">CTRL + K</code> while the QuranCaption window is focused
+					to start recording, and press it again to stop recording
+				</p>
+
+				<h1 class="mt-10 text-center text-xl font-bold">Thank you for using QuranCaption 2 !</h1>
+			</div>
+		</div>
+	</section>
+{/if}
