@@ -26,6 +26,7 @@ export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles sett
 
 // Translation page
 export const onlyShowVersesThatNeedTranslationReview: Writable<boolean> = writable(false); // Afficher uniquement les versets qui ont besoin d'une révision de traduction
+export const isFetchingIA: Writable<boolean> = writable(false); // Indique si on est en train de récupérer les informations de l'IA
 
 export function setCurrentPage(page: PageType) {
 	currentPage.set(page);

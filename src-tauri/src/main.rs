@@ -7,9 +7,16 @@ use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn get_file_content(path: String) -> Result<String, String> {
+  // read file content
+  let content = std::fs::read_to_string(&path).unwrap();
+  Ok(content)
 }
 
 #[tauri::command]

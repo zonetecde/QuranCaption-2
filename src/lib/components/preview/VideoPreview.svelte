@@ -162,7 +162,7 @@
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
 					<video
-						class={'bg-red-black w-full h-full object-contain'}
+						class="bg-red-black w-full h-full object-contain"
 						style="
 							transform: scale({$currentProject.projectSettings.videoScale});
 						"

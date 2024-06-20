@@ -64,7 +64,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": [],
+			"resources": ["ffprobe.exe"],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {

@@ -2,6 +2,7 @@
 	import { currentPage, setCurrentPage } from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import toast from 'svelte-french-toast';
 
 	let pages: string[] = ['Video editor', 'Subtitles editor', 'Translations', 'Export'];
 
@@ -12,15 +13,81 @@
 </script>
 
 <div
-	class="w-full h-full bg-black bg-opacity-30 flex items-center justify-center pt-0.5 text-xl gap-x-[10%]"
+	class="w-full h-full bg-black bg-opacity-30 flex items-center justify-center pt-0.5 text-xl gap-x-6 xl:gap-x-[10%] relative"
 >
 	<button
-		class="absolute top-0 left-0"
+		class="absolute left-3 top-1/2 -translate-y-1/2"
 		on:click={() => {
 			updateUsersProjects($currentProject);
 			window.location.href = '/';
-		}}>Save&back</button
-	>
+		}}
+		><svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke-width="1.5"
+			stroke="currentColor"
+			class="size-8"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+			/>
+		</svg>
+	</button>
+	<button
+		class="absolute left-14 top-1/2 -translate-y-1/2"
+		on:click={() => {
+			updateUsersProjects($currentProject);
+			toast.success('Project saved');
+		}}
+		><svg
+			viewBox="0 0 24 24"
+			role="img"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-labelledby="saveIconTitle"
+			stroke="white"
+			stroke-width="1.4"
+			stroke-linecap="square"
+			stroke-linejoin="miter"
+			fill="black"
+			color="black"
+			class="size-9"
+		>
+			<title id="saveIconTitle">Save</title>
+			<path
+				d="M17.2928932,3.29289322 L21,7 L21,20 C21,20.5522847 20.5522847,21 20,21 L4,21 C3.44771525,21 3,20.5522847 3,20 L3,4 C3,3.44771525 3.44771525,3 4,3 L16.5857864,3 C16.8510029,3 17.1053568,3.10535684 17.2928932,3.29289322 Z"
+			/> <rect width="10" height="8" x="7" y="13" /> <rect width="8" height="5" x="8" y="3" />
+		</svg>
+	</button>
+	<button
+		class="absolute right-3 top-1/2 -translate-y-1/2 pt-1"
+		on:click={() => {
+			// export the project
+			const json = JSON.stringify($currentProject);
+			const blob = new Blob([json], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${$currentProject.name}.qc2`;
+			a.click();
+			URL.revokeObjectURL(url);
+		}}
+		><svg
+			fill="white"
+			width="800px"
+			height="800px"
+			class="size-8"
+			viewBox="0 0 1920 1920"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="m0 1016.081 409.186 409.073 79.85-79.736-272.867-272.979h1136.415V959.611H216.169l272.866-272.866-79.85-79.85L0 1016.082ZM1465.592 305.32l315.445 315.445h-315.445V305.32Zm402.184 242.372-329.224-329.11C1507.042 187.07 1463.334 169 1418.835 169h-743.83v677.647h112.94V281.941h564.706v451.765h451.765v903.53H787.946V1185.47H675.003v564.705h1242.353V667.522c0-44.498-18.07-88.207-49.581-119.83Z"
+				fill-rule="evenodd"
+			/>
+		</svg>
+	</button>
 
 	{#each pages as page, i}
 		<button

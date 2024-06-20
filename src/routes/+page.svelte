@@ -2,7 +2,7 @@
 	import { blur, fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
-
+	import { open } from '@tauri-apps/api/dialog';
 	import {
 		createBlankProject,
 		delProject,
@@ -54,6 +54,33 @@
 	function handleDelProject(id: string) {
 		userProjects = delProject(id);
 	}
+
+	/**
+	 * Handle import project button clicked
+	 */
+	async function handleImportProjectButtonClicked() {
+		const selected = await open({
+			multiple: false,
+			filters: [
+				{
+					name: 'QuranCaption 2 Project (*.qc2)',
+					extensions: ['qc2']
+				}
+			]
+		});
+		if (!Array.isArray(selected) && selected !== null) {
+			// Read the file's content
+			const content: string = await invoke('get_file_content', {
+				path: selected
+			});
+
+			const project = JSON.parse(content);
+
+			updateUsersProjects(project); // Save the project to the local storage
+
+			openProject(project); // Open the project
+		}
+	}
 </script>
 
 <div class="p-5 h-screen flex items-center justify-center">
@@ -94,11 +121,18 @@
 		</div>
 
 		<div class="mt-12 flex justify-center">
-			<button
-				on:click={() => (createProjectVisibility = true)}
-				class="text-xl bg-[#186435] hover:bg-[#163a23] duration-150 px-12 py-3 rounded-3xl border-2 border-[#102217] shadow-xl shadow-black"
-				>Create a new project</button
-			>
+			<div class="grid grid-cols-2 gap-x-3">
+				<button
+					on:click={() => (createProjectVisibility = true)}
+					class="text-xl bg-[#186435] hover:bg-[#163a23] duration-150 px-12 py-3 rounded-3xl border-2 border-[#102217] shadow-xl shadow-black"
+					>Create a new project</button
+				>
+				<button
+					on:click={handleImportProjectButtonClicked}
+					class="text-xl bg-[#186435] hover:bg-[#163a23] duration-150 px-12 py-3 rounded-3xl border-2 border-[#102217] shadow-xl shadow-black"
+					>Import a project</button
+				>
+			</div>
 		</div>
 	</div>
 </div>

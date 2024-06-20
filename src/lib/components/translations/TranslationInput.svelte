@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/classes/Timeline';
 	import { GPT_URL } from '$lib/ext/PrivateVariable';
-	import { onlyShowVersesThatNeedTranslationReview } from '$lib/stores/LayoutStore';
+	import { isFetchingIA, onlyShowVersesThatNeedTranslationReview } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf, getEditionFromName } from '$lib/stores/QuranStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
@@ -98,18 +98,31 @@
 
 		if (savedInLocalStorage) {
 			const gptWbwTranslations = parsedSavedInLocalStorage.find(
-				(item: any) => item.surah === subtitle.surah && item.verse === subtitle.verse
+				(item: any) =>
+					item.surah === subtitle.surah &&
+					item.verse === subtitle.verse &&
+					item.lang === translation
 			);
 			if (gptWbwTranslations) {
-				return gptWbwTranslations.translation;
+				return gptWbwTranslations.wbwTranslation;
 			}
 		} else if (savedInLocalStorage === '[]') {
 			localStorage.setItem('gptWbwTranslations', JSON.stringify([]));
 		}
 
+		if ($isFetchingIA) {
+			toast.error('Please wait for the AI to finish fetching the translation', {
+				position: 'bottom-left',
+				style: 'background-color: #333; color: white;',
+				icon: '🤖'
+			});
+			return;
+		}
+
 		const prompt = `You are granted the precious job of translating the quran word by word in ${edition?.language} !\nFor exemple, in english, the verse : \"اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِیْنَ\" is translated word by word as this dictionary :\n\n{\n\"اَلْحَمْدُ\": \"In (the) name\",\n\" لِلّٰهِ \": \"of Allah\",\n\"رَبِّ\": \"the Most Gracious\",\n\"الْعٰلَمِیْنَ\": \"the Most Merciful\"\n}\n\nNow give me translations word by word in ${edition?.language} of this verse : \n\n${$Mushaf.surahs[subtitle.surah - 1].verses[subtitle.verse - 1].text}\n\nPlease, inspire your transition by the real translation of the verse - you need to give me same words as the exisiting translations :\n\n${await downloadTranslationForVerse(translation, subtitle.surah, subtitle.verse)}\n\nGive me a json formated response only - I am using you as an api`;
 
 		try {
+			isFetchingIA.set(true);
 			const response = await fetch(GPT_URL + encodeURI(prompt), {
 				method: 'GET'
 			});
@@ -122,11 +135,13 @@
 				parsedSavedInLocalStorage.push({
 					surah: subtitle.surah,
 					verse: subtitle.verse,
-					translation: gptWbwTranslations
+					wbwTranslation: gptWbwTranslations,
+					lang: translation
 				});
 				localStorage.setItem('gptWbwTranslations', JSON.stringify(parsedSavedInLocalStorage));
 			}
 
+			isFetchingIA.set(false);
 			return gptWbwTranslations;
 		} catch (e) {
 			toast.error('An error occured while asking the AI for translation', {
@@ -134,17 +149,18 @@
 				style: 'background-color: #333; color: white;',
 				icon: '🤖'
 			});
+
+			isFetchingIA.set(false);
 			return;
 		}
 	}
 
+	/**
+	 * Asks the AI for word-by-word translation of a verse in a specific language.
+	 * @param {string} translation - The ID of the translation language.
+	 * @returns {Promise<void>}
+	 */
 	async function askAiForTranslation(translation: string) {
-		/**
-		 * Asks the AI for word-by-word translation of a verse in a specific language.
-		 * @param {string} translation - The ID of the translation language.
-		 * @returns {Promise<void>}
-		 */
-
 		const gptWbwTranslations = await getGptWordByWordTranslation(translation);
 
 		let gptTranslation = '';

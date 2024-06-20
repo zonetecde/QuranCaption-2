@@ -66,14 +66,18 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div
-	class="group flex items-center justify-between p-2 border-b-2 flex-col max-w-full border-4 border-[#423f3f] rounded-2xl py-4 bg-[#0f0e0e] relative"
+	class="group flex items-center justify-between p-2 border-b-2 flex-col max-w-full border-4 border-[#423f3f] rounded-2xl py-4 bg-[#0f0e0e] relative max-h-[250px]"
 	on:mouseenter={() => (isHovered = true)}
 	on:mouseleave={() => (isHovered = false)}
 	role="contentinfo"
 >
 	<div class="flex items-center h-[65%]">
 		{#if asset.type === 'video'}
-			<video src={convertFileSrc(asset.filePath)} class="w-full object-cover" controls={isHovered}>
+			<video
+				src={convertFileSrc(asset.filePath)}
+				class="w-full object-cover h-full"
+				controls={isHovered}
+			>
 				<track kind="captions" />
 			</video>
 		{:else if asset.type === 'image'}
