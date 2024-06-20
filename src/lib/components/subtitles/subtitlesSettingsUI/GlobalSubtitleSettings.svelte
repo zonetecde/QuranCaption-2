@@ -32,6 +32,13 @@
 		step={0.05}
 		bind:bindValue={$currentProject.projectSettings.videoScale}
 	/>
+	<Slider
+		title="Translate Video"
+		min={-100}
+		max={100}
+		step={1}
+		bind:bindValue={$currentProject.projectSettings.translateVideoX}
+	/>
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">

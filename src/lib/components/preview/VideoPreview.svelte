@@ -164,7 +164,8 @@
 					<video
 						class="bg-red-black w-full h-full object-contain"
 						style="
-							transform: scale({$currentProject.projectSettings.videoScale});
+							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$videoDimensions.width *
+							($currentProject.projectSettings.translateVideoX / 100)}px);
 						"
 						src={convertFileSrc(video.filePath)}
 						bind:this={videoComponent}

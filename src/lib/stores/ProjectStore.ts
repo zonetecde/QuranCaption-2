@@ -50,7 +50,7 @@ export function createBlankProject(name: string): Project {
 			zoom: 30,
 			addedTranslations: [],
 			videoScale: 1,
-
+			translateVideoX: 0,
 			globalSubtitlesSettings: {
 				background: true,
 				backgroundColor: '#000000',
@@ -80,7 +80,8 @@ export function createBlankProject(name: string): Project {
 					outlineThickness: 2,
 					verticalPosition: 0,
 					horizontalPadding: 0,
-					opacity: 1
+					opacity: 1,
+					showVerseNumber: true
 				}
 			}
 		}

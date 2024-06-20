@@ -26,6 +26,7 @@ export interface ProjectSettings {
 	zoom: number;
 	globalSubtitlesSettings: SubtitleSettings;
 	videoScale: number;
+	translateVideoX: number;
 
 	// Dictionnaire contenant les paramères de chaque track
 	subtitlesTracksSettings: { [key: string]: SubtitleTrackSettings };
