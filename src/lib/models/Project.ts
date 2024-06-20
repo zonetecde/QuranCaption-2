@@ -70,4 +70,5 @@ export interface SubtitleTrackSettings {
 	verticalPosition: number;
 	horizontalPadding: number;
 	opacity: number;
+	showVerseNumber: boolean;
 }

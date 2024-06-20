@@ -57,6 +57,15 @@
 		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 			.opacity}
 	/>
+
+	<label class="mt-2">
+		<input
+			type="checkbox"
+			class="ml-1 scale-110"
+			bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+				.showVerseNumber}
+		/> <span class="ml-1">Show Verse Number</span>
+	</label>
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">

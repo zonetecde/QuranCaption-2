@@ -181,7 +181,8 @@
 			translations: {},
 			firstWordIndexInVerse: startWordIndex,
 			lastWordIndexInVerse: endWordIndex,
-			isSilence: subtitleText === ''
+			isSilence: subtitleText === '',
+			isLastWordInVerse: endWordIndex === wordsInSelectedVerse.length - 1
 		});
 
 		// Met à jour la liste des sous-titres

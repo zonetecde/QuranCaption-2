@@ -32,3 +32,7 @@ export function calculateFontSize(fontSize: number) {
 	// Calcul la taille de la police pour les sous-titres
 	return get(videoDimensions).width / (140 - fontSize);
 }
+
+export function latinNumberToArabic(number: string) {
+	return number.replace(/[0-9]/g, (d) => String.fromCharCode(d.charCodeAt(0) + 1584));
+}

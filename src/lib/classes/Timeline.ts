@@ -29,6 +29,7 @@ export type SubtitleClip = {
 	isSilence: boolean;
 	firstWordIndexInVerse: number;
 	lastWordIndexInVerse: number;
+	isLastWordInVerse: boolean;
 	translations: { [key: string]: string };
 };
 

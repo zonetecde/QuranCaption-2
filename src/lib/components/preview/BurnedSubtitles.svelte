@@ -1,8 +1,13 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/classes/Timeline';
-	import { getDisplayedVideoSize, calculateFontSize as calculateFontSize } from '$lib/ext/HtmlExt';
+	import {
+		getDisplayedVideoSize,
+		calculateFontSize as calculateFontSize,
+		latinNumberToArabic
+	} from '$lib/ext/HtmlExt';
 	import { currentPage, showSubtitlesPadding, videoDimensions } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
+	import { Mushaf } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -100,7 +105,13 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 				>
 					{#if subtitleLanguage === 'arabic'}
 						{currentSubtitle.text}
+						{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse}
+							{latinNumberToArabic(currentSubtitle.verse.toString())}
+						{/if}
 					{:else if currentSubtitle.translations !== undefined}
+						{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0}
+							{currentSubtitle.verse}.
+						{/if}
 						{currentSubtitle.translations[subtitleLanguage]}
 					{/if}
 				</p>

@@ -86,7 +86,8 @@
 			enableSubtitles: true,
 			fontFamily: 'Verdana',
 			color: '#ffffff',
-			opacity: 1
+			opacity: 1,
+			showVerseNumber: false
 		};
 
 		// Pour chaque verset, ajoute la traduction
