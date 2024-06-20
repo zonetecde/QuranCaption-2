@@ -13,7 +13,65 @@
 	}
 </script>
 
-<div class="bg-black w-full h-full bg-opacity-40 overflow-y-auto flex flex-col">
+<div class="bg-black w-full h-full bg-opacity-40 overflow-y-auto flex flex-col relative">
+	<div class="absolute left-1 top-1 group">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke-width="1.5"
+			stroke="currentColor"
+			class="size-7 opacity-40"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
+			/>
+		</svg>
+
+		<div
+			class="w-[400px] h-[450px] bg-[#393a3f] rounded-lg text-sm p-4 z-50 hidden group-hover:block"
+		>
+			<h1 class="underline">How to create subtitles :</h1>
+
+			<p>1. Select the surah and the verse that is being recited in the video</p>
+			<p>
+				2. Press <span class="text-yellow-500">`space`</span> to play the video and start selecting the
+				words the reciter is saying using the `up` and `down` arrow keys or the mouse
+			</p>
+			<p>
+				3. Press <span class="text-yellow-500">`enter`</span> when you have selected the words and that
+				the reciter has stopped/when you want the subtitle to end
+			</p>
+			<p>4. Repeat the process until the video is finished</p>
+
+			<p class="mt-3 underline">Additional tips :</p>
+			<p>
+				- You can press the <span class="text-yellow-500">`left`</span> and
+				<span class="text-yellow-500">`right`</span> arrow keys to go back and forth in the video
+			</p>
+			<p>
+				- You can press <span class="text-yellow-500">`backspace`</span> to delete the last subtitle
+				you have created
+			</p>
+
+			<p>
+				- You can press <span class="text-yellow-500">`s`</span> to add a silence subtitle (when there's
+				a long pause)
+			</p>
+
+			<p>
+				- You can press <span class="text-yellow-500">`b`</span> to add
+				<span class="text-yellow-500">`Bismillahi rahmani rahim`</span>
+			</p>
+			<p>
+				- You can press <span class="text-yellow-500">`a`</span> to add
+				<span class="text-yellow-500">`A3oudhou billahi mina chaytani rajim`</span>
+			</p>
+		</div>
+	</div>
+
 	<VersePicker bind:verseNumber bind:surahNumber bind:verseNumberInInput />
 
 	<WordsSelector bind:verseNumber bind:surahNumber />
