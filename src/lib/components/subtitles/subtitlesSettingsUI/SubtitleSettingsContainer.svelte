@@ -51,9 +51,11 @@
 	}
 </script>
 
-<div class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll relative">
+<div
+	class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll relative overflow-x-hidden"
+>
 	<button
-		class="absolute right-2 top-2"
+		class="absolute right-2 top-2 group"
 		on:click={() => {
 			// export the settings
 			downloadFile(
@@ -81,8 +83,16 @@
 				fill-rule="evenodd"
 			/>
 		</svg>
+
+		<p
+			class="absolute -left-1/2 -translate-x-2/3 w-40 bg-[#161313] rounded-xl top-6 hidden group-hover:block"
+		>
+			Export subtitles settings
+		</p>
 	</button>
-	<button class="absolute left-2 xl:right-9 top-2" on:click={handleImportSettingsButtonClicked}
+	<button
+		class="absolute left-2 xl:right-9 xl:left-auto top-2 group"
+		on:click={handleImportSettingsButtonClicked}
 		><svg
 			fill="white"
 			version="1.1"
@@ -107,6 +117,12 @@
 				/>
 			</g>
 		</svg>
+
+		<p
+			class="absolute xl:-left-1/2 xl:-translate-x-2/3 w-40 bg-[#161313] rounded-xl top-6 hidden group-hover:block"
+		>
+			Import subtitles settings
+		</p>
 	</button>
 
 	<h2 class="text-lg font-bold text-center">Subtitles Settings</h2>
