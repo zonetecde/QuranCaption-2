@@ -12,6 +12,7 @@
 	import {
 		GITHUB_API_URL as GITHUB_API_URL,
 		GITHUB_DOWNLOAD_LINK,
+		GITHUB_REPO_LINK,
 		SOFTWARE_VERSION
 	} from '$lib/ext/GlobalVariables';
 	import { newUpdateAvailable } from '$lib/stores/LayoutStore';
@@ -86,7 +87,7 @@
 	}
 </script>
 
-<div class="p-5 h-screen flex items-center justify-center">
+<div class="p-5 h-screen flex items-center justify-center relative">
 	<div class="xl:w-4/6 w-full">
 		<h1 class="text-4xl text-center schibstedGrotesk">QuranCaption 2</h1>
 
@@ -142,6 +143,31 @@
 			</div>
 		</div>
 	</div>
+
+	<p class="absolute bottom-3">
+		Made by <button
+			class="text-blue-300"
+			on:click={() => {
+				openLink('https://www.rayanestaszewski.fr');
+			}}>Rayane STASZEWSKI</button
+		>
+		•
+		<button
+			class="text-blue-300"
+			on:click={() => {
+				openLink(GITHUB_REPO_LINK);
+			}}>GitHub repo</button
+		>
+		•
+		<button
+			class="text-blue-300"
+			on:click={() => {
+				openLink('https://buymeacoffee.com/zonetecde');
+			}}>Buy Me A Coffee</button
+		>
+		•
+		{SOFTWARE_VERSION.replace('v', 'Version ')}
+	</p>
 </div>
 
 {#if createProjectVisibility}
