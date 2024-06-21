@@ -20,7 +20,7 @@
 		if (lastSubtitle) {
 			if (lastSubtitle.surah === -1 || lastSubtitle.verse === -1) return;
 			verseNumber = lastSubtitle.verse;
-			verseNumberInInput = lastSubtitle.surah;
+			verseNumberInInput = lastSubtitle.verse;
 			surahNumber = lastSubtitle.surah;
 		}
 	});
