@@ -77,7 +77,7 @@
 			}
 		},
 		"security": {
-			"csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'"
+			"csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.quranwbw.com https://cdn.jsdelivr.net"
 		},
 		"updater": {
 			"active": false
