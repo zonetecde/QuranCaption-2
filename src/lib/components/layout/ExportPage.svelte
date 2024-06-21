@@ -36,7 +36,7 @@
 {#if !fullScreen}
 	<section class="absolute inset-20">
 		<div class="w-full h-full flex items-center justify-center">
-			<div class="w-[500px] h-[400px] bg-[#2f2d35] p-3 rounded-lg border-2 border-[#19181d]">
+			<div class="w-[500px] h-[450px] bg-[#2f2d35] p-3 rounded-lg border-2 border-[#19181d]">
 				<h1 class="text-center text-lg">How to save the video :</h1>
 				<br />
 				<p style="color: white;">
@@ -68,7 +68,18 @@
 					to start recording, and press it again to stop recording
 				</p>
 
-				<h1 class="mt-10 text-center text-xl font-bold">Thank you for using QuranCaption 2 !</h1>
+				<h1 class="mt-10 text-center text-xl font-bold">
+					Thank you for using QuranCaption 2 !<br /><span class="text-base font-sans">
+						You can make a donation by clicking
+						<button
+							class="text-blue-400"
+							on:click={() => {
+								openLink('https://ko-fi.com/zonetecde');
+							}}>here</button
+						>
+						{'<3'}
+					</span>
+				</h1>
 			</div>
 		</div>
 	</section>

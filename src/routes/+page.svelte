@@ -163,7 +163,7 @@
 			class="text-blue-300"
 			on:click={() => {
 				openLink('https://ko-fi.com/zonetecde');
-			}}>Buy Me A Coffee</button
+			}}>Make a donation</button
 		>
 		•
 		{SOFTWARE_VERSION.replace('v', 'Version ')}
