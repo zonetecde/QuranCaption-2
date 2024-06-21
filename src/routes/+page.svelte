@@ -93,15 +93,19 @@
 		<div class="mt-10">
 			<p class="text-xl pl-3">Recent project :</p>
 
-			<div class="mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-x-4">
-				{#each userProjects as project}
-					<div class="w-56 h-full bg-[#2e2f36] rounded-xl relative">
+			<div
+				class="mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto"
+			>
+				{#each userProjects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
+					<div class="w-56 h-full bg-[#2e2f36] rounded-xl relative group">
 						<button class="flex flex-col p-3" on:click={() => openProject(project)}>
 							<p>{project.name}</p>
-							<p class="mt-14">{new Date(project.createdAt).toLocaleString()}</p>
+							<p class="absolute bottom-1 text-sm">
+								{new Date(project.createdAt).toLocaleString()}
+							</p>
 						</button>
 						<button
-							class="w-6 h-6 absolute top-1 right-1 bg-red-200 rounded-full p-1"
+							class="w-6 h-6 absolute top-1 right-1 bg-red-200 rounded-full p-1 hidden group-hover:block"
 							on:click={(e) => handleDelProject(project.id)}
 						>
 							<svg

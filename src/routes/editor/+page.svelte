@@ -14,7 +14,6 @@
 		// the slug is what after the ? in the URL
 		const slug = window.location.search.split('?')[1];
 
-		console.log(slug);
 		const project = getProjectById(slug);
 
 		if (project === undefined) {
@@ -23,6 +22,7 @@
 			return;
 		}
 
+		project.updatedAt = new Date(); // Update the last opened date
 		cursorPosition.set(project.projectSettings.cursorPosition);
 		zoom.set(project.projectSettings.zoom);
 
