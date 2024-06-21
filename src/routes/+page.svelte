@@ -36,6 +36,14 @@
 				newUpdateAvailable.set(true);
 			}
 		}
+
+		//@ts-ignore
+		kofiWidgetOverlay.draw('zonetecde', {
+			type: 'floating-chat',
+			'floating-chat.donateButton.text': 'Support me',
+			'floating-chat.donateButton.background-color': '#00b9fe',
+			'floating-chat.donateButton.text-color': '#fff'
+		});
 	});
 
 	/**
@@ -95,10 +103,11 @@
 			<p class="text-xl pl-3">Recent project :</p>
 
 			<div
-				class="mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto"
+				class={'mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto ' +
+					(userProjects.length >= 4 ? 'justify-evenly h-80' : '')}
 			>
 				{#each userProjects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
-					<div class="w-56 h-full bg-[#2e2f36] rounded-xl relative group">
+					<div class="w-56 h-32 bg-[#2e2f36] rounded-xl relative group">
 						<button class="flex flex-col p-3" on:click={() => openProject(project)}>
 							<p>{project.name}</p>
 							<p class="absolute bottom-1 text-sm">

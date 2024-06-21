@@ -77,7 +77,7 @@
 			}
 		},
 		"security": {
-			"csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.quranwbw.com https://cdn.jsdelivr.net https://rayanestaszewski.fr"
+			"csp": "default-src *; media-src *; style-src * 'unsafe-inline'; connect-src *"
 		},
 		"updater": {
 			"active": false

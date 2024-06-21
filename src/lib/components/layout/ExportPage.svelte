@@ -25,6 +25,7 @@
 
 	function toggleFullScreen() {
 		fullScreen = !fullScreen;
+
 	}
 </script>
 
