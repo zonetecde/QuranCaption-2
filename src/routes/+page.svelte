@@ -162,7 +162,7 @@
 		<button
 			class="text-blue-300"
 			on:click={() => {
-				openLink('https://buymeacoffee.com/zonetecde');
+				openLink('https://ko-fi.com/zonetecde');
 			}}>Buy Me A Coffee</button
 		>
 		•
