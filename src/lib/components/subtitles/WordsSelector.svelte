@@ -156,11 +156,33 @@
 		let lastSubtitleEndTime =
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
+		// Réajuste la position du curseur si on est sur la vidéo
+		const videoPreviewElement = document.getElementById('video-preview') as HTMLVideoElement;
+		if (videoPreviewElement) {
+			// Vérifie que c'est la seul vidéo dans la timeline (sinon on prend la pos du curseur)
+			if ($currentProject.timeline.videosTracks[0].clips.length === 1) {
+				cursorPosition.set(videoPreviewElement.currentTime * 1000);
+			} else {
+				// Si il y a plusieurs vidéos ont doit aussi ajouter la durée de toutes les vidéos d'avant
+				let totalDuration = 0;
+				for (let i = 0; i < $currentProject.timeline.videosTracks[0].clips.length; i++) {
+					const video = $currentProject.timeline.videosTracks[0].clips[i];
+					if (!videoPreviewElement.classList.contains(video.id)) {
+						totalDuration += video.duration;
+					} else {
+						break;
+					}
+				}
+				cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
+			}
+		}
+
 		// Vérifie qu'on est pas au 0
 		if ($cursorPosition < 100) {
 			toast.error('Jouer la vidéo pour ajouter un sous-titre');
 			return;
 		}
+
 		// Vérifie que la fin > début
 		// TODO 2
 		if (lastSubtitleEndTime >= $cursorPosition) {

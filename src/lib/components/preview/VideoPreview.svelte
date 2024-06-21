@@ -162,7 +162,8 @@
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
 					<video
-						class="bg-red-black w-full h-full object-contain"
+						class={'bg-red-black w-full h-full object-contain ' + currentVideo.id}
+						id="video-preview"
 						style="
 							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$videoDimensions.width *
 							($currentProject.projectSettings.translateVideoX / 100)}px);
