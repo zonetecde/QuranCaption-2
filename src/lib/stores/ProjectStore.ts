@@ -61,7 +61,7 @@ export function createBlankProject(name: string): Project {
 				creatorText: {
 					outline: true,
 					enable: true,
-					text: 'QuranCaption 2',
+					text: 'QuranCaption',
 					fontFamily: 'Verdana',
 					fontSize: 60,
 					verticalPosition: 75,

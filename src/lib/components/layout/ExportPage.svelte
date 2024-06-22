@@ -45,7 +45,7 @@
 				</p>
 				<p style="color: white;">
 					2. Add a new Source by selecting <code style="color: yellow;">Record a window</code> and choosing
-					QuranCaption 2
+					QuranCaption
 				</p>
 				<p style="color: white;">
 					3. In OBS, go to File -> Settings -> Keyboard Shortcuts and set the <code
@@ -56,7 +56,7 @@
 					<code style="color: yellow;">CTRL + K</code>
 				</p>
 				<p style="color: white;">
-					4. Press <code style="color: yellow;">F11</code> in QuranCaption 2 to enter full screen mode
+					4. Press <code style="color: yellow;">F11</code> in QuranCaption to enter full screen mode
 				</p>
 				<p style="color: white;">
 					5. Adjust the video size in OBS (hold ALT if you need to crop the recording size)
@@ -67,7 +67,7 @@
 				</p>
 
 				<h1 class="mt-10 text-center text-xl font-bold">
-					Thank you for using QuranCaption 2 !<br /><span class="text-base font-sans">
+					Thank you for using QuranCaption !<br /><span class="text-base font-sans">
 						You can make a donation by clicking
 						<button
 							class="text-blue-400"

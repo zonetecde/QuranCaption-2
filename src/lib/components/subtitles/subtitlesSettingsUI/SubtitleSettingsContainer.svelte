@@ -14,7 +14,7 @@
 
 	async function handleImportSettingsButtonClicked() {
 		// import subtitles settings
-		const content = await importAndReadFile('QuranCaption 2 Subtitles Settings (*.qc2)');
+		const content = await importAndReadFile('QuranCaption Subtitles Settings (*.qc2)');
 
 		if (content) {
 			const subtitlesSettings = JSON.parse(content);

@@ -80,7 +80,7 @@
 	<input
 		type="text"
 		class="bg-transparent border-2 border-slate-500 p-1 rounded-lg w-full text-sm"
-		placeholder="QuranCaption 2"
+		placeholder="QuranCaption"
 		bind:value={$currentProject.projectSettings.globalSubtitlesSettings.creatorText.text}
 	/>
 
