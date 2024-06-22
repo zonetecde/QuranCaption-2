@@ -1,4 +1,4 @@
-import type Asset from '$lib/classes/Asset';
+import type Asset from '$lib/models/Asset';
 import type Project from '$lib/models/Project';
 import { currentProject } from '$lib/stores/ProjectStore';
 import { get } from 'svelte/store';

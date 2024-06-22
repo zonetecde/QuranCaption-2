@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SubtitleClip } from '$lib/classes/Timeline';
+	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { calculateFontSize, latinNumberToArabic } from '$lib/ext/Utilities';
 
 	import { currentPage, showSubtitlesPadding, videoDimensions } from '$lib/stores/LayoutStore';

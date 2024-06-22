@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { secondsToHHMMSS, type SubtitleClip } from '$lib/classes/Timeline';
+	import { secondsToHHMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';

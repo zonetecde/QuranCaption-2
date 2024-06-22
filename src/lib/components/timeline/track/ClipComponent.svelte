@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type Asset from '$lib/classes/Asset';
-	import type { Clip, Track } from '$lib/classes/Timeline';
+	import type Asset from '$lib/models/Asset';
+	import type { Clip, Track } from '$lib/models/Timeline';
 	import { generateBlueColor, generatePinkColor } from '$lib/ext/Color';
 	import { trimDialog } from '$lib/stores/LayoutStore';
 	import { zoom } from '$lib/stores/TimelineStore';

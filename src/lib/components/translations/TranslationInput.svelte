@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { milisecondsToMMSS, type SubtitleClip } from '$lib/classes/Timeline';
+	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import { GPT_URL } from '$lib/ext/PrivateVariable';
 	import { isFetchingIA, onlyShowVersesThatNeedTranslationReview } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';

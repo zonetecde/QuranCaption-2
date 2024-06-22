@@ -9,7 +9,7 @@
 	} from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
-	import { secondsToHHMMSS } from '$lib/classes/Timeline';
+	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
@@ -87,7 +87,7 @@
 
 					<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 					<button
-						class="w-full h-6 absolute top-0 z-10 select-none"
+						class="w-full h-6 absolute top-0 z-10 select-none outline-none"
 						on:click={(e) => moveCursorToPosition(e, i)}
 						on:mousemove={(e) => {
 							if (e.buttons !== 1) return;

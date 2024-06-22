@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { secondsToHHMMSS } from '$lib/classes/Timeline';
+	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getLastClipEnd } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';

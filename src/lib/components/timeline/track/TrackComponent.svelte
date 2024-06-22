@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SubtitleTrack, Track } from '$lib/classes/Timeline';
+	import type { SubtitleTrack, Track } from '$lib/models/Timeline';
 	import LeftPart from './LeftPart.svelte';
 	import { zoom } from '$lib/stores/TimelineStore';
 	import { getAssetFromId } from '$lib/ext/Id';

@@ -3,10 +3,10 @@
 	import IconButton from '../common/IconButton.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import AssetViewer from './AssetViewer.svelte';
-	import { addAssets } from '$lib/classes/Asset';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { assets } from '$app/paths';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
+	import { addAssets } from '$lib/models/Asset';
 
 	function uploadAssets() {
 		open({

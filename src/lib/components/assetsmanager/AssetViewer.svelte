@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type Asset from '$lib/classes/Asset';
-	import { removeAsset } from '$lib/classes/Asset';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import Id from '$lib/ext/Id';
+	import { removeAsset } from '$lib/models/Asset';
+	import type Asset from '$lib/models/Asset';
 
 	export let asset: Asset;
 

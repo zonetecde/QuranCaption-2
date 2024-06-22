@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { SubtitleClip } from '$lib/classes/Timeline';
+	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { onMount } from 'svelte';
 	import { zoom } from '$lib/stores/TimelineStore';
 

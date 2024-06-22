@@ -3,7 +3,7 @@
 -->
 
 <script lang="ts">
-	import type Asset from '$lib/classes/Asset';
+	import type Asset from '$lib/models/Asset';
 	import { zoom } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 

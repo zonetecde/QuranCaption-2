@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { milisecondsToMMSS } from '$lib/classes/Timeline';
+	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 

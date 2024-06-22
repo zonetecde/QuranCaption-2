@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { milisecondsToMMSS, type SubtitleClip } from '$lib/classes/Timeline';
+	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 	import { onMount } from 'svelte';
