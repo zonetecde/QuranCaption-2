@@ -102,7 +102,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 				>
 					{#if !currentSubtitle.isSilence}
 						{#if subtitleLanguage === 'arabic'}
-							{currentSubtitle.text}
+							{currentSubtitle.text.trim()}
 							{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse}
 								{latinNumberToArabic(currentSubtitle.verse.toString())}
 							{/if}
@@ -110,7 +110,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 							{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0}
 								{currentSubtitle.verse}.
 							{/if}
-							{currentSubtitle.translations[subtitleLanguage]}
+							{currentSubtitle.translations[subtitleLanguage].trim()}
 						{/if}
 					{/if}
 				</p>
