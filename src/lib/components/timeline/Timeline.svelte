@@ -66,6 +66,7 @@
 
 <div
 	class={'overflow-x-scroll h-full ' + (useInPlayer ? 'overflow-y-hidden' : '')}
+	id="timeline"
 	on:wheel={handleMouseWheelWheeling}
 >
 	<div class="h-full bg-[#1f1d1d] relative w-max">
@@ -100,6 +101,7 @@
 			<!-- The `- 1` in the calcul is because the cursor is 2px thick -->
 			<div
 				class="absolute top-0 left-24 lg:left-40 h-full w-0.5 bg-[#fd322b] z-20"
+				id="cursor"
 				style="transform: translateX({($cursorPosition / 1000) * $zoom - 1}px);"
 			></div>
 		</div>

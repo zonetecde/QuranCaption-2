@@ -7,7 +7,8 @@
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
 		getLastClipEnd,
-		getTimelineTotalDuration
+		getTimelineTotalDuration,
+		zoom
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
@@ -140,7 +141,14 @@
 	function playVideo() {
 		const interval = setInterval(() => {
 			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
+				// Réajuste la position du curseur pour éviter des problèmes de sync
 				reajustCursorPosition();
+
+				// Si on arrive à la fin de la timeline, on scroll un peu pour voir la fin
+				if ($cursorPosition > 5000 && $cursorPosition % 1000 < 300) {
+					// @ts-ignore
+					document.getElementById('timeline').scrollLeft += 1;
+				}
 
 				// Play the video
 				if (videoComponent) videoComponent.play();
