@@ -106,6 +106,9 @@
 	 * @param event Événement de touche clavier
 	 */
 	function onKeyDown(event: KeyboardEvent) {
+		// Check if the user is typing in an input
+		if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+
 		if (event.key === 'ArrowUp') {
 			selectNextWord();
 		} else if (event.key === 'ArrowDown') {
