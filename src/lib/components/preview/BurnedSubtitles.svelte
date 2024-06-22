@@ -100,17 +100,19 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 							: `font-family: ${$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily}`
 					}`}
 				>
-					{#if !currentSubtitle.isSilence}
-						{#if subtitleLanguage === 'arabic'}
-							{currentSubtitle.text.trim()}
-							{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse}
-								{latinNumberToArabic(currentSubtitle.verse.toString())}
+					{#if currentSubtitle && currentSubtitle.text}
+						{#if !currentSubtitle.isSilence}
+							{#if subtitleLanguage === 'arabic'}
+								{currentSubtitle.text}
+								{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse}
+									{latinNumberToArabic(currentSubtitle.verse.toString())}
+								{/if}
+							{:else if currentSubtitle.translations !== undefined}
+								{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0}
+									{currentSubtitle.verse}.
+								{/if}
+								{currentSubtitle.translations[subtitleLanguage]}
 							{/if}
-						{:else if currentSubtitle.translations !== undefined}
-							{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0}
-								{currentSubtitle.verse}.
-							{/if}
-							{currentSubtitle.translations[subtitleLanguage].trim()}
 						{/if}
 					{/if}
 				</p>

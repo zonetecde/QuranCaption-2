@@ -49,22 +49,95 @@
 			subtitle.verse
 		);
 
+		changeText(subtitle.id, translation);
+	}
+
+	function changeText(subtitleId: string, translation: string) {
+		const subtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
+			(clip) => clip.id === subtitleId
+		);
+
+		if (!subtitle) return;
+
 		const textarea = document.getElementById(
-			'textarea-translation-' + subtitle.id + '-' + translation
+			'textarea-translation-' + subtitleId + '-' + translation
 		);
 		textarea!.textContent = subtitle.translations[translation];
 	}
 
-	function handleValidation(e: any) {
-		// Mets la même traduction à toutes les inputs qui ont le même texte arabe et qui viennent après ce sous-titre
+	/**
+	 * Handles the validation of a translation input.
+	 *
+	 * @param {any} e - The event object.
+	 * @param {string} translationId - The ID of the translation.
+	 */
+	async function handleValidation(e: any, translationId: string) {
+		// Trim the text of this subtitle
+		subtitle.translations[translationId] = subtitle.translations[translationId].trim();
+		changeText(subtitle.id, translationId);
+
+		// Trim all subsequent subtitles that come after the Arabic text of the current subtitle
+		// to facilitate the translator's work
 		for (
 			let i = subtitleIndex + 1;
 			i < $currentProject.timeline.subtitlesTracks[0].clips.length;
 			i++
 		) {
-			const clip = $currentProject.timeline.subtitlesTracks[0].clips[i];
-			if (clip.text === subtitle.text) {
-				clip.translations = subtitle.translations;
+			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
+
+			try {
+				if (element.verse === subtitle.verse && element.surah === subtitle.surah) {
+					// Check if the translation has not been modified
+					if (
+						(await downloadTranslationForVerse(translationId, element.surah, element.verse)) ===
+						element.translations[translationId]
+					) {
+						if (subtitle.lastWordIndexInVerse + 1 === element.firstWordIndexInVerse) {
+							// Get the last translation of this verse, just before the Arabic text of this subtitle
+							let lastTranslations = $currentProject.timeline.subtitlesTracks[0].clips
+								.slice(0, i)
+								.filter(
+									(clip) =>
+										clip.verse === subtitle.verse &&
+										clip.surah === subtitle.surah &&
+										clip.firstWordIndexInVerse < subtitle.firstWordIndexInVerse
+								);
+
+							// Remove duplicates of translations based on firstWordIndexInVerse and lastWordIndexInVerse
+							// If not done, some translations will be repeated and the offset will be wrong
+							const distinct = Array.from(
+								new Set(lastTranslations.map((a) => a.firstWordIndexInVerse))
+							).map((firstWordIndexInVerse) => {
+								return lastTranslations.find(
+									(a) => a.firstWordIndexInVerse === firstWordIndexInVerse
+								);
+							});
+
+							// @ts-ignore
+							lastTranslations = distinct;
+
+							// Calculate the offset of the text to remove
+							let sum = 0;
+							for (const translation of lastTranslations) {
+								sum += translation.translations[translationId].length + 1;
+							}
+
+							// Remove the already-translated part of the text
+							element.translations[translationId] = element.translations[translationId].substring(
+								subtitle.translations[translationId].length + sum
+							);
+
+							// Change the text of the textarea
+							changeText(element.id, translationId);
+						} else if (element.text === subtitle.text) {
+							// Copy the translation from the current subtitle because it is the same text
+							element.translations[translationId] = subtitle.translations[translationId];
+							changeText(element.id, translationId);
+						}
+					}
+				}
+			} catch (e) {
+				// Something went wrong
 			}
 		}
 
@@ -72,17 +145,17 @@
 		// // @ts-ignore
 		// const index = Array.from(textareas).indexOf(e.target);
 		// if (index < textareas.length - 1) {
-		// 	// @ts-ignore
-		// 	textareas[index + 1].focus();
-		// 	// Met le curseur à la fin du texte
-		// 	const range = document.createRange();
-		// 	const sel = window.getSelection();
-		// 	range.setStart(textareas[index + 1], 1);
-		// 	range.collapse(true);
-		// 	// @ts-ignore
-		// 	sel.removeAllRanges();
-		// 	// @ts-ignore
-		// 	sel.addRange(range);
+		//   // @ts-ignore
+		//   textareas[index + 1].focus();
+		//   // Set the cursor at the end of the text
+		//   const range = document.createRange();
+		//   const sel = window.getSelection();
+		//   range.setStart(textareas[index + 1], 1);
+		//   range.collapse(true);
+		//   // @ts-ignore
+		//   sel.removeAllRanges();
+		//   // @ts-ignore
+		//   sel.addRange(range);
 		// }
 	}
 
@@ -234,7 +307,7 @@
 								// Si `enter` est pressé, on va à la prochaine textarea
 								if (e.key === 'Enter') {
 									e.preventDefault();
-									handleValidation(e);
+									handleValidation(e, translationId);
 								}
 							}}
 						>
