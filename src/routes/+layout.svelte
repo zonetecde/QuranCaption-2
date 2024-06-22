@@ -11,10 +11,12 @@
 		getTimelineTotalDuration
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import { currentPage, getFonts } from '$lib/stores/LayoutStore';
+	import { currentPage, fullScreenPreview, getFonts } from '$lib/stores/LayoutStore';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
+			if ($currentProject === undefined) return;
+
 			if (e.key === 's' && e.ctrlKey) {
 				e.preventDefault();
 				updateUsersProjects($currentProject);
@@ -53,6 +55,12 @@
 					cursorPosition.update((value) => value + 3000);
 					if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
 				}
+			}
+
+			// if key is F11, toggle full screen
+			else if (e.key === 'F11') {
+				if ($currentPage === 'Video editor' || $currentPage === 'Export')
+					fullScreenPreview.set(!$fullScreenPreview);
 			}
 		};
 

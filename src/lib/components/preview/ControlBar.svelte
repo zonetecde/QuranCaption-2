@@ -51,5 +51,7 @@
 				</svg>
 			{/if}
 		</button>
+
+		<p class="absolute right-3 opacity-50">Press F11 to toggle full screen</p>
 	</div>
 </section>

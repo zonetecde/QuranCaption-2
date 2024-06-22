@@ -4,36 +4,29 @@
 	import Timeline from '../timeline/Timeline.svelte';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
-
-	let fullScreen: boolean = false;
+	import { fullScreenPreview } from '$lib/stores/LayoutStore';
 
 	onMount(() => {
 		document.onkeydown = onKeyDown;
 	});
 
 	function onKeyDown(key: any) {
-		// if key is F11
-		if (key.keyCode === 122) {
-			toggleFullScreen();
-		}
-
 		// if ctrl + k, play the video and start obs recording
 		if (key.ctrlKey && key.keyCode === 75) {
 			spaceBarPressed.set(true);
 		}
 	}
-
-	function toggleFullScreen() {
-		fullScreen = !fullScreen;
-	}
 </script>
 
-<div class={fullScreen ? 'absolute inset-0' : 'w-full h-full'}>
-	<VideoPreview hideControls={fullScreen} />
+<div class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'w-full h-full'}>
+	<VideoPreview hideControls={$fullScreenPreview} />
 </div>
-<div class={'-mt-16 ' + (fullScreen ? 'invisible' : '')}><Timeline useInPlayer={true} /></div>
 
-{#if !fullScreen}
+<div class={'-mt-16 ' + ($fullScreenPreview ? 'invisible' : '')}>
+	<Timeline useInPlayer={!$fullScreenPreview} />
+</div>
+
+{#if !$fullScreenPreview}
 	<section class="absolute inset-20">
 		<div class="w-full h-full flex items-center justify-center">
 			<div

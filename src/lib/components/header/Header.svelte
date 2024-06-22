@@ -85,7 +85,9 @@
 
 	{#each pages as page, i}
 		<button
-			class="flex items-center gap-x-2 {$currentPage === page ? 'cursor-default' : 'opacity-35'}"
+			class="flex items-center gap-x-2 outline-none {$currentPage === page
+				? 'cursor-default'
+				: 'opacity-35'}"
 			on:click={() => handlePageChange(page)}
 		>
 			<img src="/icons/{i + 1}.png" alt="1" class="h-10" />

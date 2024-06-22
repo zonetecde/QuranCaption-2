@@ -3,13 +3,7 @@
 	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import {
-		cursorPosition,
-		forceUpdateCurrentPlayingMedia,
-		getLastClipEnd,
-		getTimelineTotalDuration,
-		zoom
-	} from '$lib/stores/TimelineStore';
+	import { cursorPosition, forceUpdateCurrentPlayingMedia } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
@@ -18,7 +12,7 @@
 	import ControlBar from './ControlBar.svelte';
 	import { getDisplayedVideoSize, reajustCursorPosition } from '$lib/ext/Utilities';
 	import Page from '../../../routes/+page.svelte';
-	import { videoDimensions } from '$lib/stores/LayoutStore';
+	import { fullScreenPreview, videoDimensions } from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
 
@@ -34,6 +28,7 @@
 	});
 
 	$: $currentProject.projectSettings.subtitlesTracksSettings, calculateVideoDimensions();
+	$: $fullScreenPreview, calculateVideoDimensions();
 
 	async function calculateVideoDimensions() {
 		// tant que la vidéo n'a pas chargé

@@ -4,7 +4,7 @@
 	import Timeline from '../timeline/Timeline.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleSettings from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
-	import { videoEditorSelectedTab } from '$lib/stores/LayoutStore';
+	import { fullScreenPreview, videoEditorSelectedTab } from '$lib/stores/LayoutStore';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-2-template">
@@ -39,8 +39,8 @@
 		<!-- Editor -->
 		<section class="w-full divide-y-4 divide-[#413f3f]">
 			<!-- Video preview -->
-			<section class="h-[65%] max-h-[65%]">
-				<VideoPreview />
+			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'h-[65%] max-h-[65%]'}>
+				<VideoPreview hideControls={$fullScreenPreview} />
 			</section>
 
 			<!-- Timeline -->

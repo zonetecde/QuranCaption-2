@@ -4,7 +4,8 @@
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
-	import { currentPage, trimDialog } from '$lib/stores/LayoutStore';
+	import VideoPreview from '$lib/components/preview/VideoPreview.svelte';
+	import { currentPage, fullScreenPreview, trimDialog } from '$lib/stores/LayoutStore';
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
 	import { cursorPosition, zoom } from '$lib/stores/TimelineStore';
