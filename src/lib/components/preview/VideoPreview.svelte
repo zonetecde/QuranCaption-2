@@ -3,7 +3,7 @@
 	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { cursorPosition, forceUpdateCurrentPlayingMedia } from '$lib/stores/TimelineStore';
+	import { cursorPosition, forceUpdateCurrentPlayingMedia, zoom } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
@@ -140,7 +140,7 @@
 				reajustCursorPosition();
 
 				// Si on arrive à la fin de la timeline, on scroll un peu pour voir la fin
-				if ($cursorPosition > 5000 && $cursorPosition % 1000 < 300) {
+				if ($cursorPosition > 5000 && ($cursorPosition * $zoom) % 1000 < 200) {
 					// @ts-ignore
 					document.getElementById('timeline').scrollLeft += 1;
 				}
