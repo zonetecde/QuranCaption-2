@@ -11,9 +11,12 @@
 	});
 
 	function onKeyDown(key: any) {
-		// if ctrl + k, play the video and start obs recording
+		// If the user presses CTRL + K, we want to start the recording (obs hotkey)
 		if (key.ctrlKey && key.keyCode === 75) {
-			spaceBarPressed.set(true);
+			// In Xms to wait for OBS to start recording
+			setTimeout(() => {
+				spaceBarPressed.set(true);
+			}, 700);
 		}
 	}
 </script>
