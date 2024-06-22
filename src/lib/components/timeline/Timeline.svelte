@@ -65,11 +65,11 @@
 </script>
 
 <div
-	class={'overflow-x-scroll h-full ' + (useInPlayer ? 'overflow-y-hidden' : '')}
+	class={'overflow-x-scroll h-full ' + (useInPlayer ? 'overflow-y-hidden flipped' : '')}
 	id="timeline"
 	on:wheel={handleMouseWheelWheeling}
 >
-	<div class="h-full bg-[#1f1d1d] relative w-max">
+	<div class={'h-full bg-[#1f1d1d] relative w-max ' + (useInPlayer ? 'content' : '')}>
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
 			{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}
 				<div
@@ -123,3 +123,12 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.flipped,
+	.content {
+		transform: rotateX(180deg);
+		-ms-transform: rotateX(180deg); /* IE 9 */
+		-webkit-transform: rotateX(180deg); /* Safari and Chrome */
+	}
+</style>

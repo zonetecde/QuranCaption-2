@@ -25,19 +25,20 @@
 
 	function toggleFullScreen() {
 		fullScreen = !fullScreen;
-
 	}
 </script>
 
 <div class={fullScreen ? 'absolute inset-0' : 'w-full h-full'}>
 	<VideoPreview hideControls={fullScreen} />
 </div>
-<div class="-mt-16"><Timeline useInPlayer={true} /></div>
+<div class={'-mt-16 ' + (fullScreen ? 'invisible' : '')}><Timeline useInPlayer={true} /></div>
 
 {#if !fullScreen}
 	<section class="absolute inset-20">
 		<div class="w-full h-full flex items-center justify-center">
-			<div class="w-[500px] h-[450px] bg-[#2f2d35] p-3 rounded-lg border-2 border-[#19181d]">
+			<div
+				class="w-[500px] h-[450px] bg-[#2f2d35] bg-opacity-90 hover:bg-opacity-100 duration-100 p-3 rounded-lg border-2 border-[#19181d]"
+			>
 				<h1 class="text-center text-lg">How to save the video :</h1>
 				<br />
 				<p style="color: white;">
