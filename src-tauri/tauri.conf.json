@@ -7,7 +7,7 @@
 		"distDir": "../build"
 	},
 	"package": {
-		"productName": "QuranCaption",
+		"productName": "Quran Caption",
 		"version": "0.4.0"
 	},
 	"tauri": {
@@ -59,7 +59,7 @@
 				"icons/icon.ico"
 			],
 			"identifier": "com.rayanestaszewski.fr",
-			"longDescription": "QuranCaption is a software that allows you to create videos of Quran recitation with subtitles in multiple languages and, most importantly, with ease.",
+			"longDescription": "Quran Caption is a software that allows you to create videos of Quran recitation with subtitles in multiple languages and, most importantly, with ease.",
 			"macOS": {
 				"entitlements": null,
 				"exceptionDomain": "",
@@ -87,7 +87,7 @@
 				"fullscreen": false,
 				"height": 768,
 				"resizable": true,
-				"title": "QuranCaption",
+				"title": "Quran Caption",
 				"width": 1024,
 				"minWidth": 1024,
 				"minHeight": 768

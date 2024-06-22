@@ -81,7 +81,7 @@
 	 * Handle import project button clicked
 	 */
 	async function handleImportProjectButtonClicked() {
-		const content = await importAndReadFile('QuranCaption Project (*.qc2)');
+		const content = await importAndReadFile('Quran Caption Project (*.qc2)');
 
 		if (content) {
 			const project = JSON.parse(content);
@@ -97,7 +97,7 @@
 
 <div class="p-5 h-screen flex items-center justify-center relative">
 	<div class="xl:w-4/6 w-full">
-		<h1 class="text-4xl text-center schibstedGrotesk">QuranCaption</h1>
+		<h1 class="text-4xl text-center schibstedGrotesk">Quran Caption</h1>
 
 		<div class="mt-10">
 			<p class="text-xl pl-3">Recent project :</p>
@@ -239,7 +239,7 @@
 				</svg>
 			</button>
 
-			<p class="self-start text-center">A new version of QuranCaption is available</p>
+			<p class="self-start text-center">A new version of Quran Caption is available</p>
 
 			<button
 				class="w-1/2 h-10 bg-[#186435] hover:bg-[#163a23] duration-150 text-white mt-4 rounded-md"
