@@ -91,6 +91,7 @@ export function reajustCursorPosition() {
 					break;
 				}
 			}
+
 			cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
 		}
 	}
