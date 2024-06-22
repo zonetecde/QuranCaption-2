@@ -31,18 +31,20 @@
 	$: $fullScreenPreview, calculateVideoDimensions();
 
 	async function calculateVideoDimensions() {
-		// tant que la vidéo n'a pas chargé
-		while (videoComponent === undefined || videoComponent.videoWidth === 0) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
+		setTimeout(async () => {
+			// tant que la vidéo n'a pas chargé
+			while (videoComponent === undefined || videoComponent.videoWidth === 0) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
 
-		if (videoComponent) {
-			const _videoDimensions = getDisplayedVideoSize(videoComponent);
-			videoDimensions.set({
-				width: _videoDimensions.displayedWidth,
-				height: _videoDimensions.displayedHeight
-			});
-		}
+			if (videoComponent) {
+				const _videoDimensions = getDisplayedVideoSize(videoComponent);
+				videoDimensions.set({
+					width: _videoDimensions.displayedWidth,
+					height: _videoDimensions.displayedHeight
+				});
+			}
+		}, 1);
 	}
 
 	$: currentTime = secondsToHHMMSS($cursorPosition / 1000); // [0] = HH:MM:SS, [1] = milliseconds
