@@ -2,6 +2,8 @@ import { videoDimensions } from '$lib/stores/LayoutStore';
 import { invoke } from '@tauri-apps/api/tauri';
 import { get } from 'svelte/store';
 import { open } from '@tauri-apps/api/dialog';
+import { currentProject } from '$lib/stores/ProjectStore';
+import { cursorPosition } from '$lib/stores/TimelineStore';
 
 /**
  * Récupère la taille de la vidéo affichée dans le composant.
@@ -70,4 +72,26 @@ export async function importAndReadFile(fileName: string): Promise<string | null
 	}
 
 	return null;
+}
+
+export function reajustCursorPosition() {
+	const videoPreviewElement = document.getElementById('video-preview') as HTMLVideoElement;
+	if (videoPreviewElement) {
+		// Vérifie que c'est la seul vidéo dans la timeline (sinon on prend la pos du curseur)
+		if (get(currentProject).timeline.videosTracks[0].clips.length === 1) {
+			cursorPosition.set(videoPreviewElement.currentTime * 1000);
+		} else {
+			// Si il y a plusieurs vidéos ont doit aussi ajouter la durée de toutes les vidéos d'avant
+			let totalDuration = 0;
+			for (let i = 0; i < get(currentProject).timeline.videosTracks[0].clips.length; i++) {
+				const video = get(currentProject).timeline.videosTracks[0].clips[i];
+				if (!videoPreviewElement.classList.contains(video.id)) {
+					totalDuration += video.duration;
+				} else {
+					break;
+				}
+			}
+			cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
+		}
+	}
 }

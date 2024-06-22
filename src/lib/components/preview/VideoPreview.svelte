@@ -15,7 +15,7 @@
 	import BurnedSubtitles from './BurnedSubtitles.svelte';
 	import BackgroundOverlay from './BackgroundOverlay.svelte';
 	import ControlBar from './ControlBar.svelte';
-	import { getDisplayedVideoSize } from '$lib/ext/Utilities';
+	import { getDisplayedVideoSize, reajustCursorPosition } from '$lib/ext/Utilities';
 	import Page from '../../../routes/+page.svelte';
 	import { videoDimensions } from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
@@ -140,7 +140,8 @@
 	function playVideo() {
 		const interval = setInterval(() => {
 			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
-				$cursorPosition += 10;
+				reajustCursorPosition();
+
 				// Play the video
 				if (videoComponent) videoComponent.play();
 				if (audioComponent) audioComponent.play();
