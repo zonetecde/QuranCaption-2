@@ -5,18 +5,52 @@
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import { fullScreenPreview } from '$lib/stores/LayoutStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
 	onMount(() => {
 		document.onkeydown = onKeyDown;
 	});
 
+	let mediaRecorder: MediaRecorder;
+
 	function onKeyDown(key: any) {
 		// If the user presses CTRL + K, we want to start the recording (obs hotkey)
 		if (key.ctrlKey && key.keyCode === 75) {
 			// In Xms to wait for OBS to start recording
-			setTimeout(() => {
+			if ($isPreviewPlaying) {
 				spaceBarPressed.set(true);
-			}, 700);
+				mediaRecorder.stop();
+			} else {
+				setTimeout(() => {}, 700);
+
+				// Using webrtc, start recording the whole tab with the audio
+				navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then((stream) => {
+					spaceBarPressed.set(true);
+
+					mediaRecorder = new MediaRecorder(stream);
+					const chunks: Blob[] = [];
+
+					mediaRecorder.ondataavailable = (e) => {
+						if (e.data.size > 0) {
+							chunks.push(e.data);
+							console.log(chunks);
+						}
+					};
+
+					mediaRecorder.onstop = () => {
+						console.log('Recording stopped');
+						const blob = new Blob(chunks, { type: 'video/webm' });
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement('a');
+						a.href = url;
+						a.download = 'quran_caption_recording.webm';
+						a.click();
+						URL.revokeObjectURL(url);
+					};
+
+					mediaRecorder.start();
+				});
+			}
 		}
 	}
 </script>
