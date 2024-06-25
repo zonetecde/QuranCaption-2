@@ -91,7 +91,16 @@
 
 			try {
 				if (element.verse === subtitle.verse && element.surah === subtitle.surah) {
-					// Check if the translation has not been modified
+					// If the text is the same, copy the translation
+					if (element.text === subtitle.text) {
+						// Copy the translation from the current subtitle because it is the same text
+						element.translations[translationId] = subtitle.translations[translationId];
+						changeText(element.id, translationId);
+
+						continue;
+					}
+
+					// Else, check if the translation has not been modified for this verse to avoid overwriting it
 					if (
 						(await downloadTranslationForVerse(translationId, element.surah, element.verse)) ===
 						element.translations[translationId]
@@ -135,10 +144,6 @@
 							);
 
 							// Change the text of the textarea
-							changeText(element.id, translationId);
-						} else if (element.text === subtitle.text) {
-							// Copy the translation from the current subtitle because it is the same text
-							element.translations[translationId] = subtitle.translations[translationId];
 							changeText(element.id, translationId);
 						}
 					}
