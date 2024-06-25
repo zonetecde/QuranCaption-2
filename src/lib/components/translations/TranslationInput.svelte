@@ -26,9 +26,13 @@
 		const response = await fetch(url);
 		if (response.ok) {
 			const data = await response.json();
-			let line19 = JSON.stringify(data, null, 2).split('\n')[17];
-			line19 = line19.slice(26, -2);
-			wbwTranslation = line19.split('|');
+			let lines = JSON.stringify(data, null, 2).split('\n');
+			let i = 0;
+			while (!lines[i].includes('"translation"')) {
+				i++;
+			}
+			let translation = lines[i].split(':')[1].trim().replace(/"/g, '');
+			wbwTranslation = translation.split('|');
 		}
 
 		// Regarde si les mots sélectionnés dans le texte arabe est complet
@@ -92,7 +96,10 @@
 						(await downloadTranslationForVerse(translationId, element.surah, element.verse)) ===
 						element.translations[translationId]
 					) {
-						if (subtitle.lastWordIndexInVerse + 1 === element.firstWordIndexInVerse) {
+						if (
+							subtitle.lastWordIndexInVerse + 1 === element.firstWordIndexInVerse &&
+							subtitle.text !== element.text
+						) {
 							// Get the last translation of this verse, just before the Arabic text of this subtitle
 							let lastTranslations = $currentProject.timeline.subtitlesTracks[0].clips
 								.slice(0, i)
