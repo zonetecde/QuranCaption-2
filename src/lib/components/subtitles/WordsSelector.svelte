@@ -132,6 +132,10 @@
 			addSubtitle('', true);
 		} else if (event.key === 'Backspace') {
 			removeLastSubtitle();
+		} else if (event.key === 'v') {
+			// Sélectionne tout les mots du verset
+			startWordIndex = 0;
+			endWordIndex = wordsInSelectedVerse.length - 1;
 		}
 	}
 

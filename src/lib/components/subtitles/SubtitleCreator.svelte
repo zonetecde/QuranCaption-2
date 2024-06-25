@@ -69,6 +69,9 @@
 				- You can press <span class="text-yellow-500">`a`</span> to add
 				<span class="text-yellow-500">`A3oudhou billahi mina chaytani rajim`</span>
 			</p>
+			<p>
+				- You can press <span class="text-yellow-500">`v`</span> to select every word in the verse
+			</p>
 		</div>
 	</div>
 
