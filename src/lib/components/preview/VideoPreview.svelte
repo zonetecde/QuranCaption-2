@@ -51,7 +51,7 @@
 
 	$: currentVideo = $currentProject.timeline.videosTracks[0].clips.find(
 		(video) =>
-			(video.start === 0 && video.start <= $cursorPosition && video.end >= $cursorPosition + 1) || // Le + 1 permet de prevent un bug qui fait que le curseur ne va pas sur la deuxième vidéo lorsque la première se termine (il faut laisser le temps à l'id de la nouvelle vidéo de se mettre dans les classes du videoComponent)
+			(video.start === 0 && video.start <= $cursorPosition && video.end >= $cursorPosition) || // Le + 1 permet de prevent un bug qui fait que le curseur ne va pas sur la deuxième vidéo lorsque la première se termine (il faut laisser le temps à l'id de la nouvelle vidéo de se mettre dans les classes du videoComponent)
 			(video.start > 0 && video.start - 1000 < $cursorPosition && video.end >= $cursorPosition)
 	);
 	$: currentAudio = $currentProject.timeline.audiosTracks[0].clips.find(
