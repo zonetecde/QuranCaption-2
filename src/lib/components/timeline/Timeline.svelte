@@ -17,7 +17,6 @@
 
 	onMount(() => {
 		const timeline = document.getElementById('timeline');
-		console.log('scrollPoisition', $scrollPosition);
 		timeline?.scrollTo($scrollPosition, 0);
 	});
 

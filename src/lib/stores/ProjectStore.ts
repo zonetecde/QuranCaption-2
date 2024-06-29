@@ -99,8 +99,6 @@ export function delProject(id: string): Project[] {
 	const index = projects.findIndex((p) => p.id === id);
 
 	if (index !== -1) {
-		console.log(projects.length);
-
 		projects.splice(index, 1);
 		localStorage.setItem('projects', JSON.stringify(projects));
 	}

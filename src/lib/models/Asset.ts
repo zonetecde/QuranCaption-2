@@ -66,8 +66,6 @@ export async function addAssets(filePaths: string | string[]) {
 		);
 		return v;
 	});
-
-	console.log(_assets);
 }
 
 export function removeAsset(id: string) {
