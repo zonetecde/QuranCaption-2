@@ -8,7 +8,7 @@
 	import { currentPage, fullScreenPreview, trimDialog } from '$lib/stores/LayoutStore';
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
-	import { cursorPosition, zoom } from '$lib/stores/TimelineStore';
+	import { cursorPosition, zoom, scrollPosition } from '$lib/stores/TimelineStore';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
@@ -26,6 +26,7 @@
 		project.updatedAt = new Date(); // Update the last opened date
 		cursorPosition.set(project.projectSettings.cursorPosition);
 		zoom.set(project.projectSettings.zoom);
+		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);
 
 		// Load the project into the store
 		currentProject.set(project);

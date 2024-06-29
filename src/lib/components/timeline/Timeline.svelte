@@ -5,21 +5,20 @@
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
 		getTimelineTotalDuration,
-		scrollPoisition,
+		scrollPosition,
 		zoom
 	} from '$lib/stores/TimelineStore';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
 	export let useInPlayer = false; // Est-ce que c'est utilisé en tant que barrre de temps dans le lecteur vidéo ?
 
 	onMount(() => {
 		const timeline = document.getElementById('timeline');
-		console.log('scrollPoisition', $scrollPoisition);
-		timeline?.scrollTo($scrollPoisition, 0);
+		console.log('scrollPoisition', $scrollPosition);
+		timeline?.scrollTo($scrollPosition, 0);
 	});
 
 	$: timeLineTotalDuration = getTimelineTotalDuration($currentProject.timeline);
@@ -62,18 +61,12 @@
 			forceUpdateCurrentPlayingMedia.set(true);
 		}, 0);
 	}
-
-	let scrollPos = 0;
-
-	onDestroy(() => {
-		scrollPoisition.set(scrollPos);
-	});
 </script>
 
 <div
 	class={'overflow-x-scroll h-full ' + (useInPlayer ? 'overflow-y-hidden flipped' : '')}
 	on:scroll={(e) => {
-		scrollPos = e.currentTarget.scrollLeft;
+		scrollPosition.set(e.currentTarget.scrollLeft);
 	}}
 	id="timeline"
 	on:wheel={handleMouseWheelWheeling}

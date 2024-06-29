@@ -1,6 +1,6 @@
 import type Project from '$lib/models/Project';
 import { get, writable, type Writable } from 'svelte/store';
-import { cursorPosition, zoom } from './TimelineStore';
+import { cursorPosition, scrollPosition, zoom } from './TimelineStore';
 import Id from '$lib/ext/Id';
 
 export const currentProject: Writable<Project> = writable();
@@ -48,6 +48,7 @@ export function createBlankProject(name: string): Project {
 		projectSettings: {
 			cursorPosition: 0,
 			zoom: 30,
+			scrollLeft: 0,
 			addedTranslations: [],
 			videoScale: 1,
 			translateVideoX: 0,
@@ -133,6 +134,7 @@ export function updateUsersProjects(project: Project): void {
 
 	project.projectSettings.zoom = get(zoom);
 	project.projectSettings.cursorPosition = get(cursorPosition);
+	project.projectSettings.scrollLeft = get(scrollPosition);
 
 	const projects = getUserProjects();
 

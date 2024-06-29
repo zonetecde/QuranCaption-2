@@ -142,7 +142,7 @@
 				reajustCursorPosition();
 
 				// Si on arrive à la fin de la timeline, on scroll un peu pour voir la fin
-				if ($cursorPosition > 5000 && ($cursorPosition * $zoom) % 1000 < 300) {
+				if ($zoom === 30 && $cursorPosition > 5000 && ($cursorPosition * $zoom) % 1000 < 300) {
 					// @ts-ignore
 					document.getElementById('timeline').scrollLeft += 1;
 				}

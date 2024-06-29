@@ -24,6 +24,7 @@ export default interface Project {
 export interface ProjectSettings {
 	cursorPosition: number;
 	zoom: number;
+	scrollLeft: number;
 	globalSubtitlesSettings: SubtitleSettings;
 	videoScale: number;
 	translateVideoX: number;

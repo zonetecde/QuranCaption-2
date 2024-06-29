@@ -5,9 +5,7 @@
 
 	export let clip: SubtitleClip;
 
-	function handleClipClicked() {
-		console.log(clip);
-	}
+	function handleClipClicked() {}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
