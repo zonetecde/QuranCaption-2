@@ -3,7 +3,7 @@
 	import { GPT_URL } from '$lib/ext/PrivateVariable';
 	import { isFetchingIA, onlyShowVersesThatNeedTranslationReview } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { Mushaf, getEditionFromName } from '$lib/stores/QuranStore';
+	import { Mushaf, getEditionFromName, getWordByWordTranslation } from '$lib/stores/QuranStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { text } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
@@ -22,18 +22,7 @@
 		}
 
 		// Télécharge la traduction mot à mot
-		const url = `https://api.quranwbw.com/v1/verses?verses=${subtitle.surah}:${subtitle.verse}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			const data = await response.json();
-			let lines = JSON.stringify(data, null, 2).split('\n');
-			let i = 0;
-			while (!lines[i].includes('"translation"')) {
-				i++;
-			}
-			let translation = lines[i].split(':')[1].trim().replace(/"/g, '');
-			wbwTranslation = translation.split('|');
-		}
+		wbwTranslation = await getWordByWordTranslation(subtitle.surah, subtitle.verse);
 
 		// Regarde si les mots sélectionnés dans le texte arabe est complet
 		if (

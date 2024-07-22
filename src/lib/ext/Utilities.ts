@@ -51,13 +51,16 @@ export function downloadFile(content: string, filename: string) {
 	URL.revokeObjectURL(url);
 }
 
-export async function importAndReadFile(fileName: string): Promise<string | null> {
+export async function importAndReadFile(
+	fileName: string,
+	fileExtensions: string[] = ['qc2']
+): Promise<string | null> {
 	const selected = await open({
 		multiple: false,
 		filters: [
 			{
 				name: fileName,
-				extensions: ['qc2']
+				extensions: fileExtensions
 			}
 		]
 	});

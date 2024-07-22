@@ -1,6 +1,7 @@
 import { get, writable, type Writable } from 'svelte/store';
 import { type Quran } from '$lib/models/Quran';
 import type { Edition } from '$lib/models/Edition';
+import type { SubtitleClip } from '$lib/models/Timeline';
 
 export const Mushaf: Writable<Quran> = writable();
 export const editions: Writable<Edition[]> = writable();
@@ -122,4 +123,28 @@ export async function downloadTranslationForVerse(
  */
 export function getEditionFromName(name: string) {
 	return get(editions).find((edition) => edition.name === name);
+}
+
+export async function getWordByWordTranslation(surahNumber: number, verseNumber: number) {
+	if (surahNumber === -1 || verseNumber === -1) {
+		return []; // Si c'est un silence, une basmala ou autre
+	}
+
+	let wbwTranslation: string[] = [];
+
+	// Télécharge la traduction mot à mot
+	const url = `https://api.quranwbw.com/v1/verses?verses=${surahNumber}:${verseNumber}`;
+	const response = await fetch(url);
+	if (response.ok) {
+		const data = await response.json();
+		let lines = JSON.stringify(data, null, 2).split('\n');
+		let i = 0;
+		while (!lines[i].includes('"translation"')) {
+			i++;
+		}
+		let translation = lines[i].split(':')[1].trim().replace(/"/g, '');
+		wbwTranslation = translation.split('|');
+	}
+
+	return wbwTranslation;
 }

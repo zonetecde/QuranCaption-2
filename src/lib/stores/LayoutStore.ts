@@ -21,6 +21,7 @@ export const videoDimensions: Writable<{ width: number; height: number }> = writ
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
 export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
+export const showWordByWordTranslation: Writable<boolean> = writable(false); // Checkbox pour afficher les traductions des mots dans le subtitles editor
 
 // Video editor
 export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles settings'> =

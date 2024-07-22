@@ -1,15 +1,22 @@
 <script lang="ts">
 	import Id from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { Mushaf, getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
+	import {
+		Mushaf,
+		getNumberOfVerses,
+		getVerse,
+		getWordByWordTranslation
+	} from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { reajustCursorPosition } from '$lib/ext/Utilities';
+	import { showWordByWordTranslation } from '$lib/stores/LayoutStore';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
+	let wbwTranslation: string[] = [];
 
 	// Split the verse into words
 	$: wordsInSelectedVerse = getVerse(surahNumber, verseNumber).text.split(' ');
@@ -27,7 +34,16 @@
 	onMount(async () => {
 		// Le met sur le document car le window.onkeydown est déjà pris dans +layout.svelte
 		window.document.onkeydown = onKeyDown;
+
+		wbwTranslation = await getWordByWordTranslation(surahNumber, verseNumber);
 	});
+
+	$: if (surahNumber || verseNumber) {
+		wbwTranslation = [];
+		getWordByWordTranslation(surahNumber, verseNumber).then((translation) => {
+			wbwTranslation = translation;
+		});
+	}
 
 	onDestroy(() => {
 		window.document.onkeydown = null;
@@ -226,9 +242,15 @@
 		{@const isHighlighted = index >= startWordIndex && index <= endWordIndex}
 		<button
 			on:click={() => handleWordClicked(index, isHighlighted)}
-			class={'px-1.5 ' +
+			class={'px-1.5 flex flex-col text-center ' +
 				(isHighlighted ? 'bg-[#fbff0027] hover:bg-[#5f5b20e1]' : 'hover:bg-[#ffffff2f]')}
-			>{word}</button
-		>
+			><span class="text-center w-full">{word}</span>
+
+			{#if wbwTranslation[index] && $showWordByWordTranslation}
+				<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
+					>{wbwTranslation[index]}</span
+				>
+			{/if}
+		</button>
 	{/each}
 </div>

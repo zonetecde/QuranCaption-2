@@ -93,11 +93,44 @@
 			openProject(project); // Open the project
 		}
 	}
+
+	/**
+	 * Handle backup all projects button clicked
+	 */
+	function handleBackupAllProjectsButtonClicked() {
+		const data = JSON.stringify(userProjects, null, 2);
+
+		const blob = new Blob([data], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'QuranCaptionBackup.qcb';
+		a.click();
+	}
+
+	/**
+	 * Handle restore all projects button clicked
+	 */
+	async function handleRestoreAllProjectsButtonClicked() {
+		const content = await importAndReadFile('Quran Caption Backup (*.qcb)', ['qcb']);
+
+		if (content) {
+			const projects = JSON.parse(content);
+
+			projects.forEach((project: Project) => {
+				project.id = Id.generate(); // Generate a new id for the project
+				updateUsersProjects(project); // Save the project to the local storage
+			});
+
+			userProjects = getUserProjects();
+		}
+	}
 </script>
 
 <div class="p-5 h-screen flex items-center justify-center relative">
 	<div class="xl:w-4/6 w-full">
-		<h1 class="text-4xl text-center schibstedGrotesk">Quran Caption</h1>
+		<h1 class="text-4xl font-bold text-center schibstedGrotesk">Quran Caption</h1>
 
 		<div class="mt-10">
 			<p class="text-xl pl-3">Recent project :</p>
@@ -114,8 +147,10 @@
 								{new Date(project.createdAt).toLocaleString()}
 							</p>
 						</button>
+
+						<!-- Delete project button -->
 						<button
-							class="w-6 h-6 absolute top-1 right-1 bg-red-200 rounded-full p-1 hidden group-hover:block"
+							class="w-6 h-6 absolute bottom-1 right-1 bg-red-200 rounded-full p-1 hidden group-hover:block"
 							on:click={(e) => handleDelProject(project.id)}
 						>
 							<svg
@@ -132,13 +167,42 @@
 								/>
 							</svg>
 						</button>
+
+						<!-- Edit name button -->
+						<button
+							class="w-6 h-6 absolute bottom-1 right-8 bg-blue-200 rounded-full p-1 hidden group-hover:block"
+							on:click={(e) => {
+								e.stopPropagation();
+								// window text prompt
+								const newName = prompt('Enter the new name of the project', project.name);
+								if (newName) {
+									project.name = newName;
+									updateUsersProjects(project);
+								}
+							}}
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="black"
+								class=""
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+								/>
+							</svg>
+						</button>
 					</div>
 				{/each}
 			</div>
 		</div>
 
-		<div class="mt-12 flex justify-center">
-			<div class="grid grid-cols-2 gap-x-3">
+		<div class="mt-12 -mb-10 flex justify-center">
+			<div class="grid grid-cols-2 gap-x-3 gap-y-4">
 				<button
 					on:click={() => (createProjectVisibility = true)}
 					class="text-xl bg-[#186435] hover:bg-[#163a23] duration-150 px-12 py-3 rounded-3xl border-2 border-[#102217] shadow-xl shadow-black"
@@ -148,6 +212,18 @@
 					on:click={handleImportProjectButtonClicked}
 					class="text-xl bg-[#186435] hover:bg-[#163a23] duration-150 px-12 py-3 rounded-3xl border-2 border-[#102217] shadow-xl shadow-black"
 					>Import a project</button
+				>
+
+				<button
+					on:click={handleBackupAllProjectsButtonClicked}
+					class="text-lg opacity-50 bg-black hover:bg-[#53554e] duration-150 scale-75 py-1 rounded-3xl border-2 border-[#353534]"
+					>Backup all projects</button
+				>
+
+				<button
+					on:click={handleRestoreAllProjectsButtonClicked}
+					class="text-lg opacity-50 bg-black hover:bg-[#53554e] duration-150 scale-75 py-1 rounded-3xl border-2 border-[#353534]"
+					>Restore all projects</button
 				>
 			</div>
 		</div>
@@ -207,6 +283,9 @@
 				type="text"
 				class="w-full h-10 border-2 border-black bg-[#272424] rounded-md p-2 mt-2 outline-none"
 				bind:value={projectName}
+				on:keydown={(e) => {
+					if (e.key === 'Enter') handleCreateProjectButtonClicked();
+				}}
 			/>
 
 			<button

@@ -139,7 +139,7 @@ export function updateUsersProjects(project: Project): void {
 	const index = projects.findIndex((p) => p.id === project.id);
 	if (index === -1) {
 		if (projects.find((p) => p.name === project.name)) {
-			project.name = project.name + ' New';
+			project.name = project.name + ' - New';
 		}
 
 		projects.push(project);
