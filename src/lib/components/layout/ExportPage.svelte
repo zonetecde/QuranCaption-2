@@ -72,7 +72,7 @@
 						<button
 							class="text-blue-400"
 							on:click={() => {
-								openLink('https://ko-fi.com/zonetecde');
+								openLink('https://ko-fi.com/vzero');
 							}}>here</button
 						>
 						{'<3'}

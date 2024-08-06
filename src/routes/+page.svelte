@@ -38,7 +38,7 @@
 		}
 
 		//@ts-ignore
-		kofiWidgetOverlay.draw('zonetecde', {
+		kofiWidgetOverlay.draw('vzero', {
 			type: 'floating-chat',
 			'floating-chat.donateButton.text': 'Support me',
 			'floating-chat.donateButton.background-color': '#794bc4',
@@ -247,7 +247,7 @@
 		<button
 			class="text-blue-300"
 			on:click={() => {
-				openLink('https://ko-fi.com/zonetecde');
+				openLink('https://ko-fi.com/vzero');
 			}}>Make a donation</button
 		>
 		•
