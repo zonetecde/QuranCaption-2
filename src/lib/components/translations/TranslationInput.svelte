@@ -267,10 +267,19 @@
 			icon: '🤖'
 		});
 	}
+
+	$: doesSubtitleNeedReview =
+		(subtitle.hadItTranslationEverBeenModified === false ||
+			subtitle.hadItTranslationEverBeenModified === undefined) &&
+		isIncomplete;
 </script>
 
-{#if ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowVersesWhoseTranslationsNeedReview && (subtitle.hadItTranslationEverBeenModified === false || subtitle.hadItTranslationEverBeenModified === undefined) && isIncomplete)}
-	<div class={'p-2 border-b-2 px-10 border-[#413f3f] ' + (isIncomplete ? 'bg-[#2aaf6d09]' : '')}>
+{#if (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || ($onlyShowVersesWhoseTranslationsNeedReview && doesSubtitleNeedReview)}
+	<div
+		class={'p-2 border-b-2 px-10 border-[#413f3f] ' +
+			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#1b2b1e] ' : '') +
+			(doesSubtitleNeedReview ? 'bg-[#2b1f20] ' : '')}
+	>
 		<div class="flex justify-between items-start flex-col w-full">
 			<p class="text-lg text-left">
 				{#if subtitle.surah !== -1 && subtitle.verse !== -1}
