@@ -85,7 +85,7 @@
 				onlyShowVersesWhoseTranslationsNeedReview.set(false);
 			}}
 		/>
-		Show every subtitle
+		Show all subtitles
 	</label>
 	<label>
 		<input
@@ -111,7 +111,7 @@
 				onlyShowVersesWhoseTranslationsNeedReview.set(true);
 			}}
 		/>
-		Only show verses whose translations have not been reviewed
+		Only show subtitles whose translations have not been reviewed
 	</label>
 
 	<button

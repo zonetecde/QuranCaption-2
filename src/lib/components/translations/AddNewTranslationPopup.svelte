@@ -102,6 +102,7 @@
 			if (selectedEditionName in element.translations) return;
 
 			element.translations[selectedEditionName] = translation.text;
+			element.hadItTranslationEverBeenModified = false; // Reset the flag
 		});
 
 		toast.success('Translation added');
