@@ -28,7 +28,8 @@ export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles sett
 	writable('assets manager'); // L'onglet sélectionné dans l'éditeur vidéo
 
 // Translation page
-export const onlyShowVersesThatNeedTranslationReview: Writable<boolean> = writable(false); // Afficher uniquement les versets qui ont besoin d'une révision de traduction
+export const onlyShowSubtitlesThatAreNotFullVerses: Writable<boolean> = writable(false); // Afficher uniquement les versets qui ont besoin d'une révision de traduction
+export const onlyShowVersesWhoseTranslationsNeedReview: Writable<boolean> = writable(false); // Afficher uniquement les versets dont les traductions ont besoin d'une révision
 export const isFetchingIA: Writable<boolean> = writable(false); // Indique si on est en train de récupérer les informations de l'IA
 
 export function setCurrentPage(page: PageType) {

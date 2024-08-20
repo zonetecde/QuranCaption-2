@@ -119,8 +119,14 @@
 			const projects = JSON.parse(content);
 
 			projects.forEach((project: Project) => {
-				project.id = Id.generate(); // Generate a new id for the project
-				updateUsersProjects(project); // Save the project to the local storage
+				// if project id already exists, replace it if the updatedAt is more recent
+				const existingProject = userProjects.find((p) => p.id === project.id);
+				if (existingProject && new Date(existingProject.updatedAt) > new Date(project.updatedAt)) {
+					userProjects = userProjects.map((p) => (p.id === project.id ? project : p));
+				} else {
+					// Project does not exist, add it
+					updateUsersProjects(project);
+				}
 			});
 
 			userProjects = getUserProjects();

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import { GPT_URL } from '$lib/ext/PrivateVariable';
-	import { isFetchingIA, onlyShowVersesThatNeedTranslationReview } from '$lib/stores/LayoutStore';
+	import {
+		isFetchingIA,
+		onlyShowSubtitlesThatAreNotFullVerses,
+		onlyShowVersesWhoseTranslationsNeedReview
+	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf, getEditionFromName, getWordByWordTranslation } from '$lib/stores/QuranStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
@@ -68,6 +72,7 @@
 		// Trim the text of this subtitle
 		subtitle.translations[translationId] = subtitle.translations[translationId].trim();
 		changeText(subtitle.id, translationId);
+		subtitle.hadItTranslationEverBeenModified = true;
 
 		// Trim all subsequent subtitles that come after the Arabic text of the current subtitle
 		// to facilitate the translator's work
@@ -264,7 +269,7 @@
 	}
 </script>
 
-{#if ($onlyShowVersesThatNeedTranslationReview && isIncomplete) || !$onlyShowVersesThatNeedTranslationReview}
+{#if ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowVersesWhoseTranslationsNeedReview && (subtitle.hadItTranslationEverBeenModified === false || subtitle.hadItTranslationEverBeenModified === undefined) && isIncomplete)}
 	<div class={'p-2 border-b-2 px-10 border-[#413f3f] ' + (isIncomplete ? 'bg-[#2aaf6d09]' : '')}>
 		<div class="flex justify-between items-start flex-col w-full">
 			<p class="text-lg text-left">

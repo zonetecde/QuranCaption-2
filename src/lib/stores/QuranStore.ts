@@ -80,6 +80,9 @@ export function getNumberOfVerses(surahId: number) {
 	return quran.surahs[surahId - 1].total_verses;
 }
 
+// Cache for the translations
+const caches = new Map<string, string>();
+
 /**
  * Get the translation of a verse
  * @param surah The ID of the surah
@@ -93,6 +96,9 @@ export async function downloadTranslationForVerse(
 	verse: number,
 	removeLatin: boolean = true
 ) {
+	const cached = caches.get(`${editionName}_${surah}_${verse}_${removeLatin}`);
+	if (cached) return cached;
+
 	const edition = getEditionFromName(editionName);
 	if (!edition) return 'No translation found';
 
@@ -107,6 +113,9 @@ export async function downloadTranslationForVerse(
 
 		// Enlève les nombres entre crochets
 		text = text.replace(/\[\d+\]/g, '');
+
+		// Ajout de la traduction dans le cache
+		caches.set(`${editionName}_${surah}_${verse}_${removeLatin}`, text);
 
 		return text;
 	} else if (removeLatin) {

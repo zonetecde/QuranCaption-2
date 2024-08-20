@@ -1,5 +1,73 @@
 <script>
-	import { onlyShowVersesThatNeedTranslationReview } from '$lib/stores/LayoutStore';
+	import {
+		onlyShowSubtitlesThatAreNotFullVerses,
+		onlyShowVersesWhoseTranslationsNeedReview
+	} from '$lib/stores/LayoutStore';
+	import { currentProject, getUserProjects } from '$lib/stores/ProjectStore';
+	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
+	import toast from 'svelte-french-toast';
+
+	/**
+	 * Search in all the other user's projects for the translations of the current project
+	 */
+	async function fetchTranslationsFromOtherProjects() {
+		const userProjects = getUserProjects();
+
+		await Promise.all(
+			// Loop through all the subtitles of the current project
+			$currentProject.timeline.subtitlesTracks[0].clips.map(async (subtitle) => {
+				// If the subtitle is silence or the surah or verse is not set, skip
+				if (subtitle.isSilence) return;
+
+				await Promise.all(
+					// Loop through all the translations of the current project
+					$currentProject.projectSettings.addedTranslations.map(async (translation) => {
+						await Promise.all(
+							// Loop through all the user's projects
+							userProjects.map(async (userProject) => {
+								if (userProject.id === $currentProject.id) return;
+
+								await Promise.all(
+									userProject.timeline.subtitlesTracks[0].clips.map(async (userSubtitle) => {
+										if (
+											userSubtitle.verse === subtitle.verse &&
+											userSubtitle.surah === subtitle.surah &&
+											userSubtitle.firstWordIndexInVerse === subtitle.firstWordIndexInVerse &&
+											userSubtitle.lastWordIndexInVerse === subtitle.lastWordIndexInVerse
+										) {
+											for (const [translationId, translationText] of Object.entries(
+												userSubtitle.translations
+											)) {
+												if (translationId.split('-')[0] === translation.split('-')[0]) {
+													if (
+														subtitle.translations[translation] !== translationText &&
+														(await downloadTranslationForVerse(
+															translationId,
+															subtitle.surah,
+															subtitle.verse
+														)) !== translationText
+													) {
+														subtitle.translations[translation] = translationText;
+														subtitle.hadItTranslationEverBeenModified = true;
+													}
+												}
+											}
+										}
+									})
+								);
+							})
+						);
+					})
+				);
+			})
+		);
+
+		toast.success('Translations fetched from other projects');
+
+		// Force update
+		$currentProject.timeline.subtitlesTracks[0].clips =
+			$currentProject.timeline.subtitlesTracks[0].clips;
+	}
 </script>
 
 <div class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll">
@@ -8,10 +76,48 @@
 
 	<label>
 		<input
-			type="checkbox"
-			class="form-checkbox h-5 w-5 text-green-500"
-			bind:checked={$onlyShowVersesThatNeedTranslationReview}
+			type="radio"
+			class="form-radio h-5 w-5 text-green-500"
+			name="subtitleOption"
+			value="showAllSubtitles"
+			on:change={() => {
+				onlyShowSubtitlesThatAreNotFullVerses.set(false);
+				onlyShowVersesWhoseTranslationsNeedReview.set(false);
+			}}
 		/>
-		Only show verses that need translation review
+		Show every subtitle
 	</label>
+	<label>
+		<input
+			type="radio"
+			class="form-radio h-5 w-5 text-green-500"
+			name="subtitleOption"
+			value="showNotFullVerses"
+			on:change={() => {
+				onlyShowSubtitlesThatAreNotFullVerses.set(true);
+				onlyShowVersesWhoseTranslationsNeedReview.set(false);
+			}}
+		/>
+		Only show subtitles that are not full verses
+	</label>
+	<label>
+		<input
+			type="radio"
+			class="form-radio h-5 w-5 text-green-500"
+			name="subtitleOption"
+			value="showUnreviewedTranslations"
+			on:change={() => {
+				onlyShowSubtitlesThatAreNotFullVerses.set(false);
+				onlyShowVersesWhoseTranslationsNeedReview.set(true);
+			}}
+		/>
+		Only show verses whose translations have not been reviewed
+	</label>
+
+	<button
+		class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a]"
+		on:click={() => {
+			fetchTranslationsFromOtherProjects();
+		}}>Fetch translations from other projects</button
+	>
 </div>

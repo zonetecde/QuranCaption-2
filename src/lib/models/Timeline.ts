@@ -31,6 +31,7 @@ export type SubtitleClip = {
 	lastWordIndexInVerse: number;
 	isLastWordInVerse: boolean;
 	translations: { [key: string]: string };
+	hadItTranslationEverBeenModified: boolean;
 };
 
 export type Clip = {

@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "Quran Caption",
-		"version": "0.7.0"
+		"version": "0.8.0"
 	},
 	"tauri": {
 		"allowlist": {
