@@ -114,10 +114,21 @@
 		Only show subtitles whose translations have not been reviewed
 	</label>
 
-	<button
-		class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a]"
-		on:click={() => {
-			fetchTranslationsFromOtherProjects();
-		}}>Fetch translations from other projects</button
+	<p class="text-sm italic text-justify">
+		Remember to press enter after modifying a translation so the software can proceed with the
+		remaining translations for you.<br /><br />Green indicates that a translation required review
+		but has already been reviewed.<br /><br />Red indicates that a translation still needs to be
+		reviewed.
+	</p>
+
+	<abbr
+		title="This will try to complet the translations of the current project with the translations of your other projects."
 	>
+		<button
+			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a]"
+			on:click={() => {
+				fetchTranslationsFromOtherProjects();
+			}}>Fetch translations from other projects</button
+		>
+	</abbr>
 </div>

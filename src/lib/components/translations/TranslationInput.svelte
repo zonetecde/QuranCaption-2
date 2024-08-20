@@ -89,6 +89,7 @@
 					if (element.text === subtitle.text) {
 						// Copy the translation from the current subtitle because it is the same text
 						element.translations[translationId] = subtitle.translations[translationId];
+						element.hadItTranslationEverBeenModified = true; // Mark the translation as modified
 						changeText(element.id, translationId);
 
 						continue;
@@ -277,8 +278,8 @@
 {#if (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || ($onlyShowVersesWhoseTranslationsNeedReview && doesSubtitleNeedReview)}
 	<div
 		class={'p-2 border-b-2 px-10 border-[#413f3f] ' +
-			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#1b2b1e] ' : '') +
-			(doesSubtitleNeedReview ? 'bg-[#2b1f20] ' : '')}
+			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#212c23] ' : '') +
+			(doesSubtitleNeedReview ? 'bg-[#2c2424] ' : '')}
 	>
 		<div class="flex justify-between items-start flex-col w-full">
 			<p class="text-lg text-left">
