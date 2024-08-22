@@ -9,6 +9,7 @@
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
 	import { cursorPosition, zoom, scrollPosition } from '$lib/stores/TimelineStore';
+	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
@@ -27,6 +28,16 @@
 		cursorPosition.set(project.projectSettings.cursorPosition);
 		zoom.set(project.projectSettings.zoom);
 		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);
+
+		// Check if all the assets are still available
+		project.assets.forEach((asset) => {
+			invoke('do_file_exist', { path: asset.filePath }).then((res) => {
+				if (!res) {
+					// If the file doesn't exist, update its attribute
+					asset.exist = false;
+				}
+			});
+		});
 
 		// Load the project into the store
 		currentProject.set(project);

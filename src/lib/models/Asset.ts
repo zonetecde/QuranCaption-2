@@ -9,6 +9,7 @@ export default interface Asset {
 	type: 'audio' | 'video' | 'image' | 'unknown';
 	id: string;
 	duration: number; // In milliseconds
+	exist: boolean; // If the file exists (to relocate asset)
 }
 
 /**
@@ -49,7 +50,8 @@ export async function addAssets(filePaths: string | string[]) {
 				filePath: filePath,
 				type: fileType,
 				duration: duration,
-				id: Id.generate()
+				id: Id.generate(),
+				exist: true
 			});
 		})
 	);

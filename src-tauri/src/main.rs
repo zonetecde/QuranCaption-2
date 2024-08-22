@@ -7,7 +7,7 @@ use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -57,4 +57,9 @@ async fn all_families() -> Vec<std::string::String> {
      } else {
          vec![]
      }
+}
+
+#[tauri::command]
+async fn do_file_exist(path: String) -> bool {
+  std::path::Path::new(&path).exists()
 }
