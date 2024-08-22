@@ -4,6 +4,8 @@
 	import Id from '$lib/ext/Id';
 	import { removeAsset } from '$lib/models/Asset';
 	import type Asset from '$lib/models/Asset';
+	import { open } from '@tauri-apps/api/dialog';
+	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
 
 	export let asset: Asset;
 
@@ -61,6 +63,26 @@
 		}
 
 		$currentProject = $currentProject; // Trigger the store update
+	}
+
+	/**
+	 * Open the file dialog to relocate the asset
+	 */
+	function relocateAsset() {
+		open({
+			multiple: false,
+			directory: false,
+			defaultPath: 'C:\\Users\\User\\Videos',
+			filters: [
+				{
+					name: 'Video | Audio | Image',
+					extensions: VideoFileExt.concat(AudioFileExt).concat(ImgFileExt)
+				}
+			]
+		}).then((result) => {
+			if (result === null) return;
+			asset.filePath = result as string;
+		});
 	}
 </script>
 
@@ -136,5 +158,9 @@
 				>Add in the timeline without the audio</button
 			>
 		{/if}
+		<button
+			class="absolute w-full bg-[#1b422a] py-2 -bottom-[7.3rem] rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] z-40"
+			on:click={() => relocateAsset()}>Relocate asset</button
+		>
 	{/if}
 </div>
