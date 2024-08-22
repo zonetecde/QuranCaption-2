@@ -5,6 +5,7 @@
 	import { trimDialog } from '$lib/stores/LayoutStore';
 	import { zoom } from '$lib/stores/TimelineStore';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
+	import RelocateAssetWarning from '$lib/components/common/RelocateAssetWarning.svelte';
 
 	export let asset: Asset;
 	export let track: Track;
@@ -149,6 +150,10 @@
 				<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 			</svg>
 		</button>
+	{/if}
+
+	{#if !asset.exist}
+		<RelocateAssetWarning style="rounded-tl-none top-0 left-0" assetFilePath={asset.filePath} />
 	{/if}
 </div>
 

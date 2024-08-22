@@ -35,6 +35,8 @@
 				if (!res) {
 					// If the file doesn't exist, update its attribute
 					asset.exist = false;
+				} else {
+					asset.exist = true;
 				}
 			});
 		});

@@ -50,7 +50,7 @@
 				</p>
 			{:else}
 				{#each $currentProject.assets as asset}
-					<AssetViewer {asset} />
+					<AssetViewer bind:asset />
 				{/each}
 			{/if}
 		</div>
