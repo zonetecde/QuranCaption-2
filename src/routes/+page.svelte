@@ -15,10 +15,11 @@
 		GITHUB_REPO_LINK,
 		SOFTWARE_VERSION
 	} from '$lib/ext/GlobalVariables';
-	import { newUpdateAvailable } from '$lib/stores/LayoutStore';
+	import { newUpdateAvailable, newUpdateDescription } from '$lib/stores/LayoutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import { importAndReadFile } from '$lib/ext/Utilities';
 	import Id from '$lib/ext/Id';
+	import SvelteMarkdown from 'svelte-markdown';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -34,6 +35,7 @@
 			const data = await response.json();
 			if (data.tag_name !== SOFTWARE_VERSION) {
 				newUpdateAvailable.set(true);
+				newUpdateDescription.set(data.body);
 			}
 		}
 
@@ -307,7 +309,7 @@
 {#if $newUpdateAvailable}
 	<div transition:fade class="absolute inset-0 backdrop-blur-sm flex items-center justify-center">
 		<div
-			class="relative w-[400px] bg-default border-2 border-black rounded-xl p-4 flex flex-col items-center"
+			class="relative w-[600px] bg-default border-2 border-black rounded-xl p-4 flex flex-col items-center"
 		>
 			<button
 				class="w-6 h-6 absolute top-2 right-2 cursor-pointer border rounded-full"
@@ -324,8 +326,11 @@
 				</svg>
 			</button>
 
-			<p class="self-start text-center">A new version of Quran Caption is available</p>
+			<p class="self-start text-center w-full">A new version of Quran Caption is available</p>
 
+			<div class="mt-5 max-h-80 overflow-y-auto bg-black p-2 -mx-2">
+				<SvelteMarkdown source={$newUpdateDescription} />
+			</div>
 			<button
 				class="w-1/2 h-10 bg-[#186435] hover:bg-[#163a23] duration-150 text-white mt-4 rounded-md"
 				on:click={() => openLink(GITHUB_DOWNLOAD_LINK)}
