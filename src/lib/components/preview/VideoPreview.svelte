@@ -168,18 +168,29 @@
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
 					<video
-						class={'bg-red-black w-full h-full object-contain ' + currentVideo.id}
+						class={'bg-red-black w-full h-full object-contain ' +
+							currentVideo.id +
+							' ' +
+							(video.type === 'video' ? 'block' : 'hidden')}
 						id="video-preview"
 						style="
 							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$videoDimensions.width *
 							($currentProject.projectSettings.translateVideoX / 100)}px);
 						"
-						src={convertFileSrc(video.filePath)}
+						src={video.type === 'video' ? convertFileSrc(video.filePath) : '1pixel_vid.mp4'}
 						bind:this={videoComponent}
 						muted={currentVideo.isMuted}
 					>
 						<track kind="captions" src="vtt" srclang="en" label="English" default />
 					</video>
+
+					{#if video.type === 'image'}
+						<img
+							class="w-full h-full object-contain"
+							src={convertFileSrc(video.filePath)}
+							alt={video.filePath}
+						/>
+					{/if}
 				{:else}
 					<p>Video does not exist</p>
 				{/if}

@@ -35,7 +35,7 @@ export async function addAssets(filePaths: string | string[]) {
 			if (fileType === 'unknown') return;
 
 			// If it is a video, get its duration
-			let duration = 5000;
+			let duration = 3600 * 3 * 1000; // Default duration is 3 hours (for images)
 			if (fileType === 'video' || fileType === 'audio') {
 				try {
 					const result = await invoke('get_video_duration', { path: filePath });

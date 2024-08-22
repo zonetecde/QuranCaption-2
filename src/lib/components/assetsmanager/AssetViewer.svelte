@@ -7,6 +7,7 @@
 	import { open } from '@tauri-apps/api/dialog';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
 	import RelocateAssetWarning from '../common/RelocateAssetWarning.svelte';
+	import toast from 'svelte-french-toast';
 
 	export let asset: Asset;
 
@@ -29,6 +30,16 @@
 								$currentProject.timeline.videosTracks[0].clips.length - 1
 							].end
 						: 0;
+
+				if (lastAssetEndTime !== 0) {
+					toast(
+						"There's currently a bug that prevents the cursor from moving from one video to another. Please consider merging the videos together using a third-party software.",
+						{
+							icon: '⚠️',
+							duration: 6000
+						}
+					);
+				}
 
 				$currentProject.timeline.videosTracks[0].clips.push({
 					id: Id.generate(),
