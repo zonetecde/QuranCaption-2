@@ -61,6 +61,7 @@
 		isMuted: false,
 		id: ''
 	};
+
 	$: currentAudio = $currentProject.timeline.audiosTracks[0].clips.find(
 		(audio) =>
 			(audio.start === 0 && audio.start <= $cursorPosition && audio.end >= $cursorPosition) ||

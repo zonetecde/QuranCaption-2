@@ -90,12 +90,17 @@ export function reajustCursorPosition() {
 				const video = get(currentProject).timeline.videosTracks[0].clips[i];
 				if (!videoPreviewElement.classList.contains(video.id)) {
 					totalDuration += video.duration;
+					console.log(totalDuration);
 				} else {
 					break;
 				}
 			}
 
-			cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
+			if (totalDuration > 0) {
+				setTimeout(() => {
+					cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
+				}, 500);
+			} else cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
 		}
 	}
 }
