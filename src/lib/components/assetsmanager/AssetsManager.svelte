@@ -127,10 +127,10 @@
 				placeholder="https://www.youtube.com/watch?v=..."
 			/>
 
-			<div class="flex flex-row w-full h-10">
+			<div class="grid grid-cols-2 max-h-10">
 				<!-- button select a download location -->
 				<button
-					class={'w-1/2 h-full bg-[#272b28] hover:bg-[#0c0c0c] duration-150 text-white mt-4 rounded-md truncate px-1 ' +
+					class={'w-full h-10 bg-[#272b28] hover:bg-[#0c0c0c] duration-150 text-white mt-4 rounded-md truncate px-1 ' +
 						(downloadLocation ? 'text-sm' : '')}
 					on:click={() => {
 						selectDowloadLocation();
@@ -140,7 +140,7 @@
 				</button>
 
 				<!-- mp3/mp4 toggle -->
-				<div class="flex flex-col ml-3 mt-3">
+				<div class="flex flex-col ml-3 mt-3 z-10">
 					<p class="self-start">Format :</p>
 					<div class="flex items-center">
 						<input
