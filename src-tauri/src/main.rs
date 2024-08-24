@@ -7,7 +7,7 @@ use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -63,3 +63,42 @@ async fn all_families() -> Vec<std::string::String> {
 async fn do_file_exist(path: String) -> bool {
   std::path::Path::new(&path).exists()
 }
+
+#[tauri::command]
+async fn download_youtube_video(format: String, url: String, path: String) -> bool {
+    let format_flag = match format.as_str() {
+        "mp3" => {
+            vec!["-x", "--audio-format", "mp3"]
+        }
+        "mp4" => {
+            vec!["--format", "mp4"]
+        }
+        _ => {
+            println!("Invalid format specified");
+            return false;
+        }
+    };
+
+    let mut args = vec!["--force-ipv4"];
+    args.extend(format_flag);
+    args.push("-o");
+    args.push(&path);
+    args.push(&url);
+
+    let output = Command::new("./yt-dlp")
+        .args(&args)
+        .output();
+
+    match output {
+        Ok(output) => {
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            println!("{}", output_str);
+            true
+        }
+        Err(e) => {
+            println!("Failed to execute process: {}", e);
+            false
+        }
+    }
+}
+

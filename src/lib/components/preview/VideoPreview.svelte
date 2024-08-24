@@ -15,6 +15,7 @@
 	import { fullScreenPreview, videoDimensions } from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
+	import toast from 'svelte-french-toast';
 
 	export let hideControls = false;
 
