@@ -73,6 +73,15 @@ export async function addAssets(filePaths: string | string[]) {
 export function removeAsset(id: string) {
 	currentProject.update((v) => {
 		v.assets = v.assets.filter((asset) => asset.id !== id);
+
+		v.timeline.videosTracks.forEach((track) => {
+			track.clips = track.clips.filter((clip) => clip.assetId !== id);
+		});
+
+		v.timeline.audiosTracks.forEach((track) => {
+			track.clips = track.clips.filter((clip) => clip.assetId !== id);
+		});
+
 		return v;
 	});
 }
