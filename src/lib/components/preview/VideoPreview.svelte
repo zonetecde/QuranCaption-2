@@ -54,7 +54,13 @@
 		(video) =>
 			(video.start === 0 && video.start <= $cursorPosition && video.end >= $cursorPosition) || // Le + 1 permet de prevent un bug qui fait que le curseur ne va pas sur la deuxième vidéo lorsque la première se termine (il faut laisser le temps à l'id de la nouvelle vidéo de se mettre dans les classes du videoComponent)
 			(video.start > 0 && video.start - 1000 < $cursorPosition && video.end >= $cursorPosition)
-	);
+	) || {
+		start: 0,
+		end: 999999999,
+		assetId: 'black-screen',
+		isMuted: false,
+		id: ''
+	};
 	$: currentAudio = $currentProject.timeline.audiosTracks[0].clips.find(
 		(audio) =>
 			(audio.start === 0 && audio.start <= $cursorPosition && audio.end >= $cursorPosition) ||
@@ -188,7 +194,7 @@
 					{#if video.type === 'image'}
 						<img
 							class="w-full h-full object-contain"
-							src={convertFileSrc(video.filePath)}
+							src={video.id === 'black-screen' ? 'black.jpg' : convertFileSrc(video.filePath)}
 							alt={video.filePath}
 						/>
 					{/if}

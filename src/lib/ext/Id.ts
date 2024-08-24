@@ -15,6 +15,17 @@ export default class Id {
 }
 
 export function getAssetFromId(id: string): Asset | undefined {
+	if (id === 'black-screen') {
+		return {
+			fileName: 'Black Screen',
+			filePath: 'black.jpg',
+			type: 'image',
+			id: 'black-screen',
+			duration: 0,
+			exist: true
+		};
+	}
+
 	const asset = get(currentProject).assets.find((a: Asset) => a.id === id);
 	if (asset) return asset;
 	return undefined;
