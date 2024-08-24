@@ -27,9 +27,6 @@
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
-	let youtubeUrl = '';
-	let videoFormat = 'mp3';
-	let downloadLocation = '';
 
 	let userProjects: Project[] = [];
 
@@ -55,20 +52,6 @@
 		});
 	});
 
-	function selectDowloadLocation() {
-		open({
-			directory: true,
-			multiple: false
-		})
-			.then((res) => {
-				if (res) downloadLocation = res as string;
-				console.log(downloadLocation);
-			})
-			.catch((err) => {
-				console.error(err);
-			});
-	}
-
 	/**
 	 * Handle create project button clicked
 	 * This function create a new project and save it to the local storage
@@ -80,40 +63,6 @@
 		}
 
 		const project = createBlankProject(projectName);
-
-		// Look if a youtube link is referenced in the project creation
-		if (youtubeUrl) {
-			if (!downloadLocation) {
-				toast.error('Please select a download location');
-				return;
-			}
-
-			const path =
-				downloadLocation +
-				'/' +
-				(videoFormat === 'mp3' ? 'base audio' : 'base video') +
-				'.' +
-				videoFormat;
-
-			// Téléchargement de la vidéo youtube
-			await toast.promise(
-				invoke('download_youtube_video', {
-					format: videoFormat,
-					url: youtubeUrl,
-					path: path
-				}),
-				{
-					loading:
-						'Downloading ' + (videoFormat === 'mp3' ? 'audio' : 'video') + ' from youtube...',
-					success: 'Download completed !',
-					error: 'An error occured while downloading the video'
-				}
-			);
-
-			currentProject.set(project);
-
-			await addAssets([path]);
-		}
 
 		updateUsersProjects(project); // Save the project to the local storage
 
@@ -324,7 +273,7 @@
 		class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center"
 	>
 		<div
-			class="relative w-6/12 max-w-[500px] h-[340px] bg-default border-2 border-black rounded-xl p-4 flex flex-col items-center"
+			class="relative w-6/12 max-w-[500px] bg-default border-2 border-black rounded-xl p-4 flex flex-col items-center"
 		>
 			<button
 				class="w-6 h-6 absolute top-2 right-2 cursor-pointer border rounded-full"
@@ -350,59 +299,6 @@
 					if (e.key === 'Enter') handleCreateProjectButtonClicked();
 				}}
 			/>
-
-			<p class="self-start mt-5">
-				Import from youtube (optional) : <sm class="text-sm opacity-50"
-					>if the url is invalid, the software will crash!</sm
-				>
-			</p>
-			<input
-				type="text"
-				class="w-full h-10 border-2 border-black bg-[#272424] rounded-md p-2 mt-2 outline-none"
-				bind:value={youtubeUrl}
-				placeholder="https://www.youtube.com/watch?v=..."
-				on:keydown={(e) => {
-					if (e.key === 'Enter') handleCreateProjectButtonClicked();
-				}}
-			/>
-
-			<div class="flex flex-row w-full h-10">
-				<!-- button select a download location -->
-				<button
-					class={'w-1/2 h-full bg-[#272b28] hover:bg-[#0c0c0c] duration-150 text-white mt-4 rounded-md truncate px-1 ' +
-						(downloadLocation ? 'text-sm' : '')}
-					on:click={() => {
-						selectDowloadLocation();
-					}}
-				>
-					{downloadLocation ? downloadLocation : 'Select download location'}
-				</button>
-
-				<!-- mp3/mp4 toggle -->
-				<div class="flex flex-col ml-3 mt-3">
-					<p class="self-start">Format :</p>
-					<div class="flex items-center">
-						<input
-							type="radio"
-							id="mp3"
-							name="format"
-							value="mp3"
-							class="mr-2"
-							bind:group={videoFormat}
-						/>
-						<label for="mp3">Audio</label>
-						<input
-							type="radio"
-							id="mp4"
-							name="format"
-							value="mp4"
-							class="ml-4 mr-2"
-							bind:group={videoFormat}
-						/>
-						<label for="mp4">Video</label>
-					</div>
-				</div>
-			</div>
 
 			<button
 				class="w-1/2 h-10 bg-[#186435] hover:bg-[#163a23] duration-150 text-white mt-10 rounded-md"

@@ -15,6 +15,6 @@
 		>
 			<slot />
 		</svg>
-		<p class="ml-2 hidden xl:block">{text}</p>
+		<p class="ml-2 hidden xl:block">{@html text}</p>
 	</div>
 </button>
