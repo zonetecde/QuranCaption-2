@@ -44,10 +44,20 @@
 
 			if (videoComponent) {
 				const _videoDimensions = getDisplayedVideoSize(videoComponent);
-				videoDimensions.set({
-					width: _videoDimensions.displayedWidth,
-					height: _videoDimensions.displayedHeight
-				});
+
+				if (_videoDimensions.displayedHeight !== 0 && _videoDimensions.displayedWidth !== 0) {
+					videoDimensions.set({
+						width: _videoDimensions.displayedWidth,
+						height: _videoDimensions.displayedHeight
+					});
+				} else {
+					// Image de fond noir
+
+					videoDimensions.set({
+						width: 1920,
+						height: 1080
+					});
+				}
 			}
 		}, 1);
 	}
