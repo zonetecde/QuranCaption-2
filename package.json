@@ -19,7 +19,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/eslint": "^8.56.0",
 		"@typescript-eslint/eslint-plugin": "^5.35.1",
-		"@typescript-eslint/parser": "^3.10.1",
+		"@typescript-eslint/parser": "^5.62.0",
 		"autoprefixer": "^10.4.17",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -38,6 +38,7 @@
 	"type": "module",
 	"dependencies": {
 		"@tauri-apps/api": "^1.5.3",
+		"@tauri-apps/cli": "^1.6.1",
 		"svelte-french-toast": "^1.2.0",
 		"svelte-markdown": "^0.4.1"
 	}

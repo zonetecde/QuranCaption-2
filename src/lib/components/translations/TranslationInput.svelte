@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
-	import { GPT_URL } from '$lib/ext/PrivateVariable';
 	import {
 		isFetchingIA,
 		onlyShowSubtitlesThatAreNotFullVerses,
@@ -45,6 +44,25 @@
 			subtitle.surah,
 			subtitle.verse
 		);
+
+		// If we reset this translations, this means we might did things wrong
+		// So reset all the next translations of this verse
+		for (
+			let i = subtitleIndex + 1;
+			i < $currentProject.timeline.subtitlesTracks[0].clips.length;
+			i++
+		) {
+			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
+
+			if (element.verse === subtitle.verse && element.surah === subtitle.surah) {
+				element.translations[translation] = await downloadTranslationForVerse(
+					translation,
+					element.surah,
+					element.verse
+				);
+				changeText(element.id, translation);
+			}
+		}
 
 		changeText(subtitle.id, translation);
 	}
@@ -133,13 +151,20 @@
 								sum += translation.translations[translationId].length + 1;
 							}
 
-							// Remove the already-translated part of the text
-							element.translations[translationId] = element.translations[translationId].substring(
+							const newTranslation = element.translations[translationId].substring(
 								subtitle.translations[translationId].length + sum
 							);
 
-							// Change the text of the textarea
-							changeText(element.id, translationId);
+							// Check if the newTranslation is not empty and
+							// TODO: check if it does not start in the middle of a word - this would
+							// obviously be a mistake
+							if (newTranslation.trim() !== '') {
+								// Remove the already-translated part of the text
+								element.translations[translationId] = newTranslation;
+
+								// Change the text of the textarea
+								changeText(element.id, translationId);
+							}
 						}
 					}
 				}
@@ -164,109 +189,6 @@
 		//   // @ts-ignore
 		//   sel.addRange(range);
 		// }
-	}
-
-	/**
-	 * Asks the AI for word-by-word translation of a verse in a specific language.
-	 * @param translation The ID of the translation language.
-	 */
-	async function getGptWordByWordTranslation(translation: string) {
-		const edition = getEditionFromName(translation);
-
-		const savedInLocalStorage = localStorage.getItem('gptWbwTranslations') || '[]';
-		const parsedSavedInLocalStorage = JSON.parse(savedInLocalStorage);
-
-		if (savedInLocalStorage) {
-			const gptWbwTranslations = parsedSavedInLocalStorage.find(
-				(item: any) =>
-					item.surah === subtitle.surah &&
-					item.verse === subtitle.verse &&
-					item.lang === translation
-			);
-			if (gptWbwTranslations) {
-				return gptWbwTranslations.wbwTranslation;
-			}
-		} else if (savedInLocalStorage === '[]') {
-			localStorage.setItem('gptWbwTranslations', JSON.stringify([]));
-		}
-
-		if ($isFetchingIA) {
-			toast.error('Please wait for the AI to finish fetching the translation', {
-				position: 'bottom-left',
-				style: 'background-color: #333; color: white;',
-				icon: '🤖'
-			});
-			return;
-		}
-
-		const prompt = `You are granted the precious job of translating the quran word by word in ${edition?.language} !\nFor exemple, in english, the verse : \"اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِیْنَ\" is translated word by word as this dictionary :\n\n{\n\"اَلْحَمْدُ\": \"In (the) name\",\n\" لِلّٰهِ \": \"of Allah\",\n\"رَبِّ\": \"the Most Gracious\",\n\"الْعٰلَمِیْنَ\": \"the Most Merciful\"\n}\n\nNow give me translations word by word in ${edition?.language} of this verse : \n\n${$Mushaf.surahs[subtitle.surah - 1].verses[subtitle.verse - 1].text}\n\nPlease, inspire your transition by the real translation of the verse - you need to give me same words as the exisiting translations :\n\n${await downloadTranslationForVerse(translation, subtitle.surah, subtitle.verse)}\n\nGive me a json formated response only - I am using you as an api`;
-
-		try {
-			isFetchingIA.set(true);
-			const response = await fetch(GPT_URL + encodeURI(prompt), {
-				method: 'GET'
-			});
-			const data = (await response.json()) as string;
-			let json = data.replace('```json', '').replace('```', '').trim();
-			const gptWbwTranslations = JSON.parse(json);
-
-			// Save the chatgpt response in localStorage
-			if (savedInLocalStorage) {
-				parsedSavedInLocalStorage.push({
-					surah: subtitle.surah,
-					verse: subtitle.verse,
-					wbwTranslation: gptWbwTranslations,
-					lang: translation
-				});
-				localStorage.setItem('gptWbwTranslations', JSON.stringify(parsedSavedInLocalStorage));
-			}
-
-			isFetchingIA.set(false);
-			return gptWbwTranslations;
-		} catch (e) {
-			toast.error('An error occured while asking the AI for translation', {
-				position: 'bottom-left',
-				style: 'background-color: #333; color: white;',
-				icon: '🤖'
-			});
-
-			isFetchingIA.set(false);
-			return;
-		}
-	}
-
-	/**
-	 * Asks the AI for word-by-word translation of a verse in a specific language.
-	 * @param {string} translation - The ID of the translation language.
-	 * @returns {Promise<void>}
-	 */
-	async function askAiForTranslation(translation: string) {
-		const gptWbwTranslations = await getGptWordByWordTranslation(translation);
-
-		let gptTranslation = '';
-
-		for (let i = 0; i < Object.keys(gptWbwTranslations).length; i++) {
-			if (i >= subtitle.firstWordIndexInVerse && i <= subtitle.lastWordIndexInVerse) {
-				const element = Object.keys(gptWbwTranslations)[i];
-				gptTranslation += gptWbwTranslations[element] + ' ';
-			}
-		}
-
-		gptTranslation = gptTranslation.trim();
-
-		subtitle.translations[translation] = gptTranslation;
-
-		const textarea = document.getElementById(
-			'textarea-translation-' + subtitle.id + '-' + translation
-		);
-
-		textarea!.textContent = subtitle.translations[translation];
-
-		toast.success('The AI has successfully translated the text', {
-			position: 'bottom-left',
-			style: 'background-color: #333; color: white;',
-			icon: '🤖'
-		});
 	}
 
 	$: doesSubtitleNeedReview =
@@ -329,7 +251,7 @@
 						>
 						</span>
 
-						<div class="flex flex-row gap-x-2 bg-[#332128] px-2 rounded-md border border-[#1a1013]">
+						<div class="flex flex-row gap-x-1 bg-[#332128] px-2 rounded-md border border-[#1a1013]">
 							<button
 								class="relative group"
 								on:click={() => handleRefreshTranslation(translationId)}
@@ -353,28 +275,6 @@
 									class="absolute -translate-x-1/2 left-1/2 w-max bg-[#332128] border-[#1a1013] px-3 -bottom-5 hidden group-hover:inline-block"
 								>
 									Reset translation
-								</p>
-							</button>
-
-							<button class="relative group" on:click={() => askAiForTranslation(translationId)}>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke-width="1.5"
-									stroke="currentColor"
-									class="size-6"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
-									/>
-								</svg>
-								<p
-									class="absolute -translate-x-1/2 left-1/2 w-max bg-[#332128] border-[#1a1013] px-3 -bottom-5 hidden group-hover:inline-block"
-								>
-									Ask AI
 								</p>
 							</button>
 						</div>
