@@ -111,7 +111,8 @@
 
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = 'QuranCaptionBackup.qcb';
+		a.download =
+			'Quran Caption Backup ' + new Date().toISOString().replace(/:/g, '-').split('.')[0] + '.qcb';
 		a.click();
 	}
 

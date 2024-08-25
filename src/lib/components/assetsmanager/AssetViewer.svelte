@@ -52,6 +52,16 @@
 					isMuted: !withAudio
 				});
 
+				if (asset.type === 'image') {
+					toast(
+						'Please note that using the Background Image setting in the Global Subtitles Settings is recommended for a background image.',
+						{
+							icon: 'ℹ️',
+							duration: 6000
+						}
+					);
+				}
+
 				break;
 			case 'audio':
 				const lastAudioEndTime =

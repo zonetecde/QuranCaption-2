@@ -43,6 +43,7 @@ export interface SubtitleSettings {
 	backgroundOpacity: number;
 	fadeDuration: number;
 	horizontalPadding: number;
+	backgroundImage: string;
 
 	creatorText: CreatorText;
 }

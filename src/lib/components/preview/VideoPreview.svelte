@@ -31,6 +31,10 @@
 	$: $currentProject.projectSettings.subtitlesTracksSettings, calculateVideoDimensions();
 	$: $fullScreenPreview, calculateVideoDimensions();
 
+	$: backgroundImg = $currentProject.projectSettings.globalSubtitlesSettings.backgroundImage
+		? convertFileSrc($currentProject.projectSettings.globalSubtitlesSettings.backgroundImage)
+		: 'black.jpg';
+
 	async function calculateVideoDimensions() {
 		setTimeout(async () => {
 			// tant que la vidéo n'a pas chargé
@@ -195,7 +199,7 @@
 					{#if video.type === 'image'}
 						<img
 							class="w-full h-full object-contain"
-							src={video.id === 'black-screen' ? 'black.jpg' : convertFileSrc(video.filePath)}
+							src={video.id === 'black-screen' ? backgroundImg : convertFileSrc(video.filePath)}
 							alt={video.filePath}
 						/>
 					{/if}

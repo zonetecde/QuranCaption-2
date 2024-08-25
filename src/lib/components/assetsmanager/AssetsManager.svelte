@@ -14,6 +14,9 @@
 	let downloadLocation = '';
 	let videoFormat = 'mp4';
 
+	/**
+	 * Upload assets from the user's computer
+	 */
 	function uploadAssets() {
 		open({
 			multiple: true,

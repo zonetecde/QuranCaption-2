@@ -58,7 +58,7 @@ export function createBlankProject(name: string): Project {
 				backgroundOpacity: 0.5,
 				fadeDuration: 300,
 				horizontalPadding: 0,
-
+				backgroundImage: '',
 				creatorText: {
 					outline: true,
 					enable: true,

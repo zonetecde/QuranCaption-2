@@ -1,8 +1,29 @@
 <script lang="ts">
 	import Slider from '$lib/components/general/Slider.svelte';
 	import Toggle from '$lib/components/general/Toggle.svelte';
+	import { ImgFileExt } from '$lib/ext/File';
 	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
+	import { open } from '@tauri-apps/api/dialog';
+
+	function backgroundImageButtonClicked() {
+		open({
+			multiple: false,
+			directory: false,
+			defaultPath: 'C:\\Users\\User\\Videos',
+			filters: [
+				{
+					name: 'Image',
+					extensions: ImgFileExt
+				}
+			]
+		}).then((result) => {
+			if (result === null) return;
+
+			// Set the select file as the background image
+			$currentProject.projectSettings.globalSubtitlesSettings.backgroundImage = result as string;
+		});
+	}
 </script>
 
 <div class="flex flex-col">
@@ -50,6 +71,34 @@
 	/>
 
 	<br />
+
+	<!-- background image -->
+	<label for="background-image" class="flex items-center my-2"
+		><span class="min-w-40">Background Image :</span>
+
+		<button
+			class="bg-slate-800 border border-black text-white rounded-lg text-sm px-2 py-1"
+			on:click={backgroundImageButtonClicked}
+		>
+			Upload
+		</button>
+
+		{#if $currentProject.projectSettings.globalSubtitlesSettings.backgroundImage}
+			<p class="text-sm truncate mx-2" dir="rtl">
+				{$currentProject.projectSettings.globalSubtitlesSettings.backgroundImage || ''}
+			</p>
+
+			<abbr title="Remove this background image">
+				<button
+					class="bg-red-800 px-2 rounded-lg border border-black"
+					on:click={() =>
+						($currentProject.projectSettings.globalSubtitlesSettings.backgroundImage = '')}
+				>
+					X
+				</button></abbr
+			>
+		{/if}
+	</label>
 
 	<label for="background-color"
 		><span>Background Color :</span>
