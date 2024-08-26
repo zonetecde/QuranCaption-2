@@ -65,13 +65,6 @@
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
 	<h1 class="text-lg font-bold mb-2">Subtitle Background</h1>
 
-	<Toggle
-		text="Enable Background"
-		bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.background}
-	/>
-
-	<br />
-
 	<!-- background image -->
 	<label for="background-image" class="flex items-center my-2"
 		><span class="min-w-40">Background Image :</span>
@@ -99,6 +92,13 @@
 			>
 		{/if}
 	</label>
+
+	<Toggle
+		text="Enable Color Overlay"
+		bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.background}
+	/>
+
+	<br />
 
 	<label for="background-color"
 		><span>Background Color :</span>

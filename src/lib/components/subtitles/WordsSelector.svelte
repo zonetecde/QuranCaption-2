@@ -210,7 +210,8 @@
 			firstWordIndexInVerse: startWordIndex,
 			lastWordIndexInVerse: endWordIndex,
 			isSilence: subtitleText === '',
-			isLastWordInVerse: endWordIndex === wordsInSelectedVerse.length - 1
+			isLastWordInVerse: endWordIndex === wordsInSelectedVerse.length - 1,
+			hadItTranslationEverBeenModified: false
 		});
 
 		// Met à jour la liste des sous-titres

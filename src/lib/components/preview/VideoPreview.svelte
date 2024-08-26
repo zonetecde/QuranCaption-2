@@ -52,11 +52,14 @@
 					});
 				} else {
 					// Image de fond noir
+					const imgElement = document.getElementById('bg-img') as HTMLImageElement;
 
 					videoDimensions.set({
-						width: 1920,
-						height: 1080
+						width: imgElement.clientWidth,
+						height: imgElement.clientHeight
 					});
+
+					console.log($videoDimensions);
 				}
 			}
 		}, 1);
@@ -208,6 +211,7 @@
 
 					{#if video.type === 'image'}
 						<img
+							id="bg-img"
 							class="w-full h-full object-contain"
 							src={video.id === 'black-screen' ? backgroundImg : convertFileSrc(video.filePath)}
 							alt={video.filePath}
