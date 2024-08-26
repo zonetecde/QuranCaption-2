@@ -154,7 +154,7 @@
 				type="text"
 				placeholder="Search..."
 				bind:value={searchText}
-				class="w-80 right-0 top-1 absolute h-8 border-4 border-b-0 border-[#141414] bg-[#272424] rounded-t-md p-2 outline-none"
+				class="w-80 right-0 top-1 absolute h-8 border-4 border-b-0 border-[#141414] bg-[#171717] rounded-t-md p-2 outline-none"
 			/>
 
 			<div
