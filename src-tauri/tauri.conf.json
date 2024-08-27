@@ -67,7 +67,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": ["ffprobe.exe", "yt-dlp.exe"],
+			"resources": ["ffprobe.exe", "yt-dlp.exe", "black-vid.mp4"],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {

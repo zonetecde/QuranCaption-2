@@ -202,7 +202,9 @@
 							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$videoDimensions.width *
 							($currentProject.projectSettings.translateVideoX / 100)}px);
 						"
-						src={video.type === 'video' ? convertFileSrc(video.filePath) : '1pixel_vid.mp4'}
+						src={video.type === 'video'
+							? convertFileSrc(video.filePath)
+							: convertFileSrc('./black-vid.mp4')}
 						bind:this={videoComponent}
 						muted={currentVideo.isMuted}
 					>
