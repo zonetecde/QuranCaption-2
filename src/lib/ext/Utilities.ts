@@ -79,6 +79,7 @@ export async function importAndReadFile(
 
 export function reajustCursorPosition() {
 	const videoPreviewElement = document.getElementById('video-preview') as HTMLVideoElement;
+
 	if (videoPreviewElement) {
 		// Vérifie que c'est la seul vidéo dans la timeline (sinon on prend la pos du curseur)
 		if (get(currentProject).timeline.videosTracks[0].clips.length === 1) {
@@ -90,7 +91,6 @@ export function reajustCursorPosition() {
 				const video = get(currentProject).timeline.videosTracks[0].clips[i];
 				if (!videoPreviewElement.classList.contains(video.id)) {
 					totalDuration += video.duration;
-					console.log(totalDuration);
 				} else {
 					break;
 				}

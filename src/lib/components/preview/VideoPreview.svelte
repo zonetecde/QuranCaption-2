@@ -58,8 +58,6 @@
 						width: imgElement.clientWidth,
 						height: imgElement.clientHeight
 					});
-
-					console.log($videoDimensions);
 				}
 			}
 		}, 1);

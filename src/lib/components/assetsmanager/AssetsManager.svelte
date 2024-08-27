@@ -43,7 +43,6 @@
 		})
 			.then((res) => {
 				if (res) downloadLocation = res as string;
-				console.log(downloadLocation);
 			})
 			.catch((err) => {
 				console.error(err);
