@@ -181,17 +181,20 @@
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
 		// Réajuste la position du curseur si on est sur la vidéo
+		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
+		const currentTimeMs = audioElement.currentTime * 1000;
+
 		reajustCursorPosition(false);
 
 		// Vérifie qu'on est pas au 0
-		if ($cursorPosition < 100) {
+		if (currentTimeMs < 100) {
 			toast.error('Jouer la vidéo pour ajouter un sous-titre');
 			return;
 		}
 
 		// Vérifie que la fin > début
 		// TODO 2
-		if (lastSubtitleEndTime >= $cursorPosition) {
+		if (lastSubtitleEndTime >= currentTimeMs) {
 			toast.error(
 				'La fin du sous-titre précédent est supérieure ou égale au début du nouveau sous-titre'
 			);
@@ -202,7 +205,7 @@
 		subtitleClips.push({
 			id: subtitleId,
 			start: lastSubtitleEndTime,
-			end: $cursorPosition,
+			end: currentTimeMs,
 			text: subtitleText,
 			surah: isNotVerse ? -1 : surahNumber,
 			verse: isNotVerse ? -1 : verseNumber,
