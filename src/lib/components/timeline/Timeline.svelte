@@ -88,26 +88,32 @@
 							</p>
 						{/if}
 
-						<button
-							class="w-full h-6 absolute top-0 z-10 select-none outline-none"
-							on:click={(e) => moveCursorToPosition(e, i)}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div
+							class="w-full h-6 absolute top-0 z-10 select-none outline-none cursor-pointer"
+							on:mousedown={(e) => moveCursorToPosition(e, i)}
 							on:mousemove={(e) => {
 								if (e.buttons !== 1) return;
 								moveCursorToPosition(e, i);
 							}}
-						></button>
+						></div>
 					</div>
 				{/each}
 			{:else}
-				<button
-					class="h-6 absolute top-0 z-10 select-none outline-none"
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					class="h-6 absolute top-0 z-10 select-none outline-none focus:bg-red-300 cursor-pointer"
+					tabindex="-1"
 					style="width: {timeLineTotalDuration * 30}px;"
-					on:click={(e) => moveCursorToPosition(e, 0)}
+					on:mousedown={(e) => {
+						moveCursorToPosition(e, 0);
+					}}
 					on:mousemove={(e) => {
 						if (e.buttons !== 1) return;
 						moveCursorToPosition(e, 1);
 					}}
-				></button>
+				></div>
 			{/if}
 
 			<!-- Cursor -->
