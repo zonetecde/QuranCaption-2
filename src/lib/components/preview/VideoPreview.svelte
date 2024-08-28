@@ -58,6 +58,8 @@
 						width: imgElement.clientWidth,
 						height: imgElement.clientHeight
 					});
+
+					console.log('Video dimensions', $videoDimensions);
 				}
 			}
 		}, 1);
@@ -206,7 +208,7 @@
 						bind:this={videoComponent}
 						muted={currentVideo.isMuted}
 					>
-						<track kind="captions" src="vtt" srclang="en" label="English" default />
+						<track kind="captions" srclang="en" label="English" default />
 					</video>
 
 					{#if video.type === 'image'}

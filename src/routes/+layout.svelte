@@ -44,7 +44,7 @@
 				// Vérifie qu'on est pas dans un input
 				if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
 					e.preventDefault();
-					cursorPosition.update((value) => value - 3000);
+					cursorPosition.update((value) => value - 2000);
 					if ($cursorPosition < 0) cursorPosition.set(0);
 					if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
 				}
@@ -52,7 +52,7 @@
 				// Vérifie qu'on est pas dans un input
 				if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
 					e.preventDefault();
-					cursorPosition.update((value) => value + 3000);
+					cursorPosition.update((value) => value + 2000);
 					if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
 				}
 			}

@@ -82,7 +82,8 @@ export function createBlankProject(name: string): Project {
 					verticalPosition: 0,
 					horizontalPadding: 0,
 					opacity: 1,
-					showVerseNumber: true
+					showVerseNumber: true,
+					alignment: 'center'
 				}
 			}
 		}

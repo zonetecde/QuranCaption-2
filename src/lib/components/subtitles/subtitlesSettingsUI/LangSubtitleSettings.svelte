@@ -58,13 +58,28 @@
 			.opacity}
 	/>
 
-	<label class="mt-2">
+	<label class="mt-4">
 		<input
 			type="checkbox"
 			class="ml-1 scale-110"
 			bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 				.showVerseNumber}
 		/> <span class="ml-1">Show Verse Number</span>
+	</label>
+
+	<!-- alignement (left,center,right,justify) -->
+	<label for="alignement" class="mt-2 flex items-center"
+		><span class="w-32">Alignement :</span>
+		<select
+			class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
+			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+				.alignment}
+		>
+			<option class="bg-slate-300 text-black" value="center">Center</option>
+			<option class="bg-slate-300 text-black" value="start">Left</option>
+			<option class="bg-slate-300 text-black" value="end">Right</option>
+			<option class="bg-slate-300 text-black" value="justify">Justify</option>
+		</select>
 	</label>
 </div>
 

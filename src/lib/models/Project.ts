@@ -74,4 +74,5 @@ export interface SubtitleTrackSettings {
 	horizontalPadding: number;
 	opacity: number;
 	showVerseNumber: boolean;
+	alignment: 'start' | 'center' | 'end' | 'justify';
 }

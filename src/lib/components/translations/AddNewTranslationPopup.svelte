@@ -87,7 +87,8 @@
 			fontFamily: 'Verdana',
 			color: '#ffffff',
 			opacity: 1,
-			showVerseNumber: false
+			showVerseNumber: false,
+			alignment: 'center'
 		};
 
 		// Pour chaque verset, ajoute la traduction

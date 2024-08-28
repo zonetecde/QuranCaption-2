@@ -98,6 +98,15 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 						'Hafs'
 							? ''
 							: `font-family: ${$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily}`
+					}; text-align: ${
+						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].alignment ||
+						'center'
+					}; ${
+						subtitleLanguage === 'arabic' &&
+						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].alignment ===
+							'justify'
+							? 'direction: rtl;'
+							: ''
 					}`}
 				>
 					{#if currentSubtitle && currentSubtitle.text}
