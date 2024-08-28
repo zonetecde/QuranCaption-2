@@ -164,7 +164,7 @@
 		const interval = setInterval(() => {
 			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
 				// Réajuste la position du curseur pour éviter des problèmes de sync
-				reajustCursorPosition();
+				reajustCursorPosition(true);
 
 				// Si on arrive à la fin de la timeline, on scroll un peu pour voir la fin
 				if ($zoom === 30 && $cursorPosition > 5000 && ($cursorPosition * $zoom) % 1000 < 300) {
@@ -229,6 +229,7 @@
 				{@const audio = getAssetFromId(currentAudio.assetId)}
 				{#if audio}
 					<audio
+						id="audio-preview"
 						class="hidden"
 						src={convertFileSrc(audio.filePath)}
 						bind:this={audioComponent}

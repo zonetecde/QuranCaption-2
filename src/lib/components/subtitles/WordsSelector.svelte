@@ -181,7 +181,7 @@
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
 		// Réajuste la position du curseur si on est sur la vidéo
-		reajustCursorPosition();
+		reajustCursorPosition(false);
 
 		// Vérifie qu'on est pas au 0
 		if ($cursorPosition < 100) {

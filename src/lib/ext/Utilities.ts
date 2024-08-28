@@ -77,19 +77,30 @@ export async function importAndReadFile(
 	return null;
 }
 
-export function reajustCursorPosition() {
-	const videoPreviewElement = document.getElementById('video-preview') as HTMLVideoElement;
+/**
+ * Reajust the cursor position according to the video or the audio
+ * @param useVideoPreview If true, the cursor position will be reajusted according to the video preview, otherwise it will be reajusted according to the audio preview
+ */
+export function reajustCursorPosition(useVideoPreview: boolean) {
+	const mediaPreviewElement = document.getElementById(
+		useVideoPreview ? 'video-preview' : 'audio-preview'
+	) as any;
 
-	if (videoPreviewElement) {
+	if (mediaPreviewElement) {
 		// Vérifie que c'est la seul vidéo dans la timeline (sinon on prend la pos du curseur)
 		if (get(currentProject).timeline.videosTracks[0].clips.length === 1) {
-			cursorPosition.set(videoPreviewElement.currentTime * 1000);
+			cursorPosition.set(mediaPreviewElement.currentTime * 1000);
 		} else {
 			// Si il y a plusieurs vidéos ont doit aussi ajouter la durée de toutes les vidéos d'avant
 			let totalDuration = 0;
-			for (let i = 0; i < get(currentProject).timeline.videosTracks[0].clips.length; i++) {
-				const video = get(currentProject).timeline.videosTracks[0].clips[i];
-				if (!videoPreviewElement.classList.contains(video.id)) {
+
+			const clips = useVideoPreview
+				? get(currentProject).timeline.videosTracks[0].clips
+				: get(currentProject).timeline.audiosTracks[0].clips;
+
+			for (let i = 0; i < clips.length; i++) {
+				const video = clips[i];
+				if (!mediaPreviewElement.classList.contains(video.id)) {
 					totalDuration += video.duration;
 				} else {
 					break;
@@ -98,9 +109,9 @@ export function reajustCursorPosition() {
 
 			if (totalDuration > 0) {
 				setTimeout(() => {
-					cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
+					cursorPosition.set(mediaPreviewElement.currentTime * 1000 + totalDuration);
 				}, 500);
-			} else cursorPosition.set(videoPreviewElement.currentTime * 1000 + totalDuration);
+			} else cursorPosition.set(mediaPreviewElement.currentTime * 1000 + totalDuration);
 		}
 	}
 }
