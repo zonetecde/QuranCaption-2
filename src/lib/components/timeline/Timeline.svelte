@@ -12,6 +12,7 @@
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import { bestPerformance } from '$lib/stores/LayoutStore';
 
 	export let useInPlayer = false; // Est-ce que c'est utilisé en tant que barrre de temps dans le lecteur vidéo ?
 
@@ -72,31 +73,42 @@
 >
 	<div class={'h-full bg-[#1f1d1d] relative w-max ' + (useInPlayer ? 'content' : '')}>
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
-			{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}
-				<div
-					class="h-full"
-					style="min-width: {$zoom}px; max-width: {$zoom}px; background-color:  {i % 2 === 0
-						? '#1a1d1d'
-						: '#1d1d1d'};
+			{#if $bestPerformance}
+				{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}
+					<div
+						class="h-full"
+						style="min-width: {$zoom}px; max-width: {$zoom}px; background-color:  {i % 2 === 0
+							? '#1a1d1d'
+							: '#1d1d1d'};
 					"
-				>
-					{#if $zoom >= 30 || ($zoom > 20 && i % 5 === 0 && $zoom < 30) || ($zoom > 10 && i % 3 === 0 && $zoom < 20) || ($zoom > 5 && i % 5 === 0 && $zoom < 10) || ($zoom > 3 && i % 10 === 0 && $zoom < 5) || ($zoom > 1.5 && i % 20 === 0 && $zoom < 3) || ($zoom > 1 && i % 50 === 0 && $zoom < 1.5)}
-						<p class="text-[0.6rem] opacity-30 -translate-x-1/2 w-fit">
-							{secondsToHHMMSS(i, true)[0]}
-						</p>
-					{/if}
+					>
+						{#if $zoom >= 30 || ($zoom > 20 && i % 5 === 0 && $zoom < 30) || ($zoom > 10 && i % 3 === 0 && $zoom < 20) || ($zoom > 5 && i % 5 === 0 && $zoom < 10) || ($zoom > 3 && i % 10 === 0 && $zoom < 5) || ($zoom > 1.5 && i % 20 === 0 && $zoom < 3) || ($zoom > 1 && i % 50 === 0 && $zoom < 1.5)}
+							<p class="text-[0.6rem] opacity-30 -translate-x-1/2 w-fit">
+								{secondsToHHMMSS(i, true)[0]}
+							</p>
+						{/if}
 
-					<!-- svelte-ignore a11y-mouse-events-have-key-events -->
-					<button
-						class="w-full h-6 absolute top-0 z-10 select-none outline-none"
-						on:click={(e) => moveCursorToPosition(e, i)}
-						on:mousemove={(e) => {
-							if (e.buttons !== 1) return;
-							moveCursorToPosition(e, i);
-						}}
-					></button>
-				</div>
-			{/each}
+						<button
+							class="w-full h-6 absolute top-0 z-10 select-none outline-none"
+							on:click={(e) => moveCursorToPosition(e, i)}
+							on:mousemove={(e) => {
+								if (e.buttons !== 1) return;
+								moveCursorToPosition(e, i);
+							}}
+						></button>
+					</div>
+				{/each}
+			{:else}
+				<button
+					class="h-6 absolute top-0 z-10 select-none outline-none"
+					style="width: {timeLineTotalDuration * 30}px;"
+					on:click={(e) => moveCursorToPosition(e, 0)}
+					on:mousemove={(e) => {
+						if (e.buttons !== 1) return;
+						moveCursorToPosition(e, 1);
+					}}
+				></button>
+			{/if}
 
 			<!-- Cursor -->
 			<!-- The `- 1` in the calcul is because the cursor is 2px thick -->
