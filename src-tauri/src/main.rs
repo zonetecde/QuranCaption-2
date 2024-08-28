@@ -68,7 +68,8 @@ async fn do_file_exist(path: String) -> bool {
 async fn download_youtube_video(format: String, url: String, path: String) -> bool {
     let format_flag = match format.as_str() {
         "mp3" => {
-            vec!["-x", "--audio-format", "mp3"]
+            // Specify bitrate for MP3 format (example: 192kbps CBR)
+            vec!["-x", "--audio-format", "mp3", "--audio-quality", "192K"]
         }
         "mp4" => {
             vec!["--format", "mp4"]
@@ -101,4 +102,3 @@ async fn download_youtube_video(format: String, url: String, path: String) -> bo
         }
     }
 }
-

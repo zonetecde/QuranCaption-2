@@ -110,6 +110,12 @@
 		}
 		if (currentAudio && audioComponent)
 			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
+
+		// hh:mm:ss
+		console.log(secondsToHHMMSS(audioComponent.currentTime));
+		setTimeout(() => {
+			console.log(secondsToHHMMSS(audioComponent.currentTime));
+		}, 1000);
 	}
 
 	/**
@@ -164,7 +170,7 @@
 		const interval = setInterval(() => {
 			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
 				// Réajuste la position du curseur pour éviter des problèmes de sync
-				reajustCursorPosition();
+				reajustCursorPosition(true);
 
 				// Si on arrive à la fin de la timeline, on scroll un peu pour voir la fin
 				if ($zoom === 30 && $cursorPosition > 5000 && ($cursorPosition * $zoom) % 1000 < 300) {
