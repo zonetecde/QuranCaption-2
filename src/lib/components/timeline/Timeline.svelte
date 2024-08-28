@@ -92,6 +92,7 @@
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<div
 							class="w-full h-6 absolute top-0 z-10 select-none outline-none cursor-pointer"
+							tabindex="-1"
 							on:mousedown={(e) => moveCursorToPosition(e, i)}
 							on:mousemove={(e) => {
 								if (e.buttons !== 1) return;
@@ -103,9 +104,9 @@
 			{:else}
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					class="h-6 absolute top-0 z-10 select-none outline-none focus:bg-red-300 cursor-pointer"
+					class="h-6 absolute top-0 z-10 select-none outline-none cursor-pointer bg-red-300"
 					tabindex="-1"
-					style="width: {timeLineTotalDuration * 30}px;"
+					style="width: {timeLineTotalDuration * $zoom}px;"
 					on:mousedown={(e) => {
 						moveCursorToPosition(e, 0);
 					}}
