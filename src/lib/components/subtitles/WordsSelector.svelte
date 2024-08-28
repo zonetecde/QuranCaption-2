@@ -184,7 +184,7 @@
 		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
 		const currentTimeMs = audioElement.currentTime * 1000;
 
-		reajustCursorPosition(false);
+		reajustCursorPosition();
 
 		// Vérifie qu'on est pas au 0
 		if (currentTimeMs < 100) {

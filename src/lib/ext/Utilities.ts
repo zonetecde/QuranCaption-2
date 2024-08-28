@@ -81,10 +81,10 @@ export async function importAndReadFile(
  * Reajust the cursor position according to the video or the audio
  * @param useVideoPreview If true, the cursor position will be reajusted according to the video preview, otherwise it will be reajusted according to the audio preview
  */
-export function reajustCursorPosition(useVideoPreview: boolean) {
-	const mediaPreviewElement = document.getElementById(
-		useVideoPreview ? 'video-preview' : 'audio-preview'
-	) as any;
+export function reajustCursorPosition() {
+	const mediaPreviewElement =
+		(document.getElementById('audio-preview') as any) ||
+		(document.getElementById('video-preview') as any);
 
 	if (mediaPreviewElement) {
 		// Vérifie que c'est la seul vidéo dans la timeline (sinon on prend la pos du curseur)
@@ -94,9 +94,10 @@ export function reajustCursorPosition(useVideoPreview: boolean) {
 			// Si il y a plusieurs vidéos ont doit aussi ajouter la durée de toutes les vidéos d'avant
 			let totalDuration = 0;
 
-			const clips = useVideoPreview
-				? get(currentProject).timeline.videosTracks[0].clips
-				: get(currentProject).timeline.audiosTracks[0].clips;
+			const clips =
+				mediaPreviewElement instanceof HTMLVideoElement
+					? get(currentProject).timeline.videosTracks[0].clips
+					: get(currentProject).timeline.audiosTracks[0].clips;
 
 			for (let i = 0; i < clips.length; i++) {
 				const video = clips[i];
