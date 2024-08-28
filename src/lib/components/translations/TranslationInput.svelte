@@ -54,7 +54,11 @@
 		) {
 			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
 
-			if (element.verse === subtitle.verse && element.surah === subtitle.surah) {
+			if (
+				element.verse === subtitle.verse &&
+				element.surah === subtitle.surah &&
+				!element.hadItTranslationEverBeenModified
+			) {
 				element.translations[translation] = await downloadTranslationForVerse(
 					translation,
 					element.surah,
