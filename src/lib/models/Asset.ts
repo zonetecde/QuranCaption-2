@@ -82,6 +82,20 @@ export function removeAsset(id: string) {
 			track.clips = track.clips.filter((clip) => clip.assetId !== id);
 		});
 
+		if (v.timeline.videosTracks[0].clips.length === 0) {
+			// Add the default black video if there are no videos
+			v.timeline.videosTracks[0].clips.push({
+				id: 'black-video',
+				start: 0,
+				duration: 7200000,
+				end: 7200000,
+				assetId: 'black-video',
+				fileStartTime: 0,
+				fileEndTime: 7200000,
+				isMuted: false
+			});
+		}
+
 		return v;
 	});
 }

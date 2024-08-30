@@ -58,13 +58,21 @@
 			}
 		});
 
-		track.clips = track.clips;
-	}
+		if (track.clips.length === 0) {
+			// Add the default black video
+			track.clips.push({
+				id: 'black-video',
+				start: 0,
+				duration: 7200000,
+				end: 7200000,
+				assetId: 'black-video',
+				fileStartTime: 0,
+				fileEndTime: 7200000,
+				isMuted: false
+			});
+		}
 
-	function handleTrimClipButtonClicked() {
-		// Open the trim dialog
-		// trimDialog.set(clip.id);
-		// console.log(clip.id);
+		track.clips = track.clips;
 	}
 
 	let myMenu: ContextMenu;

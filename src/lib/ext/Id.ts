@@ -15,13 +15,13 @@ export default class Id {
 }
 
 export function getAssetFromId(id: string): Asset | undefined {
-	if (id === 'black-screen') {
+	if (id === 'black-video') {
 		return {
-			fileName: 'Black Screen',
-			filePath: 'black.jpg',
-			type: 'image',
-			id: 'black-screen',
-			duration: 0,
+			fileName: 'black-video',
+			filePath: './black-vid.mp4',
+			type: 'video',
+			id: 'black-video',
+			duration: 7200000,
 			exist: true
 		};
 	}

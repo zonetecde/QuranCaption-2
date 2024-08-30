@@ -182,7 +182,9 @@
 
 		// Réajuste la position du curseur si on est sur la vidéo
 		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
-		const currentTimeMs = audioElement.currentTime * 1000;
+		let currentTimeMs = 0;
+		if (audioElement) currentTimeMs = audioElement.currentTime * 1000;
+		else currentTimeMs = $cursorPosition;
 
 		reajustCursorPosition(false);
 

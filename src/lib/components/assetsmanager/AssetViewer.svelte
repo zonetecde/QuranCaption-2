@@ -24,6 +24,14 @@
 		switch (asset.type) {
 			case 'video':
 			case 'image':
+				if (
+					$currentProject.timeline.videosTracks[0].clips.length === 1 &&
+					$currentProject.timeline.videosTracks[0].clips[0].id === 'black-video'
+				) {
+					// Remove this clip as it is the default black video
+					$currentProject.timeline.videosTracks[0].clips = [];
+				}
+
 				const lastAssetEndTime =
 					$currentProject.timeline.videosTracks[0].clips.length > 0
 						? $currentProject.timeline.videosTracks[0].clips[

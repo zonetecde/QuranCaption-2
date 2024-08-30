@@ -8,7 +8,7 @@ export const userFonts: Writable<string[]> = writable([]); // Les polices de l'u
 export const newUpdateAvailable: Writable<boolean> = writable(false); // Indique si une nouvelle version est disponible
 export const newUpdateDescription: Writable<string> = writable(''); // La description de la nouvelle version
 export const fullScreenPreview: Writable<boolean> = writable(false); // Indique si la prévisualisation est en plein écran
-export const bestPerformance: Writable<boolean> = writable(true); // Indique si l'utilisateur a choisi la meilleure performance (cache les timings sur la timeline)
+export const bestPerformance: Writable<boolean> = writable(false); // Indique si l'utilisateur a choisi la meilleure performance (cache les timings sur la timeline)
 
 // Layout
 export const currentPage: Writable<PageType> = writable('Video editor');

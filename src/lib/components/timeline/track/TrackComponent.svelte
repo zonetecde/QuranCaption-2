@@ -24,10 +24,12 @@
 		<div class="flex flex-row h-full">
 			{#if track.type !== 'Subtitles track'}
 				{#each track.clips as clip, i}
-					{@const asset = getAssetFromId(clip.assetId)}
+					{#if clip.id !== 'black-video'}
+						{@const asset = getAssetFromId(clip.assetId)}
 
-					{#if asset}
-						<ClipComponent {asset} bind:track bind:clip {i} />
+						{#if asset}
+							<ClipComponent {asset} bind:track bind:clip {i} />
+						{/if}
 					{/if}
 				{/each}
 			{:else}

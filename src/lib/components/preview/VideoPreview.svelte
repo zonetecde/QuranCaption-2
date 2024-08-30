@@ -58,8 +58,6 @@
 						width: imgElement.clientWidth,
 						height: imgElement.clientHeight
 					});
-
-					console.log('Video dimensions', $videoDimensions);
 				}
 			}
 		}, 1);
@@ -71,13 +69,7 @@
 		(video) =>
 			(video.start === 0 && video.start <= $cursorPosition && video.end >= $cursorPosition) || // Le + 1 permet de prevent un bug qui fait que le curseur ne va pas sur la deuxième vidéo lorsque la première se termine (il faut laisser le temps à l'id de la nouvelle vidéo de se mettre dans les classes du videoComponent)
 			(video.start > 0 && video.start - 1000 < $cursorPosition && video.end >= $cursorPosition)
-	) || {
-		start: 0,
-		end: 999999999,
-		assetId: 'black-screen',
-		isMuted: false,
-		id: ''
-	};
+	);
 
 	$: currentAudio = $currentProject.timeline.audiosTracks[0].clips.find(
 		(audio) =>
@@ -110,12 +102,6 @@
 		}
 		if (currentAudio && audioComponent)
 			audioComponent.currentTime = ($cursorPosition - currentAudio.start) / 1000;
-
-		// hh:mm:ss
-		console.log(secondsToHHMMSS(audioComponent.currentTime));
-		setTimeout(() => {
-			console.log(secondsToHHMMSS(audioComponent.currentTime));
-		}, 1000);
 	}
 
 	/**
@@ -202,26 +188,26 @@
 						class={'bg-red-black w-full h-full object-contain ' +
 							currentVideo.id +
 							' ' +
-							(video.type === 'video' ? 'block' : 'hidden')}
+							(video.type === 'video' && video.id !== 'black-video' ? '' : 'hidden')}
 						id="video-preview"
 						style="
 							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$videoDimensions.width *
 							($currentProject.projectSettings.translateVideoX / 100)}px);
 						"
-						src={video.type === 'video'
-							? convertFileSrc(video.filePath)
-							: convertFileSrc('./black-vid.mp4')}
+						src={video.type === 'image'
+							? convertFileSrc('./black-vid.mp4')
+							: convertFileSrc(video.filePath)}
 						bind:this={videoComponent}
 						muted={currentVideo.isMuted}
 					>
-						<track kind="captions" srclang="en" label="English" default />
+						<track kind="captions" default />
 					</video>
 
-					{#if video.type === 'image'}
+					{#if video.type === 'image' || video.id === 'black-video'}
 						<img
 							id="bg-img"
 							class="w-full h-full object-contain"
-							src={video.id === 'black-screen' ? backgroundImg : convertFileSrc(video.filePath)}
+							src={video.id === 'black-video' ? backgroundImg : convertFileSrc(video.filePath)}
 							alt={video.filePath}
 						/>
 					{/if}

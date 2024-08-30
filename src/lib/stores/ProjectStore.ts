@@ -23,7 +23,18 @@ export function createBlankProject(name: string): Project {
 				{
 					id: Id.generate(),
 					name: 'Background Video',
-					clips: [],
+					clips: [
+						{
+							id: 'black-video',
+							start: 0,
+							end: 7200000,
+							duration: 7200000,
+							assetId: 'black-video',
+							fileStartTime: 0,
+							fileEndTime: 7200000,
+							isMuted: true
+						}
+					],
 					type: 'Video track'
 				}
 			],

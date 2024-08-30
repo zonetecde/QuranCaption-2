@@ -73,7 +73,7 @@
 >
 	<div class={'h-full bg-[#1f1d1d] relative w-max ' + (useInPlayer ? 'content' : '')}>
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
-			{#if $bestPerformance}
+			{#if !$bestPerformance}
 				{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}
 					<div
 						class="h-full"

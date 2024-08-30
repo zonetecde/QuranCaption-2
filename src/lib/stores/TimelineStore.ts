@@ -12,7 +12,15 @@ export function getTimelineTotalDuration(timeline: Timeline) {
 	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks, ...timeline.subtitlesTracks];
 	let maxEnd =
 		tracks.reduce((max, track) => {
-			return Math.max(max, track.clips.length === 0 ? 0 : track.clips[track.clips.length - 1].end);
+			return Math.max(
+				max,
+				// Does not take into account the black video
+				track.clips.length === 0
+					? 0
+					: track.clips[track.clips.length - 1].id === 'black-video'
+						? 0
+						: track.clips[track.clips.length - 1].end
+			);
 		}, 0) / 1000;
 
 	const marge = 120;
