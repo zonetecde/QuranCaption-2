@@ -81,7 +81,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 					($showSubtitlesPadding ? ' bg-blue-500 bg-opacity-30' : '')}
 			>
 				<p
-					class="arabic text-center"
+					class="arabic text-center w-full"
 					style={`font-size: ${subtitleTextSize}px; ${
 						enableOutline
 							? `text-shadow: ` +

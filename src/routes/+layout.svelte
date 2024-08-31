@@ -70,6 +70,7 @@
 			// if key is F6, toggle best performance
 			else if (e.key === 'F6') {
 				bestPerformance.set(!$bestPerformance);
+				$currentProject.projectSettings.bestPerformance = $bestPerformance;
 				if ($bestPerformance) {
 					toast.success('Best performance mode activated');
 				} else {

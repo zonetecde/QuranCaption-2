@@ -5,7 +5,12 @@
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
 	import VideoPreview from '$lib/components/preview/VideoPreview.svelte';
-	import { currentPage, fullScreenPreview, trimDialog } from '$lib/stores/LayoutStore';
+	import {
+		bestPerformance,
+		currentPage,
+		fullScreenPreview,
+		trimDialog
+	} from '$lib/stores/LayoutStore';
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
 	import { cursorPosition, zoom, scrollPosition } from '$lib/stores/TimelineStore';
@@ -28,6 +33,7 @@
 		cursorPosition.set(project.projectSettings.cursorPosition);
 		zoom.set(project.projectSettings.zoom);
 		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);
+		bestPerformance.set(project.projectSettings.bestPerformance);
 
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {
