@@ -90,6 +90,8 @@
 			}
 		}
 
+		toast.success('No collision were found.');
+
 		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 	}
 </script>
@@ -188,14 +190,19 @@
 		{/if}
 	</select>
 
-	<button
-		class="bg-[#383535] py-2.5 w-60 mx-auto rounded-xl border-2 border-black"
-		on:click={checkForCollision}>Check for collisions</button
-	>
-
 	{#if _selectedSubtitlesLanguage === 'global'}
 		<GlobalSubtitleSettings />
 	{:else}
 		<LangSubtitleSettings subtitleLanguage={_selectedSubtitlesLanguage} />
 	{/if}
+
+	<button
+		class="bg-[#383535] py-2.5 mb-6 w-60 mx-auto rounded-xl border-2 border-black"
+		on:click={checkForCollision}
+		><abbr
+			title="This button will scan all subtitles added and displayed on screen to check that they don't fit."
+		>
+			Check for collisions</abbr
+		></button
+	>
 </div>
