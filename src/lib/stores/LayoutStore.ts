@@ -1,3 +1,4 @@
+import type Project from '$lib/models/Project';
 import { invoke } from '@tauri-apps/api';
 import { get, writable, type Writable } from 'svelte/store';
 
