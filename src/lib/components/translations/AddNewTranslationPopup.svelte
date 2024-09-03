@@ -106,6 +106,8 @@
 			element.hadItTranslationEverBeenModified = false; // Reset the flag
 		});
 
+		document.getElementById('fetch-translations-button')?.click();
+
 		toast.success('Translation added');
 	}
 </script>

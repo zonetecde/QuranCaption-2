@@ -11,6 +11,8 @@
 	 * Search in all the other user's projects for the translations of the current project
 	 */
 	async function fetchTranslationsFromOtherProjects() {
+		let numberOfUpdatedTranslations = 0;
+
 		const userProjects = getUserProjects();
 
 		await Promise.all(
@@ -49,6 +51,7 @@
 													) {
 														subtitle.translations[translation] = translationText;
 														subtitle.hadItTranslationEverBeenModified = true;
+														numberOfUpdatedTranslations++;
 													}
 												}
 											}
@@ -62,7 +65,11 @@
 			})
 		);
 
-		toast.success('Translations fetched from other projects');
+		toast.success(
+			'Translations fetched from other projects.\n' +
+				numberOfUpdatedTranslations +
+				' translation(s) updated.'
+		);
 
 		// Force update
 		$currentProject.timeline.subtitlesTracks[0].clips =
@@ -126,6 +133,7 @@
 	>
 		<button
 			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a]"
+			id="fetch-translations-button"
 			on:click={() => {
 				fetchTranslationsFromOtherProjects();
 			}}>Fetch translations from other projects</button
