@@ -16,12 +16,21 @@
 
 	onMount(() => {
 		// Remets là où on était
-		const lastSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.slice(-1)[0];
-		if (lastSubtitle) {
-			if (lastSubtitle.surah === -1 || lastSubtitle.verse === -1) return;
-			verseNumber = lastSubtitle.verse;
-			verseNumberInInput = lastSubtitle.verse;
-			surahNumber = lastSubtitle.surah;
+		for (let i = $currentProject.timeline.subtitlesTracks[0].clips.length; i >= 0; i--) {
+			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
+
+			if (element && element.verse !== -1 && element.surah !== -1) {
+				verseNumber = element.verse;
+				verseNumberInInput = element.verse;
+				surahNumber = element.surah;
+
+				if (element.isLastWordInVerse) {
+					// Go to next verse
+					verseNumber += 1;
+					verseNumberInInput += 1;
+				}
+				break;
+			}
 		}
 	});
 
