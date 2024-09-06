@@ -31,7 +31,7 @@
 				{min}
 				{max}
 				{step}
-				class="ml-1 bg-transparent bg-slate-600 px-2 py-1 w-20 border border-slate-700 rounded-lg outline-none"
+				class="ml-1 bg-transparent bg-slate-600 pl-1 py-1 w-16 border border-slate-700 rounded-lg outline-none"
 				bind:value={bindValue}
 				on:mousedown={(e) => {
 					isMouseDown = true;

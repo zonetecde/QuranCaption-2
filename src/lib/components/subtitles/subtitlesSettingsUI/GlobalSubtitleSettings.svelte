@@ -70,10 +70,10 @@
 
 	<!-- background image -->
 	<label for="background-image" class="flex items-center my-2"
-		><span class="min-w-40">Background Image :</span>
+		><span class="min-w-40 text-sm xl:text-base">Background Image :</span>
 
 		<button
-			class="bg-slate-800 border border-black text-white rounded-lg text-sm px-2 py-1"
+			class="bg-slate-800 border border-black text-white rounded-lg text-sm px-2 py-1 -ml-7 xl:-ml-2"
 			on:click={backgroundImageButtonClicked}
 		>
 			Upload
