@@ -21,6 +21,10 @@ fn get_file_content(path: String) -> Result<String, String> {
 
 #[tauri::command]
 fn get_video_duration(path: String) -> Result<i32, String> {
+    // wait for the file to be not used by another process
+    std::thread::sleep(std::time::Duration::from_secs(1));
+
+
   // get video duration
   let output = Command::new("./ffprobe")
     .arg("-v")
@@ -34,9 +38,9 @@ fn get_video_duration(path: String) -> Result<i32, String> {
     .expect("failed to execute process");
    
    // convert output to string
-  let duration = String::from_utf8_lossy(&output.stdout);
-  // remove new line
-  let duration = duration.trim().parse::<f64>().unwrap();
+    let duration = String::from_utf8_lossy(&output.stdout);
+    // remove new line
+    let duration = duration.trim().parse::<f64>().unwrap_or(0.0);
 
   // to ms
   let duration = duration * 1000.0;
@@ -67,15 +71,15 @@ async fn do_file_exist(path: String) -> bool {
 #[tauri::command]
 async fn download_youtube_video(format: String, url: String, path: String) -> bool {
     let format_flag = match format.as_str() {
-        "mp3" => {
-            // Specify bitrate for MP3 format (example: 192kbps CBR)
-            vec!["-x", "--audio-format", "mp3", "--audio-quality", "192K"]
-        }
+        "webm" => {
+            // Specify constant bitrate for WebM audio (example: 192kbps)
+            vec!["--format", "bestaudio[ext=webm]", "--audio-quality", "192K", "--postprocessor-args", "-c:a libopus -b:a 192k -vbr off"]
+        },
         "mp4" => {
             vec!["--format", "mp4"]
-        }
+        },
         _ => {
-            println!("Invalid format specified");
+            println!("Invalid format specified. Only 'webm' is supported.");
             return false;
         }
     };

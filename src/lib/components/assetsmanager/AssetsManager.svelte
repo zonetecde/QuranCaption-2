@@ -68,14 +68,13 @@
 			toast.error('Please select a download location');
 			return;
 		}
-
 		const path =
 			downloadLocation +
 			'/' +
-			(videoFormat === 'mp3' ? 'base audio' : 'base video') +
+			(videoFormat === 'webm' ? 'audio_' : 'video_') +
+			Math.floor(Math.random() * (9999 - 1000 + 1) + 1000) +
 			'.' +
 			videoFormat;
-
 		// Téléchargement de la vidéo youtube
 		await toast.promise(
 			invoke('download_youtube_video', {
@@ -84,7 +83,7 @@
 				path: path
 			}),
 			{
-				loading: 'Downloading ' + (videoFormat === 'mp3' ? 'audio' : 'video') + ' from youtube...',
+				loading: 'Downloading ' + (videoFormat === 'webm' ? 'audio' : 'video') + ' from youtube...',
 				success: 'Download completed !',
 				error: 'An error occured while downloading the video'
 			}
@@ -149,19 +148,19 @@
 					{downloadLocation ? downloadLocation : 'Select download location'}
 				</button>
 
-				<!-- mp3/mp4 toggle -->
+				<!-- webm/mp4 toggle -->
 				<div class="flex flex-col ml-3 mt-3 z-10">
 					<p class="self-start">Format :</p>
 					<div class="flex items-center">
 						<input
 							type="radio"
-							id="mp3"
+							id="webm"
 							name="format"
-							value="mp3"
+							value="webm"
 							class="mr-2"
 							bind:group={videoFormat}
 						/>
-						<label for="mp3">Audio</label>
+						<label for="webm">Audio</label>
 						<input
 							type="radio"
 							id="mp4"
