@@ -9,7 +9,7 @@
 	import { latinNumberToArabic, millisecondsToSubtitlesTimeFormat } from '$lib/ext/Utilities';
 	import toast from 'svelte-french-toast';
 
-	let outputType: undefined | 'video' | 'subtitles' = 'subtitles';
+	let outputType: undefined | 'video' | 'subtitles' = undefined;
 
 	let selectedTranslations: string[] = [];
 	let translationsWithVerseNumber: string[] = [];
