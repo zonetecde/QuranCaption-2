@@ -58,7 +58,7 @@
 			}
 		});
 
-		if (track.clips.length === 0) {
+		if (track.clips.length === 0 && track.type === 'Video track') {
 			// Add the default black video
 			track.clips.push({
 				id: 'black-video',
@@ -71,6 +71,8 @@
 				isMuted: false
 			});
 		}
+
+		console.log(track.clips);
 
 		track.clips = track.clips;
 	}

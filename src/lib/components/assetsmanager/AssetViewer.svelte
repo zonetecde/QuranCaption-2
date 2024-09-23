@@ -189,9 +189,10 @@
 				>Add in the timeline without the audio</button
 			>
 		{/if}
-		{#if !asset.exist}
+		{#if asset.exist}
 			<button
-				class="absolute w-full bg-[#1b422a] py-2 -bottom-[7.3rem] rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] z-40"
+				class={'absolute w-full bg-[#1b422a] py-2 rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] z-40 ' +
+					(asset.type === 'video' ? '-bottom-[7.3rem]' : '-bottom-[4.3rem]')}
 				on:click={() => relocateAsset()}>Relocate asset</button
 			>
 		{/if}

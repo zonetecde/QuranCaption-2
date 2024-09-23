@@ -77,6 +77,8 @@
 			(audio.start > 0 && audio.start - 1000 < $cursorPosition && audio.end >= $cursorPosition)
 	);
 
+	$: console.log($currentProject.timeline.audiosTracks);
+
 	let currentSubtitle: SubtitleClip;
 
 	$: if ($spaceBarPressed) {
