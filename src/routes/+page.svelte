@@ -72,7 +72,7 @@
 
 		const project = createBlankProject(projectName);
 
-		updateUsersProjects(project); // Save the project to the local storage
+		userProjectsDesc = updateUsersProjects(project); // Save the project to the local storage
 
 		openProject(project.id); // Open the project
 	}
