@@ -84,6 +84,8 @@
 						subtitle1Rect.top < subtitle2Rect.bottom
 					) {
 						toast.error('Collision found at ' + milisecondsToMMSS(clip.start));
+
+						$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 						return;
 					}
 				}
