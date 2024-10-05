@@ -2,6 +2,7 @@ import type Project from '$lib/models/Project';
 import { get, writable, type Writable } from 'svelte/store';
 import { cursorPosition, scrollPosition, zoom } from './TimelineStore';
 import Id from '$lib/ext/Id';
+import type { ProjectDesc } from '$lib/models/Project';
 
 export const currentProject: Writable<Project> = writable();
 
@@ -107,23 +108,21 @@ export function createBlankProject(name: string): Project {
  * @param id - The ID of the project to delete.
  * @returns An array of user projects.
  */
-export function delProject(id: string): Project[] {
-	const projects = getUserProjects();
-	const index = projects.findIndex((p) => p.id === id);
+export function delProject(id: string): ProjectDesc[] {
+	localStorage.removeItem(id);
 
-	if (index !== -1) {
-		projects.splice(index, 1);
-		localStorage.setItem('projects', JSON.stringify(projects));
-	}
+	let userProjects = getUserProjects();
+	userProjects = userProjects.filter((x) => x.id !== id);
+	localStorage.setItem('projects', JSON.stringify(userProjects));
 
-	return projects;
+	return userProjects;
 }
 
 /**
  * Retrieves the user's projects from local storage.
  * @returns An array of user projects.
  */
-export function getUserProjects(): Project[] {
+export function getUserProjects(): ProjectDesc[] {
 	return JSON.parse(localStorage.getItem('projects') || '[]');
 }
 
@@ -133,21 +132,23 @@ export function getUserProjects(): Project[] {
  * @returns The project with the specified ID, or undefined if not found.
  */
 export function getProjectById(id: string): Project | undefined {
-	return getUserProjects().find((p) => p.id === id);
+	const projJson = localStorage.getItem(id);
+	if (projJson) return JSON.parse(projJson);
+	else return createBlankProject('undefined project');
 }
 
 /**
  * Updates the user's projects in local storage.
  * @param project - The project to update.
  */
-export function updateUsersProjects(project: Project): void {
-	if (project === undefined) return; // No project is open
+export function updateUsersProjects(project: Project): ProjectDesc[] {
+	const projects: ProjectDesc[] = getUserProjects();
+
+	if (project === undefined) return projects; // No project is open
 
 	project.projectSettings.zoom = get(zoom);
 	project.projectSettings.cursorPosition = get(cursorPosition);
 	project.projectSettings.scrollLeft = get(scrollPosition);
-
-	const projects = getUserProjects();
 
 	const index = projects.findIndex((p) => p.id === project.id);
 	if (index === -1) {
@@ -155,11 +156,21 @@ export function updateUsersProjects(project: Project): void {
 			project.name = project.name + ' - New';
 		}
 
-		projects.push(project);
+		projects.push({
+			id: project.id,
+			name: project.name,
+			updatedAt: project.updatedAt
+		});
 	} else {
-		projects[index] = project;
+		projects[index] = {
+			id: project.id,
+			name: project.name,
+			updatedAt: project.updatedAt
+		};
 	}
 
-	//localStorage.removeItem('projects');
+	localStorage.setItem(project.id, JSON.stringify(project));
 	localStorage.setItem('projects', JSON.stringify(projects));
+
+	return projects;
 }

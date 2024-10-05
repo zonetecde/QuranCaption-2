@@ -6,6 +6,7 @@
 		createBlankProject,
 		currentProject,
 		delProject,
+		getProjectById,
 		getUserProjects,
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
@@ -24,16 +25,20 @@
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { open } from '@tauri-apps/api/dialog';
 	import { addAssets } from '$lib/models/Asset';
+	import type { ProjectDesc } from '$lib/models/Project';
+	import { newProjectSystemMigration } from '$lib/ext/VersionFix';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
 
-	let userProjects: Project[] = [];
+	let userProjectsDesc: ProjectDesc[] = [];
 
 	let searchText = '';
 
 	onMount(async () => {
-		userProjects = getUserProjects();
+		newProjectSystemMigration();
+
+		userProjectsDesc = getUserProjects();
 
 		// Check if a new version is available
 		const response = await fetch(GITHUB_API_URL);
@@ -69,21 +74,21 @@
 
 		updateUsersProjects(project); // Save the project to the local storage
 
-		openProject(project); // Open the project
+		openProject(project.id); // Open the project
 	}
 
 	/**
 	 * Open a project
 	 */
-	function openProject(project: Project) {
-		window.location.href = `/editor?${project.id}`; // Redirect to the editor page
+	function openProject(projectId: string) {
+		window.location.href = `/editor?${projectId}`; // Redirect to the editor page
 	}
 
 	/**
 	 * Handle delete project
 	 */
 	function handleDelProject(id: string) {
-		userProjects = delProject(id);
+		userProjectsDesc = delProject(id);
 	}
 
 	/**
@@ -97,9 +102,9 @@
 
 			project.id = Id.generate(); // Generate a new id for the project
 
-			updateUsersProjects(project); // Save the project to the local storage
+			userProjectsDesc = updateUsersProjects(project); // Save the project to the local storage
 
-			openProject(project); // Open the project
+			openProject(project.id); // Open the project
 		}
 	}
 
@@ -107,6 +112,14 @@
 	 * Handle backup all projects button clicked
 	 */
 	function handleBackupAllProjectsButtonClicked() {
+		let userProjects: Project[] = [];
+
+		for (let i = 0; i < userProjectsDesc.length; i++) {
+			const element = userProjectsDesc[i];
+
+			userProjects.push(JSON.parse(localStorage.getItem(element.id)!));
+		}
+
 		const data = JSON.stringify(userProjects, null, 2);
 
 		const blob = new Blob([data], { type: 'application/json' });
@@ -130,16 +143,17 @@
 
 			projects.forEach((project: Project) => {
 				// if project id already exists, replace it if the updatedAt is more recent
-				const existingProject = userProjects.find((p) => p.id === project.id);
+				const existingProject = userProjectsDesc.find((p) => p.id === project.id);
 				if (existingProject && new Date(existingProject.updatedAt) > new Date(project.updatedAt)) {
-					userProjects = userProjects.map((p) => (p.id === project.id ? project : p));
-				} else {
+					userProjectsDesc = userProjectsDesc.map((p) => (p.id === project.id ? project : p));
+					updateUsersProjects(project);
+				} else if (!existingProject) {
 					// Project does not exist, add it
 					updateUsersProjects(project);
 				}
 			});
 
-			userProjects = getUserProjects();
+			userProjectsDesc = getUserProjects();
 		}
 	}
 </script>
@@ -149,7 +163,7 @@
 		<h1 class="text-4xl font-bold text-center schibstedGrotesk">Quran Caption</h1>
 
 		<div class="mt-10 relative">
-			<p class="text-xl pl-3">Project{userProjects.length > 1 ? 's' : ''} :</p>
+			<p class="text-xl pl-3">Project{userProjectsDesc.length > 1 ? 's' : ''} :</p>
 
 			<input
 				type="text"
@@ -160,15 +174,15 @@
 
 			<div
 				class={'mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto ' +
-					(userProjects.length >= 4 ? 'justify-evenly h-80' : '')}
+					(userProjectsDesc.length >= 4 ? 'justify-evenly h-80' : '')}
 			>
-				{#each userProjects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
+				{#each userProjectsDesc.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
 					{#if searchText === '' || project.name.toLowerCase().includes(searchText.toLowerCase())}
 						<div class="w-56 h-32 bg-[#2e2f36] rounded-xl relative group">
-							<button class="flex flex-col p-3" on:click={() => openProject(project)}>
+							<button class="flex flex-col p-3" on:click={() => openProject(project.id)}>
 								<p>{project.name}</p>
 								<p class="absolute bottom-1 text-sm">
-									{new Date(project.createdAt).toLocaleString()}
+									{new Date(project.updatedAt).toLocaleString()}
 								</p>
 							</button>
 
@@ -200,8 +214,14 @@
 									// window text prompt
 									const newName = prompt('Enter the new name of the project', project.name);
 									if (newName) {
-										project.name = newName;
-										updateUsersProjects(project);
+										userProjectsDesc = userProjectsDesc.map((x) =>
+											x.id === project.id ? { ...x, name: newName } : x
+										);
+										let _project = getProjectById(project.id);
+										// @ts-ignore
+										_project.name = newName;
+										// @ts-ignores
+										updateUsersProjects(_project);
 									}
 								}}
 							>
