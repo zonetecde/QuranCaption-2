@@ -127,6 +127,24 @@ export function getUserProjects(): ProjectDesc[] {
 }
 
 /**
+ * Retrieves the user's projects from local storage as projects.
+ * @returns An array of user projects.
+ */
+export function getUserProjectsAsProjects(): Project[] {
+	const projects = getUserProjects();
+	const result: Project[] = [];
+
+	for (const project of projects) {
+		const projJson = localStorage.getItem(project.id);
+		if (projJson) {
+			result.push(JSON.parse(projJson));
+		}
+	}
+
+	return result;
+}
+
+/**
  * Retrieves a project by its ID.
  * @param id - The ID of the project.
  * @returns The project with the specified ID, or undefined if not found.
