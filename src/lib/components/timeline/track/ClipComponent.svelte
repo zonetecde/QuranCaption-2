@@ -72,8 +72,6 @@
 			});
 		}
 
-		console.log(track.clips);
-
 		track.clips = track.clips;
 	}
 

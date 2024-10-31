@@ -44,7 +44,7 @@
 		const response = await fetch(GITHUB_API_URL);
 		if (response.ok) {
 			const data = await response.json();
-			console.log(data.tag_name);
+
 			if (data.tag_name !== SOFTWARE_VERSION) {
 				newUpdateAvailable.set(true);
 				newUpdateDescription.set(data.body);

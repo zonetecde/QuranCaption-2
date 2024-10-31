@@ -5,7 +5,7 @@
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import { fullScreenPreview } from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
 	import { latinNumberToArabic, millisecondsToSubtitlesTimeFormat } from '$lib/ext/Utilities';
 	import toast from 'svelte-french-toast';
 
@@ -179,7 +179,7 @@
 					<section class="h-full flex items-center flex-col justify-center pb-24">
 						<p class="mt-28 text-center">Please select what you want to export :</p>
 
-						<div class="flex justify-center mt-4">
+						<div class="flex justify-center mt-4 flex-wrap gap-y-3">
 							<button
 								class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded"
 								on:click={() => (outputType = 'video')}
@@ -191,6 +191,12 @@
 								on:click={() => (outputType = 'subtitles')}
 							>
 								Export the subtitles
+							</button>
+							<button
+								class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded ml-2"
+								on:click={() => downloadYoutubeChapters()}
+							>
+								Export as YouTube chapters
 							</button>
 						</div>
 

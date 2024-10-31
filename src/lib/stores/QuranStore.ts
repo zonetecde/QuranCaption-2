@@ -80,6 +80,16 @@ export function getNumberOfVerses(surahId: number) {
 	return quran.surahs[surahId - 1].total_verses;
 }
 
+/**
+ * Get the name of a surah
+ * @param surahId The ID of the surah
+ * @returns The name of the surah
+ */
+export function getSurahName(surahId: number) {
+	const quran = get(Mushaf);
+	return quran.surahs[surahId - 1].transliteration;
+}
+
 // Cache for the translations
 const caches = new Map<string, string>();
 

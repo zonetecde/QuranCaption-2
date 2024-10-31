@@ -3,8 +3,12 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
-	import { Mushaf, getEditions, getQuran } from '$lib/stores/QuranStore';
+	import {
+		currentProject,
+		downloadYoutubeChapters,
+		updateUsersProjects
+	} from '$lib/stores/ProjectStore';
+	import { Mushaf, getEditions, getQuran, getSurahName } from '$lib/stores/QuranStore';
 	import {
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
@@ -17,6 +21,7 @@
 		fullScreenPreview,
 		getFonts
 	} from '$lib/stores/LayoutStore';
+	import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 
 	onMount(() => {
 		window.onkeydown = (e) => {
@@ -76,6 +81,10 @@
 				} else {
 					toast.success('Best performance mode deactivated');
 				}
+			}
+			// if key is F3, download youtube chapters
+			else if (e.key === 'F4') {
+				downloadYoutubeChapters();
 			}
 		};
 
