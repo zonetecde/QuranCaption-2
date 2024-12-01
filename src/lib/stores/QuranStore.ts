@@ -162,7 +162,10 @@ export async function getWordByWordTranslation(surahNumber: number, verseNumber:
 			i++;
 		}
 		let translation = lines[i].split(':')[1].trim().replace(/"/g, '');
-		wbwTranslation = translation.split('|');
+
+		if (translation.includes('||')) wbwTranslation = translation.split('||');
+		else if (translation.includes('|')) wbwTranslation = translation.split('|');
+		else wbwTranslation = [translation];
 	}
 
 	return wbwTranslation;
