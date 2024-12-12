@@ -2,6 +2,10 @@ import type Project from '$lib/models/Project';
 import { get, writable, type Writable } from 'svelte/store';
 import { cursorPosition, scrollPosition, zoom } from './TimelineStore';
 import Id from '$lib/ext/Id';
+import type { ProjectDesc } from '$lib/models/Project';
+import { getSurahName } from './QuranStore';
+import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
+import toast from 'svelte-french-toast';
 
 export const currentProject: Writable<Project> = writable();
 
@@ -107,24 +111,40 @@ export function createBlankProject(name: string): Project {
  * @param id - The ID of the project to delete.
  * @returns An array of user projects.
  */
-export function delProject(id: string): Project[] {
-	const projects = getUserProjects();
-	const index = projects.findIndex((p) => p.id === id);
+export function delProject(id: string): ProjectDesc[] {
+	localStorage.removeItem(id);
 
-	if (index !== -1) {
-		projects.splice(index, 1);
-		localStorage.setItem('projects', JSON.stringify(projects));
-	}
+	let userProjects = getUserProjects();
+	userProjects = userProjects.filter((x) => x.id !== id);
+	localStorage.setItem('projects', JSON.stringify(userProjects));
 
-	return projects;
+	return userProjects;
 }
 
 /**
  * Retrieves the user's projects from local storage.
  * @returns An array of user projects.
  */
-export function getUserProjects(): Project[] {
+export function getUserProjects(): ProjectDesc[] {
 	return JSON.parse(localStorage.getItem('projects') || '[]');
+}
+
+/**
+ * Retrieves the user's projects from local storage as projects.
+ * @returns An array of user projects.
+ */
+export function getUserProjectsAsProjects(): Project[] {
+	const projects = getUserProjects();
+	const result: Project[] = [];
+
+	for (const project of projects) {
+		const projJson = localStorage.getItem(project.id);
+		if (projJson) {
+			result.push(JSON.parse(projJson));
+		}
+	}
+
+	return result;
 }
 
 /**
@@ -133,21 +153,23 @@ export function getUserProjects(): Project[] {
  * @returns The project with the specified ID, or undefined if not found.
  */
 export function getProjectById(id: string): Project | undefined {
-	return getUserProjects().find((p) => p.id === id);
+	const projJson = localStorage.getItem(id);
+	if (projJson) return JSON.parse(projJson);
+	else return createBlankProject('undefined project');
 }
 
 /**
  * Updates the user's projects in local storage.
  * @param project - The project to update.
  */
-export function updateUsersProjects(project: Project): void {
-	if (project === undefined) return; // No project is open
+export function updateUsersProjects(project: Project): ProjectDesc[] {
+	const projects: ProjectDesc[] = getUserProjects();
+
+	if (project === undefined) return projects; // No project is open
 
 	project.projectSettings.zoom = get(zoom);
 	project.projectSettings.cursorPosition = get(cursorPosition);
 	project.projectSettings.scrollLeft = get(scrollPosition);
-
-	const projects = getUserProjects();
 
 	const index = projects.findIndex((p) => p.id === project.id);
 	if (index === -1) {
@@ -155,11 +177,68 @@ export function updateUsersProjects(project: Project): void {
 			project.name = project.name + ' - New';
 		}
 
-		projects.push(project);
+		projects.push({
+			id: project.id,
+			name: project.name,
+			updatedAt: project.updatedAt
+		});
 	} else {
-		projects[index] = project;
+		projects[index] = {
+			id: project.id,
+			name: project.name,
+			updatedAt: project.updatedAt
+		};
 	}
 
-	//localStorage.removeItem('projects');
+	localStorage.setItem(project.id, JSON.stringify(project));
 	localStorage.setItem('projects', JSON.stringify(projects));
+
+	return projects;
+}
+
+export function downloadYoutubeChapters() {
+	const _currentProject = get(currentProject);
+
+	// first chapter should be 00:00:00, first surah name in the projet
+	// then the rest of the chapters should be the surah names
+	const chapters: {
+		start: string;
+		end: string;
+		title: string;
+	}[] = [];
+
+	let lastChapterName = '';
+	let i = 0;
+	_currentProject.timeline.subtitlesTracks[0].clips.forEach((clip) => {
+		if (clip.surah >= 1 && clip.surah <= 114) {
+			const surahName = getSurahName(clip.surah);
+			if (surahName !== lastChapterName) {
+				chapters.push({
+					start: millisecondsToHHMMSS(clip.start),
+					end: _currentProject.timeline.subtitlesTracks[0].clips[i - 1]
+						? millisecondsToHHMMSS(_currentProject.timeline.subtitlesTracks[0].clips[i - 1].end)
+						: '00:00:00',
+					title: surahName
+				});
+				lastChapterName = surahName;
+			}
+		}
+
+		i++;
+	});
+
+	// first chapter should start at 00:00:00 even if there's a silence or basmallah
+	if (chapters.length > 0) chapters[0].start = '00:00:00';
+
+	// download as text :
+	// 00:00:00 - Al-Fatihah
+	// ...
+	const a = document.createElement('a');
+	const file = new Blob([chapters.map((c) => `${c.start} - ${c.title}`).join('\n')], {
+		type: 'text/plain'
+	});
+	a.href = URL.createObjectURL(file);
+	a.download = 'youtube chapters for ' + _currentProject.name + '.txt';
+	a.click();
+	URL.revokeObjectURL(a.href);
 }

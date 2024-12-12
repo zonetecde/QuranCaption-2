@@ -26,8 +26,10 @@
 
 				if (element.isLastWordInVerse) {
 					// Go to next verse
-					verseNumber += 1;
-					verseNumberInInput += 1;
+					if (verseNumberInInput < $Mushaf.surahs[surahNumber - 1].verses.length) {
+						verseNumber += 1;
+						verseNumberInInput += 1;
+					}
 				}
 				break;
 			}

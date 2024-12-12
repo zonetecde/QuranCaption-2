@@ -3,7 +3,11 @@
 		onlyShowSubtitlesThatAreNotFullVerses,
 		onlyShowVersesWhoseTranslationsNeedReview
 	} from '$lib/stores/LayoutStore';
-	import { currentProject, getUserProjects } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		getUserProjects,
+		getUserProjectsAsProjects
+	} from '$lib/stores/ProjectStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import toast from 'svelte-french-toast';
 
@@ -13,7 +17,7 @@
 	async function fetchTranslationsFromOtherProjects() {
 		let numberOfUpdatedTranslations = 0;
 
-		const userProjects = getUserProjects();
+		const userProjects = getUserProjectsAsProjects();
 
 		await Promise.all(
 			// Loop through all the subtitles of the current project

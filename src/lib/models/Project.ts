@@ -4,6 +4,12 @@ import type Timeline from './Timeline';
 import Id from '../ext/Id';
 import { cursorPosition, zoom } from '../stores/TimelineStore';
 
+export interface ProjectDesc {
+	id: string;
+	name: string;
+	updatedAt: Date;
+}
+
 /**
  * Represents a project.
  */

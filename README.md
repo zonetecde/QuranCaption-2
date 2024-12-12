@@ -1,6 +1,10 @@
 # Quran Caption
 
-The easy way to make Quran recitation videos!
+Official website : https://qurancaption-project.vercel.app/
+
+Documentation : https://qurancaption-project.vercel.app/documentation
+
+## The easy way to make Quran recitation videos!
 
 With Quran Caption you can import any video by your favorite reciter and add Arabic subtitles in a fun way, without having to write anything.
 
