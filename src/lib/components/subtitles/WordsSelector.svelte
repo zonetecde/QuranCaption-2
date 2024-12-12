@@ -12,11 +12,15 @@
 	import toast from 'svelte-french-toast';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { reajustCursorPosition } from '$lib/ext/Utilities';
-	import { showWordByWordTranslation } from '$lib/stores/LayoutStore';
+	import {
+		showWordByWordTranslation,
+		showWordByWordTransliteration
+	} from '$lib/stores/LayoutStore';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
 	let wbwTranslation: string[] = [];
+	let wbwTransliteration: string[] = [];
 
 	// Split the verse into words
 	$: wordsInSelectedVerse = getVerse(surahNumber, verseNumber).text.split(' ');
@@ -36,6 +40,11 @@
 		window.document.onkeydown = onKeyDown;
 
 		wbwTranslation = await getWordByWordTranslation(surahNumber, verseNumber);
+		wbwTransliteration = await getWordByWordTranslation(
+			surahNumber,
+			verseNumber,
+			'transliteration'
+		);
 	});
 
 	$: if (surahNumber || verseNumber) {
@@ -255,6 +264,11 @@
 			{#if wbwTranslation[index] && $showWordByWordTranslation}
 				<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
 					>{wbwTranslation[index]}</span
+				>
+			{/if}
+			{#if wbwTranslation[index] && $showWordByWordTransliteration}
+				<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
+					>{wbwTransliteration[index]}</span
 				>
 			{/if}
 		</button>

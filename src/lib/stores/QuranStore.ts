@@ -134,7 +134,11 @@ export function getEditionFromName(name: string) {
 	return get(editions).find((edition) => edition.name === name);
 }
 
-export async function getWordByWordTranslation(surahNumber: number, verseNumber: number) {
+export async function getWordByWordTranslation(
+	surahNumber: number,
+	verseNumber: number,
+	type: 'translation' | 'transliteration' = 'translation'
+) {
 	if (surahNumber === -1 || verseNumber === -1) {
 		return []; // Si c'est un silence, une basmala ou autre
 	}
@@ -148,7 +152,7 @@ export async function getWordByWordTranslation(surahNumber: number, verseNumber:
 		const data = await response.json();
 		let lines = JSON.stringify(data, null, 2).split('\n');
 		let i = 0;
-		while (!lines[i].includes('"translation"')) {
+		while (!lines[i].includes('"' + type + '"')) {
 			i++;
 		}
 		let translation = lines[i].split(':')[1].trim().replace(/"/g, '');
