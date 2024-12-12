@@ -85,7 +85,8 @@
 					) {
 						toast.error('Collision found at ' + milisecondsToMMSS(clip.start));
 
-						$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
+						$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration =
+							fadeDurationBackup;
 						return;
 					}
 				}
@@ -201,9 +202,7 @@
 	<button
 		class="bg-[#383535] py-2.5 mb-6 w-60 mx-auto rounded-xl border-2 border-black"
 		on:click={checkForCollision}
-		><abbr
-			title="This button will scan all subtitles added and displayed on screen to check that they don't fit."
-		>
+		><abbr title="This button will scan all subtitles added to see if there are any collisions">
 			Check for collisions</abbr
 		></button
 	>

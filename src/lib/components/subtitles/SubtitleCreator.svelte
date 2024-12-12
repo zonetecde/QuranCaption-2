@@ -3,6 +3,7 @@
 	import SubtitlesCreatorSettings from './SubtitlesCreatorSettings.svelte';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
+	import { open as openLink } from '@tauri-apps/api/shell';
 
 	let verseNumber = 1;
 	let surahNumber = 1;
@@ -32,7 +33,7 @@
 		</svg>
 
 		<div
-			class="w-[400px] h-[450px] bg-[#393a3f] rounded-lg text-sm p-4 z-50 hidden group-hover:block"
+			class="w-[400px] h-[500px] bg-[#393a3f] rounded-lg text-sm p-4 z-50 hidden group-hover:block"
 		>
 			<h1 class="underline">How to create subtitles :</h1>
 
@@ -72,6 +73,17 @@
 			</p>
 			<p>
 				- You can press <span class="text-yellow-500">`v`</span> to select every word in the verse
+			</p>
+
+			<p class="mt-2">
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				Still need help ? Open the
+				<span
+					class="text-blue-400 cursor-pointer"
+					on:click={() => openLink('https://qurancaption-project.vercel.app/documentation')}
+					>online documentation</span
+				> for a video example.
 			</p>
 		</div>
 	</div>

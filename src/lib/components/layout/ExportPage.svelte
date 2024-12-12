@@ -171,7 +171,7 @@
 	<section class="absolute inset-20">
 		<div class="w-full h-full flex items-center justify-center">
 			<div
-				class="w-[500px] relative h-[450px] bg-[#2f2d35] bg-opacity-90 hover:bg-opacity-100 duration-100 p-3 rounded-lg border-2 border-[#19181d]"
+				class="w-[500px] relative h-[575px] bg-[#2f2d35] bg-opacity-95 hover:bg-opacity-100 duration-100 p-3 rounded-lg border-2 border-[#19181d]"
 			>
 				{#if outputType === undefined}
 					<h1 class="text-center text-lg font-bold">Export</h1>
@@ -198,9 +198,15 @@
 							>
 								Export as YouTube chapters
 							</button>
+							<button
+								class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded ml-2"
+								on:click={() => openLink('https://qurancaption-project.vercel.app/documentation')}
+							>
+								Open the online documentation
+							</button>
 						</div>
 
-						<h1 class="mt-auto text-center text-xl font-bold">
+						<h1 class="mt-10 text-center text-xl font-bold">
 							Thank you for using Quran Caption !<br /><span class="text-base font-sans">
 								You can make a donation by clicking
 								<button
@@ -212,37 +218,59 @@
 								{'<3'}
 							</span>
 						</h1>
+
+						<p class="mt-20">
+							Need some help ? Take a look to the online <a
+								href="https://qurancaption-project.vercel.app/documentation"
+								target="_blank"
+								class="text-blue-400">documentation</a
+							> !
+						</p>
 					</section>
 				{:else if outputType === 'video'}
 					<h1 class="text-center text-lg">How to save the video :</h1>
 					<br />
-					<p style="color: white;">
-						1. Start OBS (or download it from <button
-							class="text-blue-400"
-							on:click={() => openLink('https://www.obsproject.com')}>obsproject.com</button
-						>)
-					</p>
-					<p style="color: white;">
-						2. Add a new Source by selecting <code style="color: yellow;">Record a window</code> and
-						choosing Quran Caption
-					</p>
-					<p style="color: white;">
-						3. In OBS, go to File -> Settings -> Keyboard Shortcuts and set the <code
-							style="color: yellow;">Start Recording</code
-						>
-						and
-						<code style="color: yellow;">Stop Recording</code> keys to
-						<code style="color: yellow;">CTRL + K</code>
-					</p>
-					<p style="color: white;">
-						4. Press <code style="color: yellow;">F11</code> in Quran Caption to enter full screen mode
-					</p>
-					<p style="color: white;">
-						5. Adjust the video size in OBS (hold ALT if you need to crop the recording size)
-					</p>
-					<p style="color: white;">
-						6. Press <code style="color: yellow;">CTRL + K</code> while the Quran Caption window is focused
-						to start recording, and press it again to stop recording
+					<p>Follow these steps to export your video:</p>
+
+					<ol class="ml-6 list-disc">
+						<li>
+							Open <button
+								on:click={() => openLink('https://obsproject.com/')}
+								class="text-blue-400">OBS Studio</button
+							>
+							and click the <code style="color: yellow;">`+`</code> button in the
+							<code style="color: yellow;">`Sources`</code> section.
+						</li>
+						<li>
+							Select <code style="color: yellow;">`Window Capture`</code> from the list of options,
+							and select <code style="color: yellow;">`Windows 10`</code> as the capture method.
+						</li>
+						<li>From the window selection menu, choose the Quran Caption window.</li>
+						<li>
+							Click <code style="color: yellow;">`OK`</code> to add the Quran Caption window to your
+							OBS Studio scene.
+						</li>
+						<li>
+							On Quran Caption, press
+							<code style="color: yellow;">`F11`</code> to enter fullscreen mode. Make sure the cursor
+							of the timeline is at the start of the video.
+						</li>
+						<li>
+							In OBS Studio, click the <code style="color: yellow;">`Start Recording`</code> button,
+							then immediately press the <code style="color: yellow;">`space bar`</code> in Quran Caption
+							to start playing the video.
+						</li>
+						<li>
+							When the video finishes playing, click the <code style="color: yellow;"
+								>`Stop Recording`</code
+							> button in OBS Studio to stop the recording.
+						</li>
+					</ol>
+
+					<p class="mt-3">
+						<strong>Note:</strong> Don't forget to mute the sound of your microphone in OBS Studio
+						by clicking speaker icon below <code style="color: yellow;">`Mic/Aux`</code> in the audio
+						mixer section.
 					</p>
 				{:else if outputType === 'subtitles'}
 					<div class="w-full h-full flex flex-col">

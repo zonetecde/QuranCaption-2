@@ -274,7 +274,7 @@
 		</div>
 	</div>
 
-	<p class="absolute bottom-3">
+	<p class="absolute bottom-3 max-w-[600px] xl:max-w-full text-center">
 		Made by <button
 			class="text-blue-300"
 			on:click={() => {
@@ -287,6 +287,13 @@
 			on:click={() => {
 				openLink(GITHUB_REPO_LINK);
 			}}>GitHub Repo</button
+		>
+		•
+		<button
+			class="text-blue-300"
+			on:click={() => {
+				openLink('https://qurancaption-project.vercel.app/documentation');
+			}}>Documentation</button
 		>
 		•
 		<button
