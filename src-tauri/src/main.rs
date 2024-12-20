@@ -4,11 +4,17 @@
 use std::process::Command;
 use std::{ format, vec };
 use font_kit::{error::SelectionError, source::SystemSource};
+use std::fs;
+use std::time;
+use std::process::Stdio;
+use std::io::Write;
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video])
+  
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, export_video])
     .run(tauri::generate_context!())
+    
     .expect("error while running tauri application");
 }
 
@@ -105,4 +111,79 @@ async fn download_youtube_video(format: String, url: String, path: String) -> bo
             false
         }
     }
+}
+
+#[tauri::command]
+async fn export_video() -> Result<(), String> {
+    let output_file = "output2024.mp4";
+    let temp_file = "temp.mp4";
+
+    // Commande FFmpeg pour capturer l'écran
+    let mut record_process = Command::new("./ffmpeg")
+    .args([
+        "-f", "gdigrab",
+        
+        "-i", "title=Quran Caption",
+        "-y",
+        &temp_file
+    ])
+    .stdin(Stdio::piped())
+    .spawn()
+    .map_err(|err| format!("Failed to start recording: {}", err))?;
+
+    println!("Recording started...");
+
+    // Simulate 10 second recording
+    tauri::async_runtime::spawn(async {
+        tokio::time::sleep(time::Duration::from_secs(10)).await;
+    }).await.unwrap();
+
+    // Gracefully stop the recording by sending 'q' command
+    if let Some(mut stdin) = record_process.stdin.take() {
+        stdin.write_all(b"q").map_err(|err| format!("Failed to send stop signal: {}", err))?;
+    }
+
+    // Wait for the process to finish
+    match record_process.wait() {
+        Ok(status) => {
+            if status.success() {
+                println!("Recording completed successfully");
+            } else {
+                println!("Recording process exited with status: {}", status);
+            }
+        }
+        Err(err) => eprintln!("Error waiting for recording process: {}", err),
+    }
+
+    // supprime l'ancien fichier de sortie s'il existe
+    if let Ok(_) = fs::remove_file(output_file) {
+        println!("Removed old output file: {}", output_file);
+    }
+
+        
+    println!("test1");
+
+    // Conversion et nettoyage avec FFmpeg
+    let convert_command = format!("-i {} -c:v libx264 {}", temp_file, output_file);
+    let convert_status = Command::new("./ffmpeg")
+        .args(convert_command.split_whitespace())
+        .status()
+        .map_err(|err| format!("Failed to execute conversion: {}", err))?;
+
+    if !convert_status.success() {
+        return Err(format!(
+            "FFmpeg conversion failed with status: {}",
+            convert_status
+        ));
+    }
+
+    // Supprimer le fichier temporaire
+    if let Err(err) = fs::remove_file(temp_file) {
+        eprintln!("Failed to delete temporary file: {}", err);
+    }
+
+    println!("Video export completed: {}", output_file);
+    println!("test2");
+
+    Ok(())
 }

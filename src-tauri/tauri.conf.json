@@ -20,7 +20,7 @@
 				"all": false,
 				"ask": false,
 				"confirm": false,
-				"message": false,
+				"message": true,
 				"open": true,
 				"save": true
 			},
@@ -67,7 +67,7 @@
 				"providerShortName": null,
 				"signingIdentity": null
 			},
-			"resources": ["ffprobe.exe", "yt-dlp.exe", "black-vid.mp4"],
+			"resources": ["ffprobe.exe", "yt-dlp.exe", "black-vid.mp4", "ffmpeg.exe"],
 			"shortDescription": "",
 			"targets": "all",
 			"windows": {
@@ -84,6 +84,7 @@
 		},
 		"windows": [
 			{
+				"additionalBrowserArgs": "--disable-gpu",
 				"fullscreen": false,
 				"height": 768,
 				"resizable": true,

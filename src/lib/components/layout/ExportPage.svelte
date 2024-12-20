@@ -8,6 +8,7 @@
 	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
 	import { latinNumberToArabic, millisecondsToSubtitlesTimeFormat } from '$lib/ext/Utilities';
 	import toast from 'svelte-french-toast';
+	import { invoke } from '@tauri-apps/api';
 
 	let outputType: undefined | 'video' | 'subtitles' = undefined;
 
@@ -18,6 +19,14 @@
 	onMount(() => {
 		document.onkeydown = onKeyDown;
 	});
+
+	async function handleExport() {
+		try {
+			invoke('export_video');
+		} catch (error) {
+			alert(`Error: ${error}`);
+		}
+	}
 
 	function onKeyDown(key: any) {
 		// If the user presses CTRL + K, we want to start the recording (obs hotkey)
@@ -182,7 +191,7 @@
 						<div class="flex justify-center mt-4 flex-wrap gap-y-3">
 							<button
 								class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded"
-								on:click={() => (outputType = 'video')}
+								on:click={async () => await handleExport()}
 							>
 								Export the video
 							</button>
