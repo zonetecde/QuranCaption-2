@@ -176,23 +176,6 @@
 				// Something went wrong
 			}
 		}
-
-		// const textareas = document.querySelectorAll('.textarea-translation');
-		// // @ts-ignore
-		// const index = Array.from(textareas).indexOf(e.target);
-		// if (index < textareas.length - 1) {
-		//   // @ts-ignore
-		//   textareas[index + 1].focus();
-		//   // Set the cursor at the end of the text
-		//   const range = document.createRange();
-		//   const sel = window.getSelection();
-		//   range.setStart(textareas[index + 1], 1);
-		//   range.collapse(true);
-		//   // @ts-ignore
-		//   sel.removeAllRanges();
-		//   // @ts-ignore
-		//   sel.addRange(range);
-		// }
 	}
 
 	$: doesSubtitleNeedReview =
@@ -216,6 +199,11 @@
 					{milisecondsToMMSS(subtitle.start)}-{milisecondsToMMSS(subtitle.end)}</span
 				>
 			</p>
+
+			{#if subtitle.isCustomText}
+				<p class="text-lg text-left">Custom text</p>
+			{/if}
+
 			<div class="w-full text-4xl mt-4 leading-[3.5rem] flex flex-row-reverse flex-wrap">
 				{#each subtitle.text.split(' ') as word, i}
 					<div class="flex flex-col relative group">

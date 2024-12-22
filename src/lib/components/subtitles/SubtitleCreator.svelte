@@ -33,7 +33,7 @@
 		</svg>
 
 		<div
-			class="w-[400px] h-[500px] bg-[#393a3f] rounded-lg text-sm p-4 z-50 hidden group-hover:block"
+			class="w-[400px] h-[500px] bg-[#393a3f] rounded-lg text-sm p-4 z-50 hidden group-hover:block border-2 border-black"
 		>
 			<h1 class="underline">How to create subtitles :</h1>
 
@@ -70,6 +70,10 @@
 			<p>
 				- You can press <span class="text-yellow-500">`a`</span> to add
 				<span class="text-yellow-500">`A3oudhou billahi mina chaytani rajim`</span>
+			</p>
+			<p>
+				- You can press <span class="text-yellow-500">`t`</span> to add
+				<span class="text-yellow-500">`a custom text (e.g. to warn of an error)`</span>
 			</p>
 			<p>
 				- You can press <span class="text-yellow-500">`v`</span> to select every word in the verse

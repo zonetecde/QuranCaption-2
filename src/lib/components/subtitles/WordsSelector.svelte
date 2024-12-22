@@ -154,13 +154,16 @@
 			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', true);
 		} else if (event.key === 's' && !event.ctrlKey) {
 			// Ajoute un silence
-			addSubtitle('', true);
+			addSubtitle('', true, true);
 		} else if (event.key === 'Backspace') {
 			removeLastSubtitle();
 		} else if (event.key === 'v') {
 			// Sélectionne tout les mots du verset
 			startWordIndex = 0;
 			endWordIndex = wordsInSelectedVerse.length - 1;
+		} else if (event.key === 't') {
+			// Ajoute un texte custom
+			addSubtitle('', true, false, true);
 		}
 	}
 
@@ -182,7 +185,12 @@
 	 * @param subtitleText Texte du sous-titre
 	 * @param isNotVerse Si vrai, le sous-titre n'est pas un verset (la basmallah, la protection, etc.)
 	 */
-	async function addSubtitle(subtitleText: string, isNotVerse: boolean = false) {
+	async function addSubtitle(
+		subtitleText: string,
+		isNotVerse: boolean = false,
+		isSilence: boolean = false,
+		isCustomText: boolean = false
+	) {
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
@@ -223,9 +231,10 @@
 			translations: {},
 			firstWordIndexInVerse: startWordIndex,
 			lastWordIndexInVerse: endWordIndex,
-			isSilence: subtitleText === '',
+			isSilence: isSilence,
 			isLastWordInVerse: endWordIndex === wordsInSelectedVerse.length - 1,
-			hadItTranslationEverBeenModified: false
+			hadItTranslationEverBeenModified: false,
+			isCustomText: isCustomText
 		});
 
 		// Met à jour la liste des sous-titres
