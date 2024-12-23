@@ -80,6 +80,7 @@ export function getVerse(surahId: number, verseId: number) {
  */
 export function getNumberOfVerses(surahId: number) {
 	const quran = get(Mushaf);
+
 	return quran.surahs[surahId - 1].total_verses;
 }
 

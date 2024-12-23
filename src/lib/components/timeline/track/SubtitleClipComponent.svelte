@@ -3,16 +3,20 @@
 	import { onMount } from 'svelte';
 	import { zoom } from '$lib/stores/TimelineStore';
 	import { generateRandomBrightColorBasedOnSeed } from '$lib/ext/Color';
-	import { getVerse } from '$lib/stores/QuranStore';
+	import { getVerse, Mushaf } from '$lib/stores/QuranStore';
 
 	export let clip: SubtitleClip;
 	let color: string = '#7cce79';
 
 	function handleClipClicked() {}
 
-	onMount(() => {
+	onMount(async () => {
+		// Wait for the Mushaf to be loaded (needed for the color generation)
+		while (!$Mushaf) {
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+
 		color = generateRandomBrightColorBasedOnSeed(getVerse(clip.surah, clip.verse).text);
-		console.log(color);
 	});
 </script>
 
