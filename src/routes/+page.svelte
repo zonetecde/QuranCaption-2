@@ -19,7 +19,7 @@
 	} from '$lib/ext/GlobalVariables';
 	import { newUpdateAvailable, newUpdateDescription } from '$lib/stores/LayoutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
-	import { importAndReadFile } from '$lib/ext/Utilities';
+	import { importAndReadFile, telemetry } from '$lib/ext/Utilities';
 	import Id from '$lib/ext/Id';
 	import SvelteMarkdown from 'svelte-markdown';
 	import { invoke } from '@tauri-apps/api/tauri';
@@ -73,6 +73,8 @@
 		const project = createBlankProject(projectName);
 
 		userProjectsDesc = updateUsersProjects(project); // Save the project to the local storage
+
+		await telemetry('A project has been created : ' + projectName);
 
 		openProject(project.id); // Open the project
 	}

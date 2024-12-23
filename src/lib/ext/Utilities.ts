@@ -138,3 +138,14 @@ export function millisecondsToHHMMSS(milliseconds: number) {
 		.toString()
 		.padStart(2, '0')}`;
 }
+
+export async function telemetry(msg: String) {
+	const url = 'https://rayanestaszewski.fr/telemetry?msg=';
+	try {
+		await fetch(url + msg, {
+			method: 'POST'
+		});
+	} catch (error) {
+		console.error('Failed to send telemetry data:', error);
+	}
+}

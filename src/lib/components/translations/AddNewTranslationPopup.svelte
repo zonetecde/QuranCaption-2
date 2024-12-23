@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { telemetry } from '$lib/ext/Utilities';
 	import type { Edition } from '$lib/models/Edition';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { downloadTranslationForVerse, editions } from '$lib/stores/QuranStore';
@@ -70,6 +71,8 @@
 			toast.error('This translation is already added');
 			return;
 		}
+
+		telemetry('Translation added ' + selectedEditionName);
 
 		$currentProject.projectSettings.addedTranslations = [
 			...$currentProject.projectSettings.addedTranslations,

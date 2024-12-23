@@ -6,7 +6,11 @@
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import { fullScreenPreview } from '$lib/stores/LayoutStore';
 	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
-	import { latinNumberToArabic, millisecondsToSubtitlesTimeFormat } from '$lib/ext/Utilities';
+	import {
+		latinNumberToArabic,
+		millisecondsToSubtitlesTimeFormat,
+		telemetry
+	} from '$lib/ext/Utilities';
 	import toast from 'svelte-french-toast';
 
 	let outputType: undefined | 'video' | 'subtitles' = undefined;
@@ -15,8 +19,10 @@
 	let translationsWithVerseNumber: string[] = [];
 	let exportFileType: 'srt' | 'vtt' | 'json' = 'srt';
 
-	onMount(() => {
+	onMount(async () => {
 		document.onkeydown = onKeyDown;
+
+		await telemetry('Export Page Clicked');
 	});
 
 	function onKeyDown(key: any) {
