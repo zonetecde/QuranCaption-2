@@ -66,6 +66,9 @@ export async function getEditions() {
  * @returns The verse or undefined if not found
  */
 export function getVerse(surahId: number, verseId: number) {
+	if (surahId < 1 || surahId > 114) return { text: '' };
+	if (verseId < 1 || verseId > getNumberOfVerses(surahId)) return { text: '' };
+
 	const quran = get(Mushaf);
 	return quran.surahs[surahId - 1].verses[verseId - 1];
 }
