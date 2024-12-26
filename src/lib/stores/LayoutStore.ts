@@ -20,6 +20,7 @@ export const videoDimensions: Writable<{ width: number; height: number }> = writ
 	width: 0,
 	height: 0
 }); // Les dimensions de la vidéo
+export const videoSpeed: Writable<number> = writable(1); // La vitesse de la vidéo
 
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets

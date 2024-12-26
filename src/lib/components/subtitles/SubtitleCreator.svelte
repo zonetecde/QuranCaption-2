@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Mushaf } from '$lib/stores/QuranStore';
-	import SubtitlesCreatorSettings from './SubtitlesCreatorSettings.svelte';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
 	import { open as openLink } from '@tauri-apps/api/shell';
@@ -93,7 +92,6 @@
 	</div>
 
 	<VersePicker bind:verseNumber bind:surahNumber bind:verseNumberInInput />
-	<SubtitlesCreatorSettings />
 
 	<WordsSelector bind:verseNumber bind:surahNumber />
 </div>

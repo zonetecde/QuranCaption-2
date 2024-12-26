@@ -12,7 +12,7 @@
 	import ControlBar from './ControlBar.svelte';
 	import { getDisplayedVideoSize, reajustCursorPosition } from '$lib/ext/Utilities';
 	import Page from '../../../routes/+page.svelte';
-	import { fullScreenPreview, videoDimensions } from '$lib/stores/LayoutStore';
+	import { fullScreenPreview, videoDimensions, videoSpeed } from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
 	import toast from 'svelte-french-toast';
@@ -27,6 +27,16 @@
 	onDestroy(() => {
 		window.onresize = null;
 	});
+
+	$: if ($videoSpeed) {
+		console.log($videoSpeed);
+		if (videoComponent) {
+			videoComponent.playbackRate = $videoSpeed;
+		}
+		if (audioComponent) {
+			audioComponent.playbackRate = $videoSpeed;
+		}
+	}
 
 	$: $currentProject.projectSettings.subtitlesTracksSettings, calculateVideoDimensions();
 	$: $fullScreenPreview, calculateVideoDimensions();

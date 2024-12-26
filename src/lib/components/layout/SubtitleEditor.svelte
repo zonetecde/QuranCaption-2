@@ -2,6 +2,7 @@
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleCreator from '../subtitles/SubtitleCreator.svelte';
+	import SubtitlesCreatorSettings from '../subtitles/SubtitlesCreatorSettings.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
 	import SubtitleSettingsContainer from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
@@ -10,7 +11,7 @@
 <div class="flex-row w-full h-full grid grid-cols-3-template">
 	<!-- Quran and clip explorer -->
 	<section class="min-w-[220px] max-h-full overflow-hidden">
-		<SubtitleSettingsContainer />
+		<SubtitlesCreatorSettings />
 	</section>
 
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
