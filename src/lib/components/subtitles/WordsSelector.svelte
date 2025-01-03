@@ -52,6 +52,10 @@
 		getWordByWordTranslation(surahNumber, verseNumber).then((translation) => {
 			wbwTranslation = translation;
 		});
+		wbwTransliteration = [];
+		getWordByWordTranslation(surahNumber, verseNumber, 'transliteration').then((translation) => {
+			wbwTransliteration = translation;
+		});
 	}
 
 	onDestroy(() => {
@@ -275,7 +279,7 @@
 					>{wbwTranslation[index]}</span
 				>
 			{/if}
-			{#if wbwTranslation[index] && $showWordByWordTransliteration}
+			{#if wbwTransliteration[index] && $showWordByWordTransliteration}
 				<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
 					>{wbwTransliteration[index]}</span
 				>
