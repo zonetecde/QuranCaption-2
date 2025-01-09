@@ -13,14 +13,41 @@
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { reajustCursorPosition } from '$lib/ext/Utilities';
 	import {
+		currentlyEditedSubtitleId,
 		showWordByWordTranslation,
 		showWordByWordTransliteration
 	} from '$lib/stores/LayoutStore';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
+
 	let wbwTranslation: string[] = [];
 	let wbwTransliteration: string[] = [];
+
+	// Hook when a subtitle is clicked
+	$: if ($currentlyEditedSubtitleId) {
+		editSubtitle($currentlyEditedSubtitleId);
+	}
+
+	// Enter edit mode to edit a subtitle
+	async function editSubtitle(subtitleId: String) {
+		// Récupère le sous-titre à éditer
+		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+		let subtitle = subtitleClips.find((clip) => clip.id === subtitleId);
+
+		if (!subtitle) return;
+
+		console.log(subtitle);
+
+		verseNumber = subtitle.verse;
+		surahNumber = subtitle.surah;
+
+		// wait for UI to update
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		startWordIndex = subtitle.firstWordIndexInVerse;
+		endWordIndex = subtitle.lastWordIndexInVerse;
+	}
 
 	// Split the verse into words
 	$: wordsInSelectedVerse = getVerse(surahNumber, verseNumber).text.split(' ');
@@ -114,7 +141,7 @@
 	 * @param index Index du mot dans le verset
 	 * @param isHighlighted Si le mot est déjà sélectionné
 	 */
-	function handleWordClicked(index: number, isHighlighted: boolean): any {
+	function handleWordClicked(event: any, index: number, isHighlighted: boolean): any {
 		// Si le mot est après l'index de départ et que le mot n'est pas déjà sélectionné
 		if (index > startWordIndex && !isHighlighted) {
 			endWordIndex = index;
@@ -128,6 +155,9 @@
 			startWordIndex = index;
 			endWordIndex = index;
 		}
+
+		// remove focus
+		event.target.blur();
 	}
 
 	/**
@@ -145,10 +175,27 @@
 		} else if (event.key === 'Enter') {
 			const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
 			if (selectedWords.length > 0) {
-				const temp = $currentProject.timeline.subtitlesTracks[0].clips.length;
-				addSubtitle(selectedWords);
-				// Vérifie qu'il n'y a pas eu d'erreur lors de l'ajout
-				if (temp < $currentProject.timeline.subtitlesTracks[0].clips.length) selectNextWord(true);
+				if (!$currentlyEditedSubtitleId) {
+					// Ajoute le sous-titre
+					const temp = $currentProject.timeline.subtitlesTracks[0].clips.length;
+					addSubtitle(selectedWords);
+					// Vérifie qu'il n'y a pas eu d'erreur lors de l'ajout
+					if (temp < $currentProject.timeline.subtitlesTracks[0].clips.length) selectNextWord(true);
+				} else {
+					// édite le sous-titre existant
+					const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+					const subtitle = subtitleClips.find((clip) => clip.id === $currentlyEditedSubtitleId);
+					if (subtitle) {
+						subtitle.text = selectedWords;
+						subtitle.verse = verseNumber;
+						subtitle.surah = surahNumber;
+						subtitle.firstWordIndexInVerse = startWordIndex;
+						subtitle.lastWordIndexInVerse = endWordIndex;
+						subtitle.isLastWordInVerse = endWordIndex === wordsInSelectedVerse.length - 1;
+						$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
+						currentlyEditedSubtitleId.set(undefined);
+					}
+				}
 			}
 		} else if (event.key === 'b') {
 			// Ajoute la basmallah
@@ -269,8 +316,8 @@
 	{#each wordsInSelectedVerse as word, index}
 		{@const isHighlighted = index >= startWordIndex && index <= endWordIndex}
 		<button
-			on:click={() => handleWordClicked(index, isHighlighted)}
-			class={'px-1.5 flex flex-col text-center ' +
+			on:click={(e) => handleWordClicked(e, index, isHighlighted)}
+			class={'px-1.5 flex flex-col outline-none text-center ' +
 				(isHighlighted ? 'bg-[#fbff0027] hover:bg-[#5f5b20e1]' : 'hover:bg-[#ffffff2f]')}
 			><span class="text-center w-full">{word}</span>
 

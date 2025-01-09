@@ -1,6 +1,9 @@
+import type WordsSelector from '$lib/components/subtitles/WordsSelector.svelte';
 import type Project from '$lib/models/Project';
 import { invoke } from '@tauri-apps/api';
 import { get, writable, type Writable } from 'svelte/store';
+import { currentProject } from './ProjectStore';
+import toast from 'svelte-french-toast';
 
 export type PageType = 'Video editor' | 'Subtitles editor' | 'Translations' | 'Export';
 
@@ -25,8 +28,22 @@ export const videoSpeed: Writable<number> = writable(1); // La vitesse de la vid
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
 export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
-export const showWordByWordTranslation: Writable<boolean> = writable(false); // Checkbox pour afficher les traductions des mots dans le subtitles editor
+export const showWordByWordTranslation: Writable<boolean> = writable(true); // Checkbox pour afficher les traductions des mots dans le subtitles editor
 export const showWordByWordTransliteration: Writable<boolean> = writable(false); // Checkbox pour afficher les translittérations des mots dans le subtitles editor
+export const currentlyEditedSubtitleId: Writable<string | undefined> = writable(undefined); // L'id du sous-titre actuellement édité
+
+currentlyEditedSubtitleId.subscribe((id) => {
+	// Protection against editing a silence/custom text subtitle
+	if (id) {
+		let subtitleClip = get(currentProject).timeline.subtitlesTracks[0].clips.find(
+			(clip) => clip.id === id
+		);
+		if (subtitleClip && (subtitleClip.verse === -1 || subtitleClip.surah === -1)) {
+			currentlyEditedSubtitleId.set(undefined);
+			toast.error('You cannot edit this subtitle.');
+		}
+	}
+});
 
 // Video editor
 export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles settings'> =

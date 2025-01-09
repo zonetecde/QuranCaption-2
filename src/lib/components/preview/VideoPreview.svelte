@@ -34,7 +34,6 @@
 	});
 
 	$: if ($videoSpeed) {
-		console.log($videoSpeed);
 		if (videoComponent) {
 			videoComponent.playbackRate = $videoSpeed;
 		}

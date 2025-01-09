@@ -24,6 +24,8 @@
 	import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 
 	onMount(() => {
+		document.addEventListener('contextmenu', (event) => event.preventDefault());
+
 		window.onkeydown = (e) => {
 			if ($currentProject === undefined) return;
 
@@ -72,8 +74,8 @@
 				if ($currentPage === 'Video editor' || $currentPage === 'Export')
 					fullScreenPreview.set(!$fullScreenPreview);
 			}
-			// if key is F6, toggle best performance
-			else if (e.key === 'F6') {
+			// if key is F1, toggle best performance
+			else if (e.key === 'F1') {
 				bestPerformance.set(!$bestPerformance);
 				$currentProject.projectSettings.bestPerformance = $bestPerformance;
 				if ($bestPerformance) {
@@ -81,10 +83,6 @@
 				} else {
 					toast.success('Best performance mode deactivated');
 				}
-			}
-			// if key is F3, download youtube chapters
-			else if (e.key === 'F4') {
-				downloadYoutubeChapters();
 			}
 		};
 

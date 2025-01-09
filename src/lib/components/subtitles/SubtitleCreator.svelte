@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Mushaf } from '$lib/stores/QuranStore';
+	import { currentlyEditedSubtitleId } from '$lib/stores/LayoutStore';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
 	import { open as openLink } from '@tauri-apps/api/shell';
@@ -90,6 +90,25 @@
 			</p>
 		</div>
 	</div>
+
+	{#if $currentlyEditedSubtitleId}
+		<!-- {@const currentlyEditedSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
+			(clip) => clip.id === $currentlyEditedSubtitleId
+		)} -->
+		<div
+			class="absolute bottom-0 left-0 px-5 py-2 bg-[#947a38] bg-opacity-65 z-40 border-4 rounded-tr-lg border-b-0 border-l-0 border-[#413f3f]"
+		>
+			<p>
+				You are currently editing a subtitle.<br />Press Enter after selecting the word(s) that
+				should replace the existing ones.
+			</p>
+			<button
+				class="underline underline-offset-2 pt-1"
+				on:click={() => currentlyEditedSubtitleId.set(undefined)}
+				>Nervermind, stop editing this subtitle</button
+			>
+		</div>
+	{/if}
 
 	<VersePicker bind:verseNumber bind:surahNumber bind:verseNumberInInput />
 
