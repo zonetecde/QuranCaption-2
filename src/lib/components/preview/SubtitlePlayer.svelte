@@ -37,21 +37,10 @@
 				$audio.play();
 
 				let totalDuration = subtitle.end - subtitle.start;
-				let actualDuration = 0;
 
-				// Permet de si on play l'audio, le pause, puis le replay,
-				// qu'il ne se fasse pas stopper par l'ancien play qui fini sont timeout
-				while (actualDuration < totalDuration) {
-					await new Promise((resolve) => {
-						setTimeout(resolve, 10);
-					});
-
-					actualDuration += 10;
-
-					if ($playedSubtitleId !== subtitle.id) {
-						break;
-					}
-				}
+				await new Promise((resolve) => {
+					setTimeout(resolve, totalDuration);
+				});
 
 				// If the subtitle is still the one being played, stop the audio
 				if ($playedSubtitleId === subtitle.id) {
