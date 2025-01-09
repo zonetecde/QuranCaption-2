@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { downloadFile } from '$lib/ext/Utilities';
 	import {
+		clearSubtitleToEdit,
 		currentlyEditedSubtitleId,
 		currentPage,
 		setCurrentPage,
@@ -15,7 +16,7 @@
 
 	function handlePageChange(page: any) {
 		isPreviewPlaying.set(false);
-		currentlyEditedSubtitleId.set(undefined);
+		clearSubtitleToEdit();
 		setCurrentPage(page);
 
 		if (page !== 'Subtitles editor') {

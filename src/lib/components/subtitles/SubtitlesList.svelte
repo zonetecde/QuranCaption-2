@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
+		clearSubtitleToEdit,
 		currentlyEditedSubtitleId,
 		currentPage,
-		setCurrentVideoTime
+		setCurrentVideoTime,
+		setSubtitleToEdit
 	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
@@ -40,8 +42,8 @@
 		}
 
 		if ($currentPage === 'Subtitles editor') {
-			if ($currentlyEditedSubtitleId === subtitleId) currentlyEditedSubtitleId.set(undefined);
-			else currentlyEditedSubtitleId.set(subtitleId);
+			if ($currentlyEditedSubtitleId === subtitleId) clearSubtitleToEdit();
+			else setSubtitleToEdit(subtitleId);
 		}
 	}
 </script>

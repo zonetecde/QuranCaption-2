@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentlyEditedSubtitleId } from '$lib/stores/LayoutStore';
+	import { clearSubtitleToEdit, currentlyEditedSubtitleId } from '$lib/stores/LayoutStore';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
 	import { open as openLink } from '@tauri-apps/api/shell';
@@ -102,9 +102,7 @@
 				You are currently editing a subtitle.<br />Press Enter after selecting the word(s) that
 				should replace the existing ones.
 			</p>
-			<button
-				class="underline underline-offset-2 pt-1"
-				on:click={() => currentlyEditedSubtitleId.set(undefined)}
+			<button class="underline underline-offset-2 pt-1" on:click={() => clearSubtitleToEdit()}
 				>Nervermind, stop editing this subtitle</button
 			>
 		</div>

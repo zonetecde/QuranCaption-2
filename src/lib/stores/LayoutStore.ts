@@ -40,11 +40,26 @@ currentlyEditedSubtitleId.subscribe((id) => {
 			(clip) => clip.id === id
 		);
 		if (subtitleClip && (subtitleClip.verse === -1 || subtitleClip.surah === -1)) {
-			currentlyEditedSubtitleId.set(undefined);
+			clearSubtitleToEdit();
 			toast.error('You cannot edit this subtitle.');
 		}
 	}
 });
+
+export async function setSubtitleToEdit(id: string) {
+	if (get(currentPage) !== 'Subtitles editor') {
+		// switch sur la page d'édition
+		setCurrentPage('Subtitles editor');
+		await new Promise((resolve) => setTimeout(resolve, 0));
+	}
+
+	// set le subtitle à éditer
+	setSubtitleToEdit(id);
+}
+
+export function clearSubtitleToEdit() {
+	currentlyEditedSubtitleId.set(undefined);
+}
 
 // Video editor
 export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles settings'> =

@@ -13,6 +13,7 @@
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { reajustCursorPosition } from '$lib/ext/Utilities';
 	import {
+		clearSubtitleToEdit,
 		currentlyEditedSubtitleId,
 		showWordByWordTranslation,
 		showWordByWordTransliteration
@@ -193,7 +194,7 @@
 						subtitle.lastWordIndexInVerse = endWordIndex;
 						subtitle.isLastWordInVerse = endWordIndex === wordsInSelectedVerse.length - 1;
 						$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
-						currentlyEditedSubtitleId.set(undefined);
+						clearSubtitleToEdit();
 					}
 				}
 			}
