@@ -38,15 +38,20 @@ export async function scrollToCursor() {
 	const timeline = document.getElementById('timeline');
 
 	if (element && timeline) {
+		const oldScrollLeft = timeline.scrollLeft;
 		// scroll the timeline to X=0
 		timeline.scrollLeft = 0;
 
-		// get the position of the cursor par rapport à la timeline
+		// get the position of the cursor relative to the timeline
 		const cursorPositionRelativeToTimeline =
 			element.getBoundingClientRect().left - timeline.getBoundingClientRect().left;
 
-		// scroll the timeline to the cursor
-		timeline.scrollLeft = cursorPositionRelativeToTimeline - window.innerWidth / 2 + 300;
+		const newScrollLeftPos = cursorPositionRelativeToTimeline - window.innerWidth / 2 + 300;
+
+		// scroll the timeline to the cursor smoothly
+		timeline.scrollTo({
+			left: newScrollLeftPos
+		});
 	}
 }
 

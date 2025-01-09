@@ -12,7 +12,8 @@
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { bestPerformance } from '$lib/stores/LayoutStore';
+	import { bestPerformance, setCurrentVideoTime } from '$lib/stores/LayoutStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 
 	export let useInPlayer = false; // Est-ce que c'est utilisé en tant que barrre de temps dans le lecteur vidéo ?
 
@@ -55,6 +56,7 @@
 		}
 
 		cursorPosition.set((e.clientX - rect.left) / $zoom + i * 1000 + toAdd);
+		setCurrentVideoTime.set($cursorPosition);
 
 		// Permet de forcer la mise à jour du clip en cours de lecture
 		setTimeout(() => {
@@ -111,7 +113,7 @@
 						moveCursorToPosition(e, 0);
 					}}
 					on:mousemove={(e) => {
-						if (e.buttons !== 1) return;
+						if (e.buttons !== 1 || $isPreviewPlaying) return;
 						moveCursorToPosition(e, 1);
 					}}
 				></div>

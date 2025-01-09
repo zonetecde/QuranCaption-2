@@ -16,11 +16,14 @@
 	import BackgroundOverlay from './BackgroundOverlay.svelte';
 	import ControlBar from './ControlBar.svelte';
 	import { getDisplayedVideoSize, reajustCursorPosition } from '$lib/ext/Utilities';
-	import Page from '../../../routes/+page.svelte';
-	import { fullScreenPreview, videoDimensions, videoSpeed } from '$lib/stores/LayoutStore';
+	import {
+		fullScreenPreview,
+		setCurrentVideoTime,
+		videoDimensions,
+		videoSpeed
+	} from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
-	import toast from 'svelte-french-toast';
 
 	export let hideControls = false;
 
@@ -52,7 +55,7 @@
 	async function calculateVideoDimensions() {
 		setTimeout(async () => {
 			// tant que la vidéo n'a pas chargé
-			while (videoComponent === undefined || videoComponent.videoWidth === 0) {
+			while (videoComponent === undefined || (videoComponent && videoComponent.videoWidth === 0)) {
 				await new Promise((resolve) => setTimeout(resolve, 100));
 			}
 
@@ -90,6 +93,19 @@
 			(audio.start === 0 && audio.start <= $cursorPosition && audio.end >= $cursorPosition) ||
 			(audio.start > 0 && audio.start - 1000 < $cursorPosition && audio.end >= $cursorPosition)
 	);
+
+	// Set the current time of the video and audio components to the value of `setCurrentVideoTime`
+	$: if ($setCurrentVideoTime) {
+		if (currentVideo) {
+			videoComponent.currentTime = $setCurrentVideoTime;
+		}
+
+		if (currentAudio) {
+			audioComponent.currentTime = $setCurrentVideoTime;
+		}
+
+		setCurrentVideoTime.set(undefined);
+	}
 
 	let currentSubtitle: SubtitleClip;
 

@@ -24,6 +24,7 @@ export const videoDimensions: Writable<{ width: number; height: number }> = writ
 	height: 0
 }); // Les dimensions de la vidéo
 export const videoSpeed: Writable<number> = writable(1); // La vitesse de la vidéo
+export const setCurrentVideoTime: Writable<number | undefined> = writable(undefined); // Change l'endroit où la vidéo est en train de jouer
 
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
@@ -53,6 +54,8 @@ export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles sett
 export const onlyShowSubtitlesThatAreNotFullVerses: Writable<boolean> = writable(false); // Afficher uniquement les versets qui ont besoin d'une révision de traduction
 export const onlyShowVersesWhoseTranslationsNeedReview: Writable<boolean> = writable(false); // Afficher uniquement les versets dont les traductions ont besoin d'une révision
 export const isFetchingIA: Writable<boolean> = writable(false); // Indique si on est en train de récupérer les informations de l'IA
+export const audio: Writable<HTMLAudioElement | undefined> = writable(undefined); // L'audio player pour écouter individuellement les subtitles
+export const playedSubtitleId: Writable<string | undefined> = writable(undefined); // Le fichier audio à écouter
 
 export function setCurrentPage(page: PageType) {
 	currentPage.set(page);

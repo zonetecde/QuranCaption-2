@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { downloadFile } from '$lib/ext/Utilities';
-	import { currentPage, setCurrentPage, videoSpeed } from '$lib/stores/LayoutStore';
+	import {
+		currentlyEditedSubtitleId,
+		currentPage,
+		setCurrentPage,
+		videoSpeed
+	} from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import toast from 'svelte-french-toast';
@@ -10,6 +15,7 @@
 
 	function handlePageChange(page: any) {
 		isPreviewPlaying.set(false);
+		currentlyEditedSubtitleId.set(undefined);
 		setCurrentPage(page);
 
 		if (page !== 'Subtitles editor') {

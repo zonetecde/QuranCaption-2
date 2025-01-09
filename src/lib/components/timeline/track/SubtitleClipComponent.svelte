@@ -7,7 +7,11 @@
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import toast from 'svelte-french-toast';
-	import { currentlyEditedSubtitleId, currentPage } from '$lib/stores/LayoutStore';
+	import {
+		currentlyEditedSubtitleId,
+		currentPage,
+		setCurrentVideoTime
+	} from '$lib/stores/LayoutStore';
 
 	export let clip: SubtitleClip;
 	let color: string = '#7cce79';
@@ -17,12 +21,12 @@
 			// Possibility to add effects
 		} else {
 			if ($currentPage === 'Video editor') {
-				if ($isPreviewPlaying) {
-					toast.error('Stop the video to navigate to a subtitle');
-					return;
+				if ($isPreviewPlaying)
+					// move the cursor to the start of the clip
+					setCurrentVideoTime.set(clip.start / 1000);
+				else {
+					cursorPosition.set(clip.start + 1);
 				}
-				// move the cursor to the start of the clip
-				cursorPosition.set(clip.start + 1);
 			} else if ($currentPage === 'Subtitles editor') {
 				if ($isPreviewPlaying) {
 					toast.error('Stop the video to edit a subtitle');
@@ -33,16 +37,18 @@
 					currentlyEditedSubtitleId.set(undefined);
 				} else {
 					currentlyEditedSubtitleId.set(clip.id);
-
 					color = '#655429';
+
+					console.log('test');
 				}
 			}
 		}
 	}
 
 	$: if (!$currentlyEditedSubtitleId || $currentlyEditedSubtitleId !== clip.id) {
-		// Si on sort du mode édition, on remet la couleur par défaut
-		color = generateRandomBrightColorBasedOnSeed(getVerse(clip.surah, clip.verse).text);
+		if ($Mushaf)
+			// Si on sort du mode édition, on remet la couleur par défaut
+			color = generateRandomBrightColorBasedOnSeed(getVerse(clip.surah, clip.verse).text);
 	}
 
 	onMount(async () => {

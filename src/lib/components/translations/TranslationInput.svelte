@@ -1,19 +1,25 @@
 <script lang="ts">
+	import { getAssetFromId } from '$lib/ext/Id';
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
+		audio,
 		isFetchingIA,
 		onlyShowSubtitlesThatAreNotFullVerses,
-		onlyShowVersesWhoseTranslationsNeedReview
+		onlyShowVersesWhoseTranslationsNeedReview,
+		playedSubtitleId
 	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf, getEditionFromName, getWordByWordTranslation } from '$lib/stores/QuranStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { text } from '@sveltejs/kit';
+	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
+	import SubtitlePlayer from '../preview/SubtitlePlayer.svelte';
 
 	export let subtitle: SubtitleClip;
 	export let subtitleIndex: number;
+
 	let wbwTranslation: string[] = [];
 	let isIncomplete = false;
 
@@ -186,10 +192,14 @@
 
 {#if (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || ($onlyShowVersesWhoseTranslationsNeedReview && doesSubtitleNeedReview)}
 	<div
-		class={'p-2 border-b-2 px-10 border-[#413f3f] ' +
+		class={'p-2 border-b-2 px-10 relative border-[#413f3f] ' +
 			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#212c23] ' : '') +
 			(doesSubtitleNeedReview ? 'bg-[#2c2424] ' : '')}
 	>
+		<div class="absolute top-2 right-2">
+			<SubtitlePlayer {subtitle} />
+		</div>
+
 		<div class="flex justify-between items-start flex-col w-full">
 			<p class="text-lg text-left">
 				{#if subtitle.surah !== -1 && subtitle.verse !== -1}
@@ -199,23 +209,6 @@
 					{milisecondsToMMSS(subtitle.start)}-{milisecondsToMMSS(subtitle.end)}</span
 				>
 			</p>
-
-			<button>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke-width="1.5"
-					stroke="currentColor"
-					class="size-6"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-					/>
-				</svg>
-			</button>
 
 			{#if subtitle.isCustomText}
 				<p class="text-lg text-left">Custom text</p>
