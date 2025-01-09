@@ -40,6 +40,9 @@
 		verseNumber = 1;
 		verseNumberInInput = 1;
 		surahNumber = parseInt(event.target.value);
+
+		// remove focus for up and down arrow keys
+		event.target.blur();
 	}
 </script>
 

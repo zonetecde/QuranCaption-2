@@ -30,6 +30,26 @@ export function getTimelineTotalDuration(timeline: Timeline) {
 	return maxEnd + marge;
 }
 
+export async function scrollToCursor() {
+	// wait for the UI to update
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	const element = document.getElementById('cursor');
+	const timeline = document.getElementById('timeline');
+
+	if (element && timeline) {
+		// scroll the timeline to X=0
+		timeline.scrollLeft = 0;
+
+		// get the position of the cursor par rapport à la timeline
+		const cursorPositionRelativeToTimeline =
+			element.getBoundingClientRect().left - timeline.getBoundingClientRect().left;
+
+		// scroll the timeline to the cursor
+		timeline.scrollLeft = cursorPositionRelativeToTimeline - window.innerWidth / 2 + 300;
+	}
+}
+
 export function getLastClipEnd(timeline: Timeline) {
 	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks, ...timeline.subtitlesTracks];
 	let maxEnd =

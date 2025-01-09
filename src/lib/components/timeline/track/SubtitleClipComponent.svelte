@@ -1,14 +1,24 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { onMount } from 'svelte';
-	import { zoom } from '$lib/stores/TimelineStore';
+	import { cursorPosition, scrollToCursor, zoom } from '$lib/stores/TimelineStore';
 	import { generateRandomBrightColorBasedOnSeed } from '$lib/ext/Color';
 	import { getVerse, Mushaf } from '$lib/stores/QuranStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import toast from 'svelte-french-toast';
 
 	export let clip: SubtitleClip;
 	let color: string = '#7cce79';
 
-	function handleClipClicked() {}
+	async function handleClipClicked() {
+		if ($isPreviewPlaying) {
+			toast.error('Stop the video to navigate to a subtitle');
+			return;
+		}
+		// move the cursor to the start of the clip
+		cursorPosition.set(clip.start + 1);
+	}
 
 	onMount(async () => {
 		// Wait for the Mushaf to be loaded (needed for the color generation)

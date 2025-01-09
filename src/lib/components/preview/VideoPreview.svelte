@@ -3,7 +3,12 @@
 	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { cursorPosition, forceUpdateCurrentPlayingMedia, zoom } from '$lib/stores/TimelineStore';
+	import {
+		cursorPosition,
+		forceUpdateCurrentPlayingMedia,
+		scrollToCursor,
+		zoom
+	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
@@ -168,11 +173,7 @@
 				// Réajuste la position du curseur pour éviter des problèmes de sync
 				reajustCursorPosition(true);
 
-				// Si on arrive à la fin de la timeline, on scroll un peu pour voir la fin
-				if ($zoom === 30 && $cursorPosition > 5000 && ($cursorPosition * $zoom) % 1000 < 300) {
-					// @ts-ignore
-					document.getElementById('timeline').scrollLeft += 1;
-				}
+				scrollToCursor();
 
 				// Play the video
 				if (videoComponent) videoComponent.play();

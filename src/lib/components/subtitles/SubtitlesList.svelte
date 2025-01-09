@@ -1,13 +1,27 @@
 <script lang="ts">
-	import { milisecondsToMMSS } from '$lib/models/Timeline';
+	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
+	import { cursorPosition, scrollToCursor } from '$lib/stores/TimelineStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import toast from 'svelte-french-toast';
 
 	let div: HTMLDivElement;
 
 	$: if ($currentProject.timeline.subtitlesTracks[0].clips && div) {
 		// Scroll to the bottom of the div
 		div.scrollTop = div.scrollHeight;
+	}
+
+	async function handleSubtitleListItemClicked(subtitle: SubtitleClip) {
+		if ($isPreviewPlaying) {
+			toast.error('Stop the video to navigate to a subtitle');
+			return;
+		}
+		// Move the cursor to the start of the subtitle
+		cursorPosition.set(subtitle.start + 1);
+
+		scrollToCursor();
 	}
 </script>
 
@@ -19,7 +33,13 @@
 					{#if subtitle.surah !== -1 && subtitle.verse !== -1}
 						<span class="monospace">{subtitle.surah}:{subtitle.verse}</span>
 					{/if}
-					<small>{milisecondsToMMSS(subtitle.start)} - {milisecondsToMMSS(subtitle.end)}</small>
+					<button
+						tabindex="-1"
+						class="outline-none cursor-pointer"
+						on:click={() => handleSubtitleListItemClicked(subtitle)}
+						><small>{milisecondsToMMSS(subtitle.start)} - {milisecondsToMMSS(subtitle.end)}</small
+						></button
+					>
 				</p>
 				<p class="arabic text-right w-full">{subtitle.text}</p>
 			</div>
