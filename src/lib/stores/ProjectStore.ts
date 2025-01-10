@@ -68,6 +68,7 @@ export function createBlankProject(name: string): Project {
 			videoScale: 1,
 			translateVideoX: 0,
 			bestPerformance: false,
+			individualSubtitlesSettings: {},
 			globalSubtitlesSettings: {
 				background: true,
 				backgroundColor: '#000000',

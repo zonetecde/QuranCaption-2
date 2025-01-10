@@ -35,6 +35,10 @@
 		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);
 		bestPerformance.set(project.projectSettings.bestPerformance);
 
+		// migration entre les versions
+		if (!project.projectSettings.individualSubtitlesSettings)
+			project.projectSettings.individualSubtitlesSettings = {};
+
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {
 			invoke('do_file_exist', { path: asset.filePath }).then((res) => {

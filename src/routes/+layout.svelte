@@ -44,7 +44,11 @@
 			// space bar
 			else if (e.key === ' ') {
 				// if we are not in a input
-				if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
+				if (
+					document.activeElement &&
+					document.activeElement.tagName !== 'INPUT' &&
+					document.activeElement.tagName !== 'TEXTAREA'
+				) {
 					// play/pause the video
 					e.preventDefault();
 					spaceBarPressed.set(true);

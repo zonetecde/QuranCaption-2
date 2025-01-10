@@ -8,6 +8,7 @@
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import toast from 'svelte-french-toast';
+	import IndividualSubtitleSettingsContainer from './IndividualSubtitleSettingsContainer.svelte';
 
 	let _selectedSubtitlesLanguage = $selectedSubtitlesLanguage;
 
@@ -179,31 +180,37 @@
 		class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
 		bind:value={_selectedSubtitlesLanguage}
 	>
-		<option class="bg-slate-300 text-black" value="global">Global</option>
-		<option class="bg-slate-300 text-black" value="arabic">Arabic</option>
+		<option class="bg-slate-300 text-black" value="global">General Settings</option>
+		<option class="bg-slate-300 text-black" value="arabic">Global - Arabic</option>
 
 		{#if $editions}
 			<!-- Ajoute tout les autres langages -->
 			{#each $currentProject.projectSettings.addedTranslations as lang}
 				{@const edition = getEditionFromName(lang)}
 				<option class="bg-slate-300 text-black" value={lang}
-					>{edition?.language + ' - ' + edition?.author}</option
+					>Global - {edition?.language + ', ' + edition?.author}</option
 				>
 			{/each}
 		{/if}
+
+		<option class="bg-slate-300 text-black" value="individual">Individual Subtitle Settings</option>
 	</select>
 
 	{#if _selectedSubtitlesLanguage === 'global'}
 		<GlobalSubtitleSettings />
-	{:else}
+	{:else if _selectedSubtitlesLanguage !== 'individual'}
 		<LangSubtitleSettings subtitleLanguage={_selectedSubtitlesLanguage} />
+	{:else}
+		<IndividualSubtitleSettingsContainer />
 	{/if}
 
-	<button
-		class="bg-[#383535] py-2.5 mb-6 w-60 mx-auto rounded-xl border-2 border-black"
-		on:click={checkForCollision}
-		><abbr title="This button will scan all subtitles added to see if there are any collisions">
-			Check for collisions</abbr
-		></button
-	>
+	{#if _selectedSubtitlesLanguage !== 'individual'}
+		<button
+			class="bg-[#383535] py-2.5 mb-6 w-60 mx-auto rounded-xl border-2 border-black"
+			on:click={checkForCollision}
+			><abbr title="This button will scan all subtitles added to see if there are any collisions">
+				Check for collisions</abbr
+			></button
+		>
+	{/if}
 </div>

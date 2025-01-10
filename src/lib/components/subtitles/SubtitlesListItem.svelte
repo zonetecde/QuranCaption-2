@@ -11,10 +11,14 @@
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 	import { cursorPosition, scrollToCursor } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import toast from 'svelte-french-toast';
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
+	import IndividualSubtitleSettings from './subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
 
 	export let subtitle: SubtitleClip;
+	export let showIndividualCustomizationSettings = false; // Affiche les boutons de customisation de sous-titre individuel (glowing...)
+	let leftClicked = false;
 
 	async function handleSubtitleListItemTimingClicked(subtitleStart: number) {
 		if ($isPreviewPlaying)
@@ -26,13 +30,39 @@
 
 		scrollToCursor();
 	}
+
+	function toggleShowIndividualCustomizationSettings() {
+		if (showIndividualCustomizationSettings) {
+			if (subtitle.isSilence) {
+				toast.error('You cannot customize silence subtitles');
+				return;
+			}
+
+			// ajoute dans $currentProject.projectSettings.individualSubtitlesSettings si n'existe pas
+			if (!$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]) {
+				$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id] = {
+					glowEffect: false,
+					glowColor: '#ff0000',
+					glowRadius: 7,
+					bold: false,
+					italic: false,
+					underline: false
+				};
+			}
+
+			leftClicked = !leftClicked;
+		}
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	class={'p-2 border-b-2 border-[#413f3f] relative ' +
-		(subtitle.id === $currentlyEditedSubtitleId ? 'bg-[#655429]' : 'bg-[#1f1f1f]')}
+	class={'p-2 border-[#413f3f] relative ' +
+		(subtitle.id === $currentlyEditedSubtitleId ? 'bg-[#655429] ' : 'bg-[#1f1f1f] ') +
+		(leftClicked ? 'border-x-2 border-t ' : 'border-b-2 ') +
+		(showIndividualCustomizationSettings ? 'cursor-pointer' : '')}
+	on:click={toggleShowIndividualCustomizationSettings}
 >
 	{#if $currentPage === 'Subtitles editor'}
 		<div class="absolute top-1 right-8">
@@ -72,3 +102,7 @@
 		{/if}
 	</div>
 </div>
+
+{#if showIndividualCustomizationSettings && leftClicked}
+	<IndividualSubtitleSettings {subtitle} />
+{/if}

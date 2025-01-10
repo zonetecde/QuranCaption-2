@@ -13,6 +13,27 @@
 	export let hideControls = false;
 	export let subtitleLanguage: string;
 
+	$: hasCustomIndividualSettings =
+		currentSubtitle &&
+		$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id] !== undefined;
+
+	$: if (hasCustomIndividualSettings) {
+		// set the css variables for the glow effect
+		document.documentElement.style.setProperty(
+			'--subtitleGlowColor',
+			$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowColor
+		);
+
+		document.documentElement.style.setProperty(
+			'--subtitleGlowRadius',
+			$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowRadius +
+				'px'
+		);
+	}
+
+	$: subtitleSettingsForThisLang =
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage];
+
 	// @ts-ignore
 	$: currentSubtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
 		(subtitle) =>
@@ -38,30 +59,52 @@
 
 	async function calculateSubtitleTextSize() {
 		// Calcul la taille de la police pour les sous-titres
-		subtitleTextSize = calculateFontSize(
-			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize
-		);
+		subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
 	}
 </script>
 
-{#if currentSubtitle && $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableSubtitles}
+<svelte:head>
+	{#if hasCustomIndividualSettings && $currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowEffect}
+		<style>
+			@keyframes glow {
+				from {
+					text-shadow:
+						0 0 calc(var(--subtitleGlowRadius) * 1) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 1.5) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 2) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 2.5) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 3) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius)) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 4) var(--subtitleGlowColor);
+				}
+				to {
+					text-shadow:
+						0 0 calc(var(--subtitleGlowRadius) * 1.2) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 1.7) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 2.2) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 2.7) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 3.2) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 3.7) var(--subtitleGlowColor),
+						0 0 calc(var(--subtitleGlowRadius) * 4.2) var(--subtitleGlowColor);
+				}
+			}
+		</style>
+	{/if}
+</svelte:head>
+
+{#if currentSubtitle && subtitleSettingsForThisLang.enableSubtitles}
 	<!-- Ne pas créer de variable pour sibtitleFadeDuration, car on ne veut pas
 une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeline)  -->
-	{@const subtitleOutlineWidth =
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineThickness}
-	{@const enableOutline =
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableOutline}
-	{@const subtitleOutlineColor =
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineColor}
+	{@const subtitleOutlineWidth = subtitleSettingsForThisLang.outlineThickness}
+	{@const enableOutline = subtitleSettingsForThisLang.enableOutline}
+	{@const subtitleOutlineColor = subtitleSettingsForThisLang.outlineColor}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
 	{@const subtitleVerticalPosition =
-		$videoDimensions.height *
-		($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition /
-			100)}
+		$videoDimensions.height * (subtitleSettingsForThisLang.verticalPosition / 100)}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
 		$videoDimensions.width *
-		(($currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding +
+		((subtitleSettingsForThisLang.horizontalPadding +
 			$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding) /
 			100)}
 
@@ -81,33 +124,42 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 					($showSubtitlesPadding ? ' bg-blue-500 bg-opacity-30' : '')}
 			>
 				<p
-					class="arabic text-center w-full subtitle-text"
+					class={'arabic text-center w-full subtitle-text ' +
+						(hasCustomIndividualSettings &&
+						$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id]
+							.glowEffect
+							? 'glow'
+							: '')}
 					style={`font-size: ${subtitleTextSize}px; ${
 						enableOutline
 							? `text-shadow: ` +
 								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor},`.repeat(12) +
 								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor};`
 							: ``
-					} opacity: ${
-						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].opacity
-					}; color: ${
-						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].color
+					} opacity: ${subtitleSettingsForThisLang.opacity}; color: ${
+						subtitleSettingsForThisLang.color
 					};
 					${
-						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily ===
-						'Hafs'
+						subtitleSettingsForThisLang.fontFamily === 'Hafs'
 							? ''
-							: `font-family: ${$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily}`
-					}; text-align: ${
-						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].alignment ||
-						'center'
-					}; ${
-						subtitleLanguage === 'arabic' &&
-						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].alignment ===
-							'justify'
+							: `font-family: ${subtitleSettingsForThisLang.fontFamily}`
+					}; text-align: ${subtitleSettingsForThisLang.alignment || 'center'}; ${
+						subtitleLanguage === 'arabic' && subtitleSettingsForThisLang.alignment === 'justify'
 							? 'direction: rtl;'
 							: ''
-					}`}
+					};
+
+					
+					${
+						hasCustomIndividualSettings
+							? `
+						${$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].bold ? 'font-weight: bold;' : ''}
+						${$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].underline ? 'text-decoration: underline;' : ''}
+						${$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].italic ? 'font-style: italic;' : ''}
+					`
+							: ''
+					}
+					`}
 				>
 					{#if currentSubtitle && (currentSubtitle.text || currentSubtitle.isCustomText)}
 						{#if subtitleLanguage === 'arabic'}
@@ -116,7 +168,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 								{latinNumberToArabic(currentSubtitle.verse.toString())}
 							{/if}
 						{:else if currentSubtitle.translations !== undefined}
-							{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0 && currentSubtitle.verse !== -1}
+							{#if subtitleSettingsForThisLang.showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0 && currentSubtitle.verse !== -1}
 								{currentSubtitle.verse}.
 							{/if}
 							{currentSubtitle.translations[subtitleLanguage]}
@@ -127,3 +179,13 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 		</div>
 	{/key}
 {/if}
+
+<style>
+	.glow {
+		font-size: 80px;
+		text-align: center;
+		-webkit-animation: glow 1s ease-in-out infinite alternate;
+		-moz-animation: glow 1s ease-in-out infinite alternate;
+		animation: glow 1s ease-in-out infinite alternate;
+	}
+</style>

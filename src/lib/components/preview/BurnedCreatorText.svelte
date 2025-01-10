@@ -41,9 +41,12 @@
 				} opacity: ${
 					$currentProject.projectSettings.globalSubtitlesSettings.creatorText.opacity
 				}; color: ${$currentProject.projectSettings.globalSubtitlesSettings.creatorText.color};
-        ${`font-family: ${$currentProject.projectSettings.globalSubtitlesSettings.creatorText.fontFamily}`}`}
+  ${`font-family: ${$currentProject.projectSettings.globalSubtitlesSettings.creatorText.fontFamily}`}`}
 			>
-				{$currentProject.projectSettings.globalSubtitlesSettings.creatorText.text}
+				{@html $currentProject.projectSettings.globalSubtitlesSettings.creatorText.text.replace(
+					/\n/g,
+					'<br>'
+				)}
 			</p>
 		</div>
 	</div>
