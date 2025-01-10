@@ -42,7 +42,6 @@
 				clearSubtitleToEdit();
 			} else {
 				setSubtitleToEdit(clip.id);
-				color = '#655429';
 			}
 		}
 	}
@@ -66,7 +65,6 @@
 
 	function handleEditSubtitleButtonClicked(e: MouseEvent): void {
 		setSubtitleToEdit(clip.id);
-		color = '#655429';
 		myMenu.$destroy();
 	}
 </script>
@@ -78,7 +76,7 @@
 	on:click={handleClipClicked}
 	on:contextmenu={handleClipRightClicked}
 	style="width: {($zoom * (clip.end - clip.start)) / 1000}px;
-	background-color: {color}"
+	background-color: {$currentlyEditedSubtitleId === clip.id ? '#655429' : color}"
 >
 	<p class="arabic text-right px-3">
 		{clip.isSilence ? 'silence' : clip.isCustomText ? 'Custom Text' : clip.text}

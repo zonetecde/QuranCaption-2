@@ -49,6 +49,8 @@
 					subtitleClip.surah,
 					subtitleClip.verse
 				);
+
+				subtitleClip.hadItTranslationEverBeenModified = false;
 			})
 		);
 
@@ -65,7 +67,7 @@
 		{#each $currentProject.projectSettings.addedTranslations as lang, i}
 			{@const edition = getEditionFromName(lang)}
 			<button
-				class={'bg-[#214627] text-white p-1 xl:p-2 flex gap-x-2 border-2 text-xs xl:text-base border-[#173619] hover:bg-[#432749] duration-200 ' +
+				class={'bg-[#214627] text-white p-1 xl:p-2 flex gap-x-2 border-2 text-xs xl:text-base border-[#173619] hover:bg-[#2d4b49] duration-200 ' +
 					(i === $currentProject.projectSettings.addedTranslations.length - 1
 						? 'rounded-br-lg border-r-2'
 						: 'border-r-0')}

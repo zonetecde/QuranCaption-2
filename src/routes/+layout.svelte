@@ -79,9 +79,9 @@
 				bestPerformance.set(!$bestPerformance);
 				$currentProject.projectSettings.bestPerformance = $bestPerformance;
 				if ($bestPerformance) {
-					toast.success('Best performance mode activated');
+					toast.success('Best performance mode activated. Press F1 to deactivate');
 				} else {
-					toast.success('Best performance mode deactivated');
+					toast.success('Best performance mode deactivated.');
 				}
 			}
 		};

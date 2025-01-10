@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Slider from '$lib/components/general/Slider.svelte';
-	import Toggle from '$lib/components/general/Toggle.svelte';
+	import Slider from '$lib/components/common/Slider.svelte';
+	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { ImgFileExt } from '$lib/ext/File';
 	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';

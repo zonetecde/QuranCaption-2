@@ -14,11 +14,15 @@
 
 	let pages: string[] = ['Video editor', 'Subtitles editor', 'Translations', 'Export'];
 
+	/*
+	 * Handle the page change
+	 */
 	function handlePageChange(page: any) {
 		isPreviewPlaying.set(false);
 		clearSubtitleToEdit();
 		setCurrentPage(page);
 
+		// reset the video speed
 		if (page !== 'Subtitles editor') {
 			// reset la vitesse de la video
 			videoSpeed.set(1);

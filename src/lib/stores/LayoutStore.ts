@@ -24,17 +24,17 @@ export const videoDimensions: Writable<{ width: number; height: number }> = writ
 	height: 0
 }); // Les dimensions de la vidéo
 export const videoSpeed: Writable<number> = writable(1); // La vitesse de la vidéo
-export const setCurrentVideoTime: Writable<number | undefined> = writable(undefined); // Change l'endroit où la vidéo est en train de jouer
+export const setCurrentVideoTime: Writable<number | undefined> = writable(undefined); // Change l'endroit où la vidéo est en train de jouer.
+export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
 
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
-export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
 export const showWordByWordTranslation: Writable<boolean> = writable(true); // Checkbox pour afficher les traductions des mots dans le subtitles editor
 export const showWordByWordTransliteration: Writable<boolean> = writable(false); // Checkbox pour afficher les translittérations des mots dans le subtitles editor
 export const currentlyEditedSubtitleId: Writable<string | undefined> = writable(undefined); // L'id du sous-titre actuellement édité
 
 currentlyEditedSubtitleId.subscribe((id) => {
-	// Protection against editing a silence/custom text subtitle
+	// Protection contre le fait d'éditer un sous-titre qui est un silence/custom text
 	if (id) {
 		let subtitleClip = get(currentProject).timeline.subtitlesTracks[0].clips.find(
 			(clip) => clip.id === id
@@ -46,6 +46,8 @@ currentlyEditedSubtitleId.subscribe((id) => {
 	}
 });
 
+// Set the subtitle to edit
+// Si on est pas déjà sur la page d'édition, on switch sur la page d'édition
 export async function setSubtitleToEdit(id: string) {
 	if (get(currentPage) !== 'Subtitles editor') {
 		// switch sur la page d'édition
@@ -54,7 +56,7 @@ export async function setSubtitleToEdit(id: string) {
 	}
 
 	// set le subtitle à éditer
-	setSubtitleToEdit(id);
+	currentlyEditedSubtitleId.set(id);
 }
 
 export function clearSubtitleToEdit() {

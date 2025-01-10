@@ -38,8 +38,6 @@
 
 		if (!subtitle) return;
 
-		console.log(subtitle);
-
 		verseNumber = subtitle.verse;
 		surahNumber = subtitle.surah;
 
@@ -53,7 +51,9 @@
 	// Split the verse into words
 	$: wordsInSelectedVerse = getVerse(surahNumber, verseNumber).text.split(' ');
 
-	$: if (verseNumber || surahNumber) {
+	// Si on change de verset, on sélectionne le premier mot par défaut
+	// Ou si on enlève l'édition d'un sous-titre, on reset les curseurs
+	$: if (verseNumber || surahNumber || !$currentlyEditedSubtitleId) {
 		// Select the first word by default when the verse changes
 		startWordIndex = 0;
 		endWordIndex = 0;

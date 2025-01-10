@@ -44,7 +44,6 @@
 		const positionClickedWithin = e.clientX - rect.left;
 		const totalSize = $zoom;
 		const toAdd = (positionClickedWithin / totalSize) * 1000;
-
 		// Enlève temporairement l'effet de fade (car on ne veut pas que le fade soit visible lors du déplacement du curseur, juste
 		// lors de la lecture)
 		const temp = $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
@@ -77,20 +76,13 @@
 		<div class="pl-24 lg:pl-40 h-full flex w-full">
 			{#if !$bestPerformance}
 				{#each Array.from({ length: timeLineTotalDuration }, (_, i) => i) as i}
-					<div
-						class="h-full"
-						style="min-width: {$zoom}px; max-width: {$zoom}px; background-color:  {i % 2 === 0
-							? '#1a1d1d'
-							: '#1d1d1d'};
-					"
-					>
+					<div style="min-width: {$zoom}px; max-width: {$zoom}px;">
 						{#if $zoom >= 30 || ($zoom > 20 && i % 5 === 0 && $zoom < 30) || ($zoom > 10 && i % 3 === 0 && $zoom < 20) || ($zoom > 5 && i % 5 === 0 && $zoom < 10) || ($zoom > 3 && i % 10 === 0 && $zoom < 5) || ($zoom > 1.5 && i % 20 === 0 && $zoom < 3) || ($zoom > 1 && i % 50 === 0 && $zoom < 1.5)}
 							<p class="text-[0.6rem] opacity-30 -translate-x-1/2 w-fit">
 								{secondsToHHMMSS(i, true)[0]}
 							</p>
 						{/if}
 
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<div
 							class="w-full h-6 absolute top-0 z-10 select-none outline-none cursor-pointer"
@@ -103,10 +95,23 @@
 						></div>
 					</div>
 				{/each}
+
+				<!-- lignes verticales -->
+				<div
+					class="h-full"
+					style={`width: ${timeLineTotalDuration * $zoom}px;
+							background: repeating-linear-gradient(
+								90deg,          
+								#1a1e1d,           
+								#1a1e1d ${$zoom}px,   
+								#1d1d1d ${$zoom}px,   
+								#1d1d1d ${$zoom * 2}px    
+							);`}
+				></div>
 			{:else}
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					class="h-6 absolute top-0 z-10 select-none outline-none cursor-pointer"
+					class="h-4 absolute top-0 z-10 select-none outline-none cursor-pointer"
 					tabindex="-1"
 					style="width: {timeLineTotalDuration * $zoom}px;"
 					on:mousedown={(e) => {
