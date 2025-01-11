@@ -1,7 +1,6 @@
 <script lang="ts">
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
-	import SubtitleCreator from '../subtitles/SubtitleCreator.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
 	import SubtitleSettingsContainer from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';

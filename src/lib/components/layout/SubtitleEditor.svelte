@@ -1,8 +1,8 @@
 <script lang="ts">
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
-	import SubtitleCreator from '../subtitles/SubtitleCreator.svelte';
-	import SubtitlesCreatorSettings from '../subtitles/SubtitlesCreatorSettings.svelte';
+	import SubtitleEditor from '../subtitles/SubtitleEditor.svelte';
+	import SubtitlesEditorSettings from '../subtitles/SubtitlesEditorSettings.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
 	import SubtitleSettingsContainer from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
@@ -11,7 +11,7 @@
 <div class="flex-row w-full h-full grid grid-cols-3-template">
 	<!-- Quran and clip explorer -->
 	<section class="min-w-[220px] max-h-full overflow-hidden">
-		<SubtitlesCreatorSettings />
+		<SubtitlesEditorSettings />
 	</section>
 
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
@@ -19,7 +19,7 @@
 		<section class="w-full divide-y-4 divide-[#413f3f]">
 			<!-- Subtitle Editor -->
 			<section class="h-[65%] max-h-[65%]">
-				<SubtitleCreator />
+				<SubtitleEditor />
 			</section>
 
 			<!-- Timeline -->

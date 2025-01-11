@@ -4,6 +4,24 @@
 		showWordByWordTransliteration,
 		videoSpeed
 	} from '$lib/stores/LayoutStore';
+	import { currentProject } from '$lib/stores/ProjectStore';
+	import { getLastClipEnd, getTimelineTotalDuration } from '$lib/stores/TimelineStore';
+
+	let percentage = 0;
+
+	$: if (
+		$currentProject.timeline.subtitlesTracks[0].clips[
+			$currentProject.timeline.subtitlesTracks[0].clips.length - 1
+		]
+	) {
+		percentage = Math.round(
+			$currentProject.timeline.subtitlesTracks[0].clips[
+				$currentProject.timeline.subtitlesTracks[0].clips.length - 1
+			].end /
+				getLastClipEnd($currentProject.timeline) /
+				10
+		);
+	}
 </script>
 
 <div
@@ -36,4 +54,19 @@
 			<option class="bg-gray-800" value="3">3</option>
 		</select>
 	</label>
+
+	<br />
+
+	<p>Percentage of captioned video :</p>
+	<!-- proggress bar -->
+	<div class="relative w-full h-6 bg-[#3a3434] rounded-lg overflow-hidden">
+		<div
+			class="absolute top-0 left-0 h-full bg-[#5b5c66] rounded-lg"
+			style="width: {percentage}%"
+		></div>
+
+		<div class="absolute top-0 left-0 h-full w-full flex justify-center items-center">
+			<span class="text-white text-sm">{percentage}%</span>
+		</div>
+	</div>
 </div>
