@@ -5,13 +5,14 @@
 		currentlyEditedSubtitleId,
 		setSubtitleToEdit
 	} from '$lib/stores/LayoutStore';
+	import { currentProject } from '$lib/stores/ProjectStore';
 	export let subtitle: SubtitleClip;
 </script>
 
 {#if subtitle.verse !== -1 && subtitle.surah !== -1}
 	<abbr title="Edit this subtitle">
 		<button
-			class=" bg-[#253030] p-1 rounded-lg border border-[#1a1013]"
+			class="bg-[#253030] p-1 rounded-lg border border-[#1a1013]"
 			on:click={() => {
 				if ($currentlyEditedSubtitleId === subtitle.id) {
 					clearSubtitleToEdit();

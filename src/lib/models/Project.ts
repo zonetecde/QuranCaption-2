@@ -97,4 +97,5 @@ export interface IndividualSubtitleSettings {
 	bold: boolean;
 	underline: boolean;
 	italic: boolean;
+	hasAtLeastOneStyle: boolean;
 }

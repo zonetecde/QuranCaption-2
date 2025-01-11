@@ -46,7 +46,8 @@
 					bold: false,
 					italic: false,
 					underline: false,
-					glowEffect: false
+					glowEffect: false,
+					hasAtLeastOneStyle: false
 				};
 			}
 		});

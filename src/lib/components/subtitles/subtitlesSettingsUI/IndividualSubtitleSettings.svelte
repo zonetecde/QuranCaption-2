@@ -5,9 +5,23 @@
 	import { currentlyCustomizedSubtitleId } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { onMount } from 'svelte';
+	import { derived } from 'svelte/store';
 
 	export let subtitle: SubtitleClip;
 	export let removeBorder = false;
+
+	$: {
+		const settings = $currentProject.projectSettings.individualSubtitlesSettings[subtitle.id];
+		if (settings) {
+			const newStyle =
+				settings.glowEffect || settings.bold || settings.italic || settings.underline;
+
+			// Update only if the value changes to avoid a re-trigger
+			if (settings.hasAtLeastOneStyle !== newStyle) {
+				settings.hasAtLeastOneStyle = newStyle;
+			}
+		}
+	}
 </script>
 
 <div
@@ -46,7 +60,7 @@
 	<Slider
 		title="Glow Radius"
 		min={1}
-		max={10}
+		max={20}
 		step={1}
 		bind:bindValue={$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]
 			.glowRadius}

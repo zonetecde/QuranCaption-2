@@ -320,11 +320,12 @@
 		// Mets à jour les paramètres individuels custom
 		$currentProject.projectSettings.individualSubtitlesSettings[subtitleId] = {
 			glowEffect: false,
-			glowColor: '#ff0000',
-			glowRadius: 7,
+			glowColor: '#973b3b',
+			glowRadius: 12,
 			bold: false,
 			italic: false,
-			underline: false
+			underline: false,
+			hasAtLeastOneStyle: false
 		};
 
 		// Met à jour la liste des sous-titres

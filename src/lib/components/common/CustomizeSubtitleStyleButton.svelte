@@ -1,13 +1,21 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/models/Timeline';
+	import { currentProject } from '$lib/stores/ProjectStore';
 
 	export let onClick: () => void;
 	export let subtitle: SubtitleClip;
+
+	$: hadAtLeastOneStyle =
+		$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id].hasAtLeastOneStyle;
 </script>
 
 {#if !subtitle.isSilence}
 	<abbr title="Customize style">
-		<button class=" bg-[#253030] p-1 rounded-lg border border-[#1a1013]" on:click={onClick}>
+		<button
+			class={'bg-[#253030] p-1 rounded-lg border border-[#1a1013] ' +
+				(hadAtLeastOneStyle ? 'border-[#7cce79]' : '')}
+			on:click={onClick}
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"

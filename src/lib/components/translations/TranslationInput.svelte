@@ -305,7 +305,7 @@
 
 		{#if showCustomizationSettings}
 			<br />
-			<div class=" w-full bg-[#1f1f1f] p-2 border-t-2 border-[#413f3f] border-b-2">
+			<div class="w-full p-2 border-[#413f3f]">
 				<IndividualSubtitleSettings {subtitle} removeBorder={true} />
 			</div>
 		{/if}

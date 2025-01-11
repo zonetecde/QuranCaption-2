@@ -66,6 +66,14 @@
 <svelte:head>
 	{#if hasCustomIndividualSettings && $currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowEffect}
 		<style>
+			.glow {
+				font-size: 80px;
+				text-align: center;
+				-webkit-animation: glow 1s ease-in-out infinite alternate;
+				-moz-animation: glow 1s ease-in-out infinite alternate;
+				animation: glow 1s ease-in-out infinite alternate;
+			}
+
 			@keyframes glow {
 				from {
 					text-shadow:
@@ -124,12 +132,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 					($showSubtitlesPadding ? ' bg-blue-500 bg-opacity-30' : '')}
 			>
 				<p
-					class={'arabic text-center w-full subtitle-text ' +
-						(hasCustomIndividualSettings &&
-						$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id]
-							.glowEffect
-							? 'glow'
-							: '')}
+					class={'arabic text-center w-full subtitle-text glow'}
 					style={`font-size: ${subtitleTextSize}px; ${
 						enableOutline
 							? `text-shadow: ` +
@@ -179,13 +182,3 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 		</div>
 	{/key}
 {/if}
-
-<style>
-	.glow {
-		font-size: 80px;
-		text-align: center;
-		-webkit-animation: glow 1s ease-in-out infinite alternate;
-		-moz-animation: glow 1s ease-in-out infinite alternate;
-		animation: glow 1s ease-in-out infinite alternate;
-	}
-</style>
