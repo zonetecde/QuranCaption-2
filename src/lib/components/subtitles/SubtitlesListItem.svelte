@@ -43,12 +43,21 @@
 	}
 
 	$: if ($currentlyCustomizedSubtitleId === subtitle.id) {
-		let subtitleListDiv = document.getElementById('subtitle-settings-container');
+		// En fonction de si on est sur la page de Video Editor ou d'édition de sous-titre,
+		// on scroll vers le sous-titre d'une manière différente car on n'a pas la même structure de div
+		// Dans video editor c'est dans les paramètres de sous-titre à gauche, alors que dans l'édition de sous-titre c'est dans la liste des sous-titres
+		// à droite
+
+		// Si on est sur la page d'édition vidéo, on scroll
+		let subtitleListDiv = document.getElementById(
+			$currentPage === 'Video editor' ? 'subtitle-settings-container' : 'subtitle-list-container'
+		);
 		// set l'id à la div
 		if (subtitleListDiv) {
 			// Scroll to the specific subtitle
 			subtitleListDiv.scrollTop =
-				document.getElementById(`subtitle-${$currentlyCustomizedSubtitleId}`)!.offsetTop - 10;
+				document.getElementById(`subtitle-${$currentlyCustomizedSubtitleId}`)!.offsetTop -
+				($currentPage === 'Video editor' ? 10 : 250);
 
 			currentlyCustomizedSubtitleId.set(undefined);
 
@@ -72,14 +81,14 @@
 	style={customStyle}
 >
 	{#if $currentPage === 'Subtitles editor'}
-		<div class="absolute top-1 right-[3.75rem]">
-			<CustomizeSubtitleStyleButton onClick={() => (leftClicked = !leftClicked)} {subtitle} />
-		</div>
 		<div class="absolute top-1 right-8">
 			<EditSubtitleButton {subtitle} />
 		</div>
-		<div class="absolute top-1 right-1">
+		<div class="absolute top-1 right-[3.75rem]">
 			<PlaySubtitleAudioButton {subtitle} />
+		</div>
+		<div class="absolute top-1 right-1">
+			<CustomizeSubtitleStyleButton onClick={() => (leftClicked = !leftClicked)} {subtitle} />
 		</div>
 	{:else if $currentPage === 'Video editor'}
 		<div class="absolute top-1 right-1">

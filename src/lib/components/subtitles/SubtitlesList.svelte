@@ -22,7 +22,11 @@
 	}
 </script>
 
-<div class="h-full w-full bg-[#1f1f1f] overflow-y-scroll" bind:this={div}>
+<div
+	class="h-full w-full bg-[#1f1f1f] overflow-y-scroll"
+	bind:this={div}
+	id="subtitle-list-container"
+>
 	{#each $currentProject.timeline.subtitlesTracks[0].clips as subtitle}
 		<SubtitlesListItem {subtitle} />
 	{/each}

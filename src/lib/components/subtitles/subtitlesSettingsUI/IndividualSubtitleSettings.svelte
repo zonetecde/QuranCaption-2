@@ -27,17 +27,17 @@
 	/>
 
 	<label for="background-color" class="mt-2"
-		><span>Glow color :</span>
+		><span class="text-sm xl:text-base">Glow color :</span>
 		<input
 			type="color"
-			class="ml-1 bg-transparent"
+			class="ml-1 bg-transparent w-8 xl:w-12"
 			bind:value={$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]
 				.glowColor}
 		/>
 		<!-- hex -->
 		<input
 			type="text"
-			class="ml-1 bg-transparent border border-[#494444] w-20 text-center -translate-y-1"
+			class="ml-1 bg-transparent border border-[#494444] w-16 xl:w-20 text-center -translate-y-1 text-sm xl:text-base"
 			bind:value={$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]
 				.glowColor}
 		/>

@@ -18,7 +18,7 @@
 			{min}
 			{max}
 			{step}
-			class="ml-1 bg-slate-600"
+			class="ml-1 bg-slate-600 xl:w-max w-28"
 			bind:value={bindValue}
 			on:focus
 			on:blur

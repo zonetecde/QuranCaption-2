@@ -75,17 +75,23 @@
 	}
 
 	async function customizeStyleButtonClicked(e: MouseEvent) {
-		myMenu.$destroy();
+		// Si on est sur la page Video Editor, on affiche les paramètres de cette page :
+		if ($currentPage === 'Video editor') {
+			myMenu.$destroy();
 
-		selectedSubtitlesLanguage.set('individual');
-		videoEditorSelectedTab.set('subtitles settings');
-		setCurrentPage('Video editor');
+			selectedSubtitlesLanguage.set('individual');
+			videoEditorSelectedTab.set('subtitles settings');
+			setCurrentPage('Video editor');
 
-		// UI Update
-		await new Promise((resolve) => setTimeout(resolve, 10));
+			// UI Update
+			await new Promise((resolve) => setTimeout(resolve, 10));
 
-		// scroll to the individual subtitle settings
-		currentlyCustomizedSubtitleId.set(clip.id);
+			// scroll to the individual subtitle settings
+			currentlyCustomizedSubtitleId.set(clip.id);
+		} else {
+			// Sinon si on est sur la page Subtitles Editor, on affiche les paramètres de cette page : (panel de droite)
+			currentlyCustomizedSubtitleId.set(clip.id); // va trigger le hook
+		}
 	}
 </script>
 
