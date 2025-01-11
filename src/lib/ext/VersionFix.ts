@@ -1,41 +1,43 @@
 import type { ProjectDesc } from '$lib/models/Project';
 import toast from 'svelte-french-toast';
+import { importAndReadFile } from './Utilities';
+import { backupAllProjects, restoreAllProjects } from '$lib/stores/ProjectStore';
+import type Project from '$lib/models/Project';
 
 /**
- * From v2.0.0 to v2.1.0, the project system was changed.
+ * From v2.8.0 to v2.9.0, the project system was changed.
  */
-export function newProjectSystemMigration() {
+export async function newProjectSystemMigration() {
 	const projects: any[] = JSON.parse(localStorage.getItem('projects') || '[]');
 	if (projects.length > 0) {
-		if (projects[0].timeline !== undefined) {
-			// backup and download the old projects
-			const data = JSON.stringify(projects, null, 2);
-			const blob = new Blob([data], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = 'BACKUP FILE IN CASE EVERYTHING BROKE.qcb';
-			a.click();
-			// Make each project occupy one different localstorage item
-			let projectsDesc: ProjectDesc[] = [];
-			for (let i = 0; i < projects.length; i++) {
-				const element = projects[i];
+		toast.success('We are migrating your projects to the new system. Please wait a moment.');
 
-				localStorage.setItem(element.id, JSON.stringify(element));
-				projectsDesc.push({
-					name: element.name,
-					updatedAt: element.updatedAt,
-					id: element.id
-				});
-			}
+		// download all the user's project from localstorage
+		let userProjects: Project[] = [];
 
-			localStorage.setItem('projects', JSON.stringify(projectsDesc));
-			toast.success(
-				'Do not panic if your projects are not here, try to restart the software. If they are still not here, click on the "Restore all projects" button and select the file that was downloaded.',
-				{
-					duration: 20000
-				}
-			);
+		for (let i = 0; i < projects.length; i++) {
+			const element = projects[i];
+
+			userProjects.push(JSON.parse(localStorage.getItem(element.id)!));
 		}
+
+		const data = JSON.stringify(userProjects, null, 2);
+
+		// download as file the data
+		const blob = new Blob([data], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'Backup in case something went wrong.qcb';
+		a.click();
+
+		if (data) {
+			await restoreAllProjects(data);
+		}
+
+		localStorage.clear();
+		// refresh the page
+		location.reload();
 	}
 }

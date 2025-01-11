@@ -17,11 +17,11 @@
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
 
-	onMount(() => {
+	onMount(async () => {
 		// the slug is what after the ? in the URL
 		const slug = window.location.search.split('?')[1];
 
-		const project = getProjectById(slug);
+		const project = await getProjectById(slug);
 
 		if (project === undefined) {
 			// If the project is not found, redirect to the home page

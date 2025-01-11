@@ -6,6 +6,7 @@ import type { ProjectDesc } from '$lib/models/Project';
 import { getSurahName } from './QuranStore';
 import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 import toast from 'svelte-french-toast';
+import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 
 export const currentProject: Writable<Project> = writable();
 
@@ -112,12 +113,12 @@ export function createBlankProject(name: string): Project {
  * @param id - The ID of the project to delete.
  * @returns An array of user projects.
  */
-export function delProject(id: string): ProjectDesc[] {
-	localStorage.removeItem(id);
+export async function delProject(id: string): Promise<ProjectDesc[]> {
+	await localStorageWrapper.removeItem(id);
 
-	let userProjects = getUserProjects();
+	let userProjects = await getUserProjects();
 	userProjects = userProjects.filter((x) => x.id !== id);
-	localStorage.setItem('projects', JSON.stringify(userProjects));
+	await localStorageWrapper.setItem('projects', JSON.stringify(userProjects));
 
 	return userProjects;
 }
@@ -126,20 +127,20 @@ export function delProject(id: string): ProjectDesc[] {
  * Retrieves the user's projects from local storage.
  * @returns An array of user projects.
  */
-export function getUserProjects(): ProjectDesc[] {
-	return JSON.parse(localStorage.getItem('projects') || '[]');
+export async function getUserProjects(): Promise<ProjectDesc[]> {
+	return JSON.parse((await localStorageWrapper.getItem('projects')) || '[]');
 }
 
 /**
  * Retrieves the user's projects from local storage as projects.
  * @returns An array of user projects.
  */
-export function getUserProjectsAsProjects(): Project[] {
-	const projects = getUserProjects();
+export async function getUserProjectsAsProjects(): Promise<Project[]> {
+	const projects = await getUserProjects();
 	const result: Project[] = [];
 
 	for (const project of projects) {
-		const projJson = localStorage.getItem(project.id);
+		const projJson = await localStorageWrapper.getItem(project.id);
 		if (projJson) {
 			result.push(JSON.parse(projJson));
 		}
@@ -153,8 +154,8 @@ export function getUserProjectsAsProjects(): Project[] {
  * @param id - The ID of the project.
  * @returns The project with the specified ID, or undefined if not found.
  */
-export function getProjectById(id: string): Project | undefined {
-	const projJson = localStorage.getItem(id);
+export async function getProjectById(id: string): Promise<Project | undefined> {
+	const projJson = await localStorageWrapper.getItem(id);
 	if (projJson) return JSON.parse(projJson);
 	else return createBlankProject('undefined project');
 }
@@ -163,8 +164,8 @@ export function getProjectById(id: string): Project | undefined {
  * Updates the user's projects in local storage.
  * @param project - The project to update.
  */
-export function updateUsersProjects(project: Project): ProjectDesc[] {
-	const projects: ProjectDesc[] = getUserProjects();
+export async function updateUsersProjects(project: Project): Promise<ProjectDesc[]> {
+	const projects: ProjectDesc[] = await getUserProjects();
 
 	if (project === undefined) return projects; // No project is open
 
@@ -191,8 +192,8 @@ export function updateUsersProjects(project: Project): ProjectDesc[] {
 		};
 	}
 
-	localStorage.setItem(project.id, JSON.stringify(project));
-	localStorage.setItem('projects', JSON.stringify(projects));
+	await localStorageWrapper.setItem(project.id, JSON.stringify(project));
+	await localStorageWrapper.setItem('projects', JSON.stringify(projects));
 
 	return projects;
 }
@@ -242,4 +243,47 @@ export function downloadYoutubeChapters() {
 	a.download = 'youtube chapters for ' + _currentProject.name + '.txt';
 	a.click();
 	URL.revokeObjectURL(a.href);
+}
+
+/*
+ * Backup all user projects and download them as a file.
+ */
+export async function backupAllProjects(userProjectsDesc: ProjectDesc[]) {
+	let userProjects: Project[] = [];
+
+	for (let i = 0; i < userProjectsDesc.length; i++) {
+		const element = userProjectsDesc[i];
+
+		userProjects.push(JSON.parse(await localStorageWrapper.getItem(element.id)!));
+	}
+
+	const data = JSON.stringify(userProjects, null, 2);
+
+	const blob = new Blob([data], { type: 'application/json' });
+	const url = URL.createObjectURL(blob);
+
+	const a = document.createElement('a');
+	a.href = url;
+	a.download =
+		'Quran Caption Backup ' + new Date().toISOString().replace(/:/g, '-').split('.')[0] + '.qcb';
+	a.click();
+}
+
+export async function restoreAllProjects(jsonContent: string): Promise<ProjectDesc[]> {
+	const projects = JSON.parse(jsonContent);
+	let userProjectsDesc: ProjectDesc[] = [];
+
+	for (let project of projects) {
+		const existingProject = userProjectsDesc.find((p) => p.id === project.id);
+		if (existingProject && new Date(existingProject.updatedAt) > new Date(project.updatedAt)) {
+			userProjectsDesc = userProjectsDesc.map((p) => (p.id === project.id ? project : p));
+			await updateUsersProjects(project);
+		} else if (!existingProject) {
+			await updateUsersProjects(project);
+		}
+	}
+
+	userProjectsDesc = await getUserProjects();
+
+	return userProjectsDesc;
 }

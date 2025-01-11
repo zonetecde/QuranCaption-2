@@ -22,16 +22,20 @@
 		getFonts
 	} from '$lib/stores/LayoutStore';
 	import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
+	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
 
 	onMount(() => {
+		// Créer le dossier pour le localStorage si il n'existe pas
+		initializeStorage();
+
 		document.addEventListener('contextmenu', (event) => event.preventDefault());
 
-		window.onkeydown = (e) => {
+		window.onkeydown = async (e) => {
 			if ($currentProject === undefined) return;
 
 			if (e.key === 's' && e.ctrlKey) {
 				e.preventDefault();
-				updateUsersProjects($currentProject);
+				await updateUsersProjects($currentProject);
 				toast.success('Project saved');
 			}
 

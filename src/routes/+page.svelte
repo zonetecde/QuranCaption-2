@@ -3,11 +3,13 @@
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 	import {
+		backupAllProjects,
 		createBlankProject,
 		currentProject,
 		delProject,
 		getProjectById,
 		getUserProjects,
+		restoreAllProjects,
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
 	import type Project from '$lib/models/Project';
@@ -27,6 +29,7 @@
 	import { addAssets } from '$lib/models/Asset';
 	import type { ProjectDesc } from '$lib/models/Project';
 	import { newProjectSystemMigration } from '$lib/ext/VersionFix';
+	import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -36,9 +39,21 @@
 	let searchText = '';
 
 	onMount(async () => {
-		newProjectSystemMigration();
+		// TEMP
+		// const projects = JSON.parse(await localStorageWrapper.getItem('projects'));
+		// localStorage.setItem('projects', JSON.stringify(projects));
 
-		userProjectsDesc = getUserProjects();
+		// for (let i = 0; i < projects.length; i++) {
+		// 	const project = projects[i];
+		// 	console.log(project);
+		// 	if (project.id) {
+		// 		localStorage.setItem(project.id, await localStorageWrapper.getItem(project.id));
+		// 	}
+		// }
+
+		await newProjectSystemMigration();
+
+		userProjectsDesc = await getUserProjects();
 
 		// Check if a new version is available
 		const response = await fetch(GITHUB_API_URL);
@@ -72,7 +87,7 @@
 
 		const project = createBlankProject(projectName);
 
-		userProjectsDesc = updateUsersProjects(project); // Save the project to the local storage
+		userProjectsDesc = await updateUsersProjects(project); // Save the project to the local storage
 
 		await telemetry('A project has been created : ' + projectName);
 
@@ -89,8 +104,8 @@
 	/**
 	 * Handle delete project
 	 */
-	function handleDelProject(id: string) {
-		userProjectsDesc = delProject(id);
+	async function handleDelProject(id: string) {
+		userProjectsDesc = await delProject(id);
 	}
 
 	/**
@@ -104,7 +119,7 @@
 
 			project.id = Id.generate(); // Generate a new id for the project
 
-			userProjectsDesc = updateUsersProjects(project); // Save the project to the local storage
+			userProjectsDesc = await updateUsersProjects(project); // Save the project to the local storage
 
 			openProject(project.id); // Open the project
 		}
@@ -113,25 +128,8 @@
 	/**
 	 * Handle backup all projects button clicked
 	 */
-	function handleBackupAllProjectsButtonClicked() {
-		let userProjects: Project[] = [];
-
-		for (let i = 0; i < userProjectsDesc.length; i++) {
-			const element = userProjectsDesc[i];
-
-			userProjects.push(JSON.parse(localStorage.getItem(element.id)!));
-		}
-
-		const data = JSON.stringify(userProjects, null, 2);
-
-		const blob = new Blob([data], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-
-		const a = document.createElement('a');
-		a.href = url;
-		a.download =
-			'Quran Caption Backup ' + new Date().toISOString().replace(/:/g, '-').split('.')[0] + '.qcb';
-		a.click();
+	export async function handleBackupAllProjectsButtonClicked() {
+		await backupAllProjects(userProjectsDesc);
 	}
 
 	/**
@@ -141,21 +139,7 @@
 		const content = await importAndReadFile('Quran Caption Backup (*.qcb)', ['qcb']);
 
 		if (content) {
-			const projects = JSON.parse(content);
-
-			projects.forEach((project: Project) => {
-				// if project id already exists, replace it if the updatedAt is more recent
-				const existingProject = userProjectsDesc.find((p) => p.id === project.id);
-				if (existingProject && new Date(existingProject.updatedAt) > new Date(project.updatedAt)) {
-					userProjectsDesc = userProjectsDesc.map((p) => (p.id === project.id ? project : p));
-					updateUsersProjects(project);
-				} else if (!existingProject) {
-					// Project does not exist, add it
-					updateUsersProjects(project);
-				}
-			});
-
-			userProjectsDesc = getUserProjects();
+			userProjectsDesc = await restoreAllProjects(content);
 		}
 	}
 </script>
@@ -211,7 +195,7 @@
 							<!-- Edit name button -->
 							<button
 								class="w-6 h-6 absolute bottom-1 right-8 bg-blue-200 rounded-full p-1 hidden group-hover:block"
-								on:click={(e) => {
+								on:click={async (e) => {
 									e.stopPropagation();
 									// window text prompt
 									const newName = prompt('Enter the new name of the project', project.name);
@@ -219,11 +203,11 @@
 										userProjectsDesc = userProjectsDesc.map((x) =>
 											x.id === project.id ? { ...x, name: newName } : x
 										);
-										let _project = getProjectById(project.id);
+										let _project = await getProjectById(project.id);
 										// @ts-ignore
 										_project.name = newName;
 										// @ts-ignores
-										updateUsersProjects(_project);
+										await updateUsersProjects(_project);
 									}
 								}}
 							>

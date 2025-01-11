@@ -13,3 +13,4 @@ ffmpeg.exe
 ffplay.exe
 ffprobe.exe
 src/lib/ext/PrivateVariable.ts
+localStorage/

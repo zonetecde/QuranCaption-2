@@ -38,8 +38,8 @@
 		class="absolute left-3 top-1/2 -translate-y-1/2 pt-2"
 	>
 		<button
-			on:click={() => {
-				updateUsersProjects($currentProject);
+			on:click={async () => {
+				await updateUsersProjects($currentProject);
 				window.location.href = '/';
 			}}
 			><svg
@@ -60,8 +60,8 @@
 	</aabr>
 	<aabr title="Save project (CTRL + S)" class="absolute left-14 top-1/2 -translate-y-1/2 pt-2">
 		<button
-			on:click={() => {
-				updateUsersProjects($currentProject);
+			on:click={async () => {
+				await updateUsersProjects($currentProject);
 				toast.success('Project saved');
 			}}
 			><svg
