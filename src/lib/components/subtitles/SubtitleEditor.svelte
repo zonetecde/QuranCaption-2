@@ -32,62 +32,65 @@
 		</svg>
 
 		<div
-			class="w-[400px] h-[500px] bg-[#393a3f] rounded-lg text-sm p-4 z-50 hidden group-hover:block border-2 border-black"
+			class="w-[600px] h-[425px] gap-x-5 grid-cols-2 bg-[#393a3f] rounded-lg text-sm p-4 hidden group-hover:grid border-2 border-black z-50"
 		>
-			<h1 class="underline">How to create subtitles :</h1>
+			<div class="">
+				<h1 class="underline">How to create subtitles :</h1>
 
-			<p>1. Select the surah and the verse that is being recited in the video</p>
-			<p>
-				2. Press <span class="text-yellow-500">`space`</span> to play the video and start selecting the
-				words the reciter is saying using the `up` and `down` arrow keys or the mouse
-			</p>
-			<p>
-				3. Press <span class="text-yellow-500">`enter`</span> when you have selected the words and that
-				the reciter has stopped/when you want the subtitle to end
-			</p>
-			<p>4. Repeat the process until the video is finished</p>
+				<p>1. Select the surah and the verse that is being recited in the video</p>
+				<p>
+					2. Press <span class="text-yellow-500">`space`</span> to play the video and start selecting
+					the words the reciter is saying using the `up` and `down` arrow keys or the mouse
+				</p>
+				<p>
+					3. Press <span class="text-yellow-500">`enter`</span> when you have selected the words and
+					that the reciter has stopped/when you want the subtitle to end
+				</p>
+				<p>4. Repeat the process until the video is finished</p>
 
-			<p class="mt-3 underline">Additional tips :</p>
-			<p>
-				- You can press the <span class="text-yellow-500">`left`</span> and
-				<span class="text-yellow-500">`right`</span> arrow keys to go back and forth in the video
-			</p>
-			<p>
-				- You can press <span class="text-yellow-500">`backspace`</span> to delete the last subtitle
-				you have created
-			</p>
-
-			<p>
-				- You can press <span class="text-yellow-500">`s`</span> to add a silence subtitle (when there's
-				a long pause)
-			</p>
-
-			<p>
-				- You can press <span class="text-yellow-500">`b`</span> to add
-				<span class="text-yellow-500">`Bismillahi rahmani rahim`</span>
-			</p>
-			<p>
-				- You can press <span class="text-yellow-500">`a`</span> to add
-				<span class="text-yellow-500">`A3oudhou billahi mina chaytani rajim`</span>
-			</p>
-			<p>
-				- You can press <span class="text-yellow-500">`t`</span> to add
-				<span class="text-yellow-500">`a custom text (e.g. to warn of an error)`</span>
-			</p>
-			<p>
-				- You can press <span class="text-yellow-500">`v`</span> to select every word in the verse
-			</p>
-
-			<p class="mt-2">
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				Still need help ? Open the
-				<span
-					class="text-blue-400 cursor-pointer"
-					on:click={() => openLink('https://qurancaption-project.vercel.app/documentation')}
-					>online documentation</span
-				> for a video example.
-			</p>
+				<p class="mt-2">
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					Still need help ? Open the
+					<span
+						class="text-blue-400 cursor-pointer"
+						on:click={() => openLink('https://qurancaption-project.vercel.app/documentation')}
+						>online documentation</span
+					> for a video example.
+				</p>
+			</div>
+			<div>
+				<p class="underline">Additional tips:</p>
+				<p>
+					- Press <span class="text-yellow-500">`left`</span> and
+					<span class="text-yellow-500">`right`</span> to move back and forth in the video.
+				</p>
+				<p>- Press <span class="text-yellow-500">`backspace`</span> to delete the last subtitle.</p>
+				<p>
+					- Press <span class="text-yellow-500">`s`</span> to add a silence subtitle for long pauses.
+				</p>
+				<p>
+					- Press <span class="text-yellow-500">`b`</span> to add
+					<span class="text-yellow-500">`Bismillahi rahmani rahim`</span>.
+				</p>
+				<p>
+					- Press <span class="text-yellow-500">`a`</span> to add
+					<span class="text-yellow-500">`A3oudhou billahi mina chaytani rajim`</span>.
+				</p>
+				<p>
+					- Press <span class="text-yellow-500">`t`</span> to add custom text (e.g., for warnings or
+					errors).
+				</p>
+				<p>- Press <span class="text-yellow-500">`v`</span> to select every word in the verse.</p>
+				<p>- Press <span class="text-yellow-500">`e`</span> to edit the last subtitle.</p>
+				<p>
+					- Press <span class="text-yellow-500">`r`</span> to set the start word index to the last.
+				</p>
+				<p>
+					- Press <span class="text-yellow-500">`m`</span> to set the end time of the last subtitle to
+					the current time.
+				</p>
+			</div>
 		</div>
 	</div>
 
