@@ -27,6 +27,9 @@ export const videoSpeed: Writable<number> = writable(1); // La vitesse de la vid
 export const setCurrentVideoTime: Writable<number | undefined> = writable(undefined); // Change l'endroit où la vidéo est en train de jouer.
 export const showSubtitlesPadding: Writable<boolean> = writable(false); // Lorsqu'on modifie le paramètre du padding, affichage visuelle
 
+// Subtitles Settings
+export const currentlyCustomizedSubtitleId: Writable<string | undefined> = writable(undefined); // L'id du sous-titre actuellement personnalisé
+
 // Subtitles editor
 export const selectedSubtitlesLanguage: Writable<string> = writable('global'); // Afin de mémoriser le choix de l'utilisateur entre les différents onglets
 export const showWordByWordTranslation: Writable<boolean> = writable(true); // Checkbox pour afficher les traductions des mots dans le subtitles editor

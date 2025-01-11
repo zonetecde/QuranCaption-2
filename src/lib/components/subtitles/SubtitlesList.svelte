@@ -2,6 +2,7 @@
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
 		clearSubtitleToEdit,
+		currentlyCustomizedSubtitleId,
 		currentlyEditedSubtitleId,
 		currentPage,
 		setCurrentVideoTime,

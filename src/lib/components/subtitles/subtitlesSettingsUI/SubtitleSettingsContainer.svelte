@@ -102,6 +102,7 @@
 
 <div
 	class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll relative overflow-x-hidden"
+	id="subtitle-settings-container"
 >
 	<button
 		class="absolute right-2 top-2 group"

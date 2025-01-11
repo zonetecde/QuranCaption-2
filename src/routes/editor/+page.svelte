@@ -38,6 +38,18 @@
 		// migration entre les versions
 		if (!project.projectSettings.individualSubtitlesSettings)
 			project.projectSettings.individualSubtitlesSettings = {};
+		project.timeline.subtitlesTracks[0].clips.forEach((clip) => {
+			if (!project.projectSettings.individualSubtitlesSettings[clip.id]) {
+				project.projectSettings.individualSubtitlesSettings[clip.id] = {
+					glowColor: '#ff0000',
+					glowRadius: 5,
+					bold: false,
+					italic: false,
+					underline: false,
+					glowEffect: false
+				};
+			}
+		});
 
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {

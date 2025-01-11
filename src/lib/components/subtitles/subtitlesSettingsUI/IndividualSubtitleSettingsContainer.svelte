@@ -3,7 +3,11 @@
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { ImgFileExt } from '$lib/ext/File';
 	import { milisecondsToMMSS } from '$lib/models/Timeline';
-	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
+	import {
+		currentlyCustomizedSubtitleId,
+		showSubtitlesPadding,
+		userFonts
+	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { cursorPosition, getLastClipEnd } from '$lib/stores/TimelineStore';
 	import { open } from '@tauri-apps/api/dialog';
@@ -16,7 +20,7 @@
 		<p><strong>Click on the subtitle you want to customize</strong></p>
 
 		{#each $currentProject.timeline.subtitlesTracks[0].clips as subtitle}
-			<SubtitlesListItem {subtitle} showIndividualCustomizationSettings />
+			<SubtitlesListItem {subtitle} />
 		{/each}
 	</div>
 </div>

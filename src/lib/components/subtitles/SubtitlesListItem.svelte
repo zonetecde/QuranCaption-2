@@ -2,6 +2,7 @@
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
 		clearSubtitleToEdit,
+		currentlyCustomizedSubtitleId,
 		currentlyEditedSubtitleId,
 		currentPage,
 		setCurrentVideoTime,
@@ -15,10 +16,11 @@
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
 	import IndividualSubtitleSettings from './subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
+	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
 
 	export let subtitle: SubtitleClip;
-	export let showIndividualCustomizationSettings = false; // Affiche les boutons de customisation de sous-titre individuel (glowing...)
 	let leftClicked = false;
+	let customStyle = '';
 
 	async function handleSubtitleListItemTimingClicked(subtitleStart: number) {
 		if ($isPreviewPlaying)
@@ -32,25 +34,30 @@
 	}
 
 	function toggleShowIndividualCustomizationSettings() {
-		if (showIndividualCustomizationSettings) {
-			if (subtitle.isSilence) {
-				toast.error('You cannot customize silence subtitles');
-				return;
-			}
+		if (subtitle.isSilence) {
+			toast.error('You cannot customize silence subtitles');
+			return;
+		}
 
-			// ajoute dans $currentProject.projectSettings.individualSubtitlesSettings si n'existe pas
-			if (!$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]) {
-				$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id] = {
-					glowEffect: false,
-					glowColor: '#ff0000',
-					glowRadius: 7,
-					bold: false,
-					italic: false,
-					underline: false
-				};
-			}
+		leftClicked = !leftClicked;
+	}
 
-			leftClicked = !leftClicked;
+	$: if ($currentlyCustomizedSubtitleId === subtitle.id) {
+		let subtitleListDiv = document.getElementById('subtitle-settings-container');
+		// set l'id à la div
+		if (subtitleListDiv) {
+			// Scroll to the specific subtitle
+			subtitleListDiv.scrollTop =
+				document.getElementById(`subtitle-${$currentlyCustomizedSubtitleId}`)!.offsetTop - 10;
+
+			currentlyCustomizedSubtitleId.set(undefined);
+
+			leftClicked = true;
+			// change temporairement la couleur de fond pour attirer le regard
+			customStyle = 'background-color: #544D6B;';
+			setTimeout(() => {
+				customStyle = '';
+			}, 1000);
 		}
 	}
 </script>
@@ -58,18 +65,25 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	class={'p-2 border-[#413f3f] relative ' +
+	id="subtitle-{subtitle.id}"
+	class={'p-2 border-[#413f3f] relative duration-500 ' +
 		(subtitle.id === $currentlyEditedSubtitleId ? 'bg-[#655429] ' : 'bg-[#1f1f1f] ') +
-		(leftClicked ? 'border-x-2 border-t ' : 'border-b-2 ') +
-		(showIndividualCustomizationSettings ? 'cursor-pointer' : '')}
-	on:click={toggleShowIndividualCustomizationSettings}
+		(leftClicked ? 'border-x-2 border-t ' : 'border-b-2 ')}
+	style={customStyle}
 >
 	{#if $currentPage === 'Subtitles editor'}
+		<div class="absolute top-1 right-[3.75rem]">
+			<CustomizeSubtitleStyleButton onClick={() => (leftClicked = !leftClicked)} {subtitle} />
+		</div>
 		<div class="absolute top-1 right-8">
 			<EditSubtitleButton {subtitle} />
 		</div>
 		<div class="absolute top-1 right-1">
 			<PlaySubtitleAudioButton {subtitle} />
+		</div>
+	{:else if $currentPage === 'Video editor'}
+		<div class="absolute top-1 right-1">
+			<CustomizeSubtitleStyleButton onClick={() => (leftClicked = !leftClicked)} {subtitle} />
 		</div>
 	{/if}
 
@@ -103,6 +117,6 @@
 	</div>
 </div>
 
-{#if showIndividualCustomizationSettings && leftClicked}
+{#if leftClicked}
 	<IndividualSubtitleSettings {subtitle} />
 {/if}

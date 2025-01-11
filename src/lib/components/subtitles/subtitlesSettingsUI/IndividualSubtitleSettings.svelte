@@ -2,18 +2,26 @@
 	import Slider from '$lib/components/common/Slider.svelte';
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import type { SubtitleClip } from '$lib/models/Timeline';
+	import { currentlyCustomizedSubtitleId } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { onMount } from 'svelte';
 
 	export let subtitle: SubtitleClip;
+	export let removeBorder = false;
 </script>
 
-<div class="w-full border-b-2 border-x-2 border-[#413f3f] p-2 flex flex-col">
-	<div class="w-8/12 h-1 bg-[#413f3f] mx-auto" />
-	<br />
+<div
+	class={'w-full border-[#413f3f] p-2 flex flex-col ' +
+		(removeBorder ? 'border-0' : 'border-b-2 border-x-2')}
+	id="subtitle-{subtitle.id}"
+>
+	{#if removeBorder === false}
+		<div class="w-8/12 h-1 bg-[#413f3f] mx-auto" />
+		<br />
+	{/if}
 
 	<Toggle
-		text="Enable Glow Effect"
+		text="Glow Effect"
 		bind:checked={$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]
 			.glowEffect}
 	/>

@@ -289,6 +289,16 @@
 			isCustomText: isCustomText
 		});
 
+		// Mets à jour les paramètres individuels custom
+		$currentProject.projectSettings.individualSubtitlesSettings[subtitleId] = {
+			glowEffect: false,
+			glowColor: '#ff0000',
+			glowRadius: 7,
+			bold: false,
+			italic: false,
+			underline: false
+		};
+
 		// Met à jour la liste des sous-titres
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
 

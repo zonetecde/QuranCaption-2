@@ -21,12 +21,15 @@
 	import toast from 'svelte-french-toast';
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
+	import IndividualSubtitleSettings from '../subtitles/subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
+	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
 
 	export let subtitle: SubtitleClip;
 	export let subtitleIndex: number;
 
 	let wbwTranslation: string[] = [];
 	let isIncomplete = false;
+	let showCustomizationSettings = false;
 
 	onMount(async () => {
 		if (subtitle.surah === -1 || subtitle.verse === -1) {
@@ -197,10 +200,17 @@
 
 {#if (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || ($onlyShowVersesWhoseTranslationsNeedReview && doesSubtitleNeedReview)}
 	<div
-		class={'p-2 border-b-2 px-10 relative border-[#413f3f] ' +
+		class={'p-2 px-10 relative border-[#413f3f] ' +
 			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#212c23] ' : '') +
-			(doesSubtitleNeedReview ? 'bg-[#2c2424] ' : '')}
+			(doesSubtitleNeedReview ? 'bg-[#2c2424] ' : '') +
+			(!showCustomizationSettings ? 'border-b-2' : '')}
 	>
+		<div class="absolute top-2 right-[4.5rem]">
+			<CustomizeSubtitleStyleButton
+				{subtitle}
+				onClick={() => (showCustomizationSettings = !showCustomizationSettings)}
+			/>
+		</div>
 		<div class="absolute top-2 right-10">
 			<EditSubtitleButton {subtitle} />
 		</div>
@@ -292,5 +302,12 @@
 				</div>
 			{/each}
 		</div>
+
+		{#if showCustomizationSettings}
+			<br />
+			<div class=" w-full bg-[#1f1f1f] p-2 border-t-2 border-[#413f3f] border-b-2">
+				<IndividualSubtitleSettings {subtitle} removeBorder={true} />
+			</div>
+		{/if}
 	</div>
 {/if}
