@@ -39,18 +39,6 @@
 	let searchText = '';
 
 	onMount(async () => {
-		// TEMP
-		// const projects = JSON.parse(await localStorageWrapper.getItem('projects'));
-		// localStorage.setItem('projects', JSON.stringify(projects));
-
-		// for (let i = 0; i < projects.length; i++) {
-		// 	const project = projects[i];
-		// 	console.log(project);
-		// 	if (project.id) {
-		// 		localStorage.setItem(project.id, await localStorageWrapper.getItem(project.id));
-		// 	}
-		// }
-
 		await newProjectSystemMigration();
 
 		userProjectsDesc = await getUserProjects();
