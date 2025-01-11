@@ -225,6 +225,21 @@
 				// Met à jour le sous-titre à éditer
 				setSubtitleToEdit(lastSubtitle.id);
 			}
+		} else if (event.key === 'm') {
+			// Change le temps de fin du dernier sous-titre ajouté à la position actuelle
+			const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+			const lastSubtitle = subtitleClips[subtitleClips.length - 1];
+			if (lastSubtitle) {
+				if (lastSubtitle.start < $cursorPosition) {
+					lastSubtitle.end = $cursorPosition;
+					$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
+				} else {
+					toast.error('The start time of the last subtitle is greater than the current time');
+				}
+			}
+		} else if (event.key === 'r') {
+			// Reset le curseur de début à celui de fin
+			startWordIndex = endWordIndex;
 		}
 	}
 
@@ -262,13 +277,17 @@
 		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
 		let currentTimeMs = 0;
 		if (audioElement) currentTimeMs = audioElement.currentTime * 1000;
-		else currentTimeMs = $cursorPosition;
+		else {
+			const videoElement = document.getElementById('video-preview') as HTMLVideoElement;
+			if (videoElement) currentTimeMs = videoElement.currentTime * 1000;
+			else currentTimeMs = $cursorPosition;
+		}
 
 		reajustCursorPosition(false);
 
 		// Vérifie qu'on est pas au 0
 		if (currentTimeMs < 100) {
-			toast.error('Jouer la vidéo pour ajouter un sous-titre');
+			toast.error('Play the video to add a subtitle');
 			return;
 		}
 
@@ -276,7 +295,7 @@
 		// TODO 2
 		if (lastSubtitleEndTime >= currentTimeMs) {
 			toast.error(
-				'La fin du sous-titre précédent est supérieure ou égale au début du nouveau sous-titre'
+				'The end time of the previous subtitle is greater than or equal to the start time of the new subtitle'
 			);
 			return;
 		}
