@@ -15,6 +15,7 @@
 	import {
 		clearSubtitleToEdit,
 		currentlyEditedSubtitleId,
+		setSubtitleToEdit,
 		showWordByWordTranslation,
 		showWordByWordTransliteration
 	} from '$lib/stores/LayoutStore';
@@ -216,6 +217,14 @@
 		} else if (event.key === 't') {
 			// Ajoute un texte custom
 			addSubtitle('', true, false, true);
+		} else if (event.key === 'e') {
+			// Edit le dernier sous-titre ajouté
+			const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+			const lastSubtitle = subtitleClips[subtitleClips.length - 1];
+			if (lastSubtitle) {
+				// Met à jour le sous-titre à éditer
+				setSubtitleToEdit(lastSubtitle.id);
+			}
 		}
 	}
 

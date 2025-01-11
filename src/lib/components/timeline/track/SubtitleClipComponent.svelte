@@ -26,6 +26,8 @@
 	let color: string = '#7cce79';
 
 	function handleClipRightClicked(e: MouseEvent): void {
+		if (clip.verse === -1 || clip.surah === -1) return;
+
 		myMenu.createHandler();
 		myMenu.show(e);
 	}
