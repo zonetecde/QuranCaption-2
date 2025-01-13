@@ -41,8 +41,8 @@
 		project.timeline.subtitlesTracks[0].clips.forEach((clip) => {
 			if (!project.projectSettings.individualSubtitlesSettings[clip.id]) {
 				project.projectSettings.individualSubtitlesSettings[clip.id] = {
-					glowColor: '#ff0000',
-					glowRadius: 5,
+					glowColor: '#973b3b',
+					glowRadius: 12,
 					bold: false,
 					italic: false,
 					underline: false,
