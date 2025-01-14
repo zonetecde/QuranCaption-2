@@ -287,3 +287,27 @@ export async function restoreAllProjects(jsonContent: string): Promise<ProjectDe
 
 	return userProjectsDesc;
 }
+
+export function hasSubtitleDefaultIndividualSettings(subtitleId: string): boolean {
+	return get(currentProject).projectSettings.individualSubtitlesSettings[subtitleId] !== undefined;
+}
+
+export function hasSubtitleAtLeastOneStyle(subtitleId: string): boolean {
+	const _currentProject = get(currentProject);
+	return (
+		_currentProject.projectSettings.individualSubtitlesSettings[subtitleId] !== undefined &&
+		_currentProject.projectSettings.individualSubtitlesSettings[subtitleId].hasAtLeastOneStyle
+	);
+}
+
+export function setDefaultIndividualSettingsForSubtitleId(subtitleId: string) {
+	get(currentProject).projectSettings.individualSubtitlesSettings[subtitleId] = {
+		glowEffect: false,
+		glowColor: '#973b3b',
+		glowRadius: 12,
+		bold: false,
+		italic: false,
+		underline: false,
+		hasAtLeastOneStyle: false
+	};
+}

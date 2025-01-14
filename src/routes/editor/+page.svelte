@@ -35,23 +35,6 @@
 		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);
 		bestPerformance.set(project.projectSettings.bestPerformance);
 
-		// migration entre les versions
-		if (!project.projectSettings.individualSubtitlesSettings)
-			project.projectSettings.individualSubtitlesSettings = {};
-		project.timeline.subtitlesTracks[0].clips.forEach((clip) => {
-			if (!project.projectSettings.individualSubtitlesSettings[clip.id]) {
-				project.projectSettings.individualSubtitlesSettings[clip.id] = {
-					glowColor: '#973b3b',
-					glowRadius: 12,
-					bold: false,
-					italic: false,
-					underline: false,
-					glowEffect: false,
-					hasAtLeastOneStyle: false
-				};
-			}
-		});
-
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {
 			invoke('do_file_exist', { path: asset.filePath }).then((res) => {

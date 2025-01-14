@@ -1,12 +1,24 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/models/Timeline';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		hasSubtitleAtLeastOneStyle,
+		hasSubtitleDefaultIndividualSettings,
+		setDefaultIndividualSettingsForSubtitleId
+	} from '$lib/stores/ProjectStore';
 
 	export let onClick: () => void;
 	export let subtitle: SubtitleClip;
 
-	$: hadAtLeastOneStyle =
-		$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id].hasAtLeastOneStyle;
+	$: hadAtLeastOneStyle = hasSubtitleAtLeastOneStyle(subtitle.id);
+
+	function buttonClicked(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }) {
+		if (!hasSubtitleDefaultIndividualSettings(subtitle.id)) {
+			setDefaultIndividualSettingsForSubtitleId(subtitle.id);
+		}
+
+		onClick();
+	}
 </script>
 
 {#if !subtitle.isSilence}
@@ -14,7 +26,7 @@
 		<button
 			class={'bg-[#253030] p-1 rounded-lg border border-[#1a1013] ' +
 				(hadAtLeastOneStyle ? 'border-[#7cce79]' : '')}
-			on:click={onClick}
+			on:click={buttonClicked}
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
