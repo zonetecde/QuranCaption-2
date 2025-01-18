@@ -21,7 +21,7 @@
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
 	import SubtitlesListItem from '$lib/components/subtitles/SubtitlesListItem.svelte';
 	import IndividualSubtitleSettings from '$lib/components/subtitles/subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, hasSubtitleAtLeastOneStyle } from '$lib/stores/ProjectStore';
 
 	export let clip: SubtitleClip;
 	let color: string = '#7cce79';
@@ -82,9 +82,13 @@
 		if ($currentPage === 'Video editor') {
 			myMenu.$destroy();
 
-			selectedSubtitlesLanguage.set('individual');
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
 			videoEditorSelectedTab.set('subtitles settings');
-			setCurrentPage('Video editor');
+
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			selectedSubtitlesLanguage.set('individual');
 
 			// UI Update
 			await new Promise((resolve) => setTimeout(resolve, 10));
@@ -111,7 +115,7 @@
 		{clip.isSilence ? 'silence' : clip.isCustomText ? 'Custom Text' : clip.text}
 	</p>
 
-	{#if $currentProject.projectSettings.individualSubtitlesSettings[clip.id].hasAtLeastOneStyle}
+	{#if hasSubtitleAtLeastOneStyle(clip.id)}
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"

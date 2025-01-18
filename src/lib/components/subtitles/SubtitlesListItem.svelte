@@ -8,7 +8,11 @@
 		setCurrentVideoTime,
 		setSubtitleToEdit
 	} from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		hasSubtitleDefaultIndividualSettings,
+		setDefaultIndividualSettingsForSubtitleId
+	} from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 	import { cursorPosition, scrollToCursor } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
@@ -33,15 +37,6 @@
 		scrollToCursor();
 	}
 
-	function toggleShowIndividualCustomizationSettings() {
-		if (subtitle.isSilence) {
-			toast.error('You cannot customize silence subtitles');
-			return;
-		}
-
-		leftClicked = !leftClicked;
-	}
-
 	$: if ($currentlyCustomizedSubtitleId === subtitle.id) {
 		// En fonction de si on est sur la page de Video Editor ou d'édition de sous-titre,
 		// on scroll vers le sous-titre d'une manière différente car on n'a pas la même structure de div
@@ -55,13 +50,19 @@
 		// set l'id à la div
 		if (subtitleListDiv) {
 			// Scroll to the specific subtitle
-			subtitleListDiv.scrollTop =
-				document.getElementById(`subtitle-${$currentlyCustomizedSubtitleId}`)!.offsetTop -
-				($currentPage === 'Video editor' ? 10 : 250);
+			const elt = document.getElementById(`subtitle-${$currentlyCustomizedSubtitleId}`);
+			if (elt) {
+				subtitleListDiv.scrollTop = elt.offsetTop - ($currentPage === 'Video editor' ? 10 : 250);
+			}
 
 			currentlyCustomizedSubtitleId.set(undefined);
 
+			if (!hasSubtitleDefaultIndividualSettings(subtitle.id)) {
+				setDefaultIndividualSettingsForSubtitleId(subtitle.id);
+			}
+
 			leftClicked = true;
+
 			// change temporairement la couleur de fond pour attirer le regard
 			customStyle = 'background-color: #544D6B;';
 			setTimeout(() => {

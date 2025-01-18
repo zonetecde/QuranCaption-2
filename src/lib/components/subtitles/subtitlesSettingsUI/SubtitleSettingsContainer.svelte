@@ -10,12 +10,6 @@
 	import toast from 'svelte-french-toast';
 	import IndividualSubtitleSettingsContainer from './IndividualSubtitleSettingsContainer.svelte';
 
-	let _selectedSubtitlesLanguage = $selectedSubtitlesLanguage;
-
-	$: if (_selectedSubtitlesLanguage) {
-		selectedSubtitlesLanguage.set(_selectedSubtitlesLanguage);
-	}
-
 	async function handleImportSettingsButtonClicked() {
 		// import subtitles settings
 		const content = await importAndReadFile('Quran Caption Subtitles Settings (*.qc2)');
@@ -179,7 +173,7 @@
 
 	<select
 		class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
-		bind:value={_selectedSubtitlesLanguage}
+		bind:value={$selectedSubtitlesLanguage}
 	>
 		<option class="bg-slate-300 text-black" value="global">General Settings</option>
 		<option class="bg-slate-300 text-black" value="arabic">Global - Arabic</option>
@@ -197,15 +191,15 @@
 		<option class="bg-slate-300 text-black" value="individual">Individual Subtitle Settings</option>
 	</select>
 
-	{#if _selectedSubtitlesLanguage === 'global'}
+	{#if $selectedSubtitlesLanguage === 'global'}
 		<GlobalSubtitleSettings />
-	{:else if _selectedSubtitlesLanguage !== 'individual'}
-		<LangSubtitleSettings subtitleLanguage={_selectedSubtitlesLanguage} />
+	{:else if $selectedSubtitlesLanguage !== 'individual'}
+		<LangSubtitleSettings subtitleLanguage={$selectedSubtitlesLanguage} />
 	{:else}
 		<IndividualSubtitleSettingsContainer />
 	{/if}
 
-	{#if _selectedSubtitlesLanguage !== 'individual'}
+	{#if $selectedSubtitlesLanguage !== 'individual'}
 		<button
 			class="bg-[#383535] py-2.5 mb-6 w-60 mx-auto rounded-xl border-2 border-black"
 			on:click={checkForCollision}

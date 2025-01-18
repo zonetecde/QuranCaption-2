@@ -1,6 +1,10 @@
 <script lang="ts">
 	import Id from '$lib/ext/Id';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		hasSubtitleAtLeastOneStyle,
+		hasSubtitleDefaultIndividualSettings
+	} from '$lib/stores/ProjectStore';
 	import {
 		Mushaf,
 		getNumberOfVerses,
@@ -253,6 +257,13 @@
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
 		if (subtitleClips.length > 0) {
+			if (hasSubtitleDefaultIndividualSettings(subtitleClips[subtitleClips.length - 1].id)) {
+				// remove it from the dic
+				delete $currentProject.projectSettings.individualSubtitlesSettings[
+					subtitleClips[subtitleClips.length - 1].id
+				];
+			}
+
 			subtitleClips.pop();
 		}
 
@@ -319,17 +330,6 @@
 			hadItTranslationEverBeenModified: false,
 			isCustomText: isCustomText
 		});
-
-		// Mets à jour les paramètres individuels custom
-		$currentProject.projectSettings.individualSubtitlesSettings[subtitleId] = {
-			glowEffect: false,
-			glowColor: '#973b3b',
-			glowRadius: 12,
-			bold: false,
-			italic: false,
-			underline: false,
-			hasAtLeastOneStyle: false
-		};
 
 		// Met à jour la liste des sous-titres
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;

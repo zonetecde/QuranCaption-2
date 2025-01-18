@@ -3,7 +3,11 @@
 	import { calculateFontSize, latinNumberToArabic } from '$lib/ext/Utilities';
 
 	import { currentPage, showSubtitlesPadding, videoDimensions } from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		hasSubtitleAtLeastOneStyle,
+		hasSubtitleDefaultIndividualSettings
+	} from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
@@ -14,8 +18,7 @@
 	export let subtitleLanguage: string;
 
 	$: hasCustomIndividualSettings =
-		currentSubtitle &&
-		$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id] !== undefined;
+		currentSubtitle && hasSubtitleAtLeastOneStyle(currentSubtitle.id);
 
 	$: if (hasCustomIndividualSettings) {
 		// set the css variables for the glow effect
@@ -69,9 +72,9 @@
 			.glow {
 				font-size: 80px;
 				text-align: center;
-				-webkit-animation: glow 1s ease-in-out infinite alternate;
-				-moz-animation: glow 1s ease-in-out infinite alternate;
-				animation: glow 1s ease-in-out infinite alternate;
+				-webkit-animation: glow 2s ease-in-out infinite alternate;
+				-moz-animation: glow 2s ease-in-out infinite alternate;
+				animation: glow 2s ease-in-out infinite alternate;
 			}
 
 			@keyframes glow {
@@ -132,7 +135,8 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 					($showSubtitlesPadding ? ' bg-blue-500 bg-opacity-30' : '')}
 			>
 				<p
-					class={'arabic text-center w-full subtitle-text glow'}
+					class={'arabic text-center w-full subtitle-text ' +
+						(hasCustomIndividualSettings ? 'glow' : '')}
 					style={`font-size: ${subtitleTextSize}px; ${
 						enableOutline
 							? `text-shadow: ` +
