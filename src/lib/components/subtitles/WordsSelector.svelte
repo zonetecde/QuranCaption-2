@@ -195,8 +195,11 @@
 						subtitle.lastWordIndexInVerse = endWordIndex;
 						subtitle.isLastWordInVerse = endWordIndex === wordsInSelectedVerse.length - 1;
 						$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
-						clearSubtitleToEdit();
 					}
+
+					clearSubtitleToEdit();
+					// go to next word
+					selectNextWord(true);
 				}
 			}
 		} else if (event.key === 'b') {
@@ -330,9 +333,6 @@
 
 		// Met à jour la liste des sous-titres
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
-
-		// Ajoute ses paramètres individuels custom
-		//TODO 3
 
 		// Si il y a des translations, les ajoutes
 		let translations: { [key: string]: string } = {};

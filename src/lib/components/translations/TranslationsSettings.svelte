@@ -17,7 +17,9 @@
 	async function fetchTranslationsFromOtherProjects() {
 		let numberOfUpdatedTranslations = 0;
 
-		const userProjects = getUserProjectsAsProjects();
+		toast.success('Fetching translations from other projects...');
+
+		const userProjects = await getUserProjectsAsProjects();
 
 		await Promise.all(
 			// Loop through all the subtitles of the current project
