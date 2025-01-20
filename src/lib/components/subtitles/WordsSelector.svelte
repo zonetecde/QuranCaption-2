@@ -30,6 +30,10 @@
 	let wbwTranslation: string[] = [];
 	let wbwTransliteration: string[] = [];
 
+	// Variables pour le remplacement de sous-titre déjà validé
+	let tempsDebut = 0;
+	let tempsFin = 0;
+
 	// Hook when a subtitle is clicked
 	$: if ($currentlyEditedSubtitleId) {
 		editSubtitle($currentlyEditedSubtitleId);
@@ -248,6 +252,16 @@
 			// Reset le curseur de début à celui de fin
 			startWordIndex = endWordIndex;
 		}
+		// Remplacer des sous-titres
+		else if (event.key === 'd') {
+			// set le temps de debut
+			tempsDebut = getCurrentCursorTime();
+			toast.success('Start time set');
+		} else if (event.key === 'f') {
+			// set le temps de fin
+			tempsFin = getCurrentCursorTime();
+			toast.success('End time set');
+		}
 	}
 
 	/**
@@ -271,6 +285,23 @@
 	}
 
 	/**
+	 * Récupère le temps actuel du curseur
+	 */
+	function getCurrentCursorTime() {
+		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
+		let currentTimeMs = 0;
+		if (audioElement) currentTimeMs = audioElement.currentTime * 1000;
+		else {
+			const videoElement = document.getElementById('video-preview') as HTMLVideoElement;
+			if (videoElement) currentTimeMs = videoElement.currentTime * 1000;
+			else currentTimeMs = $cursorPosition;
+		}
+
+		reajustCursorPosition(false);
+		return currentTimeMs;
+	}
+
+	/**
 	 * Ajoute un sous-titre
 	 * @param subtitleText Texte du sous-titre
 	 * @param isNotVerse Si vrai, le sous-titre n'est pas un verset (la basmallah, la protection, etc.)
@@ -288,16 +319,7 @@
 			subtitleClips.length > 0 ? subtitleClips[subtitleClips.length - 1].end : 0;
 
 		// Réajuste la position du curseur si on est sur la vidéo
-		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
-		let currentTimeMs = 0;
-		if (audioElement) currentTimeMs = audioElement.currentTime * 1000;
-		else {
-			const videoElement = document.getElementById('video-preview') as HTMLVideoElement;
-			if (videoElement) currentTimeMs = videoElement.currentTime * 1000;
-			else currentTimeMs = $cursorPosition;
-		}
-
-		reajustCursorPosition(false);
+		let currentTimeMs = getCurrentCursorTime();
 
 		// Vérifie qu'on est pas au 0
 		if (currentTimeMs < 100) {
