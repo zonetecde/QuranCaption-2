@@ -35,6 +35,28 @@ export const selectedSubtitlesLanguage: Writable<string> = writable('global'); /
 export const showWordByWordTranslation: Writable<boolean> = writable(true); // Checkbox pour afficher les traductions des mots dans le subtitles editor
 export const showWordByWordTransliteration: Writable<boolean> = writable(false); // Checkbox pour afficher les translittérations des mots dans le subtitles editor
 export const currentlyEditedSubtitleId: Writable<string | undefined> = writable(undefined); // L'id du sous-titre actuellement édité
+export const isRemplacingAlreadyAddedSubtitles: Writable<boolean> = writable(false); // Indique si on est en train de remplacer des sous-titres déjà ajoutés
+export const beginTimeReplacing: Writable<number | undefined> = writable(undefined); // Le temps de début de la zone de remplacement
+export const endTimeReplacing: Writable<number | undefined> = writable(undefined); // Le temps de fin de la zone de remplacement
+
+endTimeReplacing.subscribe((endTime) => {
+	if (endTime) {
+		isRemplacingAlreadyAddedSubtitles.set(true);
+		clearSubtitleToEdit();
+	}
+});
+beginTimeReplacing.subscribe((beginTime) => {
+	if (beginTime) {
+		isRemplacingAlreadyAddedSubtitles.set(true);
+		clearSubtitleToEdit();
+	}
+});
+
+export function clearBeginAndEndTimeReplacing() {
+	beginTimeReplacing.set(undefined);
+	endTimeReplacing.set(undefined);
+	isRemplacingAlreadyAddedSubtitles.set(false);
+}
 
 currentlyEditedSubtitleId.subscribe((id) => {
 	// Protection contre le fait d'éditer un sous-titre qui est un silence/custom text

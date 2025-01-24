@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { clearSubtitleToEdit, currentlyEditedSubtitleId } from '$lib/stores/LayoutStore';
+	import { milisecondsToMMSS } from '$lib/models/Timeline';
+	import {
+		beginTimeReplacing,
+		clearBeginAndEndTimeReplacing,
+		clearSubtitleToEdit,
+		currentlyEditedSubtitleId,
+		endTimeReplacing,
+		isRemplacingAlreadyAddedSubtitles
+	} from '$lib/stores/LayoutStore';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
 	import { open as openLink } from '@tauri-apps/api/shell';
@@ -107,6 +115,33 @@
 			</p>
 			<button class="underline underline-offset-2 pt-1" on:click={() => clearSubtitleToEdit()}
 				>Nervermind, stop editing this subtitle</button
+			>
+		</div>
+	{/if}
+
+	{#if $isRemplacingAlreadyAddedSubtitles}
+		<div
+			class="absolute bottom-0 left-0 px-5 py-2 bg-[#947a38] bg-opacity-65 z-40 border-4 rounded-tr-lg border-b-0 border-l-0 border-[#413f3f]"
+		>
+			<p>
+				You are currently replacing already added subtitles.<br />
+				{#if $beginTimeReplacing && $endTimeReplacing}
+					Press Enter after selecting the word(s) that should replace the existing subtitles.
+				{:else}
+					Set the begin and end time of your new subtitle.
+				{/if}
+
+				<br />
+				Begin time : {$beginTimeReplacing
+					? milisecondsToMMSS($beginTimeReplacing)
+					: 'press `d` to set'}<br />
+				End time : {$endTimeReplacing ? milisecondsToMMSS($endTimeReplacing) : 'press `f` to set'}
+			</p>
+
+			<button
+				class="underline underline-offset-2 pt-1"
+				on:click={() => clearBeginAndEndTimeReplacing()}
+				>Nervermind, stop replacing subtitles</button
 			>
 		</div>
 	{/if}

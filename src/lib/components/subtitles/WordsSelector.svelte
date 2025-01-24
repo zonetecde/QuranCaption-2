@@ -17,8 +17,12 @@
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import { reajustCursorPosition } from '$lib/ext/Utilities';
 	import {
+		beginTimeReplacing,
+		clearBeginAndEndTimeReplacing,
 		clearSubtitleToEdit,
 		currentlyEditedSubtitleId,
+		endTimeReplacing,
+		isRemplacingAlreadyAddedSubtitles,
 		setSubtitleToEdit,
 		showWordByWordTranslation,
 		showWordByWordTransliteration
@@ -30,17 +34,13 @@
 	let wbwTranslation: string[] = [];
 	let wbwTransliteration: string[] = [];
 
-	// Variables pour le remplacement de sous-titre déjà validé
-	let tempsDebut = 0;
-	let tempsFin = 0;
-
 	// Hook when a subtitle is clicked
 	$: if ($currentlyEditedSubtitleId) {
-		editSubtitle($currentlyEditedSubtitleId);
+		setSubtitleToBeEdited($currentlyEditedSubtitleId);
 	}
 
 	// Enter edit mode to edit a subtitle
-	async function editSubtitle(subtitleId: String) {
+	async function setSubtitleToBeEdited(subtitleId: String) {
 		// Récupère le sous-titre à éditer
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 		let subtitle = subtitleClips.find((clip) => clip.id === subtitleId);
@@ -185,29 +185,17 @@
 		} else if (event.key === 'Enter') {
 			const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
 			if (selectedWords.length > 0) {
-				if (!$currentlyEditedSubtitleId) {
+				if ($isRemplacingAlreadyAddedSubtitles) {
+					// Remplace les sous-titres présent entre les temps de début et de fin par le texte sélectionné
+					replaceSubtitles(selectedWords);
+				} else if ($currentlyEditedSubtitleId) {
+					editSubtitle(selectedWords);
+				} else {
 					// Ajoute le sous-titre
 					const temp = $currentProject.timeline.subtitlesTracks[0].clips.length;
 					addSubtitle(selectedWords);
 					// Vérifie qu'il n'y a pas eu d'erreur lors de l'ajout
 					if (temp < $currentProject.timeline.subtitlesTracks[0].clips.length) selectNextWord(true);
-				} else {
-					// édite le sous-titre existant
-					const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
-					const subtitle = subtitleClips.find((clip) => clip.id === $currentlyEditedSubtitleId);
-					if (subtitle) {
-						subtitle.text = selectedWords;
-						subtitle.verse = verseNumber;
-						subtitle.surah = surahNumber;
-						subtitle.firstWordIndexInVerse = startWordIndex;
-						subtitle.lastWordIndexInVerse = endWordIndex;
-						subtitle.isLastWordInVerse = endWordIndex === wordsInSelectedVerse.length - 1;
-						$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
-					}
-
-					clearSubtitleToEdit();
-					// go to next word
-					selectNextWord(true);
 				}
 			}
 		} else if (event.key === 'b') {
@@ -235,6 +223,9 @@
 			if (lastSubtitle) {
 				// Met à jour le sous-titre à éditer
 				setSubtitleToEdit(lastSubtitle.id);
+
+				// Enlève le remplacage de sous-titres si il y en a
+				clearBeginAndEndTimeReplacing();
 			}
 		} else if (event.key === 'm') {
 			// Change le temps de fin du dernier sous-titre ajouté à la position actuelle
@@ -255,12 +246,43 @@
 		// Remplacer des sous-titres
 		else if (event.key === 'd') {
 			// set le temps de debut
-			tempsDebut = getCurrentCursorTime();
-			toast.success('Start time set');
+			beginTimeReplacing.set(getCurrentCursorTime());
+			// Enlève la fin si < début
+			if ($endTimeReplacing && $beginTimeReplacing! >= $endTimeReplacing) endTimeReplacing.set(0);
 		} else if (event.key === 'f') {
 			// set le temps de fin
-			tempsFin = getCurrentCursorTime();
-			toast.success('End time set');
+			endTimeReplacing.set(getCurrentCursorTime());
+			// Enlève le début si > fin
+			if ($beginTimeReplacing && $beginTimeReplacing >= $endTimeReplacing!)
+				beginTimeReplacing.set(0);
+		}
+	}
+
+	function editSubtitle(selectedWords: string) {
+		// édite le sous-titre existant
+		const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
+		const subtitle = subtitleClips.find((clip) => clip.id === $currentlyEditedSubtitleId);
+		if (subtitle) {
+			subtitle.text = selectedWords;
+			subtitle.verse = verseNumber;
+			subtitle.surah = surahNumber;
+			subtitle.firstWordIndexInVerse = startWordIndex;
+			subtitle.lastWordIndexInVerse = endWordIndex;
+			subtitle.isLastWordInVerse = endWordIndex === wordsInSelectedVerse.length - 1;
+			$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
+		}
+
+		clearSubtitleToEdit();
+		// go to next word
+		selectNextWord(true);
+	}
+
+	/*
+	 * Remplace les sous-titres présent entre les temps de début et de fin par le texte sélectionné
+	 */
+	function replaceSubtitles(selectedWords: string) {
+		if (!$beginTimeReplacing || !$endTimeReplacing) {
+			toast.error('Set the begin and end time of your new subtitle');
 		}
 	}
 
