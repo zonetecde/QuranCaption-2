@@ -61,48 +61,56 @@ export function createBlankProject(name: string): Project {
 				}
 			]
 		},
-		projectSettings: {
-			cursorPosition: 0,
-			zoom: 30,
-			scrollLeft: 0,
-			addedTranslations: [],
-			videoScale: 1,
-			translateVideoX: 0,
-			bestPerformance: false,
-			individualSubtitlesSettings: {},
-			globalSubtitlesSettings: {
-				background: true,
-				backgroundColor: '#000000',
-				backgroundOpacity: 0.5,
-				fadeDuration: 300,
+		projectSettings: getDefaultsProjectSettings()
+	};
+}
+
+/**
+ * Returns the default project settings.
+ * @returns The default project settings.
+ */
+export function getDefaultsProjectSettings(): Project['projectSettings'] {
+	return {
+		cursorPosition: 0,
+		zoom: 30,
+		scrollLeft: 0,
+		addedTranslations: [],
+		videoScale: 1,
+		translateVideoX: 0,
+		bestPerformance: false,
+		individualSubtitlesSettings: {},
+		globalSubtitlesSettings: {
+			background: true,
+			backgroundColor: '#000000',
+			backgroundOpacity: 0.5,
+			fadeDuration: 300,
+			horizontalPadding: 0,
+			backgroundImage: '',
+			creatorText: {
+				outline: true,
+				enable: true,
+				text: 'Quran Caption',
+				fontFamily: 'Verdana',
+				fontSize: 60,
+				verticalPosition: 75,
+				color: '#ffffff',
+				opacity: 1
+			}
+		},
+		subtitlesTracksSettings: {
+			arabic: {
+				enableSubtitles: true,
+				fontSize: 100,
+				fontFamily: 'Hafs',
+				color: '#ffffff',
+				enableOutline: true,
+				outlineColor: '#000000',
+				outlineThickness: 2,
+				verticalPosition: 0,
 				horizontalPadding: 0,
-				backgroundImage: '',
-				creatorText: {
-					outline: true,
-					enable: true,
-					text: 'Quran Caption',
-					fontFamily: 'Verdana',
-					fontSize: 60,
-					verticalPosition: 75,
-					color: '#ffffff',
-					opacity: 1
-				}
-			},
-			subtitlesTracksSettings: {
-				arabic: {
-					enableSubtitles: true,
-					fontSize: 100,
-					fontFamily: 'Hafs',
-					color: '#ffffff',
-					enableOutline: true,
-					outlineColor: '#000000',
-					outlineThickness: 2,
-					verticalPosition: 0,
-					horizontalPadding: 0,
-					opacity: 1,
-					showVerseNumber: true,
-					alignment: 'center'
-				}
+				opacity: 1,
+				showVerseNumber: true,
+				alignment: 'center'
 			}
 		}
 	};
@@ -167,7 +175,12 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
 export async function updateUsersProjects(project: Project): Promise<ProjectDesc[]> {
 	const projects: ProjectDesc[] = await getUserProjects();
 
-	if (project === undefined) return projects; // No project is open
+	if (project === undefined || project === null) return projects; // No project is open
+
+	// au cas-où
+	if (project.projectSettings === null) {
+		project.projectSettings = getDefaultsProjectSettings();
+	}
 
 	project.projectSettings.zoom = get(zoom);
 	project.projectSettings.cursorPosition = get(cursorPosition);
@@ -295,6 +308,7 @@ export function hasSubtitleDefaultIndividualSettings(subtitleId: string): boolea
 export function hasSubtitleAtLeastOneStyle(subtitleId: string): boolean {
 	const _currentProject = get(currentProject);
 	return (
+		_currentProject.projectSettings.individualSubtitlesSettings !== undefined &&
 		_currentProject.projectSettings.individualSubtitlesSettings[subtitleId] !== undefined &&
 		_currentProject.projectSettings.individualSubtitlesSettings[subtitleId].hasAtLeastOneStyle
 	);
