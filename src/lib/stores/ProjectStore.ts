@@ -302,7 +302,10 @@ export async function restoreAllProjects(jsonContent: string): Promise<ProjectDe
 }
 
 export function hasSubtitleDefaultIndividualSettings(subtitleId: string): boolean {
-	return get(currentProject).projectSettings.individualSubtitlesSettings[subtitleId] !== undefined;
+	return (
+		get(currentProject).projectSettings.individualSubtitlesSettings !== undefined &&
+		get(currentProject).projectSettings.individualSubtitlesSettings[subtitleId] !== undefined
+	);
 }
 
 export function hasSubtitleAtLeastOneStyle(subtitleId: string): boolean {

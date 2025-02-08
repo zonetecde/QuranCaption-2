@@ -243,19 +243,19 @@
 			// Reset le curseur de début à celui de fin
 			startWordIndex = endWordIndex;
 		}
-		// Remplacer des sous-titres
-		else if (event.key === 'd') {
-			// set le temps de debut
-			beginTimeReplacing.set(getCurrentCursorTime());
-			// Enlève la fin si < début
-			if ($endTimeReplacing && $beginTimeReplacing! >= $endTimeReplacing) endTimeReplacing.set(0);
-		} else if (event.key === 'f') {
-			// set le temps de fin
-			endTimeReplacing.set(getCurrentCursorTime());
-			// Enlève le début si > fin
-			if ($beginTimeReplacing && $beginTimeReplacing >= $endTimeReplacing!)
-				beginTimeReplacing.set(0);
-		}
+		// // Remplacer des sous-titres
+		// else if (event.key === 'd') {
+		// 	// set le temps de debut
+		// 	beginTimeReplacing.set(getCurrentCursorTime());
+		// 	// Enlève la fin si < début
+		// 	if ($endTimeReplacing && $beginTimeReplacing! >= $endTimeReplacing) endTimeReplacing.set(0);
+		// } else if (event.key === 'f') {
+		// 	// set le temps de fin
+		// 	endTimeReplacing.set(getCurrentCursorTime());
+		// 	// Enlève le début si > fin
+		// 	if ($beginTimeReplacing && $beginTimeReplacing >= $endTimeReplacing!)
+		// 		beginTimeReplacing.set(0);
+		// }
 	}
 
 	function editSubtitle(selectedWords: string) {
