@@ -5,12 +5,16 @@
 	export let step: number;
 	export let bindValue: number;
 	export let unit: string = '';
+	export let disabled: boolean = false;
 
 	let isMouseDown = false;
 	let yAxis = 0;
 </script>
 
-<label class="flex mt-2 min-h-24 xl:min-h-0 items-center flex-wrap overflow-x-auto">
+<label
+	class={'flex mt-2 min-h-24 xl:min-h-0 items-center flex-wrap overflow-x-auto ' +
+		(disabled ? 'opacity-50' : '')}
+>
 	<span>{title} :</span>
 	<div class="flex">
 		<input
@@ -22,11 +26,13 @@
 			bind:value={bindValue}
 			on:focus
 			on:blur
+			{disabled}
 		/>
 		<div class="flex items-center">
 			<input
 				on:focus
 				on:blur
+				{disabled}
 				type="number"
 				{min}
 				{max}

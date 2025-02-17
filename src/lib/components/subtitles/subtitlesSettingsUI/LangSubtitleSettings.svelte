@@ -112,6 +112,25 @@
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
 	<h1 class="text-lg font-bold mb-2">Position</h1>
+
+	<!-- place right below arabic -->
+	<Toggle
+		text="Place right below Arabic text"
+		bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.placeRightBelowArabic}
+	/>
+
+	<Slider
+		title="Space Between Lines"
+		min={0}
+		max={100}
+		step={0.1}
+		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.spaceBetweenLines}
+		disabled={!$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.placeRightBelowArabic}
+	/>
+
 	<Slider
 		title="Vertical Position"
 		min={-100}
@@ -119,6 +138,8 @@
 		step={0.1}
 		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 			.verticalPosition}
+		disabled={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.placeRightBelowArabic}
 	/>
 
 	<Slider

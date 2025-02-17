@@ -86,6 +86,8 @@ export interface SubtitleTrackSettings {
 	opacity: number;
 	showVerseNumber: boolean;
 	alignment: 'start' | 'center' | 'end' | 'justify';
+	placeRightBelowArabic: boolean;
+	spaceBetweenLines: number;
 }
 
 /**

@@ -110,7 +110,9 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				horizontalPadding: 0,
 				opacity: 1,
 				showVerseNumber: true,
-				alignment: 'center'
+				alignment: 'center',
+				spaceBetweenLines: 0,
+				placeRightBelowArabic: false
 			}
 		}
 	};

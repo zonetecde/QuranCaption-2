@@ -263,7 +263,6 @@
 			{#each $currentProject.projectSettings.addedTranslations as translation}
 				<BurnedSubtitles bind:currentSubtitle {hideControls} subtitleLanguage={translation} />
 			{/each}
-
 			<BurnedCreatorText />
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
