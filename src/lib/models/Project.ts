@@ -54,6 +54,15 @@ export interface GlobalVideoSettings {
 	horizontalPadding: number;
 	backgroundImage: string;
 	creatorText: CreatorText;
+	subscribeButton: SubscribeButton;
+}
+
+/**
+ * Represents the settings of the subscribe button.
+ */
+export interface SubscribeButton {
+	enable: boolean;
+	startTime: number;
 }
 
 /**

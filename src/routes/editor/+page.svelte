@@ -35,6 +35,14 @@
 		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);
 		bestPerformance.set(project.projectSettings.bestPerformance);
 
+		// Migration - added new settings - need to check if the project has the new settings
+		if (project.projectSettings.globalSubtitlesSettings.subscribeButton === undefined) {
+			project.projectSettings.globalSubtitlesSettings.subscribeButton = {
+				enable: true,
+				startTime: 3
+			};
+		}
+
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {
 			invoke('do_file_exist', { path: asset.filePath }).then((res) => {

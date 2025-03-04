@@ -86,6 +86,10 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			fadeDuration: 300,
 			horizontalPadding: 0,
 			backgroundImage: '',
+			subscribeButton: {
+				enable: false,
+				startTime: 3
+			},
 			creatorText: {
 				outline: true,
 				enable: true,

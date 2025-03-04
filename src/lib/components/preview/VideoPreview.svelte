@@ -24,6 +24,7 @@
 	} from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
+	import { fade } from 'svelte/transition';
 
 	export let hideControls = false;
 
@@ -78,6 +79,23 @@
 				}
 			}
 		}, 1);
+	}
+
+	// Pour que le gif 'subscribe' commence au début
+	let gifKey = 0;
+	let prevInRange: number | boolean = false;
+	$: subscribeButtonStartTime =
+		$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.startTime * 1000;
+	$: subscribeButtonEndTime = subscribeButtonStartTime + 4500;
+	$: {
+		const currentInRange =
+			$cursorPosition &&
+			$cursorPosition > subscribeButtonStartTime &&
+			$cursorPosition < subscribeButtonEndTime;
+		if (currentInRange && !prevInRange) {
+			gifKey = Date.now();
+		}
+		prevInRange = currentInRange;
 	}
 
 	$: currentTime = secondsToHHMMSS($cursorPosition / 1000); // [0] = HH:MM:SS, [1] = milliseconds
@@ -265,6 +283,17 @@
 			{/each}
 
 			<BurnedCreatorText />
+
+			{#if $currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
+				<img
+					src={`/icons/subscribe.gif?key=${gifKey}`}
+					alt="Subscribe"
+					class="absolute -top-10 -left-6"
+					width="300"
+					height="100"
+					transition:fade
+				/>
+			{/if}
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
 

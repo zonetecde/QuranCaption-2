@@ -1,7 +1,7 @@
 import type { ProjectDesc } from '$lib/models/Project';
 import toast from 'svelte-french-toast';
 import { importAndReadFile } from './Utilities';
-import { backupAllProjects, restoreAllProjects } from '$lib/stores/ProjectStore';
+import { backupAllProjects, getUserProjects, restoreAllProjects } from '$lib/stores/ProjectStore';
 import type Project from '$lib/models/Project';
 
 /**

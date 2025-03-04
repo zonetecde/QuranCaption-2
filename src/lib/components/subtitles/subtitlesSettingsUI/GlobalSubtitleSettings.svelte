@@ -195,3 +195,22 @@
 			.verticalPosition}
 	/>
 </div>
+
+<div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
+	<h1 class="text-lg font-bold mb-2">Subscribe Button</h1>
+
+	<Toggle
+		text="Enable Subscribe Button Animation"
+		bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable}
+	/>
+
+	<Slider
+		title="Start Time"
+		unit="s from start"
+		min={0.5}
+		max={500}
+		step={0.5}
+		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton
+			.startTime}
+	/>
+</div>
