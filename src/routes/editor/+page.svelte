@@ -38,7 +38,7 @@
 		// Migration - added new settings - need to check if the project has the new settings
 		if (project.projectSettings.globalSubtitlesSettings.subscribeButton === undefined) {
 			project.projectSettings.globalSubtitlesSettings.subscribeButton = {
-				enable: true,
+				enable: false,
 				startTime: 3
 			};
 		}
