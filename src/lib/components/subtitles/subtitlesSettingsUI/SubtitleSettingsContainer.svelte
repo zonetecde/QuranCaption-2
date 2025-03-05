@@ -44,6 +44,15 @@
 
 			// Mets à jour les settings globaux (bg, fade duration, creator text)
 			const globalSubtitlesSettings = subtitlesSettings[0];
+
+			if (globalSubtitlesSettings.subscribeButton === undefined) {
+				globalSubtitlesSettings.subscribeButton = {
+					enabled: false,
+					startTime: 3,
+					position: 'BC'
+				};
+			}
+
 			$currentProject.projectSettings.globalSubtitlesSettings = globalSubtitlesSettings;
 		}
 	}

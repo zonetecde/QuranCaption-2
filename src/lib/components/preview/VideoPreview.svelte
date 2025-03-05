@@ -86,7 +86,9 @@
 	let prevInRange: number | boolean = false;
 	$: subscribeButtonSettings =
 		$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton;
-	$: subscribeButtonStartTime = subscribeButtonSettings.startTime * 1000;
+	$: subscribeButtonStartTime = subscribeButtonSettings
+		? subscribeButtonSettings.startTime * 1000
+		: 0;
 
 	$: subscribeButtonEndTime = subscribeButtonStartTime + 4500;
 	$: {
@@ -286,11 +288,11 @@
 
 			<BurnedCreatorText />
 
-			{#if subscribeButtonSettings.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
+			{#if subscribeButtonSettings && subscribeButtonSettings.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
 				<img
 					src={`/icons/subscribe.gif?key=${gifKey}`}
 					alt="Subscribe"
-					class="absolute"
+					class="absolute opacity-50"
 					style={subscribeButtonSettings.position === 'TL'
 						? 'top: 3rem; left: 3rem;'
 						: subscribeButtonSettings.position === 'TR'
@@ -301,7 +303,7 @@
 									? 'bottom: 3rem; right: 3rem;'
 									: subscribeButtonSettings.position === 'TC'
 										? 'top: 3rem; left: 50%; transform: translateX(-50%);'
-										: 'bottom: 3rem; left: 50%; transform: translateX(-50%);'}
+										: 'bottom: 1.5rem; left: 50%; transform: translateX(-50%);'}
 					width="200"
 					height="100"
 					transition:fade
