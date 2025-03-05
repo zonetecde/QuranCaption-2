@@ -84,8 +84,10 @@
 	// Pour que le gif 'subscribe' commence au début
 	let gifKey = 0;
 	let prevInRange: number | boolean = false;
-	$: subscribeButtonStartTime =
-		$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.startTime * 1000;
+	$: subscribeButtonSettings =
+		$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton;
+	$: subscribeButtonStartTime = subscribeButtonSettings.startTime * 1000;
+
 	$: subscribeButtonEndTime = subscribeButtonStartTime + 4500;
 	$: {
 		const currentInRange =
@@ -284,12 +286,23 @@
 
 			<BurnedCreatorText />
 
-			{#if $currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
+			{#if subscribeButtonSettings.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
 				<img
 					src={`/icons/subscribe.gif?key=${gifKey}`}
 					alt="Subscribe"
-					class="absolute -top-10 -left-6"
-					width="300"
+					class="absolute"
+					style={subscribeButtonSettings.position === 'TL'
+						? 'top: 3rem; left: 3rem;'
+						: subscribeButtonSettings.position === 'TR'
+							? 'top: 3rem; right: 3rem;'
+							: subscribeButtonSettings.position === 'BL'
+								? 'bottom: 3rem; left: 3rem;'
+								: subscribeButtonSettings.position === 'BR'
+									? 'bottom: 3rem; right: 3rem;'
+									: subscribeButtonSettings.position === 'TC'
+										? 'top: 3rem; left: 50%; transform: translateX(-50%);'
+										: 'bottom: 3rem; left: 50%; transform: translateX(-50%);'}
+					width="200"
 					height="100"
 					transition:fade
 				/>

@@ -213,4 +213,19 @@
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton
 			.startTime}
 	/>
+
+	<label for="font-family" class="mt-2 flex items-center"
+		><span class="w-32">Position :</span>
+		<select
+			class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
+			bind:value={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.position}
+		>
+			<option class="bg-slate-300 text-black" value="BC">Bottom Center</option>
+			<option class="bg-slate-300 text-black" value="BR">Bottom Right</option>
+			<option class="bg-slate-300 text-black" value="BL">Bottom Left</option>
+			<option class="bg-slate-300 text-black" value="TC">Top Center</option>
+			<option class="bg-slate-300 text-black" value="TR">Top Right</option>
+			<option class="bg-slate-300 text-black" value="TL">Top Left</option>
+		</select>
+	</label>
 </div>

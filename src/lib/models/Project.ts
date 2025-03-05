@@ -63,6 +63,7 @@ export interface GlobalVideoSettings {
 export interface SubscribeButton {
 	enable: boolean;
 	startTime: number;
+	position: 'TL' | 'TR' | 'BL' | 'BR' | 'TC' | 'BC';
 }
 
 /**

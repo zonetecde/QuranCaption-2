@@ -39,7 +39,8 @@
 		if (project.projectSettings.globalSubtitlesSettings.subscribeButton === undefined) {
 			project.projectSettings.globalSubtitlesSettings.subscribeButton = {
 				enable: false,
-				startTime: 3
+				startTime: 3,
+				position: 'BC'
 			};
 		}
 

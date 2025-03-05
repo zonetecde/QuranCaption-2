@@ -88,7 +88,8 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			backgroundImage: '',
 			subscribeButton: {
 				enable: false,
-				startTime: 3
+				startTime: 3,
+				position: 'BC'
 			},
 			creatorText: {
 				outline: true,
