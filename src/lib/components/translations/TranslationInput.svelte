@@ -203,7 +203,7 @@
 		class={'p-2 px-10 relative border-[#413f3f] ' +
 			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#212c23] ' : '') +
 			(doesSubtitleNeedReview ? 'bg-[#2c2424] ' : '') +
-			(!showCustomizationSettings ? 'border-b-2' : '')}
+			(showCustomizationSettings ? 'border-b-2' : '')}
 	>
 		<div class="absolute top-2 right-[4.5rem]">
 			<CustomizeSubtitleStyleButton
