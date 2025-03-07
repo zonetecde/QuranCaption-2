@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import Id from '$lib/ext/Id';
-	import { removeAsset } from '$lib/models/Asset';
+	import { downloadFromYoutube, removeAsset } from '$lib/models/Asset';
 	import type Asset from '$lib/models/Asset';
 	import { open } from '@tauri-apps/api/dialog';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
@@ -115,6 +115,34 @@
 			asset.exist = true;
 		});
 	}
+
+	async function downloadAssetFromYouTube() {
+		if (!asset.youtubeUrl) {
+			toast.error("This asset doesn't have a youtube url");
+			return;
+		}
+
+		const filePathWithoutFileName = asset.filePath.replace(asset.fileName, '');
+		await toast.promise(
+			downloadFromYoutube(
+				asset.fileName,
+				filePathWithoutFileName,
+				asset.youtubeUrl,
+				asset.type === 'video' ? 'mp4' : 'webm',
+				false
+			),
+			{
+				loading: 'Downloading your asset from youtube...',
+				success: 'Download completed !',
+				error: 'An error occured while downloading the video'
+			}
+		);
+
+		// save the project
+		await updateUsersProjects($currentProject);
+		// reload the page
+		location.reload();
+	}
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -195,6 +223,13 @@
 					(asset.type === 'video' ? '-bottom-[7.3rem]' : '-bottom-[4.3rem]')}
 				on:click={() => relocateAsset()}>Relocate asset</button
 			>
+			{#if asset.youtubeUrl}
+				<button
+					class={'absolute w-full bg-[#1b422a] py-2 rounded-b-xl border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] z-40 ' +
+						(asset.type === 'video' ? '-bottom-[9.3rem]' : '-bottom-[6.3rem]')}
+					on:click={() => downloadAssetFromYouTube()}>Download from YouTube</button
+				>
+			{/if}
 		{/if}
 	{/if}
 

@@ -10,13 +10,35 @@ export default interface Asset {
 	id: string;
 	duration: number; // In milliseconds
 	exist: boolean; // If the file exists (to relocate asset)
+	youtubeUrl?: string;
+}
+
+export async function downloadFromYoutube(
+	fileName: string,
+	downloadFolder: string,
+	youtubeUrl: string,
+	videoFormat: string,
+	addToProject: boolean
+) {
+	await invoke('download_youtube_video', {
+		format: videoFormat,
+		url: youtubeUrl,
+		path: downloadFolder + '/' + fileName
+	}),
+		{
+			loading: 'Downloading ' + (videoFormat === 'webm' ? 'audio' : 'video') + ' from youtube...',
+			success: 'Download completed !',
+			error: 'An error occured while downloading the video'
+		};
+
+	if (addToProject) await addAssets([downloadFolder + '/' + fileName], youtubeUrl);
 }
 
 /**
  * Add videos to the store and remove duplicates
  * @param filePaths - The file names to add
  */
-export async function addAssets(filePaths: string | string[]) {
+export async function addAssets(filePaths: string | string[], youtubeUrl?: string) {
 	let _assets: Asset[] = [];
 	let _filePaths: string[];
 
@@ -51,7 +73,8 @@ export async function addAssets(filePaths: string | string[]) {
 				type: fileType,
 				duration: duration,
 				id: Id.generate(),
-				exist: true
+				exist: true,
+				youtubeUrl: youtubeUrl
 			});
 		})
 	);

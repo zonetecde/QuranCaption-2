@@ -6,7 +6,7 @@
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { assets } from '$app/paths';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
-	import { addAssets } from '$lib/models/Asset';
+	import { addAssets, downloadFromYoutube } from '$lib/models/Asset';
 	import toast from 'svelte-french-toast';
 
 	let ytbDownloadPopup = false;
@@ -57,7 +57,7 @@
 			});
 	}
 
-	async function downloadFromYouTube() {
+	async function downloadFromYouTubeButtonClicked() {
 		if (!youtubeUrl) {
 			toast.error('Please enter a youtube url');
 			return;
@@ -68,28 +68,22 @@
 			toast.error('Please select a download location');
 			return;
 		}
-		const path =
-			downloadLocation +
-			'/' +
+
+		const fileName =
 			(videoFormat === 'webm' ? 'audio_' : 'video_') +
 			Math.floor(Math.random() * (9999 - 1000 + 1) + 1000) +
 			'.' +
 			videoFormat;
+
 		// Téléchargement de la vidéo youtube
 		await toast.promise(
-			invoke('download_youtube_video', {
-				format: videoFormat,
-				url: youtubeUrl,
-				path: path
-			}),
+			downloadFromYoutube(fileName, downloadLocation, youtubeUrl, videoFormat, true),
 			{
 				loading: 'Downloading ' + (videoFormat === 'webm' ? 'audio' : 'video') + ' from youtube...',
 				success: 'Download completed !',
 				error: 'An error occured while downloading the video'
 			}
 		);
-
-		await addAssets([path]);
 
 		ytbDownloadPopup = false;
 	}
@@ -176,7 +170,7 @@
 
 			<button
 				class="w-full h-10 bg-[#264e30] hover:bg-[#274b2a] duration-150 text-white mt-8 rounded-md"
-				on:click={downloadFromYouTube}
+				on:click={downloadFromYouTubeButtonClicked}
 			>
 				Download
 			</button>
