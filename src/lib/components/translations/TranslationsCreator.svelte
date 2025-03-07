@@ -35,7 +35,7 @@
 		{#each $currentProject.timeline.subtitlesTracks[0].clips as subtitle, i}
 			{#if !subtitle.isSilence}
 				<!-- ajout dune separation -->
-				{#if !isSameVerseThanPreviousSubtitle(i)}
+				{#if !isSameVerseThanPreviousSubtitle(i) && i !== 0}
 					<div class="h-1 w-full bg-[#7e6d77]"></div>
 				{/if}
 				<TranslationInput bind:subtitle subtitleIndex={i} />
