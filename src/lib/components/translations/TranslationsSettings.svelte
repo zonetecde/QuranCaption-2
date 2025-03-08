@@ -257,5 +257,9 @@
 			placeholder="Language code (e.g. fr, en, ar)"
 			bind:value={languageCodeToTranslate}
 		/>
+		<p class=" no-underline">
+			Please double check the translations after using this feature. This is EXPERIMENTAL. I am not
+			responsible for any mistakes.
+		</p>
 	</abbr>
 </div>
