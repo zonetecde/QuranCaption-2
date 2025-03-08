@@ -39,7 +39,7 @@
 				toast.success('Project saved');
 			}
 
-			if ($currentPage === 'Translations') return;
+			if ($currentPage === 'Translations' && e.key !== 'F10') return;
 
 			if (e.key === 'Control') {
 				isCtrlPressed.set(true);
@@ -91,6 +91,15 @@
 				} else {
 					toast.success('Best performance mode deactivated.');
 				}
+			}
+			// if key is F10, enable experimental features
+			else if (e.key === 'F10') {
+				// remove from all html element that have the `experimental` class the attribute `hidden`
+				const elements = document.querySelectorAll('.experimental');
+				console.log(elements);
+				elements.forEach((element) => {
+					element.classList.remove('hidden');
+				});
 			}
 		};
 
