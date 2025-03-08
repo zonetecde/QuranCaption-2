@@ -1,6 +1,6 @@
 import type Project from '$lib/models/Project';
 import { get, writable, type Writable } from 'svelte/store';
-import { cursorPosition, scrollPosition, zoom } from './TimelineStore';
+import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
 import Id from '$lib/ext/Id';
 import type { ProjectDesc } from '$lib/models/Project';
 import { getSurahName } from './QuranStore';
@@ -162,12 +162,17 @@ export async function getUserProjectsAsProjects(): Promise<Project[]> {
 	return result;
 }
 
+export async function doesProjectExist(id: string): Promise<boolean> {
+	const projJson = await localStorageWrapper.getItem(id);
+	return projJson !== null;
+}
+
 /**
  * Retrieves a project by its ID.
  * @param id - The ID of the project.
  * @returns The project with the specified ID, or undefined if not found.
  */
-export async function getProjectById(id: string): Promise<Project | undefined> {
+export async function getProjectById(id: string): Promise<Project> {
 	const projJson = await localStorageWrapper.getItem(id);
 	if (projJson) return JSON.parse(projJson);
 	else return createBlankProject('undefined project');
@@ -177,7 +182,10 @@ export async function getProjectById(id: string): Promise<Project | undefined> {
  * Updates the user's projects in local storage.
  * @param project - The project to update.
  */
-export async function updateUsersProjects(project: Project): Promise<ProjectDesc[]> {
+export async function updateUsersProjects(
+	project: Project,
+	isInMigrationMode: boolean = false
+): Promise<ProjectDesc[]> {
 	const projects: ProjectDesc[] = await getUserProjects();
 
 	if (project === undefined || project === null) return projects; // No project is open
@@ -187,9 +195,11 @@ export async function updateUsersProjects(project: Project): Promise<ProjectDesc
 		project.projectSettings = getDefaultsProjectSettings();
 	}
 
-	project.projectSettings.zoom = get(zoom);
-	project.projectSettings.cursorPosition = get(cursorPosition);
-	project.projectSettings.scrollLeft = get(scrollPosition);
+	if (!isInMigrationMode) {
+		project.projectSettings.zoom = get(zoom);
+		project.projectSettings.cursorPosition = get(cursorPosition);
+		project.projectSettings.scrollLeft = get(scrollPosition);
+	}
 
 	const index = projects.findIndex((p) => p.id === project.id);
 	if (index === -1) {
@@ -200,13 +210,21 @@ export async function updateUsersProjects(project: Project): Promise<ProjectDesc
 		projects.push({
 			id: project.id,
 			name: project.name,
-			updatedAt: project.updatedAt
+			updatedAt: project.updatedAt,
+			percentageCompleted: getProjectPercentageCaptioned(project),
+			translations: project.projectSettings.addedTranslations,
+			duration: getLastClipEnd(project.timeline),
+			status: 'not set'
 		});
 	} else {
 		projects[index] = {
 			id: project.id,
 			name: project.name,
-			updatedAt: project.updatedAt
+			updatedAt: project.updatedAt,
+			percentageCompleted: getProjectPercentageCaptioned(project),
+			translations: project.projectSettings.addedTranslations,
+			duration: getLastClipEnd(project.timeline),
+			status: !projects[index].status ? 'not set' : projects[index].status
 		};
 	}
 
@@ -214,6 +232,20 @@ export async function updateUsersProjects(project: Project): Promise<ProjectDesc
 	await localStorageWrapper.setItem('projects', JSON.stringify(projects));
 
 	return projects;
+}
+
+export function getProjectPercentageCaptioned(project: Project): number {
+	if (
+		project.timeline.subtitlesTracks[0].clips[project.timeline.subtitlesTracks[0].clips.length - 1]
+	) {
+		return Math.round(
+			project.timeline.subtitlesTracks[0].clips[
+				project.timeline.subtitlesTracks[0].clips.length - 1
+			].end /
+				getLastClipEnd(project.timeline) /
+				10
+		);
+	} else return 0;
 }
 
 export function downloadYoutubeChapters() {

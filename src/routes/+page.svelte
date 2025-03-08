@@ -28,7 +28,10 @@
 	import { open } from '@tauri-apps/api/dialog';
 	import { addAssets } from '$lib/models/Asset';
 	import type { ProjectDesc } from '$lib/models/Project';
-	import { newProjectSystemMigration } from '$lib/ext/VersionFix';
+	import {
+		addInformationsAboutProjectMigration,
+		newProjectSystemMigration
+	} from '$lib/ext/VersionFix';
 	import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 
 	let createProjectVisibility = false;
@@ -42,6 +45,14 @@
 		await newProjectSystemMigration();
 
 		userProjectsDesc = await getUserProjects();
+
+		if (
+			userProjectsDesc.length > 0 &&
+			userProjectsDesc[userProjectsDesc.length - 1].status === undefined
+		) {
+			toast.success('We are doing some updates on your projects, please wait a few seconds');
+			await addInformationsAboutProjectMigration(); // Add informations about the projects (% captioned, duration, etc)
+		}
 
 		// Check if a new version is available
 		const response = await fetch(GITHUB_API_URL);

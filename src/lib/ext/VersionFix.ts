@@ -1,7 +1,14 @@
 import type { ProjectDesc } from '$lib/models/Project';
 import toast from 'svelte-french-toast';
 import { importAndReadFile } from './Utilities';
-import { backupAllProjects, getUserProjects, restoreAllProjects } from '$lib/stores/ProjectStore';
+import {
+	backupAllProjects,
+	doesProjectExist,
+	getProjectById,
+	getUserProjects,
+	restoreAllProjects,
+	updateUsersProjects
+} from '$lib/stores/ProjectStore';
 import type Project from '$lib/models/Project';
 
 /**
@@ -40,4 +47,16 @@ export async function newProjectSystemMigration() {
 		// refresh the page
 		location.reload();
 	}
+}
+
+export async function addInformationsAboutProjectMigration() {
+	const projects = await getUserProjects();
+	await Promise.all(
+		projects.map(async (project) => {
+			if (await doesProjectExist(project.id)) {
+				const proj = await getProjectById(project.id);
+				updateUsersProjects(proj, true);
+			}
+		})
+	);
 }

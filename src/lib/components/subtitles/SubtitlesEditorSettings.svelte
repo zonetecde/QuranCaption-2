@@ -4,23 +4,12 @@
 		showWordByWordTransliteration,
 		videoSpeed
 	} from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
-	import { getLastClipEnd, getTimelineTotalDuration } from '$lib/stores/TimelineStore';
+	import { currentProject, getProjectPercentageCaptioned } from '$lib/stores/ProjectStore';
 
 	let percentage = 0;
 
-	$: if (
-		$currentProject.timeline.subtitlesTracks[0].clips[
-			$currentProject.timeline.subtitlesTracks[0].clips.length - 1
-		]
-	) {
-		percentage = Math.round(
-			$currentProject.timeline.subtitlesTracks[0].clips[
-				$currentProject.timeline.subtitlesTracks[0].clips.length - 1
-			].end /
-				getLastClipEnd($currentProject.timeline) /
-				10
-		);
+	$: if ($currentProject.timeline.subtitlesTracks[0].clips) {
+		percentage = getProjectPercentageCaptioned($currentProject);
 	}
 </script>
 
