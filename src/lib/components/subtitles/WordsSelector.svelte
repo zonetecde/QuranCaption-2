@@ -61,8 +61,7 @@
 	$: wordsInSelectedVerse = getVerse(surahNumber, verseNumber).text.split(' ');
 
 	// Si on change de verset, on sélectionne le premier mot par défaut
-	// Ou si on enlève l'édition d'un sous-titre, on reset les curseurs
-	$: if (verseNumber || surahNumber || !$currentlyEditedSubtitleId) {
+	$: if (verseNumber || surahNumber) {
 		// Select the first word by default when the verse changes
 		startWordIndex = 0;
 		endWordIndex = 0;
@@ -259,6 +258,8 @@
 	}
 
 	function editSubtitle(selectedWords: string) {
+		console.log(startWordIndex, endWordIndex);
+
 		// édite le sous-titre existant
 		const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 		const subtitle = subtitleClips.find((clip) => clip.id === $currentlyEditedSubtitleId);
