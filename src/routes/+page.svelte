@@ -193,16 +193,20 @@
 						<div class="w-full h-32 bg-[#403e46] rounded-xl relative group p-3">
 							<div class="grid grid-cols-2 grid-rows-2">
 								<p>Name : <b>{project.name}</b></p>
-								<p>Duration : <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
-								<p>
-									Percentage captioned : <b>{project.percentageCaptioned}%</b>
-								</p>
 
-								{#if project.percentageTranslated !== -1}
+								<!-- prevent this from showing if the migration hasnt been done yet -->
+								{#if project.translations !== undefined}
+									<p>Duration : <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
 									<p>
-										Percentage translated: <b>{project.percentageTranslated}%</b>
-										{@html langCodeToFlagEmojies(project.translations)}
+										Percentage captioned : <b>{project.percentageCaptioned}%</b>
 									</p>
+
+									{#if project.percentageTranslated !== -1}
+										<p>
+											Percentage translated: <b>{project.percentageTranslated}%</b>
+											{@html langCodeToFlagEmojies(project.translations)}
+										</p>
+									{/if}
 								{/if}
 							</div>
 							<p class="absolute bottom-1 right-2 text-sm">
