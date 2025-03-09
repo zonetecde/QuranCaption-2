@@ -51,6 +51,29 @@
 		}
 	});
 
+	/**
+	 * Check if the current subtitle is the same verse than the previous subtitle.
+	 * @param {number} subtitleIndex - The index of the subtitle.
+	 */
+	function isSameVerseThanPreviousSubtitle(subtitleIndex: number): boolean {
+		let track = $currentProject.timeline.subtitlesTracks[0];
+
+		if (subtitleIndex === 0) return false;
+
+		let i: number = 1;
+		// ne compte pas les silences/subtitles speciaux
+		while (track.clips[subtitleIndex - i].verse === -1) {
+			i++;
+
+			if (subtitleIndex - i < 0) return false;
+		}
+
+		return (
+			track.clips[subtitleIndex - i].verse === track.clips[subtitleIndex].verse &&
+			track.clips[subtitleIndex - i].surah === track.clips[subtitleIndex].surah
+		);
+	}
+
 	async function handleRefreshTranslation(translation: string) {
 		// @ts-ignore
 		subtitle.translations[translation] = await downloadTranslationForVerse(
@@ -199,6 +222,11 @@
 </script>
 
 {#if (!$onlyShowSubtitlesThatAreNotFullVerses && !$onlyShowVersesWhoseTranslationsNeedReview) || ($onlyShowSubtitlesThatAreNotFullVerses && isIncomplete) || ($onlyShowVersesWhoseTranslationsNeedReview && doesSubtitleNeedReview)}
+	<!-- ajout dune separation -->
+	{#if !isSameVerseThanPreviousSubtitle(subtitleIndex) && subtitleIndex !== 0}
+		<div class="h-1 w-full bg-[#7e6d77]"></div>
+	{/if}
+
 	<div
 		class={'p-2 px-10 relative border-[#413f3f] ' +
 			(isIncomplete && !doesSubtitleNeedReview ? 'bg-[#212c23] ' : '') +

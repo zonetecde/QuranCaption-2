@@ -152,6 +152,12 @@
 		nl: 'NL' // Dutch -> Netherlands
 	};
 
+	/**
+	 * Convert language codes to flag emojies
+	 *
+	 * @param langCodes The language codes
+	 * @returns The flag emojies
+	 */
 	function langCodeToFlagEmojies(langCodes: string[]) {
 		const flags = langCodes.map((langCode) => {
 			const language = langCode.substring(0, 2).toLowerCase();
