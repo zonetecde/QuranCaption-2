@@ -13,7 +13,14 @@ export interface ProjectDesc {
 	percentageTranslated: number;
 	translations: string[];
 	duration: number;
-	status: 'not started' | 'captioning' | 'translating' | 'completed' | 'exported' | 'not set';
+	status:
+		| 'To caption'
+		| 'Captioning'
+		| 'To translate'
+		| 'Translating'
+		| 'To export'
+		| 'Exported'
+		| 'not set';
 	description: string;
 	reciter: string;
 	versesRange: string[];

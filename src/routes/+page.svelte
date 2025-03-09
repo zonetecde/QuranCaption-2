@@ -196,10 +196,11 @@
 
 								<!-- prevent this from showing if the migration hasnt been done yet -->
 								{#if project.translations !== undefined}
-									<p>Duration : <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
 									<p>
 										Percentage captioned : <b>{project.percentageCaptioned}%</b>
 									</p>
+
+									<p>Duration : <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
 
 									{#if project.percentageTranslated !== -1}
 										<p>
@@ -207,6 +208,10 @@
 											{@html langCodeToFlagEmojies(project.translations)}
 										</p>
 									{/if}
+
+									<div class="absolute top-0 right-0 rounded-tr-xl rounded-bl-xl px-3 py-1">
+										<button on:click={() => {}}>Status: {project.status}</button>
+									</div>
 								{/if}
 							</div>
 							<p class="absolute bottom-1 right-2 text-sm">
@@ -226,7 +231,7 @@
 
 							<!-- Delete project button -->
 							<button
-								class="w-6 h-6 absolute bottom-1 right-1 bg-red-200 rounded-full p-1 hidden group-hover:block"
+								class="w-6 h-6 absolute bottom-1.5 left-[7.5rem] bg-red-200 rounded-full p-1 hidden group-hover:block"
 								on:click={(e) => handleDelProject(project.id)}
 							>
 								<svg
@@ -246,7 +251,7 @@
 
 							<!-- Edit name button -->
 							<button
-								class="w-6 h-6 absolute bottom-1 right-8 bg-blue-200 rounded-full p-1 hidden group-hover:block"
+								class="w-6 h-6 absolute bottom-1.5 left-[5.5rem] bg-blue-200 rounded-full p-1 hidden group-hover:block"
 								on:click={async (e) => {
 									e.stopPropagation();
 									// window text prompt
