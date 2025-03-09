@@ -29,7 +29,6 @@
 			return;
 		}
 
-		project.updatedAt = new Date(); // Update the last opened date
 		cursorPosition.set(project.projectSettings.cursorPosition);
 		zoom.set(project.projectSettings.zoom);
 		scrollPosition.set(project.projectSettings.scrollLeft ?? 0);

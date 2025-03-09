@@ -5,11 +5,17 @@
 	} from '$lib/stores/LayoutStore';
 	import {
 		currentProject,
+		getProjectPercentageTranslated,
 		getUserProjects,
 		getUserProjectsAsProjects
 	} from '$lib/stores/ProjectStore';
 	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import toast from 'svelte-french-toast';
+
+	let percentage = 0;
+	$: if ($currentProject.timeline.subtitlesTracks[0].clips) {
+		percentage = getProjectPercentageTranslated($currentProject);
+	}
 
 	/**
 	 * Search in all the other user's projects for the translations of the current project
@@ -228,6 +234,19 @@
 		but has already been reviewed.<br /><br />Red indicates that a translation still needs to be
 		reviewed.
 	</p>
+
+	<p>Percentage of translated subtitles :</p>
+	<!-- proggress bar -->
+	<div class="relative w-full h-6 bg-[#3a3434] rounded-lg overflow-hidden">
+		<div
+			class="absolute top-0 left-0 h-full bg-[#5b5c66] rounded-lg"
+			style="width: {percentage}%"
+		></div>
+
+		<div class="absolute top-0 left-0 h-full w-full flex justify-center items-center">
+			<span class="text-white text-sm">{percentage}%</span>
+		</div>
+	</div>
 
 	<abbr
 		title="This will try to complet the translations of the current project with the translations of your other projects."

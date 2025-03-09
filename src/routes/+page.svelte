@@ -21,7 +21,7 @@
 	} from '$lib/ext/GlobalVariables';
 	import { newUpdateAvailable, newUpdateDescription } from '$lib/stores/LayoutStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
-	import { importAndReadFile, telemetry } from '$lib/ext/Utilities';
+	import { importAndReadFile, millisecondsToHHMMSS, telemetry } from '$lib/ext/Utilities';
 	import Id from '$lib/ext/Id';
 	import SvelteMarkdown from 'svelte-markdown';
 	import { invoke } from '@tauri-apps/api/tauri';
@@ -33,6 +33,7 @@
 		newProjectSystemMigration
 	} from '$lib/ext/VersionFix';
 	import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
+	import { secondsToHHMMSS } from '$lib/models/Timeline';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -46,15 +47,12 @@
 
 		userProjectsDesc = await getUserProjects();
 
-		if (
-			userProjectsDesc.length > 0 &&
-			userProjectsDesc[userProjectsDesc.length - 1].status === undefined
-		) {
-			toast.success('We are doing some updates on your projects, please wait a few seconds');
-			await addInformationsAboutProjectMigration(); // Add informations about the projects (% captioned, duration, etc)
-		}
+		if (await addInformationsAboutProjectMigration(userProjectsDesc))
+			// Add informations about the projects (% captioned, duration, etc)
+			userProjectsDesc = await getUserProjects(); // update the projects if the migration has been done
 
 		// Check if a new version is available
+
 		const response = await fetch(GITHUB_API_URL);
 		if (response.ok) {
 			const data = await response.json();
@@ -141,13 +139,36 @@
 			userProjectsDesc = await restoreAllProjects(content);
 		}
 	}
+
+	const LANGUAGE_TO_COUNTRY = {
+		en: 'US', // English -> United States
+		ar: 'SA', // Arabic -> Saudi Arabia
+		zh: 'CN', // Chinese -> China
+		pt: 'PT', // Portuguese -> Portugal
+		ja: 'JP', // Japanese -> Japan
+		ko: 'KR', // Korean -> South Korea
+		de: 'DE', // German -> Germany
+		it: 'IT', // Italian -> Italy
+		nl: 'NL' // Dutch -> Netherlands
+	};
+
+	function langCodeToFlagEmojies(langCodes: string[]) {
+		const flags = langCodes.map((langCode) => {
+			const language = langCode.substring(0, 2).toLowerCase();
+			//@ts-ignore
+			const countryCode = LANGUAGE_TO_COUNTRY[language] || language.toUpperCase();
+
+			return `<img src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg" alt="${countryCode}" width="20" style="display: inline-block; vertical-align: middle; margin-left: 3px;">`;
+		});
+		return `(${flags.join(', ')})`;
+	}
 </script>
 
 <div class="p-5 h-screen flex items-center justify-center relative">
 	<div class="xl:w-4/6 w-full">
 		<h1 class="text-4xl font-bold text-center schibstedGrotesk">Quran Caption</h1>
 
-		<div class="mt-10 relative">
+		<div class="mt-10 relative h-80 2xl:h-[500px] xl:h-[400px]">
 			<p class="text-xl pl-3">Project{userProjectsDesc.length > 1 ? 's' : ''} :</p>
 
 			<input
@@ -158,18 +179,40 @@
 			/>
 
 			<div
-				class={'mt-2 h-40 bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto ' +
+				class={'mt-2 h-full bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto ' +
 					(userProjectsDesc.length >= 4 ? 'justify-evenly h-80' : '')}
 			>
 				{#each userProjectsDesc.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
 					{#if searchText === '' || project.name.toLowerCase().includes(searchText.toLowerCase())}
-						<div class="w-56 h-32 bg-[#2e2f36] rounded-xl relative group">
-							<button class="flex flex-col p-3" on:click={() => openProject(project.id)}>
-								<p>{project.name}</p>
-								<p class="absolute bottom-1 text-sm">
-									{new Date(project.updatedAt).toLocaleString()}
+						<div class="w-full h-32 bg-[#403e46] rounded-xl relative group p-3">
+							<div class="grid grid-cols-2 grid-rows-2">
+								<p>Name : <b>{project.name}</b></p>
+								<p>Duration : <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
+								<p>
+									Percentage captioned : <b>{project.percentageCaptioned}%</b>
 								</p>
-							</button>
+
+								{#if project.percentageTranslated !== -1}
+									<p>
+										Percentage translated: <b>{project.percentageTranslated}%</b>
+										{@html langCodeToFlagEmojies(project.translations)}
+									</p>
+								{/if}
+							</div>
+							<p class="absolute bottom-1 right-2 text-sm">
+								Last update : {new Date(project.updatedAt).toLocaleString([], {
+									month: 'long',
+									day: '2-digit',
+									year: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit'
+								})}
+							</p>
+
+							<button
+								class="px-5 py-2 bg-[#3a533a] absolute bottom-0 left-0 rounded-bl-xl rounded-tr-xl hover:bg-[#2f4a2f] duration-150"
+								on:click={() => openProject(project.id)}>Open</button
+							>
 
 							<!-- Delete project button -->
 							<button
@@ -231,7 +274,7 @@
 			</div>
 		</div>
 
-		<div class="mt-12 -mb-10 flex justify-center">
+		<div class="mt-14 -mb-10 flex justify-center">
 			<div class="grid grid-cols-2 gap-x-3 gap-y-4">
 				<button
 					on:click={() => (createProjectVisibility = true)}

@@ -49,14 +49,37 @@ export async function newProjectSystemMigration() {
 	}
 }
 
-export async function addInformationsAboutProjectMigration() {
-	const projects = await getUserProjects();
-	await Promise.all(
-		projects.map(async (project) => {
+/**
+ * This function will check if the user's project have the versesRange property.
+ * If not, this means they did not have the migration from v3.4 to v3.5
+ * This will trigger a save of all the projects in the local storage; the save will add the versesRange property and others properties to the project
+ * @param userProjectsDesc The user's projects
+ * @returns true if the migration was done, false otherwise
+ */
+export async function addInformationsAboutProjectMigration(
+	userProjectsDesc: ProjectDesc[]
+): Promise<boolean> {
+	if (
+		userProjectsDesc.length > 0 &&
+		userProjectsDesc[userProjectsDesc.length - 1].versesRange === undefined
+	) {
+		toast('We are doing some updates on your projects, please wait a few seconds...', {
+			duration: 5000,
+			icon: '🔄'
+		});
+
+		const projects = await getUserProjects();
+		for (const project of projects) {
 			if (await doesProjectExist(project.id)) {
 				const proj = await getProjectById(project.id);
 				updateUsersProjects(proj, true);
 			}
-		})
-	);
+		}
+
+		toast.success('Your projects have been updated successfully!');
+
+		return true;
+	}
+
+	return false;
 }

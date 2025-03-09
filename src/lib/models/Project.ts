@@ -9,10 +9,14 @@ export interface ProjectDesc {
 	id: string;
 	name: string;
 	updatedAt: Date;
-	percentageCompleted: number;
+	percentageCaptioned: number;
+	percentageTranslated: number;
 	translations: string[];
 	duration: number;
 	status: 'not started' | 'captioning' | 'translating' | 'completed' | 'exported' | 'not set';
+	description: string;
+	reciter: string;
+	versesRange: string[];
 }
 
 /**

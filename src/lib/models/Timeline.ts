@@ -56,6 +56,8 @@ export function secondsToHHMMSS(
 	seconds: number,
 	removeLeadingZero: boolean = false
 ): [string, string] {
+	if (seconds === undefined) return ['00:00', '00'];
+
 	if (seconds < 60) {
 		let firstStr = (removeLeadingZero ? '' : '00:') + seconds.toFixed(0).padStart(2, '0');
 		let secondStr = seconds.toFixed(2).split('.')[1];

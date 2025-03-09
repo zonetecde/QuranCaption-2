@@ -211,20 +211,29 @@ export async function updateUsersProjects(
 			id: project.id,
 			name: project.name,
 			updatedAt: project.updatedAt,
-			percentageCompleted: getProjectPercentageCaptioned(project),
+			percentageCaptioned: getProjectPercentageCaptioned(project),
+			percentageTranslated: getProjectPercentageTranslated(project),
 			translations: project.projectSettings.addedTranslations,
 			duration: getLastClipEnd(project.timeline),
-			status: 'not set'
+			status: 'not set',
+			description: '',
+			reciter: '',
+			versesRange: []
 		});
 	} else {
 		projects[index] = {
 			id: project.id,
 			name: project.name,
-			updatedAt: project.updatedAt,
-			percentageCompleted: getProjectPercentageCaptioned(project),
+			updatedAt: new Date(),
+			percentageCaptioned: getProjectPercentageCaptioned(project),
+			percentageTranslated: getProjectPercentageTranslated(project),
 			translations: project.projectSettings.addedTranslations,
 			duration: getLastClipEnd(project.timeline),
-			status: !projects[index].status ? 'not set' : projects[index].status
+			// met des valeurs par défaut pour les anciens projets
+			status: !projects[index].status ? 'not set' : projects[index].status,
+			description: !projects[index].description ? '' : projects[index].description,
+			reciter: !projects[index].reciter ? '' : projects[index].reciter,
+			versesRange: getProjectVersesRange(project)
 		};
 	}
 
@@ -234,6 +243,11 @@ export async function updateUsersProjects(
 	return projects;
 }
 
+/**
+ *  Returns the percentage of the project that has been captioned.
+ * @param project  The project to get the percentage of captioned verses.
+ * @returns  The percentage of captioned verses.
+ */
 export function getProjectPercentageCaptioned(project: Project): number {
 	if (
 		project.timeline.subtitlesTracks[0].clips[project.timeline.subtitlesTracks[0].clips.length - 1]
@@ -246,6 +260,59 @@ export function getProjectPercentageCaptioned(project: Project): number {
 				10
 		);
 	} else return 0;
+}
+
+export function getProjectPercentageTranslated(project: Project): number {
+	// -1 if no translation is added
+	if (project.projectSettings.addedTranslations.length === 0) return -1;
+
+	let translated = 0;
+	let total = 0;
+	for (let index = 0; index < project.timeline.subtitlesTracks[0].clips.length; index++) {
+		const element = project.timeline.subtitlesTracks[0].clips[index];
+
+		if (element.verse === -1 || element.surah === -1) continue;
+
+		// if the verse has been translated or if it's complete (no need to edit the translation)
+		if (
+			element.hadItTranslationEverBeenModified ||
+			(element.firstWordIndexInVerse === 0 && element.isLastWordInVerse)
+		)
+			translated++;
+		total++;
+	}
+
+	return Math.round((translated / total) * 100);
+}
+
+/**
+ * Returns the verses range of the project.
+ * @param project - The project to get the verses range from.
+ * @returns The verses range of the project. (ex: ['1:1->1:7', '114:1->114:6'])
+ */
+export function getProjectVersesRange(project: Project): string[] {
+	const versesRange: string[] = [];
+	const clips = project.timeline.subtitlesTracks[0].clips;
+
+	let lastSurah = 0;
+
+	for (let i = 0; i < clips.length; i++) {
+		const clip = clips[i];
+		if (clip.verse === -1 || clip.surah === -1) continue;
+
+		if (clip.surah !== lastSurah) {
+			versesRange.push(`${clip.surah}:${clip.verse}->`);
+			lastSurah = clip.surah;
+		} else {
+			// removes everything after the last ->
+			versesRange[versesRange.length - 1] =
+				versesRange[versesRange.length - 1].split('->')[0] + '->';
+			// set the last verse
+			versesRange[versesRange.length - 1] += `${clip.verse}`;
+		}
+	}
+
+	return versesRange;
 }
 
 export function downloadYoutubeChapters() {
