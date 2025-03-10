@@ -124,8 +124,7 @@
 			/>
 
 			<div
-				class={'mt-2 h-full bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto ' +
-					(userProjectsDesc.length >= 4 ? 'justify-evenly h-80' : '')}
+				class={'mt-2 h-full bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap flex-row overflow-y-auto '}
 			>
 				{#if userProjectsDesc.length > 0}
 					{#each userProjectsDesc.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
