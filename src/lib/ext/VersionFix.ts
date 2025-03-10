@@ -69,14 +69,21 @@ export async function addInformationsAboutProjectMigration(
 		});
 
 		const projects = await getUserProjects();
-		for (const project of projects) {
-			if (await doesProjectExist(project.id)) {
-				const proj = await getProjectById(project.id);
-				updateUsersProjects(proj, true);
+		await toast.promise(
+			Promise.all(
+				projects.map(async (project) => {
+					if (await doesProjectExist(project.id)) {
+						const proj = await getProjectById(project.id);
+						await updateUsersProjects(proj, true);
+					}
+				})
+			),
+			{
+				loading: 'Updating projects...',
+				success: 'Projects updated successfully!',
+				error: 'Error updating projects'
 			}
-		}
-
-		toast.success('Your projects have been updated successfully!');
+		);
 
 		return true;
 	}

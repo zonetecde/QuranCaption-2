@@ -8,7 +8,7 @@
 		downloadYoutubeChapters,
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
-	import { Mushaf, getEditions, getQuran, getSurahName } from '$lib/stores/QuranStore';
+	import { Mushaf, getEditions, loadQuran, getSurahName } from '$lib/stores/QuranStore';
 	import {
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
@@ -109,7 +109,7 @@
 			}
 		};
 
-		getQuran();
+		loadQuran();
 		getEditions();
 		getFonts();
 	});

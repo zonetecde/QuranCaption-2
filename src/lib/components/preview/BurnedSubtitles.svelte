@@ -8,7 +8,6 @@
 		hasSubtitleAtLeastOneStyle,
 		hasSubtitleDefaultIndividualSettings
 	} from '$lib/stores/ProjectStore';
-	import { Mushaf } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';

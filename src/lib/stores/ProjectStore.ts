@@ -3,7 +3,7 @@ import { get, writable, type Writable } from 'svelte/store';
 import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
 import Id from '$lib/ext/Id';
 import type { ProjectDesc } from '$lib/models/Project';
-import { getSurahName } from './QuranStore';
+import { loadQuran, getSurahName, Mushaf } from './QuranStore';
 import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 import toast from 'svelte-french-toast';
 import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
@@ -15,10 +15,11 @@ export const currentProject: Writable<Project> = writable();
  * @param name - The name of the project.
  * @returns The created project.
  */
-export function createBlankProject(name: string): Project {
+export function createBlankProject(name: string, reciter: string): Project {
 	return {
 		id: Id.generate(),
 		name: name.trim(),
+		reciter: reciter,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		description: '',
@@ -175,7 +176,7 @@ export async function doesProjectExist(id: string): Promise<boolean> {
 export async function getProjectById(id: string): Promise<Project> {
 	const projJson = await localStorageWrapper.getItem(id);
 	if (projJson) return JSON.parse(projJson);
-	else return createBlankProject('undefined project');
+	else return createBlankProject('undefined project', '');
 }
 
 /**
@@ -216,8 +217,8 @@ export async function updateUsersProjects(
 			translations: project.projectSettings.addedTranslations,
 			duration: getLastClipEnd(project.timeline),
 			status: 'not set',
-			description: '',
-			reciter: '',
+			description: project.description || '',
+			reciter: project.reciter || '',
 			versesRange: []
 		});
 	} else {
@@ -295,6 +296,7 @@ export function getProjectPercentageTranslated(project: Project): number {
  * @returns The verses range of the project. (ex: ['1:1->1:7', '114:1->114:6'])
  */
 export function getProjectVersesRange(project: Project): string[] {
+	console.log('getProjectVersesRange', project);
 	const versesRange: string[] = [];
 	const clips = project.timeline.subtitlesTracks[0].clips;
 
@@ -316,7 +318,19 @@ export function getProjectVersesRange(project: Project): string[] {
 		}
 	}
 
-	return versesRange;
+	// now convert 1:1->7 to readable text : 1. Al Fatiha (1-7)
+	const mushaf = get(Mushaf);
+	for (let i = 0; i < versesRange.length; i++) {
+		const element = versesRange[i].split(':');
+		const surahName = mushaf.surahs[Number.parseInt(element[0]) - 1].transliteration;
+		const startVerse = element[1].split('->')[0];
+		const endVerse = element[1].split('->')[1];
+
+		versesRange[i] = element[0] + '. ' + surahName + ' (' + startVerse + '-' + endVerse + ')';
+	}
+
+	// remove duplicates
+	return versesRange.filter((v, i, a) => a.indexOf(v) === i);
 }
 
 export function downloadYoutubeChapters() {

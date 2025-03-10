@@ -11,7 +11,7 @@ export const editions: Writable<Edition[]> = writable();
  * and set it in the store.
  * @throws Error if the Quran could not be loaded
  */
-export async function getQuran() {
+export async function loadQuran() {
 	if (get(Mushaf)) {
 		return; // Already loaded
 	}

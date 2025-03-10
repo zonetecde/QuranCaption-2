@@ -32,6 +32,7 @@ export interface ProjectDesc {
 export default interface Project {
 	id: string;
 	name: string;
+	reciter: string;
 	description: string;
 	createdAt: Date;
 	updatedAt: Date;
