@@ -108,11 +108,11 @@
 			<div class="absolute top-0 right-0 rounded-tr-xl rounded-bl-xl px-3 py-1 group/status">
 				<button on:click={() => {}}
 					>Status:
-					<span class=" group-hover:hidden">{project.status}</span>
+					<span class=" group-hover/status:hidden">{project.status}</span>
 					<select
 						bind:value={project.status}
 						on:change={() => saveProject()}
-						class=" h-10 bg-[#474c55] rounded-md p-2 text-white hidden group-hover:inline"
+						class=" h-10 bg-[#474c55] rounded-md p-2 text-white hidden group-hover/status:inline"
 					>
 						<option value="To caption">To caption</option>
 						<option value="Captioning">Captioning</option>
