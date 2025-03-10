@@ -106,16 +106,13 @@
 			{/if}
 
 			<div class="absolute top-0 right-0 rounded-tr-xl rounded-bl-xl px-3 py-1 group/status">
-				<button on:click={() => {}}>Status: {project.status}</button>
-
-				<div
-					class="absolute group-hover/status:block hidden top-8 right-2 bg-[#a1a1ba] text-black w-48 h-[5rem] border-2 z-10 rounded-md flex-col"
-				>
-					<p class="font-bold text-center">Select a new status</p>
+				<button on:click={() => {}}
+					>Status:
+					<span class=" group-hover:hidden">{project.status}</span>
 					<select
 						bind:value={project.status}
 						on:change={() => saveProject()}
-						class=" ml-6 mt-0.5 h-10 w-3/4 bg-[#474c55] rounded-md p-2 text-white"
+						class=" h-10 bg-[#474c55] rounded-md p-2 text-white hidden group-hover:inline"
 					>
 						<option value="To caption">To caption</option>
 						<option value="Captioning">Captioning</option>
@@ -125,7 +122,7 @@
 						<option value="Exported">Exported</option>
 						<option value="not set">Not set</option>
 					</select>
-				</div>
+				</button>
 			</div>
 		{/if}
 	</div>
