@@ -225,7 +225,7 @@ export async function updateUsersProjects(
 		projects[index] = {
 			id: project.id,
 			name: project.name,
-			updatedAt: new Date(),
+			updatedAt: isInMigrationMode ? projects[index].updatedAt : new Date(),
 			percentageCaptioned: getProjectPercentageCaptioned(project),
 			percentageTranslated: getProjectPercentageTranslated(project),
 			translations: project.projectSettings.addedTranslations,
@@ -296,7 +296,6 @@ export function getProjectPercentageTranslated(project: Project): number {
  * @returns The verses range of the project. (ex: ['1:1->1:7', '114:1->114:6'])
  */
 export function getProjectVersesRange(project: Project): string[] {
-	console.log('getProjectVersesRange', project);
 	const versesRange: string[] = [];
 	const clips = project.timeline.subtitlesTracks[0].clips;
 

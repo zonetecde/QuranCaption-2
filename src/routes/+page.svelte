@@ -83,6 +83,9 @@
 
 		if (content) {
 			userProjectsDesc = await restoreAllProjects(content);
+
+			await addInformationsAboutProjectMigration(userProjectsDesc, true);
+			userProjectsDesc = await getUserProjects(); // update the projects when the migration is done
 		}
 	}
 
@@ -124,11 +127,19 @@
 				class={'mt-2 h-full bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap overflow-y-auto ' +
 					(userProjectsDesc.length >= 4 ? 'justify-evenly h-80' : '')}
 			>
-				{#each userProjectsDesc.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
-					{#if searchText === '' || checkSearchText(project, searchText)}
-						<ProjectTile {project} bind:userProjectsDesc {openProject} />
-					{/if}
-				{/each}
+				{#if userProjectsDesc.length > 0}
+					{#each userProjectsDesc.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
+						{#if searchText === '' || checkSearchText(project, searchText)}
+							<ProjectTile {project} bind:userProjectsDesc {openProject} />
+						{/if}
+					{/each}
+				{:else}
+					<div class="w-full h-full flex items-center justify-center">
+						<p class="text-center text-xl bg-black bg-opacity-30 py-5 px-16 rounded-xl">
+							You have no project yet<br /><br /> Click on "Create a new project" to start !
+						</p>
+					</div>
+				{/if}
 			</div>
 		</div>
 

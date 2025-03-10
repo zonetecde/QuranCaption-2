@@ -57,35 +57,31 @@ export async function newProjectSystemMigration() {
  * @returns true if the migration was done, false otherwise
  */
 export async function addInformationsAboutProjectMigration(
-	userProjectsDesc: ProjectDesc[]
+	userProjectsDesc: ProjectDesc[],
+	force: boolean = false // force la migration
 ): Promise<boolean> {
-	if (
-		userProjectsDesc.length > 0 &&
-		userProjectsDesc[userProjectsDesc.length - 1].versesRange === undefined
-	) {
-		toast('We are doing some updates on your projects, please wait a few seconds...', {
-			duration: 5000,
-			icon: '🔄'
-		});
+	if (userProjectsDesc.length > 0) {
+		if (
+			force ||
+			userProjectsDesc.some((project: ProjectDesc) => project.versesRange === undefined)
+		) {
+			toast('We are doing some updates on your projects, please wait a few seconds...', {
+				duration: 5000,
+				icon: '🔄'
+			});
 
-		const projects = await getUserProjects();
-		await toast.promise(
-			Promise.all(
-				projects.map(async (project) => {
-					if (await doesProjectExist(project.id)) {
-						const proj = await getProjectById(project.id);
-						await updateUsersProjects(proj, true);
-					}
-				})
-			),
-			{
-				loading: 'Updating projects...',
-				success: 'Projects updated successfully!',
-				error: 'Error updating projects'
+			let projects = await getUserProjects();
+			for (const project of projects) {
+				if (await doesProjectExist(project.id)) {
+					const proj = await getProjectById(project.id);
+					await updateUsersProjects(proj, true);
+				}
 			}
-		);
 
-		return true;
+			toast.success('Your projects have been updated successfully!');
+
+			return true;
+		}
 	}
 
 	return false;
