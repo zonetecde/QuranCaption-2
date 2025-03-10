@@ -10,6 +10,7 @@
 		getProjectById,
 		getUserProjects,
 		restoreAllProjects,
+		updateUserProjectsDesc,
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
 	import type Project from '$lib/models/Project';
@@ -34,6 +35,7 @@
 	} from '$lib/ext/VersionFix';
 	import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 	import { secondsToHHMMSS } from '$lib/models/Timeline';
+	import { confirm } from '@tauri-apps/api/dialog';
 
 	let createProjectVisibility = false;
 	let projectName = 'New Project';
@@ -41,6 +43,7 @@
 	let userProjectsDesc: ProjectDesc[] = [];
 
 	let searchText = '';
+	let hasProjectLoaded = false;
 
 	onMount(async () => {
 		await newProjectSystemMigration();
@@ -51,8 +54,9 @@
 			// Add informations about the projects (% captioned, duration, etc)
 			userProjectsDesc = await getUserProjects(); // update the projects if the migration has been done
 
-		// Check if a new version is available
+		hasProjectLoaded = true;
 
+		// Check if a new version is available
 		const response = await fetch(GITHUB_API_URL);
 		if (response.ok) {
 			const data = await response.json();
@@ -168,6 +172,10 @@
 		});
 		return `(${flags.join(', ')})`;
 	}
+
+	$: if (hasProjectLoaded) {
+		updateUserProjectsDesc(userProjectsDesc);
+	}
 </script>
 
 <div class="p-5 h-screen flex items-center justify-center relative">
@@ -192,25 +200,72 @@
 					{#if searchText === '' || project.name.toLowerCase().includes(searchText.toLowerCase())}
 						<div class="w-full h-32 bg-[#403e46] rounded-xl relative group p-3">
 							<div class="grid grid-cols-2 grid-rows-2">
-								<p>Name : <b>{project.name}</b></p>
+								<p>
+									Name:
+									<button
+										on:click={() => {
+											const newProjectName = prompt(
+												'Enter the new name of the project',
+												project.name
+											);
+											if (newProjectName) project.name = newProjectName;
+										}}><b>{project.name}</b></button
+									>
+								</p>
 
 								<!-- prevent this from showing if the migration hasnt been done yet -->
 								{#if project.translations !== undefined}
 									<p>
-										Percentage captioned : <b>{project.percentageCaptioned}%</b>
+										Percentage captioned: <b>{project.percentageCaptioned}%</b>
 									</p>
 
-									<p>Duration : <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
+									<p>Duration: <b>{secondsToHHMMSS(project.duration, true)[0]}</b></p>
 
 									{#if project.percentageTranslated !== -1}
 										<p>
 											Percentage translated: <b>{project.percentageTranslated}%</b>
 											{@html langCodeToFlagEmojies(project.translations)}
 										</p>
+									{:else}
+										<!-- dummy div pour occuper une place de la grid -->
+										<div></div>
 									{/if}
 
-									<div class="absolute top-0 right-0 rounded-tr-xl rounded-bl-xl px-3 py-1">
+									<p>
+										Reciter: <button
+											on:click={() => {
+												// open window text prompt
+												const newReciter = prompt(
+													'Enter the new reciter of the project',
+													project.reciter
+												);
+												if (newReciter) project.reciter = newReciter;
+											}}><b>{project.reciter || 'Ø'}</b></button
+										>
+									</p>
+
+									<div
+										class="absolute top-0 right-0 rounded-tr-xl rounded-bl-xl px-3 py-1 group/status"
+									>
 										<button on:click={() => {}}>Status: {project.status}</button>
+
+										<div
+											class="absolute group-hover/status:block hidden top-8 right-2 bg-[#a1a1ba] text-black w-48 h-[5rem] border-2 z-10 rounded-md flex-col"
+										>
+											<p class="font-bold text-center">Select a new status</p>
+											<select
+												bind:value={project.status}
+												class=" ml-6 mt-0.5 h-10 w-3/4 bg-[#474c55] rounded-md p-2 text-white"
+											>
+												<option value="To caption">To caption</option>
+												<option value="Captioning">Captioning</option>
+												<option value="To translate">To translate</option>
+												<option value="Translating">Translating</option>
+												<option value="To export">To export</option>
+												<option value="Exported">Exported</option>
+												<option value="not set">Not set</option>
+											</select>
+										</div>
 									</div>
 								{/if}
 							</div>
@@ -231,8 +286,12 @@
 
 							<!-- Delete project button -->
 							<button
-								class="w-6 h-6 absolute bottom-1.5 left-[7.5rem] bg-red-200 rounded-full p-1 hidden group-hover:block"
-								on:click={(e) => handleDelProject(project.id)}
+								class="w-6 h-6 absolute bottom-1.5 left-[5.5rem] bg-red-200 rounded-full p-1 hidden group-hover:block"
+								on:click={async (e) => {
+									// tauri prompt to confirm deletion
+									const res = await confirm('Are you sure you want to delete this project?');
+									if (res) handleDelProject(project.id);
+								}}
 							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
@@ -245,41 +304,6 @@
 										stroke-linecap="round"
 										stroke-linejoin="round"
 										d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-									/>
-								</svg>
-							</button>
-
-							<!-- Edit name button -->
-							<button
-								class="w-6 h-6 absolute bottom-1.5 left-[5.5rem] bg-blue-200 rounded-full p-1 hidden group-hover:block"
-								on:click={async (e) => {
-									e.stopPropagation();
-									// window text prompt
-									const newName = prompt('Enter the new name of the project', project.name);
-									if (newName) {
-										userProjectsDesc = userProjectsDesc.map((x) =>
-											x.id === project.id ? { ...x, name: newName } : x
-										);
-										let _project = await getProjectById(project.id);
-										// @ts-ignore
-										_project.name = newName;
-										// @ts-ignores
-										await updateUsersProjects(_project);
-									}
-								}}
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke-width="1.5"
-									stroke="black"
-									class=""
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
 									/>
 								</svg>
 							</button>

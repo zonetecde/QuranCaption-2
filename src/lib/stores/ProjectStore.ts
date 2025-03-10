@@ -243,6 +243,10 @@ export async function updateUsersProjects(
 	return projects;
 }
 
+export async function updateUserProjectsDesc(projects: ProjectDesc[]) {
+	await localStorageWrapper.setItem('projects', JSON.stringify(projects));
+}
+
 /**
  *  Returns the percentage of the project that has been captioned.
  * @param project  The project to get the percentage of captioned verses.
