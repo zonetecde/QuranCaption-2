@@ -235,18 +235,20 @@
 		reviewed.
 	</p>
 
-	<p>Percentage of translated subtitles :</p>
-	<!-- proggress bar -->
-	<div class="relative w-full h-6 bg-[#3a3434] rounded-lg overflow-hidden">
-		<div
-			class="absolute top-0 left-0 h-full bg-[#5b5c66] rounded-lg"
-			style="width: {percentage}%"
-		></div>
+	{#if percentage !== -1}
+		<p>Percentage of translated subtitles :</p>
+		<!-- proggress bar -->
+		<div class="relative w-full h-6 bg-[#3a3434] rounded-lg overflow-hidden">
+			<div
+				class="absolute top-0 left-0 h-full bg-[#5b5c66] rounded-lg"
+				style="width: {percentage}%"
+			></div>
 
-		<div class="absolute top-0 left-0 h-full w-full flex justify-center items-center">
-			<span class="text-white text-sm">{percentage}%</span>
+			<div class="absolute top-0 left-0 h-full w-full flex justify-center items-center">
+				<span class="text-white text-sm">{percentage}%</span>
+			</div>
 		</div>
-	</div>
+	{/if}
 
 	<abbr
 		title="This will try to complet the translations of the current project with the translations of your other projects."
