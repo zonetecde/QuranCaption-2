@@ -31,7 +31,7 @@
 		sortedProjects = getSortedUserProjects();
 	}
 	let searchText = '';
-	let showSortMenu = true;
+	let showSortMenu = false;
 	let sortType: 'name' | 'reciter' | 'updatedAt' | 'createdAt' | 'duration' = 'updatedAt';
 	let sortDirection: 'asc' | 'desc' = 'desc';
 	let onlyShowThosesWithStatus: ProjectStatus | 'any' = 'any';
