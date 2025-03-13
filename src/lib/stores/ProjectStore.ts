@@ -219,7 +219,8 @@ export async function updateUsersProjects(
 			status: 'not set',
 			description: project.description || '',
 			reciter: project.reciter || '',
-			versesRange: []
+			versesRange: [],
+			createdAt: project.createdAt
 		});
 	} else {
 		projects[index] = {
@@ -234,7 +235,8 @@ export async function updateUsersProjects(
 			status: !projects[index].status ? 'not set' : projects[index].status,
 			description: !projects[index].description ? '' : projects[index].description,
 			reciter: !projects[index].reciter ? '' : projects[index].reciter,
-			versesRange: getProjectVersesRange(project)
+			versesRange: getProjectVersesRange(project),
+			createdAt: projects[index].createdAt || project.createdAt
 		};
 	}
 

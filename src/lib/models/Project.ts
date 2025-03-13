@@ -5,22 +5,25 @@ import Id from '../ext/Id';
 import { cursorPosition, zoom } from '../stores/TimelineStore';
 import { currentProject } from '$lib/stores/ProjectStore';
 
+export type ProjectStatus =
+	| 'To caption'
+	| 'Captioning'
+	| 'To translate'
+	| 'Translating'
+	| 'To export'
+	| 'Exported'
+	| 'not set';
+
 export interface ProjectDesc {
 	id: string;
 	name: string;
 	updatedAt: Date;
+	createdAt: Date;
 	percentageCaptioned: number;
 	percentageTranslated: number;
 	translations: string[];
 	duration: number;
-	status:
-		| 'To caption'
-		| 'Captioning'
-		| 'To translate'
-		| 'Translating'
-		| 'To export'
-		| 'Exported'
-		| 'not set';
+	status: ProjectStatus;
 	description: string;
 	reciter: string;
 	versesRange: string[];

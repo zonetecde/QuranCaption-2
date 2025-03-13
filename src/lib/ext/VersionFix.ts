@@ -51,7 +51,7 @@ export async function newProjectSystemMigration() {
 
 /**
  * This function will check if the user's project have the versesRange property.
- * If not, this means they did not have the migration from v3.4 to v3.5
+ * If not, this means they did not have the migration from v3.4 to v3.5 - and v3.5 to v3.6. (for the createdAt property)
  * This will trigger a save of all the projects in the local storage; the save will add the versesRange property and others properties to the project
  * @param userProjectsDesc The user's projects
  * @returns true if the migration was done, false otherwise
@@ -61,10 +61,7 @@ export async function addInformationsAboutProjectMigration(
 	force: boolean = false // force la migration
 ): Promise<boolean> {
 	if (userProjectsDesc.length > 0) {
-		if (
-			force ||
-			userProjectsDesc.some((project: ProjectDesc) => project.versesRange === undefined)
-		) {
+		if (force || userProjectsDesc.some((project: ProjectDesc) => project.createdAt === undefined)) {
 			toast('We are doing some updates on your projects, please wait a few seconds...', {
 				duration: 5000,
 				icon: '🔄'

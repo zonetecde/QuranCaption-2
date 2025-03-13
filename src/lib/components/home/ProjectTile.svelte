@@ -71,7 +71,9 @@
 			</p>
 
 			<p>
-				Duration: <b>{project.duration === 0 ? 'Ø' : secondsToHHMMSS(project.duration, true)[0]}</b>
+				Duration: <b
+					>{project.duration === 0 ? '0:00' : secondsToHHMMSS(project.duration, true)[0]}</b
+				>
 			</p>
 
 			{#if project.percentageTranslated !== -1}
@@ -127,8 +129,15 @@
 		{/if}
 	</div>
 	<p class="absolute bottom-1 right-2 text-sm">
-		Last update : {new Date(project.updatedAt).toLocaleString([], {
-			month: 'long',
+		Created: {new Date(project.createdAt).toLocaleString([], {
+			month: '2-digit',
+			day: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		})}
+		• Last updated: {new Date(project.updatedAt).toLocaleString([], {
+			month: '2-digit',
 			day: '2-digit',
 			year: 'numeric',
 			hour: '2-digit',

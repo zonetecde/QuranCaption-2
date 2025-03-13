@@ -12,7 +12,7 @@
 	import { GITHUB_REPO_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
 	import { importAndReadFile, telemetry } from '$lib/ext/Utilities';
 	import Id from '$lib/ext/Id';
-	import type { ProjectDesc } from '$lib/models/Project';
+	import type { ProjectDesc, ProjectStatus } from '$lib/models/Project';
 	import {
 		addInformationsAboutProjectMigration,
 		newProjectSystemMigration
@@ -21,10 +21,20 @@
 	import NewUpdatePopUp from '$lib/components/home/NewUpdatePopUp.svelte';
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import CreateProjectForm from '$lib/components/home/CreateProjectForm.svelte';
+	import { fade } from 'svelte/transition';
+	import SortMenu from '$lib/components/home/SortMenu.svelte';
 
 	let createProjectVisibility = false;
 	let userProjectsDesc: ProjectDesc[] = [];
+	let sortedProjects: ProjectDesc[] = [];
+	$: if (userProjectsDesc || sortType || sortDirection || onlyShowThosesWithStatus) {
+		sortedProjects = getSortedUserProjects();
+	}
 	let searchText = '';
+	let showSortMenu = true;
+	let sortType: 'name' | 'reciter' | 'updatedAt' | 'createdAt' | 'duration' = 'updatedAt';
+	let sortDirection: 'asc' | 'desc' = 'desc';
+	let onlyShowThosesWithStatus: ProjectStatus | 'any' = 'any';
 
 	onMount(async () => {
 		await newProjectSystemMigration();
@@ -107,6 +117,45 @@
 				.includes(searchText.replaceAll("'", '').replaceAll('-', '').toLowerCase())
 		);
 	}
+
+	function getSortedUserProjects(): ProjectDesc[] {
+		if (userProjectsDesc.length === 0) return [];
+		console.log(sortDirection, sortType, onlyShowThosesWithStatus);
+		try {
+			return userProjectsDesc
+				.filter((project) => {
+					if (onlyShowThosesWithStatus === 'any') return true;
+					return project.status === onlyShowThosesWithStatus;
+				})
+				.sort((a, b) => {
+					if (sortDirection === 'asc') {
+						if (sortType === 'updatedAt')
+							return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+						if (sortType === 'createdAt')
+							return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+						if (sortType === 'name') return a.name.localeCompare(b.name);
+						if (sortType === 'duration') {
+							console.log(a.duration, b.duration);
+							return a.duration - b.duration;
+						}
+						if (sortType === 'reciter') return a.reciter.localeCompare(b.reciter);
+						else return 0;
+					} else {
+						if (sortType === 'updatedAt')
+							return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+						if (sortType === 'createdAt')
+							return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+						if (sortType === 'name') return b.name.localeCompare(a.name);
+						if (sortType === 'duration') return b.duration - a.duration;
+						if (sortType === 'reciter') return b.reciter.localeCompare(a.reciter);
+						else return 0;
+					}
+				});
+		} catch (e) {
+			console.error(e);
+			return userProjectsDesc;
+		}
+	}
 </script>
 
 <div class="p-5 h-screen flex items-center justify-center relative">
@@ -116,18 +165,38 @@
 		<div class="mt-10 relative h-80 2xl:h-[500px] xl:h-[400px]">
 			<p class="text-xl pl-3">Project{userProjectsDesc.length > 1 ? 's' : ''} :</p>
 
+			<abbr title="Sort">
+				<button
+					class="w-8 right-[20rem] top-1 absolute border-[#141414] bg-[#171717] border-4 rounded-tl-md"
+					on:click={() => {
+						showSortMenu = !showSortMenu;
+					}}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						style="fill: white;transform: rotate(180deg);msFilter:progid:DXImageTransform.Microsoft.BasicImage(rotation=2);"
+						><path d="M7 20h2V8h3L8 4 4 8h3zm13-4h-3V4h-2v12h-3l4 4z"></path></svg
+					>
+				</button>
+			</abbr>
+
+			{#if showSortMenu}
+				<SortMenu bind:sortDirection bind:sortType bind:onlyShowThosesWithStatus />
+			{/if}
+
 			<input
 				type="text"
 				placeholder="Search..."
 				bind:value={searchText}
-				class="w-80 right-0 top-1 absolute h-8 border-4 border-b-0 border-[#141414] bg-[#171717] rounded-t-md p-2 outline-none"
+				class="w-80 right-0 top-1 absolute h-8 border-4 border-b-0 border-l-0 border-[#141414] bg-[#171717] rounded-tr-md p-2 outline-none"
 			/>
 
 			<div
 				class={'mt-2 h-full bg-default border-4 border-[#141414] rounded-xl p-3 flex gap-4 flex-wrap flex-row overflow-y-auto '}
 			>
 				{#if userProjectsDesc.length > 0}
-					{#each userProjectsDesc.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) as project}
+					{#each sortedProjects as project}
 						{#if searchText === '' || checkSearchText(project, searchText)}
 							<ProjectTile {project} bind:userProjectsDesc {openProject} />
 						{/if}
