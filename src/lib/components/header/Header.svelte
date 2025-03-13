@@ -18,6 +18,7 @@
 	 * Handle the page change
 	 */
 	function handlePageChange(page: any) {
+		console.log('Changing page to', page);
 		isPreviewPlaying.set(false);
 		clearSubtitleToEdit();
 		setCurrentPage(page);
@@ -27,6 +28,9 @@
 			// reset la vitesse de la video
 			videoSpeed.set(1);
 		}
+
+		// remove focus from the button
+		(document.activeElement as HTMLElement).blur();
 	}
 </script>
 
