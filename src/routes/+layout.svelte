@@ -2,7 +2,7 @@
 	import toast, { Toaster } from 'svelte-french-toast';
 	import '../app.css';
 	import { onMount } from 'svelte';
-	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import { isCtrlPressed, isSpeedButtonPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import {
 		currentProject,
 		downloadYoutubeChapters,
@@ -19,7 +19,8 @@
 		bestPerformance,
 		currentPage,
 		fullScreenPreview,
-		getFonts
+		getFonts,
+		videoSpeed
 	} from '$lib/stores/LayoutStore';
 	import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
@@ -76,7 +77,6 @@
 					if ($isPreviewPlaying) forceUpdateCurrentPlayingMedia.set(true); // Recalcule le clip en cours de lecture
 				}
 			}
-
 			// if key is F11, toggle full screen
 			else if (e.key === 'F11') {
 				if ($currentPage === 'Video editor' || $currentPage === 'Export')
@@ -100,12 +100,23 @@
 				elements.forEach((element) => {
 					element.classList.remove('hidden');
 				});
+			} else if (e.key === 'PageUp' || e.key === 'PageDown') {
+				if ($currentPage === 'Subtitles editor' && $isSpeedButtonPressed === false) {
+					isSpeedButtonPressed.set(true);
+					videoSpeed.set($videoSpeed + 1);
+					console.log($videoSpeed);
+				}
 			}
 		};
 
 		window.onkeyup = (e) => {
 			if (e.key === 'Control') {
 				isCtrlPressed.set(false);
+			} else if (e.key === 'PageUp' || e.key === 'PageDown') {
+				if ($currentPage === 'Subtitles editor' && $isSpeedButtonPressed === true) {
+					isSpeedButtonPressed.set(false);
+					videoSpeed.set($videoSpeed - 1);
+				}
 			}
 		};
 

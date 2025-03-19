@@ -33,14 +33,14 @@
 			class="bg-white bg-opacity-15 w-[200px] ml-auto ox-2 outline-none"
 			bind:value={$videoSpeed}
 		>
-			<option class="bg-gray-800" value="0.5">0.5</option>
-			<option class="bg-gray-800" value="0.75">0.75</option>
-			<option class="bg-gray-800" value="1">1</option>
-			<option class="bg-gray-800" value="1.25">1.25</option>
-			<option class="bg-gray-800" value="1.5">1.5</option>
-			<option class="bg-gray-800" value="1.75">1.75</option>
-			<option class="bg-gray-800" value="2">2</option>
-			<option class="bg-gray-800" value="3">3</option>
+			<option class="bg-gray-800" value={0.5}>0.5</option>
+			<option class="bg-gray-800" value={0.75}>0.75</option>
+			<option class="bg-gray-800" value={1}>1</option>
+			<option class="bg-gray-800" value={1.25}>1.25</option>
+			<option class="bg-gray-800" value={1.5}>1.5</option>
+			<option class="bg-gray-800" value={1.75}>1.75</option>
+			<option class="bg-gray-800" value={2}>2</option>
+			<option class="bg-gray-800" value={3}>3</option>
 		</select>
 	</label>
 
