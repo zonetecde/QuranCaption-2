@@ -120,7 +120,9 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				horizontalPadding: 0,
 				opacity: 1,
 				showVerseNumber: true,
-				alignment: 'center'
+				alignment: 'center',
+				fitOnOneLine: false,
+				neededHeightToFit: -1
 			}
 		}
 	};
@@ -325,6 +327,7 @@ export function getProjectVersesRange(project: Project): string[] {
 
 	// now convert 1:1->7 to readable text : 1. Al Fatiha (1-7)
 	const mushaf = get(Mushaf);
+	if (mushaf === undefined) return [];
 	for (let i = 0; i < versesRange.length; i++) {
 		const element = versesRange[i].split(':');
 		const surahName = mushaf.surahs[Number.parseInt(element[0]) - 1].transliteration;
@@ -455,7 +458,6 @@ export function setDefaultIndividualSettingsForSubtitleId(subtitleId: string) {
 		bold: false,
 		italic: false,
 		underline: false,
-		hasAtLeastOneStyle: false,
-		fontSize: 60
+		hasAtLeastOneStyle: false
 	};
 }

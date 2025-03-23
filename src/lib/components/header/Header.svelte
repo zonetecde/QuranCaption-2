@@ -11,8 +11,29 @@
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import toast from 'svelte-french-toast';
 	import { open as openLink } from '@tauri-apps/api/shell';
+	import Toggle from '../common/Toggle.svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	let pages: string[] = ['Video editor', 'Subtitles editor', 'Translations', 'Export'];
+	let enableAutoSave: boolean = true;
+	let autoSaveInterval: number;
+
+	$: if (enableAutoSave) {
+		// save the project every 10 seconds
+		if (autoSaveInterval) clearInterval(autoSaveInterval);
+		autoSaveInterval = setInterval(async () => {
+			await updateUsersProjects($currentProject);
+			console.log('Auto saved');
+		}, 10000);
+	}
+
+	$: if (!enableAutoSave) {
+		clearInterval(autoSaveInterval);
+	}
+
+	$: onDestroy(() => {
+		clearInterval(autoSaveInterval);
+	});
 
 	/*
 	 * Handle the page change
@@ -81,13 +102,26 @@
 				color="black"
 				class="size-9"
 			>
-				<title id="saveIconTitle">Save</title>
 				<path
 					d="M17.2928932,3.29289322 L21,7 L21,20 C21,20.5522847 20.5522847,21 20,21 L4,21 C3.44771525,21 3,20.5522847 3,20 L3,4 C3,3.44771525 3.44771525,3 4,3 L16.5857864,3 C16.8510029,3 17.1053568,3.10535684 17.2928932,3.29289322 Z"
 				/> <rect width="10" height="8" x="7" y="13" /> <rect width="8" height="5" x="8" y="3" />
 			</svg>
 		</button>
 	</aabr>
+
+	<!-- enable autosave -->
+	<div class="absolute left-24 top-1/2 -translate-y-1/2 pt-2 opacity-40 hover:opacity-100">
+		<div class="flex items-center gap-x-2 flex-col">
+			<input
+				type="checkbox"
+				id="enableAutoSave"
+				bind:checked={enableAutoSave}
+				class="h-5 w-5"
+				style="transform: scale(0.8);"
+			/>
+			<label for="enableAutoSave" class="text-white text-sm">Autosave</label>
+		</div>
+	</div>
 	<aabr title="Open the Documentation" class="absolute right-14 top-1/2 -translate-y-1/2 pt-2">
 		<button
 			on:click={() => {

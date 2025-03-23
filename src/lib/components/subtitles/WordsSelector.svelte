@@ -258,8 +258,6 @@
 	}
 
 	function editSubtitle(selectedWords: string) {
-		console.log(startWordIndex, endWordIndex);
-
 		// édite le sous-titre existant
 		const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 		const subtitle = subtitleClips.find((clip) => clip.id === $currentlyEditedSubtitleId);

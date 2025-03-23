@@ -120,7 +120,6 @@
 
 	function getSortedUserProjects(): ProjectDesc[] {
 		if (userProjectsDesc.length === 0) return [];
-		console.log(sortDirection, sortType, onlyShowThosesWithStatus);
 		try {
 			return userProjectsDesc
 				.filter((project) => {
@@ -135,7 +134,6 @@
 							return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 						if (sortType === 'name') return a.name.localeCompare(b.name);
 						if (sortType === 'duration') {
-							console.log(a.duration, b.duration);
 							return a.duration - b.duration;
 						}
 						if (sortType === 'reciter') return a.reciter.localeCompare(b.reciter);

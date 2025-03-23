@@ -96,7 +96,6 @@
 			else if (e.key === 'F10') {
 				// remove from all html element that have the `experimental` class the attribute `hidden`
 				const elements = document.querySelectorAll('.experimental');
-				console.log(elements);
 				elements.forEach((element) => {
 					element.classList.remove('hidden');
 				});
@@ -104,7 +103,6 @@
 				if ($currentPage === 'Subtitles editor' && $isSpeedButtonPressed === false) {
 					isSpeedButtonPressed.set(true);
 					videoSpeed.set($videoSpeed + 1);
-					console.log($videoSpeed);
 				}
 			}
 		};

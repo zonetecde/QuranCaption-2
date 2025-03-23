@@ -47,6 +47,12 @@
 			project.projectSettings.globalSubtitlesSettings.globalGlowColor = '#ffffff';
 			project.projectSettings.globalSubtitlesSettings.globalGlowRadius = 12;
 		}
+		for (const [key, value] of Object.entries(project.projectSettings.subtitlesTracksSettings)) {
+			if (value.fitOnOneLine === undefined) {
+				value.fitOnOneLine = false;
+				value.neededHeightToFit = -1;
+			}
+		}
 
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {

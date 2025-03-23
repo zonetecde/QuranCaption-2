@@ -2,7 +2,12 @@
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { calculateFontSize, latinNumberToArabic } from '$lib/ext/Utilities';
 
-	import { currentPage, showSubtitlesPadding, videoDimensions } from '$lib/stores/LayoutStore';
+	import {
+		currentPage,
+		fullScreenPreview,
+		showSubtitlesPadding,
+		videoDimensions
+	} from '$lib/stores/LayoutStore';
 	import {
 		currentProject,
 		hasSubtitleAtLeastOneStyle,
@@ -15,6 +20,8 @@
 	export let currentSubtitle: SubtitleClip;
 	export let hideControls = false;
 	export let subtitleLanguage: string;
+	let paragraph: HTMLElement;
+	let displaySubtitle = true;
 
 	$: hasCustomIndividualSettings =
 		currentSubtitle && hasSubtitleAtLeastOneStyle(currentSubtitle.id);
@@ -73,21 +80,40 @@
 
 	let subtitleTextSize = 1;
 
-	$: if ($videoDimensions || currentSubtitle.id) calculateSubtitleTextSize();
+	$: if (
+		$videoDimensions ||
+		(paragraph &&
+			subtitleSettingsForThisLang.fitOnOneLine &&
+			paragraph.clientHeight !== subtitleSettingsForThisLang.neededHeightToFit)
+	)
+		calculateSubtitleTextSize();
+
+	let lastCalculationTime: number | null = null;
 
 	async function calculateSubtitleTextSize() {
+		// Si on a déjà calculé la taille il y a moins de 100ms, on ne le refait pas
+		if (lastCalculationTime && Date.now() - lastCalculationTime < 100) return;
+		lastCalculationTime = Date.now();
+
 		// Calcul la taille de la police pour les sous-titres
-		if (
-			subtitleLanguage === 'arabic' &&
-			hasCustomIndividualSettings &&
-			$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].fontSize !==
-				-1
-		) {
-			subtitleTextSize = calculateFontSize(
-				$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].fontSize
-			);
-		} else {
-			subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
+		subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
+
+		const p = document.getElementsByClassName(
+			'subtitle-text ' + subtitleLanguage
+		)[0] as HTMLElement;
+
+		if (p) {
+			if (subtitleSettingsForThisLang.fitOnOneLine) {
+				displaySubtitle = false;
+				while (
+					p.clientHeight > subtitleSettingsForThisLang.neededHeightToFit &&
+					subtitleSettingsForThisLang.neededHeightToFit !== -1
+				) {
+					subtitleTextSize -= 4;
+					await new Promise((resolve) => setTimeout(resolve, 1));
+				}
+				displaySubtitle = true;
+			}
 		}
 	}
 </script>
@@ -161,6 +187,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 					($showSubtitlesPadding ? ' bg-blue-500 bg-opacity-30' : '')}
 			>
 				<p
+					bind:this={paragraph}
 					class={'arabic text-center w-full subtitle-text ' +
 						subtitleLanguage +
 						' ' +
@@ -171,7 +198,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor},`.repeat(12) +
 								`0 0 ${subtitleOutlineWidth}px ${subtitleOutlineColor};`
 							: ``
-					} opacity: ${subtitleSettingsForThisLang.opacity}; color: ${
+					} opacity: ${displaySubtitle === false ? 0 : subtitleSettingsForThisLang.opacity}; color: ${
 						subtitleSettingsForThisLang.color
 					};
 					${
