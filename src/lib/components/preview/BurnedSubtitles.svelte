@@ -91,13 +91,7 @@
 	)
 		calculateSubtitleTextSize();
 
-	let lastCalculationTime: number | null = null;
-
 	async function calculateSubtitleTextSize() {
-		// Si on a déjà calculé la taille il y a moins de 100ms, on ne le refait pas
-		// if (lastCalculationTime && Date.now() - lastCalculationTime < 100) return;
-		lastCalculationTime = Date.now();
-
 		// Calcul la taille de la police pour les sous-titres
 		subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
 
