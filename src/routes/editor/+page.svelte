@@ -42,6 +42,11 @@
 				position: 'BC'
 			};
 		}
+		if (project.projectSettings.globalSubtitlesSettings.globalGlowEffect === undefined) {
+			project.projectSettings.globalSubtitlesSettings.globalGlowEffect = false;
+			project.projectSettings.globalSubtitlesSettings.globalGlowColor = '#ffffff';
+			project.projectSettings.globalSubtitlesSettings.globalGlowRadius = 12;
+		}
 
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {

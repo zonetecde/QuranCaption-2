@@ -80,6 +80,7 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 		translateVideoX: 0,
 		bestPerformance: false,
 		individualSubtitlesSettings: {},
+
 		globalSubtitlesSettings: {
 			background: true,
 			backgroundColor: '#000000',
@@ -101,7 +102,10 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				verticalPosition: 75,
 				color: '#ffffff',
 				opacity: 1
-			}
+			},
+			globalGlowColor: '#ffffff',
+			globalGlowEffect: false,
+			globalGlowRadius: 12
 		},
 		subtitlesTracksSettings: {
 			arabic: {
@@ -441,6 +445,9 @@ export function hasSubtitleAtLeastOneStyle(subtitleId: string): boolean {
 }
 
 export function setDefaultIndividualSettingsForSubtitleId(subtitleId: string) {
+	if (!get(currentProject).projectSettings.individualSubtitlesSettings)
+		get(currentProject).projectSettings.individualSubtitlesSettings = {};
+
 	get(currentProject).projectSettings.individualSubtitlesSettings[subtitleId] = {
 		glowEffect: false,
 		glowColor: '#973b3b',
@@ -448,6 +455,7 @@ export function setDefaultIndividualSettingsForSubtitleId(subtitleId: string) {
 		bold: false,
 		italic: false,
 		underline: false,
-		hasAtLeastOneStyle: false
+		hasAtLeastOneStyle: false,
+		fontSize: 60
 	};
 }

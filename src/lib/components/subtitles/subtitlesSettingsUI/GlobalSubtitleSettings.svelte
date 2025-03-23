@@ -229,3 +229,35 @@
 		</select>
 	</label>
 </div>
+
+<div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">
+	<h1 class="text-lg font-bold mb-2">Global Glowing</h1>
+	<Toggle
+		text="Glow Effect"
+		bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.globalGlowEffect}
+	/>
+
+	<label for="background-color" class="mt-2"
+		><span class="text-sm xl:text-base">Glow color :</span>
+		<input
+			type="color"
+			class="ml-1 bg-transparent w-8 xl:w-12"
+			bind:value={$currentProject.projectSettings.globalSubtitlesSettings.globalGlowColor}
+		/>
+		<!-- hex -->
+		<input
+			type="text"
+			class="ml-1 bg-transparent border border-[#494444] w-16 xl:w-20 text-center -translate-y-1 text-sm xl:text-base"
+			bind:value={$currentProject.projectSettings.globalSubtitlesSettings.globalGlowColor}
+		/>
+	</label>
+
+	<Slider
+		title="Glow Radius"
+		min={1}
+		max={20}
+		step={1}
+		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.globalGlowRadius}
+	/>
+	<br />
+</div>

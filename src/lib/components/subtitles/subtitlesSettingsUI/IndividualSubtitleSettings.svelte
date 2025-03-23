@@ -10,11 +10,21 @@
 	export let subtitle: SubtitleClip;
 	export let removeBorder = false;
 
+	let useCustomFontSize: boolean;
+
 	$: {
 		const settings = $currentProject.projectSettings.individualSubtitlesSettings[subtitle.id];
 		if (settings) {
 			const newStyle =
-				settings.glowEffect || settings.bold || settings.italic || settings.underline;
+				settings.glowEffect ||
+				settings.bold ||
+				settings.italic ||
+				settings.underline ||
+				settings.fontSize !== -1;
+
+			if (useCustomFontSize === undefined) useCustomFontSize = settings.fontSize !== -1;
+			if (useCustomFontSize === false) settings.fontSize = -1;
+			if (useCustomFontSize === true && settings.fontSize === -1) settings.fontSize = 50;
 
 			// Update only if the value changes to avoid a re-trigger
 			if (settings.hasAtLeastOneStyle !== newStyle) {
@@ -85,5 +95,19 @@
 			bind:checked={$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]
 				.underline}
 		/>
+
+		<Toggle text="Custom font size (arabic)" bind:checked={useCustomFontSize} />
+
+		<div class={'-mt-3 ' + (useCustomFontSize ? '' : 'opacity-50 pointer-events-none')}>
+			<!-- font size -->
+			<Slider
+				title="Font Size"
+				min={1}
+				max={140}
+				step={1}
+				bind:bindValue={$currentProject.projectSettings.individualSubtitlesSettings[subtitle.id]
+					.fontSize}
+			/>
+		</div>
 	</div>
 </div>

@@ -18,8 +18,13 @@
 
 	$: hasCustomIndividualSettings =
 		currentSubtitle && hasSubtitleAtLeastOneStyle(currentSubtitle.id);
+	$: hasGlobalGlowEffect = $currentProject.projectSettings.globalSubtitlesSettings.globalGlowEffect;
 
-	$: if (hasCustomIndividualSettings) {
+	// pour le glow
+	$: if (
+		hasCustomIndividualSettings &&
+		$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowEffect
+	) {
 		// set the css variables for the glow effect
 		document.documentElement.style.setProperty(
 			'--subtitleGlowColor',
@@ -30,6 +35,17 @@
 			'--subtitleGlowRadius',
 			$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowRadius +
 				'px'
+		);
+	} else if (hasGlobalGlowEffect) {
+		// set the css variables for the glow effect
+		document.documentElement.style.setProperty(
+			'--subtitleGlowColor',
+			$currentProject.projectSettings.globalSubtitlesSettings.globalGlowColor
+		);
+
+		document.documentElement.style.setProperty(
+			'--subtitleGlowRadius',
+			$currentProject.projectSettings.globalSubtitlesSettings.globalGlowRadius + 'px'
 		);
 	}
 
@@ -57,16 +73,27 @@
 
 	let subtitleTextSize = 1;
 
-	$: $videoDimensions, calculateSubtitleTextSize();
+	$: if ($videoDimensions || currentSubtitle.id) calculateSubtitleTextSize();
 
 	async function calculateSubtitleTextSize() {
 		// Calcul la taille de la police pour les sous-titres
-		subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
+		if (
+			subtitleLanguage === 'arabic' &&
+			hasCustomIndividualSettings &&
+			$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].fontSize !==
+				-1
+		) {
+			subtitleTextSize = calculateFontSize(
+				$currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].fontSize
+			);
+		} else {
+			subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
+		}
 	}
 </script>
 
 <svelte:head>
-	{#if hasCustomIndividualSettings && $currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowEffect}
+	{#if hasGlobalGlowEffect || (hasCustomIndividualSettings && $currentProject.projectSettings.individualSubtitlesSettings[currentSubtitle.id].glowEffect)}
 		<style>
 			.glow {
 				font-size: 80px;
@@ -135,7 +162,9 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 			>
 				<p
 					class={'arabic text-center w-full subtitle-text ' +
-						(hasCustomIndividualSettings ? 'glow' : '')}
+						subtitleLanguage +
+						' ' +
+						(hasCustomIndividualSettings || hasGlobalGlowEffect ? 'glow' : '')}
 					style={`font-size: ${subtitleTextSize}px; ${
 						enableOutline
 							? `text-shadow: ` +

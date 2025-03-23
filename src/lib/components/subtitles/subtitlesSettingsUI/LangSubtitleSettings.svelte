@@ -132,5 +132,3 @@
 			.horizontalPadding}
 	/>
 </div>
-
-<br />

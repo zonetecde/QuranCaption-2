@@ -209,12 +209,14 @@
 	{/if}
 
 	{#if $selectedSubtitlesLanguage !== 'individual'}
-		<button
-			class="bg-[#383535] py-2.5 mb-6 w-60 mx-auto rounded-xl border-2 border-black"
-			on:click={checkForCollision}
-			><abbr title="This button will scan all subtitles added to see if there are any collisions">
-				Check for collisions</abbr
-			></button
-		>
+		<div class="flex flex-row items-center justify-center gap-4">
+			<button
+				class="bg-[#383535] py-2.5 mx-auto rounded-xl border-2 border-black w-1/2"
+				on:click={checkForCollision}
+				><abbr title="This button will scan all subtitles added to see if there are any collisions">
+					Check for collisions</abbr
+				></button
+			>
+		</div>
 	{/if}
 </div>

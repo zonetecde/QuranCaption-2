@@ -74,6 +74,9 @@ export interface GlobalVideoSettings {
 	backgroundImage: string;
 	creatorText: CreatorText;
 	subscribeButton: SubscribeButton;
+	globalGlowEffect: boolean;
+	globalGlowColor: string;
+	globalGlowRadius: number;
 }
 
 /**
@@ -128,4 +131,5 @@ export interface IndividualSubtitleSettings {
 	underline: boolean;
 	italic: boolean;
 	hasAtLeastOneStyle: boolean;
+	fontSize: number;
 }
