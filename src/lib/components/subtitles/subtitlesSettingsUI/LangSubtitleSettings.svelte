@@ -2,7 +2,7 @@
 	import Slider from '$lib/components/common/Slider.svelte';
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { fullScreenPreview, showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import toast from 'svelte-french-toast';
 
@@ -11,16 +11,17 @@
 	$: if (
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine ===
 			true &&
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].neededHeightToFit ===
-			-1
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+			.neededHeightToFitFullScreen === -1
 	)
 		findNeededHeightToBeOneLine();
 
 	$: if (
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine === false
 	)
-		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].neededHeightToFit =
-			-1;
+		$currentProject.projectSettings.subtitlesTracksSettings[
+			subtitleLanguage
+		].neededHeightToFitFullScreen = -1;
 
 	/*
 	 * Find the height needed to fit the subtitle on one line
@@ -36,11 +37,11 @@
 		const enableTemp =
 			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableSubtitles;
 
-		let heightNeeded = -1;
+		let heightNeededSmallPreview = -1;
+		let heightNeededFullScreen = -1;
+
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableSubtitles =
 			true;
-
-		fullScreenPreview.set(true);
 
 		for (let i = 0; i < subtitleClips.length; i++) {
 			const clip = subtitleClips[i];
@@ -56,18 +57,43 @@
 				'subtitle-text ' + subtitleLanguage
 			)[0] as HTMLParagraphElement;
 
-			if (subtitleParagraph && heightNeeded === -1) {
+			if (subtitleParagraph && heightNeededSmallPreview === -1) {
 				// change le texte pour qu'il tienne sur une ligne, prend sa hauteur et va faire en sorte que tout les autres
 				// sous-titres aient la même hauteur
 				const temp = subtitleParagraph.innerHTML;
+
 				if (temp !== '') {
-					subtitleParagraph.innerHTML = '.';
+					// créer un str qui fait le bon nbre de ligne max
+					let newInnerText = '.';
+					for (
+						let i = 1;
+						i <
+						$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+							.maxNumberOfLines;
+						i++
+					) {
+						newInnerText += '<br/>.';
+					}
+
+					// met le str dans le sous-titre pour voir la hauteur
+					subtitleParagraph.innerHTML = newInnerText;
 
 					await new Promise((resolve) => {
 						setTimeout(resolve, 100); // Wait for subtitle to render
 					});
 
-					heightNeeded = subtitleParagraph.clientHeight;
+					// récupère la hauteur
+					heightNeededSmallPreview = subtitleParagraph.clientHeight;
+
+					fullScreenPreview.set(true);
+
+					await new Promise((resolve) => {
+						setTimeout(resolve, 100); // Wait for subtitle to render
+					});
+
+					heightNeededFullScreen = subtitleParagraph.clientHeight;
+
+					// remet le texte original
 					subtitleParagraph.innerHTML = temp;
 
 					await new Promise((resolve) => {
@@ -79,15 +105,41 @@
 			}
 		}
 
-		if (heightNeeded !== -1) {
-			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].neededHeightToFit =
-				heightNeeded;
+		// si on a trouvé la hauteur, on la met dans les settings
+		if (heightNeededSmallPreview !== -1) {
+			$currentProject.projectSettings.subtitlesTracksSettings[
+				subtitleLanguage
+			].neededHeightToFitFullScreen = heightNeededFullScreen;
+
+			console.log('heightNeededFullScreen', heightNeededFullScreen);
+
+			$currentProject.projectSettings.subtitlesTracksSettings[
+				subtitleLanguage
+			].neededHeightToFitSmallPreview = heightNeededSmallPreview;
+
+			console.log('heightNeededSmallPreview', heightNeededSmallPreview);
+		} else {
+			toast.error('Please add a subtitle to calculate the height needed to fit on one line');
 		}
+
+		// remet les settings comme avant
 		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
-		cursorPosition.set(cursorPosTemp);
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableSubtitles =
 			enableTemp;
 		fullScreenPreview.set(false);
+
+		const temp = $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
+		if (temp !== 0) {
+			$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = 0;
+			setTimeout(() => {
+				$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = temp;
+			}, 0);
+			cursorPosition.set(cursorPosTemp);
+		}
+
+		await new Promise((resolve) => {
+			setTimeout(resolve, 100);
+		});
 
 		toast.success(
 			'To change the max font size, uncheck the checkbox, change the font size and check the checkbox again\n\nNote: This will work when being on fullscreen preview',
@@ -143,7 +195,30 @@
 			bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 				.fitOnOneLine}
 		/>
-		<span class="ml-1">Adapt font size to fit on one line</span>
+		<span class="ml-1"
+			>Adapt font size to fit on
+			<select
+				class="bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
+				disabled={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+					.fitOnOneLine}
+				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+					.maxNumberOfLines}
+			>
+				<option value={1} class="bg-slate-300 text-black">1</option>
+				<option value={2} class="bg-slate-300 text-black">2</option>
+				<option value={3} class="bg-slate-300 text-black">3</option>
+				<option value={4} class="bg-slate-300 text-black">4</option>
+			</select>
+			<abbrt
+				class="underline decoration-dotted underline-offset-4"
+				title="talking about this fontsize - meaning it could be on one line or more but will not exceed the height of N lines of this fontsize"
+			>
+				line{$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+					.maxNumberOfLines > 1
+					? 's'
+					: ''} max
+			</abbrt>
+		</span>
 	</label>
 	<br />
 	<br />
@@ -230,14 +305,26 @@
 			.verticalPosition}
 	/>
 
-	<Slider
-		on:focus={() => showSubtitlesPadding.set(true)}
-		on:blur={() => showSubtitlesPadding.set(false)}
-		title="Horizontal Padding"
-		min={0}
-		max={50}
-		step={0.1}
-		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-			.horizontalPadding}
-	/>
+	{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine}
+		<p class="text-xs text-center mt-2">
+			To change the horizontal padding, uncheck the `Adapt font size to fit ...` checkbox, change
+			the padding and check the checkbox again
+		</p>
+	{/if}
+	<div
+		class={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine
+			? 'opacity-50 pointer-events-none'
+			: ''}
+	>
+		<Slider
+			on:focus={() => showSubtitlesPadding.set(true)}
+			on:blur={() => showSubtitlesPadding.set(false)}
+			title="Horizontal Padding"
+			min={0}
+			max={50}
+			step={0.1}
+			bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+				.horizontalPadding}
+		/>
+	</div>
 </div>

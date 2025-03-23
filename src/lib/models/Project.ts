@@ -119,7 +119,9 @@ export interface SubtitleTrackSettings {
 	showVerseNumber: boolean;
 	alignment: 'start' | 'center' | 'end' | 'justify';
 	fitOnOneLine: boolean;
-	neededHeightToFit: number;
+	neededHeightToFitFullScreen: number;
+	neededHeightToFitSmallPreview: number;
+	maxNumberOfLines: number;
 }
 
 /**

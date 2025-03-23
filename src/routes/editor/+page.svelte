@@ -50,7 +50,8 @@
 		for (const [key, value] of Object.entries(project.projectSettings.subtitlesTracksSettings)) {
 			if (value.fitOnOneLine === undefined) {
 				value.fitOnOneLine = false;
-				value.neededHeightToFit = -1;
+				value.neededHeightToFitFullScreen = -1;
+				value.maxNumberOfLines = key === 'arabic' ? 1 : 2;
 			}
 		}
 

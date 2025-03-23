@@ -122,7 +122,9 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				showVerseNumber: true,
 				alignment: 'center',
 				fitOnOneLine: false,
-				neededHeightToFit: -1
+				neededHeightToFitFullScreen: -1,
+				maxNumberOfLines: 1,
+				neededHeightToFitSmallPreview: -1
 			}
 		}
 	};

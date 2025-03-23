@@ -84,7 +84,10 @@
 		$videoDimensions ||
 		(paragraph &&
 			subtitleSettingsForThisLang.fitOnOneLine &&
-			paragraph.clientHeight !== subtitleSettingsForThisLang.neededHeightToFit)
+			(($fullScreenPreview &&
+				paragraph.clientHeight > subtitleSettingsForThisLang.neededHeightToFitFullScreen) ||
+				(!$fullScreenPreview &&
+					paragraph.clientHeight > subtitleSettingsForThisLang.neededHeightToFitSmallPreview)))
 	)
 		calculateSubtitleTextSize();
 
@@ -92,7 +95,7 @@
 
 	async function calculateSubtitleTextSize() {
 		// Si on a déjà calculé la taille il y a moins de 100ms, on ne le refait pas
-		if (lastCalculationTime && Date.now() - lastCalculationTime < 100) return;
+		// if (lastCalculationTime && Date.now() - lastCalculationTime < 100) return;
 		lastCalculationTime = Date.now();
 
 		// Calcul la taille de la police pour les sous-titres
@@ -105,10 +108,12 @@
 		if (p) {
 			if (subtitleSettingsForThisLang.fitOnOneLine) {
 				displaySubtitle = false;
-				while (
-					p.clientHeight > subtitleSettingsForThisLang.neededHeightToFit &&
-					subtitleSettingsForThisLang.neededHeightToFit !== -1
-				) {
+
+				const usedHeight = $fullScreenPreview
+					? subtitleSettingsForThisLang.neededHeightToFitFullScreen
+					: subtitleSettingsForThisLang.neededHeightToFitSmallPreview;
+
+				while (p.clientHeight > usedHeight && usedHeight !== -1) {
 					subtitleTextSize -= 4;
 					await new Promise((resolve) => setTimeout(resolve, 1));
 				}

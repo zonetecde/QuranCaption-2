@@ -39,7 +39,14 @@
 				// move the cursor to the start of the clip
 				setCurrentVideoTime.set(clip.start / 1000);
 			else {
-				cursorPosition.set(clip.start + 1);
+				const temp = $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
+				if (temp !== 0) {
+					$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = 0;
+					setTimeout(() => {
+						$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = temp;
+					}, 0);
+					cursorPosition.set(clip.start + 1);
+				}
 			}
 		} else if ($currentPage === 'Subtitles editor') {
 			if ($isPreviewPlaying) {

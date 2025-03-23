@@ -91,7 +91,11 @@
 			color: '#ffffff',
 			opacity: 1,
 			showVerseNumber: false,
-			alignment: 'center'
+			alignment: 'center',
+			fitOnOneLine: false,
+			neededHeightToFitFullScreen: -1,
+			maxNumberOfLines: 2,
+			neededHeightToFitSmallPreview: -1
 		};
 
 		// Pour chaque verset, ajoute la traduction
