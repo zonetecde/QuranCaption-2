@@ -2,7 +2,11 @@
 	import Slider from '$lib/components/common/Slider.svelte';
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { fullScreenPreview, showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
-	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		hasAtLeastOneSubtitle,
+		updateUsersProjects
+	} from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import toast from 'svelte-french-toast';
 
@@ -27,6 +31,15 @@
 	 * Find the height needed to fit the subtitle on one line
 	 */
 	async function findNeededHeightToBeOneLine() {
+		if (hasAtLeastOneSubtitle() === false) {
+			toast.error(
+				'Please add at least one subtitle to find the height needed to fit the subtitle on one line'
+			);
+			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine =
+				false;
+			return;
+		}
+
 		// pour la langue sélectionnée
 		const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 
@@ -119,7 +132,9 @@
 
 			console.log('heightNeededSmallPreview', heightNeededSmallPreview);
 		} else {
-			toast.error('Please add a subtitle to calculate the height needed to fit on one line');
+			toast.error(
+				'There was an error while trying to find the height needed to fit the subtitle on one line'
+			);
 		}
 
 		// remet les settings comme avant

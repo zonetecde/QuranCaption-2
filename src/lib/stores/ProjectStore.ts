@@ -463,3 +463,7 @@ export function setDefaultIndividualSettingsForSubtitleId(subtitleId: string) {
 		hasAtLeastOneStyle: false
 	};
 }
+
+export function hasAtLeastOneSubtitle() {
+	return get(currentProject).timeline.subtitlesTracks[0].clips.some((c) => c.verse !== -1);
+}

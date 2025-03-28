@@ -9,6 +9,12 @@
 	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import toast from 'svelte-french-toast';
 	import IndividualSubtitleSettingsContainer from './IndividualSubtitleSettingsContainer.svelte';
+	import type {
+		GlobalVideoSettings,
+		IndividualSubtitleSettings,
+		ProjectSettings,
+		SubtitleTrackSettings
+	} from '$lib/models/Project';
 
 	async function handleImportSettingsButtonClicked() {
 		// import subtitles settings
@@ -34,6 +40,15 @@
 					Object.keys($currentProject.projectSettings.subtitlesTracksSettings).forEach(
 						(langKey) => {
 							if (langKey.startsWith(lang)) {
+								const settings: SubtitleTrackSettings = subtitlesSettingsLangs[key];
+
+								// Migration
+								if (settings.fitOnOneLine === undefined) {
+									settings.fitOnOneLine = false;
+									settings.neededHeightToFitFullScreen = -1;
+									settings.maxNumberOfLines = langKey === 'arabic' ? 1 : 2;
+								}
+
 								$currentProject.projectSettings.subtitlesTracksSettings[langKey] =
 									subtitlesSettingsLangs[key];
 							}
@@ -43,14 +58,20 @@
 			});
 
 			// Mets à jour les settings globaux (bg, fade duration, creator text)
-			const globalSubtitlesSettings = subtitlesSettings[0];
+			const globalSubtitlesSettings: GlobalVideoSettings = subtitlesSettings[0];
 
+			// Migration
 			if (globalSubtitlesSettings.subscribeButton === undefined) {
 				globalSubtitlesSettings.subscribeButton = {
-					enabled: false,
+					enable: false,
 					startTime: 3,
 					position: 'BC'
 				};
+			}
+			if (globalSubtitlesSettings.globalGlowEffect === undefined) {
+				globalSubtitlesSettings.globalGlowEffect = false;
+				globalSubtitlesSettings.globalGlowColor = '#ffffff';
+				globalSubtitlesSettings.globalGlowRadius = 12;
 			}
 
 			$currentProject.projectSettings.globalSubtitlesSettings = globalSubtitlesSettings;
