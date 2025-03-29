@@ -52,10 +52,7 @@
 											for (const [translationId, translationText] of Object.entries(
 												userSubtitle.translations
 											)) {
-												if (
-													translationText !== '' &&
-													translationId.split('-')[0] === translation.split('-')[0]
-												) {
+												if (translationText !== '' && translationId === translation) {
 													if (
 														subtitle.translations[translation] !== translationText &&
 														(await downloadTranslationForVerse(
