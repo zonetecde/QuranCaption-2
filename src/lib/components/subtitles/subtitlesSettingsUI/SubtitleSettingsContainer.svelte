@@ -26,8 +26,14 @@
 			// Mets à jour les settings pour chaque langue
 			const subtitlesSettingsLangs = subtitlesSettings[1];
 
-			$currentProject.projectSettings.subtitlesTracksSettings['arabic'] =
-				subtitlesSettingsLangs['arabic'];
+			// Migration
+			if (subtitlesSettingsLangs.fitOnOneLine === undefined) {
+				subtitlesSettingsLangs['arabic'].fitOnOneLine = false;
+				subtitlesSettingsLangs['arabic'].neededHeightToFitFullScreen = -1;
+				subtitlesSettingsLangs['arabic'].maxNumberOfLines = 1;
+			}
+
+			subtitlesSettingsLangs['arabic'] = subtitlesSettingsLangs['arabic'];
 
 			// Pour chaque langue dans le fichier
 			Object.keys(subtitlesSettingsLangs).forEach((key) => {
@@ -49,8 +55,7 @@
 									settings.maxNumberOfLines = langKey === 'arabic' ? 1 : 2;
 								}
 
-								$currentProject.projectSettings.subtitlesTracksSettings[langKey] =
-									subtitlesSettingsLangs[key];
+								$currentProject.projectSettings.subtitlesTracksSettings[langKey] = settings;
 							}
 						}
 					);
