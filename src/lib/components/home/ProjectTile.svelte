@@ -110,7 +110,25 @@
 			<div class="absolute top-0 right-0 rounded-tr-xl rounded-bl-xl px-3 py-1 group/status">
 				<button on:click={() => {}}
 					>Status:
-					<span class=" group-hover/status:hidden">{project.status}</span>
+					<span
+						class="group-hover/status:hidden px-2 pb-1 pt-0.5 rounded"
+						style="background-color: {project.status === 'To caption'
+							? '#d9534f'
+							: project.status === 'Captioning'
+								? '#5bc0de'
+								: project.status === 'To translate'
+									? '#d9534f'
+									: project.status === 'Translating'
+										? '#0275d8'
+										: project.status === 'To export'
+											? '#d9534f'
+											: project.status === 'Exported'
+												? '#006400'
+												: ''};
+							   color: white;"
+					>
+						{project.status}
+					</span>
 					<select
 						bind:value={project.status}
 						on:change={() => saveProject()}
