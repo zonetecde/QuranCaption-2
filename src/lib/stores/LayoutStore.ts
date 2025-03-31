@@ -4,8 +4,14 @@ import { invoke } from '@tauri-apps/api';
 import { get, writable, type Writable } from 'svelte/store';
 import { currentProject } from './ProjectStore';
 import toast from 'svelte-french-toast';
+import { allStatus, type ProjectStatus } from '$lib/models/Project';
 
 export type PageType = 'Video editor' | 'Subtitles editor' | 'Translations' | 'Export';
+// Home page
+export const sortDirection: Writable<'asc' | 'desc'> = writable('desc');
+export const sortType: Writable<'updatedAt' | 'createdAt' | 'name' | 'duration' | 'reciter'> =
+	writable('updatedAt');
+export const onlyShowThosesWithStatus: Writable<ProjectStatus[]> = writable(allStatus);
 
 // System
 export const userFonts: Writable<string[]> = writable([]); // Les polices de l'utilisateur

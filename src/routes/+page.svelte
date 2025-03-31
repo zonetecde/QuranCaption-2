@@ -12,7 +12,7 @@
 	import { GITHUB_REPO_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
 	import { importAndReadFile, telemetry } from '$lib/ext/Utilities';
 	import Id from '$lib/ext/Id';
-	import type { ProjectDesc, ProjectStatus } from '$lib/models/Project';
+	import { allStatus, type ProjectDesc, type ProjectStatus } from '$lib/models/Project';
 	import {
 		addInformationsAboutProjectMigration,
 		newProjectSystemMigration
@@ -23,18 +23,18 @@
 	import CreateProjectForm from '$lib/components/home/CreateProjectForm.svelte';
 	import { fade } from 'svelte/transition';
 	import SortMenu from '$lib/components/home/SortMenu.svelte';
+	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
 
 	let createProjectVisibility = false;
 	let userProjectsDesc: ProjectDesc[] = [];
 	let sortedProjects: ProjectDesc[] = [];
-	$: if (userProjectsDesc || sortType || sortDirection || onlyShowThosesWithStatus) {
+
+	$: if (userProjectsDesc || $sortType || $sortDirection || $onlyShowThosesWithStatus) {
 		sortedProjects = getSortedUserProjects();
 	}
+
 	let searchText = '';
 	let showSortMenu = false;
-	let sortType: 'name' | 'reciter' | 'updatedAt' | 'createdAt' | 'duration' = 'updatedAt';
-	let sortDirection: 'asc' | 'desc' = 'desc';
-	let onlyShowThosesWithStatus: ProjectStatus | 'any' = 'any';
 
 	onMount(async () => {
 		await newProjectSystemMigration();
@@ -123,30 +123,42 @@
 		try {
 			return userProjectsDesc
 				.filter((project) => {
-					if (onlyShowThosesWithStatus === 'any') return true;
-					return project.status === onlyShowThosesWithStatus;
+					return $onlyShowThosesWithStatus.includes(project.status);
 				})
 				.sort((a, b) => {
-					if (sortDirection === 'asc') {
-						if (sortType === 'updatedAt')
-							return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-						if (sortType === 'createdAt')
-							return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-						if (sortType === 'name') return a.name.localeCompare(b.name);
-						if (sortType === 'duration') {
-							return a.duration - b.duration;
-						}
-						if (sortType === 'reciter') return a.reciter.localeCompare(b.reciter);
-						else return 0;
-					} else {
-						if (sortType === 'updatedAt')
-							return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-						if (sortType === 'createdAt')
-							return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-						if (sortType === 'name') return b.name.localeCompare(a.name);
-						if (sortType === 'duration') return b.duration - a.duration;
-						if (sortType === 'reciter') return b.reciter.localeCompare(a.reciter);
-						else return 0;
+					switch ($sortDirection) {
+						case 'asc':
+							switch ($sortType) {
+								case 'updatedAt':
+									return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+								case 'createdAt':
+									return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+								case 'name':
+									return a.name.localeCompare(b.name);
+								case 'duration':
+									return a.duration - b.duration;
+								case 'reciter':
+									return a.reciter.localeCompare(b.reciter);
+								default:
+									return 0;
+							}
+						case 'desc':
+							switch ($sortType) {
+								case 'updatedAt':
+									return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+								case 'createdAt':
+									return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+								case 'name':
+									return b.name.localeCompare(a.name);
+								case 'duration':
+									return b.duration - a.duration;
+								case 'reciter':
+									return b.reciter.localeCompare(a.reciter);
+								default:
+									return 0;
+							}
+						default:
+							return 0;
 					}
 				});
 		} catch (e) {
@@ -180,7 +192,7 @@
 			</abbr>
 
 			{#if showSortMenu}
-				<SortMenu bind:sortDirection bind:sortType bind:onlyShowThosesWithStatus />
+				<SortMenu />
 			{/if}
 
 			<input

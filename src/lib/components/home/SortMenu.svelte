@@ -1,10 +1,7 @@
 <script lang="ts">
-	import type { ProjectStatus } from '$lib/models/Project';
+	import { allStatus, type ProjectStatus } from '$lib/models/Project';
+	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
 	import { fade } from 'svelte/transition';
-
-	export let sortDirection: 'asc' | 'desc' = 'desc';
-	export let sortType: 'updatedAt' | 'createdAt' | 'name' | 'duration' | 'reciter' = 'updatedAt';
-	export let onlyShowThosesWithStatus: 'any' | ProjectStatus = 'any';
 </script>
 
 <div
@@ -15,14 +12,14 @@
 		<section>
 			<label for="sortDirection" class="text-white p-2">Sort by :</label>
 			<select
-				bind:value={sortDirection}
+				bind:value={$sortDirection}
 				class="bg-[#171717] text-white p-2 outline-none"
 				id="sortDirection"
 			>
 				<option value="asc">Ascending</option>
 				<option value="desc">Descending</option>
 			</select>
-			<select bind:value={sortType} class="bg-[#171717] text-white p-2 outline-none">
+			<select bind:value={$sortType} class="bg-[#171717] text-white p-2 outline-none">
 				<option value="updatedAt">Last updated</option>
 				<option value="createdAt">Created at</option>
 				<option value="name">Name</option>
@@ -31,21 +28,27 @@
 		</section>
 
 		<section>
-			<label for="onlyShowThosesWithStatus" class="text-white p-2">With status :</label>
-			<select
-				bind:value={onlyShowThosesWithStatus}
-				class="bg-[#171717] text-white p-2 outline-none"
-				id="onlyShowThosesWithStatus"
+			<label class="text-white p-2" for="">With status :</label>
+			<button
+				class="text-white px-2 border rounded-lg opacity-45"
+				on:click={() => onlyShowThosesWithStatus.set([])}
 			>
-				<option value="any">Any</option>
-				<option value="To caption">To caption</option>
-				<option value="Captioning">Captioning</option>
-				<option value="To translate">To translate</option>
-				<option value="Translating">Translating</option>
-				<option value="To export">To export</option>
-				<option value="Exported">Exported</option>
-				<option value="not set">Not set</option>
-			</select>
+				Uncheck all
+			</button>
+			<div class="flex flex-col text-white p-2">
+				{#each allStatus as status}
+					<label>
+						<input
+							checked={$onlyShowThosesWithStatus.includes(status)}
+							type="checkbox"
+							bind:group={$onlyShowThosesWithStatus}
+							value={status}
+							class="mr-2"
+						/>
+						{status}
+					</label>
+				{/each}
+			</div>
 		</section>
 	</div>
 </div>

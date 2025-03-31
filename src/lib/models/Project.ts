@@ -13,6 +13,15 @@ export type ProjectStatus =
 	| 'To export'
 	| 'Exported'
 	| 'not set';
+export const allStatus: ProjectStatus[] = [
+	'To caption',
+	'Captioning',
+	'To translate',
+	'Translating',
+	'To export',
+	'Exported',
+	'not set'
+];
 
 export interface ProjectDesc {
 	id: string;
