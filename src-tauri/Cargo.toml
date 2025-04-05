@@ -1,10 +1,10 @@
 [package]
-name = "app"
-version = "0.2.2"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+name = "Quran Caption"
+version = "0.3.9"
+description = "Quran Caption is a software that makes it easy to generate videos of Quran recitation with subtitles in any language !"
+authors = ["Rayane STASZEWSKI"]
+license = "Attribution-NonCommercial 4.0 International"
+repository = "https://github.com/zonetecde/QuranCaption-2"
 default-run = "app"
 edition = "2021"
 rust-version = "1.60"
