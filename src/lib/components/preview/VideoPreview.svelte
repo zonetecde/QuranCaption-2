@@ -118,11 +118,11 @@
 
 	// Set the current time of the video and audio components to the value of `setCurrentVideoTime`
 	$: if ($setCurrentVideoTime) {
-		if (currentVideo) {
+		if (currentVideo && videoComponent) {
 			videoComponent.currentTime = $setCurrentVideoTime;
 		}
 
-		if (currentAudio) {
+		if (currentAudio && audioComponent) {
 			audioComponent.currentTime = $setCurrentVideoTime;
 		}
 
