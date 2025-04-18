@@ -49,10 +49,56 @@
 											userSubtitle.firstWordIndexInVerse === subtitle.firstWordIndexInVerse &&
 											userSubtitle.lastWordIndexInVerse === subtitle.lastWordIndexInVerse
 										) {
-											for (const [translationId, translationText] of Object.entries(
+											for (let [translationId, translationText] of Object.entries(
 												userSubtitle.translations
 											)) {
-												if (translationText !== '' && translationId === translation) {
+												// Si :
+												// 1. La traduction n'est pas vide
+												// 2. La traduction est la même que celle de l'utilisateur
+												// OU que l'on passe de la traduction française sans ponctuation à la traduction française avec ponctuation
+												const isMuhammadHamidulTranslation =
+													translationId.includes('fra-muhammadhamidul') &&
+													translation.includes('fra-muhammadhameedu');
+												if (
+													translationText !== '' &&
+													(translationId === translation || isMuhammadHamidulTranslation)
+												) {
+													// Nécessaire pour passer de la traduction sans ponctuation à la traduction avec ponctuation - les usages de guillemets sont différents
+													if (isMuhammadHamidulTranslation) {
+														translationText = translationText.replace('«', '"').replace('»', '"');
+														// ajoute les points de ponctuation à la fin s'il n'y en a
+														// si subtitle.translations[translation] se finit par `,` ou `!` ou `?` ou `.` ou `:` ou `;` et que translationText ne se finit pas par `,` ou `!` ou `?` ou `.` ou `:` ou `;` alors on ajoute le point du ponctuation de subtitle.translations[translation] à la fin de translationText
+														if (
+															subtitle.isLastWordInVerse &&
+															(subtitle.translations[translation].endsWith(',') ||
+																subtitle.translations[translation].endsWith('!') ||
+																subtitle.translations[translation].endsWith('?') ||
+																subtitle.translations[translation].endsWith('.') ||
+																subtitle.translations[translation].endsWith(':') ||
+																subtitle.translations[translation].endsWith(';'))
+														) {
+															// vérifie si translationText ne se finit pas par le point de ponctuation de subtitle.translations[translation]
+															if (
+																!translationText.endsWith(
+																	subtitle.translations[translation].slice(-1)
+																)
+															) {
+																if (
+																	subtitle.translations[translation].slice(-1) === '.' ||
+																	subtitle.translations[translation].slice(-1) === ';' ||
+																	subtitle.translations[translation].slice(-1) === ':' ||
+																	subtitle.translations[translation].slice(-1) === ','
+																) {
+																	// Ajout sans espace avant
+																	translationText += subtitle.translations[translation].slice(-1);
+																} else {
+																	translationText +=
+																		' ' + subtitle.translations[translation].slice(-1);
+																}
+															}
+														}
+													}
+
 													if (
 														subtitle.translations[translation] !== translationText &&
 														(await downloadTranslationForVerse(

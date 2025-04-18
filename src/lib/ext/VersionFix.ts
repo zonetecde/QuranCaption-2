@@ -62,10 +62,13 @@ export async function addInformationsAboutProjectMigration(
 ): Promise<boolean> {
 	if (userProjectsDesc.length > 0) {
 		if (force || userProjectsDesc.some((project: ProjectDesc) => project.createdAt === undefined)) {
-			toast('We are doing some updates on your projects, please wait a few seconds...', {
-				duration: 5000,
-				icon: '🔄'
-			});
+			toast(
+				'We are doing some updates on your projects, please wait until a message appears to confirm that the update is done',
+				{
+					duration: 8000,
+					icon: '🔄'
+				}
+			);
 
 			let projects = await getUserProjects();
 			for (const project of projects) {
