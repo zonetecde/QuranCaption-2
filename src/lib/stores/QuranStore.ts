@@ -116,6 +116,30 @@ export async function downloadTranslationForVerse(
 	const edition = getEditionFromName(editionName);
 	if (!edition) return 'No translation found';
 
+	if (edition.comments === 'PONCTUATION') {
+		// Certaines traductions sont prise d'une autre API car ne contienent pas de ponctuation.
+		// Ces traductions ont un lien différent et pour attribut comments "PONCTUATION" (pour les reconnaitre)
+		// Télécharge donc via un autre lien
+		const link = edition.link.replace('{chapter}', surah.toString());
+
+		const response = await fetch(link);
+
+		if (response.ok) {
+			const translation = await response.json();
+			let text = translation[verse][1];
+
+			// Enlève les nombres entre crochets
+			text = text.replace(/\[\d+\]/g, '');
+
+			// Ajout de la traduction dans le cache
+			caches.set(`${editionName}_${surah}_${verse}_${removeLatin}`, text);
+
+			return text;
+		}
+
+		return 'No translation found';
+	}
+
 	let url = edition.link.replace('.json', ''); // remove the "-la" from the link because we want the accents.
 	if (removeLatin) url = url.replace('-la', '');
 
@@ -123,6 +147,7 @@ export async function downloadTranslationForVerse(
 
 	if (response.ok) {
 		const translation = await response.json();
+
 		let text = translation.text;
 
 		// Enlève les nombres entre crochets

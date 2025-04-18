@@ -1315,8 +1315,8 @@
 		"language": "English",
 		"direction": "ltr",
 		"source": "",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-mustafakhattaba.json",
+		"comments": "PONCTUATION",
+		"link": "https://raw.githubusercontent.com/ReflectsLight/quran-json/refs/heads/main/share/quran-json/TheNobleQuran/en/{chapter}.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-mustafakhattaba.min.json"
 	},
 	"eng_mustafakhattabg": {
@@ -1699,35 +1699,15 @@
 		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.min.json"
 	},
-	"fra_muhammadhameedu_la": {
-		"name": "fra-muhammadhameedu-la",
-		"author": "Muhammad Hameedullah",
-		"language": "French",
-		"direction": "ltr",
-		"source": "https://quranenc.com/check/french_hameedullah/v1.0.0-csv.1 , https://quranenc.com/en/browse/french_hameedullah , https://quranenc.com ,",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-muhammadhameedu-la.json",
-		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-muhammadhameedu-la.min.json"
-	},
 	"fra_muhammadhameedu": {
 		"name": "fra-muhammadhameedu",
 		"author": "Muhammad Hameedullah",
 		"language": "French",
 		"direction": "ltr",
 		"source": "https://quranenc.com/check/french_hameedullah/v1.0.0-csv.1 , https://quranenc.com/en/browse/french_hameedullah , https://quranenc.com ,",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-muhammadhameedu.json",
+		"comments": "PONCTUATION",
+		"link": "https://raw.githubusercontent.com/ReflectsLight/quran-json/refs/heads/main/share/quran-json/TheNobleQuran/fr/{chapter}.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-muhammadhameedu.min.json"
-	},
-	"fra_muhammadhamidul_la": {
-		"name": "fra-muhammadhamidul-la",
-		"author": "Muhammad Hamidullah",
-		"language": "French",
-		"direction": "ltr",
-		"source": "http://tanzil.net",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-muhammadhamidul-la.json",
-		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-muhammadhamidul-la.min.json"
 	},
 	"fra_muhammadhamidul": {
 		"name": "fra-muhammadhamidul",
@@ -2049,24 +2029,15 @@
 		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ind-unknown.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ind-unknown.min.json"
 	},
-	"ita_hamzarobertopic_la": {
-		"name": "ita-hamzarobertopic-la",
-		"author": "Hamza Roberto Piccardo",
-		"language": "Italian",
-		"direction": "ltr",
-		"source": "http://tanzil.net",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ita-hamzarobertopic-la.json",
-		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ita-hamzarobertopic-la.min.json"
-	},
+
 	"ita_hamzarobertopic": {
 		"name": "ita-hamzarobertopic",
 		"author": "Hamza Roberto Piccardo",
 		"language": "Italian",
 		"direction": "ltr",
 		"source": "http://tanzil.net",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ita-hamzarobertopic.json",
+		"comments": "PONCTUATION",
+		"link": "https://raw.githubusercontent.com/ReflectsLight/quran-json/refs/heads/main/share/quran-json/TheNobleQuran/it/{chapter}.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ita-hamzarobertopic.min.json"
 	},
 	"jav_unknown_la": {
@@ -2705,8 +2676,8 @@
 		"language": "Dutch",
 		"direction": "ltr",
 		"source": "http://tanzil.net",
-		"comments": "",
-		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/nld-sofianssiregar.json",
+		"comments": "PONCTUATION",
+		"link": "https://raw.githubusercontent.com/ReflectsLight/quran-json/refs/heads/main/share/quran-json/TheNobleQuran/nl/{chapter}.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/nld-sofianssiregar.min.json"
 	},
 	"nld_unknown": {
