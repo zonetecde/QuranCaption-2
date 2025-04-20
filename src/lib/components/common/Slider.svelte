@@ -4,7 +4,7 @@
 	export let max: number;
 	export let step: number;
 	export let bindValue: number;
-	export let unit: string = '';
+	export let unit = '';
 
 	let isMouseDown = false;
 	let yAxis = 0;

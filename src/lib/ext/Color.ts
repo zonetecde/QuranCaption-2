@@ -18,7 +18,7 @@ export function generatePinkColor(uniqueId: string): string {
 	return `rgb(${r}, ${g}, ${b})`;
 }
 
-export function generateRandomBrightColorBasedOnSeed(seed: String): string {
+export function generateRandomBrightColorBasedOnSeed(seed: string): string {
 	const hash = seed.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
 
 	const r = ((hash & 0x000000ff) % 40) + 200;

@@ -15,7 +15,7 @@
 	import { onDestroy, onMount } from 'svelte';
 
 	let pages: string[] = ['Video editor', 'Subtitles editor', 'Translations', 'Export'];
-	let enableAutoSave: boolean = true;
+	let enableAutoSave = true;
 	let autoSaveInterval: number;
 
 	$: if (enableAutoSave) {

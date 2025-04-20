@@ -45,7 +45,7 @@
 			return;
 		}
 
-		let contentFile: string = '';
+		let contentFile = '';
 
 		let verses = $currentProject.timeline.subtitlesTracks[0].clips.map((subtitleClip) => {
 			return {

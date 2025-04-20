@@ -24,7 +24,7 @@
 	import { currentProject, hasSubtitleAtLeastOneStyle } from '$lib/stores/ProjectStore';
 
 	export let clip: SubtitleClip;
-	let color: string = '#7cce79';
+	let color = '#7cce79';
 
 	function handleClipRightClicked(e: MouseEvent): void {
 		if (clip.verse === -1 || clip.surah === -1) return;

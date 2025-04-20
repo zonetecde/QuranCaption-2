@@ -19,7 +19,7 @@ export async function downloadTranslationForVerse(
 	editionName: string,
 	surah: number,
 	verse: number,
-	removeLatin: boolean = true
+	removeLatin = true
 ): Promise<string> {
 	// Check if the surah and verse are valid
 	if (surah === -1 || verse === -1) return NO_TRANSLATION;

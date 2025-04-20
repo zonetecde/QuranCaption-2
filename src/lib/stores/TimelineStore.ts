@@ -57,7 +57,7 @@ export async function scrollToCursor() {
 
 export function getLastClipEnd(timeline: Timeline) {
 	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks, ...timeline.subtitlesTracks];
-	let maxEnd =
+	const maxEnd =
 		tracks.reduce((max, track) => {
 			return Math.max(
 				max,

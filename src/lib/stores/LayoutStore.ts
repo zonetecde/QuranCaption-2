@@ -65,7 +65,7 @@ export function clearBeginAndEndTimeReplacing() {
 currentlyEditedSubtitleId.subscribe((id) => {
 	// Protection contre le fait d'éditer un sous-titre qui est un silence/custom text
 	if (id) {
-		let subtitleClip = get(currentProject).timeline.subtitlesTracks[0].clips.find(
+		const subtitleClip = get(currentProject).timeline.subtitlesTracks[0].clips.find(
 			(clip) => clip.id === id
 		);
 		if (subtitleClip && (subtitleClip.verse === -1 || subtitleClip.surah === -1)) {

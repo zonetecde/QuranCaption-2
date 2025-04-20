@@ -57,7 +57,7 @@
 
 		if (subtitleIndex === 0) return false;
 
-		let i: number = 1;
+		let i = 1;
 		// ne compte pas les silences/subtitles speciaux
 		while (track.clips[subtitleIndex - i].verse === -1) {
 			i++;

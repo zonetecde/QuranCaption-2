@@ -5,8 +5,8 @@
 	import toast from 'svelte-french-toast';
 	import { blur, fade } from 'svelte/transition';
 
-	let projectName: string = 'New Project';
-	let reciter: string = '';
+	let projectName = 'New Project';
+	let reciter = '';
 	export let createProjectVisibility: boolean;
 	export let openProject: (projectId: string) => void;
 	export let userProjectsDesc: ProjectDesc[];

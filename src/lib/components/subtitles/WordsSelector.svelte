@@ -37,7 +37,7 @@
 	}
 
 	// Enter edit mode to edit a subtitle
-	async function setSubtitleToBeEdited(subtitleId: String) {
+	async function setSubtitleToBeEdited(subtitleId: string) {
 		// Récupère le sous-titre à éditer
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 		let subtitle = subtitleClips.find((clip) => clip.id === subtitleId);
@@ -100,7 +100,7 @@
 	 * Ou, s'il n'y a plus de mots, passe au verset suivant
 	 * @param removeAllSection Si vrai, supprime la sélection actuelle pour ne sélectionner que le prochain mot
 	 */
-	function selectNextWord(removeAllSection: boolean = false) {
+	function selectNextWord(removeAllSection = false) {
 		// Dans le cas où on veut avancer le curseur (plusieurs mots sélectionnés)
 		if (endWordIndex < wordsInSelectedVerse.length - 1) {
 			endWordIndex += 1;
@@ -326,9 +326,9 @@
 	 */
 	async function addSubtitle(
 		subtitleText: string,
-		isNotVerse: boolean = false,
-		isSilence: boolean = false,
-		isCustomText: boolean = false
+		isNotVerse = false,
+		isSilence = false,
+		isCustomText = false
 	) {
 		// Ajoute le sous-titre à la liste des sous-titres
 		let subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;

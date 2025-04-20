@@ -193,7 +193,7 @@ export async function getProjectById(id: string): Promise<Project> {
  */
 export async function updateUsersProjects(
 	project: Project,
-	isInMigrationMode: boolean = false
+	isInMigrationMode = false
 ): Promise<ProjectDesc[]> {
 	const projects: ProjectDesc[] = await getUserProjects();
 
@@ -394,7 +394,7 @@ export function downloadYoutubeChapters() {
  * Backup all user projects and download them as a file.
  */
 export async function backupAllProjects(userProjectsDesc: ProjectDesc[]) {
-	let userProjects: Project[] = [];
+	const userProjects: Project[] = [];
 
 	for (let i = 0; i < userProjectsDesc.length; i++) {
 		const element = userProjectsDesc[i];
@@ -418,7 +418,7 @@ export async function restoreAllProjects(jsonContent: string): Promise<ProjectDe
 	const projects = JSON.parse(jsonContent);
 	let userProjectsDesc: ProjectDesc[] = [];
 
-	for (let project of projects) {
+	for (const project of projects) {
 		const existingProject = userProjectsDesc.find((p) => p.id === project.id);
 		if (existingProject && new Date(existingProject.updatedAt) > new Date(project.updatedAt)) {
 			userProjectsDesc = userProjectsDesc.map((p) => (p.id === project.id ? project : p));

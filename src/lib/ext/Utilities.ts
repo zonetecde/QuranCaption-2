@@ -17,7 +17,7 @@ export function downloadFile(content: string, filename: string) {
  * Telemetry function to send data to me
  * @param msg The message to be sent
  */
-export async function telemetry(msg: String) {
+export async function telemetry(msg: string) {
 	const url = 'https://rayanestaszewski.fr/telemetry?msg=';
 	try {
 		await fetch(url + msg, {

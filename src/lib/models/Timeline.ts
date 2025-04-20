@@ -54,13 +54,13 @@ export type Clip = {
  */
 export function secondsToHHMMSS(
 	seconds: number,
-	removeLeadingZero: boolean = false
+	removeLeadingZero = false
 ): [string, string] {
 	if (seconds === undefined) return ['00:00', '00'];
 
 	if (seconds < 60) {
-		let firstStr = (removeLeadingZero ? '' : '00:') + seconds.toFixed(0).padStart(2, '0');
-		let secondStr = seconds.toFixed(2).split('.')[1];
+		const firstStr = (removeLeadingZero ? '' : '00:') + seconds.toFixed(0).padStart(2, '0');
+		const secondStr = seconds.toFixed(2).split('.')[1];
 
 		return [firstStr, secondStr];
 	}

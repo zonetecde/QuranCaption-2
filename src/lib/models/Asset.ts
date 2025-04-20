@@ -40,7 +40,7 @@ export async function downloadFromYoutube(
  * @param filePaths - The file names to add
  */
 export async function addAssets(filePaths: string | string[], youtubeUrl?: string) {
-	let _assets: Asset[] = [];
+	const _assets: Asset[] = [];
 	let _filePaths: string[];
 
 	// Convert to array if not already

@@ -19,7 +19,7 @@ export async function newProjectSystemMigration() {
 		toast.success('We are migrating your projects to the new system. Please wait a moment.');
 
 		// download all the user's project from localstorage
-		let userProjects: Project[] = [];
+		const userProjects: Project[] = [];
 
 		for (let i = 0; i < projects.length; i++) {
 			const element = projects[i];
@@ -57,7 +57,7 @@ export async function newProjectSystemMigration() {
  */
 export async function addInformationsAboutProjectMigration(
 	userProjectsDesc: ProjectDesc[],
-	force: boolean = false // force la migration
+	force = false // force la migration
 ): Promise<boolean> {
 	if (userProjectsDesc.length > 0) {
 		if (force || userProjectsDesc.some((project: ProjectDesc) => project.createdAt === undefined)) {
@@ -69,7 +69,7 @@ export async function addInformationsAboutProjectMigration(
 				}
 			);
 
-			let projects = await getUserProjects();
+			const projects = await getUserProjects();
 			for (const project of projects) {
 				if (await doesProjectExist(project.id)) {
 					const proj = await getProjectById(project.id);
