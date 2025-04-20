@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { allStatus, type ProjectStatus } from '$lib/models/Project';
+	import { allStatus } from '$lib/models/Project';
 	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
 	import { fade } from 'svelte/transition';
 </script>

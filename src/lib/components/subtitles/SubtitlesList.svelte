@@ -1,17 +1,5 @@
 <script lang="ts">
-	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
-	import {
-		clearSubtitleToEdit,
-		currentlyCustomizedSubtitleId,
-		currentlyEditedSubtitleId,
-		currentPage,
-		setCurrentVideoTime,
-		setSubtitleToEdit
-	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { getEditionFromName } from '$lib/stores/QuranStore';
-	import { cursorPosition, scrollToCursor } from '$lib/stores/TimelineStore';
-	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import SubtitlesListItem from './SubtitlesListItem.svelte';
 
 	let div: HTMLDivElement;

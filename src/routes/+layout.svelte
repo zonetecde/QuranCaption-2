@@ -1,20 +1,5 @@
 <script lang="ts">
-	import toast, { Toaster } from 'svelte-french-toast';
-	import '../app.css';
-	import { onMount } from 'svelte';
-	import { isCtrlPressed, isSpeedButtonPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import {
-		currentProject,
-		downloadYoutubeChapters,
-		updateUsersProjects
-	} from '$lib/stores/ProjectStore';
-	import { Mushaf, getEditions, loadQuran, getSurahName } from '$lib/stores/QuranStore';
-	import {
-		cursorPosition,
-		forceUpdateCurrentPlayingMedia,
-		getTimelineTotalDuration
-	} from '$lib/stores/TimelineStore';
-	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
 	import {
 		bestPerformance,
 		currentPage,
@@ -22,7 +7,14 @@
 		getFonts,
 		videoSpeed
 	} from '$lib/stores/LayoutStore';
-	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
+	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
+	import { getEditions, loadQuran } from '$lib/stores/QuranStore';
+	import { isCtrlPressed, isSpeedButtonPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import { cursorPosition, forceUpdateCurrentPlayingMedia } from '$lib/stores/TimelineStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import { onMount } from 'svelte';
+	import toast, { Toaster } from 'svelte-french-toast';
+	import '../app.css';
 
 	onMount(() => {
 		// Créer le dossier pour le localStorage si il n'existe pas

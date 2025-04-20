@@ -1,10 +1,8 @@
-import type WordsSelector from '$lib/components/subtitles/WordsSelector.svelte';
-import type Project from '$lib/models/Project';
+import { allStatus, type ProjectStatus } from '$lib/models/Project';
 import { invoke } from '@tauri-apps/api';
+import toast from 'svelte-french-toast';
 import { get, writable, type Writable } from 'svelte/store';
 import { currentProject } from './ProjectStore';
-import toast from 'svelte-french-toast';
-import { allStatus, type ProjectStatus } from '$lib/models/Project';
 
 export type PageType = 'Video editor' | 'Subtitles editor' | 'Translations' | 'Export';
 // Home page

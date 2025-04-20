@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
 	import {
 		onlyShowSubtitlesThatAreNotFullVerses,
 		onlyShowVersesWhoseTranslationsNeedReview
@@ -6,10 +7,8 @@
 	import {
 		currentProject,
 		getProjectPercentageTranslated,
-		getUserProjects,
 		getUserProjectsAsProjects
 	} from '$lib/stores/ProjectStore';
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
 	import toast from 'svelte-french-toast';
 
 	let percentage = 0;

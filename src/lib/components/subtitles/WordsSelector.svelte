@@ -1,15 +1,14 @@
 <script lang="ts">
 	import Id from '$lib/ext/Id';
-	import {
-		currentProject,
-		hasSubtitleAtLeastOneStyle,
-		hasSubtitleDefaultIndividualSettings
-	} from '$lib/stores/ProjectStore';
-	import { Mushaf, getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
+	import { currentProject, hasSubtitleDefaultIndividualSettings } from '$lib/stores/ProjectStore';
+	import { getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 
+	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 	import {
 		beginTimeReplacing,
 		clearBeginAndEndTimeReplacing,
@@ -21,9 +20,6 @@
 		showWordByWordTranslation,
 		showWordByWordTransliteration
 	} from '$lib/stores/LayoutStore';
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
-	import { getWordByWordTranslation } from '$lib/functions/Wbw';
-	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
 
 	export let verseNumber: number;
 	export let surahNumber: number;

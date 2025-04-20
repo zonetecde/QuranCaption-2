@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { fullScreenPreview, videoEditorSelectedTab } from '$lib/stores/LayoutStore';
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
-	import Timeline from '../timeline/Timeline.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleSettings from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
-	import { fullScreenPreview, videoEditorSelectedTab } from '$lib/stores/LayoutStore';
+	import Timeline from '../timeline/Timeline.svelte';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-2-template">

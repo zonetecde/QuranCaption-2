@@ -1,4 +1,4 @@
-import { writeTextFile, readTextFile, removeFile, createDir } from '@tauri-apps/api/fs';
+import { createDir, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 
 // Chemin où les données seront stockées
 const STORAGE_PATH = 'localStorage/';

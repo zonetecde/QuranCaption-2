@@ -1,5 +1,5 @@
-import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/dialog';
+import { invoke } from '@tauri-apps/api/tauri';
 
 /**
  * Open a file dialog to select a file and read its content

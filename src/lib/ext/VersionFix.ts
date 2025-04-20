@@ -1,14 +1,13 @@
+import type Project from '$lib/models/Project';
 import type { ProjectDesc } from '$lib/models/Project';
-import toast from 'svelte-french-toast';
 import {
-	backupAllProjects,
 	doesProjectExist,
 	getProjectById,
 	getUserProjects,
 	restoreAllProjects,
 	updateUsersProjects
 } from '$lib/stores/ProjectStore';
-import type Project from '$lib/models/Project';
+import toast from 'svelte-french-toast';
 
 /**
  * From v2.8.0 to v2.9.0, the project system was changed.

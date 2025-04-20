@@ -8,9 +8,9 @@
 		endTimeReplacing,
 		isRemplacingAlreadyAddedSubtitles
 	} from '$lib/stores/LayoutStore';
+	import { open as openLink } from '@tauri-apps/api/shell';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
-	import { open as openLink } from '@tauri-apps/api/shell';
 
 	let verseNumber = 1;
 	let surahNumber = 1;

@@ -2,10 +2,7 @@
 	import Slider from '$lib/components/common/Slider.svelte';
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import type { SubtitleClip } from '$lib/models/Timeline';
-	import { currentlyCustomizedSubtitleId } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { onMount } from 'svelte';
-	import { derived } from 'svelte/store';
 
 	export let subtitle: SubtitleClip;
 	export let removeBorder = false;

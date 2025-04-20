@@ -2,11 +2,7 @@
 	import Slider from '$lib/components/common/Slider.svelte';
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { fullScreenPreview, showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
-	import {
-		currentProject,
-		hasAtLeastOneSubtitle,
-		updateUsersProjects
-	} from '$lib/stores/ProjectStore';
+	import { currentProject, hasAtLeastOneSubtitle } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import toast from 'svelte-french-toast';
 

@@ -52,10 +52,7 @@ export type Clip = {
  * @param removeLeadingZero If true, removes the leading zero from the string
  * @returns A tuple with the first string being the HH:MM:SS and the second string being the milliseconds
  */
-export function secondsToHHMMSS(
-	seconds: number,
-	removeLeadingZero = false
-): [string, string] {
+export function secondsToHHMMSS(seconds: number, removeLeadingZero = false): [string, string] {
 	if (seconds === undefined) return ['00:00', '00'];
 
 	if (seconds < 60) {

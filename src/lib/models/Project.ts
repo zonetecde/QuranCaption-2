@@ -1,9 +1,5 @@
-import { get } from 'svelte/store';
 import type Asset from './Asset';
 import type Timeline from './Timeline';
-import Id from '../ext/Id';
-import { cursorPosition, zoom } from '../stores/TimelineStore';
-import { currentProject } from '$lib/stores/ProjectStore';
 
 export type ProjectStatus =
 	| 'To caption'

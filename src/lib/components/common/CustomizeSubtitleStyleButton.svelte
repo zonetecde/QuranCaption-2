@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import {
-		currentProject,
 		hasSubtitleAtLeastOneStyle,
 		hasSubtitleDefaultIndividualSettings,
 		setDefaultIndividualSettingsForSubtitleId

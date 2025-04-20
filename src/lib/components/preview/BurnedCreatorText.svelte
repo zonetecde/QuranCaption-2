@@ -3,7 +3,6 @@
 	import { videoDimensions } from '$lib/stores/LayoutStore';
 
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { onDestroy, onMount } from 'svelte';
 
 	let subtitleTextSize = 1;
 

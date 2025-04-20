@@ -1,12 +1,11 @@
-import type Project from '$lib/models/Project';
-import { get, writable, type Writable } from 'svelte/store';
-import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
 import Id from '$lib/ext/Id';
-import type { ProjectDesc } from '$lib/models/Project';
-import { loadQuran, getSurahName, Mushaf } from './QuranStore';
-import toast from 'svelte-french-toast';
 import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 import { millisecondsToHHMMSS } from '$lib/functions/Formatter';
+import type Project from '$lib/models/Project';
+import type { ProjectDesc } from '$lib/models/Project';
+import { get, writable, type Writable } from 'svelte/store';
+import { getSurahName, Mushaf } from './QuranStore';
+import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
 
 export const currentProject: Writable<Project> = writable();
 

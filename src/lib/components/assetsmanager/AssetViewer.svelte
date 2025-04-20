@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
-	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
-	import Id from '$lib/ext/Id';
-	import { downloadFromYoutube, removeAsset } from '$lib/models/Asset';
-	import type Asset from '$lib/models/Asset';
-	import { open } from '@tauri-apps/api/dialog';
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
-	import RelocateAssetWarning from '../common/RelocateAssetWarning.svelte';
+	import Id from '$lib/ext/Id';
+	import type Asset from '$lib/models/Asset';
+	import { downloadFromYoutube, removeAsset } from '$lib/models/Asset';
+	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
+	import { open } from '@tauri-apps/api/dialog';
+	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import toast from 'svelte-french-toast';
+	import RelocateAssetWarning from '../common/RelocateAssetWarning.svelte';
 
 	export let asset: Asset;
 

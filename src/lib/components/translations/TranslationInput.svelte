@@ -1,25 +1,18 @@
 <script lang="ts">
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
-		audio,
-		currentlyEditedSubtitleId,
-		currentPage,
-		isFetchingIA,
 		onlyShowSubtitlesThatAreNotFullVerses,
-		onlyShowVersesWhoseTranslationsNeedReview,
-		playedSubtitleId,
-		setCurrentPage,
-		setSubtitleToEdit
+		onlyShowVersesWhoseTranslationsNeedReview
 	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { Mushaf, getEditionFromName } from '$lib/stores/QuranStore';
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getEditionFromName, Mushaf } from '$lib/stores/QuranStore';
 	import { onMount } from 'svelte';
+	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
 	import IndividualSubtitleSettings from '../subtitles/subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
-	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
-	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 
 	export let subtitle: SubtitleClip;
 	export let subtitleIndex: number;

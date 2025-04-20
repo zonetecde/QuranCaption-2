@@ -2,17 +2,15 @@
 	import { downloadFile } from '$lib/ext/Utilities';
 	import {
 		clearSubtitleToEdit,
-		currentlyEditedSubtitleId,
 		currentPage,
 		setCurrentPage,
 		videoSpeed
 	} from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import toast from 'svelte-french-toast';
 	import { open as openLink } from '@tauri-apps/api/shell';
-	import Toggle from '../common/Toggle.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
+	import toast from 'svelte-french-toast';
 
 	let pages: string[] = ['Video editor', 'Subtitles editor', 'Translations', 'Export'];
 	let enableAutoSave = true;

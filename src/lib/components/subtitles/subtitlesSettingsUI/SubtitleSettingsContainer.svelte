@@ -1,21 +1,16 @@
 <script lang="ts">
+	import { downloadFile } from '$lib/ext/Utilities';
+	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
+	import type { GlobalVideoSettings, SubtitleTrackSettings } from '$lib/models/Project';
+	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import { selectedSubtitlesLanguage } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import GlobalSubtitleSettings from './GlobalSubtitleSettings.svelte';
-	import LangSubtitleSettings from './LangSubtitleSettings.svelte';
 	import { editions, getEditionFromName } from '$lib/stores/QuranStore';
-	import { downloadFile } from '$lib/ext/Utilities';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
-	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import toast from 'svelte-french-toast';
+	import GlobalSubtitleSettings from './GlobalSubtitleSettings.svelte';
 	import IndividualSubtitleSettingsContainer from './IndividualSubtitleSettingsContainer.svelte';
-	import type {
-		GlobalVideoSettings,
-		IndividualSubtitleSettings,
-		ProjectSettings,
-		SubtitleTrackSettings
-	} from '$lib/models/Project';
-	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
+	import LangSubtitleSettings from './LangSubtitleSettings.svelte';
 
 	async function handleImportSettingsButtonClicked() {
 		// import subtitles settings

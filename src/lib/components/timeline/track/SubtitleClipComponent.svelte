@@ -1,27 +1,23 @@
 <script lang="ts">
-	import type { SubtitleClip } from '$lib/models/Timeline';
-	import { onMount } from 'svelte';
-	import { cursorPosition, scrollToCursor, zoom } from '$lib/stores/TimelineStore';
 	import { generateRandomBrightColorBasedOnSeed } from '$lib/ext/Color';
-	import { getVerse, Mushaf } from '$lib/stores/QuranStore';
-	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import toast from 'svelte-french-toast';
+	import type { SubtitleClip } from '$lib/models/Timeline';
 	import {
 		clearSubtitleToEdit,
 		currentlyCustomizedSubtitleId,
 		currentlyEditedSubtitleId,
 		currentPage,
 		selectedSubtitlesLanguage,
-		setCurrentPage,
 		setCurrentVideoTime,
 		setSubtitleToEdit,
 		videoEditorSelectedTab
 	} from '$lib/stores/LayoutStore';
-	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
-	import SubtitlesListItem from '$lib/components/subtitles/SubtitlesListItem.svelte';
-	import IndividualSubtitleSettings from '$lib/components/subtitles/subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
 	import { currentProject, hasSubtitleAtLeastOneStyle } from '$lib/stores/ProjectStore';
+	import { getVerse, Mushaf } from '$lib/stores/QuranStore';
+	import { cursorPosition, zoom } from '$lib/stores/TimelineStore';
+	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import { onMount } from 'svelte';
+	import ContextMenu, { Item } from 'svelte-contextmenu';
+	import toast from 'svelte-french-toast';
 
 	export let clip: SubtitleClip;
 	let color = '#7cce79';

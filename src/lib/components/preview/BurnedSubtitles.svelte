@@ -1,22 +1,16 @@
 <script lang="ts">
 	import type { SubtitleClip } from '$lib/models/Timeline';
 
+	import { latinNumberToArabic } from '$lib/functions/Arabic';
+	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import {
-		currentPage,
 		fullScreenPreview,
 		showSubtitlesPadding,
 		videoDimensions
 	} from '$lib/stores/LayoutStore';
-	import {
-		currentProject,
-		hasSubtitleAtLeastOneStyle,
-		hasSubtitleDefaultIndividualSettings
-	} from '$lib/stores/ProjectStore';
+	import { currentProject, hasSubtitleAtLeastOneStyle } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
-	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { latinNumberToArabic } from '$lib/functions/Arabic';
-	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 
 	export let currentSubtitle: SubtitleClip;
 	export let hideControls = false;

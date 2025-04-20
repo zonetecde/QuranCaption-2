@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { GITHUB_API_URL, GITHUB_DOWNLOAD_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
+	import { open as openLink } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
 	import SvelteMarkdown from 'svelte-markdown';
 	import { fade } from 'svelte/transition';
-	import { open as openLink } from '@tauri-apps/api/shell';
-	import { GITHUB_API_URL, GITHUB_DOWNLOAD_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
 
 	let newUpdateAvailable = false;
 	let newUpdateDescription = '';

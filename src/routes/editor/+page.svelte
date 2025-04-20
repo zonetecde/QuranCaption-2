@@ -4,16 +4,9 @@
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
-	import VideoPreview from '$lib/components/preview/VideoPreview.svelte';
-	import {
-		bestPerformance,
-		currentPage,
-		fullScreenPreview,
-		trimDialog
-	} from '$lib/stores/LayoutStore';
+	import { bestPerformance, currentPage, trimDialog } from '$lib/stores/LayoutStore';
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
-	import { editions } from '$lib/stores/QuranStore';
-	import { cursorPosition, zoom, scrollPosition } from '$lib/stores/TimelineStore';
+	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
 

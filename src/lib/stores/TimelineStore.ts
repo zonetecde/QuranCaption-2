@@ -1,7 +1,5 @@
-import type Asset from '$lib/models/Asset';
-import { get, writable, type Writable } from 'svelte/store';
-import { currentProject } from './ProjectStore';
 import type Timeline from '$lib/models/Timeline';
+import { writable, type Writable } from 'svelte/store';
 
 export const zoom: Writable<number> = writable(30); // 30 px per second
 export const cursorPosition: Writable<number> = writable(0); // in milliseconds, current moment in the timeline / video preview

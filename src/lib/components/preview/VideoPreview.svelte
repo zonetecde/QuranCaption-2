@@ -5,15 +5,14 @@
 	import {
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
-		scrollToCursor,
-		zoom
+		scrollToCursor
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
-	import BurnedSubtitles from './BurnedSubtitles.svelte';
-	import BackgroundOverlay from './BackgroundOverlay.svelte';
-	import ControlBar from './ControlBar.svelte';
+	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
+	import { getDisplayedVideoSize } from '$lib/functions/VideoPreviewCalc';
+	import { getAssetFromId } from '$lib/models/Asset';
 	import {
 		fullScreenPreview,
 		setCurrentVideoTime,
@@ -21,11 +20,11 @@
 		videoSpeed
 	} from '$lib/stores/LayoutStore';
 	import { onDestroy, onMount } from 'svelte';
-	import BurnedCreatorText from './BurnedCreatorText.svelte';
 	import { fade } from 'svelte/transition';
-	import { getAssetFromId } from '$lib/models/Asset';
-	import { getDisplayedVideoSize } from '$lib/functions/VideoPreviewCalc';
-	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
+	import BackgroundOverlay from './BackgroundOverlay.svelte';
+	import BurnedCreatorText from './BurnedCreatorText.svelte';
+	import BurnedSubtitles from './BurnedSubtitles.svelte';
+	import ControlBar from './ControlBar.svelte';
 
 	export let hideControls = false;
 

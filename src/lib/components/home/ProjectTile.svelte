@@ -2,7 +2,6 @@
 	import type { ProjectDesc } from '$lib/models/Project';
 	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { delProject, updateUserProjectsDesc } from '$lib/stores/ProjectStore';
-	import { onMount } from 'svelte';
 
 	const LANGUAGE_TO_COUNTRY = {
 		en: 'US', // English -> United States

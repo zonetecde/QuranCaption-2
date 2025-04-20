@@ -1,29 +1,25 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import toast from 'svelte-french-toast';
-	import {
-		backupAllProjects,
-		createBlankProject,
-		getUserProjects,
-		restoreAllProjects,
-		updateUsersProjects
-	} from '$lib/stores/ProjectStore';
-	import type Project from '$lib/models/Project';
+	import CreateProjectForm from '$lib/components/home/CreateProjectForm.svelte';
+	import NewUpdatePopUp from '$lib/components/home/NewUpdatePopUp.svelte';
+	import ProjectTile from '$lib/components/home/ProjectTile.svelte';
+	import SortMenu from '$lib/components/home/SortMenu.svelte';
 	import { GITHUB_REPO_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
 	import Id from '$lib/ext/Id';
-	import { allStatus, type ProjectDesc, type ProjectStatus } from '$lib/models/Project';
 	import {
 		addInformationsAboutProjectMigration,
 		newProjectSystemMigration
 	} from '$lib/ext/VersionFix';
-	import ProjectTile from '$lib/components/home/ProjectTile.svelte';
-	import NewUpdatePopUp from '$lib/components/home/NewUpdatePopUp.svelte';
-	import { open as openLink } from '@tauri-apps/api/shell';
-	import CreateProjectForm from '$lib/components/home/CreateProjectForm.svelte';
-	import { fade } from 'svelte/transition';
-	import SortMenu from '$lib/components/home/SortMenu.svelte';
-	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
 	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
+	import { type ProjectDesc } from '$lib/models/Project';
+	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
+	import {
+		backupAllProjects,
+		getUserProjects,
+		restoreAllProjects,
+		updateUsersProjects
+	} from '$lib/stores/ProjectStore';
+	import { open as openLink } from '@tauri-apps/api/shell';
+	import { onMount } from 'svelte';
 
 	let createProjectVisibility = false;
 	let userProjectsDesc: ProjectDesc[] = [];

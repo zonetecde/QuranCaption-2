@@ -1,11 +1,10 @@
 <script lang="ts">
+	import RelocateAssetWarning from '$lib/components/common/RelocateAssetWarning.svelte';
+	import { generateBlueColor, generatePinkColor } from '$lib/ext/Color';
 	import type Asset from '$lib/models/Asset';
 	import type { Clip, Track } from '$lib/models/Timeline';
-	import { generateBlueColor, generatePinkColor } from '$lib/ext/Color';
-	import { trimDialog } from '$lib/stores/LayoutStore';
 	import { zoom } from '$lib/stores/TimelineStore';
-	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
-	import RelocateAssetWarning from '$lib/components/common/RelocateAssetWarning.svelte';
+	import ContextMenu, { Item } from 'svelte-contextmenu';
 
 	export let asset: Asset;
 	export let track: Track;

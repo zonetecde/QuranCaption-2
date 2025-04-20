@@ -1,8 +1,3 @@
-import type Asset from '$lib/models/Asset';
-import type Project from '$lib/models/Project';
-import { currentProject } from '$lib/stores/ProjectStore';
-import { get } from 'svelte/store';
-
 export default class Id {
 	static generate() {
 		const s4 = () =>

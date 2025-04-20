@@ -1,6 +1,3 @@
-import { get } from 'svelte/store';
-import { Mushaf } from '../stores/QuranStore';
-
 export interface Surah {
 	id: number;
 	name: string;

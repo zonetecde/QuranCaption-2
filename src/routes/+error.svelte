@@ -1,6 +1,5 @@
 <script>
 	import { page } from '$app/stores';
-	import Page from './+page.svelte';
 </script>
 
 <div id="main">

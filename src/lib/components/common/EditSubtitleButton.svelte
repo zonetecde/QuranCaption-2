@@ -5,7 +5,6 @@
 		currentlyEditedSubtitleId,
 		setSubtitleToEdit
 	} from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
 	export let subtitle: SubtitleClip;
 </script>
 

@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import VideoPreview from '../preview/VideoPreview.svelte';
-	import Timeline from '../timeline/Timeline.svelte';
-	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { open as openLink } from '@tauri-apps/api/shell';
-	import { fullScreenPreview } from '$lib/stores/LayoutStore';
-	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
-	import { telemetry } from '$lib/ext/Utilities';
-	import toast from 'svelte-french-toast';
 	import { latinNumberToArabic } from '$lib/functions/Arabic';
 	import { millisecondsToSubtitlesTimeFormat } from '$lib/functions/Formatter';
+	import { fullScreenPreview } from '$lib/stores/LayoutStore';
+	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
+	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import { open as openLink } from '@tauri-apps/api/shell';
+	import { onMount } from 'svelte';
+	import toast from 'svelte-french-toast';
+	import VideoPreview from '../preview/VideoPreview.svelte';
+	import Timeline from '../timeline/Timeline.svelte';
 
 	let outputType: undefined | 'video' | 'subtitles' = undefined;
 

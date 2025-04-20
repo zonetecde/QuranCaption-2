@@ -3,7 +3,7 @@
 	import type { ProjectDesc } from '$lib/models/Project';
 	import { createBlankProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import toast from 'svelte-french-toast';
-	import { blur, fade } from 'svelte/transition';
+	import { blur } from 'svelte/transition';
 
 	let projectName = 'New Project';
 	let reciter = '';

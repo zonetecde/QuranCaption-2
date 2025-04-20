@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
-		clearSubtitleToEdit,
 		currentlyCustomizedSubtitleId,
 		currentlyEditedSubtitleId,
 		currentPage,
-		setCurrentVideoTime,
-		setSubtitleToEdit
+		setCurrentVideoTime
 	} from '$lib/stores/LayoutStore';
 	import {
 		currentProject,
@@ -16,11 +14,10 @@
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 	import { cursorPosition, scrollToCursor } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import toast from 'svelte-french-toast';
+	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
 	import IndividualSubtitleSettings from './subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
-	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
 
 	export let subtitle: SubtitleClip;
 	let leftClicked = false;

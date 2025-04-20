@@ -1,7 +1,6 @@
-import { get, writable, type Writable } from 'svelte/store';
-import { type Quran } from '$lib/models/Quran';
 import type { Edition } from '$lib/models/Edition';
-import type { SubtitleClip } from '$lib/models/Timeline';
+import { type Quran } from '$lib/models/Quran';
+import { get, writable, type Writable } from 'svelte/store';
 
 export const Mushaf: Writable<Quran> = writable();
 export const editions: Writable<Edition[]> = writable();
