@@ -134,7 +134,13 @@ export async function downloadTranslationForVerse(
 			// Ajout de la traduction dans le cache
 			caches.set(`${editionName}_${surah}_${verse}_${removeLatin}`, text);
 
-			return text;
+			// Comme c'est de l'OCR il y a certaines erreurs de ponctuation
+			return text
+				.replaceAll(' .', '.')
+				.replaceAll(' ,', ',')
+				.replaceAll(' ;', ';')
+				.replaceAll(' ]', ']')
+				.replaceAll('[ ', '[');
 		}
 
 		return 'No translation found';
