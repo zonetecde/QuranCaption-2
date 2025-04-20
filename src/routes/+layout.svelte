@@ -22,7 +22,6 @@
 		getFonts,
 		videoSpeed
 	} from '$lib/stores/LayoutStore';
-	import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
 
 	onMount(() => {

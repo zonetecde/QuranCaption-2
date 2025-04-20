@@ -1,6 +1,5 @@
 import type { ProjectDesc } from '$lib/models/Project';
 import toast from 'svelte-french-toast';
-import { importAndReadFile } from './Utilities';
 import {
 	backupAllProjects,
 	doesProjectExist,
