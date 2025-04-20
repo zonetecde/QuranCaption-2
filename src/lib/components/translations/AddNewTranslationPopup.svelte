@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
 	import { telemetry } from '$lib/ext/Utilities';
 	import type { Edition } from '$lib/models/Edition';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { downloadTranslationForVerse, editions } from '$lib/stores/QuranStore';
+	import { editions } from '$lib/stores/QuranStore';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 	import { fade } from 'svelte/transition';
@@ -71,8 +72,6 @@
 			toast.error('This translation is already added');
 			return;
 		}
-
-		telemetry('Translation added ' + selectedEditionName);
 
 		$currentProject.projectSettings.addedTranslations = [
 			...$currentProject.projectSettings.addedTranslations,

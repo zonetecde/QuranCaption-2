@@ -4,9 +4,9 @@ import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './Timeline
 import Id from '$lib/ext/Id';
 import type { ProjectDesc } from '$lib/models/Project';
 import { loadQuran, getSurahName, Mushaf } from './QuranStore';
-import { millisecondsToHHMMSS } from '$lib/ext/Utilities';
 import toast from 'svelte-french-toast';
 import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
+import { millisecondsToHHMMSS } from '$lib/functions/Formatter';
 
 export const currentProject: Writable<Project> = writable();
 

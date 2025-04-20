@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { downloadTranslationForVerse, getEditionFromName } from '$lib/stores/QuranStore';
+	import { getEditionFromName } from '$lib/stores/QuranStore';
 	//@ts-ignore
 	import { check_outros, group_outros, transition_out } from 'svelte/internal';
 	import AddNewTranslationPopup from '$lib/components/translations/AddNewTranslationPopup.svelte';
 	import { fade } from 'svelte/transition';
 	import type { Edition } from '$lib/models/Edition';
 	import toast from 'svelte-french-toast';
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
 
 	let selectedTranslation: Edition | undefined = undefined;
 

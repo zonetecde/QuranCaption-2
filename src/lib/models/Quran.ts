@@ -25,3 +25,8 @@ export interface Verse {
 export interface Quran {
 	surahs: Surah[];
 }
+
+interface Edition {
+	link: string;
+	comments?: string;
+}

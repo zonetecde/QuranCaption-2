@@ -13,20 +13,3 @@ export default class Id {
 		return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
 	}
 }
-
-export function getAssetFromId(id: string): Asset | undefined {
-	if (id === 'black-video') {
-		return {
-			fileName: 'black-video',
-			filePath: './black-vid.mp4',
-			type: 'video',
-			id: 'black-video',
-			duration: 7200000,
-			exist: true
-		};
-	}
-
-	const asset = get(currentProject).assets.find((a: Asset) => a.id === id);
-	if (asset) return asset;
-	return undefined;
-}

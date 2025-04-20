@@ -10,7 +10,6 @@
 	} from '$lib/stores/ProjectStore';
 	import type Project from '$lib/models/Project';
 	import { GITHUB_REPO_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
-	import { importAndReadFile, telemetry } from '$lib/ext/Utilities';
 	import Id from '$lib/ext/Id';
 	import { allStatus, type ProjectDesc, type ProjectStatus } from '$lib/models/Project';
 	import {
@@ -24,6 +23,7 @@
 	import { fade } from 'svelte/transition';
 	import SortMenu from '$lib/components/home/SortMenu.svelte';
 	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
+	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
 
 	let createProjectVisibility = false;
 	let userProjectsDesc: ProjectDesc[] = [];

@@ -5,7 +5,6 @@
 	import { onMount } from 'svelte';
 
 	import TranslationsCreatorHeader from './TranslationsCreatorHeader.svelte';
-	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
 	import TranslationInput from './TranslationInput.svelte';
 </script>
 

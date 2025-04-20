@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getAssetFromId } from '$lib/ext/Id';
+	import { getAssetFromId } from '$lib/models/Asset';
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { audio, playedSubtitleId } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';

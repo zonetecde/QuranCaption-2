@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { secondsToHHMMSS, type SubtitleClip } from '$lib/models/Timeline';
-	import { getAssetFromId } from '$lib/ext/Id';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
 	import {
@@ -15,7 +14,6 @@
 	import BurnedSubtitles from './BurnedSubtitles.svelte';
 	import BackgroundOverlay from './BackgroundOverlay.svelte';
 	import ControlBar from './ControlBar.svelte';
-	import { getDisplayedVideoSize, reajustCursorPosition } from '$lib/ext/Utilities';
 	import {
 		fullScreenPreview,
 		setCurrentVideoTime,
@@ -25,6 +23,9 @@
 	import { onDestroy, onMount } from 'svelte';
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
 	import { fade } from 'svelte/transition';
+	import { getAssetFromId } from '$lib/models/Asset';
+	import { getDisplayedVideoSize } from '$lib/functions/VideoPreviewCalc';
+	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
 
 	export let hideControls = false;
 
@@ -208,7 +209,7 @@
 		const interval = setInterval(() => {
 			if ($isPreviewPlaying && (videoComponent || audioComponent)) {
 				// Réajuste la position du curseur pour éviter des problèmes de sync
-				reajustCursorPosition(true);
+				readjustCursorPosition(true);
 
 				scrollToCursor();
 

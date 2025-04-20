@@ -2,6 +2,7 @@ import { getFileNameFromPath, getFileType } from '$lib/ext/File';
 import Id from '$lib/ext/Id';
 import { currentProject } from '$lib/stores/ProjectStore';
 import { invoke } from '@tauri-apps/api';
+import { get } from 'svelte/store';
 
 export default interface Asset {
 	fileName: string;
@@ -121,4 +122,21 @@ export function removeAsset(id: string) {
 
 		return v;
 	});
+}
+
+export function getAssetFromId(id: string): Asset | undefined {
+	if (id === 'black-video') {
+		return {
+			fileName: 'black-video',
+			filePath: './black-vid.mp4',
+			type: 'video',
+			id: 'black-video',
+			duration: 7200000,
+			exist: true
+		};
+	}
+
+	const asset = get(currentProject).assets.find((a: Asset) => a.id === id);
+	if (asset) return asset;
+	return undefined;
 }

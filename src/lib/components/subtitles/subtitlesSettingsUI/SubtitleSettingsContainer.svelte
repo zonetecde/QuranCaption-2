@@ -4,7 +4,7 @@
 	import GlobalSubtitleSettings from './GlobalSubtitleSettings.svelte';
 	import LangSubtitleSettings from './LangSubtitleSettings.svelte';
 	import { editions, getEditionFromName } from '$lib/stores/QuranStore';
-	import { downloadFile, importAndReadFile } from '$lib/ext/Utilities';
+	import { downloadFile } from '$lib/ext/Utilities';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import toast from 'svelte-french-toast';
@@ -15,6 +15,7 @@
 		ProjectSettings,
 		SubtitleTrackSettings
 	} from '$lib/models/Project';
+	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
 
 	async function handleImportSettingsButtonClicked() {
 		// import subtitles settings

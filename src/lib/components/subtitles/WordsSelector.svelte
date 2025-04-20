@@ -5,17 +5,11 @@
 		hasSubtitleAtLeastOneStyle,
 		hasSubtitleDefaultIndividualSettings
 	} from '$lib/stores/ProjectStore';
-	import {
-		Mushaf,
-		getNumberOfVerses,
-		getVerse,
-		getWordByWordTranslation
-	} from '$lib/stores/QuranStore';
+	import { Mushaf, getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
-	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
-	import { reajustCursorPosition } from '$lib/ext/Utilities';
+
 	import {
 		beginTimeReplacing,
 		clearBeginAndEndTimeReplacing,
@@ -27,6 +21,9 @@
 		showWordByWordTranslation,
 		showWordByWordTransliteration
 	} from '$lib/stores/LayoutStore';
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getWordByWordTranslation } from '$lib/functions/Wbw';
+	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
@@ -318,7 +315,7 @@
 			else currentTimeMs = $cursorPosition;
 		}
 
-		reajustCursorPosition(false);
+		readjustCursorPosition(false);
 		return currentTimeMs;
 	}
 

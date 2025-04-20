@@ -2,9 +2,9 @@
 	import type { SubtitleTrack, Track } from '$lib/models/Timeline';
 	import LeftPart from './LeftPart.svelte';
 	import { zoom } from '$lib/stores/TimelineStore';
-	import { getAssetFromId } from '$lib/ext/Id';
 	import ClipComponent from './ClipComponent.svelte';
 	import SubtitleClipComponent from './SubtitleClipComponent.svelte';
+	import { getAssetFromId } from '$lib/models/Asset';
 
 	export let track: Track | SubtitleTrack;
 </script>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getAssetFromId } from '$lib/ext/Id';
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
 		audio,
@@ -13,16 +12,14 @@
 		setSubtitleToEdit
 	} from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { Mushaf, getEditionFromName, getWordByWordTranslation } from '$lib/stores/QuranStore';
-	import { downloadTranslationForVerse } from '$lib/stores/QuranStore';
-	import { text } from '@sveltejs/kit';
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { Mushaf, getEditionFromName } from '$lib/stores/QuranStore';
+	import { downloadTranslationForVerse } from '$lib/functions/Translation';
 	import { onMount } from 'svelte';
-	import toast from 'svelte-french-toast';
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
 	import IndividualSubtitleSettings from '../subtitles/subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
 	import CustomizeSubtitleStyleButton from '../common/CustomizeSubtitleStyleButton.svelte';
+	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 
 	export let subtitle: SubtitleClip;
 	export let subtitleIndex: number;

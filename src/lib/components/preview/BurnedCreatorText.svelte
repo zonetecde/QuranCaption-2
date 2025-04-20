@@ -1,5 +1,5 @@
 <script>
-	import { calculateFontSize } from '$lib/ext/Utilities';
+	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import { videoDimensions } from '$lib/stores/LayoutStore';
 
 	import { currentProject } from '$lib/stores/ProjectStore';

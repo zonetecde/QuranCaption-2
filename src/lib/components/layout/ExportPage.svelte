@@ -6,12 +6,10 @@
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import { fullScreenPreview } from '$lib/stores/LayoutStore';
 	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
-	import {
-		latinNumberToArabic,
-		millisecondsToSubtitlesTimeFormat,
-		telemetry
-	} from '$lib/ext/Utilities';
+	import { telemetry } from '$lib/ext/Utilities';
 	import toast from 'svelte-french-toast';
+	import { latinNumberToArabic } from '$lib/functions/Arabic';
+	import { millisecondsToSubtitlesTimeFormat } from '$lib/functions/Formatter';
 
 	let outputType: undefined | 'video' | 'subtitles' = undefined;
 
@@ -21,8 +19,6 @@
 
 	onMount(async () => {
 		document.onkeydown = onKeyDown;
-
-		await telemetry('Export Page Clicked');
 	});
 
 	function onKeyDown(key: any) {
