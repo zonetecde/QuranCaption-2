@@ -140,7 +140,9 @@ export async function downloadTranslationForVerse(
 				.replaceAll(' ,', ',')
 				.replaceAll(' ;', ';')
 				.replaceAll(' ]', ']')
-				.replaceAll('[ ', '[');
+				.replaceAll('[ ', '[')
+				.replaceAll(' )', ')')
+				.replaceAll('( ', '(');
 		}
 
 		return 'No translation found';
