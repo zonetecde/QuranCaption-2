@@ -3,13 +3,13 @@
 	import NewUpdatePopUp from '$lib/components/home/NewUpdatePopUp.svelte';
 	import ProjectTile from '$lib/components/home/ProjectTile.svelte';
 	import SortMenu from '$lib/components/home/SortMenu.svelte';
+	import { importAndReadFile } from '$lib/ext/File';
 	import { GITHUB_REPO_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
 	import Id from '$lib/ext/Id';
 	import {
 		addInformationsAboutProjectMigration,
 		newProjectSystemMigration
 	} from '$lib/ext/VersionFix';
-	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
 	import { type ProjectDesc } from '$lib/models/Project';
 	import { onlyShowThosesWithStatus, sortDirection, sortType } from '$lib/stores/LayoutStore';
 	import {

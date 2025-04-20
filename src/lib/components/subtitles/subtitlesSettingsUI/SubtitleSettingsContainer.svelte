@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { importAndReadFile } from '$lib/ext/File';
 	import { downloadFile } from '$lib/ext/Utilities';
-	import { importAndReadFile } from '$lib/functions/FileDialogHelper';
 	import type { GlobalVideoSettings, SubtitleTrackSettings } from '$lib/models/Project';
 	import { milisecondsToMMSS } from '$lib/models/Timeline';
 	import { selectedSubtitlesLanguage } from '$lib/stores/LayoutStore';

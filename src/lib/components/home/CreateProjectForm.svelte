@@ -26,10 +26,7 @@
 		userProjectsDesc = await updateUsersProjects(project); // Save the project to the local storage
 
 		await telemetry(
-			'A Quran Caption project has been created.\nProject name : ' +
-				projectName +
-				'\nReciter : ' +
-				reciter
+			'A Quran Caption project has been created | Name : ' + projectName + ' | Reciter : ' + reciter
 		);
 
 		openProject(project.id); // Open the project
