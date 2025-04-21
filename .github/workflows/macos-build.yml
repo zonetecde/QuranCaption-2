@@ -104,7 +104,7 @@ jobs:
         run: npm install
 
       - name: Build the app
-        run: npm run tauri build
+        run: DEBUG=tauri:bundler npm run tauri build
 
       - name: Upload macOS artifact
         if: matrix.os == 'macos-latest'
