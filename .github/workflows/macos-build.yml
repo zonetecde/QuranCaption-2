@@ -32,8 +32,6 @@ jobs:
         run: |
           brew install ffmpeg
           brew install p7zip
-          rm -rf src-tauri/binaries/* 
-          mkdir -p src-tauri/binaries
 
       - name: Download yt-dlp (macos)
         if: matrix.os == 'macos-latest' # Removed Linux condition
@@ -49,7 +47,7 @@ jobs:
           chmod +x yt-dlp.exe
           mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
 
-      - name: Download and extract ffprobe (Linux)
+      - name: Download and extract ffprobe (macos)
         if: matrix.os == 'macos-latest'
         run: |
           curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
@@ -63,8 +61,9 @@ jobs:
         run: |
           choco install ffmpeg -y
 
-      # FFprobe extraction for Windows and macOS
+      # FFprobe extraction for Windows
       - name: Download and extract ffprobe.exe
+        if: matrix.os == 'windows-latest'
         run: |
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
