@@ -33,6 +33,13 @@ jobs:
           brew install ffmpeg
           brew install p7zip
 
+      - name: Download yt-dlp
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        run: |
+          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp_linux
+          chmod +x yt-dlp
+          mv yt-dlp src-tauri/yt-dlp
+
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -58,6 +65,15 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/jammy-temp.list
           sudo rm -f /etc/apt/preferences.d/jammy-temp-pref
           sudo apt-get update
+
+      - name: Download and extract ffprobe (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p src-tauri
+          curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+          tar -xf ffmpeg.tar.xz
+          cp ffmpeg-*/ffprobe src-tauri/ffprobe
+          chmod +x src-tauri/ffprobe
 
       # Windows setup
       - name: Install dependencies (Windows)
