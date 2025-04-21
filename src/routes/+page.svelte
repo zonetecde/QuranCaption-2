@@ -20,6 +20,7 @@
 	} from '$lib/stores/ProjectStore';
 	import { open as openLink } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
+	import toast from 'svelte-french-toast';
 
 	let createProjectVisibility = false;
 	let userProjectsDesc: ProjectDesc[] = [];
@@ -48,6 +49,20 @@
 			'floating-chat.donateButton.background-color': '#794bc4',
 			'floating-chat.donateButton.text-color': '#fff'
 		});
+
+		// Show update infos popup
+		if (!localStorage.getItem(SOFTWARE_VERSION)) {
+			localStorage.setItem(SOFTWARE_VERSION, 'true');
+
+			toast(
+				'Join our new Discord server to get help, report bugs, or suggest new features!\n(Link at the bottom of the page)',
+				{
+					duration: 15000,
+					position: 'top-center',
+					icon: 'ℹ️'
+				}
+			);
+		}
 	});
 
 	/**
@@ -272,6 +287,13 @@
 			on:click={() => {
 				openLink('https://ko-fi.com/vzero');
 			}}>Make a donation</button
+		>
+		•
+		<button
+			class="text-blue-300"
+			on:click={() => {
+				openLink('https://discord.gg/Hxfqq2QA2J');
+			}}>Join the Discord</button
 		>
 		•
 		{SOFTWARE_VERSION.replace('v', 'Version ')}
