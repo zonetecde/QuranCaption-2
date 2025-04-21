@@ -85,7 +85,7 @@ jobs:
           name: 'Quran Caption MacOS.app'
           path: src-tauri/target/release/bundle/**/Quran Caption.app
 
-      - name: Upload Windows installer
+      - name: Upload Windows Installer (MacOS)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
