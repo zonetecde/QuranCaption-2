@@ -18,13 +18,13 @@ jobs:
       # Installe 7zip pour pouvoir extraire les .7z
       - name: Install p7zip
         run: brew install p7zip
-      # Télécharger le build essentials et n’extraire que ffprobe.exe
+
       - name: Download and extract ffprobe.exe
         run: |
           mkdir -p src-tauri
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
-          # -e pour extraire sans structure de dossier, filtrer le chemin vers bin\ffprobe.exe
-          7z e ffmpeg.7z "*\bin\ffprobe.exe" -o src-tauri -y
+          # -e pour extraire sans arborescence, on filtre le chemin vers bin\ffprobe.exe
+          7z e ffmpeg.7z "*\bin\ffprobe.exe" -osrc-tauri -y
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
