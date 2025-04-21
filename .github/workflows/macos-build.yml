@@ -59,7 +59,6 @@ jobs:
       - name: Download and extract ffprobe.exe
         if: matrix.os != 'ubuntu-latest'
         run: |
-          mkdir -p src-tauri
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri
 
