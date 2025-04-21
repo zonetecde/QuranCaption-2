@@ -199,12 +199,6 @@
 							>
 								Export as YouTube chapters
 							</button>
-							<button
-								class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded ml-2"
-								on:click={() => openLink('https://qurancaption-project.vercel.app/documentation')}
-							>
-								Open the online documentation
-							</button>
 						</div>
 
 						<h1 class="mt-10 text-center text-xl font-bold">
@@ -220,12 +214,20 @@
 							</span>
 						</h1>
 
-						<p class="mt-20">
-							Need some help ? Take a look to the online <a
+						<p class="mt-20 text-center">
+							Need help? Check out the online <a
 								href="https://qurancaption-project.vercel.app/documentation"
 								target="_blank"
 								class="text-blue-400">documentation</a
-							> !
+							>
+							or join the
+							<button
+								class="text-blue-300"
+								on:click={() => {
+									openLink('https://discord.gg/Hxfqq2QA2J');
+								}}>Discord server</button
+							>
+							to ask your questions!
 						</p>
 					</section>
 				{:else if outputType === 'video'}
