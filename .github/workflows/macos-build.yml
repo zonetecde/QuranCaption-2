@@ -20,6 +20,9 @@ jobs:
         with:
           toolchain: stable
           override: true
+      - name: Patch time crate
+        working-directory: src-tauri
+        run: cargo update -p time --precise 0.3.35
       - name: Install app dependencies
         run: npm install
       - name: Build the app
