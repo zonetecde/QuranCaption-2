@@ -22,4 +22,4 @@ You can download the latest version of Quran Caption here : [Releases](https://g
 
 ### Note for the developers:
 
-When you git clone the repo, don't forget to add [ffprobe.exe](https://www.ffmpeg.org/download.html) to the `src-tauri/binaries` folder.
+When you git clone the repo, don't forget to add [ffprobe.exe](https://www.ffmpeg.org/download.html) and [yt-dlp.exe](https://github.com/yt-dlp/yt-dlp/releases) to the `src-tauri/binaries` folder to be able to run the app.
