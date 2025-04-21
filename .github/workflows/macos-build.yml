@@ -1,4 +1,4 @@
-name: Build macOS App
+name: Build Tauri Apps
 
 on:
   push:
@@ -7,41 +7,71 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      # Installe 7zip pour pouvoir extraire les .7z
-      - name: Install p7zip
-        run: brew install p7zip
-
-      - name: Download and extract ffprobe.exe
-        run: |
-          mkdir -p src-tauri
-          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
-          # 1) Lister pour vérifier le chemin interne
-          7z l ffmpeg.7z
-          # 2) Extraire uniquement ffprobe.exe (forward-slashes !)
-          7z e ffmpeg.7z '*/bin/ffprobe.exe' -osrc-tauri -y
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
+
+      - name: Install OS-specific dependencies
+        run: |
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            brew install ffmpeg p7zip
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg p7zip-full
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            choco install ffmpeg p7zip -y
+          fi
+
+      - name: Download and extract ffprobe.exe
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir -p src-tauri
+          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
+          7z l ffmpeg.7z
+          7z e ffmpeg.7z '*/bin/ffprobe.exe' -osrc-tauri -y
+
       - name: Patch time crate
         working-directory: src-tauri
         run: cargo update -p time --precise 0.3.35
+
       - name: Install app dependencies
         run: npm install
+
       - name: Build the app
         run: npm run tauri build
-      - name: Upload artifact
+
+      - name: Upload macOS artifact
+        if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: macos-app
-          path: src-tauri/target/release/bundle
+          name: 'Quran Caption MacOs.app'
+          path: src-tauri/target/release/bundle/Quran\ Caption.app
+
+      - name: Upload Windows artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'Quran Caption Windows.exe'
+          path: src-tauri/target/release/bundle/Quran\ Caption.exe
+
+      - name: Upload Linux artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'Quran Caption Linux.AppImage'
+          path: src-tauri/target/release/bundle/Quran\ Caption.AppImage
