@@ -82,12 +82,12 @@ jobs:
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: 'Quran Caption MacOS.app'
+          name: 'Quran Caption (MacOS)'
           path: src-tauri/target/release/bundle/**/Quran Caption.app
 
       - name: Upload Windows Installer (MacOS)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: 'Quran Caption Installer (Windows)'
+          name: 'Quran Caption (Windows)'
           path: src-tauri/target/release/bundle/nsis/Quran Caption_*_x64-setup.exe
