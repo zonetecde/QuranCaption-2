@@ -26,16 +26,21 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Install OS-specific dependencies
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
         run: |
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            brew install ffmpeg p7zip
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg p7zip-full
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            choco install ffmpeg p7zip -y
-          fi
+          brew install ffmpeg p7zip
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg p7zip-full
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install ffmpeg p7zip -y
 
       - name: Download and extract ffprobe.exe
         if: matrix.os == 'windows-latest'
@@ -60,18 +65,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: 'Quran Caption MacOs.app'
-          path: src-tauri/target/release/bundle/Quran\ Caption.app
+          path: src-tauri/target/release/bundle/**/Quran Caption.app
 
       - name: Upload Windows artifact
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: 'Quran Caption Windows.exe'
-          path: src-tauri/target/release/bundle/Quran\ Caption.exe
+          path: src-tauri/target/release/bundle/**/Quran Caption.exe
 
       - name: Upload Linux artifact
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: 'Quran Caption Linux.AppImage'
-          path: src-tauri/target/release/bundle/Quran\ Caption.AppImage
+          path: src-tauri/target/release/bundle/**/Quran Caption.AppImage
