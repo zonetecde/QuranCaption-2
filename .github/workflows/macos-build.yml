@@ -59,7 +59,11 @@ jobs:
             libsoup2.4-dev \
             libjavascriptcoregtk-4.0-dev \
             libwebkit2gtk-4.0-dev \
-            pkg-config
+            pkg-config \
+            libfuse-dev \
+            patchelf \
+            xorriso \
+            appimaged
 
           # Cleanup
           sudo rm -f /etc/apt/sources.list.d/jammy-temp.list
