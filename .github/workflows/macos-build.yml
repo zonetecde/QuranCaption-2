@@ -33,13 +33,16 @@ jobs:
           brew install ffmpeg
           brew install p7zip
 
-      # Linux setup (updated for Ubuntu 24.04 Noble)
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y software-properties-common
-          sudo add-apt-repository universe
+
+          # Temporary Jammy repo setup
+          sudo sh -c "echo 'deb http://archive.ubuntu.com/ubuntu jammy main' > /etc/apt/sources.list.d/jammy-temp.list"
+          sudo sh -c "echo 'Package: *\nPin: release n=noble\nPin-Priority: 500\n\nPackage: libwebkit2gtk-4.0-dev\nPin: release n=jammy\nPin-Priority: 1000' > /etc/apt/preferences.d/jammy-temp-pref"
+
           sudo apt-get update
           sudo apt-get install -y \
             ffmpeg \
@@ -50,6 +53,11 @@ jobs:
             libjavascriptcoregtk-4.0-dev \
             libwebkit2gtk-4.0-dev \
             pkg-config
+
+          # Cleanup
+          sudo rm -f /etc/apt/sources.list.d/jammy-temp.list
+          sudo rm -f /etc/apt/preferences.d/jammy-temp-pref
+          sudo apt-get update
 
       # Windows setup
       - name: Install dependencies (Windows)
