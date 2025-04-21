@@ -88,6 +88,14 @@ jobs:
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri
 
+      # FFprobe.exe extraction for Linux (even if it's Linux, .exe is expected by build script)
+      - name: Download and extract ffprobe.exe (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get install -y p7zip-full
+          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
+          7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri
+
       - name: Patch time crate
         working-directory: src-tauri
         run: cargo update -p time --precise 0.3.35
