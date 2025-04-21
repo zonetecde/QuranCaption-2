@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          choco install ffmpeg p7zip -y
+          choco install ffmpeg 7zip -y
 
       - name: Download and extract ffprobe.exe
         if: matrix.os == 'windows-latest'
