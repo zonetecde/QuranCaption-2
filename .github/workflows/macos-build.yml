@@ -23,8 +23,11 @@ jobs:
         run: |
           mkdir -p src-tauri
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
-          # -e pour extraire sans arborescence, on filtre le chemin vers bin\ffprobe.exe
-          7z e ffmpeg.7z "*\bin\ffprobe.exe" -osrc-tauri -y
+          # 1) Lister pour vérifier le chemin interne
+          7z l ffmpeg.7z
+          # 2) Extraire uniquement ffprobe.exe (forward-slashes !)
+          7z e ffmpeg.7z '*/bin/ffprobe.exe' -osrc-tauri -y
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
