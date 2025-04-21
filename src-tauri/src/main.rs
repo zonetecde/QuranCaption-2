@@ -26,7 +26,7 @@ fn get_video_duration(path: String) -> Result<i32, String> {
 
 
   // get video duration
-  let output = Command::new("./ffprobe")
+  let output = Command::new("./binaries/ffprobe")
     .arg("-v")
     .arg("error")
     .arg("-show_entries")
@@ -90,7 +90,7 @@ async fn download_youtube_video(format: String, url: String, path: String) -> bo
     args.push(&path);
     args.push(&url);
 
-    let output = Command::new("./yt-dlp")
+    let output = Command::new("./binaries/yt-dlp")
         .args(&args)
         .output();
 

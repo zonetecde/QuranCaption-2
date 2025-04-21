@@ -38,16 +38,15 @@ jobs:
         run: |
           curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp_linux
           chmod +x yt-dlp
-          mv yt-dlp src-tauri/yt-dlp
+          mv yt-dlp src-tauri/binariesyt-dlp
 
       - name: Download and extract ffprobe (Linux)
         if: matrix.os == 'macos-latest'
         run: |
-          mkdir -p src-tauri
           curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
           tar -xf ffmpeg.tar.xz
-          cp ffmpeg-*/ffprobe src-tauri/ffprobe
-          chmod +x src-tauri/ffprobe
+          cp ffmpeg-*/ffprobe src-tauri/binaries/ffprobe
+          chmod +x src-tauri/binaries/ffprobe
 
       # Windows setup
       - name: Install dependencies (Windows)
@@ -59,7 +58,7 @@ jobs:
       - name: Download and extract ffprobe.exe
         run: |
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
-          7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri
+          7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
 
       - name: Patch time crate
         working-directory: src-tauri

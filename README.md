@@ -20,7 +20,6 @@ You can download the latest version of Quran Caption here : [Releases](https://g
 
 ![image](https://github.com/zonetecde/QuranCaption-2/assets/56195432/1d51e292-e97f-4816-b497-4242ba153909)
 
-
 ### Note for the developers:
 
-When you git clone the repo, don't forget to add [ffprobe.exe](https://www.ffmpeg.org/download.html) to the `src-tauri` folder.
+When you git clone the repo, don't forget to add [ffprobe.exe](https://www.ffmpeg.org/download.html) to the `src-tauri/binaries` folder.
