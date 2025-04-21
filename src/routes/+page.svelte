@@ -6,6 +6,7 @@
 	import { importAndReadFile } from '$lib/ext/File';
 	import { GITHUB_REPO_LINK, SOFTWARE_VERSION } from '$lib/ext/GlobalVariables';
 	import Id from '$lib/ext/Id';
+	import { telemetry } from '$lib/ext/Utilities';
 	import {
 		addInformationsAboutProjectMigration,
 		newProjectSystemMigration
@@ -53,7 +54,7 @@
 		// Show update infos popup
 		if (!localStorage.getItem(SOFTWARE_VERSION)) {
 			localStorage.setItem(SOFTWARE_VERSION, 'true');
-
+			await telemetry('A user has installed version ' + SOFTWARE_VERSION + ' of the application.');
 			toast(
 				'Join our new Discord server to get help, report bugs, or suggest new features!\n(Link at the bottom of the page)',
 				{
