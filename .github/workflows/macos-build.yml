@@ -26,11 +26,14 @@ jobs:
           toolchain: stable
           override: true
 
+      # macOS setup
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          brew install ffmpeg p7zip
+          brew install ffmpeg
+          brew install p7zip
 
+      # Linux setup
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -42,16 +45,31 @@ jobs:
             libglib2.0-dev \
             pkg-config
 
+      # Windows setup
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          choco install ffmpeg 7zip -y
+          choco install ffmpeg -y
+          # p7zip n'est plus disponible sur Chocolatey, on l'ignore
 
-      - name: Download and extract ffprobe.exe
+      # Download and extract ffprobe.exe (Windows only)
+      - name: Download and extract ffprobe.exe (Windows)
         if: matrix.os == 'windows-latest'
         run: |
+          mkdir -p src-tauri
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z l ffmpeg.7z
+          7z e ffmpeg.7z '*/bin/ffprobe.exe' -osrc-tauri -y
+
+      # Download and extract ffprobe.exe (macOS)
+      - name: Download and extract ffprobe.exe (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p src-tauri
+          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
+          # 1) Lister pour vérifier le chemin interne
+          7z l ffmpeg.7z
+          # 2) Extraire uniquement ffprobe.exe (forward-slashes !)
           7z e ffmpeg.7z '*/bin/ffprobe.exe' -osrc-tauri -y
 
       - name: Patch time crate
