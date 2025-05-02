@@ -118,6 +118,68 @@
 	/>
 </div>
 
+<div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">
+	<h1 class="text-lg font-bold mb-2">Surah name</h1>
+
+	<section class="flex flex-col gap-2">
+		<Toggle
+			text="Display Surah Name"
+			bind:checked={
+				$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable
+			}
+		/>
+		<section class="flex flex-col gap-2">
+			<Toggle
+				text="Display Surah Name in Latin"
+				bind:checked={
+					$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.showLatin
+				}
+			/>
+			{#if $currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.showLatin}
+				<div class="flex">
+					<p>Text:</p>
+					<input
+						type="text"
+						class="ml-1 bg-transparent w-20 border border-slate-500 rounded-lg text-sm px-1"
+						bind:value={
+							$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
+								.latinTextBeforeSurahName
+						}
+					/>
+				</div>
+			{/if}
+		</section>
+	</section>
+
+	<Slider
+		title="Vertical Position"
+		min={-10}
+		max={100}
+		step={0.5}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition
+		}
+	/>
+
+	<Slider
+		title="Opacity"
+		min={0}
+		max={1}
+		step={0.01}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.opacity
+		}
+	/>
+
+	<Slider
+		title="Size"
+		min={0.2}
+		max={3}
+		step={0.1}
+		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size}
+	/>
+</div>
+
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
 	<h1 class="text-lg font-bold mb-2">Creator Text</h1>
 
@@ -188,8 +250,9 @@
 		min={-100}
 		max={100}
 		step={1}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.creatorText
-			.verticalPosition}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition
+		}
 	/>
 </div>
 
@@ -207,8 +270,9 @@
 		min={0.5}
 		max={500}
 		step={0.5}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton
-			.startTime}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.startTime
+		}
 	/>
 
 	<label for="font-family" class="mt-2 flex items-center"

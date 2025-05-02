@@ -92,6 +92,14 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				startTime: 3,
 				position: 'BC'
 			},
+			surahNameSettings: {
+				enable: false,
+				size: 1,
+				opacity: 0.8,
+				verticalPosition: 10,
+				showLatin: true,
+				latinTextBeforeSurahName: 'Surah'
+			},
 			creatorText: {
 				outline: true,
 				enable: true,

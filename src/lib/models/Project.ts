@@ -82,6 +82,19 @@ export interface GlobalVideoSettings {
 	globalGlowEffect: boolean;
 	globalGlowColor: string;
 	globalGlowRadius: number;
+	surahNameSettings: SurahNameSettings;
+}
+
+/**
+ * Represents the settings of the surah name.
+ */
+export interface SurahNameSettings {
+	enable: boolean;
+	size: number;
+	verticalPosition: number;
+	opacity: number;
+	showLatin: boolean;
+	latinTextBeforeSurahName: string;
 }
 
 /**

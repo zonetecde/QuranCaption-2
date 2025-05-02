@@ -25,6 +25,7 @@
 	import BurnedCreatorText from './BurnedCreatorText.svelte';
 	import BurnedSubtitles from './BurnedSubtitles.svelte';
 	import ControlBar from './ControlBar.svelte';
+	import BurnedSurahName from './BurnedSurahName.svelte';
 
 	export let hideControls = false;
 
@@ -287,6 +288,12 @@
 			{/each}
 
 			<BurnedCreatorText />
+
+			<BurnedSurahName
+				bind:currentSubtitle
+				surahNameSettings={$currentProject.projectSettings.globalSubtitlesSettings
+					.surahNameSettings}
+			/>
 
 			{#if subscribeButtonSettings && subscribeButtonSettings.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
 				<img
