@@ -289,11 +289,7 @@
 
 			<BurnedCreatorText />
 
-			<BurnedSurahName
-				bind:currentSubtitle
-				surahNameSettings={$currentProject.projectSettings.globalSubtitlesSettings
-					.surahNameSettings}
-			/>
+			<BurnedSurahName bind:currentSubtitle />
 
 			{#if subscribeButtonSettings && subscribeButtonSettings.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
 				<img
@@ -301,13 +297,13 @@
 					alt="Subscribe"
 					class="absolute opacity-50"
 					style={subscribeButtonSettings.position === 'TL'
-						? 'top: 3rem; left: 3rem;'
+						? 'top: 3rem; left: 7rem;'
 						: subscribeButtonSettings.position === 'TR'
-							? 'top: 3rem; right: 3rem;'
+							? 'top: 3rem; right: 7rem;'
 							: subscribeButtonSettings.position === 'BL'
-								? 'bottom: 3rem; left: 3rem;'
+								? 'bottom: 3rem; left: 7rem;'
 								: subscribeButtonSettings.position === 'BR'
-									? 'bottom: 3rem; right: 3rem;'
+									? 'bottom: 3rem; right: 7rem;'
 									: subscribeButtonSettings.position === 'TC'
 										? 'top: 3rem; left: 50%; transform: translateX(-50%);'
 										: 'bottom: 1.5rem; left: 50%; transform: translateX(-50%);'}

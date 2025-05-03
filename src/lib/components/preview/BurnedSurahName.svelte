@@ -9,10 +9,24 @@
 	import { fade } from 'svelte/transition';
 
 	export let currentSubtitle: SubtitleClip;
-	export let surahNameSettings: SurahNameSettings;
+	$: surahNameSettings = $currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings;
 
 	$: if (currentSubtitle && currentSubtitle.surah !== -1) {
 		latestSurah.set(currentSubtitle.surah);
+	} else if (currentSubtitle && currentSubtitle.surah === -1) {
+		// cherche la dernière sourate dans le projet juste apres currentsubtitle.start
+		const surah = $currentProject.timeline.subtitlesTracks[0].clips.find((subtitle) => {
+			return (
+				subtitle.start > currentSubtitle.start &&
+				subtitle.surah !== -1 &&
+				subtitle.surah !== undefined
+			);
+		});
+		if (surah) {
+			latestSurah.set(surah.surah);
+		} else {
+			latestSurah.set(-1);
+		}
 	}
 </script>
 
@@ -29,8 +43,8 @@
 
 	{#if surahNameSettings.enable && $latestSurah !== -1}
 		<div
-			class="absolute left-1/2 -translate-x-1/2"
 			transition:fade
+			class="absolute left-1/2 -translate-x-1/2"
 			style={`--tw-scale-x: ${surahNameSettings.size}; --tw-scale-y: ${surahNameSettings.size}; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); width: ${$videoDimensions.width}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 		>
 			<div
@@ -45,7 +59,7 @@
 						style="filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);"
 					/>
 
-					{#if surahNameSettings.showLatin}
+					{#if surahNameSettings.showLatin && $Mushaf}
 						<p
 							class="text-white ml-2"
 							style="font-family: {$currentProject.projectSettings.globalSubtitlesSettings

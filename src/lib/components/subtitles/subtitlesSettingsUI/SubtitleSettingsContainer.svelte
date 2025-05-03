@@ -75,6 +75,16 @@
 				globalSubtitlesSettings.globalGlowColor = '#ffffff';
 				globalSubtitlesSettings.globalGlowRadius = 12;
 			}
+			if (globalSubtitlesSettings.surahNameSettings === undefined) {
+				globalSubtitlesSettings.surahNameSettings = {
+					enable: false,
+					size: 1,
+					opacity: 0.8,
+					verticalPosition: 10,
+					showLatin: true,
+					latinTextBeforeSurahName: 'Surah'
+				};
+			}
 
 			$currentProject.projectSettings.globalSubtitlesSettings = globalSubtitlesSettings;
 		}
