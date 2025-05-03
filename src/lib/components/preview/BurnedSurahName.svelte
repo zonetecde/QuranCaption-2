@@ -41,7 +41,7 @@
 		$videoDimensions.width *
 		($currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding / 100)}
 
-	{#if surahNameSettings.enable && $latestSurah !== -1}
+	{#if surahNameSettings.enable && $latestSurah && $latestSurah !== -1}
 		<div
 			transition:fade
 			class="absolute left-1/2 -translate-x-1/2"
