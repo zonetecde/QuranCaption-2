@@ -170,10 +170,10 @@
 			$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.opacity
 		}
 	/>
-
+	<!-- TODO -->
 	<Slider
 		title="Size"
-		min={0.2}
+		min={0.05}
 		max={3}
 		step={0.1}
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size}

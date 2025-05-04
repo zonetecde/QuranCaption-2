@@ -38,6 +38,7 @@
 		await newProjectSystemMigration();
 
 		userProjectsDesc = await getUserProjects();
+		console.log(userProjectsDesc);
 
 		if (await addInformationsAboutProjectMigration(userProjectsDesc))
 			// Add informations about the projects (% captioned, duration, etc)
@@ -220,7 +221,7 @@
 				{#if userProjectsDesc.length > 0}
 					{#each sortedProjects as project}
 						{#if searchText === '' || checkSearchText(project, searchText)}
-							<ProjectTile {project} bind:userProjectsDesc {openProject} />
+							<ProjectTile bind:project bind:userProjectsDesc {openProject} />
 						{/if}
 					{/each}
 				{:else}

@@ -240,7 +240,7 @@ export async function updateUsersProjects(
 	} else {
 		projects[index] = {
 			id: project.id,
-			name: project.name,
+			name: projects[index].name,
 			updatedAt: isInMigrationMode ? projects[index].updatedAt : new Date(),
 			percentageCaptioned: getProjectPercentageCaptioned(project),
 			percentageTranslated: getProjectPercentageTranslated(project),

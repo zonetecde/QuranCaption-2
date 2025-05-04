@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import type { SurahNameSettings } from '$lib/models/Project';
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { videoDimensions } from '$lib/stores/LayoutStore';
@@ -10,6 +11,8 @@
 
 	export let currentSubtitle: SubtitleClip;
 	$: surahNameSettings = $currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings;
+
+	$: $videoDimensions, calculateSubtitleTextSize();
 
 	$: if (currentSubtitle && currentSubtitle.surah !== -1) {
 		latestSurah.set(currentSubtitle.surah);
@@ -28,6 +31,18 @@
 			latestSurah.set(-1);
 		}
 	}
+
+	let size = 1;
+
+	function calculateSubtitleTextSize() {
+		// Calcul la taille de la police pour les sous-titres
+		size =
+			calculateFontSize(
+				$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size
+			) * 0.1;
+
+		console.log(size);
+	}
 </script>
 
 {#if currentSubtitle && $latestSurah !== -1}
@@ -45,7 +60,7 @@
 		<div
 			transition:fade
 			class="absolute left-1/2 -translate-x-1/2"
-			style={`--tw-scale-x: ${surahNameSettings.size}; --tw-scale-y: ${surahNameSettings.size}; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); width: ${$videoDimensions.width}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
+			style={`--tw-scale-x: ${size}; --tw-scale-y: ${size}; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); width: ${$videoDimensions.width}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 		>
 			<div
 				class="flex items-center justify-center h-full"
