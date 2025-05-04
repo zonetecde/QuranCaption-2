@@ -93,7 +93,7 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				position: 'BC'
 			},
 			surahNameSettings: {
-				enable: false,
+				enable: true,
 				size: 1,
 				opacity: 0.8,
 				verticalPosition: 10,
