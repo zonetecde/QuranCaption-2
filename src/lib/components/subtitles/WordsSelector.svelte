@@ -7,7 +7,7 @@
 	import toast from 'svelte-french-toast';
 
 	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getVerseTranslation } from '$lib/functions/Translation';
 	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 	import {
 		beginTimeReplacing,
@@ -377,7 +377,7 @@
 			$currentProject.projectSettings.addedTranslations.map(async (translation: string) => {
 				let translationText = isNotVerse
 					? ''
-					: await downloadTranslationForVerse(translation, surahNumber, verseNumber);
+					: await getVerseTranslation(translation, surahNumber, verseNumber);
 
 				translations[translation] = translationText;
 			})

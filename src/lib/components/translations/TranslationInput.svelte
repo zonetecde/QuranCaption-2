@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getVerseTranslation } from '$lib/functions/Translation';
 	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 	import { milisecondsToMMSS, type SubtitleClip } from '$lib/models/Timeline';
 	import {
@@ -66,7 +66,7 @@
 
 	async function handleResetTranslation(translation: string) {
 		// @ts-ignore
-		subtitle.translations[translation] = await downloadTranslationForVerse(
+		subtitle.translations[translation] = await getVerseTranslation(
 			translation,
 			subtitle.surah,
 			subtitle.verse
@@ -86,7 +86,7 @@
 				element.surah === subtitle.surah &&
 				!element.hadItTranslationEverBeenModified
 			) {
-				element.translations[translation] = await downloadTranslationForVerse(
+				element.translations[translation] = await getVerseTranslation(
 					translation,
 					element.surah,
 					element.verse
@@ -146,7 +146,7 @@
 
 					// Else, check if the translation has not been modified for this verse to avoid overwriting it
 					if (
-						(await downloadTranslationForVerse(translationId, element.surah, element.verse)) ===
+						(await getVerseTranslation(translationId, element.surah, element.verse)) ===
 						element.translations[translationId]
 					) {
 						if (

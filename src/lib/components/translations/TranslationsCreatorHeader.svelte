@@ -1,6 +1,6 @@
 <script lang="ts">
 	import AddNewTranslationPopup from '$lib/components/translations/AddNewTranslationPopup.svelte';
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getVerseTranslation } from '$lib/functions/Translation';
 	import type { Edition } from '$lib/models/Edition';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
@@ -45,7 +45,7 @@
 
 		await Promise.all(
 			$currentProject.timeline.subtitlesTracks[0].clips.map(async (subtitleClip) => {
-				subtitleClip.translations[name] = await downloadTranslationForVerse(
+				subtitleClip.translations[name] = await getVerseTranslation(
 					name,
 					subtitleClip.surah,
 					subtitleClip.verse

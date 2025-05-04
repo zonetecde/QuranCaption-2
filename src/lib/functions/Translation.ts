@@ -15,7 +15,7 @@ const NO_TRANSLATION = 'No translation found';
  * @param editionName The name of the edition
  * @returns The translation or 'No translation found' if not found
  */
-export async function downloadTranslationForVerse(
+export async function getVerseTranslation(
 	editionName: string,
 	surah: number,
 	verse: number,
@@ -107,7 +107,7 @@ async function handleFailedResponse(
 	removeLatin: boolean
 ): Promise<string> {
 	if (removeLatin) {
-		return downloadTranslationForVerse(editionName, surah, verse, false);
+		return getVerseTranslation(editionName, surah, verse, false);
 	}
 	return NO_TRANSLATION;
 }

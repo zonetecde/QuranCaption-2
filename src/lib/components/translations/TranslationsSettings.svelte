@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { fetchTranslationsFromGpt } from '$lib/functions/AutomaticTranslationsUsingAI';
+	import { getVerseTranslation } from '$lib/functions/Translation';
 	import {
 		onlyShowSubtitlesThatAreNotFullVerses,
 		onlyShowVersesWhoseTranslationsNeedReview
@@ -100,7 +101,7 @@
 
 													if (
 														subtitle.translations[translation] !== translationText &&
-														(await downloadTranslationForVerse(
+														(await getVerseTranslation(
 															translationId,
 															subtitle.surah,
 															subtitle.verse
@@ -134,96 +135,7 @@
 	}
 
 	let languageCodeToTranslate = '';
-	async function fetchTranslationsFromGpt() {
-		if (languageCodeToTranslate === '') {
-			toast.error('Please enter a language code.');
-			return;
-		}
-
-		const urlBase =
-			'https://rayanestaszewski.fr/gpt-translation?verseKey=@1&verseExtract=@2&verseTranslation=@3';
-
-		// Création du dictionnaire
-		const verses: Record<string, { verseExtract: string; subtitleId: string }[]> = {};
-
-		// Utiliser for...of au lieu de .map() pour les async
-		for (const subtitle of $currentProject.timeline.subtitlesTracks[0].clips) {
-			if (
-				subtitle.isSilence ||
-				subtitle.isCustomText ||
-				subtitle.hadItTranslationEverBeenModified ||
-				(subtitle.firstWordIndexInVerse === 0 && subtitle.isLastWordInVerse) ||
-				subtitle.verse === -1 ||
-				subtitle.surah === -1
-			)
-				continue;
-
-			const verseKey = `${subtitle.surah}:${subtitle.verse}`;
-
-			if (!verses[verseKey]) {
-				verses[verseKey] = [];
-			}
-
-			verses[verseKey].push({
-				verseExtract: subtitle.text,
-				subtitleId: subtitle.id
-			});
-		}
-
-		// Traiter les traductions une par une
-		for (const translation of $currentProject.projectSettings.addedTranslations) {
-			if (!translation.includes(languageCodeToTranslate)) continue;
-
-			for (const [verseKey, verseExtracts] of Object.entries(verses)) {
-				toast('Translation of verse ' + verseKey + ' is being processed...', {
-					duration: 1000,
-					icon: '🔍'
-				});
-
-				try {
-					const verseTranslation = await fetch(
-						urlBase
-							.replace('@1', verseKey)
-							.replace('@2', JSON.stringify(verseExtracts.map((e) => e.verseExtract)))
-							.replace(
-								'@3',
-								await downloadTranslationForVerse(
-									translation,
-									Number(verseKey.split(':')[0]),
-									Number(verseKey.split(':')[1])
-								)
-							)
-					).then((r) => r.json());
-
-					const tabTrans = JSON.parse(verseTranslation).translations;
-
-					// Mise à jour directe avec find()
-					for (const [index, extract] of verseExtracts.entries()) {
-						const subtitle = $currentProject.timeline.subtitlesTracks[0].clips.find(
-							(s) => s.id === extract.subtitleId
-						);
-
-						if (subtitle && tabTrans[index]) {
-							subtitle.translations[translation] = tabTrans[index];
-							subtitle.hadItTranslationEverBeenModified = true;
-						}
-					}
-				} catch (error) {
-					console.error('Error processing verse:', verseKey, error);
-				}
-
-				// Force update
-				$currentProject.timeline.subtitlesTracks[0].clips = [
-					...$currentProject.timeline.subtitlesTracks[0].clips
-				];
-
-				// attend 3 secondes
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-			}
-		}
-
-		toast.success('All translations fetched from AI.');
-	}
+	let processButton: HTMLButtonElement;
 </script>
 
 <div class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll">
@@ -303,26 +215,34 @@
 			}}>Fetch translations from other projects</button
 		>
 	</abbr>
+
+	<p class="text-center">-- Experimental Section --</p>
+
+	<p class="text-sm italic text-justify">
+		This will prompt the AI to translate partial verses when they are incomplete. The AI will
+		normally not invent anything, but will simply trim the existing translation you've provided to
+		match the correct portion.<br /> You must first add a translation to the project, enter its
+		language code, and then click the button below.<br /> Please double-check the translations after
+		using this feature. This is EXPERIMENTAL. I am not responsible for any mistakes.
+	</p>
+
 	<abbr
 		title="This will ask an AI to translate the verses of the current project for you."
-		class="hidden experimental"
+		class="experimental"
 	>
 		<button
-			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a] w-full"
+			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a] w-full border-b-0 rounded-b-none"
 			id="fetch-translations-button"
+			bind:this={processButton}
 			on:click={() => {
-				fetchTranslationsFromGpt();
+				fetchTranslationsFromGpt(processButton, languageCodeToTranslate);
 			}}>Automatic Translation using AI</button
 		>
 		<input
 			type="text"
-			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a] w-full px-2"
-			placeholder="Language code (e.g. fr, en, ar)"
+			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a] w-full px-2 border-t-0 rounded-t-none"
+			placeholder="Enter language code (e.g. fr, en, ar)"
 			bind:value={languageCodeToTranslate}
 		/>
-		<p class=" no-underline">
-			Please double check the translations after using this feature. This is EXPERIMENTAL. I am not
-			responsible for any mistakes.
-		</p>
 	</abbr>
 </div>

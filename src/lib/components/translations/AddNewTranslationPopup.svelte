@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { downloadTranslationForVerse } from '$lib/functions/Translation';
+	import { getVerseTranslation } from '$lib/functions/Translation';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
 	import { createEventDispatcher } from 'svelte';
@@ -28,7 +28,7 @@
 				if (element.verse === -1 || element.surah === -1) return; // Skip if it's not a verse (silence, basmala, etc.
 
 				// Download the translation for the verse
-				let translation = await downloadTranslationForVerse(
+				let translation = await getVerseTranslation(
 					selectedEditionName,
 					element.surah,
 					element.verse
