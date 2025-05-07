@@ -68,15 +68,15 @@
 			>
 				<div class="text-center flex flex-col" style={`font-size: px;`}>
 					<img
-						class="h-16"
-						src={`https://al-islam.org/images/surah-names-black/b-surah-${$latestSurah.toString()}.png`}
+						class=""
+						src={`https://cdn.amrayn.com/qimages-c/1${$latestSurah.toString()}.svg`}
 						alt="Surah Name"
-						style="filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);"
+						style="filter: invert(100%) brightness(200%) contrast(100%);"
 					/>
 
 					{#if surahNameSettings.showLatin && $Mushaf}
 						<p
-							class="text-white ml-2"
+							class="text-white -mt-7 ml-2"
 							style="font-family: {$currentProject.projectSettings.globalSubtitlesSettings
 								.creatorText.fontFamily};"
 						>

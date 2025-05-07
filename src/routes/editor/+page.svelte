@@ -50,7 +50,7 @@
 		if (project.projectSettings.globalSubtitlesSettings.surahNameSettings === undefined) {
 			project.projectSettings.globalSubtitlesSettings.surahNameSettings = {
 				enable: false,
-				size: 1,
+				size: 30,
 				opacity: 0.8,
 				verticalPosition: 10,
 				showLatin: true,
@@ -113,8 +113,7 @@
 		--c1: #171717;
 		--c2: #191919;
 
-		--_g:
-			var(--c1) 0% 5%, var(--c2) 6% 15%, var(--c1) 16% 25%, var(--c2) 26% 35%, var(--c1) 36% 45%,
+		--_g: var(--c1) 0% 5%, var(--c2) 6% 15%, var(--c1) 16% 25%, var(--c2) 26% 35%, var(--c1) 36% 45%,
 			var(--c2) 46% 55%, var(--c1) 56% 65%, var(--c2) 66% 75%, var(--c1) 76% 85%, var(--c2) 86% 95%,
 			#0000 96%;
 
