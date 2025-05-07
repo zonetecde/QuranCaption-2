@@ -179,7 +179,7 @@
 			for (let i = verse.firstWordInVerse + 1; i <= verse.lastWordInVerse + 1; i++) {
 				const key = `${verse.surahNumber}:${verse.verseNumber}:${i}`;
 				if (qpcv2Quran[key]) {
-					str += qpcv2Quran[key].text + ' ';
+					str += qpcv2Quran[key].text + ' ';
 				} else {
 					console.warn(`Missing key in QPC V2 JSON: ${key}`);
 				}
