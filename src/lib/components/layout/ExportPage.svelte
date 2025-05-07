@@ -15,6 +15,21 @@
 	let selectedTranslations: string[] = [];
 	let translationsWithVerseNumber: string[] = [];
 	let exportFileType: 'srt' | 'vtt' | 'json' = 'srt';
+	let useQPCV2Format = false;
+	let qpcv2Quran: any = undefined;
+
+	$: if (useQPCV2Format && qpcv2Quran === undefined) {
+		// Load the json file containing the QPC V2 format
+		fetch('/quran/QPC_V2.json').then((response) => {
+			if (response.ok) {
+				response.json().then((data) => {
+					qpcv2Quran = data;
+				});
+			} else {
+				toast.error('Error loading the QPC V2 format file.');
+			}
+		});
+	}
 
 	onMount(async () => {
 		document.onkeydown = onKeyDown;
@@ -68,13 +83,15 @@
 				let i = 1;
 
 				verses.forEach((verse) => {
-					if (verse.isEmpty) return;
+					if (verse.isEmpty || verse.firstWordInVerse === -1 || verse.lastWordInVerse === -1)
+						return;
 
 					contentFile += `${i}\n`;
 					contentFile += `${millisecondsToSubtitlesTimeFormat(verse.start)} --> ${millisecondsToSubtitlesTimeFormat(verse.end)}\n`;
 
-					if (selectedTranslations.includes('Arabic'))
-						contentFile += `${verse.arabicText} ${translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse ? latinNumberToArabic(verse.verseNumber.toString()) : ''}\n`;
+					if (selectedTranslations.includes('Arabic')) {
+						contentFile += getArabicText(verse);
+					}
 
 					for (let key in verse.translations) {
 						if (selectedTranslations.includes(key))
@@ -97,8 +114,7 @@
 					contentFile += `${index}\n`;
 					contentFile += `${millisecondsToSubtitlesTimeFormat(verse.start)}.000 --> ${millisecondsToSubtitlesTimeFormat(verse.end)}.000\n`;
 
-					if (selectedTranslations.includes('Arabic'))
-						contentFile += `${verse.arabicText} ${translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse ? latinNumberToArabic(verse.verseNumber.toString()) : ''}\n`;
+					if (selectedTranslations.includes('Arabic')) contentFile += getArabicText(verse);
 
 					for (let key in verse.translations) {
 						if (selectedTranslations.includes(key))
@@ -127,11 +143,7 @@
 						};
 
 						if (selectedTranslations.includes('Arabic')) {
-							verseContent.text =
-								verse.arabicText +
-								(translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse
-									? ' ' + latinNumberToArabic(verse.verseNumber.toString())
-									: '');
+							verseContent.text = getArabicText(verse).trim();
 						}
 
 						for (let key in verse.translations) {
@@ -157,6 +169,34 @@
 		element.download = $currentProject.name + '_subtitles.' + exportFileType.toLowerCase();
 		document.body.appendChild(element);
 		element.click();
+	}
+
+	function getArabicText(verse: any) {
+		let contentFile = '';
+		console.log('Type de useQPCV2Format : ' + typeof useQPCV2Format);
+		if (useQPCV2Format) {
+			let str: string = '';
+			for (let i = verse.firstWordInVerse + 1; i <= verse.lastWordInVerse + 1; i++) {
+				const key = `${verse.surahNumber}:${verse.verseNumber}:${i}`;
+				if (qpcv2Quran[key]) {
+					str += qpcv2Quran[key].text;
+				} else {
+					console.warn(`Missing key in QPC V2 JSON: ${key}`);
+				}
+			}
+
+			if (translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse) {
+				str +=
+					qpcv2Quran[
+						verse.surahNumber + ':' + verse.verseNumber + ':' + (verse.lastWordInVerse + 1)
+					].text;
+			}
+
+			contentFile += `${str}\n`;
+		} else {
+			contentFile += `${verse.arabicText} ${translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse ? latinNumberToArabic(verse.verseNumber.toString()) : ''}\n`;
+		}
+		return contentFile;
 	}
 </script>
 
@@ -296,7 +336,7 @@
 						<p class="mt-6">Choose what you want to include in your file :</p>
 
 						<div>
-							{#each ['Arabic', ...$currentProject.projectSettings.addedTranslations] as translation}
+							{#each ['Arabic', ...$currentProject.projectSettings.addedTranslations] as translation, i}
 								<label class="flex items-center mt-2 border-y border-gray-500">
 									<div>
 										<label class="ml-2"
@@ -318,6 +358,17 @@
 										>
 									</div>
 									<div class="ml-auto">
+										{#if translation === 'Arabic'}
+											<label class="mr-3"
+												><input
+													type="checkbox"
+													class="form-checkbox"
+													disabled={!selectedTranslations.includes(translation)}
+													bind:checked={useQPCV2Format}
+												/>
+												Use QPC V2 format
+											</label>
+										{/if}
 										<label class=""
 											><input
 												type="checkbox"
