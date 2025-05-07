@@ -188,7 +188,7 @@
 			if (translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse) {
 				str +=
 					qpcv2Quran[
-						verse.surahNumber + ':' + verse.verseNumber + ':' + (verse.lastWordInVerse + 1)
+						verse.surahNumber + ':' + verse.verseNumber + ':' + (verse.lastWordInVerse + 2)
 					].text;
 			}
 
