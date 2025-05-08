@@ -40,7 +40,6 @@
 	function onSurahChange(event: any) {
 		if (event.target.options[event.target.selectedIndex].innerText === 'Add poems, mutūn, ...') {
 			addOtherTextsPopupVisibility.set(true);
-			return;
 		}
 
 		verseNumber = 1;
