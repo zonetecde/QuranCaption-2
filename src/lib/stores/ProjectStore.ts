@@ -94,7 +94,7 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			},
 			surahNameSettings: {
 				enable: true,
-				size: 30,
+				size: 75,
 				opacity: 0.8,
 				verticalPosition: 10,
 				showLatin: true,

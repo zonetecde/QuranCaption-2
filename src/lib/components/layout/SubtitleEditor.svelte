@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { addOtherTextsPopupVisibility } from '$lib/stores/LayoutStore';
 	import VideoPreview from '../preview/VideoPreview.svelte';
+	import AddOtherTextsPopup from '../subtitles/AddOtherTextsPopup.svelte';
 	import SubtitleEditor from '../subtitles/SubtitleEditor.svelte';
 	import SubtitlesEditorSettings from '../subtitles/SubtitlesEditorSettings.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';
@@ -37,6 +39,10 @@
 		</div>
 	</section>
 </div>
+
+{#if $addOtherTextsPopupVisibility}
+	<AddOtherTextsPopup />
+{/if}
 
 <style>
 	@media (min-width: 1280px) {

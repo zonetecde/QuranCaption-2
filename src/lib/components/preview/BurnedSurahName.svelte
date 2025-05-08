@@ -68,7 +68,7 @@
 			>
 				<div class="text-center flex flex-col" style={`font-size: px;`}>
 					<img
-						class=""
+						class="size-[100px]"
 						src={`https://cdn.amrayn.com/qimages-c/${$latestSurah.toString()}.svg`}
 						alt="Surah Name"
 						style="filter: invert(100%) brightness(200%) contrast(100%);"
@@ -76,7 +76,7 @@
 
 					{#if surahNameSettings.showLatin && $Mushaf}
 						<p
-							class="text-white -mt-7 ml-2"
+							class="text-white -mt-9 text-[10px]"
 							style="font-family: {$currentProject.projectSettings.globalSubtitlesSettings
 								.creatorText.fontFamily};"
 						>
