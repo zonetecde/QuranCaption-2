@@ -78,7 +78,7 @@
 			if (globalSubtitlesSettings.surahNameSettings === undefined) {
 				globalSubtitlesSettings.surahNameSettings = {
 					enable: false,
-					size: 30,
+					size: 75,
 					opacity: 0.8,
 					verticalPosition: 10,
 					showLatin: true,

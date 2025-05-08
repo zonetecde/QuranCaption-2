@@ -40,6 +40,7 @@ export const currentlyEditedSubtitleId: Writable<string | undefined> = writable(
 export const isRemplacingAlreadyAddedSubtitles: Writable<boolean> = writable(false); // Indique si on est en train de remplacer des sous-titres déjà ajoutés
 export const beginTimeReplacing: Writable<number | undefined> = writable(undefined); // Le temps de début de la zone de remplacement
 export const endTimeReplacing: Writable<number | undefined> = writable(undefined); // Le temps de fin de la zone de remplacement
+export const addOtherTextsPopupVisibility: Writable<boolean> = writable(false); // Indique si le popup pour ajouter d'autres textes est visible
 
 endTimeReplacing.subscribe((endTime) => {
 	if (endTime) {

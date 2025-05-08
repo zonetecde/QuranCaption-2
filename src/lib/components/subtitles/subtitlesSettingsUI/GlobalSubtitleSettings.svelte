@@ -167,9 +167,9 @@
 	<!-- TODO -->
 	<Slider
 		title="Size"
-		min={0.001}
-		max={75}
-		step={0.1}
+		min={10}
+		max={100}
+		step={1}
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size}
 	/>
 </div>

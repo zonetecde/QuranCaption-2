@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { addOtherTextsPopupVisibility } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';
 	import { onMount } from 'svelte';
@@ -37,6 +38,11 @@
 	});
 
 	function onSurahChange(event: any) {
+		if (event.target.options[event.target.selectedIndex].innerText === 'Add poems, mutūn, ...') {
+			addOtherTextsPopupVisibility.set(true);
+			return;
+		}
+
 		verseNumber = 1;
 		verseNumberInInput = 1;
 		surahNumber = parseInt(event.target.value);
@@ -51,6 +57,8 @@
 		class="bg-white bg-opacity-15 w-[200px] ml-auto ox-2 outline-none"
 		on:change={onSurahChange}
 	>
+		<option class="bg-gray-800" value="1" selected={1 === surahNumber}>Add poems, mutūn, ...</option
+		>
 		{#each $Mushaf.surahs as surah}
 			<option class="bg-gray-800" selected={surah.id === surahNumber} value={surah.id}
 				>{surah.id}. {surah.transliteration}</option
@@ -61,6 +69,7 @@
 	<input
 		type="number"
 		class="bg-white bg-opacity-15 w-[65px] px-2 outline-none"
+		disabled={surahNumber === 0}
 		min="1"
 		max={$Mushaf.surahs[surahNumber - 1].total_verses}
 		bind:value={verseNumberInInput}

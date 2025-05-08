@@ -50,7 +50,7 @@
 		if (project.projectSettings.globalSubtitlesSettings.surahNameSettings === undefined) {
 			project.projectSettings.globalSubtitlesSettings.surahNameSettings = {
 				enable: false,
-				size: 30,
+				size: 75,
 				opacity: 0.8,
 				verticalPosition: 10,
 				showLatin: true,
