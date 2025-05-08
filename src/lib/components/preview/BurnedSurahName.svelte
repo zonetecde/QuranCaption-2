@@ -69,7 +69,7 @@
 				<div class="text-center flex flex-col" style={`font-size: px;`}>
 					<img
 						class=""
-						src={`https://cdn.amrayn.com/qimages-c/1${$latestSurah.toString()}.svg`}
+						src={`https://cdn.amrayn.com/qimages-c/${$latestSurah.toString()}.svg`}
 						alt="Surah Name"
 						style="filter: invert(100%) brightness(200%) contrast(100%);"
 					/>
