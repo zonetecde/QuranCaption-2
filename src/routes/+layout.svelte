@@ -15,6 +15,7 @@
 	import { onMount } from 'svelte';
 	import toast, { Toaster } from 'svelte-french-toast';
 	import '../app.css';
+	import { loadOtherTexts } from '$lib/stores/OtherTextsStore';
 
 	onMount(() => {
 		// Créer le dossier pour le localStorage si il n'existe pas
@@ -110,6 +111,7 @@
 		};
 
 		loadQuran();
+		loadOtherTexts();
 		getEditions();
 		getFonts();
 	});

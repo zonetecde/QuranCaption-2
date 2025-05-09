@@ -9,7 +9,8 @@ export interface Surah {
 
 export enum Type {
 	Meccan = 'meccan',
-	Medinan = 'medinan'
+	Medinan = 'medinan',
+	OtherText = 'other_text'
 }
 
 export interface Verse {

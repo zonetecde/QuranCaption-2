@@ -38,13 +38,15 @@
 	});
 
 	function onSurahChange(event: any) {
-		if (event.target.options[event.target.selectedIndex].innerText === 'Add poems, mutūn, ...') {
+		const isOtherText =
+			event.target.options[event.target.selectedIndex].innerText === 'Add poems, mutūn, ...';
+		if (isOtherText) {
 			addOtherTextsPopupVisibility.set(true);
 		}
 
 		verseNumber = 1;
 		verseNumberInInput = 1;
-		surahNumber = parseInt(event.target.value);
+		surahNumber = isOtherText ? 1 : parseInt(event.target.value);
 
 		// remove focus for up and down arrow keys
 		event.target.blur();

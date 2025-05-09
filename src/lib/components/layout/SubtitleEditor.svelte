@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { addOtherTextsPopupVisibility } from '$lib/stores/LayoutStore';
+	import AddOtherTextsPopup from '../othertexts/AddOtherTextsPopup.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
-	import AddOtherTextsPopup from '../subtitles/AddOtherTextsPopup.svelte';
 	import SubtitleEditor from '../subtitles/SubtitleEditor.svelte';
 	import SubtitlesEditorSettings from '../subtitles/SubtitlesEditorSettings.svelte';
 	import SubtitlesList from '../subtitles/SubtitlesList.svelte';

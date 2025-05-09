@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '$lib/stores/OtherTextsStore';
 	import Header from '$lib/components/header/Header.svelte';
 	import ExportPage from '$lib/components/layout/ExportPage.svelte';
 	import SubtitleEditor from '$lib/components/layout/SubtitleEditor.svelte';
