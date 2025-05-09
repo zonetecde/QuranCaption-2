@@ -241,6 +241,15 @@
 							</button>
 						</div>
 
+						<button
+							class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded mt-4"
+							on:click={() => {
+								fullScreenPreview.set(true);
+							}}
+						>
+							Enter fullscreen
+						</button>
+
 						<h1 class="mt-10 text-center text-xl font-bold">
 							Thank you for using Quran Caption !<br /><span class="text-base font-sans">
 								You can make a donation by clicking

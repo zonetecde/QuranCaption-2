@@ -20,13 +20,17 @@ fn get_file_content(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn get_video_duration(path: String) -> Result<i32, String> {
+fn get_video_duration(path: String, app_handle: tauri::AppHandle) -> Result<i32, String> {
     // wait for the file to be not used by another process
     std::thread::sleep(std::time::Duration::from_secs(1));
 
+    let path_resolver = app_handle.path_resolver();
 
+ // Attempt to resolve the path to the bundled 'ffprobe' binary
+ match path_resolver.resolve_resource("binaries/ffprobe") {
+    Some(ffprobe_path) => {
   // get video duration
-  let output = Command::new("./binaries/ffprobe")
+  let output = Command::new(ffprobe_path)
     .arg("-v")
     .arg("error")
     .arg("-show_entries")
@@ -45,6 +49,12 @@ fn get_video_duration(path: String) -> Result<i32, String> {
   // to ms
   let duration = duration * 1000.0;
   Ok(duration as i32)
+    },
+    None => {
+        // Handle the case where the path could not be resolved
+        Err("Failed to resolve ffprobe path".to_string())
+    }
+  }
 }
 
 #[tauri::command]
@@ -69,7 +79,7 @@ async fn do_file_exist(path: String) -> bool {
 }
 
 #[tauri::command]
-async fn download_youtube_video(format: String, url: String, path: String) -> bool {
+async fn download_youtube_video(format: String, url: String, path: String, app_handle: tauri::AppHandle) -> bool {
     let format_flag = match format.as_str() {
         "webm" => {
             // Specify constant bitrate for WebM audio (example: 192kbps)
@@ -90,7 +100,13 @@ async fn download_youtube_video(format: String, url: String, path: String) -> bo
     args.push(&path);
     args.push(&url);
 
-    let output = Command::new("./binaries/yt-dlp")
+    let path_resolver = app_handle.path_resolver();
+
+    // Attempt to resolve the path to the bundled 'ffprobe' binary
+    match path_resolver.resolve_resource("binaries/yt-dlp") {
+       Some(ytdlp_path) => {
+
+    let output = Command::new(ytdlp_path)
         .args(&args)
         .output();
 
@@ -105,4 +121,11 @@ async fn download_youtube_video(format: String, url: String, path: String) -> bo
             false
         }
     }
+         },
+         None => {
+              // Handle the case where the path could not be resolved
+              println!("Failed to resolve yt-dlp path");
+              false
+         }
+     }
 }

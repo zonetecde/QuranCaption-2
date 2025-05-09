@@ -199,7 +199,7 @@
 		} else if (event.key === 's' && !event.ctrlKey) {
 			// Ajoute un silence
 			addSubtitle('', true, true);
-		} else if (event.key === 'Backspace') {
+		} else if (event.key === 'Backspace' || event.code === 'Backspace' || event.key === 'Delete') {
 			removeLastSubtitle();
 		} else if (event.key === 'v') {
 			// Sélectionne tout les mots du verset

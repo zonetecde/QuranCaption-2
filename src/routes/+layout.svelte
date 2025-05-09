@@ -96,6 +96,11 @@
 					isSpeedButtonPressed.set(true);
 					videoSpeed.set($videoSpeed + 1);
 				}
+			} else if (e.key === 'Escape') {
+				// if in full screen, exit full screen
+				if ($fullScreenPreview) {
+					fullScreenPreview.set(false);
+				}
 			}
 		};
 

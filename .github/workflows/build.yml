@@ -30,29 +30,20 @@ jobs:
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          brew install ffmpeg
           brew install p7zip
 
       - name: Download yt-dlp (macos)
-        if: matrix.os == 'macos-latest' # Removed Linux condition
+        if: matrix.os == 'macos-latest'
         run: |
-          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp_linux
+          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.04.30/yt-dlp_macos
           chmod +x yt-dlp
           mv yt-dlp src-tauri/binaries/yt-dlp
-
-      - name: Download yt-dlp (windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp.exe
-          chmod +x yt-dlp.exe
-          mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
 
       - name: Download and extract ffprobe (macos)
         if: matrix.os == 'macos-latest'
         run: |
-          curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
-          tar -xf ffmpeg.tar.xz
-          cp ffmpeg-*/ffprobe src-tauri/binaries/ffprobe
+          curl -L -o ffprobe.7z https://evermeet.cx/ffmpeg/ffprobe-119416-g1dbc5675c1.7z
+          7z e -y ffprobe.7z -osrc-tauri/binaries
           chmod +x src-tauri/binaries/ffprobe
 
       # Windows setup
@@ -60,6 +51,13 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           choco install ffmpeg -y
+
+      - name: Download yt-dlp (windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp.exe
+          chmod +x yt-dlp.exe
+          mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
 
       # FFprobe extraction for Windows
       - name: Download and extract ffprobe.exe
