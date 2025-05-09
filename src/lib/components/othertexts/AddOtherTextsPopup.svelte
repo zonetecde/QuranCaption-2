@@ -2,6 +2,7 @@
 	import { Type, type Surah } from '$lib/models/Quran';
 	import { addOtherTextsPopupVisibility } from '$lib/stores/LayoutStore';
 	import { OtherTexts } from '$lib/stores/OtherTextsStore';
+	import OtherTextsEditor from './OtherTextsEditor.svelte';
 	import OtherTextsList from './OtherTextsList.svelte';
 
 	let selectedText: Surah | null = null;
@@ -21,7 +22,7 @@
 				<!-- Left Column -->
 				<OtherTextsList bind:selectedText />
 				<!-- Right Column -->
-				<div class=""></div>
+				<OtherTextsEditor bind:selectedText />
 			</section>
 
 			<button

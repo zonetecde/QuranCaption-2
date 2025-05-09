@@ -5,8 +5,8 @@
 	function addNewTextButtonClick() {
 		let newText: Surah = {
 			id: $OtherTexts.length + 1,
-			name: 'New text',
-			transliteration: 'Text name',
+			name: 'X by Y',
+			transliteration: '',
 			type: Type.OtherText,
 			total_verses: 0,
 			verses: []
@@ -21,11 +21,15 @@
 
 <div class="border-r-4 border-gray-800 pt-3 h-full relative flex flex-col pb-20">
 	{#if $OtherTexts.length > 0}
+		<p class="text-center mb-3">Your text{$OtherTexts.length > 1 ? 's' : ''} :</p>
 		{#each $OtherTexts as text}
 			<div
-				class="flex items-center justify-between mb-2 hover:bg-black hover:bg-opacity-30 py-1 px-2"
+				class={'flex items-center justify-between mb-2 py-1 px-2 ' +
+					(selectedText && selectedText.id === text.id
+						? 'bg-gray-700'
+						: 'hover:bg-black hover:bg-opacity-30 ')}
 			>
-				<button class="cursor-pointer w-full text-left">
+				<button class="cursor-pointer w-full text-left" on:click={() => (selectedText = text)}>
 					<p class="text-sm text-gray-300">{text.name}</p>
 				</button>
 				<!-- <button
