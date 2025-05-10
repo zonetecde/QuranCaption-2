@@ -173,7 +173,6 @@
 
 	function getArabicText(verse: any) {
 		let contentFile = '';
-		console.log('Type de useQPCV2Format : ' + typeof useQPCV2Format);
 		if (useQPCV2Format) {
 			let str: string = '';
 			for (let i = verse.firstWordInVerse + 1; i <= verse.lastWordInVerse + 1; i++) {

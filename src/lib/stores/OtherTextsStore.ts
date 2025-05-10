@@ -16,13 +16,11 @@ export async function loadOtherTexts() {
 	try {
 		const response = await localStorageWrapper.getItem('otherTexts');
 		OtherTexts.set(response || []);
-		console.log('Other texts loaded from local storage', response);
 	} catch (e) {
 		console.error(e);
 	}
 }
 
 OtherTexts.subscribe(async (ot) => {
-	console.log('Saving other texts in LS');
 	await localStorageWrapper.setItem('otherTexts', ot);
 });

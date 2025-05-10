@@ -37,7 +37,6 @@
 	 * Handle the page change
 	 */
 	function handlePageChange(page: any) {
-		console.log('Changing page to', page);
 		isPreviewPlaying.set(false);
 		clearSubtitleToEdit();
 		setCurrentPage(page);

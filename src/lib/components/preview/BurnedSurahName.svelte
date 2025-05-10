@@ -40,8 +40,6 @@
 			calculateFontSize(
 				$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size
 			) * 0.1;
-
-		console.log(size);
 	}
 </script>
 

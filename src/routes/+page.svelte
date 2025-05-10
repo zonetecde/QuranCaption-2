@@ -38,7 +38,6 @@
 		await newProjectSystemMigration();
 
 		userProjectsDesc = await getUserProjects();
-		console.log(userProjectsDesc);
 
 		if (await addInformationsAboutProjectMigration(userProjectsDesc))
 			// Add informations about the projects (% captioned, duration, etc)
