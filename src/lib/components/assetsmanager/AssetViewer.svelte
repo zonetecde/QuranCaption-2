@@ -4,8 +4,8 @@
 	import type Asset from '$lib/models/Asset';
 	import { downloadFromYoutube, removeAsset } from '$lib/models/Asset';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
-	import { open } from '@tauri-apps/api/dialog';
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { open } from '@tauri-apps/plugin-dialog';
+	import { convertFileSrc } from '@tauri-apps/api/core';
 	import toast from 'svelte-french-toast';
 	import RelocateAssetWarning from '../common/RelocateAssetWarning.svelte';
 

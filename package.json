@@ -38,8 +38,11 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@tauri-apps/api": "^1.5.3",
-		"@tauri-apps/cli": "^1.6.1",
+		"@tauri-apps/api": "^2.0.0",
+		"@tauri-apps/cli": "^2.5.0",
+		"@tauri-apps/plugin-dialog": "^2.2.1",
+		"@tauri-apps/plugin-fs": "^2.2.1",
+		"@tauri-apps/plugin-shell": "^2.2.1",
 		"patch-package": "^8.0.0",
 		"svelte-french-toast": "^1.2.0",
 		"svelte-markdown": "^0.4.1"

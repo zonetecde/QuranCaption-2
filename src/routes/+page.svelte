@@ -19,7 +19,7 @@
 		restoreAllProjects,
 		updateUsersProjects
 	} from '$lib/stores/ProjectStore';
-	import { open as openLink } from '@tauri-apps/api/shell';
+	import { open as openLink } from '@tauri-apps/plugin-shell';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 

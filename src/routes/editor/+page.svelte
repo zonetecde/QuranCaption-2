@@ -8,7 +8,7 @@
 	import { bestPerformance, currentPage, trimDialog } from '$lib/stores/LayoutStore';
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
-	import { invoke } from '@tauri-apps/api/tauri';
+	import { invoke } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
 
 	onMount(async () => {

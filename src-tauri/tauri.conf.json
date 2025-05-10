@@ -1,97 +1,74 @@
 {
-	"$schema": "../node_modules/@tauri-apps/cli/schema.json",
-	"build": {
-		"beforeBuildCommand": "npm run build",
-		"beforeDevCommand": "npm run dev",
-		"devPath": "http://localhost:5173",
-		"distDir": "../build"
-	},
-	"package": {
-		"productName": "Quran Caption",
-		"version": "4.3.0"
-	},
-	"tauri": {
-		"allowlist": {
-			"all": false,
-			"shell": {
-				"open": true
-			},
-			"dialog": {
-				"all": false,
-				"ask": false,
-				"confirm": true,
-				"message": false,
-				"open": true,
-				"save": true
-			},
-			"protocol": {
-				"all": true,
-				"asset": true,
-				"assetScope": ["**"]
-			},
-			"fs": {
-				"all": false,
-				"copyFile": false,
-				"createDir": true,
-				"exists": false,
-				"readDir": true,
-				"readFile": true,
-				"removeDir": false,
-				"removeFile": true,
-				"renameFile": false,
-				"scope": ["**"],
-				"writeFile": true
-			}
-		},
-		"bundle": {
-			"active": true,
-			"category": "DeveloperTool",
-			"copyright": "",
-			"deb": {
-				"depends": []
-			},
-			"externalBin": [],
-			"icon": [
-				"icons/32x32.png",
-				"icons/128x128.png",
-				"icons/128x128@2x.png",
-				"icons/icon.icns",
-				"icons/icon.ico"
-			],
-			"identifier": "com.rayanestaszewski.fr",
-			"longDescription": "Quran Caption is a software that allows you to create videos of Quran recitation with subtitles in multiple languages and, most importantly, with ease.",
-			"macOS": {
-				"entitlements": null,
-				"exceptionDomain": "",
-				"frameworks": [],
-				"providerShortName": null,
-				"signingIdentity": null
-			},
-			"resources": ["binaries/**/*", "black-vid.mp4"],
-			"shortDescription": "",
-			"targets": "all",
-			"windows": {
-				"certificateThumbprint": null,
-				"digestAlgorithm": "sha256",
-				"timestampUrl": ""
-			}
-		},
-		"security": {
-			"csp": "default-src *; media-src *; style-src * 'unsafe-inline'; connect-src *"
-		},
-		"updater": {
-			"active": false
-		},
-		"windows": [
-			{
-				"fullscreen": false,
-				"height": 768,
-				"resizable": true,
-				"title": "Quran Caption",
-				"width": 1024,
-				"minWidth": 1024,
-				"minHeight": 768
-			}
-		]
-	}
+  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "frontendDist": "../build",
+    "devUrl": "http://localhost:5173"
+  },
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": "all",
+    "externalBin": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "longDescription": "Quran Caption is a software that allows you to create videos of Quran recitation with subtitles in multiple languages and, most importantly, with ease.",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "resources": [
+      "binaries/**/*",
+      "black-vid.mp4"
+    ],
+    "shortDescription": "",
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  },
+  "productName": "Quran Caption",
+  "mainBinaryName": "Quran Caption",
+  "version": "4.3.0",
+  "identifier": "com.rayanestaszewski.fr",
+  "plugins": {},
+  "app": {
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 768,
+        "resizable": true,
+        "title": "Quran Caption",
+        "width": 1024,
+        "minWidth": 1024,
+        "minHeight": 768,
+        "useHttpsScheme": true
+      }
+    ],
+    "security": {
+      "assetProtocol": {
+        "scope": [
+          "**"
+        ],
+        "enable": true
+      },
+      "csp": "default-src *; media-src *; style-src * 'unsafe-inline'; connect-src ipc: http://ipc.localhost *"
+    }
+  }
 }

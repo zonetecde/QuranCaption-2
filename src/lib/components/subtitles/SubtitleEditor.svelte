@@ -8,7 +8,7 @@
 		endTimeReplacing,
 		isRemplacingAlreadyAddedSubtitles
 	} from '$lib/stores/LayoutStore';
-	import { open as openLink } from '@tauri-apps/api/shell';
+	import { open as openLink } from '@tauri-apps/plugin-shell';
 	import VersePicker from './VersePicker.svelte';
 	import WordsSelector from './WordsSelector.svelte';
 

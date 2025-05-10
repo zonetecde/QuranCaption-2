@@ -4,7 +4,7 @@
 	import { fullScreenPreview } from '$lib/stores/LayoutStore';
 	import { currentProject, downloadYoutubeChapters } from '$lib/stores/ProjectStore';
 	import { spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { open as openLink } from '@tauri-apps/api/shell';
+	import { open as openLink } from '@tauri-apps/plugin-shell';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 	import VideoPreview from '../preview/VideoPreview.svelte';

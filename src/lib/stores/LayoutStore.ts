@@ -1,8 +1,8 @@
 import { allStatus, type ProjectStatus } from '$lib/models/Project';
-import { invoke } from '@tauri-apps/api';
 import toast from 'svelte-french-toast';
 import { get, writable, type Writable } from 'svelte/store';
 import { currentProject } from './ProjectStore';
+import { invoke } from '@tauri-apps/api/core';
 
 export type PageType = 'Video editor' | 'Subtitles editor' | 'Translations' | 'Export';
 // Home page

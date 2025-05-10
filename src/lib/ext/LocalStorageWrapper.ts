@@ -1,11 +1,12 @@
-import { createDir, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
+import { readTextFile, writeTextFile, create, remove, BaseDirectory } from '@tauri-apps/plugin-fs';
 
 // Chemin où les données seront stockées
 const STORAGE_PATH = 'localStorage/';
 
 export async function initializeStorage() {
+	console.log('Initializing storage...');
 	try {
-		await createDir(STORAGE_PATH, { recursive: true });
+		await create(STORAGE_PATH, { baseDir: BaseDirectory.AppData });
 		console.log('Storage initialized');
 	} catch (error) {
 		console.error('Failed to initialize storage:', error);
@@ -33,7 +34,7 @@ export const localStorageWrapper = {
 	async removeItem(key: string) {
 		const filePath = `${STORAGE_PATH}${key}.json`;
 		try {
-			await removeFile(filePath);
+			await remove(filePath);
 		} catch (error) {
 			console.warn(`Failed to remove key "${key}" from storage.`);
 		}

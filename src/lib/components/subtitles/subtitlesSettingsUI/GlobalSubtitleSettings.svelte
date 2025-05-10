@@ -4,7 +4,7 @@
 	import { ImgFileExt } from '$lib/ext/File';
 	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { open } from '@tauri-apps/api/dialog';
+	import { open } from '@tauri-apps/plugin-dialog';
 
 	function backgroundImageButtonClicked() {
 		open({

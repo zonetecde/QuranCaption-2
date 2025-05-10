@@ -8,7 +8,7 @@
 		scrollToCursor
 	} from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { convertFileSrc } from '@tauri-apps/api/core';
 
 	import { readjustCursorPosition } from '$lib/functions/TimelineHelper';
 	import { getDisplayedVideoSize } from '$lib/functions/VideoPreviewCalc';

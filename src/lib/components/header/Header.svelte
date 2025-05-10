@@ -8,7 +8,7 @@
 	} from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
-	import { open as openLink } from '@tauri-apps/api/shell';
+	import { open as openLink } from '@tauri-apps/plugin-shell';
 	import { onDestroy } from 'svelte';
 	import toast from 'svelte-french-toast';
 

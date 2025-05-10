@@ -1,7 +1,7 @@
 import { getFileNameFromPath, getFileType } from '$lib/ext/File';
 import Id from '$lib/ext/Id';
 import { currentProject } from '$lib/stores/ProjectStore';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { get } from 'svelte/store';
 
 export default interface Asset {

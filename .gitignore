@@ -15,3 +15,4 @@ ffprobe.exe
 yt-dlp.exe
 src/lib/ext/PrivateVariable.ts
 localStorage/
+_localStorage/

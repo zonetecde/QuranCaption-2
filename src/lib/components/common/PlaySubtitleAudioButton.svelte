@@ -3,7 +3,7 @@
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { audio, playedSubtitleId } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { convertFileSrc } from '@tauri-apps/api/core';
 	import toast from 'svelte-french-toast';
 
 	export let subtitle: SubtitleClip;

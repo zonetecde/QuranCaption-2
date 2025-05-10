@@ -2,7 +2,7 @@
 	import { AudioFileExt, ImgFileExt, VideoFileExt } from '$lib/ext/File';
 	import { addAssets, downloadFromYoutube } from '$lib/models/Asset';
 	import { currentProject } from '$lib/stores/ProjectStore';
-	import { open } from '@tauri-apps/api/dialog';
+	import { open } from '@tauri-apps/plugin-dialog';
 	import toast from 'svelte-french-toast';
 	import IconButton from '../common/IconButton.svelte';
 	import AssetViewer from './AssetViewer.svelte';
