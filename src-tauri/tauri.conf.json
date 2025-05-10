@@ -58,7 +58,7 @@
 				"icons/icon.icns",
 				"icons/icon.ico"
 			],
-			"identifier": "com.rayanestaszewski.fr",
+			"identifier": "com.qurancaption",
 			"longDescription": "Quran Caption is a software that allows you to create videos of Quran recitation with subtitles in multiple languages and, most importantly, with ease.",
 			"macOS": {
 				"entitlements": null,

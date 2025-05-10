@@ -18,8 +18,11 @@
 	import { loadOtherTexts } from '$lib/stores/OtherTextsStore';
 
 	onMount(() => {
-		// Créer le dossier pour le localStorage si il n'existe pas
 		initializeStorage();
+		loadQuran();
+		loadOtherTexts();
+		getEditions();
+		getFonts();
 
 		document.addEventListener('contextmenu', (event) => event.preventDefault());
 
@@ -114,11 +117,6 @@
 				}
 			}
 		};
-
-		loadQuran();
-		loadOtherTexts();
-		getEditions();
-		getFonts();
 	});
 </script>
 

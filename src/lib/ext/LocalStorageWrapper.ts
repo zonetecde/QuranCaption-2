@@ -1,11 +1,15 @@
 import { createDir, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
+import { invoke } from '@tauri-apps/api/tauri';
 
-// Chemin où les données seront stockées
-const STORAGE_PATH = 'localStorage/';
+export async function getLocalStoragePath() {
+	let EXECUTAVLE_PATH = await invoke('path_to_executable');
+	let STORAGE_PATH = EXECUTAVLE_PATH + 'localStorage/';
+	return STORAGE_PATH;
+}
 
 export async function initializeStorage() {
 	try {
-		await createDir(STORAGE_PATH, { recursive: true });
+		await createDir(await getLocalStoragePath(), { recursive: true });
 		console.log('Storage initialized');
 	} catch (error) {
 		console.error('Failed to initialize storage:', error);
@@ -15,12 +19,12 @@ export async function initializeStorage() {
 // Assurez-vous que toutes les données sont sérialisées en JSON
 export const localStorageWrapper = {
 	async setItem(key: string, value: any) {
-		const filePath = `${STORAGE_PATH}${key}.json`;
+		const filePath = `${await getLocalStoragePath()}${key}.json`;
 		await writeTextFile(filePath, JSON.stringify(value));
 	},
 
 	async getItem(key: string) {
-		const filePath = `${STORAGE_PATH}${key}.json`;
+		const filePath = `${await getLocalStoragePath()}${key}.json`;
 		try {
 			const data = await readTextFile(filePath);
 			return JSON.parse(data);
@@ -31,7 +35,7 @@ export const localStorageWrapper = {
 	},
 
 	async removeItem(key: string) {
-		const filePath = `${STORAGE_PATH}${key}.json`;
+		const filePath = `${await getLocalStoragePath()}${key}.json`;
 		try {
 			await removeFile(filePath);
 		} catch (error) {

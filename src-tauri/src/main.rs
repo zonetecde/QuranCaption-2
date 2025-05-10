@@ -7,7 +7,7 @@ use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -128,4 +128,28 @@ async fn download_youtube_video(format: String, url: String, path: String, app_h
               false
          }
      }
+}
+
+#[tauri::command]
+fn path_to_executable() -> Result<String, String> {
+    // Get the current executable path
+    match std::env::current_exe() {
+        Ok(exe_path) => {
+            // Remove the executable file name and convert to string
+            match exe_path.parent() {
+                Some(parent_path) => {
+                    let mut path_str = parent_path.to_str().unwrap_or("").to_string();
+                    if !path_str.ends_with(std::path::MAIN_SEPARATOR) {
+                        path_str.push(std::path::MAIN_SEPARATOR);
+                    }
+                    Ok(path_str)
+                }
+                None => Err("Failed to get parent directory of executable".to_string()),
+            }
+        }
+        Err(e) => {
+            // Return an error message if the path cannot be determined
+            Err(format!("Failed to get executable path: {}", e))
+        }
+    }
 }
