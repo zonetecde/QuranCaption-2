@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 	import { Type, type Surah } from '$lib/models/Quran';
 	import { addOtherTextsPopupVisibility } from '$lib/stores/LayoutStore';
 	import { OtherTexts } from '$lib/stores/OtherTextsStore';
@@ -27,9 +28,12 @@
 
 			<button
 				class="absolute bottom-1.5 xl:bottom-8 bg-blue-500 -translate-x-1/2 left-1/2 text-white px-4 py-2 rounded hover:bg-blue-600"
-				on:click={() => addOtherTextsPopupVisibility.set(false)}
+				on:click={async () => {
+					await localStorageWrapper.setItem('otherTexts', $OtherTexts);
+					addOtherTextsPopupVisibility.set(false);
+				}}
 			>
-				Close
+				Save & Close
 			</button>
 		</div>
 	</div>

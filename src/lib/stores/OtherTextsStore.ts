@@ -9,7 +9,7 @@ export const OtherTexts = writable<Surah[]>([]);
  * and set it in the store.
  */
 export async function loadOtherTexts() {
-	if (get(OtherTexts)) {
+	if (get(OtherTexts) && get(OtherTexts).length > 0) {
 		return; // Already loaded
 	}
 
@@ -20,7 +20,3 @@ export async function loadOtherTexts() {
 		console.error(e);
 	}
 }
-
-OtherTexts.subscribe(async (ot) => {
-	await localStorageWrapper.setItem('otherTexts', ot);
-});

@@ -17,7 +17,7 @@
 	import '../app.css';
 	import { loadOtherTexts } from '$lib/stores/OtherTextsStore';
 
-	onMount(() => {
+	onMount(async () => {
 		initializeStorage();
 		loadQuran();
 		loadOtherTexts();
@@ -40,7 +40,6 @@
 			if (e.key === 'Control') {
 				isCtrlPressed.set(true);
 			}
-
 			// space bar
 			else if (e.key === ' ') {
 				// if we are not in a input
@@ -54,7 +53,6 @@
 					spaceBarPressed.set(true);
 				}
 			}
-
 			// Flèche gauche/droite pour controler le curseur
 			else if (e.key === 'ArrowLeft') {
 				// Vérifie qu'on est pas dans un input

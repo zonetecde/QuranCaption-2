@@ -10,6 +10,7 @@
 	import { getVerseTranslation } from '$lib/functions/Translation';
 	import { getWordByWordTranslation } from '$lib/functions/Wbw';
 	import {
+		addOtherTextsPopupVisibility,
 		beginTimeReplacing,
 		clearBeginAndEndTimeReplacing,
 		clearSubtitleToEdit,
@@ -169,6 +170,7 @@
 	function onKeyDown(event: KeyboardEvent) {
 		// Check if the user is typing in an input
 		if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+		if ($addOtherTextsPopupVisibility) return; // Si le popup est ouvert, on ne fait rien
 
 		if (event.key === 'ArrowUp') {
 			selectNextWord();
