@@ -192,25 +192,25 @@
 					if (temp < $currentProject.timeline.subtitlesTracks[0].clips.length) selectNextWord(true);
 				}
 			}
-		} else if (event.key === 'b') {
+		} else if (event.key === 'b' || event.key === 'B') {
 			// Ajoute la basmallah
 			addSubtitle('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', true);
-		} else if (event.key === 'a') {
+		} else if (event.key === 'a' || event.key === 'A') {
 			// Ajoute la protection
 			addSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', true);
-		} else if (event.key === 's' && !event.ctrlKey) {
+		} else if ((event.key === 's' || event.key === 'S') && !event.ctrlKey) {
 			// Ajoute un silence
 			addSubtitle('', true, true);
 		} else if (event.key === 'Backspace' || event.code === 'Backspace' || event.key === 'Delete') {
 			removeLastSubtitle();
-		} else if (event.key === 'v') {
+		} else if (event.key === 'v' || event.key === 'V') {
 			// Sélectionne tout les mots du verset
 			startWordIndex = 0;
 			endWordIndex = wordsInSelectedVerse.length - 1;
-		} else if (event.key === 't') {
+		} else if (event.key === 't' || event.key === 'T') {
 			// Ajoute un texte custom
 			addSubtitle('', true, false, true);
-		} else if (event.key === 'e') {
+		} else if (event.key === 'e' || event.key === 'E') {
 			// Edit le dernier sous-titre ajouté
 			const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 			const lastSubtitle = subtitleClips[subtitleClips.length - 1];
@@ -221,7 +221,7 @@
 				// Enlève le remplacage de sous-titres si il y en a
 				clearBeginAndEndTimeReplacing();
 			}
-		} else if (event.key === 'm') {
+		} else if (event.key === 'm' || event.key === 'M') {
 			// Change le temps de fin du dernier sous-titre ajouté à la position actuelle
 			const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
 			const lastSubtitle = subtitleClips[subtitleClips.length - 1];
@@ -233,7 +233,7 @@
 					toast.error('The start time of the last subtitle is greater than the current time');
 				}
 			}
-		} else if (event.key === 'r') {
+		} else if (event.key === 'r' || event.key === 'R') {
 			// Reset le curseur de début à celui de fin
 			startWordIndex = endWordIndex;
 		}
