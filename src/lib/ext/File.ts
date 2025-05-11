@@ -49,7 +49,7 @@ export function getFileNameFromPath(path: string): string {
  * @returns The file type
  */
 export function getFileType(filePath: string): 'audio' | 'video' | 'image' | 'unknown' {
-	const ext = filePath.split('.').pop() || '';
+	const ext = filePath.split('.').pop()?.toLocaleLowerCase() || '';
 	if (AudioFileExt.includes(ext)) return 'audio';
 	if (VideoFileExt.includes(ext)) return 'video';
 	if (ImgFileExt.includes(ext)) return 'image';
