@@ -3,6 +3,7 @@
 	import type { SurahNameSettings } from '$lib/models/Project';
 	import type { SubtitleClip } from '$lib/models/Timeline';
 	import { videoDimensions } from '$lib/stores/LayoutStore';
+	import { getTextName } from '$lib/stores/OtherTextsStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';
 	import { latestSurah } from '$lib/stores/VideoPreviewStore';
@@ -65,21 +66,29 @@
 				style="opacity: {surahNameSettings.opacity}"
 			>
 				<div class="text-center flex flex-col" style={`font-size: px;`}>
-					<img
-						class="size-[100px]"
-						src={`https://cdn.amrayn.com/qimages-c/${$latestSurah.toString()}.svg`}
-						alt="Surah Name"
-						style="filter: invert(100%) brightness(200%) contrast(100%);"
-					/>
-
+					{#if $latestSurah >= 1}
+						<img
+							class="size-[100px]"
+							src={`https://cdn.amrayn.com/qimages-c/${$latestSurah.toString()}.svg`}
+							alt="Surah Name"
+							style="filter: invert(100%) brightness(200%) contrast(100%);"
+						/>
+					{:else}
+						<!-- placeholder qui prends la même taille que l'img en temps habituel -->
+						<div class="h-[100px] w-[100px"></div>
+					{/if}
 					{#if surahNameSettings.showLatin && $Mushaf}
 						<p
 							class="text-white -mt-9 text-[10px]"
 							style="font-family: {$currentProject.projectSettings.globalSubtitlesSettings
 								.creatorText.fontFamily};"
 						>
-							{surahNameSettings.latinTextBeforeSurahName}
-							{$Mushaf.surahs[$latestSurah - 1].transliteration}
+							{#if $latestSurah >= 1}
+								{surahNameSettings.latinTextBeforeSurahName}
+								{$Mushaf.surahs[$latestSurah - 1].transliteration}
+							{:else if $latestSurah <= -2}
+								{getTextName($latestSurah)}
+							{/if}
 						</p>
 					{/if}
 				</div>

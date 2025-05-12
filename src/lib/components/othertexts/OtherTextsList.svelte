@@ -4,8 +4,8 @@
 
 	function addNewTextButtonClick() {
 		let newText: Surah = {
-			id: $OtherTexts.length + 1,
-			name: 'X by Y',
+			id: ($OtherTexts.length + 2) * -1, // +2 pour commencer à -2 (-1 étant réserver pour les nums de sourate invalides)
+			name: 'New text ' + ($OtherTexts.length + 1),
 			transliteration: '',
 			type: Type.OtherText,
 			total_verses: 0,
@@ -32,14 +32,14 @@
 				<button class="cursor-pointer w-full text-left" on:click={() => (selectedText = text)}>
 					<p class="text-sm text-gray-300">{text.name}</p>
 				</button>
-				<!-- <button
-									class="text-red-500 hover:text-red-700"
-									on:click={() => {
-										OtherTexts.set($OtherTexts.filter((t) => t.id !== text.id));
-									}}
-								>
-									Delete
-								</button> -->
+				<button
+					class="text-red-500 hover:text-red-700"
+					on:click={() => {
+						OtherTexts.set($OtherTexts.filter((t) => t.id !== text.id));
+					}}
+				>
+					Delete
+				</button>
 			</div>
 		{/each}
 	{:else}

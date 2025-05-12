@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getVerseTranslation } from '$lib/functions/Translation';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, getDefaultsTranslationSettings } from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
 	import { createEventDispatcher } from 'svelte';
 	import toast from 'svelte-french-toast';
@@ -76,24 +76,8 @@
 			selectedEditionName
 		];
 
-		$currentProject.projectSettings.subtitlesTracksSettings[selectedEditionName] = {
-			fontSize: 91,
-			enableOutline: true,
-			outlineColor: '#000000',
-			outlineThickness: 2,
-			verticalPosition: 25,
-			horizontalPadding: 0,
-			enableSubtitles: true,
-			fontFamily: 'Verdana',
-			color: '#ffffff',
-			opacity: 1,
-			showVerseNumber: false,
-			alignment: 'center',
-			fitOnOneLine: false,
-			neededHeightToFitFullScreen: -1,
-			maxNumberOfLines: 2,
-			neededHeightToFitSmallPreview: -1
-		};
+		$currentProject.projectSettings.subtitlesTracksSettings[selectedEditionName] =
+			getDefaultsTranslationSettings();
 
 		// Pour chaque verset, ajoute la traduction
 		$currentProject.timeline.subtitlesTracks[0].clips.forEach((element) => {

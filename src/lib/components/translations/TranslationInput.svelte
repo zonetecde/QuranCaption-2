@@ -13,6 +13,7 @@
 	import EditSubtitleButton from '../common/EditSubtitleButton.svelte';
 	import PlaySubtitleAudioButton from '../common/PlaySubtitleAudioButton.svelte';
 	import IndividualSubtitleSettings from '../subtitles/subtitlesSettingsUI/IndividualSubtitleSettings.svelte';
+	import { getTextName, getTextTranslations } from '$lib/stores/OtherTextsStore';
 
 	export let subtitle: SubtitleClip;
 	export let subtitleIndex: number;
@@ -26,6 +27,9 @@
 			isIncomplete = true;
 
 			return; // Si c'est un silence, une basmala ou autre
+		} else if (subtitle.surah < -1) {
+			// Si c'est un texte custom on leave ici
+			return;
 		}
 
 		// Télécharge la traduction mot à mot
@@ -66,11 +70,18 @@
 
 	async function handleResetTranslation(translation: string) {
 		// @ts-ignore
-		subtitle.translations[translation] = await getVerseTranslation(
-			translation,
-			subtitle.surah,
-			subtitle.verse
-		);
+		if (subtitle.surah < -1) {
+			// custom text
+			subtitle.translations[translation] = getTextTranslations(subtitle.surah, subtitle.verse)[
+				translation
+			];
+		} else {
+			subtitle.translations[translation] = await getVerseTranslation(
+				translation,
+				subtitle.surah,
+				subtitle.verse
+			);
+		}
 
 		// If we reset this translations, this means we might did things wrong
 		// So reset all the next translations of this verse
@@ -238,8 +249,11 @@
 
 		<div class="flex justify-between items-start flex-col w-full">
 			<p class="text-lg text-left">
-				{#if subtitle.surah !== -1 && subtitle.verse !== -1}
-					{subtitle.surah}:{subtitle.verse}
+				{#if subtitle.surah > 0 && subtitle.verse > 0}
+					<span class="monospace">{subtitle.surah}:{subtitle.verse}</span>
+				{:else if subtitle.surah < -1 && subtitle.verse > 0}
+					<!-- texte custom -->
+					<span class="monospace">{getTextName(subtitle.surah)}:{subtitle.verse}</span>
 				{/if}
 				<span class="text-xs">
 					{milisecondsToMMSS(subtitle.start)}-{milisecondsToMMSS(subtitle.end)}</span

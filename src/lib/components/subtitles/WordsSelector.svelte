@@ -1,6 +1,10 @@
 <script lang="ts">
 	import Id from '$lib/ext/Id';
-	import { currentProject, hasSubtitleDefaultIndividualSettings } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		getDefaultsTranslationSettings,
+		hasSubtitleDefaultIndividualSettings
+	} from '$lib/stores/ProjectStore';
 	import { getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
@@ -21,9 +25,16 @@
 		showWordByWordTranslation,
 		showWordByWordTransliteration
 	} from '$lib/stores/LayoutStore';
+	import {
+		getNumberOfVersesOfText,
+		getTextTranslations,
+		getVerseFromText,
+		OtherTexts
+	} from '$lib/stores/OtherTextsStore';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
+	export let selectedTextId: number | null = null;
 
 	let wbwTranslation: string[] = [];
 	let wbwTransliteration: string[] = [];
@@ -41,8 +52,14 @@
 
 		if (!subtitle) return;
 
-		verseNumber = subtitle.verse;
-		surahNumber = subtitle.surah;
+		if (subtitle.surah < 0) {
+			// custom text
+			selectedTextId = subtitle.surah;
+			verseNumber = subtitle.verse;
+		} else {
+			verseNumber = subtitle.verse;
+			surahNumber = subtitle.surah;
+		}
 
 		// wait for UI to update
 		await new Promise((resolve) => setTimeout(resolve, 0));
@@ -52,7 +69,9 @@
 	}
 
 	// Split the verse into words
-	$: wordsInSelectedVerse = getVerse(surahNumber, verseNumber).text.split(' ');
+	$: wordsInSelectedVerse = selectedTextId
+		? getVerseFromText(selectedTextId, verseNumber).split('***')
+		: getVerse(surahNumber, verseNumber).text.split(' ');
 
 	// Si on change de verset, on sélectionne le premier mot par défaut
 	$: if (verseNumber || surahNumber) {
@@ -69,15 +88,17 @@
 		// Le met sur le document car le window.onkeydown est déjà pris dans +layout.svelte
 		window.document.onkeydown = onKeyDown;
 
-		wbwTranslation = await getWordByWordTranslation(surahNumber, verseNumber);
-		wbwTransliteration = await getWordByWordTranslation(
-			surahNumber,
-			verseNumber,
-			'transliteration'
-		);
+		if (!selectedTextId) {
+			wbwTranslation = await getWordByWordTranslation(surahNumber, verseNumber);
+			wbwTransliteration = await getWordByWordTranslation(
+				surahNumber,
+				verseNumber,
+				'transliteration'
+			);
+		}
 	});
 
-	$: if (surahNumber || verseNumber) {
+	$: if ((surahNumber || verseNumber) && !selectedTextId) {
 		wbwTranslation = [];
 		getWordByWordTranslation(surahNumber, verseNumber).then((translation) => {
 			wbwTranslation = translation;
@@ -105,7 +126,10 @@
 			if (removeAllSection) startWordIndex = endWordIndex;
 		} else {
 			// Verset suivant s'il existe
-			if (verseNumber < getNumberOfVerses(surahNumber)) {
+			if (
+				verseNumber <
+				(selectedTextId ? getNumberOfVersesOfText(selectedTextId) : getNumberOfVerses(surahNumber))
+			) {
 				verseNumber += 1;
 			}
 		}
@@ -177,7 +201,9 @@
 		} else if (event.key === 'ArrowDown') {
 			selectPreviousWord();
 		} else if (event.key === 'Enter') {
-			const selectedWords = wordsInSelectedVerse.slice(startWordIndex, endWordIndex + 1).join(' ');
+			const selectedWords = wordsInSelectedVerse
+				.slice(startWordIndex, endWordIndex + 1)
+				.join(selectedTextId ? ' *** ' : ' '); // Pour les autres textes ce sont des vers entiers, et c'est deux par deux donc on sépare par ***
 			if (selectedWords.length > 0) {
 				if ($isRemplacingAlreadyAddedSubtitles) {
 					// Remplace les sous-titres présent entre les temps de début et de fin par le texte sélectionné
@@ -347,7 +373,6 @@
 		}
 
 		// Vérifie que la fin > début
-		// TODO 2
 		if (lastSubtitleEndTime >= currentTimeMs) {
 			toast.error(
 				'The end time of the previous subtitle is greater than or equal to the start time of the new subtitle'
@@ -361,7 +386,7 @@
 			start: lastSubtitleEndTime,
 			end: currentTimeMs,
 			text: subtitleText,
-			surah: isNotVerse ? -1 : surahNumber,
+			surah: isNotVerse ? -1 : selectedTextId || surahNumber,
 			verse: isNotVerse ? -1 : verseNumber,
 			translations: {},
 			firstWordIndexInVerse: startWordIndex,
@@ -378,18 +403,58 @@
 		// Si il y a des translations, les ajoutes
 		let translations: { [key: string]: string } = {};
 
-		await Promise.all(
-			$currentProject.projectSettings.addedTranslations.map(async (translation: string) => {
-				let translationText = isNotVerse
-					? ''
-					: await getVerseTranslation(translation, surahNumber, verseNumber);
+		if ($currentProject.projectSettings.addedTranslations.length > 0) {
+			await Promise.all(
+				$currentProject.projectSettings.addedTranslations.map(async (translation: string) => {
+					if (!selectedTextId) {
+						let translationText = isNotVerse
+							? ''
+							: await getVerseTranslation(translation, surahNumber, verseNumber);
 
-				translations[translation] = translationText;
-			})
-		);
+						translations[translation] = translationText;
+					} else {
+						// Si c'est un autre texte, on ajoute sa traduction depuis le store
+						const trans = getTextTranslations(selectedTextId, verseNumber)[translation];
+						// Deux cas :
+						// - on a sélectionné les deux sub-versets
+						// - on a sélectionné un seul sub-verset
+						if (startWordIndex === 0 && endWordIndex === wordsInSelectedVerse.length - 1) {
+							translations[translation] = trans;
+						} else {
+							// Si c'est le premier subverset
+							if (startWordIndex === 0) {
+								translations[translation] = trans.split('***')[0];
+							} else if (endWordIndex === wordsInSelectedVerse.length - 1) {
+								// Si c'est le dernier sub
+								translations[translation] = trans.split('***')[1];
+							}
+						}
+					}
+				})
+			);
 
-		// Met à jour les translations
-		subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
+			// Met à jour les translations
+			subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
+		} else if (surahNumber < -1 && selectedTextId) {
+			// Si c'est un autre texte, on ajoute sa traduction depuis le store
+			translations = getTextTranslations(selectedTextId, verseNumber);
+
+			subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
+
+			for (const key in translations) {
+				// si elle n'a pas été ajouté au projet, l'ajoute
+				if (!$currentProject.projectSettings.addedTranslations.includes(key)) {
+					$currentProject.projectSettings.subtitlesTracksSettings[key] =
+						getDefaultsTranslationSettings();
+
+					$currentProject.projectSettings.addedTranslations = [
+						...$currentProject.projectSettings.addedTranslations,
+						key
+					];
+				}
+			}
+		}
+
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips; // Force l'update du component SubtitlesList
 	}
 </script>
@@ -402,18 +467,21 @@
 		<button
 			on:click={(e) => handleWordClicked(e, index, isHighlighted)}
 			class={'px-1.5 flex flex-col outline-none text-center ' +
-				(isHighlighted ? 'bg-[#fbff0027] hover:bg-[#5f5b20e1]' : 'hover:bg-[#ffffff2f]')}
+				(isHighlighted ? 'bg-[#fbff0027] hover:bg-[#5f5b20e1] ' : 'hover:bg-[#ffffff2f] ') +
+				(selectedTextId ? 'w-full' : '')}
 			><span class="text-center w-full">{word}</span>
 
-			{#if wbwTranslation[index] && $showWordByWordTranslation}
-				<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
-					>{wbwTranslation[index]}</span
-				>
-			{/if}
-			{#if wbwTransliteration[index] && $showWordByWordTransliteration}
-				<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
-					>{wbwTransliteration[index]}</span
-				>
+			{#if !selectedTextId}
+				{#if wbwTranslation[index] && $showWordByWordTranslation}
+					<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
+						>{wbwTranslation[index]}</span
+					>
+				{/if}
+				{#if wbwTransliteration[index] && $showWordByWordTransliteration}
+					<span class="text-sm w-full text-center molengo" style="margin-right: 0.5rem;"
+						>{wbwTransliteration[index]}</span
+					>
+				{/if}
 			{/if}
 		</button>
 	{/each}

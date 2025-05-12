@@ -97,7 +97,7 @@ function extractTextFromResponse(
 				return item.verse;
 			}
 		}
-		return 'No translation found';
+		return NO_TRANSLATION;
 	} else {
 		return data.text;
 	}

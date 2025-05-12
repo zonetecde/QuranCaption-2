@@ -14,6 +14,7 @@
 
 	let verseNumber = 1;
 	let surahNumber = 1;
+	let selectedTextId: number | null = null;
 
 	let verseNumberInInput = 1;
 	$: if (verseNumber) {
@@ -154,7 +155,7 @@
 		</div>
 	{/if}
 
-	<VersePicker bind:verseNumber bind:surahNumber bind:verseNumberInInput />
+	<VersePicker bind:verseNumber bind:surahNumber bind:verseNumberInInput bind:selectedTextId />
 
-	<WordsSelector bind:verseNumber bind:surahNumber />
+	<WordsSelector bind:verseNumber bind:surahNumber bind:selectedTextId />
 </div>

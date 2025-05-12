@@ -6,6 +6,7 @@
 		currentPage,
 		setCurrentVideoTime
 	} from '$lib/stores/LayoutStore';
+	import { getTextName } from '$lib/stores/OtherTextsStore';
 	import {
 		currentProject,
 		hasSubtitleDefaultIndividualSettings,
@@ -96,8 +97,11 @@
 
 	<div class="flex flex-col w-full">
 		<p class="text-sm text-left">
-			{#if subtitle.surah !== -1 && subtitle.verse !== -1}
+			{#if subtitle.surah > 0 && subtitle.verse > 0}
 				<span class="monospace">{subtitle.surah}:{subtitle.verse}</span>
+			{:else if subtitle.surah < -1 && subtitle.verse > 0}
+				<!-- texte custom -->
+				<span class="monospace">{getTextName(subtitle.surah)}:{subtitle.verse}</span>
 			{/if}
 			<button
 				tabindex="-1"
@@ -114,7 +118,9 @@
 		{#if !subtitle.isSilence}
 			{#each $currentProject.projectSettings.addedTranslations as translation}
 				<p class="text-xs text-justify text-[#c5d4c4]">
-					<span class="text-[#8cbb8a] font-bold">{getEditionFromName(translation)?.language}:</span>
+					<span class="text-[#8cbb8a] font-bold"
+						>{getEditionFromName(translation)?.language || translation}:</span
+					>
 					{subtitle.translations[translation] ?? 'Downloading...'}
 				</p>
 			{/each}

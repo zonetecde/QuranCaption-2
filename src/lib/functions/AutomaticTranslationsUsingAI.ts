@@ -159,7 +159,14 @@ async function fetchTranslation(
 }
 
 function updateSubtitles(verseExtracts: any[], translations: any, translationKey: string) {
-	const tabTrans = JSON.parse(translations).translations;
+	let tabTrans = [];
+	try {
+		tabTrans = JSON.parse(translations).translations;
+	} catch (error) {
+		console.error('Error parsing translations:', error, translations);
+		toast.error('Failed to parse translations');
+		return;
+	}
 
 	// Mise à jour directe avec find()
 	for (const [index, extract] of verseExtracts.entries()) {

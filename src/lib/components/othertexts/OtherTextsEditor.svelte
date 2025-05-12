@@ -113,26 +113,37 @@
 		let jsonStr: string;
 
 		jsonStr = await toast.promise(
-			fetch(url, options).then((response) => {
-				if (response.ok) {
-					return response.json();
-				} else {
-					throw new Error('Network response was not ok');
-				}
-			}),
+			fetch(url, options)
+				.then((response) => {
+					if (response.ok) {
+						return response.json();
+					} else {
+						throw new Error('Network response was not ok');
+					}
+				})
+				.finally(() => {
+					isFetching = false;
+				}),
 			{
-				loading: 'AI is formatting the text...',
-				success: 'Text formatted successfully',
+				loading: 'AI is processing your request...',
+				success: 'AI has returned the text.',
 				error: 'Error formatting the text. Please try again.'
 			}
 		);
 
 		rawText = '';
-		isFetching = false;
 		showRawInputBox = false;
 
 		console.log(jsonStr);
-		json = JSON.parse(jsonStr);
+		try {
+			json = JSON.parse(jsonStr);
+		} catch (error) {
+			toast.error(
+				"Error parsing the response from AI. It might be related to copyright issues. Please try again, maybe it'll work."
+			);
+			console.error('Error parsing JSON:', error);
+			return;
+		}
 		console.log(json);
 
 		if (json.verses.length > 0) {
@@ -183,7 +194,13 @@
 		</div>
 
 		<br />
-		<p class="text-sm font-medium flex items-center">Verses/lines:</p>
+		<p class="text-sm font-medium flex items-center">
+			Verses/lines: <span class="text-gray-500 text-xs ml-1">
+				Make sure that in the arabic text and in the translations, the two sub-verses are separated
+				by "***"
+			</span>
+		</p>
+
 		<br />
 		{#if selectedText.verses.length === 0}
 			<p class="text-sm text-gray-500">No verses/lines added yet.</p>
@@ -196,6 +213,7 @@
 								>{index + 1}.
 								<input
 									type="text"
+									placeholder="ما لذَّةُ العيشِ إلّا صُحبَةَ الفُقَرا *** هُمُ السّلاطينُ والسّادَةُ الأُمَرا"
 									class="arabic text-right w-full h-12 text-lg ml-1 border border-gray-900 bg-[#3c4251] rounded-md px-1 outline-none"
 									bind:value={verse.text}
 								/></label
@@ -230,6 +248,7 @@
 											class="text-sm font-medium flex items-center w-full"
 											>{lang}:
 											<input
+												placeholder="What delight [...] the fuqara? *** They are the sultans, lords, and princes."
 												type="text"
 												id="translation-{index}-{lang}"
 												class="h-8 w-full ml-1 border border-gray-900 bg-[#3c4251] rounded-md px-1 outline-none"

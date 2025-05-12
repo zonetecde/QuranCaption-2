@@ -219,15 +219,25 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 				>
 					{#if currentSubtitle && (currentSubtitle.text || currentSubtitle.isCustomText)}
 						{#if subtitleLanguage === 'arabic'}
-							{currentSubtitle.text}
-							{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse && currentSubtitle.verse !== -1}
+							{#if currentSubtitle.surah > 0}
+								{currentSubtitle.text}
+							{:else}
+								<!-- custom text, replace *** with line break -->
+								{@html currentSubtitle.text.replace(/\*\*\*/g, '‎ '.repeat(7))}
+							{/if}
+							{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse && currentSubtitle.verse !== -1 && currentSubtitle.surah > 0}
 								{latinNumberToArabic(currentSubtitle.verse.toString())}
 							{/if}
 						{:else if currentSubtitle.translations !== undefined}
 							{#if subtitleSettingsForThisLang.showVerseNumber && currentSubtitle.firstWordIndexInVerse === 0 && currentSubtitle.verse !== -1}
 								{currentSubtitle.verse}.
 							{/if}
-							{currentSubtitle.translations[subtitleLanguage]}
+							{#if currentSubtitle.surah > 0}
+								{currentSubtitle.translations[subtitleLanguage]}
+							{:else if currentSubtitle.translations[subtitleLanguage] !== undefined}
+								<!-- custom text, replace *** with line break -->
+								{@html currentSubtitle.translations[subtitleLanguage].replace(/\*\*\*/g, '<br>')}
+							{/if}
 						{/if}
 					{/if}
 				</p>

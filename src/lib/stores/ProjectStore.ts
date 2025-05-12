@@ -137,6 +137,27 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 	};
 }
 
+export function getDefaultsTranslationSettings(): Project['projectSettings']['subtitlesTracksSettings']['arabic'] {
+	return {
+		fontSize: 91,
+		enableOutline: true,
+		outlineColor: '#000000',
+		outlineThickness: 2,
+		verticalPosition: 25,
+		horizontalPadding: 0,
+		enableSubtitles: true,
+		fontFamily: 'Verdana',
+		color: '#ffffff',
+		opacity: 1,
+		showVerseNumber: false,
+		alignment: 'center',
+		fitOnOneLine: false,
+		neededHeightToFitFullScreen: -1,
+		maxNumberOfLines: 2,
+		neededHeightToFitSmallPreview: -1
+	};
+}
+
 /**
  * Deletes a project by its ID.
  * @param id - The ID of the project to delete.
@@ -320,7 +341,7 @@ export function getProjectVersesRange(project: Project): string[] {
 
 	for (let i = 0; i < clips.length; i++) {
 		const clip = clips[i];
-		if (clip.verse === -1 || clip.surah === -1) continue;
+		if (clip.verse < 0 || clip.surah < 0) continue;
 
 		if (clip.surah !== lastSurah) {
 			versesRange.push(`${clip.surah}:${clip.verse}->`);

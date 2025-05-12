@@ -224,9 +224,13 @@
 			<!-- Ajoute tout les autres langages -->
 			{#each $currentProject.projectSettings.addedTranslations as lang}
 				{@const edition = getEditionFromName(lang)}
-				<option class="bg-slate-300 text-black" value={lang}
-					>Global - {edition?.language + ', ' + edition?.author}</option
-				>
+				{#if edition}
+					<option class="bg-slate-300 text-black" value={lang}
+						>Global - {edition?.language + ', ' + edition?.author}</option
+					>
+				{:else}
+					<option class="bg-slate-300 text-black" value={lang}>Global - {lang}</option>
+				{/if}
 			{/each}
 		{/if}
 
