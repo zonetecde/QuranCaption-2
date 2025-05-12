@@ -236,6 +236,9 @@
 		} else if (event.key === 'r' || event.key === 'R') {
 			// Reset le curseur de début à celui de fin
 			startWordIndex = endWordIndex;
+		} else if (event.key === 'c' || event.key === 'C') {
+			// Sélectionne de l'indice de début actuel jusqu'à l'indice de fin max
+			endWordIndex = wordsInSelectedVerse.length - 1;
 		}
 		// // Remplacer des sous-titres
 		// else if (event.key === 'd') {

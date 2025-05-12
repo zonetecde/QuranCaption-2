@@ -67,7 +67,7 @@
 					> for a video example.
 				</p>
 			</div>
-			<div>
+			<div class="text-xs">
 				<p class="underline">Additional tips:</p>
 				<p>
 					- Press <span class="text-yellow-500">`left`</span> and
@@ -95,8 +95,16 @@
 					- Press <span class="text-yellow-500">`r`</span> to set the start word index to the last.
 				</p>
 				<p>
+					- Press <span class="text-yellow-500">`c`</span> to set the end word index to the end of the
+					verse.
+				</p>
+				<p>
 					- Press <span class="text-yellow-500">`m`</span> to set the end time of the last subtitle to
 					the current time.
+				</p>
+				<p>
+					- Hold <span class="text-yellow-500">`PageUp`</span> or
+					<span class="text-yellow-500">`PageDown`</span> to temporarily increase the reading speed.
 				</p>
 			</div>
 		</div>
