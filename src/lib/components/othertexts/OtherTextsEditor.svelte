@@ -102,6 +102,7 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
+
 			body: JSON.stringify(data)
 		};
 
@@ -131,7 +132,6 @@
 			}
 		);
 
-		rawText = '';
 		showRawInputBox = false;
 
 		console.log(jsonStr);
@@ -139,7 +139,7 @@
 			json = JSON.parse(jsonStr);
 		} catch (error) {
 			toast.error(
-				"Error parsing the response from AI. It might be related to copyright issues. Please try again, maybe it'll work."
+				"Error parsing the response from AI. Please try again, maybe it'll work.\n\n" + error
 			);
 			console.error('Error parsing JSON:', error);
 			return;
@@ -148,9 +148,14 @@
 
 		if (json.verses.length > 0) {
 			selectedText.verses = json.verses.map((verse: any, index: number) => {
+				// remove new line from translations
+				for (const lang in verse.translations) {
+					verse.translations[lang] = verse.translations[lang].replace('\n', ' *** ');
+				}
+
 				return {
 					id: verse.number,
-					text: verse.text,
+					text: verse.text.replace('\n', ' *** '),
 					translations: verse.translations
 				};
 			});

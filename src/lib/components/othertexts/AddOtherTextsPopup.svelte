@@ -7,6 +7,12 @@
 	import OtherTextsList from './OtherTextsList.svelte';
 
 	let selectedText: Surah | null = null;
+
+	async function closePopup() {
+		await saveOtherTexts();
+		OtherTexts.set($OtherTexts); // trigger reactivity
+		addOtherTextsPopupVisibility.set(false);
+	}
 </script>
 
 <div class="absolute inset-0 bg-black bg-opacity-65 z-20 backdrop-blur-sm">
@@ -16,10 +22,7 @@
 		>
 			<button
 				class="absolute top-2 right-2 text-gray-400 hover:text-gray-200"
-				on:click={async () => {
-					await saveOtherTexts();
-					addOtherTextsPopupVisibility.set(false);
-				}}
+				on:click={closePopup}
 			>
 				<svg
 					class="w-6 h-6"
@@ -47,10 +50,7 @@
 
 			<button
 				class="absolute bottom-1.5 xl:bottom-8 bg-blue-500 -translate-x-1/2 left-1/2 text-white px-4 py-2 rounded hover:bg-blue-600"
-				on:click={async () => {
-					await saveOtherTexts();
-					addOtherTextsPopupVisibility.set(false);
-				}}
+				on:click={closePopup}
 			>
 				Save & Close
 			</button>
