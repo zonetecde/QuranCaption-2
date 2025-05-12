@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Type, type Surah } from '$lib/models/Quran';
 	import { OtherTexts } from '$lib/stores/OtherTextsStore';
+	import { onMount } from 'svelte';
 
 	function addNewTextButtonClick() {
 		let newText: Surah = {
@@ -17,6 +18,13 @@
 	}
 
 	export let selectedText: Surah | null = null;
+
+	onMount(() => {
+		// Set the selected text to the first one if it exists
+		if ($OtherTexts.length > 0) {
+			selectedText = $OtherTexts[0];
+		}
+	});
 </script>
 
 <div class="border-r-4 border-gray-800 pt-3 h-full relative flex flex-col pb-20">
@@ -34,8 +42,14 @@
 				</button>
 				<button
 					class="text-red-500 hover:text-red-700"
-					on:click={() => {
-						OtherTexts.set($OtherTexts.filter((t) => t.id !== text.id));
+					on:click={async () => {
+						// tauri confirmation dialog
+						if (await confirm('Are you sure you want to delete this text?')) {
+							OtherTexts.set($OtherTexts.filter((t) => t.id !== text.id));
+							if (selectedText && selectedText.id === text.id) {
+								selectedText = null; // Deselect the text if it was selected
+							}
+						}
 					}}
 				>
 					Delete
