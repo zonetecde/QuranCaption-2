@@ -45,7 +45,7 @@ export async function getVerseTranslation(
 
 		// Parse the response and extract the text
 		const translation = await response.json();
-		const rawText = extractTextFromResponse(translation, verse, edition);
+		const rawText = extractTextFromResponse(translation, surah, verse, edition);
 		const processedText = processTranslationText(rawText, edition);
 
 		// Cache the processed text
@@ -71,14 +71,36 @@ function buildTranslationUrl(
 		return edition.link.replace('{chapter}', surah.toString());
 	}
 
+	// Si l'édition fait partie d'une demande spéciale (saheeh international)
+	if (edition.comments === 'SPECIAL_REQUEST') {
+		return edition.link;
+	}
+
 	let baseUrl = edition.link.replace('.json', '');
 	if (removeLatin) baseUrl = baseUrl.replace('-la', '');
 	return `${baseUrl}/${surah}/${verse}.json`;
 }
 
 // Extract the text from the response based on the used API
-function extractTextFromResponse(data: any, verse: number, edition: Edition): string {
-	return edition.comments === 'PONCTUATION' ? data[verse][1] : data.text;
+function extractTextFromResponse(
+	data: any,
+	surah: number,
+	verse: number,
+	edition: Edition
+): string {
+	if (edition.comments === 'PONCTUATION') {
+		return data[verse][1];
+	} else if (edition.comments === 'SPECIAL_REQUEST') {
+		for (const key in data['quran']['en.sahih']) {
+			const item = data['quran']['en.sahih'][key];
+			if (item.surah === surah && item.ayah === verse) {
+				return item.verse;
+			}
+		}
+		return 'No translation found';
+	} else {
+		return data.text;
+	}
 }
 
 // Process the translation text to remove unwanted characters

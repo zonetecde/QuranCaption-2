@@ -1369,6 +1369,16 @@
 		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-safiurrahmanalm.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-safiurrahmanalm.min.json"
 	},
+	"eng_saheehinternational": {
+		"name": "eng-saheehinternational",
+		"author": "Saheeh International",
+		"language": "English",
+		"direction": "ltr",
+		"source": "https://api.globalquran.com/complete/en.sahih.json",
+		"comments": "SPECIAL_REQUEST",
+		"link": "https://api.globalquran.com/complete/en.sahih.json",
+		"linkmin": "https://api.globalquran.com/complete/en.sahih.json"
+	},
 	"eng_shabbirahmed": {
 		"name": "eng-shabbirahmed",
 		"author": "Shabbir Ahmed",
