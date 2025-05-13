@@ -49,12 +49,6 @@ jobs:
           chmod +x src-tauri/binaries/ffprobe
           chmod +x src-tauri/binaries/ffmpeg
 
-      # Windows setup
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install ffmpeg -y
-
       - name: Download yt-dlp (windows)
         if: matrix.os == 'windows-latest'
         run: |
