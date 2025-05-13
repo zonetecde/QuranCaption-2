@@ -73,7 +73,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           cd src-tauri/video-creator
-          build_win.bat
+          chmod +x build_win.bat
+          ./build_win.bat
           move dist\video_creator.exe ..\binaries\video_creator.exe
 
       # Video creator script for macOS
