@@ -6,6 +6,7 @@ import type { ProjectDesc } from '$lib/models/Project';
 import { get, writable, type Writable } from 'svelte/store';
 import { getSurahName, Mushaf } from './QuranStore';
 import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
+import { getTextName, OtherTexts } from './OtherTextsStore';
 
 export const currentProject: Writable<Project> = writable();
 
@@ -341,7 +342,6 @@ export function getProjectVersesRange(project: Project): string[] {
 
 	for (let i = 0; i < clips.length; i++) {
 		const clip = clips[i];
-		if (clip.verse < 0 || clip.surah < 0) continue;
 
 		if (clip.surah !== lastSurah) {
 			versesRange.push(`${clip.surah}:${clip.verse}->`);
@@ -355,16 +355,27 @@ export function getProjectVersesRange(project: Project): string[] {
 		}
 	}
 
+	console.log('versesRange', versesRange);
 	// now convert 1:1->7 to readable text : 1. Al Fatiha (1-7)
 	const mushaf = get(Mushaf);
 	if (mushaf === undefined) return [];
 	for (let i = 0; i < versesRange.length; i++) {
 		const element = versesRange[i].split(':');
-		const surahName = mushaf.surahs[Number.parseInt(element[0]) - 1].transliteration;
+
+		const surahNumber = Number.parseInt(element[0]);
+
 		const startVerse = element[1].split('->')[0];
 		const endVerse = element[1].split('->')[1];
 
-		versesRange[i] = element[0] + '. ' + surahName + ' (' + startVerse + '-' + endVerse + ')';
+		if (surahNumber >= 1) {
+			// Sourate du Coran
+			const surahName = mushaf.surahs[surahNumber - 1].transliteration;
+			versesRange[i] = element[0] + '. ' + surahName + ' (' + startVerse + '-' + endVerse + ')';
+		} else {
+			// Custom text
+			const surahName = getTextName(surahNumber);
+			versesRange[i] = surahName + ' (' + startVerse + '-' + endVerse + ')';
+		}
 	}
 
 	// remove duplicates
