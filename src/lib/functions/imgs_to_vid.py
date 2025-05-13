@@ -6,12 +6,20 @@ import tempfile
 import shutil
 from PIL import Image
 
-def create_video_from_images(folder_path, audio_path, transition_ms):
+def create_video_from_images(folder_path, audio_path, transition_ms, start_time_ms=0, end_time_ms=0, output_path=None):
     """
     Creates a video from images in a folder with timing information in filenames.
-    Ensures proper timing and fade transitions.
+    Applies fade transition only to the middle 60% of the image height.
+    
+    Args:
+        folder_path: Path to folder containing PNG images
+        audio_path: Path to audio file
+        transition_ms: Duration of transitions in milliseconds
+        start_time_ms: Time to trim from start of final video (ms)
+        end_time_ms: End time for trim in final video (ms, 0 = until end)
+        output_path: Custom output path for the video (None = default path)
     """
-    # Convert transition from ms to seconds
+    # Convert transition time from ms to seconds
     transition_sec = transition_ms / 1000.0
     
     # Get all PNG files from the folder
@@ -40,179 +48,137 @@ def create_video_from_images(folder_path, audio_path, transition_ms):
     
     print(f"Trouvé {len(image_data)} images à inclure dans la vidéo.")
     
-    # Get total duration from the last image's end time
-    total_duration = image_data[-1]['end_time']
-    print(f"Durée totale estimée: {total_duration:.2f} secondes")
+    # Set default output path if not provided
+    if output_path is None:
+        output_path = os.path.join(folder_path, "output_video.mp4")
     
     # Create a temporary directory for our intermediate files
     temp_dir = tempfile.mkdtemp()
     try:
-        # Create static image segments first
-        segment_files = []
+        # First, analyze image dimensions
+        print("Analyse des dimensions des images...")
+        first_img = Image.open(image_data[0]['path'])
+        width, height = first_img.size
+        first_img.close()
         
+        # Calculate region heights (20% top, 60% middle, 20% bottom)
+        # Ensure all heights are even numbers (required for YUV420p)
+        top_height = int(height * 0.2) // 2 * 2  # Force even number
+        middle_height = int(height * 0.6) // 2 * 2  # Force even number
+        bottom_height = height - top_height - middle_height
+        if bottom_height % 2 != 0:  # Ensure bottom height is even
+            bottom_height -= 1
+            middle_height += 1
+        
+        print(f"Dimensions: {width}x{height}")
+        print(f"Zones (ajustées pour être paires): Haut={top_height}px, Milieu={middle_height}px, Bas={bottom_height}px")
+        
+        # Make sure width is also even
+        if width % 2 != 0:
+            width -= 1  # Reduce width by 1 if odd
+            
+        # Create temporary log file for FFmpeg output
+        log_file = os.path.join(temp_dir, "ffmpeg_log.txt")
+        
+        # Prepare intermediate files for each image section
         for i, data in enumerate(image_data):
+            print(f"Traitement de l'image {i+1}/{len(image_data)}: {data['file']} ({data['start_time']}s - {data['end_time']}s)")
             img_path = data['path']
-            start_time = data['start_time']
-            end_time = data['end_time']
-            duration = end_time - start_time
+            duration = data['end_time'] - data['start_time']
             
-            segment_file = os.path.join(temp_dir, f"segment_{i:04d}.mp4")
-            
-            # Create a video segment from this image with exact duration
+            # Create top section (remains intact)
+            top_section = os.path.join(temp_dir, f"top_{i:04d}.mp4")
             cmd = [
                 'ffmpeg',
                 '-y',
                 '-loop', '1',
                 '-i', img_path,
+                '-vf', f'crop={width}:{top_height}:0:0,fps=30',
                 '-c:v', 'libx264',
                 '-t', str(duration),
                 '-pix_fmt', 'yuv420p',
-                '-vf', 'fps=30',
                 '-preset', 'veryfast',
-                segment_file
+                top_section
             ]
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            segment_files.append(segment_file)
-        
-        # Create a file list for concatenation with proper timing
-        concat_file = os.path.join(temp_dir, "concat.txt")
-        with open(concat_file, 'w') as f:
-            for i, data in enumerate(image_data):
-                f.write(f"file '{segment_files[i]}'\n")
-                # Set the inpoint - important for proper timing alignment
-                f.write(f"inpoint 0\n")
-                # Set outpoint (duration)
-                f.write(f"outpoint {data['end_time'] - data['start_time']}\n")
-        
-        # Create intermediate video without audio and transitions
-        base_video = os.path.join(temp_dir, "base_video.mp4")
-        cmd = [
-            'ffmpeg',
-            '-y',
-            '-f', 'concat',
-            '-safe', '0',
-            '-i', concat_file,
-            '-c', 'copy',
-            base_video
-        ]
-        subprocess.run(cmd, check=True)
-        
-        # Now create a filter complex to add fade transitions
-        filter_complex = []
-        for i in range(len(image_data)):
-            filter_complex.append(f"[0:v]trim=start={image_data[i]['start_time']}:end={image_data[i]['end_time']},setpts=PTS-STARTPTS[v{i}];")
-        
-        # Add fade in/out filters
-        for i in range(len(image_data)):
-            if i > 0:
-                # Add fade in if not the first clip
-                overlap_start = image_data[i]['start_time']
-                filter_complex[-1] = filter_complex[-1][:-1] + f",fade=type=in:start_time=0:duration={transition_sec}[v{i}];"
+            with open(log_file, 'a') as f:
+                subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
             
-            if i < len(image_data) - 1:
-                # Add fade out if not the last clip
-                fade_start = image_data[i]['end_time'] - transition_sec
-                relative_fade_start = image_data[i]['end_time'] - image_data[i]['start_time'] - transition_sec
-                filter_complex[-1] = filter_complex[-1][:-1] + f",fade=type=out:start_time={relative_fade_start}:duration={transition_sec}[v{i}];"
-        
-        # Add overlay commands for transitions
-        overlay_commands = []
-        for i in range(len(image_data)):
-            if i == 0:
-                overlay_commands.append(f"[v{i}]")
-            else:
-                # Calculate exact overlay time
-                overlay_commands.append(f"[tmp{i-1}][v{i}]overlay=shortest=1:eof_action=pass[tmp{i}];")
-        
-        # Fix the last overlay command
-        if len(image_data) > 1:
-            overlay_commands[-1] = overlay_commands[-1].replace(f"[tmp{len(image_data)-1}]", "[outv]")
-        else:
-            overlay_commands[-1] += "[outv]"
-        
-        # Build the final filter complex
-        filter_str = ''.join(filter_complex) + ''.join(overlay_commands)
-        
-        # Final output with audio
-        output_path = os.path.join(folder_path, "output_video.mp4")
-        
-        # Create a silent video with the right timing and transitions
-        temp_video_path = os.path.join(temp_dir, "temp_video.mp4")
-        
-        # Instead of the complex filter approach, we'll use a simpler xfade filter chain
-        # First, prepare each segment with the exact duration
-        segments_with_timing = []
-        for i, data in enumerate(image_data):
-            segment_file = os.path.join(temp_dir, f"timed_segment_{i:04d}.mp4")
+            # Create middle section (with fade effects)
+            middle_section = os.path.join(temp_dir, f"middle_{i:04d}.mp4")
+            fade_in = "fade=in:st=0:d=" + str(transition_sec) if i > 0 else "null"
+            fade_out = "fade=out:st=" + str(max(0, duration - transition_sec)) + ":d=" + str(transition_sec) if i < len(image_data) - 1 else "null"
+            
             cmd = [
                 'ffmpeg',
                 '-y',
                 '-loop', '1',
-                '-i', data['path'],
+                '-i', img_path,
+                '-vf', f'crop={width}:{middle_height}:0:{top_height},fps=30,{fade_in},{fade_out}',
                 '-c:v', 'libx264',
-                '-t', str(data['end_time'] - data['start_time']),
+                '-t', str(duration),
                 '-pix_fmt', 'yuv420p',
-                '-vf', 'fps=30',
                 '-preset', 'veryfast',
+                middle_section
+            ]
+            with open(log_file, 'a') as f:
+                subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+            
+            # Create bottom section (remains intact)
+            bottom_section = os.path.join(temp_dir, f"bottom_{i:04d}.mp4")
+            cmd = [
+                'ffmpeg',
+                '-y',
+                '-loop', '1',
+                '-i', img_path,
+                '-vf', f'crop={width}:{bottom_height}:0:{top_height + middle_height},fps=30',
+                '-c:v', 'libx264',
+                '-t', str(duration),
+                '-pix_fmt', 'yuv420p',
+                '-preset', 'veryfast',
+                bottom_section
+            ]
+            with open(log_file, 'a') as f:
+                subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+        
+        # Create intermediate combined segments
+        segment_files = []
+        print("Combinaison des sections pour chaque image...")
+        
+        for i, data in enumerate(image_data):
+            duration = data['end_time'] - data['start_time']
+            
+            # Create a filtercomplex to stack the three sections
+            segment_file = os.path.join(temp_dir, f"segment_{i:04d}.mp4")
+            filter_complex = (
+                f"[0:v][1:v]vstack=inputs=2[temp];"
+                f"[temp][2:v]vstack=inputs=2[outv]"
+            )
+            
+            cmd = [
+                'ffmpeg',
+                '-y',
+                '-i', os.path.join(temp_dir, f"top_{i:04d}.mp4"),
+                '-i', os.path.join(temp_dir, f"middle_{i:04d}.mp4"),
+                '-i', os.path.join(temp_dir, f"bottom_{i:04d}.mp4"),
+                '-filter_complex', filter_complex,
+                '-map', '[outv]',
+                '-c:v', 'libx264',
+                '-preset', 'veryfast',
+                '-t', str(duration),
                 segment_file
             ]
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            segments_with_timing.append({
-                'file': segment_file,
-                'start': data['start_time'],
-                'end': data['end_time']
-            })
+            with open(log_file, 'a') as f:
+                subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+            segment_files.append(segment_file)
         
-        # Create a complex filtergraph to handle timing and transitions
-        filterscript_path = os.path.join(temp_dir, "filter.txt")
-        with open(filterscript_path, 'w') as f:
-            inputs = []
-            for i in range(len(segments_with_timing)):
-                inputs.append(f"[{i}:v]setpts=PTS+{segments_with_timing[i]['start']}/TB[v{i}];")
-            
-            f.write(''.join(inputs))
-            
-            # Create the xfade transitions and chain them
-            last_output = "v0"
-            for i in range(1, len(segments_with_timing)):
-                curr_start = segments_with_timing[i]['start']
-                # Calculate exact transition timing
-                transition_start = curr_start - transition_sec/2
-                f.write(f"[{last_output}][v{i}]xfade=transition=fade:duration={transition_sec}:offset={transition_start}[v{i}out];")
-                last_output = f"v{i}out"
-            
-            # Mark the final output
-            if len(segments_with_timing) > 1:
-                f.write(f"[{last_output}]")
-            else:
-                f.write("[v0]")
-        
-        # Use a different approach - create each segment with proper timing, then combine with concat filter
+        # Create a concat file to sequence all segments
         concat_list_path = os.path.join(temp_dir, "segments.txt")
         with open(concat_list_path, 'w') as f:
-            for idx, data in enumerate(image_data):
-                duration = data['end_time'] - data['start_time']
-                segment_file = os.path.join(temp_dir, f"segment_{idx:04d}.mp4")
-                # Create silent video with exact timing
-                fade_in = "fade=in:st=0:d=" + str(transition_sec) if idx > 0 else "null"
-                fade_out = "fade=out:st=" + str(duration - transition_sec) + ":d=" + str(transition_sec) if idx < len(image_data) - 1 else "null"
-                
-                cmd = [
-                    'ffmpeg',
-                    '-y',
-                    '-loop', '1',
-                    '-i', data['path'],
-                    '-c:v', 'libx264',
-                    '-t', str(duration),
-                    '-pix_fmt', 'yuv420p',
-                    '-vf', f"fps=30,{fade_in},{fade_out}",
-                    '-preset', 'veryfast',
-                    segment_file
-                ]
-                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            for segment_file in segment_files:
                 f.write(f"file '{segment_file}'\n")
         
         # Concatenate all segments
+        print("Assemblage des segments en vidéo complète...")
         silent_video = os.path.join(temp_dir, "silent_video.mp4")
         cmd = [
             'ffmpeg',
@@ -223,9 +189,11 @@ def create_video_from_images(folder_path, audio_path, transition_ms):
             '-c', 'copy',
             silent_video
         ]
-        subprocess.run(cmd, check=True)
+        with open(log_file, 'a') as f:
+            subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
         
-        # Finally add audio
+        # Add audio to create the full video
+        full_video = os.path.join(temp_dir, "full_video.mp4")
         cmd = [
             'ffmpeg',
             '-y',
@@ -236,22 +204,91 @@ def create_video_from_images(folder_path, audio_path, transition_ms):
             '-c:v', 'copy',
             '-c:a', 'aac',
             '-shortest',
-            output_path
+            full_video
         ]
-        subprocess.run(cmd, check=True)
+        with open(log_file, 'a') as f:
+            subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
         
-        print(f"Vidéo créée avec succès: {output_path}")
+        # Step 3: Apply trimming if requested
+        final_output = output_path
+        
+        if start_time_ms > 0 or end_time_ms > 0:
+            print(f"Application du trim: début={start_time_ms}ms" + (f", fin={end_time_ms}ms" if end_time_ms > 0 else ""))
+            
+            trim_cmd = ['ffmpeg', '-y', '-i', full_video]
+            
+            # Add trim parameters
+            trim_args = []
+            if start_time_ms > 0:
+                start_time_sec = start_time_ms / 1000.0
+                trim_args.extend(['-ss', str(start_time_sec)])
+            
+            if end_time_ms > 0:
+                end_time_sec = end_time_ms / 1000.0
+                # Calculate duration from start point
+                if start_time_ms > 0:
+                    duration_sec = end_time_sec - (start_time_ms / 1000.0)
+                    trim_args.extend(['-t', str(duration_sec)])
+                else:
+                    # If no start time specified, use -to
+                    trim_args.extend(['-to', str(end_time_sec)])
+            
+            # Output options
+            trim_cmd.extend(trim_args)
+            trim_cmd.extend(['-c:v', 'copy', '-c:a', 'copy', final_output])
+            
+            with open(log_file, 'a') as f:
+                subprocess.run(trim_cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+        else:
+            # If no trimming, just copy the full video to the output path
+            shutil.copy2(full_video, final_output)
+        
+        # Get the final video duration
+        duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', final_output]
+        result = subprocess.run(duration_cmd, capture_output=True, text=True)
+        try:
+            final_duration = float(result.stdout.strip())
+            print(f"Durée finale de la vidéo: {final_duration:.2f} secondes")
+        except ValueError:
+            print("Impossible de déterminer la durée finale de la vidéo")
+        
+        print(f"Vidéo créée avec succès: {final_output}")
+        print(f"Le fondu a été appliqué uniquement à la partie centrale (60% de la hauteur).")
+        if start_time_ms > 0 or end_time_ms > 0:
+            print(f"Vidéo trimmée: début à {start_time_ms}ms" + (f" jusqu'à {end_time_ms}ms" if end_time_ms > 0 else ""))
+        print(f"Journal FFmpeg disponible dans: {log_file}")
+    
+    except Exception as e:
+        print(f"Une erreur s'est produite: {e}")
+        print(f"Consultez le journal FFmpeg pour plus de détails: {log_file}")
     
     finally:
-        # Clean up
-        shutil.rmtree(temp_dir, ignore_errors=True)
+        # Don't clean up temp directory if there was an error, so logs can be examined
+        if 'log_file' in locals() and os.path.exists(log_file):
+            print(f"Le dossier temporaire n'a pas été supprimé pour permettre l'examen des fichiers: {temp_dir}")
+        else:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Créer une vidéo à partir d'images avec informations temporelles")
+    parser = argparse.ArgumentParser(description="Créer une vidéo à partir d'images avec fondu uniquement au milieu")
     parser.add_argument("folder_path", help="Chemin vers le dossier contenant les images PNG")
     parser.add_argument("audio_path", help="Chemin vers le fichier audio")
     parser.add_argument("transition_ms", type=int, help="Durée de transition en millisecondes")
+    parser.add_argument("start_time", type=int, 
+                        help="Temps de début pour couper la vidéo finale (en millisecondes, 0 = pas de coupe)")
+    parser.add_argument("end_time", type=int, 
+                        help="Temps de fin pour couper la vidéo finale (en millisecondes, 0 = jusqu'à la fin)")
+    parser.add_argument("output_path", help="Chemin personnalisé pour la vidéo de sortie")
     
     args = parser.parse_args()
     
-    create_video_from_images(args.folder_path, args.audio_path, args.transition_ms)
+    create_video_from_images(
+        args.folder_path, 
+        args.audio_path, 
+        args.transition_ms,
+        args.start_time,
+        args.end_time,
+        args.output_path
+    )
+
+# test with  py .\imgs_to_vid.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4
