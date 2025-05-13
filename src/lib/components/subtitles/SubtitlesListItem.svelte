@@ -121,7 +121,7 @@
 					<span class="text-[#8cbb8a] font-bold"
 						>{getEditionFromName(translation)?.language || translation}:</span
 					>
-					{subtitle.translations[translation] ?? 'Downloading...'}
+					{subtitle.translations[translation] ?? (subtitle.surah >= 1 ? 'Downloading...' : '')}
 				</p>
 			{/each}
 		{:else}

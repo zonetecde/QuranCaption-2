@@ -24,10 +24,16 @@
 		for (let i = $currentProject.timeline.subtitlesTracks[0].clips.length; i >= 0; i--) {
 			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
 
-			if (element && element.verse !== -1 && element.surah > 0) {
+			if (element && element.verse !== -1) {
 				verseNumber = element.verse;
 				verseNumberInInput = element.verse;
-				surahNumber = element.surah;
+
+				if (element.surah >= 1) {
+					surahNumber = element.surah;
+				} else {
+					surahNumber = 1;
+					selectedTextId = element.surah;
+				}
 
 				if (element.isLastWordInVerse) {
 					// Go to next verse
