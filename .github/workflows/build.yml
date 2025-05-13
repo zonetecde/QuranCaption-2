@@ -39,12 +39,15 @@ jobs:
           chmod +x yt-dlp
           mv yt-dlp src-tauri/binaries/yt-dlp
 
-      - name: Download and extract ffprobe (macos)
+      - name: Download and extract ffprobe and ffmpeg (macos)
         if: matrix.os == 'macos-latest'
         run: |
           curl -L -o ffprobe.7z https://evermeet.cx/ffmpeg/ffprobe-119416-g1dbc5675c1.7z
+          curl -L -o ffmpeg.7z https://evermeet.cx/ffmpeg/ffmpeg-119416-g1dbc5675c1.7z
           7z e -y ffprobe.7z -osrc-tauri/binaries
+          7z e -y ffmpeg.7z -osrc-tauri/binaries
           chmod +x src-tauri/binaries/ffprobe
+          chmod +x src-tauri/binaries/ffmpeg
 
       # Windows setup
       - name: Install dependencies (Windows)
@@ -59,12 +62,13 @@ jobs:
           chmod +x yt-dlp.exe
           mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
 
-      # FFprobe extraction for Windows
-      - name: Download and extract ffprobe.exe
+      # FFprobe and FFmpeg extraction for Windows
+      - name: Download and extract ffprobe.exe and ffmpeg.exe
         if: matrix.os == 'windows-latest'
         run: |
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
+          7z e -y ffmpeg.7z -i'!*/bin/ffmpeg.exe' -osrc-tauri/binaries
 
       # Video creator script for Windows
       # QuranCaption-2\src\lib\functions\export_scripts\build_win.bat

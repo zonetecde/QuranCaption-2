@@ -10,21 +10,16 @@ import platform
 
 def find_ffmpeg_path():
     """Determine the path to ffmpeg executable based on the platform."""
-    # Check if bundled ffmpeg exists
-    bundled_dir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "ffmpeg_bin")
+    # Check if ffmpeg and ffprobe are in the same directory as the Python file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    local_ffmpeg = os.path.join(script_dir, "ffmpeg.exe" if platform.system() == "Windows" else "ffmpeg")
+    local_ffprobe = os.path.join(script_dir, "ffprobe.exe" if platform.system() == "Windows" else "ffprobe")
     
-    if platform.system() == "Windows":
-        bundled_ffmpeg = os.path.join(bundled_dir, "ffmpeg.exe")
-        bundled_ffprobe = os.path.join(bundled_dir, "ffprobe.exe")
-        if os.path.exists(bundled_ffmpeg) and os.path.exists(bundled_ffprobe):
-            return bundled_ffmpeg, bundled_ffprobe
-        return "ffmpeg", "ffprobe"  # Use system PATH
-    else:  # macOS or Linux
-        bundled_ffmpeg = os.path.join(bundled_dir, "ffmpeg")
-        bundled_ffprobe = os.path.join(bundled_dir, "ffprobe")
-        if os.path.exists(bundled_ffmpeg) and os.path.exists(bundled_ffprobe):
-            return bundled_ffmpeg, bundled_ffprobe
-        return "ffmpeg", "ffprobe"  # Use system PATH
+    if os.path.exists(local_ffmpeg) and os.path.exists(local_ffprobe):
+        return local_ffmpeg, local_ffprobe
+
+    # Fallback to system PATH
+    return "ffmpeg", "ffprobe"
 
 def create_video_from_images(folder_path, audio_path, transition_ms, start_time_ms=0, end_time_ms=0, output_path=None):
     """
