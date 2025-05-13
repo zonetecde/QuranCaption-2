@@ -7,8 +7,8 @@ mkdir -p ffmpeg_bin
 # Téléchargement de FFmpeg pour macOS si nécessaire
 if [ ! -f ffmpeg_bin/ffmpeg ] || [ ! -f ffmpeg_bin/ffprobe ]; then
     echo "Downloading FFmpeg for macOS..."
-    curl -L https://evermeet.cx/ffmpeg/getrelease/ffmpeg/7.0 -o ffmpeg.zip
-    curl -L https://evermeet.cx/ffmpeg/getrelease/ffprobe/7.0 -o ffprobe.zip
+    curl -L https://evermeet.cx/ffmpeg/ffmpeg.zip -o ffmpeg.zip
+    curl -L https://evermeet.cx/ffmpeg/ffprobe.zip -o ffprobe.zip
     unzip ffmpeg.zip -d ffmpeg_bin
     unzip ffprobe.zip -d ffmpeg_bin
     chmod +x ffmpeg_bin/ffmpeg
@@ -17,6 +17,6 @@ if [ ! -f ffmpeg_bin/ffmpeg ] || [ ! -f ffmpeg_bin/ffprobe ]; then
 fi
 
 # Construction de l'exécutable
-pyinstaller --onefile --add-data "ffmpeg_bin:ffmpeg_bin" imgs_to_vid.py --name video_creator
+python3 -m PyInstaller --onefile --add-data "ffmpeg_bin:ffmpeg_bin" imgs_to_vid.py --name video_creator
 
 echo "Executable created: dist/video_creator"
