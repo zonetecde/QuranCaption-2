@@ -1,11 +1,15 @@
 <script lang="ts">
+	import { importAndReadFile } from '$lib/ext/File';
 	import { Type, type Surah } from '$lib/models/Quran';
 	import { OtherTexts } from '$lib/stores/OtherTextsStore';
 	import { onMount } from 'svelte';
 
 	function addNewTextButtonClick() {
+		// nbre aleatoire entre -2 et -9999999
+		// pour ne pas avoir de conflit avec les sourates existantes
+		const randomId = Math.floor(Math.random() * -9999999) - 2;
 		let newText: Surah = {
-			id: ($OtherTexts.length + 2) * -1, // +2 pour commencer à -2 (-1 étant réserver pour les nums de sourate invalides)
+			id: randomId,
 			name: 'New text ' + ($OtherTexts.length + 1),
 			transliteration: '',
 			type: Type.OtherText,
@@ -25,6 +29,45 @@
 			selectedText = $OtherTexts[0];
 		}
 	});
+
+	async function importTextButtonClick() {
+		// import subtitles settings
+		const content = await importAndReadFile('Quran Caption Custom Text (*.qc2)');
+
+		if (content) {
+			const customText = JSON.parse(content);
+
+			if (customText) {
+				const textId = customText.id;
+
+				const textWithThisId = $OtherTexts.find((text) => text.id === textId);
+				if (textWithThisId) {
+					// Si on a déjà un texte avec le même id, on demande de le remplacer
+					const replace = await confirm(
+						'A custom text with the same ID already exists. Do you want to replace it?'
+					);
+					if (!replace) {
+						return;
+					}
+					// Remplace le texte existant
+					$OtherTexts = $OtherTexts.map((__text) => {
+						if (__text.id === textId) {
+							return customText;
+						}
+						return __text;
+					});
+				} else {
+					// Ajoute le texte
+					$OtherTexts = [customText, ...$OtherTexts];
+				}
+
+				// trigger reactivity
+				OtherTexts.set($OtherTexts);
+				// Set the selected text to the newly added text
+				selectedText = customText;
+			}
+		}
+	}
 </script>
 
 <div
@@ -66,10 +109,20 @@
 			</p>
 		</div>
 	{/if}
-	<button
-		class="absolute bottom-3 left-1/2 -translate-x-1/2 w-3/4 text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-		on:click={addNewTextButtonClick}
-	>
-		Add New Text
-	</button>
+	<div class="absolute bottom-0 h-10 mb-2 w-full flex flex-col gap-y-3 px-2">
+		<div class="flex flex-row gap-x-3 items-center justify-center">
+			<button
+				class="text-sm bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
+				on:click={addNewTextButtonClick}
+			>
+				Add New Text
+			</button>
+			<button
+				class="text-sm bg-blue-500 text-white w-full py-2 rounded hover:bg-blue-600"
+				on:click={importTextButtonClick}
+			>
+				Import Text
+			</button>
+		</div>
+	</div>
 </div>

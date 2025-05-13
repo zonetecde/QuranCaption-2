@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { importAndReadFile } from '$lib/ext/File';
 	import { localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 	import { Type, type Surah } from '$lib/models/Quran';
 	import { addOtherTextsPopupVisibility } from '$lib/stores/LayoutStore';
 	import { OtherTexts, saveOtherTexts } from '$lib/stores/OtherTextsStore';
+	import { text } from '@sveltejs/kit';
 	import OtherTextsEditor from './OtherTextsEditor.svelte';
 	import OtherTextsList from './OtherTextsList.svelte';
 

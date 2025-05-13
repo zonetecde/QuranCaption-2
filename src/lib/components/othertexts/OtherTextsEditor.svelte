@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { downloadFile } from '$lib/ext/Utilities';
 	import type { Surah } from '$lib/models/Quran';
 	import { getTextTranslations } from '$lib/stores/OtherTextsStore';
 	import { currentProject, getDefaultsTranslationSettings } from '$lib/stores/ProjectStore';
@@ -237,7 +238,36 @@
 </script>
 
 {#if selectedText}
-	<div class="w-full h-full py-3 px-3 overflow-y-auto bg-[#232121] rounded-r-2xl">
+	<div
+		class="w-full h-full py-3 px-3 overflow-y-auto bg-[#232121] rounded-r-2xl relative overflow-x-hidden"
+	>
+		<button
+			class="absolute right-2 top-2 group"
+			on:click={() => {
+				// export the settings
+				downloadFile(JSON.stringify(selectedText, null, 2), `${selectedText?.name}.qc2`);
+			}}
+			><svg
+				fill="white"
+				width="800px"
+				height="800px"
+				class="size-5"
+				viewBox="0 0 1920 1920"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="m0 1016.081 409.186 409.073 79.85-79.736-272.867-272.979h1136.415V959.611H216.169l272.866-272.866-79.85-79.85L0 1016.082ZM1465.592 305.32l315.445 315.445h-315.445V305.32Zm402.184 242.372-329.224-329.11C1507.042 187.07 1463.334 169 1418.835 169h-743.83v677.647h112.94V281.941h564.706v451.765h451.765v903.53H787.946V1185.47H675.003v564.705h1242.353V667.522c0-44.498-18.07-88.207-49.581-119.83Z"
+					fill-rule="evenodd"
+				/>
+			</svg>
+
+			<p
+				class="absolute -left-1/2 -translate-x-2/3 w-40 bg-[#161313] rounded-xl top-6 hidden group-hover:block"
+			>
+				Export text
+			</p>
+		</button>
+
 		<h2 class="text-xl text-center">Text editor</h2>
 		<br />
 		<div class="flex flex-row relative">
