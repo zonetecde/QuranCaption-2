@@ -91,7 +91,7 @@
 			</option>
 		{/each}
 
-		<option class="bg-gray-800" value={-1}>Add new text</option>
+		<option class="bg-gray-800" value={-1}>Manage Other Texts</option>
 	</select>
 
 	{#if selectedTextId === null}

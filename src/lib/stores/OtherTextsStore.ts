@@ -64,5 +64,7 @@ export function getTextTranslations(textId: number, verseId: number): { [key: st
 
 	const verse = text.verses.find((v) => v.id === verseId);
 	if (!verse) return {};
+
+	console.log(text);
 	return verse.translations;
 }

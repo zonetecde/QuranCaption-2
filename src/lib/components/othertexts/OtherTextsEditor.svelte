@@ -1,10 +1,48 @@
 <script lang="ts">
 	import type { Surah } from '$lib/models/Quran';
+	import { getTextTranslations } from '$lib/stores/OtherTextsStore';
+	import { currentProject, getDefaultsTranslationSettings } from '$lib/stores/ProjectStore';
+	import { cli } from '@tauri-apps/api';
 	import { ask } from '@tauri-apps/api/dialog';
 	import toast from 'svelte-french-toast';
 
 	export let selectedText: Surah | null = null;
 	let rawText: string = '';
+
+	$: if (selectedText?.verses) {
+		// Ce trigger peut se déclencher lorsque on modifie une traduction.
+		// Le but serait d'update les subtitles clips du projet pour mettre la nouvelle traduction
+		$currentProject.timeline.subtitlesTracks[0].clips.forEach((clip) => {
+			if (clip.surah !== selectedText!.id || clip.verse <= 0) {
+				return;
+			}
+
+			// pour chaque traduction
+			Object.keys(clip.translations).forEach((lang) => {
+				// Met à jour la traduction
+				const trans = selectedText!.verses[clip.verse - 1].translations[lang];
+				if (!trans) return;
+
+				if (trans.includes(' *** ')) {
+					// Si c'est premier sub-verse
+					if (clip.firstWordIndexInVerse === 0 && clip.lastWordIndexInVerse === 0) {
+						clip.translations[lang] = trans.split(' *** ')[0];
+					} else if (clip.firstWordIndexInVerse === 0 && clip.lastWordIndexInVerse > 0) {
+						// Si c'est tout le sub-verse
+						clip.translations[lang] = trans;
+					} else {
+						// Si c'est le deuxième sub-verse
+						clip.translations[lang] = trans.split(' *** ')[1];
+					}
+				} else {
+					clip.translations[lang] = trans;
+				}
+			});
+		});
+
+		// trigger reactivity
+		selectedText = { ...selectedText };
+	}
 
 	function removeVerseButtonClick(index: number): any {
 		if (!selectedText) return;
@@ -46,11 +84,39 @@
 			'Enter the language code for the translation (e.g., "en" for English):'
 		);
 		if (translationLangCode) {
+			// Vérifie si la langue existe déjà
+			if (
+				selectedText.verses.length > 0 &&
+				selectedText.verses[0].translations[translationLangCode]
+			) {
+				toast.error('This translation already exists.');
+				return;
+			}
+
 			selectedText.verses.forEach((verse) => {
 				verse.translations[translationLangCode] = '';
 			});
+
+			// Ajoute les traductions qui viennent d'être ajoutées aux subtitlesClips déjà existants
+			$currentProject.timeline.subtitlesTracks[0].clips.forEach((clip) => {
+				if (clip.surah === selectedText!.id && clip.verse > 0) {
+					clip.translations[translationLangCode] = '';
+				}
+			});
+
+			// Ajoute la traduction à la liste des traductions ajoutées du projet
+			if (!$currentProject.projectSettings.addedTranslations.includes(translationLangCode)) {
+				$currentProject.projectSettings.subtitlesTracksSettings[translationLangCode] =
+					getDefaultsTranslationSettings();
+
+				$currentProject.projectSettings.addedTranslations = [
+					...$currentProject.projectSettings.addedTranslations,
+					translationLangCode
+				];
+			}
+
+			selectedText = { ...selectedText }; // Trigger reactivity
 		}
-		selectedText = { ...selectedText }; // Trigger reactivity
 	}
 
 	function removeTranslationButtonClick() {
@@ -63,7 +129,14 @@
 			selectedText.verses.forEach((verse) => {
 				delete verse.translations[translationLangCode];
 			});
+			// Remove the translation from the subtitles clips
+			$currentProject.timeline.subtitlesTracks[0].clips.forEach((clip) => {
+				if (clip.surah === selectedText!.id && clip.verse > 0) {
+					delete clip.translations[translationLangCode];
+				}
+			});
 		}
+
 		selectedText = { ...selectedText }; // Trigger reactivity
 	}
 
@@ -244,13 +317,13 @@
 							</button>
 						</div>
 
-						<div class="flex flex-col justify-center ml-4 monospace">
+						<div class="flex flex-col justify-center ml-4">
 							{#if Object.keys(verse.translations).length > 0}
 								{#each Object.keys(verse.translations) as lang}
 									<div class="flex items-center mb-2">
 										<label
 											for="translation-{index}-{lang}"
-											class="text-sm font-medium flex items-center w-full"
+											class="text-sm font-medium flex items-center w-full monospace"
 											>{lang}:
 											<input
 												placeholder="What delight [...] the fuqara? *** They are the sultans, lords, and princes."

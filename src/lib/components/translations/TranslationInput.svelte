@@ -134,6 +134,10 @@
 		changeText(subtitle.id, translationId);
 		subtitle.hadItTranslationEverBeenModified = true;
 
+		if (subtitle.surah <= 0) {
+			return; // pas d'autocomplet pour les textes custom
+		}
+
 		// Trim all subsequent subtitles that come after the Arabic text of the current subtitle
 		// to facilitate the translator's work
 		for (
@@ -283,7 +287,9 @@
 		<div class="flex flex-col mt-1 gap-y-3">
 			{#each $currentProject.projectSettings.addedTranslations as translationId}
 				<div>
-					<p class="font-bold w-full">{getEditionFromName(translationId)?.language}:</p>
+					<p class="font-bold w-full">
+						{getEditionFromName(translationId)?.language || translationId}:
+					</p>
 
 					<div class="flex relative flex-row">
 						<!-- svelte-ignore a11y-interactive-supports-focus -->

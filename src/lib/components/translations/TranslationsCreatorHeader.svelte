@@ -33,6 +33,11 @@
 	function handleTranslationHeaderClicked(lang: string) {
 		// Action dialog
 		const edition = getEditionFromName(lang);
+		if (!edition) {
+			toast.error(
+				'This translation cannot be removed, as it is attached to a custom text. Yet, you can hide it in the video settings.'
+			);
+		}
 		selectedTranslation = edition;
 	}
 
@@ -73,7 +78,7 @@
 						? 'rounded-br-lg border-r-2'
 						: 'border-r-0')}
 				on:click={() => handleTranslationHeaderClicked(lang)}
-				>{edition?.language} - {edition?.author}</button
+				>{(edition && `${edition?.language} - ${edition?.author}`) || lang}</button
 			>
 		{/each}
 	</div>

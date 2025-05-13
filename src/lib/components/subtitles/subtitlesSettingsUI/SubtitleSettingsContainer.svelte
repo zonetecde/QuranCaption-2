@@ -42,7 +42,8 @@
 					// Trouve dans les sous-titre actuelle lequel correspond à la même langue
 					Object.keys($currentProject.projectSettings.subtitlesTracksSettings).forEach(
 						(langKey) => {
-							if (langKey.startsWith(lang)) {
+							// Condition qui prends en compte les subtitles settings pour texte (seulement 2 char (en, fr, ...))
+							if ((langKey.length >= 3 && langKey.startsWith(lang)) || lang.startsWith(langKey)) {
 								const settings: SubtitleTrackSettings = subtitlesSettingsLangs[key];
 
 								// Migration
