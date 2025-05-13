@@ -124,3 +124,5 @@ if __name__ == "__main__":
     transition_ms = int(sys.argv[3])
     output_path = sys.argv[4]
     main(folder_path, audio_path, transition_ms, output_path)
+
+#py .\imgs_to_vid.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 200 ./vid.mp4
