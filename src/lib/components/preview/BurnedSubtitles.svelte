@@ -248,7 +248,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 									/\*\*\*/g,
 									(
 										$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-											.customTextSeparator || ' ••• '
+											.customTextSeparator || '<br>'
 									)
 										.replaceAll(' ', '‎ ')
 										.replaceAll('\\n', '<br>')
