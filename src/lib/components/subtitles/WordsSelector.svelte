@@ -436,6 +436,23 @@
 			// Met à jour les translations
 			subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
 		} else if (surahNumber < -1 && selectedTextId) {
+			// Si c'est un autre texte, on ajoute sa traduction depuis le store
+			translations = getTextTranslations(selectedTextId, verseNumber);
+
+			subtitleClips.find((clip) => clip.id === subtitleId)!.translations = translations;
+
+			for (const key in translations) {
+				// si elle n'a pas été ajouté au projet, l'ajoute
+				if (!$currentProject.projectSettings.addedTranslations.includes(key)) {
+					$currentProject.projectSettings.subtitlesTracksSettings[key] =
+						getDefaultsTranslationSettings();
+
+					$currentProject.projectSettings.addedTranslations = [
+						...$currentProject.projectSettings.addedTranslations,
+						key
+					];
+				}
+			}
 		}
 
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips; // Force l'update du component SubtitlesList
