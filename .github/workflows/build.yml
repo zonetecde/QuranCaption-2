@@ -66,6 +66,27 @@ jobs:
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
 
+      # Video creator script for Windows
+      # QuranCaption-2\src\lib\functions\export_scripts\build_win.bat
+      # Once built, the file located in src-tauri\video-creator\dist\video_creator.exe must be moved to src-tauri/binaries
+      - name: Build video creator script
+        if: matrix.os == 'windows-latest'
+        run: |
+          cd src-tauri/video-creator
+          build_win.bat
+          move dist\video_creator.exe ..\binaries\video_creator.exe
+
+      # Video creator script for macOS
+      # QuranCaption-2\src\lib\functions\export_scripts\build_mac.sh
+      # Once built, the file located in src-tauri\video-creator\dist\video_creator must be moved to src-tauri/binaries
+      - name: Build video creator script (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd src-tauri/video-creator
+          chmod +x build_mac.sh
+          ./build_mac.sh
+          mv dist/video_creator ../binaries/video_creator
+
       - name: Patch time crate
         working-directory: src-tauri
         run: cargo update -p time --precise 0.3.35

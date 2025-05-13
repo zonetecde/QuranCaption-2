@@ -18,7 +18,8 @@ localStorage/
 _localStorage/
 
 # for the export
-src/lib/functions/export_scripts/build/*
-src/lib/functions/export_scripts/dist/*
-src/lib/functions/export_scripts/ffmpeg_bin/*
-src/lib/functions/export_scripts/video_creator.spec
+src-tauri/video-creator/build/*
+src-tauri/video-creator/dist/*
+src-tauri/video-creator/ffmpeg_bin/*
+src-tauri/video-creator/video_creator.spec
+
