@@ -76,6 +76,9 @@
 				verseNumber = 1;
 			}
 		}
+
+		// remove focus for up and down arrow keys
+		event.target.blur();
 	}
 </script>
 
