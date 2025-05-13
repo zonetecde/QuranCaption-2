@@ -27,7 +27,7 @@
 			//@ts-ignore
 			const countryCode = LANGUAGE_TO_COUNTRY[language] || language.toUpperCase();
 
-			return `<img src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg" alt="${countryCode}" width="20" style="display: inline-block; vertical-align: middle; margin-left: 3px;">`;
+			return `<img src="http://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg" alt="${countryCode}" width="20" style="display: inline-block; vertical-align: middle; margin-left: 3px; max-height: 20px; max-width: 20px;" />`;
 		});
 		return `(${flags.join(', ')})`;
 	}
