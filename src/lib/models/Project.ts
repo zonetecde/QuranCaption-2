@@ -140,6 +140,7 @@ export interface SubtitleTrackSettings {
 	neededHeightToFitFullScreen: number;
 	neededHeightToFitSmallPreview: number;
 	maxNumberOfLines: number;
+	customTextSeparator: string;
 }
 
 /**

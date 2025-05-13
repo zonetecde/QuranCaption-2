@@ -132,7 +132,8 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				fitOnOneLine: false,
 				neededHeightToFitFullScreen: -1,
 				maxNumberOfLines: 1,
-				neededHeightToFitSmallPreview: -1
+				neededHeightToFitSmallPreview: -1,
+				customTextSeparator: ' ••• '
 			}
 		}
 	};
@@ -143,6 +144,7 @@ export function getDefaultsTranslationSettings(): Project['projectSettings']['su
 		fontSize: 91,
 		enableOutline: true,
 		outlineColor: '#000000',
+		customTextSeparator: '\\n',
 		outlineThickness: 2,
 		verticalPosition: 25,
 		horizontalPadding: 0,

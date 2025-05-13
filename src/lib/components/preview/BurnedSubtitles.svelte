@@ -223,7 +223,15 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 								{currentSubtitle.text}
 							{:else}
 								<!-- custom text, replace *** with line break -->
-								{@html currentSubtitle.text.replace(/\*\*\*/g, '‎ '.repeat(7))}
+								{@html currentSubtitle.text.replace(
+									/\*\*\*/g,
+									(
+										$currentProject.projectSettings.subtitlesTracksSettings['arabic']
+											.customTextSeparator || ' ••• '
+									)
+										.replaceAll(' ', ' ‎ ')
+										.replaceAll('\\n', '<br>')
+								)}
 							{/if}
 							{#if $currentProject.projectSettings.subtitlesTracksSettings['arabic'].showVerseNumber && currentSubtitle.isLastWordInVerse && currentSubtitle.verse !== -1 && currentSubtitle.surah > 0}
 								{latinNumberToArabic(currentSubtitle.verse.toString())}
@@ -236,7 +244,15 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 								{currentSubtitle.translations[subtitleLanguage]}
 							{:else if currentSubtitle.translations[subtitleLanguage] !== undefined}
 								<!-- custom text, replace *** with line break -->
-								{@html currentSubtitle.translations[subtitleLanguage].replace(/\*\*\*/g, '<br>')}
+								{@html currentSubtitle.translations[subtitleLanguage].replace(
+									/\*\*\*/g,
+									(
+										$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+											.customTextSeparator || ' ••• '
+									)
+										.replaceAll(' ', '‎ ')
+										.replaceAll('\\n', '<br>')
+								)}
 							{/if}
 						{/if}
 					{/if}

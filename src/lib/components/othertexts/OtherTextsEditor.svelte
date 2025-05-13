@@ -110,6 +110,10 @@
 				$currentProject.projectSettings.subtitlesTracksSettings[translationLangCode] =
 					getDefaultsTranslationSettings();
 
+				$currentProject.projectSettings.subtitlesTracksSettings[
+					translationLangCode
+				].customTextSeparator = '\\n';
+
 				$currentProject.projectSettings.addedTranslations = [
 					...$currentProject.projectSettings.addedTranslations,
 					translationLangCode
