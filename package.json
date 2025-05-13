@@ -40,6 +40,7 @@
 	"dependencies": {
 		"@tauri-apps/api": "^1.5.3",
 		"@tauri-apps/cli": "^1.6.1",
+		"dom-to-image": "^2.6.0",
 		"patch-package": "^8.0.0",
 		"svelte-french-toast": "^1.2.0",
 		"svelte-markdown": "^0.4.1"

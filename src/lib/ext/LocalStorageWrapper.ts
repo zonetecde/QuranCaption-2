@@ -1,7 +1,8 @@
 import { createDir, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { invoke } from '@tauri-apps/api/tauri';
 
-let STORAGE_PATH: string | undefined = undefined;
+export let STORAGE_PATH: string | undefined = undefined;
+export let EXPORT_PATH: string | undefined = undefined;
 
 export async function getLocalStoragePath() {
 	if (STORAGE_PATH) return STORAGE_PATH;
@@ -10,10 +11,18 @@ export async function getLocalStoragePath() {
 	STORAGE_PATH = EXECUTAVLE_PATH + 'localStorage/';
 	return STORAGE_PATH;
 }
+export async function getExportPath() {
+	if (EXPORT_PATH) return EXPORT_PATH;
+
+	let EXECUTAVLE_PATH = await invoke('path_to_executable');
+	EXPORT_PATH = EXECUTAVLE_PATH + 'export/';
+	return EXPORT_PATH;
+}
 
 export async function initializeStorage() {
 	try {
 		await createDir(await getLocalStoragePath(), { recursive: true });
+		await createDir(await getExportPath(), { recursive: true });
 		console.log('Storage initialized');
 	} catch (error) {
 		console.error('Failed to initialize storage:', error);

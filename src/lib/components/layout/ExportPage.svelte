@@ -9,6 +9,7 @@
 	import toast from 'svelte-french-toast';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
+	import { exportCurrentProjectAsVideo } from '$lib/functions/ExportProject';
 
 	let outputType: undefined | 'video' | 'subtitles' = undefined;
 
@@ -247,6 +248,12 @@
 							}}
 						>
 							Enter fullscreen
+						</button>
+						<button
+							class="bg-green-700 hover:bg-green-900 duration-100 text-white font-bold py-2 px-4 rounded mt-4"
+							on:click={exportCurrentProjectAsVideo}
+						>
+							Export your video
 						</button>
 
 						<h1 class="mt-10 text-center text-xl font-bold">
