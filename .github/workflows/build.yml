@@ -56,17 +56,17 @@ jobs:
           chmod +x yt-dlp.exe
           mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
 
-      # FFprobe and FFmpeg extraction for Windows
-      - name: Download and extract ffprobe.exe and ffmpeg.exe
+      # Setup Python and PyInstaller for Windows
+      - name: Setup Python and PyInstaller
+        if: matrix.os == 'windows-latest'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install PyInstaller
         if: matrix.os == 'windows-latest'
         run: |
-          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
-          7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
-          7z e -y ffmpeg.7z -i'!*/bin/ffmpeg.exe' -osrc-tauri/binaries
-
-      # Video creator script for Windows
-      # QuranCaption-2\src\lib\functions\export_scripts\build_win.bat
-      # Once built, the file located in src-tauri\video-creator\dist\video_creator.exe must be moved to src-tauri/binaries
+          pip install pyinstaller
       - name: Build video creator script
         if: matrix.os == 'windows-latest'
         run: |
