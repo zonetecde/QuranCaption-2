@@ -237,7 +237,7 @@
 </script>
 
 {#if selectedText}
-	<div class="w-full h-full py-3 px-3 overflow-y-auto">
+	<div class="w-full h-full py-3 px-3 overflow-y-auto bg-[#232121] rounded-r-2xl">
 		<h2 class="text-xl text-center">Text editor</h2>
 		<br />
 		<div class="flex flex-row relative">

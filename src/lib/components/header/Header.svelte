@@ -140,10 +140,9 @@
 			</svg>
 		</button>
 	</aabr>
-	<aabr title="Download project" class="absolute right-3 top-1/2 -translate-y-1/2 pt-2">
+	<aabr title="Export project" class="absolute right-3 top-1/2 -translate-y-1/2 pt-2">
 		<button
 			on:click={() => {
-				// export the project
 				downloadFile(JSON.stringify($currentProject, null, 2), `${$currentProject.name}.qc2`);
 			}}
 			><svg

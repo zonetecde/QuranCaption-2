@@ -18,7 +18,7 @@
 <div class="absolute inset-0 bg-black bg-opacity-65 z-20 backdrop-blur-sm">
 	<div class="flex items-center justify-center h-full">
 		<div
-			class="text-white relative min-w-[950px] w-3/4 h-3/4 bg-gray-800 p-4 rounded-lg shadow-lg shadow-black"
+			class="text-white relative min-w-[950px] w-3/4 h-3/4 bg-[#171717] border-4 border-[#272626] p-4 rounded-2xl shadow-lg shadow-black"
 		>
 			<button
 				class="absolute top-2 right-2 text-gray-400 hover:text-gray-200"

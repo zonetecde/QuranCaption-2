@@ -27,7 +27,9 @@
 	});
 </script>
 
-<div class="border-r-4 border-gray-800 pt-3 h-full relative flex flex-col pb-20">
+<div
+	class="border-r-4 border-[#171717] bg-[#232121] rounded-l-2xl pt-3 h-full relative flex flex-col pb-20"
+>
 	{#if $OtherTexts.length > 0}
 		<p class="text-center mb-3">Your text{$OtherTexts.length > 1 ? 's' : ''} :</p>
 		{#each $OtherTexts as text}
