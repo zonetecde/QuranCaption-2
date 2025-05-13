@@ -229,7 +229,7 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 										$currentProject.projectSettings.subtitlesTracksSettings['arabic']
 											.customTextSeparator || ' ••• '
 									)
-										.replaceAll(' ', ' ‎ ')
+										.replaceAll(' ', '؜ ؜')
 										.replaceAll('\\n', '<br>')
 								)}
 							{/if}
