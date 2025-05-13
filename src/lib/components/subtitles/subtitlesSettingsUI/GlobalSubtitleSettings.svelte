@@ -164,7 +164,6 @@
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
 			.opacity}
 	/>
-	<!-- TODO -->
 	<Slider
 		title="Size"
 		min={10}
