@@ -4,21 +4,36 @@ import argparse
 import subprocess
 import tempfile
 import shutil
+import sys
 from PIL import Image
+import platform
+
+def find_ffmpeg_path():
+    """Determine the path to ffmpeg executable based on the platform."""
+    # Check if bundled ffmpeg exists
+    bundled_dir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "ffmpeg_bin")
+    
+    if platform.system() == "Windows":
+        bundled_ffmpeg = os.path.join(bundled_dir, "ffmpeg.exe")
+        bundled_ffprobe = os.path.join(bundled_dir, "ffprobe.exe")
+        if os.path.exists(bundled_ffmpeg) and os.path.exists(bundled_ffprobe):
+            return bundled_ffmpeg, bundled_ffprobe
+        return "ffmpeg", "ffprobe"  # Use system PATH
+    else:  # macOS or Linux
+        bundled_ffmpeg = os.path.join(bundled_dir, "ffmpeg")
+        bundled_ffprobe = os.path.join(bundled_dir, "ffprobe")
+        if os.path.exists(bundled_ffmpeg) and os.path.exists(bundled_ffprobe):
+            return bundled_ffmpeg, bundled_ffprobe
+        return "ffmpeg", "ffprobe"  # Use system PATH
 
 def create_video_from_images(folder_path, audio_path, transition_ms, start_time_ms=0, end_time_ms=0, output_path=None):
     """
     Creates a video from images in a folder with timing information in filenames.
     Applies fade transition only to the middle 60% of the image height.
-    
-    Args:
-        folder_path: Path to folder containing PNG images
-        audio_path: Path to audio file
-        transition_ms: Duration of transitions in milliseconds
-        start_time_ms: Time to trim from start of final video (ms)
-        end_time_ms: End time for trim in final video (ms, 0 = until end)
-        output_path: Custom output path for the video (None = default path)
     """
+    # Get ffmpeg paths
+    ffmpeg_path, ffprobe_path = find_ffmpeg_path()
+    
     # Convert transition time from ms to seconds
     transition_sec = transition_ms / 1000.0
     
@@ -44,7 +59,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
     
     if not image_data:
         print("Aucune image trouvée avec le bon format de nom.")
-        return
+        return 1
     
     print(f"Trouvé {len(image_data)} images à inclure dans la vidéo.")
     
@@ -89,7 +104,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             # Create top section (remains intact)
             top_section = os.path.join(temp_dir, f"top_{i:04d}.mp4")
             cmd = [
-                'ffmpeg',
+                ffmpeg_path,
                 '-y',
                 '-loop', '1',
                 '-i', img_path,
@@ -109,7 +124,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             fade_out = "fade=out:st=" + str(max(0, duration - transition_sec)) + ":d=" + str(transition_sec) if i < len(image_data) - 1 else "null"
             
             cmd = [
-                'ffmpeg',
+                ffmpeg_path,
                 '-y',
                 '-loop', '1',
                 '-i', img_path,
@@ -126,7 +141,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             # Create bottom section (remains intact)
             bottom_section = os.path.join(temp_dir, f"bottom_{i:04d}.mp4")
             cmd = [
-                'ffmpeg',
+                ffmpeg_path,
                 '-y',
                 '-loop', '1',
                 '-i', img_path,
@@ -155,7 +170,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             )
             
             cmd = [
-                'ffmpeg',
+                ffmpeg_path,
                 '-y',
                 '-i', os.path.join(temp_dir, f"top_{i:04d}.mp4"),
                 '-i', os.path.join(temp_dir, f"middle_{i:04d}.mp4"),
@@ -181,7 +196,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         print("Assemblage des segments en vidéo complète...")
         silent_video = os.path.join(temp_dir, "silent_video.mp4")
         cmd = [
-            'ffmpeg',
+            ffmpeg_path,
             '-y',
             '-f', 'concat',
             '-safe', '0',
@@ -195,7 +210,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         # Add audio to create the full video
         full_video = os.path.join(temp_dir, "full_video.mp4")
         cmd = [
-            'ffmpeg',
+            ffmpeg_path,
             '-y',
             '-i', silent_video,
             '-i', audio_path,
@@ -215,7 +230,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         if start_time_ms > 0 or end_time_ms > 0:
             print(f"Application du trim: début={start_time_ms}ms" + (f", fin={end_time_ms}ms" if end_time_ms > 0 else ""))
             
-            trim_cmd = ['ffmpeg', '-y', '-i', full_video]
+            trim_cmd = [ffmpeg_path, '-y', '-i', full_video]
             
             # Add trim parameters
             trim_args = []
@@ -244,7 +259,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             shutil.copy2(full_video, final_output)
         
         # Get the final video duration
-        duration_cmd = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', final_output]
+        duration_cmd = [ffprobe_path, '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', final_output]
         result = subprocess.run(duration_cmd, capture_output=True, text=True)
         try:
             final_duration = float(result.stdout.strip())
@@ -256,11 +271,13 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         print(f"Le fondu a été appliqué uniquement à la partie centrale (60% de la hauteur).")
         if start_time_ms > 0 or end_time_ms > 0:
             print(f"Vidéo trimmée: début à {start_time_ms}ms" + (f" jusqu'à {end_time_ms}ms" if end_time_ms > 0 else ""))
-        print(f"Journal FFmpeg disponible dans: {log_file}")
+        
+        return 0  # Success
     
     except Exception as e:
         print(f"Une erreur s'est produite: {e}")
         print(f"Consultez le journal FFmpeg pour plus de détails: {log_file}")
+        return 1  # Error
     
     finally:
         # Don't clean up temp directory if there was an error, so logs can be examined
@@ -269,7 +286,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         else:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Créer une vidéo à partir d'images avec fondu uniquement au milieu")
     parser.add_argument("folder_path", help="Chemin vers le dossier contenant les images PNG")
     parser.add_argument("audio_path", help="Chemin vers le fichier audio")
@@ -282,7 +299,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    create_video_from_images(
+    return create_video_from_images(
         args.folder_path, 
         args.audio_path, 
         args.transition_ms,
@@ -291,4 +308,8 @@ if __name__ == "__main__":
         args.output_path
     )
 
-# test with  py .\imgs_to_vid.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4
+if __name__ == "__main__":
+    sys.exit(main())
+
+#py .\imgs_to_vid.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4
+#video_creator C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4

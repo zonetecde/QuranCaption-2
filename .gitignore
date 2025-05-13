@@ -16,3 +16,9 @@ yt-dlp.exe
 src/lib/ext/PrivateVariable.ts
 localStorage/
 _localStorage/
+
+# for the export
+src/lib/functions/export_scripts/build/*
+src/lib/functions/export_scripts/dist/*
+src/lib/functions/export_scripts/ffmpeg_bin/*
+src/lib/functions/export_scripts/video_creator.spec
