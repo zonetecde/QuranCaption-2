@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { fetchTranslationsFromGpt } from '$lib/functions/AutomaticTranslationsUsingAI';
+	import {
+		addAITranslations,
+		fetchTranslationsFromGpt
+	} from '$lib/functions/AutomaticTranslationsUsingAI';
 	import { getVerseTranslation } from '$lib/functions/Translation';
 	import {
 		onlyShowSubtitlesThatAreNotFullVerses,
@@ -135,7 +138,7 @@
 	}
 
 	let languageCodeToTranslate = '';
-	let processButton: HTMLButtonElement;
+	let aiOutput = '';
 </script>
 
 <div class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll">
@@ -218,31 +221,40 @@
 
 	<p class="text-center">-- Experimental Section --</p>
 
-	<p class="text-sm italic text-justify">
-		This will prompt the AI to translate partial verses when they are incomplete. The AI will
-		normally not invent anything, but will simply trim the existing translation you've provided to
-		match the correct portion.<br /> You must first add a translation to the project, enter its
-		language code, and then click the button below.<br /> Please double-check the translations after
-		using this feature. This is EXPERIMENTAL. I am not responsible for any mistakes.
-	</p>
-
-	<abbr
-		title="This will ask an AI to translate the verses of the current project for you."
-		class="experimental"
-	>
-		<button
-			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a] w-full border-b-0 rounded-b-none"
-			id="fetch-translations-button"
-			bind:this={processButton}
-			on:click={() => {
-				fetchTranslationsFromGpt(processButton, languageCodeToTranslate);
-			}}>Automatic Translation using AI</button
-		>
+	<div class="flex flex-col">
 		<input
 			type="text"
-			class="border py-2 border-gray-200 rounded-lg duration-100 bg-[#170f1a] w-full px-2 border-t-0 rounded-t-none"
+			class="border py-2 border-gray-200 rounded-lg duration-100 text-sm bg-[#170f1a] w-full px-2 border-b-0 rounded-b-none"
 			placeholder="Enter language code (e.g. fr, en, ar)"
 			bind:value={languageCodeToTranslate}
 		/>
-	</abbr>
+		<button
+			class="border py-2 border-gray-200 rounded-lg text-sm duration-100 bg-[#170f1a] w-full border-t-0 rounded-t-none"
+			id="fetch-translations-button"
+			on:click={() => {
+				fetchTranslationsFromGpt(languageCodeToTranslate);
+			}}>Copy AI prompt</button
+		>
+	</div>
+
+	<p class="text-sm text-justify">
+		Once you have copied the prompt, go to Grok.com and paste it there. (I found that it is
+		currently the best AI for this task, but you can use any AI you prefer.)
+	</p>
+	<p class="text-sm text-justify">Then, paste what Grok provided here:</p>
+
+	<div class="flex flex-col">
+		<textarea
+			class="border py-2 border-gray-200 rounded-lg duration-100 text-sm bg-[#170f1a] w-full px-2 border-b-0 rounded-b-none"
+			placeholder="Paste AI's response here"
+			bind:value={aiOutput}
+		></textarea>
+		<button
+			class="border py-2 border-gray-200 rounded-lg text-sm duration-100 bg-[#170f1a] w-full border-t-0 rounded-t-none"
+			id="fetch-translations-button"
+			on:click={() => {
+				addAITranslations(aiOutput, languageCodeToTranslate);
+			}}>Add the AI-generated translations</button
+		>
+	</div>
 </div>

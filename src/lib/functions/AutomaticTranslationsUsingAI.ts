@@ -2,210 +2,280 @@ import { currentProject } from '$lib/stores/ProjectStore';
 import toast from 'svelte-french-toast';
 import { get } from 'svelte/store';
 import { getVerseTranslation } from './Translation';
+import { getVerse } from '$lib/stores/QuranStore';
+import type { SubtitleClip } from '$lib/models/Timeline';
 
-let globalProcessButton: HTMLButtonElement;
-let languageCodeToTranslate: string;
-
-interface TranslationProcessState {
-	isProcessing: boolean;
-	abortController: AbortController | null;
-}
-
-const translationProcess: TranslationProcessState = {
-	isProcessing: false,
-	abortController: null
-};
-
-export async function fetchTranslationsFromGpt(
-	button: HTMLButtonElement, // Renommage du paramètre
-	languageCode: string
-) {
-	// Correction 2 : Assignation correcte au niveau du module
-	globalProcessButton = button;
-	languageCodeToTranslate = languageCode;
-
-	try {
-		if (!globalProcessButton) return;
-
-		// Correction 3 : Logique d'annulation améliorée
-		if (translationProcess.isProcessing) {
-			translationProcess.abortController?.abort();
-			return; // Retour précoce pour éviter le traitement supplémentaire
-		}
-
-		if (!languageCodeToTranslate) {
-			toast.error('Please enter a language code.');
-			return;
-		}
-
-		translationProcess.isProcessing = true;
-		translationProcess.abortController = new AbortController();
-		globalProcessButton.innerText = 'Stop translation process';
-
-		const verses = createVerseDictionary();
-		await processTranslations(verses);
-
-		// Correction 4 : Déplacer le toast de succès avant le reset
-		toast.success('Translation process completed.');
-	} catch (error) {
-		handleProcessError(error);
-	} finally {
-		// Correction 5 : Reset seulement si le processus était actif
-		if (translationProcess.isProcessing) {
-			resetProcessState();
-		}
-	}
-}
-
-function createVerseDictionary() {
-	const verses: Record<string, { verseExtract: string; subtitleId: string }[]> = {};
-
-	for (const subtitle of get(currentProject).timeline.subtitlesTracks[0].clips) {
-		if (shouldSkipSubtitle(subtitle)) continue;
-
-		const verseKey = `${subtitle.surah}:${subtitle.verse}`;
-		verses[verseKey] ??= [];
-		verses[verseKey].push({
-			verseExtract: subtitle.text,
-			subtitleId: subtitle.id
-		});
+export async function fetchTranslationsFromGpt(languageCode: string) {
+	if (languageCode === '') {
+		toast.error('Please enter a language code');
+		return;
 	}
 
-	return verses;
-}
+	// Génère le prompt est le met dans le clipboard
+	const prompt_base = await fetch('/prompts/translations.txt');
+	const prompt = await prompt_base.text();
 
-function shouldSkipSubtitle(subtitle: any): boolean {
-	return (
-		subtitle.isSilence ||
-		subtitle.isCustomText ||
-		subtitle.hadItTranslationEverBeenModified ||
-		(subtitle.firstWordIndexInVerse === 0 && subtitle.isLastWordInVerse) ||
-		subtitle.verse === -1 ||
-		subtitle.surah === -1
+	// recupere l'edition de la traduction
+	const edition = get(currentProject).projectSettings.addedTranslations.find((t) =>
+		t.includes(languageCode)
 	);
-}
-
-async function processTranslations(
-	verses: Record<string, { verseExtract: string; subtitleId: string }[]>
-) {
-	const { signal } = translationProcess.abortController!;
-	const translations = get(currentProject).projectSettings.addedTranslations;
-	const hasValidLanguage = translations.some((t) => t.includes(languageCodeToTranslate!));
-
-	if (!hasValidLanguage) {
+	if (!edition) {
 		toast.error('Language code not found.');
 		return;
 	}
 
-	for (const translation of translations) {
-		if (!translation.includes(languageCodeToTranslate!)) continue;
+	// remplace @1 par l'input
+	// génère donc l'input
+	let input: {
+		full_verse_arabic: string;
+		target_segments_arabic: string[];
+		existing_translation: string;
+	}[] = [];
 
-		for (const [verseKey, verseExtracts] of Object.entries(verses)) {
-			if (signal.aborted) return;
+	let lastVerse = -1;
+	let lastSurah = -1;
+	let allClipOfThisVerse: SubtitleClip[] = [];
 
-			await processVerse(translation, verseKey, verseExtracts, signal);
-			await delay(1000); // Temporisation entre les requêtes
+	for (const subtitle of get(currentProject).timeline.subtitlesTracks[0].clips) {
+		if (subtitle.isSilence || subtitle.isCustomText || subtitle.surah < 0) continue;
+
+		if (lastSurah === -1 && lastVerse === -1) {
+			lastSurah = subtitle.surah;
+			lastVerse = subtitle.verse;
+		}
+
+		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
+			// confirme tout les clips précedents
+			input.push({
+				full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
+				target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
+				existing_translation: await getVerseTranslation(
+					edition,
+					allClipOfThisVerse[0].surah,
+					allClipOfThisVerse[0].verse
+				)
+			});
+
+			allClipOfThisVerse = [subtitle]; // reset le tableau
+			lastVerse = subtitle.verse;
+			lastSurah = subtitle.surah;
+		} else {
+			// ajoute le clip
+			allClipOfThisVerse.push(subtitle);
 		}
 	}
-}
 
-async function processVerse(
-	translation: string,
-	verseKey: string,
-	verseExtracts: any[],
-	signal: AbortSignal
-) {
-	try {
-		toast(`Translating verse ${verseKey}...`, { duration: 1000, icon: '🔍' });
-
-		const verseTranslation = await fetchTranslation(
-			verseKey,
-			verseExtracts.map((e) => e.verseExtract),
-			translation,
-			signal
-		);
-
-		updateSubtitles(verseExtracts, verseTranslation, translation);
-		forceSubtitlesUpdate();
-	} catch (error) {
-		if (!signal.aborted) {
-			console.error(`Error processing verse ${verseKey}:`, error);
-			toast.error(`Failed to translate verse ${verseKey}`);
-		}
+	// ajoute le dernier clip
+	if (allClipOfThisVerse.length > 0) {
+		input.push({
+			full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
+			target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
+			existing_translation: await getVerseTranslation(
+				edition,
+				allClipOfThisVerse[0].surah,
+				allClipOfThisVerse[0].verse
+			)
+		});
 	}
+
+	// remplace @1 par l'input
+	const inputString = JSON.stringify(input);
+	const promptWithInput = prompt.replace(/@1/g, inputString);
+
+	navigator.clipboard.writeText(promptWithInput);
+	toast.success('Prompt copied to clipboard! Go to Grok.com and paste it there.', {
+		duration: 7000
+	});
+
+	return;
 }
 
-async function fetchTranslation(
-	verseKey: string,
-	extracts: string[],
-	translation: string,
-	signal: AbortSignal
-) {
-	const url = new URL('https://rayanestaszewski.fr/gpt-translation');
-	url.searchParams.set('verseKey', verseKey);
-	url.searchParams.set('verseExtract', JSON.stringify(extracts));
-	url.searchParams.set(
-		'verseTranslation',
-		await getVerseTranslation(
-			translation,
-			Number(verseKey.split(':')[0]),
-			Number(verseKey.split(':')[1])
-		)
-	);
+export function addAITranslations(raw_json: string, languageCode: string) {
+	/**
+	 * format : 
+	 * 
+	 * 
+	 * [
+  [
+    "Louange à Allah à qui appartient",
+    "tout ce qui est dans les cieux et tout ce qui est",
+    "sur la terre. Et louange à Lui dans l'au-delà.",
+    "Louange à Allah à qui appartient tout ce qui est dans les cieux et tout ce qui est sur la terre. Et louange à Lui dans l'au-delà.",
+    "Et c'est Lui le Sage, le Parfaitement Connaisseur.",
+    "Et louange à Lui dans l'au-delà. Et c'est Lui le Sage, le Parfaitement Connaisseur."
+  ],
+  [
+    "Il sait qui pénètre en terre et qui en sort",
+    "et qui en sort, ce qui descend du ciel",
+    "ce qui descend du ciel et ce qui y remonte",
+    "et ce qui y remonte",
+    "Et c'est Lui le Miséricordieux, le Pardonneur."
+  ]
+]
 
-	const response = await fetch(url.toString(), { signal });
+	 */
 
-	return response.json();
-}
-
-function updateSubtitles(verseExtracts: any[], translations: any, translationKey: string) {
-	let tabTrans = [];
-	try {
-		tabTrans = JSON.parse(translations).translations;
-	} catch (error) {
-		console.error('Error parsing translations:', error, translations);
-		toast.error('Failed to parse translations');
+	if (raw_json === '') {
+		toast.error('Please paste the AI response');
 		return;
 	}
 
-	// Mise à jour directe avec find()
-	for (const [index, extract] of verseExtracts.entries()) {
-		const subtitle = get(currentProject).timeline.subtitlesTracks[0].clips.find(
-			(s) => s.id === extract.subtitleId
+	const edition = get(currentProject).projectSettings.addedTranslations.find((t) =>
+		t.includes(languageCode)
+	);
+	if (!edition) {
+		toast.error('Language code not found.');
+		return;
+	}
+
+	let json;
+	try {
+		json = JSON.parse(raw_json);
+	} catch (error) {
+		toast.error('Invalid JSON format. Could not parse the input.');
+		return;
+	}
+
+	// on vérifie que le json est bien formé
+	if (!Array.isArray(json)) {
+		toast.error('Invalid JSON format. Expected an array.');
+		return;
+	}
+
+	// Get the current project data
+	const project = get(currentProject);
+	if (!project) {
+		toast.error('No project is currently loaded.');
+		return;
+	}
+
+	// Get the subtitle track
+	const subtitleTrack = project.timeline.subtitlesTracks[0];
+	if (!subtitleTrack) {
+		toast.error('No subtitle track found in project.');
+		return;
+	}
+
+	// Group clips by verse, similar to fetchTranslationsFromGpt
+	let verseGroups: Map<string, SubtitleClip[]> = new Map();
+	let verseOrder: string[] = []; // To keep track of the order of verses
+
+	// On parcourt les clips en les regroupant par verset
+	let lastVerse = -1;
+	let lastSurah = -1;
+	let allClipOfThisVerse: SubtitleClip[] = [];
+
+	for (const subtitle of subtitleTrack.clips) {
+		if (subtitle.isSilence || subtitle.isCustomText || subtitle.surah < 0) continue;
+
+		if (lastSurah === -1 && lastVerse === -1) {
+			lastSurah = subtitle.surah;
+			lastVerse = subtitle.verse;
+		}
+
+		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
+			// Add previous verse group to our maps
+			const key = `${lastSurah}:${lastVerse}`;
+			verseGroups.set(key, [...allClipOfThisVerse]);
+			verseOrder.push(key);
+
+			// Reset for new verse
+			allClipOfThisVerse = [subtitle];
+			lastVerse = subtitle.verse;
+			lastSurah = subtitle.surah;
+		} else {
+			// Add clip to current verse
+			allClipOfThisVerse.push(subtitle);
+		}
+	}
+
+	// Add the last verse group if there is one
+	if (allClipOfThisVerse.length > 0) {
+		const key = `${lastSurah}:${lastVerse}`;
+		verseGroups.set(key, [...allClipOfThisVerse]);
+		verseOrder.push(key);
+	}
+
+	// Check if the number of verse groups matches the number of translation arrays
+	if (verseOrder.length !== json.length) {
+		toast.error(
+			`Mismatch between project verses (${verseOrder.length}) and AI translations (${json.length}).`
 		);
-
-		if (subtitle && tabTrans[index]) {
-			subtitle.translations[translationKey] = tabTrans[index];
-			subtitle.hadItTranslationEverBeenModified = true;
-		}
+		return;
 	}
-}
 
-function forceSubtitlesUpdate() {
-	currentProject.update(() => {
-		return { ...get(currentProject) };
+	// Update clips with translations
+	let updatedCount = 0;
+	let skippedCount = 0;
+	let newSubtitleClips = [...subtitleTrack.clips]; // Create a copy of the clips array
+
+	verseOrder.forEach((key, verseIndex) => {
+		const clips = verseGroups.get(key);
+		const translations = json[verseIndex];
+
+		if (!clips || !translations || !Array.isArray(translations)) {
+			skippedCount++;
+			return;
+		}
+
+		if (clips.length !== translations.length) {
+			toast.error(
+				`For verse ${key}: Segment count mismatch. Found ${clips.length} clips but ${translations.length} translations.`
+			);
+			skippedCount++;
+			return;
+		}
+
+		// Apply translations to clips
+		clips.forEach((clip, i) => {
+			if (translations[i]) {
+				// Find the matching clip in the original array and update it
+				const clipIndex = newSubtitleClips.findIndex(
+					(c) =>
+						!c.isSilence &&
+						c.surah === clip.surah &&
+						c.verse === clip.verse &&
+						c.start === clip.start
+				);
+
+				if (clipIndex !== -1) {
+					// Create new clip with updated translations
+					newSubtitleClips[clipIndex] = {
+						...newSubtitleClips[clipIndex],
+						translations: {
+							...newSubtitleClips[clipIndex].translations,
+							[edition]: translations[i]
+						},
+						hadItTranslationEverBeenModified: true
+					};
+					updatedCount++;
+				} else {
+					skippedCount++;
+				}
+			} else {
+				skippedCount++;
+			}
+		});
 	});
-}
 
-function resetProcessState() {
-	translationProcess.isProcessing = false;
-	translationProcess.abortController = null;
-	if (globalProcessButton) {
-		globalProcessButton.innerText = 'Automatic Translation using AI';
-	}
-}
+	// Update the project with modified clips
+	currentProject.update((currentValue) => {
+		return {
+			...currentValue,
+			timeline: {
+				...currentValue.timeline,
+				subtitlesTracks: [
+					{
+						...subtitleTrack,
+						clips: newSubtitleClips
+					},
+					...currentValue.timeline.subtitlesTracks.slice(1)
+				]
+			}
+		};
+	});
 
-function handleProcessError(error: any) {
-	if (error.name === 'AbortError') {
-		if (translationProcess.isProcessing) {
-			toast.error('Translation process aborted');
-		}
-	} else {
-		console.error('Unexpected error:', error);
-		toast.error('An unexpected error occurred');
-	}
-}
-
-function delay(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+	toast.success(
+		`Successfully updated ${updatedCount} clips with AI translations.${skippedCount > 0 ? ` Skipped ${skippedCount} clips.` : ''}`
+	);
 }
