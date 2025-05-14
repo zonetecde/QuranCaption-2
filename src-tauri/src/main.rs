@@ -162,6 +162,8 @@ async fn create_video(
     start_time: i32,
     end_time: i32,
     output_path: String,
+    top_ratio: f32,
+    bottom_ratio: f32,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
 
@@ -180,9 +182,11 @@ async fn create_video(
         transition_ms.to_string(),
         start_time.to_string(),
         end_time.to_string(),
-        output_path
+        output_path,
+        top_ratio.to_string(),
+        bottom_ratio.to_string(),
     ];
-    
+
     // Exécuter la commande
     let output = std::process::Command::new(video_creator_path)
         .args(&cmd_args)

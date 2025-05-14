@@ -392,9 +392,9 @@ def main():
     parser.add_argument("end_time", type=int, 
                         help="End time for trimming the final video (in milliseconds, 0 = until the end)")
     parser.add_argument("output_path", help="Custom path for the output video")
-    parser.add_argument("--top-ratio", type=float, default=0.2,
+    parser.add_argument("top_ratio", type=float,
                         help="Ratio of the height for the top section (0.0 to 0.5, default: 0.2 or 20%%)")
-    parser.add_argument("--bottom-ratio", type=float, default=0.2,
+    parser.add_argument("bottom_ratio", type=float,
                         help="Ratio of the height for the bottom section (0.0 to 0.5, default: 0.2 or 20%%)")
     
     args = parser.parse_args()
@@ -414,7 +414,7 @@ if __name__ == "__main__":
     sys.exit(main())
 
 # Exemple d'utilisation standard (avec les ratios par défaut de 20%):
-#py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4 --top-ratio 0.2 --bottom-ratio 0.2
+#py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4 0.2 0.2
 
 # Exemple pour exécutable compilé:
-#video_creator C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4 --top-ratio 0.2 --bottom-ratio 0.2
+#video_creator C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4 0.2 0.2
