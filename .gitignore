@@ -12,6 +12,7 @@ vite.config.ts.timestamp-*
 ffmpeg.exe
 ffplay.exe
 ffprobe.exe
+video_creator.exe
 yt-dlp.exe
 src/lib/ext/PrivateVariable.ts
 localStorage/
@@ -20,7 +21,6 @@ _localStorage/
 # for the export
 src-tauri/video-creator/build/*
 src-tauri/video-creator/dist/*
-src-tauri/video-creator/ffmpeg_bin/*
 src-tauri/video-creator/video_creator.spec
 
 src-tauri/video-creator/output.mp4

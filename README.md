@@ -22,7 +22,7 @@ You can download the latest version of Quran Caption here : [Releases](https://g
 
 ### Note for Developers:
 
-After cloning the repository, ensure that you add the `ffprobe`, `ffmpeg`, and `yt-dlp` files, and compile the `video_creator.py` script into the `src-tauri/binaries` folder so the app can run properly.
+After cloning the repository, ensure that you add the `ffprobe`, `ffmpeg`, and `yt-dlp` files, and compile the `video_creator.py` script so the app can run properly.
 
 ###### 🔧 How to do that?
 

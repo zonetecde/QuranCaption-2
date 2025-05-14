@@ -27,6 +27,6 @@ Download the files **without extensions** and place them in `src-tauri/binaries`
 
 #### 📜 Compile the Python Script
 
-To compile the Python script, navigate to the `src-tauri/video-creator` directory and run the `build_win.bat` file for Windows or the `build_mac.sh` file for MacOS. This will generate a `video_creator.exe` file in the same directory. Move this file to the `src-tauri/binaries` folder.
+To compile the Python script, navigate to the `src-tauri/video-creator` directory and run the `build_win.bat` file for Windows or the `build_mac.sh` file for MacOS. This will generate a `video_creator.exe` file in the `src-tauri/binaries` folder.
 
 > ⚠️ Ensure the `build_mac.sh` file is executable on MacOS (`chmod +x`).
