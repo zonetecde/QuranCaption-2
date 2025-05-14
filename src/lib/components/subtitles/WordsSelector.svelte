@@ -31,6 +31,7 @@
 		getVerseFromText,
 		OtherTexts
 	} from '$lib/stores/OtherTextsStore';
+	import { getCurrentCursorTime } from '$lib/stores/VideoPreviewStore';
 
 	export let verseNumber: number;
 	export let surahNumber: number;
@@ -327,23 +328,6 @@
 		}
 
 		$currentProject.timeline.subtitlesTracks[0].clips = subtitleClips;
-	}
-
-	/**
-	 * Récupère le temps actuel du curseur
-	 */
-	function getCurrentCursorTime() {
-		const audioElement = document.getElementById('audio-preview') as HTMLAudioElement;
-		let currentTimeMs = 0;
-		if (audioElement) currentTimeMs = audioElement.currentTime * 1000;
-		else {
-			const videoElement = document.getElementById('video-preview') as HTMLVideoElement;
-			if (videoElement) currentTimeMs = videoElement.currentTime * 1000;
-			else currentTimeMs = $cursorPosition;
-		}
-
-		readjustCursorPosition(false);
-		return currentTimeMs;
 	}
 
 	/**
