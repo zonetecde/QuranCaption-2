@@ -7,7 +7,7 @@ use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -24,7 +24,7 @@ fn get_video_duration(path: String, app_handle: tauri::AppHandle) -> Result<i32,
     // wait for the file to be not used by another process
     std::thread::sleep(std::time::Duration::from_secs(1));
 
-    let path_resolver = app_handle.path_resolver();
+    let path_resolver: tauri::PathResolver = app_handle.path_resolver();
 
  // Attempt to resolve the path to the bundled 'ffprobe' binary
  match path_resolver.resolve_resource("binaries/ffprobe") {
@@ -152,4 +152,52 @@ fn path_to_executable() -> Result<String, String> {
             Err(format!("Failed to get executable path: {}", e))
         }
     }
+}
+
+#[tauri::command]
+async fn create_video(
+    folder_path: String,
+    audio_path: String,
+    transition_ms: i32,
+    start_time: i32,
+    end_time: i32,
+    output_path: String,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+
+        let path_resolver: tauri::PathResolver = app_handle.path_resolver();
+
+        
+    // Déterminer l'emplacement de l'exécutable
+// Attempt to resolve the path to the bundled 'video_creator' binary
+ match path_resolver.resolve_resource("binaries/video_creator") {
+    Some(video_creator_path) => {
+
+    // Construire les arguments
+    let cmd_args = vec![
+        folder_path,
+        audio_path,
+        transition_ms.to_string(),
+        start_time.to_string(),
+        end_time.to_string(),
+        output_path
+    ];
+    
+    // Exécuter la commande
+    let output = std::process::Command::new(video_creator_path)
+        .args(&cmd_args)
+        .output()
+        .map_err(|e| format!("Erreur lors de l'exécution: {}", e))?;
+    
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+    },
+    None => {
+        // Handle the case where the path could not be resolved
+        Err("Failed to resolve video_creator path".to_string())
+    }
+ }
 }
