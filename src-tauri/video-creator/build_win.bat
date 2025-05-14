@@ -12,3 +12,8 @@ rem Build the executable
 pyinstaller --onefile video_creator.py --name video_creator
 
 echo Executable created: dist\video_creator.exe
+
+@REM move the executable from dist\video_creator.exe to ..\binaries\video_creator.exe
+move dist\video_creator.exe ..\binaries\video_creator.exe
+
+echo Executable moved to ..\binaries\video_creator.exe

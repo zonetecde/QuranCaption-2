@@ -23,3 +23,4 @@ src-tauri/video-creator/dist/*
 src-tauri/video-creator/ffmpeg_bin/*
 src-tauri/video-creator/video_creator.spec
 
+src-tauri/video-creator/output.mp4
