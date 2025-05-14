@@ -4,6 +4,7 @@
 	import { latinNumberToArabic } from '$lib/functions/Arabic';
 	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import {
+		calculateAdjustedVerticalPosition,
 		fullScreenPreview,
 		showSubtitlesPadding,
 		videoDimensions
@@ -156,8 +157,12 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 	{@const enableOutline = subtitleSettingsForThisLang.enableOutline}
 	{@const subtitleOutlineColor = subtitleSettingsForThisLang.outlineColor}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
-	{@const subtitleVerticalPosition =
-		$videoDimensions.height * (subtitleSettingsForThisLang.verticalPosition / 100)}
+	{@const subtitleVerticalPosition = calculateAdjustedVerticalPosition(
+		$videoDimensions.height,
+		$videoDimensions.width,
+		subtitleSettingsForThisLang.verticalPosition,
+		$fullScreenPreview
+	)}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
 		$videoDimensions.width *

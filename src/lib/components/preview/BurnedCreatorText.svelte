@@ -1,6 +1,6 @@
 <script>
 	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
-	import { videoDimensions } from '$lib/stores/LayoutStore';
+	import { calculateAdjustedVerticalPosition, videoDimensions } from '$lib/stores/LayoutStore';
 
 	import { currentProject } from '$lib/stores/ProjectStore';
 
@@ -18,9 +18,12 @@
 
 {#if $currentProject.projectSettings.globalSubtitlesSettings.creatorText.enable}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
-	{@const subtitleVerticalPosition =
-		$videoDimensions.height *
-		($currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition / 100)}
+	{@const subtitleVerticalPosition = calculateAdjustedVerticalPosition(
+		$videoDimensions.height,
+		$videoDimensions.width,
+		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition,
+		true
+	)}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
 		$videoDimensions.width *

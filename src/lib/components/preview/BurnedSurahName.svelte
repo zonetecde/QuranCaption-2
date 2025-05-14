@@ -2,7 +2,7 @@
 	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import type { SurahNameSettings } from '$lib/models/Project';
 	import type { SubtitleClip } from '$lib/models/Timeline';
-	import { videoDimensions } from '$lib/stores/LayoutStore';
+	import { calculateAdjustedVerticalPosition, videoDimensions } from '$lib/stores/LayoutStore';
 	import { getTextName } from '$lib/stores/OtherTextsStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';
@@ -46,10 +46,12 @@
 
 {#if currentSubtitle && $latestSurah !== -1}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
-	{@const subtitleVerticalPosition =
-		$videoDimensions.height *
-		($currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition /
-			100)}
+	{@const subtitleVerticalPosition = calculateAdjustedVerticalPosition(
+		$videoDimensions.height,
+		$videoDimensions.width,
+		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition,
+		true
+	)}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
 		$videoDimensions.width *
