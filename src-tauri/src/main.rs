@@ -7,7 +7,7 @@ use font_kit::{error::SelectionError, source::SystemSource};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, open])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -204,4 +204,19 @@ async fn create_video(
         Err("Failed to resolve video_creator path".to_string())
     }
  }
+}
+
+#[tauri::command]
+async fn open(path: String) {
+    let path = std::path::Path::new(&path);
+    let dir_path = if path.is_file() {
+        path.parent().unwrap_or(path)
+    } else {
+        path
+    };
+
+    // Open the directory or file location using the default file explorer
+    if let Err(e) = std::process::Command::new("explorer").arg(dir_path).spawn() {
+        eprintln!("Failed to open directory or file location: {}", e);
+    }
 }

@@ -1,5 +1,5 @@
 import { fullScreenPreview } from '$lib/stores/LayoutStore';
-import { currentProject } from '$lib/stores/ProjectStore';
+import { currentProject, getFirstAudioOrVideoPath } from '$lib/stores/ProjectStore';
 import { cursorPosition } from '$lib/stores/TimelineStore';
 import toast from 'svelte-french-toast';
 import { get } from 'svelte/store';
@@ -9,6 +9,7 @@ import { path } from '@tauri-apps/api';
 import DomToImage from 'dom-to-image';
 import { EXPORT_PATH } from '$lib/ext/LocalStorageWrapper';
 import { createDir } from '@tauri-apps/api/fs';
+import { invoke } from '@tauri-apps/api/tauri';
 
 export async function exportCurrentProjectAsVideo() {
 	// Première étape : on rentre en mode plein écran
@@ -30,7 +31,7 @@ export async function exportCurrentProjectAsVideo() {
 		cursorPosition.set(clip.start + 100);
 
 		await new Promise((resolve) => {
-			setTimeout(resolve, 100); // Wait for subtitle to render
+			setTimeout(resolve, 10); // Wait for subtitle to render
 		});
 
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché
@@ -38,11 +39,39 @@ export async function exportCurrentProjectAsVideo() {
 		await takeScreenshot(randomId.toString(), Math.floor(clip.start) + '_' + Math.floor(clip.end));
 	}
 
-	toast.success('No collision were found.');
-
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
+
 	// On sort du mode plein écran
 	fullScreenPreview.set(false);
+
+	const outputPath = `${EXPORT_PATH}${_currentProject.name}.mp4`;
+
+	// On appelle le script python pour créer la vidéo
+	await toast.promise(
+		invoke('create_video', {
+			folderPath: `${EXPORT_PATH}${randomId}`,
+			audioPath: getFirstAudioOrVideoPath(),
+			transitionMs: _currentProject.projectSettings.globalSubtitlesSettings.fadeDuration,
+			startTime: 0,
+			endTime: 0,
+			outputPath: outputPath,
+			topRatio: 0.2,
+			bottomRatio: 0.2
+		}),
+		{
+			loading: 'Creating video...',
+			success: 'Video created successfully!',
+			error: (error) => {
+				return 'Error while creating video: ' + error;
+			}
+		}
+	);
+	// ouvre le dossier contenant la vidéo
+	await invoke('open', {
+		path: outputPath
+	});
+	// supprime le dossier contenant les images
+	await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
 }
 
 async function takeScreenshot(folderName: string, fileName: string) {

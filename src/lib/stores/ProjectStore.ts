@@ -7,6 +7,7 @@ import { get, writable, type Writable } from 'svelte/store';
 import { getSurahName, Mushaf } from './QuranStore';
 import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
 import { getTextName, OtherTexts } from './OtherTextsStore';
+import { getAssetFromId } from '$lib/models/Asset';
 
 export const currentProject: Writable<Project> = writable();
 
@@ -353,7 +354,6 @@ export function getProjectVersesRange(project: Project): string[] {
 		}
 	}
 
-	console.log('versesRange', versesRange);
 	// now convert 1:1->7 to readable text : 1. Al Fatiha (1-7)
 	const mushaf = get(Mushaf);
 	if (mushaf === undefined) return [];
@@ -503,4 +503,15 @@ export function setDefaultIndividualSettingsForSubtitleId(subtitleId: string) {
 
 export function hasAtLeastOneSubtitle() {
 	return get(currentProject).timeline.subtitlesTracks[0].clips.some((c) => c.verse !== -1);
+}
+
+export function getFirstAudioOrVideoPath(): string {
+	const _currentProject = get(currentProject);
+	if (_currentProject.timeline.audiosTracks.length > 0) {
+		return getAssetFromId(_currentProject.timeline.audiosTracks[0].clips[0].assetId)!.filePath;
+	} else if (_currentProject.timeline.videosTracks.length > 0) {
+		return getAssetFromId(_currentProject.timeline.videosTracks[0].clips[0].assetId)!.filePath;
+	} else {
+		return '';
+	}
 }

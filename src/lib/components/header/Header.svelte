@@ -21,7 +21,6 @@
 		if (autoSaveInterval) clearInterval(autoSaveInterval);
 		autoSaveInterval = setInterval(async () => {
 			await updateUsersProjects($currentProject);
-			console.log('Auto saved');
 		}, 10000);
 	}
 
