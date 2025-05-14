@@ -306,5 +306,5 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())
 
-#py .\imgs_to_vid.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4
+#py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4
 #video_creator C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\907260 C:\Users\zonedetec\Documents\quran.al.luhaidan\46\audio_9107.webm 300 5000 7000 ./output.mp4

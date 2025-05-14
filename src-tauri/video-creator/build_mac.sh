@@ -8,6 +8,6 @@ if ! command -v pyinstaller &> /dev/null; then
 fi
 
 # Build the executable
-pyinstaller --onefile imgs_to_vid.py --name video_creator
+pyinstaller --onefile video_creator.py --name video_creator
 
 echo "Executable created: dist/video_creator"

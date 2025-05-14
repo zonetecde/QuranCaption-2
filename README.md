@@ -20,10 +20,10 @@ You can download the latest version of Quran Caption here : [Releases](https://g
 
 ![image](https://qurancaption-project.vercel.app/translations-tab.png)
 
-### Note for the developers:
+### Note for Developers:
 
-After cloning the repository, make sure to add both `ffprobe` and `yt-dlp` to the `src-tauri/binaries` folder so the app can run properly.
+After cloning the repository, ensure that you add the `ffprobe`, `ffmpeg`, and `yt-dlp` files, and compile the `video_creator.py` script into the `src-tauri/binaries` folder so the app can run properly.
 
-#### 🔧 Download Links (per OS)
+###### 🔧 How to do that?
 
-You can find the download links for `ffprobe` and `yt-dlp` in the `src-tauri/binaries/readme.md` file.
+You can find instructions and download links in the `src-tauri/binaries/readme.md` file.

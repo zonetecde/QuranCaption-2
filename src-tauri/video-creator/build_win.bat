@@ -9,6 +9,6 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 rem Build the executable
-pyinstaller --onefile imgs_to_vid.py --name video_creator
+pyinstaller --onefile video_creator.py --name video_creator
 
 echo Executable created: dist\video_creator.exe
