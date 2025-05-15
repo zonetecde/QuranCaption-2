@@ -228,7 +228,13 @@
 		} else if ((event.key === 's' || event.key === 'S') && !event.ctrlKey) {
 			// Ajoute un silence
 			addSubtitle('', true, true);
-		} else if (event.key === 'Backspace' || event.code === 'Backspace' || event.key === 'Delete') {
+		} else if (
+			event.key === 'Backspace' ||
+			event.code === 'Backspace' ||
+			event.key === 'Delete' ||
+			event.code === 'Delete' ||
+			event.key === 'Clear'
+		) {
 			removeLastSubtitle();
 		} else if (event.key === 'v' || event.key === 'V') {
 			// Sélectionne tout les mots du verset

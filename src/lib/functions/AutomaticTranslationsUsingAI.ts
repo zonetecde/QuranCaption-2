@@ -5,7 +5,17 @@ import { getVerseTranslation } from './Translation';
 import { getVerse } from '$lib/stores/QuranStore';
 import type { SubtitleClip } from '$lib/models/Timeline';
 
-export async function fetchTranslationsFromGpt(languageCode: string) {
+/**
+ * Génère un prompt pour l'IA afin de traduire les segments de versets incomplets.
+ *
+ * Cette fonction ne traite que les versets qui sont divisés en plusieurs clips
+ * (segments). Les versets représentés par un seul clip sont considérés comme
+ * "complets" et sont ignorés car ils n'ont pas besoin d'être retraduits segment
+ * par segment.
+ *
+ * @param languageCode Code de langue pour la traduction (ex: "fr", "en", etc.)
+ */
+export async function generateTranslationsPrompt(languageCode: string) {
 	if (languageCode === '') {
 		toast.error('Please enter a language code');
 		return;
@@ -23,13 +33,12 @@ export async function fetchTranslationsFromGpt(languageCode: string) {
 		toast.error('Language code not found.');
 		return;
 	}
-
 	// remplace @1 par l'input
-	// génère donc l'input
+	// génère donc l'input - ne contient que les versets incomplets (divisés en plusieurs clips)
 	let input: {
-		full_verse_arabic: string;
-		target_segments_arabic: string[];
-		existing_translation: string;
+		full_verse_arabic: string; // Texte arabe complet du verset
+		target_segments_arabic: string[]; // Segments en arabe à traduire individuellement
+		existing_translation: string; // Traduction existante du verset complet (référence)
 	}[] = [];
 
 	let lastVerse = -1;
@@ -46,15 +55,19 @@ export async function fetchTranslationsFromGpt(languageCode: string) {
 
 		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
 			// confirme tout les clips précedents
-			input.push({
-				full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
-				target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
-				existing_translation: await getVerseTranslation(
-					edition,
-					allClipOfThisVerse[0].surah,
-					allClipOfThisVerse[0].verse
-				)
-			});
+			if (allClipOfThisVerse.length > 1) {
+				// skip if only one clip (subtitle already complet)
+				input.push({
+					full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse)
+						.text,
+					target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
+					existing_translation: await getVerseTranslation(
+						edition,
+						allClipOfThisVerse[0].surah,
+						allClipOfThisVerse[0].verse
+					)
+				});
+			}
 
 			allClipOfThisVerse = [subtitle]; // reset le tableau
 			lastVerse = subtitle.verse;
@@ -64,9 +77,9 @@ export async function fetchTranslationsFromGpt(languageCode: string) {
 			allClipOfThisVerse.push(subtitle);
 		}
 	}
-
 	// ajoute le dernier clip
-	if (allClipOfThisVerse.length > 0) {
+	// skip if only one clip (subtitle already complet)
+	if (allClipOfThisVerse.length > 1) {
 		input.push({
 			full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
 			target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
@@ -78,41 +91,64 @@ export async function fetchTranslationsFromGpt(languageCode: string) {
 		});
 	}
 
+	if (input.length === 0) {
+		toast.error(
+			'No clips found to generate prompt (either all clips are custom text or full verses).'
+		);
+		return;
+	}
+	// Journalisation pour débogage (peut être désactivée en production)
+	const debug = false;
+	if (debug) {
+		console.log(`Generating prompt for ${input.length} incomplete verses`);
+		input.forEach((item, index) => {
+			console.log(`Verse ${index + 1}:`);
+			console.log(`  Segments: ${item.target_segments_arabic.length}`);
+			console.log(`  First segment: ${item.target_segments_arabic[0]}`);
+		});
+	}
+
 	// remplace @1 par l'input
-	const inputString = JSON.stringify(input);
+	const inputString = JSON.stringify(input, null, 2);
 	const promptWithInput = prompt.replace(/@1/g, inputString);
 
 	navigator.clipboard.writeText(promptWithInput);
-	toast.success('Prompt copied to clipboard! Go to Grok.com and paste it there.', {
-		duration: 7000
-	});
+	toast.success(
+		`Prompt copied to clipboard! Contains ${input.length} incomplete verses. Go to Grok.com and paste it there.`,
+		{
+			duration: 7000
+		}
+	);
 
 	return;
 }
 
 export function addAITranslations(raw_json: string, languageCode: string) {
 	/**
-	 * format : 
-	 * 
-	 * 
+	 * Applique les traductions générées par l'IA aux sous-titres.
+	 *
+	 * Note: Cette fonction ne traite que les versets incomplets (divisés en plusieurs clips),
+	 * conformément à la fonction generateTranslationsPrompt qui ne génère des prompts que
+	 * pour les versets incomplets.
+	 *
+	 * Format attendu du JSON:
 	 * [
-  [
-    "Louange à Allah à qui appartient",
-    "tout ce qui est dans les cieux et tout ce qui est",
-    "sur la terre. Et louange à Lui dans l'au-delà.",
-    "Louange à Allah à qui appartient tout ce qui est dans les cieux et tout ce qui est sur la terre. Et louange à Lui dans l'au-delà.",
-    "Et c'est Lui le Sage, le Parfaitement Connaisseur.",
-    "Et louange à Lui dans l'au-delà. Et c'est Lui le Sage, le Parfaitement Connaisseur."
-  ],
-  [
-    "Il sait qui pénètre en terre et qui en sort",
-    "et qui en sort, ce qui descend du ciel",
-    "ce qui descend du ciel et ce qui y remonte",
-    "et ce qui y remonte",
-    "Et c'est Lui le Miséricordieux, le Pardonneur."
-  ]
-]
-
+	 *   [
+	 *     "Louange à Allah à qui appartient",
+	 *     "tout ce qui est dans les cieux et tout ce qui est",
+	 *     "sur la terre. Et louange à Lui dans l'au-delà.",
+	 *     "Louange à Allah à qui appartient tout ce qui est dans les cieux et tout ce qui est sur la terre. Et louange à Lui dans l'au-delà.",
+	 *     "Et c'est Lui le Sage, le Parfaitement Connaisseur.",
+	 *     "Et louange à Lui dans l'au-delà. Et c'est Lui le Sage, le Parfaitement Connaisseur."
+	 *   ],
+	 *   [
+	 *     "Il sait qui pénètre en terre et qui en sort",
+	 *     "et qui en sort, ce qui descend du ciel",
+	 *     "ce qui descend du ciel et ce qui y remonte",
+	 *     "et ce qui y remonte",
+	 *     "Et c'est Lui le Miséricordieux, le Pardonneur."
+	 *   ]
+	 * ]
 	 */
 
 	if (raw_json === '') {
@@ -155,8 +191,7 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		toast.error('No subtitle track found in project.');
 		return;
 	}
-
-	// Group clips by verse, similar to fetchTranslationsFromGpt
+	// Group clips by verse, similar to generateTranslationsPrompt, but only including incomplete verses
 	let verseGroups: Map<string, SubtitleClip[]> = new Map();
 	let verseOrder: string[] = []; // To keep track of the order of verses
 
@@ -174,10 +209,12 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		}
 
 		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
-			// Add previous verse group to our maps
-			const key = `${lastSurah}:${lastVerse}`;
-			verseGroups.set(key, [...allClipOfThisVerse]);
-			verseOrder.push(key);
+			// Add previous verse group to our maps ONLY if it contains more than 1 clip (incomplete verse)
+			if (allClipOfThisVerse.length > 1) {
+				const key = `${lastSurah}:${lastVerse}`;
+				verseGroups.set(key, [...allClipOfThisVerse]);
+				verseOrder.push(key);
+			}
 
 			// Reset for new verse
 			allClipOfThisVerse = [subtitle];
@@ -189,17 +226,17 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		}
 	}
 
-	// Add the last verse group if there is one
-	if (allClipOfThisVerse.length > 0) {
+	// Add the last verse group if there is one AND it has more than 1 clip (incomplete verse)
+	if (allClipOfThisVerse.length > 1) {
 		const key = `${lastSurah}:${lastVerse}`;
 		verseGroups.set(key, [...allClipOfThisVerse]);
 		verseOrder.push(key);
 	}
-
 	// Check if the number of verse groups matches the number of translation arrays
 	if (verseOrder.length !== json.length) {
 		toast.error(
-			`Mismatch between project verses (${verseOrder.length}) and AI translations (${json.length}).`
+			`Mismatch between incomplete project verses (${verseOrder.length}) and AI translations (${json.length}). 
+             Make sure you're using the latest prompt from 'Generate Prompt' and that all translations were included in the response.`
 		);
 		return;
 	}
@@ -274,8 +311,7 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 			}
 		};
 	});
-
 	toast.success(
-		`Successfully updated ${updatedCount} clips with AI translations.${skippedCount > 0 ? ` Skipped ${skippedCount} clips.` : ''}`
+		`Successfully updated ${updatedCount} clips with AI translations for incomplete verses.${skippedCount > 0 ? ` Skipped ${skippedCount} clips.` : ''}`
 	);
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
 		addAITranslations,
-		fetchTranslationsFromGpt
+		generateTranslationsPrompt
 	} from '$lib/functions/AutomaticTranslationsUsingAI';
 	import { getVerseTranslation } from '$lib/functions/Translation';
 	import {
@@ -14,6 +14,7 @@
 		getUserProjectsAsProjects
 	} from '$lib/stores/ProjectStore';
 	import toast from 'svelte-french-toast';
+	import { open as openLink } from '@tauri-apps/api/shell';
 
 	let percentage = 0;
 	$: if ($currentProject.timeline.subtitlesTracks[0].clips) {
@@ -232,14 +233,19 @@
 			class="border py-2 border-gray-200 rounded-lg text-sm duration-100 bg-[#170f1a] w-full border-t-0 rounded-t-none"
 			id="fetch-translations-button"
 			on:click={() => {
-				fetchTranslationsFromGpt(languageCodeToTranslate);
+				generateTranslationsPrompt(languageCodeToTranslate);
 			}}>Copy AI prompt</button
 		>
 	</div>
 
 	<p class="text-sm text-justify">
-		Once you have copied the prompt, go to Grok.com and paste it there. (I found that it is
-		currently the best AI for this task, but you can use any AI you prefer.)
+		Once you have copied the prompt, go to <button
+			class="text-blue-300"
+			on:click={() => {
+				openLink('https://grok.com');
+			}}>Grok.com</button
+		> and paste it there. (I found that it is currently the best AI for this task, but you can use any
+		AI you prefer.)
 	</p>
 	<p class="text-sm text-justify">Then, paste what Grok provided here:</p>
 
