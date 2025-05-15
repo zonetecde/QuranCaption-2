@@ -158,10 +158,10 @@ export async function exportCurrentProjectAsVideo() {
 
 async function takeScreenshot(folderName: string, fileName: string) {
 	// L'élément à transformer en image
-	var node = document.getElementById('preview')!;
+	let node = document.getElementById('preview')!;
 
 	// Qualité de l'image
-	var scale = 2;
+	let scale = 2;
 
 	// Utilisation de DomToImage pour transformer la div en image
 	try {
@@ -178,11 +178,21 @@ async function takeScreenshot(folderName: string, fileName: string) {
 		// with tauri, save the image to the desktop
 		const fileNameWithExtension = fileName + '.png';
 		const filePathWithName = `${EXPORT_PATH}${folderName}/${fileNameWithExtension}`;
+
+		// Convertir dataUrl base64 en ArrayBuffer sans utiliser fetch
+		const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+		const binaryString = window.atob(base64Data);
+		const bytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
+
 		await fs.writeBinaryFile({
 			path: filePathWithName,
-			contents: await fetch(dataUrl).then((res) => res.arrayBuffer())
+			contents: bytes.buffer
 		});
 	} catch (error: any) {
+		console.error('Error while taking screenshot: ', error);
 		toast.error('Error while taking screenshot: ' + error.message);
 	}
 }

@@ -77,7 +77,7 @@
 			}
 		},
 		"security": {
-			"csp": "default-src *; media-src *; style-src * 'unsafe-inline'; connect-src *"
+			"csp": "default-src *; media-src *; style-src * 'unsafe-inline'; connect-src *; img-src * data:"
 		},
 		"updater": {
 			"active": false
