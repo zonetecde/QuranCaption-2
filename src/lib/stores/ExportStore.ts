@@ -5,6 +5,7 @@ export const endTime: Writable<number | null> = writable(null);
 
 export const exportType: Writable<string> = writable('video-static');
 export const currentlyExporting: Writable<boolean> = writable(false); // Indique si on est en train d'exporter
+export const triggerSubtitleResize: Writable<boolean> = writable(false); // Indique si on doit redimensionner les sous-titres
 
 // Video section ratios (in percentage)
 export const topRatio: Writable<number> = writable(25); // default: 20%

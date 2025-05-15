@@ -9,7 +9,12 @@
 	} from '$lib/stores/LayoutStore';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
 	import { getEditions, loadQuran } from '$lib/stores/QuranStore';
-	import { isCtrlPressed, isSpeedButtonPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
+	import {
+		isCtrlPressed,
+		isEscapePressed,
+		isSpeedButtonPressed,
+		spaceBarPressed
+	} from '$lib/stores/ShortcutStore';
 	import { cursorPosition, forceUpdateCurrentPlayingMedia } from '$lib/stores/TimelineStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
 	import { onMount } from 'svelte';
@@ -113,6 +118,8 @@
 					isSpeedButtonPressed.set(false);
 					videoSpeed.set($videoSpeed - 1);
 				}
+			} else if (e.key === 'Escape') {
+				isEscapePressed.set(true);
 			}
 		};
 	});

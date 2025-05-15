@@ -1,4 +1,4 @@
-import { fullScreenPreview, videoDimensions } from '$lib/stores/LayoutStore';
+import { fullScreenPreview, setCurrentVideoTime, videoDimensions } from '$lib/stores/LayoutStore';
 import { currentProject, getFirstAudioOrVideoPath } from '$lib/stores/ProjectStore';
 import {
 	cursorPosition,
@@ -19,9 +19,11 @@ import {
 	currentlyExporting,
 	endTime,
 	startTime,
-	topRatio
+	topRatio,
+	triggerSubtitleResize
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
+import { isEscapePressed } from '$lib/stores/ShortcutStore';
 
 export async function exportCurrentProjectAsVideo() {
 	const _currentProject = get(currentProject);
@@ -63,8 +65,8 @@ export async function exportCurrentProjectAsVideo() {
 	}
 
 	// Première étape : on rentre en mode plein écran
-	currentlyExporting.set(true);
 	fullScreenPreview.set(true);
+	currentlyExporting.set(true);
 
 	// Deuxième étape : on navigue de sous-titre en sous-titre
 	const subtitleClips = _currentProject.timeline.subtitlesTracks[0].clips;
@@ -75,17 +77,33 @@ export async function exportCurrentProjectAsVideo() {
 	const randomId = Math.floor(Math.random() * 1000000); // nom du dossier contenant les images
 	await createDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
 
+	toast("Creating images, do not touch anything. Press 'Esc' to cancel.", {
+		duration: 4000,
+		icon: '🔄'
+	});
+
 	for (let i = 0; i < subtitleClips.length; i++) {
+		if (get(isEscapePressed)) {
+			// cancel the export
+			toast.error('Export cancelled');
+			currentlyExporting.set(false);
+			fullScreenPreview.set(false);
+			isEscapePressed.set(false);
+			// await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
+			return;
+		}
+
 		const clip = subtitleClips[i];
 
 		cursorPosition.set(clip.start + 100);
+		triggerSubtitleResize.set(false);
 
 		await new Promise((resolve) => {
-			setTimeout(resolve, 10); // Wait for subtitle to render
+			setTimeout(resolve, 40);
 		});
-		videoDimensions.set(get(videoDimensions));
+		triggerSubtitleResize.set(true); // trigger le changement de fontsize pour l'option `fitInOneLine`
 		await new Promise((resolve) => {
-			setTimeout(resolve, 100); // Wait for subtitle to render
+			setTimeout(resolve, 50); // wait for subtitles to be displayed in one line
 		});
 
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché

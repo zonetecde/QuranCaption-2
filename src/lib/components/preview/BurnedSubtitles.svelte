@@ -12,6 +12,7 @@
 	import { currentProject, hasSubtitleAtLeastOneStyle } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { fade } from 'svelte/transition';
+	import { currentlyExporting, triggerSubtitleResize } from '$lib/stores/ExportStore';
 
 	export let currentSubtitle: SubtitleClip;
 	export let hideControls = false;
@@ -77,8 +78,10 @@
 	let subtitleTextSize = 1;
 
 	$: if (
-		$videoDimensions ||
-		(paragraph &&
+		(!$currentlyExporting && $videoDimensions) ||
+		$triggerSubtitleResize ||
+		(!$currentlyExporting &&
+			paragraph &&
 			subtitleSettingsForThisLang.fitOnOneLine &&
 			(($fullScreenPreview &&
 				paragraph.clientHeight > subtitleSettingsForThisLang.neededHeightToFitFullScreen) ||

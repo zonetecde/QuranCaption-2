@@ -298,7 +298,7 @@
 
 			<BurnedSurahName bind:currentSubtitle />
 			<!-- Video Section Ratio Visualization (vertical) -->
-			{#if $currentPage === 'Export' && $exportType === 'video-static' && !$currentlyExporting}
+			{#if $currentlyExporting === false && $currentPage === 'Export' && $exportType === 'video-static'}
 				<!-- Horizontal separator lines - adjusted to not overlap with control bar -->
 				<div
 					class="absolute inset-0 pointer-events-none"

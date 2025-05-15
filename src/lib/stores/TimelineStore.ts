@@ -45,8 +45,6 @@ export function getVideoDurationInMs(): number {
 		);
 	}, 0);
 
-	console.log('maxEnd', maxEnd);
-
 	return maxEnd;
 }
 
