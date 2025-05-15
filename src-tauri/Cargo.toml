@@ -1,6 +1,6 @@
 [package]
 name = "Quran-Caption"
-version = "0.4.3"
+version = "0.4.4"
 description = "Quran Caption is a software that makes it easy to generate videos of Quran recitation with subtitles in any language !"
 authors = ["Rayane STASZEWSKI"]
 license = "Attribution-NonCommercial 4.0 International"

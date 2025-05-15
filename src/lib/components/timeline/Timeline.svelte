@@ -139,12 +139,12 @@
 
 			{#if $currentPage === 'Export' && !$fullScreenPreview && $exportType === 'video-static'}
 				<!-- Selection area between start and end time -->
-				{#if $startTime >= 0 && $endTime > $startTime}
+				{#if $startTime >= 0 && ($endTime || getTimelineTotalDuration() * 100) > $startTime}
 					<div
 						class="absolute top-5 left-24 lg:left-40 h-60 z-50"
 						style="
 						transform: translateX({($startTime / 1000) * $zoom}px);
-						width: {(($endTime - $startTime) / 1000) * $zoom}px;
+						width: {((($endTime || getTimelineTotalDuration() * 100) - $startTime) / 1000) * $zoom}px;
 						background-color: rgba(46, 204, 113, 0.3);
 						border-top: 2px solid rgba(46, 204, 113, 0.5);
 						border-bottom: 2px solid rgba(46, 204, 113, 0.5);
@@ -161,10 +161,11 @@
 				{/if}
 
 				<!-- End time marker -->
-				{#if $endTime > 0}
+				{#if ($endTime || getTimelineTotalDuration() * 100) > 0}
 					<div
 						class="absolute top-5 left-24 lg:left-40 h-60 z-50 flex items-center border-l-2 border-[#229753]"
-						style="transform: translateX({($endTime / 1000) * $zoom}px);"
+						style="transform: translateX({(($endTime || getTimelineTotalDuration() * 100) / 1000) *
+							$zoom}px);"
 					></div>
 				{/if}
 			{/if}
