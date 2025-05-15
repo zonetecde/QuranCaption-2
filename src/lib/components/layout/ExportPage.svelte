@@ -12,12 +12,12 @@
 		<!-- Editor -->
 		<section class="w-full divide-y-4 divide-[#413f3f]">
 			<!-- Video preview -->
-			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'h-[65%] max-h-[65%]'}>
+			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'h-[93%] max-h-[93%]'}>
 				<VideoPreview hideControls={$fullScreenPreview} />
 			</section>
 
 			<!-- Timeline -->
-			<section class="h-[35%]">
+			<section class="h-[7%]">
 				<Timeline />
 			</section>
 		</section>
@@ -34,10 +34,5 @@
 	/* grid cols 2 : first col 75% the second col 25% */
 	.grid-cols-2-template {
 		grid-template-columns: 75% 25%;
-	}
-
-	.selected {
-		background-color: #202c1c;
-		color: white;
 	}
 </style>

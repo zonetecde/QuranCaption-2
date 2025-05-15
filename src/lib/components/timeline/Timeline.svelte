@@ -12,8 +12,14 @@
 	import LeftPart from './track/LeftPart.svelte';
 	import { secondsToHHMMSS } from '$lib/models/Timeline';
 	import { isCtrlPressed, spaceBarPressed } from '$lib/stores/ShortcutStore';
-	import { bestPerformance, setCurrentVideoTime } from '$lib/stores/LayoutStore';
+	import {
+		bestPerformance,
+		currentPage,
+		fullScreenPreview,
+		setCurrentVideoTime
+	} from '$lib/stores/LayoutStore';
 	import { isPreviewPlaying } from '$lib/stores/VideoPreviewStore';
+	import { startTime, endTime, exportType } from '$lib/stores/ExportStore';
 
 	export let useInPlayer = false; // Est-ce que c'est utilisé en tant que barrre de temps dans le lecteur vidéo ?
 
@@ -22,7 +28,7 @@
 		timeline?.scrollTo($scrollPosition, 0);
 	});
 
-	$: timeLineTotalDuration = getTimelineTotalDuration($currentProject.timeline);
+	$: timeLineTotalDuration = getTimelineTotalDuration();
 
 	function handleMouseWheelWheeling(event: WheelEvent) {
 		if (!$isCtrlPressed) return;
@@ -123,7 +129,6 @@
 					}}
 				></div>
 			{/if}
-
 			<!-- Cursor -->
 			<!-- The `- 1` in the calcul is because the cursor is 2px thick -->
 			<div
@@ -131,6 +136,38 @@
 				id="cursor"
 				style="transform: translateX({($cursorPosition / 1000) * $zoom - 1}px);"
 			></div>
+
+			{#if $currentPage === 'Export' && !$fullScreenPreview && $exportType === 'video-static'}
+				<!-- Selection area between start and end time -->
+				{#if $startTime >= 0 && $endTime > $startTime}
+					<div
+						class="absolute top-5 left-24 lg:left-40 h-60 z-50"
+						style="
+						transform: translateX({($startTime / 1000) * $zoom}px);
+						width: {(($endTime - $startTime) / 1000) * $zoom}px;
+						background-color: rgba(46, 204, 113, 0.3);
+						border-top: 2px solid rgba(46, 204, 113, 0.5);
+						border-bottom: 2px solid rgba(46, 204, 113, 0.5);
+					"
+					></div>
+				{/if}
+
+				<!-- Start time marker -->
+				{#if $startTime > 0}
+					<div
+						class="absolute top-5 left-24 lg:left-40 h-60 z-50 flex items-center border-l-2 border-[#229753]"
+						style="transform: translateX({($startTime / 1000) * $zoom}px);"
+					></div>
+				{/if}
+
+				<!-- End time marker -->
+				{#if $endTime > 0}
+					<div
+						class="absolute top-5 left-24 lg:left-40 h-60 z-50 flex items-center border-l-2 border-[#229753]"
+						style="transform: translateX({($endTime / 1000) * $zoom}px);"
+					></div>
+				{/if}
+			{/if}
 		</div>
 
 		<div class="absolute top-0 left-0 w-full h-full">

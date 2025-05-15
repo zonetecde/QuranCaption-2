@@ -1,12 +1,14 @@
 import type Timeline from '$lib/models/Timeline';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
+import { currentProject } from './ProjectStore';
 
 export const zoom: Writable<number> = writable(30); // 30 px per second
 export const cursorPosition: Writable<number> = writable(0); // in milliseconds, current moment in the timeline / video preview
 export const forceUpdateCurrentPlayingMedia: Writable<boolean> = writable(false);
 export const scrollPosition: Writable<number> = writable(0);
 
-export function getTimelineTotalDuration(timeline: Timeline) {
+export function getTimelineTotalDuration(): number {
+	const timeline = get(currentProject).timeline;
 	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks, ...timeline.subtitlesTracks];
 	let maxEnd =
 		tracks.reduce((max, track) => {

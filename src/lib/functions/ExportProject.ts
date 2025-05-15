@@ -1,6 +1,6 @@
 import { fullScreenPreview } from '$lib/stores/LayoutStore';
 import { currentProject, getFirstAudioOrVideoPath } from '$lib/stores/ProjectStore';
-import { cursorPosition } from '$lib/stores/TimelineStore';
+import { cursorPosition, getTimelineTotalDuration } from '$lib/stores/TimelineStore';
 import toast from 'svelte-french-toast';
 import { get } from 'svelte/store';
 import { fs } from '@tauri-apps/api';
@@ -10,11 +10,57 @@ import DomToImage from 'dom-to-image';
 import { EXPORT_PATH } from '$lib/ext/LocalStorageWrapper';
 import { createDir } from '@tauri-apps/api/fs';
 import { invoke } from '@tauri-apps/api/tauri';
+import {
+	bottomRatio,
+	currentlyExporting,
+	endTime,
+	startTime,
+	topRatio
+} from '$lib/stores/ExportStore';
 
 export async function exportCurrentProjectAsVideo() {
-	// Première étape : on rentre en mode plein écran
-	fullScreenPreview.set(true);
 	const _currentProject = get(currentProject);
+
+	// Vérifie si le projet est exportable
+	if (get(endTime) !== null && get(startTime) > get(endTime)!) {
+		toast.error('Invalid export time range');
+		return;
+	} else if (get(endTime) !== null && get(startTime) === get(endTime)) {
+		toast.error('Please select a time range to export');
+		return;
+	}
+	if (_currentProject.timeline.subtitlesTracks[0].clips.length === 0) {
+		toast.error('The video is empty');
+		return;
+	}
+
+	// Si il n'y a pas de sous-titre entre le dernier sous-titre et le endTime, on en créer un (silencieux)
+	const lastSubtitle = _currentProject.timeline.subtitlesTracks[0].clips.slice(-1)[0];
+	console.log(lastSubtitle.end, get(endTime) || getTimelineTotalDuration() * 100);
+	if (lastSubtitle.end < (get(endTime) || getTimelineTotalDuration() * 100)) {
+		_currentProject.timeline.subtitlesTracks[0].clips = [
+			..._currentProject.timeline.subtitlesTracks[0].clips,
+			{
+				id: 'temporary',
+				start: lastSubtitle.end,
+				end: get(endTime) || getTimelineTotalDuration() * 100,
+				verse: -1,
+				surah: -1,
+				text: '',
+				isSilence: true,
+				isCustomText: false,
+				translations: {},
+				firstWordIndexInVerse: -1,
+				lastWordIndexInVerse: -1,
+				isLastWordInVerse: false,
+				hadItTranslationEverBeenModified: false
+			}
+		];
+	}
+
+	// Première étape : on rentre en mode plein écran
+	currentlyExporting.set(true);
+	fullScreenPreview.set(true);
 
 	// Deuxième étape : on navigue de sous-titre en sous-titre
 	const subtitleClips = _currentProject.timeline.subtitlesTracks[0].clips;
@@ -43,6 +89,11 @@ export async function exportCurrentProjectAsVideo() {
 
 	// On sort du mode plein écran
 	fullScreenPreview.set(false);
+	currentlyExporting.set(false);
+
+	// Supprime le sous-titre temporaire (ceux qui ont pour id "temporary")
+	_currentProject.timeline.subtitlesTracks[0].clips =
+		_currentProject.timeline.subtitlesTracks[0].clips.filter((clip) => clip.id !== 'temporary');
 
 	const outputPath = `${EXPORT_PATH}${_currentProject.name}.mp4`;
 
@@ -51,15 +102,17 @@ export async function exportCurrentProjectAsVideo() {
 		invoke('create_video', {
 			folderPath: `${EXPORT_PATH}${randomId}`,
 			audioPath: getFirstAudioOrVideoPath(),
-			transitionMs: _currentProject.projectSettings.globalSubtitlesSettings.fadeDuration,
-			startTime: 0,
-			endTime: 0,
+			transitionMs: Math.floor(
+				_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration
+			),
+			startTime: Math.floor(get(startTime)),
+			endTime: Math.floor(get(endTime) || 0),
 			outputPath: outputPath,
-			topRatio: 0.2,
-			bottomRatio: 0.2
+			topRatio: get(topRatio) / 100,
+			bottomRatio: get(bottomRatio) / 100
 		}),
 		{
-			loading: 'Creating video...',
+			loading: 'Creating video (id: ' + randomId + ')',
 			success: 'Video created successfully!',
 			error: (error) => {
 				return 'Error while creating video: ' + error;
