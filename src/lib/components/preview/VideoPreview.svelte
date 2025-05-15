@@ -236,7 +236,7 @@
 </script>
 
 <div class="w-full h-full flex flex-col relative overflow-hidden">
-	<div class={'h-full relative bg-[#0f0d0d] ' + (hideControls ? '' : 'pb-16')} id="preview">
+	<div class={'h-full relative bg-black ' + (hideControls ? '' : 'pb-16')} id="preview">
 		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId) || currentSubtitle}
 			{#if currentVideo}
 				{@const video = getAssetFromId(currentVideo.assetId)}
