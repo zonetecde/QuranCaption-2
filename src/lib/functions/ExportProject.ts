@@ -79,7 +79,7 @@ export async function exportCurrentProjectAsVideo() {
 
 	toast("Creating images, do not touch anything. Press 'Esc' to cancel.", {
 		duration: 4000,
-		icon: '🔄'
+		icon: 'ℹ️'
 	});
 
 	for (let i = 0; i < subtitleClips.length; i++) {
@@ -89,7 +89,7 @@ export async function exportCurrentProjectAsVideo() {
 			currentlyExporting.set(false);
 			fullScreenPreview.set(false);
 			isEscapePressed.set(false);
-			// await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
+			await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
 			return;
 		}
 
