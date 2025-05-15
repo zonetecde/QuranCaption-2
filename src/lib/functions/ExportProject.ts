@@ -89,6 +89,7 @@ export async function exportCurrentProjectAsVideo() {
 			currentlyExporting.set(false);
 			fullScreenPreview.set(false);
 			isEscapePressed.set(false);
+			_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 			await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
 			return;
 		}
