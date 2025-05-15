@@ -30,6 +30,26 @@ export function getTimelineTotalDuration(): number {
 	return maxEnd + marge;
 }
 
+export function getVideoDurationInMs(): number {
+	const timeline = get(currentProject).timeline;
+	const tracks = [...timeline.videosTracks, ...timeline.audiosTracks];
+	let maxEnd = tracks.reduce((max, track) => {
+		return Math.max(
+			max,
+			// Does not take into account the black video
+			track.clips.length === 0
+				? 0
+				: track.clips[track.clips.length - 1].id === 'black-video'
+					? 0
+					: track.clips[track.clips.length - 1].end
+		);
+	}, 0);
+
+	console.log('maxEnd', maxEnd);
+
+	return maxEnd;
+}
+
 export async function scrollToCursor() {
 	// wait for the UI to update
 	await new Promise((resolve) => setTimeout(resolve, 0));

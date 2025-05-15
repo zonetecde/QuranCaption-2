@@ -1,6 +1,10 @@
 import { fullScreenPreview } from '$lib/stores/LayoutStore';
 import { currentProject, getFirstAudioOrVideoPath } from '$lib/stores/ProjectStore';
-import { cursorPosition, getTimelineTotalDuration } from '$lib/stores/TimelineStore';
+import {
+	cursorPosition,
+	getTimelineTotalDuration,
+	getVideoDurationInMs
+} from '$lib/stores/TimelineStore';
 import toast from 'svelte-french-toast';
 import { get } from 'svelte/store';
 import { fs } from '@tauri-apps/api';
@@ -36,14 +40,13 @@ export async function exportCurrentProjectAsVideo() {
 
 	// Si il n'y a pas de sous-titre entre le dernier sous-titre et le endTime, on en créer un (silencieux)
 	const lastSubtitle = _currentProject.timeline.subtitlesTracks[0].clips.slice(-1)[0];
-	console.log(lastSubtitle.end, get(endTime) || getTimelineTotalDuration() * 100);
-	if (lastSubtitle.end < (get(endTime) || getTimelineTotalDuration() * 100)) {
+	if (lastSubtitle.end < (get(endTime) || getVideoDurationInMs())) {
 		_currentProject.timeline.subtitlesTracks[0].clips = [
 			..._currentProject.timeline.subtitlesTracks[0].clips,
 			{
 				id: 'temporary',
 				start: lastSubtitle.end,
-				end: get(endTime) || getTimelineTotalDuration() * 100,
+				end: get(endTime) || getVideoDurationInMs(),
 				verse: -1,
 				surah: -1,
 				text: '',

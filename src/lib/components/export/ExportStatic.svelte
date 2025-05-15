@@ -2,7 +2,7 @@
 	import { exportCurrentProjectAsVideo } from '$lib/functions/ExportProject';
 	import { endTime, startTime, topRatio, middleRatio, bottomRatio } from '$lib/stores/ExportStore';
 
-	import { getTimelineTotalDuration } from '$lib/stores/TimelineStore';
+	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
 	import { getCurrentCursorTime } from '$lib/stores/VideoPreviewStore';
 	import { onMount } from 'svelte';
 
@@ -54,7 +54,7 @@
 	<div class="flex gap-2">
 		<p id="end-time" class="flex-1 p-2 rounded-md bg-[#1c2c29] text-white">
 			{$endTime === null
-				? millisecondsToTime(getTimelineTotalDuration())
+				? millisecondsToTime(getVideoDurationInMs())
 				: millisecondsToTime($endTime)}
 		</p>
 		<button
