@@ -64,8 +64,8 @@
 				"entitlements": null,
 				"exceptionDomain": "",
 				"frameworks": [],
-				"providerShortName": null,
-				"signingIdentity": null
+				"providerShortName": "Quran Caption",
+				"signingIdentity": "-"
 			},
 			"resources": ["binaries/**/*", "black-vid.mp4"],
 			"shortDescription": "",
