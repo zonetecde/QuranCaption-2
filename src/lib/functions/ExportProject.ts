@@ -1,4 +1,4 @@
-import { fullScreenPreview } from '$lib/stores/LayoutStore';
+import { fullScreenPreview, videoDimensions } from '$lib/stores/LayoutStore';
 import { currentProject, getFirstAudioOrVideoPath } from '$lib/stores/ProjectStore';
 import {
 	cursorPosition,
@@ -21,6 +21,7 @@ import {
 	startTime,
 	topRatio
 } from '$lib/stores/ExportStore';
+import { readjustCursorPosition } from './TimelineHelper';
 
 export async function exportCurrentProjectAsVideo() {
 	const _currentProject = get(currentProject);
@@ -82,6 +83,10 @@ export async function exportCurrentProjectAsVideo() {
 		await new Promise((resolve) => {
 			setTimeout(resolve, 10); // Wait for subtitle to render
 		});
+		videoDimensions.set(get(videoDimensions));
+		await new Promise((resolve) => {
+			setTimeout(resolve, 100); // Wait for subtitle to render
+		});
 
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché
 		// take a screenshot of the current frame
@@ -116,10 +121,13 @@ export async function exportCurrentProjectAsVideo() {
 		}),
 		{
 			loading: 'Creating video (id: ' + randomId + ')',
-			success: 'Video created successfully!',
+			success: 'Video created successfully (' + outputPath + ')',
 			error: (error) => {
 				return 'Error while creating video: ' + error;
 			}
+		},
+		{
+			position: 'bottom-right'
 		}
 	);
 	// ouvre le dossier contenant la vidéo

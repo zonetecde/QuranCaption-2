@@ -5,6 +5,7 @@
 		cursorPosition,
 		forceUpdateCurrentPlayingMedia,
 		getTimelineTotalDuration,
+		getVideoDurationInMs,
 		scrollPosition,
 		zoom
 	} from '$lib/stores/TimelineStore';
@@ -45,7 +46,7 @@
 		}
 	}
 
-	function moveCursorToPosition(e: any, i: number) {
+	function moveCursorToMousePosition(e: any, i: number) {
 		let rect = e.currentTarget.getBoundingClientRect();
 		const positionClickedWithin = e.clientX - rect.left;
 		const totalSize = $zoom;
@@ -93,10 +94,10 @@
 						<div
 							class="w-full h-6 absolute top-0 z-10 select-none outline-none cursor-pointer"
 							tabindex="-1"
-							on:mousedown={(e) => moveCursorToPosition(e, i)}
+							on:mousedown={(e) => moveCursorToMousePosition(e, i)}
 							on:mousemove={(e) => {
 								if (e.buttons !== 1) return;
-								moveCursorToPosition(e, i);
+								moveCursorToMousePosition(e, i);
 							}}
 						></div>
 					</div>
@@ -121,11 +122,11 @@
 					tabindex="-1"
 					style="width: {timeLineTotalDuration * $zoom}px;"
 					on:mousedown={(e) => {
-						moveCursorToPosition(e, 0);
+						moveCursorToMousePosition(e, 0);
 					}}
 					on:mousemove={(e) => {
 						if (e.buttons !== 1 || $isPreviewPlaying) return;
-						moveCursorToPosition(e, 1);
+						moveCursorToMousePosition(e, 1);
 					}}
 				></div>
 			{/if}
@@ -139,12 +140,12 @@
 
 			{#if $currentPage === 'Export' && !$fullScreenPreview && $exportType === 'video-static'}
 				<!-- Selection area between start and end time -->
-				{#if $startTime >= 0 && ($endTime || getTimelineTotalDuration() * 100) > $startTime}
+				{#if $startTime >= 0 && ($endTime || getVideoDurationInMs()) > $startTime}
 					<div
 						class="absolute top-5 left-24 lg:left-40 h-60 z-50"
 						style="
 						transform: translateX({($startTime / 1000) * $zoom}px);
-						width: {((($endTime || getTimelineTotalDuration() * 100) - $startTime) / 1000) * $zoom}px;
+						width: {((($endTime || getVideoDurationInMs()) - $startTime) / 1000) * $zoom}px;
 						background-color: rgba(46, 204, 113, 0.3);
 						border-top: 2px solid rgba(46, 204, 113, 0.5);
 						border-bottom: 2px solid rgba(46, 204, 113, 0.5);
@@ -161,10 +162,10 @@
 				{/if}
 
 				<!-- End time marker -->
-				{#if ($endTime || getTimelineTotalDuration() * 100) > 0}
+				{#if ($endTime || getVideoDurationInMs()) > 0}
 					<div
 						class="absolute top-5 left-24 lg:left-40 h-60 z-50 flex items-center border-l-2 border-[#229753]"
-						style="transform: translateX({(($endTime || getTimelineTotalDuration() * 100) / 1000) *
+						style="transform: translateX({(($endTime || getVideoDurationInMs()) / 1000) *
 							$zoom}px);"
 					></div>
 				{/if}
