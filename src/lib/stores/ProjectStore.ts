@@ -338,20 +338,32 @@ export function getProjectVersesRange(project: Project): string[] {
 	const clips = project.timeline.subtitlesTracks[0].clips;
 
 	let lastSurah = 0;
+	let lastValidVerse = 0;
 
 	for (let i = 0; i < clips.length; i++) {
 		const clip = clips[i];
 
-		if (clip.surah !== -1 && clip.surah !== lastSurah) {
+		// Ignorer les clips de silence
+		if (clip.surah === -1) continue;
+
+		if (clip.surah !== lastSurah) {
+			// Début d'une nouvelle sourate
 			versesRange.push(`${clip.surah}:${clip.verse}->`);
 			lastSurah = clip.surah;
+			lastValidVerse = clip.verse;
 		} else {
+			// Mise à jour du dernier verset de la sourate actuelle
 			if (versesRange.length !== 0) {
+				// Stocker uniquement les versets valides
+				if (clip.verse !== -1) {
+					lastValidVerse = clip.verse;
+				}
+
 				// removes everything after the last ->
 				versesRange[versesRange.length - 1] =
 					versesRange[versesRange.length - 1].split('->')[0] + '->';
-				// set the last verse
-				versesRange[versesRange.length - 1] += `${clip.verse}`;
+				// set the last verse avec la dernière valeur valide
+				versesRange[versesRange.length - 1] += `${lastValidVerse}`;
 			}
 		}
 	}
@@ -378,6 +390,7 @@ export function getProjectVersesRange(project: Project): string[] {
 		}
 	}
 
+	console.log('versesRange', versesRange);
 	// remove duplicates
 	return versesRange.filter((v, i, a) => a.indexOf(v) === i);
 }
