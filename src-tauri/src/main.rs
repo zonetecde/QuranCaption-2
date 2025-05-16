@@ -177,20 +177,18 @@ async fn create_video(
     Some(video_creator_path) => {
 
     // Construire les arguments
-    let mut cmd_args = vec![
-        folder_path,
-        audio_path,
+    let cmd_args = vec![
+        folder_path.clone(),
+        audio_path.clone(),
         transition_ms.to_string(),
         start_time.to_string(),
         end_time.to_string(),
-        output_path,
+        output_path.clone(),
         top_ratio.to_string(),
         bottom_ratio.to_string(),
+        if dynamic_top { "1".to_string() } else { "0".to_string() },
     ];
 
-    if dynamic_top {
-        cmd_args.push("--dynamic-top".to_string());
-    }
 
     // Exécuter la commande
     let output = std::process::Command::new(video_creator_path)

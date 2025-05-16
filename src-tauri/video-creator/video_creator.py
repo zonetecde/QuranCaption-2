@@ -800,8 +800,8 @@ def main():
                         help="Ratio of the height for the top section (0.0 to 0.5)")
     parser.add_argument("bottom_ratio", type=float,
                         help="Ratio of the height for the bottom section (0.0 to 0.5)")
-    parser.add_argument("--dynamic-top", action="store_true",
-                        help="Process top section for each image separately instead of keeping it static (no fade effect)")
+    parser.add_argument("dynamic_top", type=int,
+                        help="Set to 1 for dynamic top section (process top section for each image separately, no fade effect), 0 for static top section (default behavior)")
     
     args = parser.parse_args()
     
@@ -814,7 +814,7 @@ def main():
         args.output_path,
         args.top_ratio,
         args.bottom_ratio,
-        not args.dynamic_top  # invert flag: dynamic_top=True → is_top_section_static=False
+        not bool(args.dynamic_top)  # 1 → False (dynamic), 0 → True (static)
     )
 
 if __name__ == "__main__":
