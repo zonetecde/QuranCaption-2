@@ -56,7 +56,7 @@
 			localStorage.setItem(SOFTWARE_VERSION, 'true');
 			await telemetry('A user has installed version ' + SOFTWARE_VERSION + ' of the application.');
 			toast(
-				'Join our new Discord server to get help, report bugs, or suggest new features!\n(Link at the bottom of the page)',
+				'Join the Discord server to get help, report bugs, or suggest new features!\n(Link at the bottom of the page)',
 				{
 					duration: 15000,
 					position: 'top-center',
