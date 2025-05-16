@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { exportCurrentProjectAsVideo } from '$lib/functions/ExportProject';
-	import { endTime, startTime, topRatio, middleRatio, bottomRatio } from '$lib/stores/ExportStore';
+	import {
+		endTime,
+		startTime,
+		topRatio,
+		middleRatio,
+		bottomRatio,
+		orientation
+	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
 	import { getCurrentCursorTime } from '$lib/stores/VideoPreviewStore';
@@ -64,6 +71,19 @@
 			Set current
 		</button>
 	</div>
+</div>
+
+<!-- landscape/portrait -->
+<div class="flex items-center mt-4">
+	<input
+		type="checkbox"
+		id="landscape-mode"
+		class="mr-2"
+		on:change={() => {
+			orientation.set($orientation === 'landscape' ? 'portrait' : 'landscape');
+		}}
+	/>
+	<label for="landscape-mode" class="text-sm font-bold">Portrait mode (TikTok format)</label>
 </div>
 
 <!-- Video section ratios -->
@@ -175,7 +195,7 @@
 	<div class="grid grid-cols-3 gap-1 items-center">
 		<div class="flex flex-col xl:flex-row items-center">
 			<div class="w-4 h-4 bg-indigo-600 rounded mr-2"></div>
-			<span class="text-xs xl:text-sm">Surah name/Other</span>
+			<span class="text-xs xl:text-sm">Surah name</span>
 		</div>
 		<div class="flex flex-col xl:flex-row items-center">
 			<div class="w-4 h-4 bg-green-600 rounded mr-2"></div>
@@ -184,7 +204,7 @@
 		</div>
 		<div class="flex flex-col xl:flex-row items-center">
 			<div class="w-4 h-4 bg-amber-600 rounded mr-2"></div>
-			<span class="text-xs xl:text-sm">Creator Info/Other</span>
+			<span class="text-xs xl:text-sm">Creator Info</span>
 		</div>
 	</div>
 

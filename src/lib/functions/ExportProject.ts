@@ -20,7 +20,8 @@ import {
 	endTime,
 	startTime,
 	topRatio,
-	triggerSubtitleResize
+	triggerSubtitleResize,
+	orientation
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -197,6 +198,9 @@ async function takeScreenshot(folderName: string, fileName: string) {
 	// Qualité de l'image
 	let scale = 2;
 
+	// Si en mode portrait, on va prévoir pour le crop 9:16
+	const isPortrait = get(orientation) === 'portrait';
+
 	// Utilisation de DomToImage pour transformer la div en image
 	try {
 		const dataUrl = await DomToImage.toPng(node, {
@@ -209,12 +213,50 @@ async function takeScreenshot(folderName: string, fileName: string) {
 			}
 		});
 
+		// Si on est en mode portrait, on crop pour avoir un ratio 9:16
+		let finalDataUrl = dataUrl;
+		if (isPortrait) {
+			// Créer un canvas temporaire pour manipuler l'image
+			const canvas = document.createElement('canvas');
+			const context = canvas.getContext('2d');
+
+			if (context) {
+				// Créer une image à partir de dataUrl
+				const img = new Image();
+				img.src = dataUrl;
+
+				// Attendre que l'image soit chargée
+				await new Promise((resolve) => {
+					img.onload = resolve;
+				});
+
+				// Calculer les dimensions pour un ratio 9:16
+				// En gardant toute la hauteur et en ajustant la largeur
+				const targetRatio = 9 / 16;
+				const finalHeight = img.height;
+				const finalWidth = finalHeight * targetRatio;
+
+				// Centrer horizontalement (prendre le milieu de l'image)
+				const offsetX = (img.width - finalWidth) / 2;
+
+				// Configurer le canvas pour les nouvelles dimensions
+				canvas.width = finalWidth;
+				canvas.height = finalHeight;
+
+				// Dessiner la partie de l'image qu'on veut garder
+				context.drawImage(img, offsetX, 0, finalWidth, finalHeight, 0, 0, finalWidth, finalHeight);
+
+				// Récupérer la nouvelle image
+				finalDataUrl = canvas.toDataURL('image/png');
+			}
+		}
+
 		// with tauri, save the image to the desktop
 		const fileNameWithExtension = fileName + '.png';
 		const filePathWithName = `${EXPORT_PATH}${folderName}/${fileNameWithExtension}`;
 
 		// Convertir dataUrl base64 en ArrayBuffer sans utiliser fetch
-		const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+		const base64Data = finalDataUrl.replace(/^data:image\/png;base64,/, '');
 		const binaryString = window.atob(base64Data);
 		const bytes = new Uint8Array(binaryString.length);
 		for (let i = 0; i < binaryString.length; i++) {

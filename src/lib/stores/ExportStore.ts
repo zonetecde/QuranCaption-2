@@ -2,6 +2,7 @@ import { writable, type Writable } from 'svelte/store';
 
 export const startTime: Writable<number> = writable(0);
 export const endTime: Writable<number | null> = writable(null);
+export const orientation: Writable<'landscape' | 'portrait'> = writable('landscape');
 
 export const exportType: Writable<string> = writable('video-static');
 export const currentlyExporting: Writable<boolean> = writable(false); // Indique si on est en train d'exporter

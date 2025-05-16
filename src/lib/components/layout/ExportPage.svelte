@@ -12,12 +12,12 @@
 		<!-- Editor -->
 		<section class="w-full divide-y-4 divide-[#413f3f]">
 			<!-- Video preview -->
-			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'h-[93%] max-h-[93%]'}>
+			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'h-[85%] max-h-[85%]'}>
 				<VideoPreview hideControls={$fullScreenPreview} />
 			</section>
 
 			<!-- Timeline -->
-			<section class="h-[7%]">
+			<section class="h-[15%]">
 				<Timeline />
 			</section>
 		</section>
