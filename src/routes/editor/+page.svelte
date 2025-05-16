@@ -10,7 +10,6 @@
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
-	import ExportPageOld from '$lib/components/layout/ExportPageOld.svelte';
 
 	onMount(async () => {
 		// the slug is what after the ? in the URL
