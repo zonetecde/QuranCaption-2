@@ -11,6 +11,11 @@ import multiprocessing
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
+# Ajouter le support pour PyInstaller ici
+if hasattr(sys, 'frozen'):
+    # Nous sommes dans une version compilée avec PyInstaller
+    multiprocessing.freeze_support()
+
 def find_ffmpeg_path():
     """Determine the path to ffmpeg executable based on the platform."""
     # Check if ffmpeg and ffprobe are in the same directory as the Python file
@@ -476,8 +481,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         # Make sure width is also even
         if width % 2 != 0:
             width -= 1  # Reduce width by 1 if odd
-            
-        # Create temporary log file for FFmpeg output
+              # Create temporary log file for FFmpeg output
         log_file = os.path.join(temp_dir, "ffmpeg_log.txt")
           # Calculate total video duration
         total_duration = image_data[-1]['end_time'] - image_data[0]['start_time']
@@ -485,15 +489,24 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         if not use_sectioning:
             print("No sectioning: creating video segments in parallel...")
             
-            # Process images in parallel using ProcessPoolExecutor
+            # Version compatible avec PyInstaller - utilisation de ThreadPoolExecutor au lieu de ProcessPoolExecutor
             segment_files = []
-            with ProcessPoolExecutor(max_workers=num_cores) as executor:
-                # Prepare parameters for parallel processing
+            
+            if hasattr(sys, 'frozen'):
+                # Mode compilé: pas de parallélisation pour éviter les problèmes avec PyInstaller
+                print("Running in compiled mode: using sequential processing instead of parallel processing")
                 params = [(ffmpeg_path, temp_dir, log_file, i, data, transition_sec, len(image_data)) 
                         for i, data in enumerate(image_data)]
-                
-                # Process all images in parallel and collect results
-                segment_files = list(executor.map(process_image_full, params))
+                segment_files = [process_image_full(param) for param in params]
+            else:
+                # Mode script: parallélisation avec ProcessPoolExecutor
+                with ProcessPoolExecutor(max_workers=num_cores) as executor:
+                    # Prepare parameters for parallel processing
+                    params = [(ffmpeg_path, temp_dir, log_file, i, data, transition_sec, len(image_data)) 
+                            for i, data in enumerate(image_data)]
+                    
+                    # Process all images in parallel and collect results
+                    segment_files = list(executor.map(process_image_full, params))
         else:
             if is_top_section_static:
                 print("Using optimized sectioning approach with static sections...")
@@ -513,18 +526,31 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
                         ffmpeg_path, temp_dir, log_file,
                         image_data[0]['path'], width, bottom_height, top_height + middle_height, "bottom", total_duration
                     )
-                
-                # Process only the middle sections of each image in parallel
+                  # Process only the middle sections of each image in parallel
                 middle_sections = []
-                with ProcessPoolExecutor(max_workers=num_cores) as executor:
-                    # Prepare parameters for parallel processing
+                
+                if hasattr(sys, 'frozen'):
+                    # Mode compilé: pas de parallélisation pour éviter les problèmes avec PyInstaller
+                    print("Running in compiled mode: using sequential processing instead of parallel processing")
+                    # Prepare parameters
                     params = [(ffmpeg_path, temp_dir, log_file, i, data, 
                             top_height, middle_height, width, 
                             transition_sec, len(image_data))
                             for i, data in enumerate(image_data)]
                     
-                    # Process all middle sections in parallel
-                    middle_results = list(executor.map(process_middle_section, params))
+                    # Process all middle sections sequentially
+                    middle_results = [process_middle_section(param) for param in params]
+                else:
+                    # Mode script: parallélisation avec ProcessPoolExecutor
+                    with ProcessPoolExecutor(max_workers=num_cores) as executor:
+                        # Prepare parameters for parallel processing
+                        params = [(ffmpeg_path, temp_dir, log_file, i, data, 
+                                top_height, middle_height, width, 
+                                transition_sec, len(image_data))
+                                for i, data in enumerate(image_data)]
+                        
+                        # Process all middle sections in parallel
+                        middle_results = list(executor.map(process_middle_section, params))
                 
                 # Sort results by index to maintain order
                 middle_results.sort(key=lambda x: x[0])
@@ -821,7 +847,7 @@ if __name__ == "__main__":
     sys.exit(main())
 
 # Exemple d'utilisation standard (avec top statique - comportement par défaut):
-#py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\2 C:\Users\zonedetec\Documents\quran.al.luhaidan\47\audio_2608.webm 300 0 0 ./output.mp4 0.25 0.25
+#py .\video_creator.py F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\1 C:\Users\zonedetec\downloads\audio_4676.webm 300 0 0 ./output.mp4 0.25 0.25 0
 
 # Exemple avec top section dynamique (ajoutez --dynamic-top):
 #py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\2 C:\Users\zonedetec\Documents\quran.al.luhaidan\47\audio_2608.webm 300 0 0 ./output.mp4 0.25 0.25 --dynamic-top
