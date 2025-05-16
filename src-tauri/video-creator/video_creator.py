@@ -806,22 +806,53 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             silent_video
         ]
         with open(log_file, 'a') as f:
-            subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
-        
-        # Add audio to create the full video
+            subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)        # Add audio to create the full video
         full_video = os.path.join(temp_dir, "full_video.mp4")
-        cmd = [
-            ffmpeg_path,
-            '-y',
-            '-i', silent_video,
-            '-i', audio_path,
-            '-map', '0:v',
-            '-map', '1:a',
-            '-c:v', 'copy',
-            '-c:a', 'aac',
-            '-shortest',
-            full_video
-        ]
+        
+        # Si un startTime est spécifié, nous devons également couper l'audio
+        if start_time_ms > 0:
+            print(f"Adjusting audio to start at {start_time_sec:.2f} seconds")
+            # D'abord, extrayons l'audio à partir du point de départ
+            trimmed_audio = os.path.join(temp_dir, "trimmed_audio.aac")
+            trim_cmd = [
+                ffmpeg_path,
+                '-y',
+                '-i', audio_path,
+                '-ss', str(start_time_sec),
+                '-c:a', 'aac',
+                trimmed_audio
+            ]
+            with open(log_file, 'a') as f:
+                subprocess.run(trim_cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+            
+            # Maintenant, ajoutons cet audio coupé à la vidéo
+            cmd = [
+                ffmpeg_path,
+                '-y',
+                '-i', silent_video,
+                '-i', trimmed_audio,
+                '-map', '0:v',
+                '-map', '1:a',
+                '-c:v', 'copy',
+                '-c:a', 'copy',
+                '-shortest',
+                full_video
+            ]
+        else:
+            # Comportement par défaut si start_time_ms = 0
+            cmd = [
+                ffmpeg_path,
+                '-y',
+                '-i', silent_video,
+                '-i', audio_path,
+                '-map', '0:v',
+                '-map', '1:a',
+                '-c:v', 'copy',
+                '-c:a', 'aac',
+                '-shortest',
+                full_video
+            ]
+            
         with open(log_file, 'a') as f:
             subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
         
