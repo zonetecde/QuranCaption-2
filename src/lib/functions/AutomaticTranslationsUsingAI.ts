@@ -13,6 +13,9 @@ import type { SubtitleClip } from '$lib/models/Timeline';
  * "complets" et sont ignorés car ils n'ont pas besoin d'être retraduits segment
  * par segment.
  *
+ * De plus, les versets dont tous les segments ont déjà été modifiés manuellement
+ * (hadItTranslationEverBeenModified = true pour tous les clips) sont également exclus.
+ *
  * @param languageCode Code de langue pour la traduction (ex: "fr", "en", etc.)
  */
 export async function generateTranslationsPrompt(languageCode: string) {
@@ -55,18 +58,26 @@ export async function generateTranslationsPrompt(languageCode: string) {
 
 		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
 			// confirme tout les clips précedents
+			// skip if only one clip (subtitle already complet)
 			if (allClipOfThisVerse.length > 1) {
-				// skip if only one clip (subtitle already complet)
-				input.push({
-					full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse)
-						.text,
-					target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
-					existing_translation: await getVerseTranslation(
-						edition,
-						allClipOfThisVerse[0].surah,
-						allClipOfThisVerse[0].verse
-					)
-				});
+				// Vérifier si au moins un des clips n'a pas été modifié manuellement
+				const hasUnmodifiedClip = allClipOfThisVerse.some(
+					(clip) => !clip.hadItTranslationEverBeenModified
+				);
+
+				// N'ajouter le verset que si au moins un clip n'a pas été modifié
+				if (hasUnmodifiedClip) {
+					input.push({
+						full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse)
+							.text,
+						target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
+						existing_translation: await getVerseTranslation(
+							edition,
+							allClipOfThisVerse[0].surah,
+							allClipOfThisVerse[0].verse
+						)
+					});
+				}
 			}
 
 			allClipOfThisVerse = [subtitle]; // reset le tableau
@@ -80,20 +91,28 @@ export async function generateTranslationsPrompt(languageCode: string) {
 	// ajoute le dernier clip
 	// skip if only one clip (subtitle already complet)
 	if (allClipOfThisVerse.length > 1) {
-		input.push({
-			full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
-			target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
-			existing_translation: await getVerseTranslation(
-				edition,
-				allClipOfThisVerse[0].surah,
-				allClipOfThisVerse[0].verse
-			)
-		});
+		// Vérifier si au moins un des clips n'a pas été modifié manuellement
+		const hasUnmodifiedClip = allClipOfThisVerse.some(
+			(clip) => !clip.hadItTranslationEverBeenModified
+		);
+
+		// N'ajouter le verset que si au moins un clip n'a pas été modifié
+		if (hasUnmodifiedClip) {
+			input.push({
+				full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
+				target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
+				existing_translation: await getVerseTranslation(
+					edition,
+					allClipOfThisVerse[0].surah,
+					allClipOfThisVerse[0].verse
+				)
+			});
+		}
 	}
 
 	if (input.length === 0) {
 		toast.error(
-			'No clips found to generate prompt (either all clips are custom text or full verses).'
+			'No clips found to generate prompt (either all clips are custom text, full verses, or have already been manually translated).'
 		);
 		return;
 	}
@@ -129,7 +148,7 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 	 *
 	 * Note: Cette fonction ne traite que les versets incomplets (divisés en plusieurs clips),
 	 * conformément à la fonction generateTranslationsPrompt qui ne génère des prompts que
-	 * pour les versets incomplets.
+	 * pour les versets incomplets avec au moins un segment non modifié manuellement.
 	 *
 	 * Format attendu du JSON:
 	 * [
@@ -192,6 +211,7 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		return;
 	}
 	// Group clips by verse, similar to generateTranslationsPrompt, but only including incomplete verses
+	// with at least one clip that hasn't been manually translated
 	let verseGroups: Map<string, SubtitleClip[]> = new Map();
 	let verseOrder: string[] = []; // To keep track of the order of verses
 
@@ -209,11 +229,19 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		}
 
 		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
-			// Add previous verse group to our maps ONLY if it contains more than 1 clip (incomplete verse)
+			// Add previous verse group to our maps ONLY if:
+			// 1. It contains more than 1 clip (incomplete verse)
+			// 2. At least one clip hasn't been manually translated
 			if (allClipOfThisVerse.length > 1) {
-				const key = `${lastSurah}:${lastVerse}`;
-				verseGroups.set(key, [...allClipOfThisVerse]);
-				verseOrder.push(key);
+				const hasUnmodifiedClip = allClipOfThisVerse.some(
+					(clip) => !clip.hadItTranslationEverBeenModified
+				);
+
+				if (hasUnmodifiedClip) {
+					const key = `${lastSurah}:${lastVerse}`;
+					verseGroups.set(key, [...allClipOfThisVerse]);
+					verseOrder.push(key);
+				}
 			}
 
 			// Reset for new verse
@@ -226,12 +254,21 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		}
 	}
 
-	// Add the last verse group if there is one AND it has more than 1 clip (incomplete verse)
+	// Add the last verse group if:
+	// 1. It has more than 1 clip (incomplete verse)
+	// 2. At least one clip hasn't been manually translated
 	if (allClipOfThisVerse.length > 1) {
-		const key = `${lastSurah}:${lastVerse}`;
-		verseGroups.set(key, [...allClipOfThisVerse]);
-		verseOrder.push(key);
+		const hasUnmodifiedClip = allClipOfThisVerse.some(
+			(clip) => !clip.hadItTranslationEverBeenModified
+		);
+
+		if (hasUnmodifiedClip) {
+			const key = `${lastSurah}:${lastVerse}`;
+			verseGroups.set(key, [...allClipOfThisVerse]);
+			verseOrder.push(key);
+		}
 	}
+
 	// Check if the number of verse groups matches the number of translation arrays
 	if (verseOrder.length !== json.length) {
 		toast.error(

@@ -310,7 +310,13 @@
 						</span>
 
 						<div class="flex flex-row gap-x-1 bg-[#332128] px-2 rounded-md border border-[#1a1013]">
-							<button class="relative group" on:click={() => handleResetTranslation(translationId)}>
+							<button
+								class="relative group"
+								on:click={() => {
+									handleResetTranslation(translationId);
+									subtitle.hadItTranslationEverBeenModified = false;
+								}}
+							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									fill="none"
