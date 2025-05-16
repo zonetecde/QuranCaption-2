@@ -342,15 +342,17 @@ export function getProjectVersesRange(project: Project): string[] {
 	for (let i = 0; i < clips.length; i++) {
 		const clip = clips[i];
 
-		if (clip.surah !== lastSurah) {
+		if (clip.surah !== -1 && clip.surah !== lastSurah) {
 			versesRange.push(`${clip.surah}:${clip.verse}->`);
 			lastSurah = clip.surah;
 		} else {
-			// removes everything after the last ->
-			versesRange[versesRange.length - 1] =
-				versesRange[versesRange.length - 1].split('->')[0] + '->';
-			// set the last verse
-			versesRange[versesRange.length - 1] += `${clip.verse}`;
+			if (versesRange.length !== 0) {
+				// removes everything after the last ->
+				versesRange[versesRange.length - 1] =
+					versesRange[versesRange.length - 1].split('->')[0] + '->';
+				// set the last verse
+				versesRange[versesRange.length - 1] += `${clip.verse}`;
+			}
 		}
 	}
 
@@ -369,7 +371,7 @@ export function getProjectVersesRange(project: Project): string[] {
 			// Sourate du Coran
 			const surahName = mushaf.surahs[surahNumber - 1].transliteration;
 			versesRange[i] = element[0] + '. ' + surahName + ' (' + startVerse + '-' + endVerse + ')';
-		} else {
+		} else if (surahNumber < -1) {
 			// Custom text
 			const surahName = getTextName(surahNumber);
 			versesRange[i] = surahName + ' (' + startVerse + '-' + endVerse + ')';
