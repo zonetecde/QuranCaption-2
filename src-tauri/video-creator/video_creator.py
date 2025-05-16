@@ -60,22 +60,47 @@ def process_image_full(params):
     
     return segment_file
 
+def process_section_with_transition(params):
+    """Process a section of an image with fade effects"""
+    ffmpeg_path, temp_dir, log_file, i, data, section_type, height, y_offset, width, transition_sec, total_images = params
+    
+    print(f"Processing {section_type} section of image {i+1}/{total_images}: {data['file']} ({data['start_time']}s - {data['end_time']}s)")
+    img_path = data['path']
+    duration = data['end_time'] - data['start_time']
+    
+    # Create section with fade effects
+    section_file = os.path.join(temp_dir, f"{section_type}_{i:04d}.mp4")
+    fade_in = "fade=in:st=0:d=" + str(transition_sec) if i > 0 else "null"
+    fade_out = "fade=out:st=" + str(max(0, duration - transition_sec)) + ":d=" + str(transition_sec) if i < total_images - 1 else "null"
+    vf_args = f'crop={width}:{height}:0:{y_offset},fps=30,{fade_in},{fade_out}'
+    process_image_segment(ffmpeg_path, img_path, duration, section_file, vf_args, log_file)
+    
+    return (i, section_file, duration)
+
 def process_middle_section(params):
     """Process only the middle section of an image with fade effects"""
     ffmpeg_path, temp_dir, log_file, i, data, top_height, middle_height, width, transition_sec, total_images = params
     
-    print(f"Processing middle section of image {i+1}/{total_images}: {data['file']} ({data['start_time']}s - {data['end_time']}s)")
+    # Use the more generic function with middle-specific parameters
+    return process_section_with_transition(
+        (ffmpeg_path, temp_dir, log_file, i, data, "middle", middle_height, top_height, width, transition_sec, total_images)
+    )
+
+def process_top_section(params):
+    """Process the top section of an image without fade effects (when not static)"""
+    ffmpeg_path, temp_dir, log_file, i, data, top_height, width, transition_sec, total_images = params
+    
+    print(f"Processing top section of image {i+1}/{total_images}: {data['file']} ({data['start_time']}s - {data['end_time']}s)")
     img_path = data['path']
     duration = data['end_time'] - data['start_time']
     
-    # Create middle section with fade effects
-    middle_section = os.path.join(temp_dir, f"middle_{i:04d}.mp4")
-    fade_in = "fade=in:st=0:d=" + str(transition_sec) if i > 0 else "null"
-    fade_out = "fade=out:st=" + str(max(0, duration - transition_sec)) + ":d=" + str(transition_sec) if i < total_images - 1 else "null"
-    vf_args = f'crop={width}:{middle_height}:0:{top_height},fps=30,{fade_in},{fade_out}'
-    process_image_segment(ffmpeg_path, img_path, duration, middle_section, vf_args, log_file)
+    # Create top section without fade effects
+    section_file = os.path.join(temp_dir, f"top_{i:04d}.mp4")
+    # No fade effects for top section, even when dynamic
+    vf_args = f'crop={width}:{top_height}:0:0,fps=30'
+    process_image_segment(ffmpeg_path, img_path, duration, section_file, vf_args, log_file)
     
-    return (i, middle_section, duration)
+    return (i, section_file, duration)
 
 def create_static_section(ffmpeg_path, temp_dir, log_file, img_path, width, height, y_pos, section_name, total_duration):
     """Create a static video section (top or bottom) that spans the entire video duration"""
@@ -83,6 +108,11 @@ def create_static_section(ffmpeg_path, temp_dir, log_file, img_path, width, heig
     section_file = os.path.join(temp_dir, f"{section_name}_static.mp4")
     vf_args = f'crop={width}:{height}:0:{y_pos},fps=30'
     
+    # Optimized approach: create shorter video then use stream copy to extend it
+    short_duration = min(5.0, total_duration)  # Use a short sample (5 seconds or less if total duration is shorter)
+    temp_section = os.path.join(temp_dir, f"{section_name}_temp.mp4")
+    
+    # Create a short segment first
     cmd = [
         ffmpeg_path,
         '-y',
@@ -90,13 +120,43 @@ def create_static_section(ffmpeg_path, temp_dir, log_file, img_path, width, heig
         '-i', img_path,
         '-vf', vf_args,
         '-c:v', 'libx264',
-        '-t', str(total_duration),
+        '-t', str(short_duration),
         '-pix_fmt', 'yuv420p',
         '-preset', 'veryfast',
+        temp_section
+    ]
+    with open(log_file, 'a') as f:
+        subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+    
+    # Now loop this segment to reach the required duration using stream copy (much faster)
+    # Use the concat demuxer for more efficient handling of static content
+    concat_txt = os.path.join(temp_dir, f"{section_name}_concat.txt")
+    repeats = int(total_duration / short_duration) + 1  # +1 to ensure we have enough duration
+    
+    with open(concat_txt, 'w') as f:
+        for _ in range(repeats):
+            f.write(f"file '{temp_section}'\n")
+    
+    cmd = [
+        ffmpeg_path,
+        '-y',
+        '-f', 'concat',
+        '-safe', '0',
+        '-i', concat_txt,
+        '-c', 'copy',
+        '-t', str(total_duration),
         section_file
     ]
     with open(log_file, 'a') as f:
         subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+    
+    # Remove the temporary file
+    try:
+        os.remove(temp_section)
+        os.remove(concat_txt)
+    except:
+        pass  # Ignore any errors during cleanup
+        
     return section_file
 
 def process_image_sections(params):
@@ -321,7 +381,7 @@ def combine_sections(ffmpeg_path, temp_dir, log_file, i, sections_data, top_heig
         subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
     return segment_file
 
-def create_video_from_images(folder_path, audio_path, transition_ms, start_time_ms=0, end_time_ms=0, output_path=None, top_ratio=0.2, bottom_ratio=0.2):
+def create_video_from_images(folder_path, audio_path, transition_ms, start_time_ms=0, end_time_ms=0, output_path=None, top_ratio=0.2, bottom_ratio=0.2, is_top_section_static=True):
     """
     Creates a video from images in a folder with timing information in filenames.
     Applies fade transition only to the middle section of the image height.
@@ -335,6 +395,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
     - output_path: Custom output path (None = default path in folder)
     - top_ratio: Ratio of image height for the top section (default: 0.2 or 20%, 0 = no top section)
     - bottom_ratio: Ratio of image height for the bottom section (default: 0.2 or 20%, 0 = no bottom section)
+    - is_top_section_static: If True, only process the top section once for all images. If False, process top section for each image but without applying fade transitions (default: True)
     """
     # Get ffmpeg paths
     ffmpeg_path, ffprobe_path = find_ffmpeg_path()
@@ -420,8 +481,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         log_file = os.path.join(temp_dir, "ffmpeg_log.txt")
           # Calculate total video duration
         total_duration = image_data[-1]['end_time'] - image_data[0]['start_time']
-        
-        # Process images
+          # Process images
         if not use_sectioning:
             print("No sectioning: creating video segments in parallel...")
             
@@ -435,50 +495,188 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
                 # Process all images in parallel and collect results
                 segment_files = list(executor.map(process_image_full, params))
         else:
-            print("Using optimized sectioning approach with static top and bottom sections...")
-            
-            # Create static top section from the first image (if needed)
-            static_top = None
-            if top_height > 0:
-                static_top = create_static_section(
-                    ffmpeg_path, temp_dir, log_file,
-                    image_data[0]['path'], width, top_height, 0, "top", total_duration
-                )
-            
-            # Create static bottom section from the first image (if needed)
-            static_bottom = None
-            if bottom_height > 0:
-                static_bottom = create_static_section(
-                    ffmpeg_path, temp_dir, log_file,
-                    image_data[0]['path'], width, bottom_height, top_height + middle_height, "bottom", total_duration
-                )
-            
-            # Process only the middle sections of each image in parallel
-            middle_sections = []
-            with ProcessPoolExecutor(max_workers=num_cores) as executor:
-                # Prepare parameters for parallel processing
-                params = [(ffmpeg_path, temp_dir, log_file, i, data, 
-                        top_height, middle_height, width, 
-                        transition_sec, len(image_data))
-                        for i, data in enumerate(image_data)]
+            if is_top_section_static:
+                print("Using optimized sectioning approach with static sections...")
                 
-                # Process all middle sections in parallel
-                middle_results = list(executor.map(process_middle_section, params))
-            
-            # Sort results by index to maintain order
-            middle_results.sort(key=lambda x: x[0])
-            
-            # Extract middle sections and durations
-            middle_sections = [(i, (section, data['end_time'] - data['start_time'])) 
-                             for i, (idx, section, _) in enumerate(middle_results)
-                             for data in [image_data[idx]]]
-            
-            # Combine middle sections with static top and bottom sections
-            segment_files = combine_with_static_sections(
-                ffmpeg_path, temp_dir, log_file, 
-                middle_sections, static_top, static_bottom, 
-                top_height, bottom_height
-            )
+                # Create static top section from the first image (if needed)
+                static_top = None
+                if top_height > 0:
+                    static_top = create_static_section(
+                        ffmpeg_path, temp_dir, log_file,
+                        image_data[0]['path'], width, top_height, 0, "top", total_duration
+                    )
+                
+                # Create static bottom section from the first image (if needed)
+                static_bottom = None
+                if bottom_height > 0:
+                    static_bottom = create_static_section(
+                        ffmpeg_path, temp_dir, log_file,
+                        image_data[0]['path'], width, bottom_height, top_height + middle_height, "bottom", total_duration
+                    )
+                
+                # Process only the middle sections of each image in parallel
+                middle_sections = []
+                with ProcessPoolExecutor(max_workers=num_cores) as executor:
+                    # Prepare parameters for parallel processing
+                    params = [(ffmpeg_path, temp_dir, log_file, i, data, 
+                            top_height, middle_height, width, 
+                            transition_sec, len(image_data))
+                            for i, data in enumerate(image_data)]
+                    
+                    # Process all middle sections in parallel
+                    middle_results = list(executor.map(process_middle_section, params))
+                
+                # Sort results by index to maintain order
+                middle_results.sort(key=lambda x: x[0])
+                
+                # Extract middle sections and durations
+                middle_sections = [(i, (section, data['end_time'] - data['start_time'])) 
+                                for i, (idx, section, _) in enumerate(middle_results)
+                                for data in [image_data[idx]]]
+                
+                # Combine middle sections with static top and bottom sections
+                segment_files = combine_with_static_sections(
+                    ffmpeg_path, temp_dir, log_file, 
+                    middle_sections, static_top, static_bottom, 
+                    top_height, bottom_height
+                )
+            else:
+                print("Processing with dynamic top section (different for each image, but no fade transitions)...")
+                
+                # Create static bottom section only (if needed)
+                static_bottom = None
+                if bottom_height > 0:
+                    static_bottom = create_static_section(
+                        ffmpeg_path, temp_dir, log_file,
+                        image_data[0]['path'], width, bottom_height, top_height + middle_height, "bottom", total_duration
+                    )
+                
+                # Process top and middle sections of each image in parallel
+                top_results = []
+                middle_results = []
+                
+                with ProcessPoolExecutor(max_workers=num_cores) as executor:
+                    # Process both middle and top sections (if top_height > 0)
+                    futures = []
+                    
+                    # Middle section parameters
+                    middle_params = [(ffmpeg_path, temp_dir, log_file, i, data, 
+                                    top_height, middle_height, width, 
+                                    transition_sec, len(image_data))
+                                    for i, data in enumerate(image_data)]
+                    
+                    # Process all middle sections
+                    for params in middle_params:
+                        futures.append(executor.submit(process_middle_section, params))
+                    
+                    # If top section exists, process those too
+                    if top_height > 0:
+                        top_params = [(ffmpeg_path, temp_dir, log_file, i, data,
+                                    top_height, width,
+                                    transition_sec, len(image_data))
+                                    for i, data in enumerate(image_data)]
+                        
+                        for params in top_params:
+                            futures.append(executor.submit(process_top_section, params))
+                    
+                    # Collect results
+                    for future in as_completed(futures):
+                        result = future.result()
+                        if "middle" in os.path.basename(result[1]):
+                            middle_results.append(result)
+                        else:
+                            top_results.append(result)
+                
+                # Sort results by index
+                middle_results.sort(key=lambda x: x[0])
+                if top_height > 0:
+                    top_results.sort(key=lambda x: x[0])
+                
+                # Combine top, middle and static bottom sections for each image
+                segment_files = []
+                
+                for i, (_, middle_section, _) in enumerate(middle_results):
+                    segment_file = os.path.join(temp_dir, f"segment_{i:04d}.mp4")
+                    duration = image_data[i]['end_time'] - image_data[i]['start_time']
+                    
+                    if top_height > 0 and bottom_height > 0:
+                        # Trim bottom section
+                        bottom_trimmed = os.path.join(temp_dir, f"bottom_trimmed_{i:04d}.mp4")
+                        trim_cmd = [
+                            ffmpeg_path, '-y',
+                            '-ss', str(0),
+                            '-i', static_bottom,
+                            '-t', str(duration),
+                            '-c', 'copy',
+                            bottom_trimmed
+                        ]
+                        with open(log_file, 'a') as f:
+                            subprocess.run(trim_cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+                            
+                        # Stack all three sections
+                        filter_complex = "[0:v][1:v]vstack=inputs=2[temp];[temp][2:v]vstack=inputs=2[outv]"
+                        cmd = [
+                            ffmpeg_path, '-y',
+                            '-i', top_results[i][1],
+                            '-i', middle_section,
+                            '-i', bottom_trimmed,
+                            '-filter_complex', filter_complex,
+                            '-map', '[outv]',
+                            '-c:v', 'libx264',
+                            '-preset', 'veryfast',
+                            '-t', str(duration),
+                            segment_file
+                        ]
+                    elif top_height > 0:
+                        # Only top and middle sections
+                        filter_complex = "[0:v][1:v]vstack=inputs=2[outv]"
+                        cmd = [
+                            ffmpeg_path, '-y',
+                            '-i', top_results[i][1],
+                            '-i', middle_section,
+                            '-filter_complex', filter_complex,
+                            '-map', '[outv]',
+                            '-c:v', 'libx264',
+                            '-preset', 'veryfast',
+                            '-t', str(duration),
+                            segment_file
+                        ]
+                    elif bottom_height > 0:
+                        # Only middle and bottom sections
+                        bottom_trimmed = os.path.join(temp_dir, f"bottom_trimmed_{i:04d}.mp4")
+                        trim_cmd = [
+                            ffmpeg_path, '-y',
+                            '-ss', str(0),
+                            '-i', static_bottom,
+                            '-t', str(duration),
+                            '-c', 'copy',
+                            bottom_trimmed
+                        ]
+                        with open(log_file, 'a') as f:
+                            subprocess.run(trim_cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+                            
+                        filter_complex = "[0:v][1:v]vstack=inputs=2[outv]"
+                        cmd = [
+                            ffmpeg_path, '-y',
+                            '-i', middle_section,
+                            '-i', bottom_trimmed,
+                            '-filter_complex', filter_complex,
+                            '-map', '[outv]',
+                            '-c:v', 'libx264',
+                            '-preset', 'veryfast',
+                            '-t', str(duration),
+                            segment_file
+                        ]
+                    else:
+                        # Only middle section (no stacking needed)
+                        shutil.copy2(middle_section, segment_file)
+                        cmd = None
+                    
+                    if cmd:
+                        with open(log_file, 'a') as f:
+                            subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+                            
+                    segment_files.append(segment_file)
         
         # Create a concat file to sequence all segments
         concat_list_path = os.path.join(temp_dir, "segments.txt")
@@ -560,11 +758,15 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             print(f"Final video duration: {final_duration:.2f} seconds")
         except ValueError:
             print("Unable to determine the final duration of the video")
+            
         print(f"Video successfully created: {final_output}")
         if use_sectioning:
             middle_percent = int(middle_ratio * 100)
-            print(f"Fade was applied only to the central part ({middle_percent}% of the height).")
-            print("Optimized processing: static top and bottom sections were created only once!")
+            print(f"Fade was applied only to the central part ({middle_percent}% of the height).")            
+            if is_top_section_static:
+                print("Optimized processing: static top and bottom sections were created only once!")
+            else:
+                print("Dynamic top section (changes with each image but no fade effect), bottom section static.")
         else:
             print("Fade was applied to the entire image (no sectioning).")
         if start_time_ms > 0 or end_time_ms > 0:
@@ -595,9 +797,11 @@ def main():
                         help="End time for trimming the final video (in milliseconds, 0 = until the end)")
     parser.add_argument("output_path", help="Custom path for the output video")
     parser.add_argument("top_ratio", type=float,
-                        help="Ratio of the height for the top section (0.0 to 0.5, default: 0.2 or 20%%)")
+                        help="Ratio of the height for the top section (0.0 to 0.5)")
     parser.add_argument("bottom_ratio", type=float,
-                        help="Ratio of the height for the bottom section (0.0 to 0.5, default: 0.2 or 20%%)")
+                        help="Ratio of the height for the bottom section (0.0 to 0.5)")
+    parser.add_argument("--dynamic-top", action="store_true",
+                        help="Process top section for each image separately instead of keeping it static (no fade effect)")
     
     args = parser.parse_args()
     
@@ -609,14 +813,15 @@ def main():
         args.end_time,
         args.output_path,
         args.top_ratio,
-        args.bottom_ratio
+        args.bottom_ratio,
+        not args.dynamic_top  # invert flag: dynamic_top=True → is_top_section_static=False
     )
 
 if __name__ == "__main__":
     sys.exit(main())
 
-# Exemple d'utilisation standard (avec les ratios par défaut de 20%):
-#py .\video_creator_optimized.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\2 C:\Users\zonedetec\Documents\quran.al.luhaidan\47\audio_2608.webm 300 0 0 ./output.mp4 0.25 0.25
+# Exemple d'utilisation standard (avec top statique - comportement par défaut):
+#py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\2 C:\Users\zonedetec\Documents\quran.al.luhaidan\47\audio_2608.webm 300 0 0 ./output.mp4 0.25 0.25
 
-# Exemple pour exécutable compilé:
-#video_creator_optimized C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\2 C:\Users\zonedetec\Documents\quran.al.luhaidan\47\audio_2608.webm 300 0 0 ./output.mp4 0.25 0.25
+# Exemple avec top section dynamique (ajoutez --dynamic-top):
+#py .\video_creator.py C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\2 C:\Users\zonedetec\Documents\quran.al.luhaidan\47\audio_2608.webm 300 0 0 ./output.mp4 0.25 0.25 --dynamic-top
