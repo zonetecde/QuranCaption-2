@@ -509,9 +509,9 @@ export function hasAtLeastOneSubtitle() {
 
 export function getFirstAudioOrVideoPath(): string {
 	const _currentProject = get(currentProject);
-	if (_currentProject.timeline.audiosTracks.length > 0) {
+	if (_currentProject.timeline.audiosTracks[0].clips.length > 0) {
 		return getAssetFromId(_currentProject.timeline.audiosTracks[0].clips[0].assetId)!.filePath;
-	} else if (_currentProject.timeline.videosTracks.length > 0) {
+	} else if (_currentProject.timeline.videosTracks[0].clips.length > 0) {
 		return getAssetFromId(_currentProject.timeline.videosTracks[0].clips[0].assetId)!.filePath;
 	} else {
 		return '';
