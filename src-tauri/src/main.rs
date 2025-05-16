@@ -164,6 +164,7 @@ async fn create_video(
     output_path: String,
     top_ratio: f32,
     bottom_ratio: f32,
+    dynamic_top: bool,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
 
@@ -176,7 +177,7 @@ async fn create_video(
     Some(video_creator_path) => {
 
     // Construire les arguments
-    let cmd_args = vec![
+    let mut cmd_args = vec![
         folder_path,
         audio_path,
         transition_ms.to_string(),
@@ -186,6 +187,10 @@ async fn create_video(
         top_ratio.to_string(),
         bottom_ratio.to_string(),
     ];
+
+    if dynamic_top {
+        cmd_args.push("--dynamic-top".to_string());
+    }
 
     // Exécuter la commande
     let output = std::process::Command::new(video_creator_path)

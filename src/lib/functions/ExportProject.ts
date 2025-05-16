@@ -82,6 +82,8 @@ export async function exportCurrentProjectAsVideo() {
 		icon: 'ℹ️'
 	});
 
+	let surahsInVideo = new Set<number>();
+
 	for (let i = 0; i < subtitleClips.length; i++) {
 		if (get(isEscapePressed)) {
 			// cancel the export
@@ -95,6 +97,8 @@ export async function exportCurrentProjectAsVideo() {
 		}
 
 		const clip = subtitleClips[i];
+
+		if (clip.surah !== -1) surahsInVideo.add(clip.surah);
 
 		cursorPosition.set(clip.start + 100);
 		triggerSubtitleResize.set(false);
@@ -136,7 +140,10 @@ export async function exportCurrentProjectAsVideo() {
 			endTime: Math.floor(get(endTime) || 0),
 			outputPath: outputPath,
 			topRatio: get(topRatio) / 100,
-			bottomRatio: get(bottomRatio) / 100
+			bottomRatio: get(bottomRatio) / 100,
+			dynamicTop:
+				surahsInVideo.size > 1 &&
+				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable // si il y a plusieurs sourates le top avec affichage de la sourate changera
 		}),
 		{
 			loading: 'Creating video (id: ' + randomId + ')',
