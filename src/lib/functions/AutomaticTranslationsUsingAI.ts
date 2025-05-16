@@ -68,8 +68,7 @@ export async function generateTranslationsPrompt(languageCode: string) {
 				// N'ajouter le verset que si au moins un clip n'a pas été modifié
 				if (hasUnmodifiedClip) {
 					input.push({
-						full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse)
-							.text,
+						full_verse_arabic: allClipOfThisVerse[0].surah + ':' + allClipOfThisVerse[0].verse,
 						target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
 						existing_translation: await getVerseTranslation(
 							edition,
@@ -99,7 +98,7 @@ export async function generateTranslationsPrompt(languageCode: string) {
 		// N'ajouter le verset que si au moins un clip n'a pas été modifié
 		if (hasUnmodifiedClip) {
 			input.push({
-				full_verse_arabic: getVerse(allClipOfThisVerse[0].surah, allClipOfThisVerse[0].verse).text,
+				full_verse_arabic: allClipOfThisVerse[0].surah + ':' + allClipOfThisVerse[0].verse,
 				target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
 				existing_translation: await getVerseTranslation(
 					edition,

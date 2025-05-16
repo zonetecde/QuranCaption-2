@@ -1,3 +1,4 @@
+// filepath: f:\Programmation\tauri\QuranCaption-2\static\prompts\translations.txt
 **Task**:  
 Programmatically map **multiple Arabic segments** (including overlapping ones) from a set of Quranic verses to their **exact, contiguous substrings** within pre-existing translations. For each verse in the input array, ensure every Arabic segment is matched to a direct substring of `existing_translation`, preserving overlaps and covering all words in the translation.
 
@@ -5,15 +6,15 @@ Programmatically map **multiple Arabic segments** (including overlapping ones) f
 
 **Inputs**:  
 An array of objects, where each object contains:  
-1. `full_verse_arabic` (string): The full Arabic text of the verse.  
-2. `target_segments_arabic` (array of strings): Arabic phrases to map, which are substrings of `full_verse_arabic` and may overlap.  
+1. `full_verse_arabic` (string): Le numéro de sourate et verset au format "s:v" (ex: "1:1" pour Al-Fatiha verset 1).  
+2. `target_segments_arabic` (array of strings): Arabic phrases to map, which are segments of the complete verse.  
 3. `existing_translation` (string): The pre-translated text of the full verse in another language (e.g., French, English).  
 
 **Input Structure**:  
 ```json
 [
   {
-    "full_verse_arabic": "Arabic verse text",
+    "full_verse_arabic": "s:v", // Format: "sourate:verset", ex: "2:255"
     "target_segments_arabic": ["segment1", "segment2", ...],
     "existing_translation": "Translated verse text"
   },
@@ -49,9 +50,9 @@ An array of objects, where each object contains:
    - Do not reorder, split, or modify words in the translation.  
    - Example:  
      - Arabic segment: `"قَالُوا خَيْرًا"`  
-     - `existing_translation`: `"They say, “All the best!”"`  
-     - **Correct**: `"They say, “All the best!”"`  
-     - **Incorrect**: `"“All the best!”"` (omits context) or `"They say good"` (not verbatim).  
+     - `existing_translation`: `"They say, "All the best!""`  
+     - **Correct**: `"They say, "All the best!""`  
+     - **Incorrect**: `""All the best!""` (omits context) or `"They say good"` (not verbatim).  
 
 2. **Complete Coverage**:  
    - The union of all non-null translations for an input object must **exactly cover** `existing_translation` without gaps or missing words.  
@@ -62,16 +63,16 @@ An array of objects, where each object contains:
 
 3. **Overlapping Segments**:  
    - Overlapping Arabic segments must map to overlapping translation substrings, repeating words as needed.  
-   - Each segment’s translation must include **all words** corresponding to its Arabic text, even if previously included.  
+   - Each segment's translation must include **all words** corresponding to its Arabic text, even if previously included.  
    - Example:  
-     - `full_verse_arabic`: `"إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ"`  
-     - `target_segments_arabic`: `["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"]`  
+     - `full_verse_arabic`: `"1:5"`  
+     - `target_segments_arabic`: `["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"]`  
      - `existing_translation`: `"You alone we worship, and You alone we ask for help."`  
      - **Output**: `["You alone we worship", "worship, and You alone"]`  
      - **Explanation**: The word "worship" is repeated due to overlap in Arabic segments.  
 
 4. **Context Preservation**:  
-   - Include complete syntactic units (e.g., subjects, verbs, clauses) in the translation substring, even if the Arabic segment is partial, as long as it’s contiguous.  
+   - Include complete syntactic units (e.g., subjects, verbs, clauses) in the translation substring, even if the Arabic segment is partial, as long as it's contiguous.  
    - Example:  
      - Arabic segment: `"لَا تَأْخُذُهُ"`  
      - `existing_translation`: `"Neither drowsiness overtakes Him nor sleep."`  
@@ -79,19 +80,19 @@ An array of objects, where each object contains:
      - **Incorrect**: `"overtakes Him"` (incomplete clause).  
 
 5. **No Truncation**:  
-   - Ensure translations include **all words** corresponding to the Arabic segment’s meaning and context.  
+   - Ensure translations include **all words** corresponding to the Arabic segment's meaning and context.  
    - Example:  
-     - Arabic segment: `"وَمَا يَنزِلُ مِنَ ٱلسَّمَآءِ وَمَا يَعۡرُجُ"`  
+     - Arabic segment: `"وَمَا يَنزِلُ مِنَ ٱلسَّمَآءِ وَمَا يَعۡرُجُ"`  
      - `existing_translation`: `"Il sait ce qui descend du ciel et ce qui y remonte."`  
      - **Correct**: `"ce qui descend du ciel et ce qui y remonte."`  
      - **Incorrect**: `"descend du ciel et ce qui"` (truncates phrase).  
 
 6. **Handle Non-Contiguous Cases**:  
-   - If an Arabic segment’s translation is not a contiguous substring, return `null`.  
+   - If an Arabic segment's translation is not a contiguous substring, return `null`.  
    - Example:  
      - Arabic segment: `"زِدْنِي عِلْمًا"` (non-contiguous in translation)  
      - `existing_translation`: `"My Lord, increase me in knowledge."`  
-     - **Output**: `null` (if "increase me in knowledge" isn’t contiguous).  
+     - **Output**: `null` (if "increase me in knowledge" isn't contiguous).  
 
 ---
 
@@ -101,7 +102,7 @@ An array of objects, where each object contains:
 - **Input**:  
   ```json
   {
-    "full_verse_arabic": "يَعۡلَمُ مَا يَلِجُ فِي ٱلۡأَرۡضِ وَمَا يَخۡرُجُ مِنۡهَا",
+    "full_verse_arabic": "34:2",
     "target_segments_arabic": ["يَعۡلَمُ مَا يَلِجُ فِي ٱلۡأَرۡضِ", "مَا يَلِجُ فِي ٱلۡأَرۡضِ وَمَا يَخۡرُجُ"],
     "existing_translation": "Il sait qui pénètre en terre et qui en sort."
   }
@@ -116,8 +117,8 @@ An array of objects, where each object contains:
 - **Input**:  
   ```json
   {
-    "full_verse_arabic": "ٱلۡحَمۡدُ لِلَّهِ ٱلَّذِي لَهُۥ مَا فِي ٱلسَّمَٰوَٰتِ",
-    "target_segments_arabic": ["ٱلۡحَمۡدُ لِلَّهِ", "ٱلَّذِي لَهُۥ مَا فِي ٱلسَّمَٰوَٰتِ"],
+    "full_verse_arabic": "34:1",
+    "target_segments_arabic": ["ٱلۡحَمۡدُ لِلَّهِ", "ٱلَّذِي لَهُۥ مَا فِي ٱلسَّمَٰوَٰتِ"],
     "existing_translation": "Louange à Allah à qui appartient tout ce qui est dans les cieux."
   }
   ```  
@@ -132,22 +133,22 @@ An array of objects, where each object contains:
   ```json
   [
     {
-      "full_verse_arabic": "لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ",
+      "full_verse_arabic": "2:255",
       "target_segments_arabic": ["لَا تَأْخُذُهُ", "تَأْخُذُهُ سِنَةٌ"],
-      "existing_translation": "Ni le sommeil ni la fatigue ne L’atteignent."
+      "existing_translation": "Ni le sommeil ni la fatigue ne L'atteignent."
     },
     {
-      "full_verse_arabic": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
-      "target_segments_arabic": ["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"],
-      "existing_translation": "C’est Toi seul que nous adorons et Toi seul dont nous implorons secours."
+      "full_verse_arabic": "1:5",
+      "target_segments_arabic": ["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"],
+      "existing_translation": "C'est Toi seul que nous adorons et Toi seul dont nous implorons secours."
     }
   ]
   ```  
 - **Output**:  
   ```json
   [
-    ["Ni le sommeil ni la fatigue ne L’atteignent", "la fatigue ne L’atteignent"],
-    ["C’est Toi seul que nous adorons", "que nous adorons et Toi seul"]
+    ["Ni le sommeil ni la fatigue ne L'atteignent", "la fatigue ne L'atteignent"],
+    ["C'est Toi seul que nous adorons", "que nous adorons et Toi seul"]
   ]
   ```  
 - **Explanation**: Overlaps in both verses repeat words ("la fatigue", "que nous adorons") to reflect Arabic segment overlaps.  
@@ -156,7 +157,7 @@ An array of objects, where each object contains:
 - **Input**:  
   ```json
   {
-    "full_verse_arabic": "رَبِّ زِدْنِي عِلْمًا",
+    "full_verse_arabic": "20:114",
     "target_segments_arabic": ["زِدْنِي عِلْمًا"],
     "existing_translation": "Seigneur, augmente-moi en savoir."
   }
@@ -165,7 +166,7 @@ An array of objects, where each object contains:
   ```json
   [null]
   ```  
-- **Explanation**: The segment’s translation ("augmente-moi en savoir") is not a contiguous substring due to word order, so it returns `null`.  
+- **Explanation**: The segment's translation ("augmente-moi en savoir") is not a contiguous substring due to word order, so it returns `null`.  
 
 ---
 
@@ -180,7 +181,7 @@ An array of objects, where each object contains:
 **Final Notes**:  
 - Prioritize **verbatim substring accuracy** over translation continuity.  
 - Overlaps are expected and must repeat words as needed.  
-- Ensure **no truncation** of translations; include all words corresponding to the Arabic segment’s meaning and context.  
+- Ensure **no truncation** of translations; include all words corresponding to the Arabic segment's meaning and context.  
 - Validate that translations collectively cover the entire `existing_translation` without gaps.
 
 
