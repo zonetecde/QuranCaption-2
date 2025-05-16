@@ -96,7 +96,29 @@ export async function exportCurrentProjectAsVideo() {
 			return;
 		}
 
-		const clip = subtitleClips[i];
+		let clip = subtitleClips[i];
+
+		// Si on ne commence pas au début de la vidéo, on créé un sous-titre noire de 0 à startTime
+		let subtitleTemp;
+		if (i === 0 && get(startTime) > 0) {
+			// créé une copie de clip dans une variable temporaire
+			subtitleTemp = {
+				...clip
+			};
+
+			// remplace le texte par un noir
+			clip.text = '';
+			clip.start = 0;
+			clip.end = subtitleClips.find((c) => c.end >= get(startTime))?.start || get(startTime);
+			clip.isSilence = true;
+			clip.translations = {};
+			clip.surah = -1;
+			clip.verse = -1;
+		} else if (i > 0 && clip.end < get(startTime)) {
+			continue; // on skip les clips qui sont avant le startTime
+		} else if (get(endTime) !== null && clip.start > get(endTime)!) {
+			break; // on skip les clips qui sont après le endTime
+		}
 
 		if (clip.surah !== -1) surahsInVideo.add(clip.surah);
 
@@ -114,8 +136,12 @@ export async function exportCurrentProjectAsVideo() {
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché
 		// take a screenshot of the current frame
 		await takeScreenshot(randomId.toString(), Math.floor(clip.start) + '_' + Math.floor(clip.end));
-	}
 
+		// On remet le clip original
+		if (i === 0 && get(startTime) > 0 && subtitleTemp) {
+			subtitleClips[i] = { ...subtitleTemp };
+		}
+	}
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 
 	// On sort du mode plein écran

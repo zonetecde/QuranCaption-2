@@ -29,6 +29,26 @@ def find_ffmpeg_path():
     # Fallback to system PATH
     return "ffmpeg", "ffprobe"
 
+def create_black_segment(ffmpeg_path, temp_dir, log_file, width, height, duration, output_file=None):
+    """Create a black video segment with the specified duration"""
+    if output_file is None:
+        output_file = os.path.join(temp_dir, f"black_segment.mp4")
+    
+    cmd = [
+        ffmpeg_path,
+        '-y',
+        '-f', 'lavfi',
+        '-i', f'color=black:s={width}x{height}',
+        '-c:v', 'libx264',
+        '-t', str(duration),
+        '-pix_fmt', 'yuv420p',
+        '-preset', 'veryfast',
+        output_file
+    ]
+    with open(log_file, 'a') as f:
+        subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+    return output_file
+
 def process_image_segment(ffmpeg_path, img_path, duration, output_file, vf_args, log_file):
     """Helper function to process a single video segment for an image"""
     cmd = [
@@ -395,8 +415,10 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
     - folder_path: Path to folder containing PNG images
     - audio_path: Path to audio file
     - transition_ms: Transition duration in milliseconds
-    - start_time_ms: Start time for trimming in milliseconds (0 = no trim)
-    - end_time_ms: End time for trimming in milliseconds (0 = until the end)
+    - start_time_ms: Start time in milliseconds (0 = start at the beginning)
+      Si start_time > 0, la vidéo commencera directement à ce temps, en supprimant tout le contenu avant
+    - end_time_ms: End time in milliseconds (0 = until the end)
+      Si end_time > 0, seules les images pertinentes jusqu'à ce point seront traitées
     - output_path: Custom output path (None = default path in folder)
     - top_ratio: Ratio of image height for the top section (default: 0.2 or 20%, 0 = no top section)
     - bottom_ratio: Ratio of image height for the bottom section (default: 0.2 or 20%, 0 = no bottom section)
@@ -410,14 +432,14 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
     
     # Get all PNG files from the folder
     image_files = [f for f in os.listdir(folder_path) if f.endswith('.png')]
-    
-    # Extract timing information and sort by start time
+      # Extract timing information and sort by start time
     image_data = []
     for img_file in image_files:
         match = re.match(r'(\d+)_(\d+)\.png', img_file)
         if match:
             start_time = int(match.group(1)) / 1000.0  # Convert to seconds
             end_time = int(match.group(2)) / 1000.0    # Convert to seconds
+            
             image_data.append({
                 'file': img_file,
                 'start_time': start_time,
@@ -432,7 +454,30 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         print("No images found with the correct filename format.")
         return 1
     
-    print(f"Found {len(image_data)} images to include in the video.")
+    # Convertir start_time_ms et end_time_ms en secondes pour faciliter les comparaisons
+    start_time_sec = start_time_ms / 1000.0 if start_time_ms > 0 else 0
+    end_time_sec = end_time_ms / 1000.0 if end_time_ms > 0 else float('inf')
+    
+    # Filtrer les images pertinentes en fonction du start_time et end_time
+    # Une image est pertinente si:
+    # - Elle commence avant end_time ET se termine après start_time
+    # Ou en d'autres termes, si elle n'est pas complètement en dehors de la plage [start_time, end_time]
+    relevant_image_data = []
+    
+    for img in image_data:
+        # L'image est pertinente si elle n'est pas entièrement avant start_time ou après end_time
+        if not (img['end_time'] <= start_time_sec or (end_time_sec != float('inf') and img['start_time'] >= end_time_sec)):
+            relevant_image_data.append(img)
+    
+    # Remplacer la liste complète par la liste filtrée
+    original_count = len(image_data)
+    image_data = relevant_image_data
+    
+    if not image_data:
+        print(f"No images found within the specified time range ({start_time_ms}ms to {end_time_ms if end_time_ms > 0 else 'end'}ms).")
+        return 1
+    
+    print(f"Found {original_count} images in total, {len(image_data)} images are relevant for the specified time range.")
     
     # Set default output path if not provided
     if output_path is None:
@@ -702,16 +747,54 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
                         with open(log_file, 'a') as f:
                             subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
                             
-                    segment_files.append(segment_file)
+                    segment_files.append(segment_file)          # Si start_time > 0, on supprime directement la partie entre 0 et start_time
+        # Ajuster le premier segment si nécessaire pour commencer exactement à start_time
+        if start_time_ms > 0 and image_data[0]['start_time'] < start_time_sec:
+            print(f"Adjusting first segment to start exactly at {start_time_sec:.2f} seconds")
+            # Dans ce cas, on doit couper la première image pour qu'elle commence à start_time_sec
+            first_img_adjusted = os.path.join(temp_dir, "first_segment_adjusted.mp4")
+            offset = start_time_sec - image_data[0]['start_time']
+            
+            # Ne pas utiliser -c copy car cela peut causer des problèmes avec la position d'offset exacte
+            # Au lieu de cela, réencoder cette partie pour garantir que le fichier est valide
+            cmd = [
+                ffmpeg_path,
+                '-y',
+                '-i', segment_files[0],  # Le premier segment d'image est toujours à l'index 0 car on n'ajoute plus de segment noir
+                '-ss', str(offset),
+                '-c:v', 'libx264',  # Réencoder au lieu de simplement copier
+                '-preset', 'veryfast',
+                '-pix_fmt', 'yuv420p',
+                first_img_adjusted
+            ]
+            with open(log_file, 'a') as f:
+                subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
+            
+            # Vérifier si le fichier ajusté est valide avant de l'utiliser
+            if os.path.exists(first_img_adjusted) and os.path.getsize(first_img_adjusted) > 1000:
+                # Remplacer le premier segment par le segment ajusté
+                segment_files[0] = first_img_adjusted
+            else:
+                print("Warning: Adjusted segment is invalid, using original segment instead.")
+          # Vérifier que tous les segments sont valides avant de les concaténer
+        valid_segments = []
+        for segment_file in segment_files:
+            if os.path.exists(segment_file) and os.path.getsize(segment_file) > 1000:
+                valid_segments.append(segment_file)
+            else:
+                print(f"Warning: Skipping invalid segment: {os.path.basename(segment_file)}")
+        
+        if not valid_segments:
+            print("Error: No valid segments found to concatenate!")
+            return 1
         
         # Create a concat file to sequence all segments
         concat_list_path = os.path.join(temp_dir, "segments.txt")
         with open(concat_list_path, 'w') as f:
-            for segment_file in segment_files:
+            for segment_file in valid_segments:
                 f.write(f"file '{segment_file}'\n")
         
-        # Concatenate all segments
-        print("Assembling segments into a complete video...")
+        print(f"Assembling {len(valid_segments)} valid segments into a complete video...")
         silent_video = os.path.join(temp_dir, "silent_video.mp4")
         cmd = [
             ffmpeg_path,
@@ -742,38 +825,25 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         with open(log_file, 'a') as f:
             subprocess.run(cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
         
-        # Step 3: Apply trimming if requested
+        # Nous n'avons plus besoin de faire de trim, car nous avons déjà sélectionné et ajusté les images pertinentes
         final_output = output_path
         
-        if start_time_ms > 0 or end_time_ms > 0:
-            print(f"Applying trim: start={start_time_ms}ms" + (f", end={end_time_ms}ms" if end_time_ms > 0 else ""))
-            
-            trim_cmd = [ffmpeg_path, '-y', '-i', full_video]
-            
-            # Add trim parameters
-            trim_args = []
-            if start_time_ms > 0:
-                start_time_sec = start_time_ms / 1000.0
-                trim_args.extend(['-ss', str(start_time_sec)])
-            
-            if end_time_ms > 0:
-                end_time_sec = end_time_ms / 1000.0
-                # Calculate duration from start point
-                if start_time_ms > 0:
-                    duration_sec = end_time_sec - (start_time_ms / 1000.0)
-                    trim_args.extend(['-t', str(duration_sec)])
-                else:
-                    # If no start time specified, use -to
-                    trim_args.extend(['-to', str(end_time_sec)])
-            
-            # Output options
-            trim_cmd.extend(trim_args)
-            trim_cmd.extend(['-c:v', 'copy', '-c:a', 'copy', final_output])
+        # Si une durée de fin a été spécifiée et que la dernière image va au-delà,
+        # il peut être nécessaire de faire un trim final
+        if end_time_ms > 0 and image_data[-1]['end_time'] > end_time_sec:
+            print(f"Applying final trim to match exact end time: {end_time_ms}ms")
+            trim_cmd = [
+                ffmpeg_path, '-y', 
+                '-i', full_video,
+                '-t', str(end_time_sec),
+                '-c:v', 'copy', '-c:a', 'copy', 
+                final_output
+            ]
             
             with open(log_file, 'a') as f:
                 subprocess.run(trim_cmd, check=True, stdout=f, stderr=subprocess.STDOUT)
         else:
-            # If no trimming, just copy the full video to the output path
+            # Si pas besoin de trim final, simplement copier la vidéo complète
             shutil.copy2(full_video, final_output)
         
         # Get the final video duration
@@ -784,8 +854,8 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
             print(f"Final video duration: {final_duration:.2f} seconds")
         except ValueError:
             print("Unable to determine the final duration of the video")
-            
         print(f"Video successfully created: {final_output}")
+        
         if use_sectioning:
             middle_percent = int(middle_ratio * 100)
             print(f"Fade was applied only to the central part ({middle_percent}% of the height).")            
@@ -796,7 +866,8 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         else:
             print("Fade was applied to the entire image (no sectioning).")
         if start_time_ms > 0 or end_time_ms > 0:
-            print(f"Video trimmed: start at {start_time_ms}ms" + (f" until {end_time_ms}ms" if end_time_ms > 0 else ""))
+            print(f"Optimized video generation for time range: {start_time_ms}ms" + (f" to {end_time_ms}ms" if end_time_ms > 0 else " to end"))
+            print(f"Only relevant images were processed, and all content before {start_time_ms}ms was removed.")
         
         return 0  # Success
     

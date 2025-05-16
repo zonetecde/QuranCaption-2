@@ -168,45 +168,41 @@ async fn create_video(
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
 
-        let path_resolver: tauri::PathResolver = app_handle.path_resolver();
+    let path_resolver: tauri::PathResolver = app_handle.path_resolver();
 
-        
-    // Déterminer l'emplacement de l'exécutable
-// Attempt to resolve the path to the bundled 'video_creator' binary
- match path_resolver.resolve_resource("binaries/video_creator") {
-    Some(video_creator_path) => {
+    // Attempt to resolve the path to the bundled 'video_creator' binary
+    match path_resolver.resolve_resource("binaries/video_creator") {
+        Some(video_creator_path) => {
+            // Construct the arguments
+            let cmd_args = vec![
+                folder_path.clone(),
+                audio_path.clone(),
+                transition_ms.to_string(),
+                start_time.to_string(),
+                end_time.to_string(),
+                output_path.clone(),
+                top_ratio.to_string(),
+                bottom_ratio.to_string(),
+                if dynamic_top { "1".to_string() } else { "0".to_string() },
+            ];
 
-    // Construire les arguments
-    let cmd_args = vec![
-        folder_path.clone(),
-        audio_path.clone(),
-        transition_ms.to_string(),
-        start_time.to_string(),
-        end_time.to_string(),
-        output_path.clone(),
-        top_ratio.to_string(),
-        bottom_ratio.to_string(),
-        if dynamic_top { "1".to_string() } else { "0".to_string() },
-    ];
+            // Execute the command without putting it in background mode
+            let status = std::process::Command::new(video_creator_path)
+                .args(&cmd_args)
+                .status()
+                .map_err(|e| format!("Error while executing: {}", e))?;
 
-
-    // Exécuter la commande
-    let output = std::process::Command::new(video_creator_path)
-        .args(&cmd_args)
-        .output()
-        .map_err(|e| format!("Erreur lors de l'exécution: {}", e))?;
-    
-    if output.status.success() {
-        Ok(String::from_utf8_lossy(&output.stdout).to_string())
-    } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+            if status.success() {
+                Ok("Video creation process completed successfully.".to_string())
+            } else {
+                Err("Video creation process failed.".to_string())
+            }
+        },
+        None => {
+            // Handle the case where the path could not be resolved
+            Err("Failed to resolve video_creator path".to_string())
+        }
     }
-    },
-    None => {
-        // Handle the case where the path could not be resolved
-        Err("Failed to resolve video_creator path".to_string())
-    }
- }
 }
 
 #[tauri::command]
