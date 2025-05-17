@@ -9,12 +9,7 @@ from PIL import Image
 import platform
 import multiprocessing
 from functools import partial
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-
-# Ajouter le support pour PyInstaller ici
-if hasattr(sys, 'frozen'):
-    # Nous sommes dans une version compilée avec PyInstaller
-    multiprocessing.freeze_support()
+from concurrent.futures import ThreadPoolExecutor, ThreadPoolExecutor, as_completed
 
 def find_ffmpeg_path():
     """Determine the path to ffmpeg executable based on the platform."""
@@ -534,24 +529,18 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
         if not use_sectioning:
             print("No sectioning: creating video segments in parallel...")
             
-            # Version compatible avec PyInstaller - utilisation de ThreadPoolExecutor au lieu de ProcessPoolExecutor
+            # Version compatible avec PyInstaller - utilisation de ThreadPoolExecutor au lieu de ThreadPoolExecutor
             segment_files = []
             
-            if hasattr(sys, 'frozen'):
-                # Mode compilé: pas de parallélisation pour éviter les problèmes avec PyInstaller
-                print("Running in compiled mode: using sequential processing instead of parallel processing")
+        
+            # Mode script: parallélisation avec ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=num_cores) as executor:
+                # Prepare parameters for parallel processing
                 params = [(ffmpeg_path, temp_dir, log_file, i, data, transition_sec, len(image_data)) 
                         for i, data in enumerate(image_data)]
-                segment_files = [process_image_full(param) for param in params]
-            else:
-                # Mode script: parallélisation avec ProcessPoolExecutor
-                with ProcessPoolExecutor(max_workers=num_cores) as executor:
-                    # Prepare parameters for parallel processing
-                    params = [(ffmpeg_path, temp_dir, log_file, i, data, transition_sec, len(image_data)) 
-                            for i, data in enumerate(image_data)]
-                    
-                    # Process all images in parallel and collect results
-                    segment_files = list(executor.map(process_image_full, params))
+                
+                # Process all images in parallel and collect results
+                segment_files = list(executor.map(process_image_full, params))
         else:
             if is_top_section_static:
                 print("Using optimized sectioning approach with static sections...")
@@ -574,28 +563,17 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
                   # Process only the middle sections of each image in parallel
                 middle_sections = []
                 
-                if hasattr(sys, 'frozen'):
-                    # Mode compilé: pas de parallélisation pour éviter les problèmes avec PyInstaller
-                    print("Running in compiled mode: using sequential processing instead of parallel processing")
-                    # Prepare parameters
+                
+                # Mode script: parallélisation avec ThreadPoolExecutor
+                with ThreadPoolExecutor(max_workers=num_cores) as executor:
+                    # Prepare parameters for parallel processing
                     params = [(ffmpeg_path, temp_dir, log_file, i, data, 
                             top_height, middle_height, width, 
                             transition_sec, len(image_data))
                             for i, data in enumerate(image_data)]
                     
-                    # Process all middle sections sequentially
-                    middle_results = [process_middle_section(param) for param in params]
-                else:
-                    # Mode script: parallélisation avec ProcessPoolExecutor
-                    with ProcessPoolExecutor(max_workers=num_cores) as executor:
-                        # Prepare parameters for parallel processing
-                        params = [(ffmpeg_path, temp_dir, log_file, i, data, 
-                                top_height, middle_height, width, 
-                                transition_sec, len(image_data))
-                                for i, data in enumerate(image_data)]
-                        
-                        # Process all middle sections in parallel
-                        middle_results = list(executor.map(process_middle_section, params))
+                    # Process all middle sections in parallel
+                    middle_results = list(executor.map(process_middle_section, params))
                 
                 # Sort results by index to maintain order
                 middle_results.sort(key=lambda x: x[0])
@@ -626,7 +604,7 @@ def create_video_from_images(folder_path, audio_path, transition_ms, start_time_
                 top_results = []
                 middle_results = []
                 
-                with ProcessPoolExecutor(max_workers=num_cores) as executor:
+                with ThreadPoolExecutor(max_workers=num_cores) as executor:
                     # Process both middle and top sections (if top_height > 0)
                     futures = []
                     
