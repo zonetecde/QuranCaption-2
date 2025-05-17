@@ -13,6 +13,7 @@
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { fade } from 'svelte/transition';
 	import { currentlyExporting, triggerSubtitleResize } from '$lib/stores/ExportStore';
+	import { isCalculatingNeededHeights } from '$lib/stores/VideoPreviewStore';
 
 	export let currentSubtitle: SubtitleClip;
 	export let hideControls = false;
@@ -78,7 +79,11 @@
 	let subtitleTextSize = 1;
 
 	$: if (
-		(!$currentlyExporting && $videoDimensions) ||
+		// !$isCalculatingNeededHeights  -> c'est quand on appuie sur la checkbox `fitInOneLine`. Ça fait des calculs,
+		// on ne veut pas que la taille du sous-titre change pendant ce temps là
+		// $currentlyExporting -> c'est quand on exporte la vidéo. C'est manuellement géré dans le code de l'export pour éviter plusieurs appels à `calculateSubtitleTextSize`
+		// $videoDimensions -> c'est quand on change la taille de la vidéo. On ne veut pas que la taille du sous-titre change pendant ce temps là
+		(!$isCalculatingNeededHeights && !$currentlyExporting && $videoDimensions) ||
 		$triggerSubtitleResize ||
 		(!$currentlyExporting &&
 			paragraph &&
@@ -106,8 +111,13 @@
 					? subtitleSettingsForThisLang.neededHeightToFitFullScreen
 					: subtitleSettingsForThisLang.neededHeightToFitSmallPreview;
 
-				while (p.clientHeight > usedHeight && usedHeight !== -1) {
+				while (
+					p.clientHeight > usedHeight &&
+					usedHeight !== -1 &&
+					!p.innerHTML.includes('.CALCULATING.')
+				) {
 					subtitleTextSize -= 4;
+
 					await new Promise((resolve) => setTimeout(resolve, 1));
 				}
 				displaySubtitle = true;

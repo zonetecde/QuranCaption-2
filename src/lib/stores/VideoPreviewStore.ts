@@ -4,6 +4,7 @@ import { cursorPosition } from './TimelineStore';
 
 export const isPreviewPlaying: Writable<boolean> = writable(false);
 export const latestSurah: Writable<number> = writable(-1); // The latest surah that was played in the preview
+export const isCalculatingNeededHeights: Writable<boolean> = writable(false);
 
 /**
  * Récupère le temps actuel du curseur

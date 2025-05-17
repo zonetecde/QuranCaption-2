@@ -4,6 +4,7 @@
 	import { fullScreenPreview, showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
 	import { currentProject, hasAtLeastOneSubtitle } from '$lib/stores/ProjectStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
+	import { isCalculatingNeededHeights } from '$lib/stores/VideoPreviewStore';
 	import toast from 'svelte-french-toast';
 
 	export let subtitleLanguage = 'arabic';
@@ -35,6 +36,8 @@
 				false;
 			return;
 		}
+
+		isCalculatingNeededHeights.set(true);
 
 		// pour la langue sélectionnée
 		const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
@@ -88,7 +91,7 @@
 					subtitleParagraph.innerHTML = newInnerText;
 
 					await new Promise((resolve) => {
-						setTimeout(resolve, 100); // Wait for subtitle to render
+						setTimeout(resolve, 2000); // Wait for subtitle to render
 					});
 
 					// récupère la hauteur
@@ -129,6 +132,8 @@
 			);
 		}
 
+		isCalculatingNeededHeights.set(false);
+
 		// remet les settings comme avant
 		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableSubtitles =
@@ -159,8 +164,9 @@
 
 <Toggle
 	text="Enable Subtitles"
-	bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-		.enableSubtitles}
+	bind:checked={
+		$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableSubtitles
+	}
 />
 
 <!-- Font size -->
@@ -169,8 +175,9 @@
 		><span class="w-32">Font Family :</span>
 		<select
 			class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
-			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.fontFamily}
+			bind:value={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontFamily
+			}
 		>
 			<option class="bg-slate-300 text-black" value="Hafs">Hafs</option>
 
@@ -190,8 +197,9 @@
 			min={1}
 			max={140}
 			step={1}
-			bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.fontSize}
+			bind:bindValue={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize
+			}
 		/>
 	</div>
 
@@ -199,8 +207,9 @@
 		<input
 			type="checkbox"
 			class="ml-1 scale-110"
-			bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.fitOnOneLine}
+			bind:checked={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine
+			}
 		/>
 		<span class="ml-1"
 			>Adapt font size to fit on
@@ -208,8 +217,9 @@
 				class="bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
 				disabled={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
 					.fitOnOneLine}
-				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-					.maxNumberOfLines}
+				bind:value={
+					$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].maxNumberOfLines
+				}
 			>
 				<option value={1} class="bg-slate-300 text-black">1</option>
 				<option value={2} class="bg-slate-300 text-black">2</option>
@@ -245,16 +255,18 @@
 		min={0}
 		max={1}
 		step={0.01}
-		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-			.opacity}
+		bind:bindValue={
+			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].opacity
+		}
 	/>
 
 	<label class="mt-4">
 		<input
 			type="checkbox"
 			class="ml-1 scale-110"
-			bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.showVerseNumber}
+			bind:checked={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].showVerseNumber
+			}
 		/> <span class="ml-1">Show Verse Number</span>
 	</label>
 
@@ -263,8 +275,9 @@
 		><span class="w-32">Alignement :</span>
 		<select
 			class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
-			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.alignment}
+			bind:value={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].alignment
+			}
 		>
 			<option class="bg-slate-300 text-black" value="center">Center</option>
 			<option class="bg-slate-300 text-black" value="start">Left</option>
@@ -278,16 +291,18 @@
 	<h1 class="text-lg font-bold mb-2">Subtitle Outline</h1>
 	<Toggle
 		text="Enable outline"
-		bind:checked={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-			.enableOutline}
+		bind:checked={
+			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].enableOutline
+		}
 	/>
 	<label for="background-color" class="mt-2"
 		><span>Outline Color :</span>
 		<input
 			type="color"
 			class="ml-1 bg-transparent"
-			bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.outlineColor}
+			bind:value={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineColor
+			}
 		/>
 	</label>
 
@@ -296,8 +311,9 @@
 		min={1}
 		max={40}
 		step={0.5}
-		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-			.outlineThickness}
+		bind:bindValue={
+			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].outlineThickness
+		}
 	/>
 </div>
 
@@ -308,8 +324,9 @@
 		min={-100}
 		max={100}
 		step={0.1}
-		bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-			.verticalPosition}
+		bind:bindValue={
+			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition
+		}
 	/>
 
 	{#if $currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine}
@@ -330,8 +347,9 @@
 			min={0}
 			max={50}
 			step={0.1}
-			bind:bindValue={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-				.horizontalPadding}
+			bind:bindValue={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding
+			}
 		/>
 	</div>
 </div>
@@ -346,8 +364,10 @@
 			<input
 				type="text"
 				class="w-full mt-1 bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
-				bind:value={$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
-					.customTextSeparator}
+				bind:value={
+					$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage]
+						.customTextSeparator
+				}
 				placeholder="\n for line break"
 			/>
 		</span></label
