@@ -116,7 +116,7 @@ export async function exportCurrentProjectAsVideo() {
 		});
 		triggerSubtitleResize.set(true); // trigger le changement de fontsize pour l'option `fitInOneLine`
 		await new Promise((resolve) => {
-			setTimeout(resolve, 50); // wait for subtitles to be displayed in one line
+			setTimeout(resolve, clip.text.split(' ').length >= 9 ? 120 : 50); // wait for subtitles to be displayed in one line
 		});
 
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché
