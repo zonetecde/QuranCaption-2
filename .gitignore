@@ -25,3 +25,4 @@ src-tauri/video-creator/video_creator.spec
 
 src-tauri/video-creator/output.mp4
 src-tauri/video_creator_debug.txt
+src-tauri/binaries/output.mp4

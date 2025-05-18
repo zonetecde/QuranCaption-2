@@ -2,15 +2,19 @@
 echo Creating the executable for Windows...
 
 echo Installing dependencies...
+pip install pyinstaller --upgrade
+pip install argparse 
+pip install opencv-python-headless 
+pip install numpy 
+pip install moviepy==1.0.3 
 pip install pillow
-pip install pyinstaller
 echo Dependencies installed successfully.
 
 rem Check if PyInstaller is installed
 pyinstaller --version >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo PyInstaller is not installed. Installing it again...
-    pip install pyinstaller
+    pip install pyinstaller --upgrade
 )
 
 rem Build the executable

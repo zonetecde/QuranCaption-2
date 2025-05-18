@@ -2,14 +2,18 @@
 echo "Creating the executable for macOS..."
 
 echo "Installing dependencies..."
+pip install pyinstaller --upgrade
+pip install argparse 
+pip install opencv-python-headless 
+pip install numpy 
+pip install moviepy==1.0.3 
 pip install pillow
-pip install pyinstaller
 echo "Dependencies installed successfully."
 
 # Check if PyInstaller is installed
 if ! command -v pyinstaller &> /dev/null; then
     echo "PyInstaller is not installed. Installing it now..."
-    pip install pyinstaller
+    pip install pyinstaller --upgrade
 fi
 
 # Build the executable

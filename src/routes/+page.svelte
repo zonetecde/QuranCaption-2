@@ -58,7 +58,7 @@
 			toast(
 				'Join the Discord server to get help, report bugs, or suggest new features!\n(Link at the bottom of the page)',
 				{
-					duration: 15000,
+					duration: 8000,
 					position: 'top-center',
 					icon: 'ℹ️'
 				}
