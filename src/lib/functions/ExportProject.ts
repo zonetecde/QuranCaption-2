@@ -117,8 +117,16 @@ export async function exportCurrentProjectAsVideo() {
 			setTimeout(resolve, 40);
 		});
 		triggerSubtitleResize.set(true); // trigger le changement de fontsize pour l'option `fitInOneLine`
+		let waitTime = 50;
+		if (clip.text.split(' ').length >= 9) {
+			waitTime = 120;
+		}
+		if (get(orientation) === 'portrait') {
+			waitTime += 50;
+		}
+
 		await new Promise((resolve) => {
-			setTimeout(resolve, clip.text.split(' ').length >= 9 ? 120 : 50); // wait for subtitles to be displayed in one line
+			setTimeout(resolve, waitTime); // wait for subtitles to be displayed in one line
 		});
 
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché
@@ -135,7 +143,7 @@ export async function exportCurrentProjectAsVideo() {
 	_currentProject.timeline.subtitlesTracks[0].clips =
 		_currentProject.timeline.subtitlesTracks[0].clips.filter((clip) => clip.id !== 'temporary');
 
-	const outputPath = `${EXPORT_PATH}${makeFileNameValid(_currentProject.name + (_currentProject.reciter !== '' ? ' (' + _currentProject.reciter + ')' : ''))}.mp4`;
+	const outputPath = `${EXPORT_PATH}${makeFileNameValid(_currentProject.name + (_currentProject.reciter !== '' ? ' (' + _currentProject.reciter + ')' : '')) + '_' + randomId}.mp4`;
 
 	// On appelle le script python pour créer la vidéo
 	await toast.promise(

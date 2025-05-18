@@ -20,9 +20,6 @@
 
 		// for a 9/16 ratio, calculate the width
 		widthForPortrait = (totalHeight * 9) / 16;
-
-		console.log('totalHeight', totalHeight);
-		console.log('widthForPortrait', widthForPortrait);
 	}
 </script>
 
