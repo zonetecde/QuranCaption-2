@@ -86,9 +86,9 @@
 				endTime: null,
 				orientation: 'landscape',
 				exportType: 'video-static',
-				topRatio: 0.25,
-				middleRatio: 0.5,
-				bottomRatio: 0.25,
+				topRatio: 25,
+				middleRatio: 50,
+				bottomRatio: 25,
 				quality: 1
 			};
 		}
@@ -106,7 +106,7 @@
 		});
 		// Load the project into the store
 		currentProject.set(project);
-		
+
 		// Ensure the export settings are applied after the project is loaded into the store
 		if (project.projectSettings.exportSettings !== undefined) {
 			startTime.set(project.projectSettings.exportSettings.startTime);
