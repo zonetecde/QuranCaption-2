@@ -8,6 +8,16 @@ import { getSurahName, Mushaf } from './QuranStore';
 import { cursorPosition, getLastClipEnd, scrollPosition, zoom } from './TimelineStore';
 import { getTextName, OtherTexts } from './OtherTextsStore';
 import { getAssetFromId } from '$lib/models/Asset';
+import {
+	startTime,
+	endTime,
+	orientation,
+	exportType,
+	topRatio,
+	middleRatio,
+	bottomRatio,
+	quality
+} from './ExportStore';
 
 export const currentProject: Writable<Project> = writable();
 
@@ -81,7 +91,16 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 		translateVideoX: 0,
 		bestPerformance: false,
 		individualSubtitlesSettings: {},
-
+		exportSettings: {
+			startTime: 0,
+			endTime: null,
+			orientation: 'landscape',
+			exportType: 'video-static',
+			topRatio: 25,
+			middleRatio: 50,
+			bottomRatio: 25,
+			quality: 1
+		},
 		globalSubtitlesSettings: {
 			background: true,
 			backgroundColor: '#000000',
@@ -236,10 +255,22 @@ export async function updateUsersProjects(
 		project.projectSettings = getDefaultsProjectSettings();
 	}
 
+	// Met tout les attributs à jour en fonction de l'interface
 	if (!isInMigrationMode) {
 		project.projectSettings.zoom = get(zoom);
 		project.projectSettings.cursorPosition = get(cursorPosition);
 		project.projectSettings.scrollLeft = get(scrollPosition);
+
+		project.projectSettings.exportSettings = {
+			startTime: get(startTime),
+			endTime: get(endTime),
+			orientation: get(orientation),
+			exportType: get(exportType),
+			topRatio: get(topRatio),
+			middleRatio: get(middleRatio),
+			bottomRatio: get(bottomRatio),
+			quality: get(quality)
+		};
 	}
 
 	const index = projects.findIndex((p) => p.id === project.id);

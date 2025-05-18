@@ -10,6 +10,16 @@
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
+	import {
+		startTime,
+		endTime,
+		orientation,
+		exportType,
+		topRatio,
+		middleRatio,
+		bottomRatio,
+		quality
+	} from '$lib/stores/ExportStore';
 
 	onMount(async () => {
 		// the slug is what after the ? in the URL
@@ -59,6 +69,30 @@
 			};
 		}
 
+		// Set the values for the export settings
+		if (project.projectSettings.exportSettings !== undefined) {
+			startTime.set(project.projectSettings.exportSettings.startTime);
+			endTime.set(project.projectSettings.exportSettings.endTime);
+			orientation.set(project.projectSettings.exportSettings.orientation);
+			exportType.set(project.projectSettings.exportSettings.exportType);
+			topRatio.set(project.projectSettings.exportSettings.topRatio);
+			middleRatio.set(project.projectSettings.exportSettings.middleRatio);
+			bottomRatio.set(project.projectSettings.exportSettings.bottomRatio);
+			quality.set(project.projectSettings.exportSettings.quality);
+		} else {
+			// If the project doesn't have the export settings, set the default values
+			project.projectSettings.exportSettings = {
+				startTime: 0,
+				endTime: null,
+				orientation: 'landscape',
+				exportType: 'video-static',
+				topRatio: 0.25,
+				middleRatio: 0.5,
+				bottomRatio: 0.25,
+				quality: 1
+			};
+		}
+
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {
 			invoke('do_file_exist', { path: asset.filePath }).then((res) => {
@@ -70,9 +104,20 @@
 				}
 			});
 		});
-
 		// Load the project into the store
 		currentProject.set(project);
+		
+		// Ensure the export settings are applied after the project is loaded into the store
+		if (project.projectSettings.exportSettings !== undefined) {
+			startTime.set(project.projectSettings.exportSettings.startTime);
+			endTime.set(project.projectSettings.exportSettings.endTime);
+			orientation.set(project.projectSettings.exportSettings.orientation);
+			exportType.set(project.projectSettings.exportSettings.exportType);
+			topRatio.set(project.projectSettings.exportSettings.topRatio);
+			middleRatio.set(project.projectSettings.exportSettings.middleRatio);
+			bottomRatio.set(project.projectSettings.exportSettings.bottomRatio);
+			quality.set(project.projectSettings.exportSettings.quality);
+		}
 	});
 </script>
 

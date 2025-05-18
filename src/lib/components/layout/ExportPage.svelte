@@ -1,10 +1,21 @@
 <script lang="ts">
 	import { fullScreenPreview, videoEditorSelectedTab } from '$lib/stores/LayoutStore';
+	import { onMount } from 'svelte';
 	import AssetsManager from '../assetsmanager/AssetsManager.svelte';
 	import ExportOptions from '../export/ExportOptions.svelte';
 	import VideoPreview from '../preview/VideoPreview.svelte';
 	import SubtitleSettings from '../subtitles/subtitlesSettingsUI/SubtitleSettingsContainer.svelte';
 	import Timeline from '../timeline/Timeline.svelte';
+	import { currentProject } from '$lib/stores/ProjectStore';
+	import { endTime, startTime } from '$lib/stores/ExportStore';
+	import {
+		orientation,
+		exportType,
+		topRatio,
+		middleRatio,
+		bottomRatio,
+		quality
+	} from '$lib/stores/ExportStore';
 </script>
 
 <div class="flex-row w-full h-full grid grid-cols-2-template">

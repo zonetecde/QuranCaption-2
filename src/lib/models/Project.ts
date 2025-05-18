@@ -1,3 +1,4 @@
+import type ExportStatic from '$lib/components/export/ExportStatic.svelte';
 import type Asset from './Asset';
 import type Timeline from './Timeline';
 
@@ -65,6 +66,21 @@ export interface ProjectSettings {
 	subtitlesTracksSettings: { [key: string]: SubtitleTrackSettings };
 	addedTranslations: string[];
 	individualSubtitlesSettings: { [key: string]: IndividualSubtitleSettings };
+
+	exportSettings: ExportSettings;
+}
+
+export type ExportType = 'video-static' | 'video-obs' | 'sub' | 'ytb-chapters';
+
+export interface ExportSettings {
+	startTime: number;
+	endTime: number | null;
+	orientation: 'landscape' | 'portrait';
+	exportType: ExportType;
+	topRatio: number;
+	middleRatio: number;
+	bottomRatio: number;
+	quality: number;
 }
 
 /**
