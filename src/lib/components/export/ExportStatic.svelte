@@ -6,12 +6,14 @@
 		topRatio,
 		middleRatio,
 		bottomRatio,
-		orientation
+		orientation,
+		quality
 	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
 	import { getCurrentCursorTime } from '$lib/stores/VideoPreviewStore';
 	import { onMount } from 'svelte';
+	import Slider from '../common/Slider.svelte';
 
 	function millisecondsToTime(ms: number): string {
 		const milliseconds = Math.round((ms % 1000) / 10);
@@ -84,6 +86,16 @@
 		}}
 	/>
 	<label for="landscape-mode" class="text-sm font-bold">Portrait mode (TikTok format)</label>
+</div>
+
+<!-- quality (slide bar from 1 to 3) -->
+<div class="flex flex-col mt-4">
+	<p class="font-bold mr-2">Quality</p>
+	<p class="text-sm opacity-80 mt-1">
+		Adjust the quality of the exported video. Note that higher quality settings may increase export
+		times.<br />1 = 1080p and 2 = 4k.
+	</p>
+	<Slider title="Value" min={1} max={2} step={0.1} bind:bindValue={$quality} unit="x" />
 </div>
 
 <!-- Video section ratios -->

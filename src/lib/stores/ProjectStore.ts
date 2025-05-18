@@ -421,7 +421,6 @@ export function getProjectVersesRange(project: Project): string[] {
 		}
 	}
 
-	console.log('versesRange', versesRange);
 	// remove duplicates
 	return versesRange.filter((v, i, a) => a.indexOf(v) === i);
 }

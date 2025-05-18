@@ -21,7 +21,8 @@ import {
 	startTime,
 	topRatio,
 	triggerSubtitleResize,
-	orientation
+	orientation,
+	quality
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -171,7 +172,7 @@ async function takeScreenshot(folderName: string, fileName: string) {
 	let node = document.getElementById('preview')!;
 
 	// Qualité de l'image
-	let scale = 1;
+	let scale = get(quality);
 
 	// Si en mode portrait, on va prévoir pour le crop 9:16
 	const isPortrait = get(orientation) === 'portrait';
