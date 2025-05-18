@@ -121,11 +121,11 @@
 		if (heightNeededSmallPreview !== -1) {
 			$currentProject.projectSettings.subtitlesTracksSettings[
 				subtitleLanguage
-			].neededHeightToFitFullScreen = heightNeededFullScreen;
+			].neededHeightToFitFullScreen = heightNeededFullScreen + 5;
 
 			$currentProject.projectSettings.subtitlesTracksSettings[
 				subtitleLanguage
-			].neededHeightToFitSmallPreview = heightNeededSmallPreview;
+			].neededHeightToFitSmallPreview = heightNeededSmallPreview + 5;
 		} else {
 			toast.error(
 				'There was an error while trying to find the height needed to fit the subtitle on one line'
