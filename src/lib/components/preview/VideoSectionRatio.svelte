@@ -18,8 +18,11 @@
 	$: if ($videoDimensions && maindiv) {
 		totalHeight = maindiv.clientHeight;
 
-		// for a 16/9 ratio, calculate the width
-		widthForPortrait = (totalHeight * 16) / 9;
+		// for a 9/16 ratio, calculate the width
+		widthForPortrait = (totalHeight * 9) / 16;
+
+		console.log('totalHeight', totalHeight);
+		console.log('widthForPortrait', widthForPortrait);
 	}
 </script>
 
@@ -103,14 +106,16 @@
 		class:bottom-16={!hideControls}
 		class:bottom-0={hideControls}
 	>
-		<div
-			class="absolute w-0.5 h-full bg-white bg-opacity-30 pointer-events-none z-10"
-			style="left: {$topRatio}%;"
-		></div>
-		<!-- Line between middle and bottom sections -->
-		<div
-			class="absolute w-0.5 h-full bg-white bg-opacity-30 pointer-events-none z-10"
-			style="left: {$topRatio + $middleRatio}%;"
-		></div>
+		<!-- Visualisation du ratio 9:16 (bordures gauche et droite) -->
+		{#if widthForPortrait > 0}
+			<div
+				class="absolute top-0 bottom-0 bg-black bg-opacity-80 border-r border-white border-opacity-75 z-10"
+				style="left: 0; width: calc(50% - {widthForPortrait / 2}px);"
+			></div>
+			<div
+				class="absolute top-0 bottom-0 bg-black bg-opacity-80 border-l border-white border-opacity-75 z-10"
+				style="right: 0; width: calc(50% - {widthForPortrait / 2}px);"
+			></div>
+		{/if}
 	</div>
 {/if}
