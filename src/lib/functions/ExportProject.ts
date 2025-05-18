@@ -176,7 +176,7 @@ async function takeScreenshot(folderName: string, fileName: string) {
 	let node = document.getElementById('preview')!;
 
 	// Qualité de l'image
-	let scale = 2;
+	let scale = 1;
 
 	// Si en mode portrait, on va prévoir pour le crop 9:16
 	const isPortrait = get(orientation) === 'portrait';

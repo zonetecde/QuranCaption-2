@@ -91,7 +91,7 @@
 					subtitleParagraph.innerHTML = newInnerText;
 
 					await new Promise((resolve) => {
-						setTimeout(resolve, 2000); // Wait for subtitle to render
+						setTimeout(resolve, 200); // Wait for subtitle to render
 					});
 
 					// récupère la hauteur
@@ -100,7 +100,7 @@
 					fullScreenPreview.set(true);
 
 					await new Promise((resolve) => {
-						setTimeout(resolve, 100); // Wait for subtitle to render
+						setTimeout(resolve, 200); // Wait for subtitle to render
 					});
 
 					heightNeededFullScreen = subtitleParagraph.clientHeight;
