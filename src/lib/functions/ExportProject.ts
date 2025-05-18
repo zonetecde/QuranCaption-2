@@ -163,12 +163,6 @@ export async function exportCurrentProjectAsVideo() {
 			position: 'bottom-right'
 		}
 	);
-	// ouvre le dossier contenant la vidéo
-	await invoke('open', {
-		path: outputPath
-	});
-	// supprime le dossier contenant les images
-	await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
 }
 
 async function takeScreenshot(folderName: string, fileName: string) {

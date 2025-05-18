@@ -1,4 +1,5 @@
 import argparse
+import shutil
 import cv2
 import numpy as np
 import os
@@ -269,6 +270,12 @@ def main():
     
     print(f"Video creation completed in {time.time() - start_time:.2f} seconds")
     print(f"Final video duration: {duration_sec:.2f} seconds")
+
+    # Once done, remove the dir containing the images with all its content
+    if os.path.exists(args.folder_path):
+        shutil.rmtree(args.folder_path)
+    # Open the export folder with the video selected
+    os.startfile(os.path.dirname(args.output_path))
 
 if __name__ == "__main__":
     main()
