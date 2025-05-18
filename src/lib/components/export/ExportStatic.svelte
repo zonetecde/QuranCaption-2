@@ -81,8 +81,10 @@
 		type="checkbox"
 		id="landscape-mode"
 		class="mr-2"
+		checked={$orientation === 'portrait'}
 		on:change={() => {
 			orientation.set($orientation === 'landscape' ? 'portrait' : 'landscape');
+			console.log('Orientation changed to:', $orientation);
 		}}
 	/>
 	<label for="landscape-mode" class="text-sm font-bold">Portrait mode (TikTok format)</label>
