@@ -56,6 +56,16 @@ export function getFileType(filePath: string): 'audio' | 'video' | 'image' | 'un
 	return 'unknown';
 }
 
+export function makeFileNameValid(fileName: string): string {
+	// Replace characters not allowed in Windows file names: \ / : * ? " < > |
+	fileName = fileName.replace(/[\\/:*?"<>|]/g, '_');
+	// Remove leading and trailing spaces
+	fileName = fileName.trim();
+	// Remove trailing dots (Windows does not allow file names to end with a dot)
+	fileName = fileName.replace(/\.+$/, '');
+	return fileName;
+}
+
 export const ImgFileExt = [
 	'jpg',
 	'jpeg',

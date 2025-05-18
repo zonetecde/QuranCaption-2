@@ -25,6 +25,7 @@ import {
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
+import { makeFileNameValid } from '$lib/ext/File';
 
 export async function exportCurrentProjectAsVideo() {
 	const _currentProject = get(currentProject);
@@ -133,7 +134,7 @@ export async function exportCurrentProjectAsVideo() {
 	_currentProject.timeline.subtitlesTracks[0].clips =
 		_currentProject.timeline.subtitlesTracks[0].clips.filter((clip) => clip.id !== 'temporary');
 
-	const outputPath = `${EXPORT_PATH}${_currentProject.name}.mp4`;
+	const outputPath = `${EXPORT_PATH}${makeFileNameValid(_currentProject.name + (_currentProject.reciter !== '' ? ' (' + _currentProject.reciter + ')' : ''))}.mp4`;
 
 	// On appelle le script python pour créer la vidéo
 	await toast.promise(
