@@ -48,7 +48,8 @@ export function openExportWindow() {
 		decorations: false,
 		minWidth: 1920,
 		minHeight: 1080,
-		skipTaskbar: true
+		skipTaskbar: true,
+		visible: false // Le process se fait en arrière plan
 	});
 
 	appWindow.onCloseRequested((e) => {
@@ -60,6 +61,28 @@ export function openExportWindow() {
 
 		// and close the main window
 		appWindow.close();
+	});
+
+	webview.once('tauri://created', function () {
+		// Ajoute à la liste des vidéos en cours d'export
+		currentlyExportingVideos.set([
+			{
+				exportId: exportId,
+				projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')',
+				startTime: get(startTime),
+				endTime: get(endTime) || getVideoDurationInMs(),
+				portrait: get(orientation) === 'portrait',
+				status: 'taking frames'
+			},
+			...get(currentlyExportingVideos)
+		]);
+
+		toast.promise(exportPromise, {
+			loading:
+				'Capturing video frames... You can start another export or switch projects in the meantime.',
+			success: 'Video frames have been successfully captured.',
+			error: 'An error occurred while capturing video frames.'
+		});
 	});
 
 	// Create a promise that resolves when the event tauri://destroyed is triggered
@@ -89,29 +112,6 @@ export function openExportWindow() {
 			console.error('Error creating the webview window', e);
 			// An error occurred during the creation of the webview window
 			reject(e);
-		});
-	});
-	webview.once('tauri://created', function () {
-		// webview.minimize(); // Minimize the window to avoid displaying it
-
-		// Ajoute à la liste des vidéos en cours d'export
-		currentlyExportingVideos.set([
-			{
-				exportId: exportId,
-				projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')',
-				startTime: get(startTime),
-				endTime: get(endTime) || getVideoDurationInMs(),
-				portrait: get(orientation) === 'portrait',
-				status: 'taking frames'
-			},
-			...get(currentlyExportingVideos)
-		]);
-
-		toast.promise(exportPromise, {
-			loading:
-				'Capturing video frames... You can start another export or switch projects in the meantime.',
-			success: 'Video frames have been successfully captured.',
-			error: 'An error occurred while capturing video frames.'
 		});
 	});
 }
