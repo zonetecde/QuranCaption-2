@@ -51,9 +51,9 @@
 	});
 </script>
 
-<div class="h-screen min-h-[1080px] bg-red-400 flex flex-col overflow-x-hidden" id="container">
+<div class="h-screen min-h-[1080px] flex flex-col overflow-x-hidden" id="container">
 	{#if $currentProject}
-		<VideoPreview hideControls />
+		<VideoPreview hideControls force1920x1080 />
 	{:else}
 		<div class="flex items-center justify-center h-full">
 			<div class="text-2xl">Loading...</div>

@@ -34,7 +34,6 @@ import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
 import { makeFileNameValid } from '$lib/ext/File';
 import { WebviewWindow } from '@tauri-apps/api/window';
-import { appWindow } from '@tauri-apps/api/window';
 
 export function openExportWindow() {
 	// force save pour mettre à jour les paramètres d'export
@@ -42,6 +41,7 @@ export function openExportWindow() {
 
 	const exportId = Math.floor(Math.random() * 1000000); // ID unique pour l'export
 
+	// Créer la fenêtre qui va prendre les screenshots
 	const webview = new WebviewWindow(exportId.toString(), {
 		url: '/export?projectId=' + get(currentProject).id + '&exportId=' + exportId,
 		resizable: false,
@@ -50,17 +50,6 @@ export function openExportWindow() {
 		minHeight: 1080,
 		skipTaskbar: true,
 		visible: false // Le process se fait en arrière plan
-	});
-
-	appWindow.onCloseRequested((e) => {
-		// Close the webview window when the main window is closed
-		const webview = WebviewWindow.getByLabel(exportId.toString());
-		if (webview) {
-			webview.close();
-		}
-
-		// and close the main window
-		appWindow.close();
 	});
 
 	webview.once('tauri://created', function () {
@@ -113,6 +102,30 @@ export function openExportWindow() {
 			// An error occurred during the creation of the webview window
 			reject(e);
 		});
+	});
+}
+
+// Créer la fenêtre qui affiche tout les exports en cours si elle n'existe pas
+export function createOrUpdateExportDetailsWindow() {
+	console.log('window called');
+	let exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
+
+	if (!exportDetailsWindow) {
+		exportDetailsWindow = new WebviewWindow('exportDetails', {
+			url: '/export-details',
+			resizable: true,
+			decorations: true,
+			minWidth: 300,
+			minHeight: 150
+		});
+
+		// Affiche la fenêtre
+		exportDetailsWindow.show();
+	}
+
+	// Update les infos
+	exportDetailsWindow.emit('updateExportDetails', {
+		currentlyExportingVideos: get(currentlyExportingVideos)
 	});
 }
 
@@ -177,17 +190,6 @@ export async function exportCurrentProjectAsVideo() {
 	let surahsInVideo = new Set<number>();
 
 	for (let i = 0; i < subtitleClips.length; i++) {
-		if (get(isEscapePressed)) {
-			// cancel the export
-			toast.error('Export cancelled');
-			currentlyExporting.set(false);
-			fullScreenPreview.set(false);
-			isEscapePressed.set(false);
-			_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
-			await fs.removeDir(`${EXPORT_PATH}${get(currentlyExportingId)}`, { recursive: true });
-			return;
-		}
-
 		let clip = subtitleClips[i];
 
 		// Si on ne commence pas au début de la vidéo, on créé un sous-titre noire de 0 à startTime

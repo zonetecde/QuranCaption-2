@@ -37,6 +37,7 @@
 	import VideoSectionRatio from './VideoSectionRatio.svelte';
 
 	export let hideControls = false;
+	export let force1920x1080 = false;
 
 	onMount(async () => {
 		window.onresize = calculateVideoDimensions;
@@ -237,7 +238,12 @@
 </script>
 
 <div class="w-full h-full flex flex-col relative overflow-hidden">
-	<div class={'h-full relative bg-black ' + (hideControls ? '' : 'pb-16')} id="preview">
+	<div
+		class={'h-full relative bg-black ' +
+			(hideControls ? '' : 'pb-16') +
+			(force1920x1080 ? ' force-1920x1080' : '')}
+		id="preview"
+	>
 		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId) || currentSubtitle}
 			{#if currentVideo}
 				{@const video = getAssetFromId(currentVideo.assetId)}
@@ -329,3 +335,10 @@
 		<ControlBar {currentTime} {handlePlayVideoButtonClicked} />
 	{/if}
 </div>
+
+<style>
+	.force-1920x1080 {
+		width: 1920px;
+		height: 1080px;
+	}
+</style>

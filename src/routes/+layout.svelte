@@ -23,6 +23,8 @@
 	import { loadOtherTexts } from '$lib/stores/OtherTextsStore';
 	import { currentlyExportingVideos } from '$lib/stores/ExportStore';
 	import { listen } from '@tauri-apps/api/event';
+	import { appWindow } from '@tauri-apps/api/window';
+	import { invoke, window as tauriWindow } from '@tauri-apps/api';
 
 	onMount(async () => {
 		initializeStorage();
@@ -139,6 +141,25 @@
 					return video;
 				});
 			});
+		});
+
+		// Si on ferme la fenêtre du logiciel, on ferme aussi les fenêtre d'export (cancel l'export)
+		appWindow.onCloseRequested(async (e) => {
+			if (e.windowLabel !== 'main') {
+				return;
+			}
+
+			const webview = tauriWindow.getAll();
+
+			for (const w of webview) {
+				if (w.label !== 'main') {
+					w.close();
+				}
+			}
+
+			// and close the main window
+			appWindow.close();
+			await invoke('close');
 		});
 	});
 </script>

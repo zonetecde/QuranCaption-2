@@ -8,7 +8,7 @@ use tauri::Manager; // Ajouté pour permettre l'émission d'événements
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, open])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, open,close])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -220,4 +220,10 @@ async fn open(path: String) {
     if let Err(e) = std::process::Command::new("explorer").arg(dir_path).spawn() {
         eprintln!("Failed to open directory or file location: {}", e);
     }
+}
+
+#[tauri::command]
+fn close() {
+    // Close the application
+    std::process::exit(0);
 }
