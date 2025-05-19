@@ -127,22 +127,6 @@
 			}
 		};
 
-		// Écouter l'événement video-export-finished émis par Rust
-		const unlisten = await listen('video-export-finished', (event) => {
-			const receivedExportId = event.payload as number;
-
-			console.log('Received export id:', receivedExportId);
-
-			currentlyExportingVideos.update((videos) => {
-				return videos.map((video) => {
-					if (video.exportId === receivedExportId) {
-						video.status = 'finished';
-					}
-					return video;
-				});
-			});
-		});
-
 		// Si on ferme la fenêtre du logiciel, on ferme aussi les fenêtre d'export (cancel l'export)
 		appWindow.onCloseRequested(async (e) => {
 			if (e.windowLabel !== 'main') {

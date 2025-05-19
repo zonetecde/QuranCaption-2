@@ -19,51 +19,15 @@ export const bottomRatio: Writable<number> = writable(25); // default: 20%
 
 export const quality: Writable<number> = writable(1); // default: 1
 
-export const currentlyExportingVideos: Writable<CurrentlyExportingVideoDetail[]> = writable([
-	{
-		exportId: 13234,
-		projectName: 'Project 1',
-		startTime: 1000,
-		endTime: 0,
-		portrait: false,
-		status: 'taking frames'
-	},
-	{
-		exportId: 13235,
-		projectName: 'Project 2',
-		startTime: 2000,
-		endTime: 0,
-		portrait: true,
-		status: 'exporting'
-	},
-	{
-		exportId: 13236,
-		projectName: 'Project 3',
-		startTime: 3000,
-		endTime: 0,
-		portrait: false,
-		status: 'finished'
-	},
-	{
-		exportId: 13237,
-		projectName: 'Project 4',
-		startTime: 4000,
-		endTime: 0,
-		portrait: true,
-		status: 'error'
-	}
-]);
+export const currentlyExportingVideos: Writable<VideoExportStatus[]> = writable([]);
 
-export interface CurrentlyExportingVideoDetail {
+export interface VideoExportStatus {
 	exportId: number;
 	projectName: string;
 	startTime: number;
 	endTime: number;
 	portrait: boolean;
-	status: 'taking frames' | 'exporting' | 'finished' | 'error';
+	status: string;
+	progress: number; // 0-100
+	outputPath: string; // Chemin de sortie du fichier
 }
-
-currentlyExportingVideos.subscribe((videos) => {
-	// Il n'y a que le main qui peut envoyer des messages (sinon boucle infinie)
-	if (appWindow.label === 'main' && videos.length > 0) createOrUpdateExportDetailsWindow();
-});

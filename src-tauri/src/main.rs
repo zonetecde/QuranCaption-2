@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::os::windows::process::CommandExt;
 use std::process::Command;
 use std::{ format, vec };
 use font_kit::{error::SelectionError, source::SystemSource};
@@ -169,7 +170,6 @@ async fn create_video(
     dynamic_top: bool,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
-
     let path_resolver: tauri::PathResolver = app_handle.path_resolver();
 
     // Attempt to resolve the path to the bundled 'video_creator' binary
@@ -188,13 +188,70 @@ async fn create_video(
                 if dynamic_top { "1".to_string() } else { "0".to_string() },
             ];
 
-            // Execute the command without putting it in background mode
-            let status = std::process::Command::new(video_creator_path)
-                .args(&cmd_args)
-                .status()
-                .map_err(|e| format!("Error while executing: {}", e))?;            if status.success() {
-                // Émettre un événement pour notifier le frontend que l'exportation est terminée
-                let _ = app_handle.emit_all("video-export-finished", export_id);
+            // Execute the command in the background and capture output
+            let mut command = std::process::Command::new(video_creator_path);
+            command.args(&cmd_args);
+            
+            // Configure to capture stdout
+            command.stdout(std::process::Stdio::piped());
+
+            #[cfg(target_os = "windows")]
+            {
+                command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+            }
+
+            // Start the process
+            let mut child = command
+                .spawn()
+                .map_err(|e| format!("Error while starting process: {}", e))?;
+            
+            // Get stdout handle
+            if let Some(stdout) = child.stdout.take() {
+                use std::io::{BufRead, BufReader};
+                use regex::Regex;
+                
+                // Regex to extract percentage
+                let re = Regex::new(r"percentage:\s*(\d+)%").unwrap();
+                
+                // Create a buffered reader
+                let reader = BufReader::new(stdout);
+                
+                // Read line by line
+                for line in reader.lines() {
+                    if let Ok(line) = line {
+                        println!("Output: {}", line);
+                        
+                        // Try to find percentage in the line
+                        if let Some(caps) = re.captures(&line) {
+                            if let Some(percentage_match) = caps.get(1) {
+                                if let Ok(percentage) = percentage_match.as_str().parse::<i32>() {
+                                    // Emit event with current progress
+                                    let payload = serde_json::json!({
+                                        "exportId": export_id,
+                                        "progress": percentage,
+                                        "status": "Exporting video..."
+                                    });
+                                    let _ = app_handle.emit_all("updateExportDetailsById", payload);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Wait for process to complete
+            let status = child
+                .wait()
+                .map_err(|e| format!("Error while waiting for process: {}", e))?;
+
+            if status.success() {
+                // Emit an event to notify the frontend that the export is complete
+                let payload = serde_json::json!({
+                    "exportId": export_id,
+                    "progress": 100,
+                    "status": "Exported"
+                });
+                let _ = app_handle.emit_all("updateExportDetailsById", payload);
                 Ok("Video creation process completed successfully.".to_string())
             } else {
                 Err("Video creation process failed.".to_string())

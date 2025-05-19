@@ -11,6 +11,22 @@ from concurrent.futures import ThreadPoolExecutor
 import re
 from PIL import Image
 import time
+from proglog import ProgressBarLogger
+
+class MyBarLogger(ProgressBarLogger):
+    
+    def callback(self, **changes):
+        # Every time the logger message is updated, this function is called with
+        # the `changes` dictionary of the form `parameter: new value`.
+        for (parameter, value) in changes.items():
+            print ('Parameter %s is now %s' % (parameter, value))
+    
+    def bars_callback(self, bar, attr, value,old_value=None):
+        # Every time the logger progress is updated, this function is called        
+        percentage = (value / self.bars[bar]['total']) * 100
+        print("percentage: " + str(round(percentage)) + "%")
+
+logger = MyBarLogger()
 
 def get_ffmpeg_path():
     """Get the FFmpeg path, checking first in the executable's directory."""
@@ -265,7 +281,9 @@ def main():
         audio_codec='aac',
         preset='ultrafast',  # For fast encoding
         threads=8,           # Use multiple threads
-        ffmpeg_params=['-crf', '23']  # Balance between quality and size
+        ffmpeg_params=['-crf', '23'],  # Balance between quality and size
+        logger=logger
+        
     )
     
     print(f"Video creation completed in {time.time() - start_time:.2f} seconds")
@@ -283,4 +301,4 @@ if __name__ == "__main__":
 
 # ./video_creator.exe "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0
 
-# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0
+# py video_creator.py "C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "C:\Users\zonedetec\Documents\quran.al.luhaidan\30\audio_2258.webm" 300 0 0 "./output.mp4" 0.25 0.25 0

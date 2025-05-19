@@ -28,7 +28,8 @@ import {
 	orientation,
 	quality,
 	currentlyExportingVideos,
-	currentlyExportingId
+	currentlyExportingId,
+	type VideoExportStatus
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -49,22 +50,23 @@ export function openExportWindow() {
 		minWidth: 1920,
 		minHeight: 1080,
 		skipTaskbar: true,
-		visible: false // Le process se fait en arrière plan
+		visible: false, // Le process se fait en arrière plan
+		alwaysOnTop: true
 	});
 
-	webview.once('tauri://created', function () {
+	webview.once('tauri://created', async function () {
 		// Ajoute à la liste des vidéos en cours d'export
-		currentlyExportingVideos.set([
-			{
-				exportId: exportId,
-				projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')',
-				startTime: get(startTime),
-				endTime: get(endTime) || getVideoDurationInMs(),
-				portrait: get(orientation) === 'portrait',
-				status: 'taking frames'
-			},
-			...get(currentlyExportingVideos)
-		]);
+		const exportDetail: VideoExportStatus = {
+			exportId: exportId,
+			projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')',
+			startTime: get(startTime),
+			endTime: get(endTime) || getVideoDurationInMs(),
+			portrait: get(orientation) === 'portrait',
+			status: 'Capturing video frames...',
+			outputPath: '',
+			progress: 0
+		};
+		exportDetail.outputPath = generateOutputPath(exportDetail);
 
 		toast.promise(exportPromise, {
 			loading:
@@ -72,6 +74,17 @@ export function openExportWindow() {
 			success: 'Video frames have been successfully captured.',
 			error: 'An error occurred while capturing video frames.'
 		});
+
+		const justCreated = await createOrUpdateExportDetailsWindow();
+
+		// Attend que la fenêtre load
+		if (justCreated)
+			await new Promise((resolve) => {
+				setTimeout(resolve, 2000);
+			});
+
+		// ajoute l'export à la liste des exports en cours
+		addExport(exportDetail);
 	});
 
 	// Create a promise that resolves when the event tauri://destroyed is triggered
@@ -87,14 +100,7 @@ export function openExportWindow() {
 			);
 
 			// modifie le statut de la vidéo en cours d'export
-			currentlyExportingVideos.update((videos) => {
-				return videos.map((video) => {
-					if (video.exportId === exportId) {
-						video.status = 'exporting';
-					}
-					return video;
-				});
-			});
+			updateExportStatus(exportId, 0, 'Exporting video...');
 		});
 
 		webview.once('tauri://error', function (e) {
@@ -105,9 +111,34 @@ export function openExportWindow() {
 	});
 }
 
+function updateExportStatus(exportId: number, progress: number, status: string) {
+	// Met à jour le statut de l'export
+	const exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
+	if (exportDetailsWindow) {
+		exportDetailsWindow.emit('updateExportDetailsById', {
+			exportId: exportId,
+			progress: progress,
+			status: status
+		});
+	}
+}
+
+function addExport(exportDetail: VideoExportStatus) {
+	// Ajoute l'export à la liste des exports en cours
+	const exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
+	if (exportDetailsWindow) {
+		exportDetailsWindow.emit('addExport', exportDetail);
+	}
+}
+
+export function generateOutputPath(project: VideoExportStatus) {
+	const outputPath = `${EXPORT_PATH}${makeFileNameValid(project.projectName) + '_' + project.exportId}.mp4`;
+
+	return outputPath;
+}
+
 // Créer la fenêtre qui affiche tout les exports en cours si elle n'existe pas
-export function createOrUpdateExportDetailsWindow() {
-	console.log('window called');
+export async function createOrUpdateExportDetailsWindow(): Promise<boolean> {
 	let exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
 
 	if (!exportDetailsWindow) {
@@ -115,20 +146,27 @@ export function createOrUpdateExportDetailsWindow() {
 			url: '/export-details',
 			resizable: true,
 			decorations: true,
-			minWidth: 300,
-			minHeight: 150
+			width: 600,
+			height: 250,
+			title: 'Export Details'
 		});
 
 		// Affiche la fenêtre
-		exportDetailsWindow.show();
+		await exportDetailsWindow.show();
+
+		return true;
 	}
 
-	// Update les infos
-	exportDetailsWindow.emit('updateExportDetails', {
-		currentlyExportingVideos: get(currentlyExportingVideos)
-	});
+	// Si la fenêtre existe déjà, on la met au premier plan
+	await exportDetailsWindow.setFocus();
+	await exportDetailsWindow.show();
+	return false;
 }
 
+/**
+ * Fonction appelée par la fenêtre d'export pour exporter le projet courrant en vidéo.
+ * @returns
+ */
 export async function exportCurrentProjectAsVideo() {
 	const _currentProject = get(currentProject);
 
@@ -189,15 +227,22 @@ export async function exportCurrentProjectAsVideo() {
 
 	let surahsInVideo = new Set<number>();
 
+	let iMin = 0;
+	let iMax = subtitleClips.length - 1;
+
 	for (let i = 0; i < subtitleClips.length; i++) {
 		let clip = subtitleClips[i];
-
-		// Si on ne commence pas au début de la vidéo, on créé un sous-titre noire de 0 à startTime
 		if (clip.end < get(startTime)) {
-			continue; // on skip les clips qui sont avant le startTime
+			iMin = i + 1; // on skip les clips qui sont avant le startTime
+			continue;
 		} else if (get(endTime) !== null && clip.start > get(endTime)!) {
-			break; // on skip les clips qui sont après le endTime
+			iMax = i - 1; // on skip les clips qui sont après le endTime
+			break;
 		}
+	}
+
+	for (let i = iMin; i <= iMax; i++) {
+		let clip = subtitleClips[i];
 
 		if (clip.surah !== -1) surahsInVideo.add(clip.surah);
 
@@ -226,6 +271,13 @@ export async function exportCurrentProjectAsVideo() {
 			get(currentlyExportingId)!.toString(),
 			Math.floor(clip.start) + '_' + Math.floor(clip.end)
 		);
+
+		// On met à jour la progress bar
+		updateExportStatus(
+			get(currentlyExportingId)!,
+			Math.floor(((i - iMin) / (iMax - iMin)) * 100),
+			'Capturing video frames...'
+		);
 	}
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 
@@ -237,7 +289,10 @@ export async function exportCurrentProjectAsVideo() {
 	_currentProject.timeline.subtitlesTracks[0].clips =
 		_currentProject.timeline.subtitlesTracks[0].clips.filter((clip) => clip.id !== 'temporary');
 
-	const outputPath = `${EXPORT_PATH}${makeFileNameValid(_currentProject.name + (_currentProject.reciter !== '' ? ' (' + _currentProject.reciter + ')' : '')) + '_' + get(currentlyExportingId)}.mp4`;
+	const outputPath = generateOutputPath({
+		exportId: get(currentlyExportingId)!,
+		projectName: get(currentProject).name
+	} as VideoExportStatus);
 
 	// On appelle le script python pour créer la vidéo
 	invoke('create_video', {
