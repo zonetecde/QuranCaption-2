@@ -41,20 +41,19 @@ export function openExportWindow() {
 	updateUsersProjects(get(currentProject));
 
 	const exportId = Math.floor(Math.random() * 1000000); // ID unique pour l'export
-	const uniqueLabel = 'exportWindow' + exportId;
 
-	const webview = new WebviewWindow(uniqueLabel, {
+	const webview = new WebviewWindow(exportId.toString(), {
 		url: '/export?projectId=' + get(currentProject).id + '&exportId=' + exportId,
 		resizable: false,
 		decorations: false,
-		width: 1920,
-		height: 1080,
+		minWidth: 1920,
+		minHeight: 1080,
 		skipTaskbar: true
 	});
 
 	appWindow.onCloseRequested((e) => {
 		// Close the webview window when the main window is closed
-		const webview = WebviewWindow.getByLabel(uniqueLabel);
+		const webview = WebviewWindow.getByLabel(exportId.toString());
 		if (webview) {
 			webview.close();
 		}
@@ -71,14 +70,14 @@ export function openExportWindow() {
 			toast.success(
 				'The export process has started. You can monitor its progress in the opened console.',
 				{
-					duration: 8000
+					duration: 3000
 				}
 			);
 
 			// modifie le statut de la vidéo en cours d'export
 			currentlyExportingVideos.update((videos) => {
 				return videos.map((video) => {
-					if (video.windowLabel === uniqueLabel) {
+					if (video.exportId === exportId) {
 						video.status = 'exporting';
 					}
 					return video;
@@ -103,7 +102,6 @@ export function openExportWindow() {
 				startTime: get(startTime),
 				endTime: get(endTime) || getVideoDurationInMs(),
 				portrait: get(orientation) === 'portrait',
-				windowLabel: uniqueLabel,
 				status: 'taking frames'
 			},
 			...get(currentlyExportingVideos)
@@ -256,8 +254,8 @@ export async function exportCurrentProjectAsVideo() {
 	});
 
 	// Ferme la fenêtre d'export
-	// l'id de la est exportWindow + exportId
-	const webview = WebviewWindow.getByLabel('exportWindow' + get(currentlyExportingId));
+	// l'id de la fenetre est le même que l'id de l'export
+	const webview = WebviewWindow.getByLabel(get(currentlyExportingId)!.toString());
 	if (webview) {
 		webview.close();
 	}

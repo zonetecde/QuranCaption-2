@@ -21,7 +21,6 @@ export const currentlyExportingVideos: Writable<CurrentlyExportingVideoDetail[]>
 
 export interface CurrentlyExportingVideoDetail {
 	exportId: number;
-	windowLabel: string;
 	projectName: string;
 	startTime: number;
 	endTime: number;
