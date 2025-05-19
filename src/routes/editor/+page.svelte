@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type Project from '$lib/models/Project';
 	import '$lib/stores/OtherTextsStore';
 	import Header from '$lib/components/header/Header.svelte';
 	import ExportPage from '$lib/components/layout/ExportPage.svelte';
@@ -6,7 +7,7 @@
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
 	import { bestPerformance, currentPage, trimDialog } from '$lib/stores/LayoutStore';
-	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
+	import { currentProject, getProjectById, initExportSettings } from '$lib/stores/ProjectStore';
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
@@ -70,28 +71,7 @@
 		}
 
 		// Set the values for the export settings
-		if (project.projectSettings.exportSettings !== undefined) {
-			startTime.set(project.projectSettings.exportSettings.startTime);
-			endTime.set(project.projectSettings.exportSettings.endTime);
-			orientation.set(project.projectSettings.exportSettings.orientation);
-			exportType.set(project.projectSettings.exportSettings.exportType);
-			topRatio.set(project.projectSettings.exportSettings.topRatio);
-			middleRatio.set(project.projectSettings.exportSettings.middleRatio);
-			bottomRatio.set(project.projectSettings.exportSettings.bottomRatio);
-			quality.set(project.projectSettings.exportSettings.quality);
-		} else {
-			// If the project doesn't have the export settings, set the default values
-			project.projectSettings.exportSettings = {
-				startTime: 0,
-				endTime: null,
-				orientation: 'landscape',
-				exportType: 'video-static',
-				topRatio: 25,
-				middleRatio: 50,
-				bottomRatio: 25,
-				quality: 1
-			};
-		}
+		initExportSettings(project);
 
 		// Check if all the assets are still available
 		project.assets.forEach((asset) => {

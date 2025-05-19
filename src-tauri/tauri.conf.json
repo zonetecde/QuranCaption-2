@@ -41,6 +41,9 @@
 				"renameFile": false,
 				"scope": ["**"],
 				"writeFile": true
+			},
+			"window": {
+				"all": true
 			}
 		},
 		"bundle": {

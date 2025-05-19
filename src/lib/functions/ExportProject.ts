@@ -1,5 +1,9 @@
 import { fullScreenPreview, setCurrentVideoTime, videoDimensions } from '$lib/stores/LayoutStore';
-import { currentProject, getFirstAudioOrVideoPath } from '$lib/stores/ProjectStore';
+import {
+	currentProject,
+	getFirstAudioOrVideoPath,
+	updateUsersProjects
+} from '$lib/stores/ProjectStore';
 import {
 	cursorPosition,
 	getTimelineTotalDuration,
@@ -22,11 +26,97 @@ import {
 	topRatio,
 	triggerSubtitleResize,
 	orientation,
-	quality
+	quality,
+	currentlyExportingVideos,
+	currentlyExportingId
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
 import { makeFileNameValid } from '$lib/ext/File';
+import { WebviewWindow } from '@tauri-apps/api/window';
+import { appWindow } from '@tauri-apps/api/window';
+
+export function openExportWindow() {
+	// force save pour mettre à jour les paramètres d'export
+	updateUsersProjects(get(currentProject));
+
+	const exportId = Math.floor(Math.random() * 1000000); // ID unique pour l'export
+	const uniqueLabel = 'exportWindow' + exportId;
+
+	const webview = new WebviewWindow(uniqueLabel, {
+		url: '/export?projectId=' + get(currentProject).id + '&exportId=' + exportId,
+		resizable: false,
+		decorations: false,
+		width: 1920,
+		height: 1080,
+		skipTaskbar: true
+	});
+
+	appWindow.onCloseRequested((e) => {
+		// Close the webview window when the main window is closed
+		const webview = WebviewWindow.getByLabel(uniqueLabel);
+		if (webview) {
+			webview.close();
+		}
+
+		// and close the main window
+		appWindow.close();
+	});
+
+	// Create a promise that resolves when the event tauri://destroyed is triggered
+	const exportPromise = new Promise<void>((resolve, reject) => {
+		webview.once('tauri://destroyed', function () {
+			resolve();
+
+			toast.success(
+				'The export process has started. You can monitor its progress in the opened console.',
+				{
+					duration: 8000
+				}
+			);
+
+			// modifie le statut de la vidéo en cours d'export
+			currentlyExportingVideos.update((videos) => {
+				return videos.map((video) => {
+					if (video.windowLabel === uniqueLabel) {
+						video.status = 'exporting';
+					}
+					return video;
+				});
+			});
+		});
+
+		webview.once('tauri://error', function (e) {
+			console.error('Error creating the webview window', e);
+			// An error occurred during the creation of the webview window
+			reject(e);
+		});
+	});
+	webview.once('tauri://created', function () {
+		// webview.minimize(); // Minimize the window to avoid displaying it
+
+		// Ajoute à la liste des vidéos en cours d'export
+		currentlyExportingVideos.set([
+			{
+				exportId: exportId,
+				projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')',
+				startTime: get(startTime),
+				endTime: get(endTime) || getVideoDurationInMs(),
+				portrait: get(orientation) === 'portrait',
+				windowLabel: uniqueLabel,
+				status: 'taking frames'
+			},
+			...get(currentlyExportingVideos)
+		]);
+
+		toast.promise(exportPromise, {
+			loading:
+				'Capturing video frames... You can start another export or switch projects in the meantime.',
+			success: 'Video frames have been successfully captured.',
+			error: 'An error occurred while capturing video frames.'
+		});
+	});
+}
 
 export async function exportCurrentProjectAsVideo() {
 	const _currentProject = get(currentProject);
@@ -77,8 +167,9 @@ export async function exportCurrentProjectAsVideo() {
 	const fadeDurationBackup = _currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = 0;
 
-	const randomId = Math.floor(Math.random() * 1000000); // nom du dossier contenant les images
-	await createDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
+	await createDir(`${EXPORT_PATH}${get(currentlyExportingId)}`, { recursive: true });
+
+	console.log(`Created directory: ${EXPORT_PATH}${get(currentlyExportingId)}`);
 
 	toast("Creating images, do not touch anything. Press 'Esc' to cancel.", {
 		duration: 4000,
@@ -95,7 +186,7 @@ export async function exportCurrentProjectAsVideo() {
 			fullScreenPreview.set(false);
 			isEscapePressed.set(false);
 			_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
-			await fs.removeDir(`${EXPORT_PATH}${randomId}`, { recursive: true });
+			await fs.removeDir(`${EXPORT_PATH}${get(currentlyExportingId)}`, { recursive: true });
 			return;
 		}
 
@@ -110,7 +201,7 @@ export async function exportCurrentProjectAsVideo() {
 
 		if (clip.surah !== -1) surahsInVideo.add(clip.surah);
 
-		cursorPosition.set(clip.start + 100);
+		cursorPosition.set(clip.start + 30);
 		triggerSubtitleResize.set(false);
 
 		await new Promise((resolve) => {
@@ -131,7 +222,10 @@ export async function exportCurrentProjectAsVideo() {
 
 		// Une fois que le sous-titre est affiché, enregistre en image tout ce qui est affiché
 		// take a screenshot of the current frame
-		await takeScreenshot(randomId.toString(), Math.floor(clip.start) + '_' + Math.floor(clip.end));
+		await takeScreenshot(
+			get(currentlyExportingId)!.toString(),
+			Math.floor(clip.start) + '_' + Math.floor(clip.end)
+		);
 	}
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 
@@ -143,36 +237,30 @@ export async function exportCurrentProjectAsVideo() {
 	_currentProject.timeline.subtitlesTracks[0].clips =
 		_currentProject.timeline.subtitlesTracks[0].clips.filter((clip) => clip.id !== 'temporary');
 
-	const outputPath = `${EXPORT_PATH}${makeFileNameValid(_currentProject.name + (_currentProject.reciter !== '' ? ' (' + _currentProject.reciter + ')' : '')) + '_' + randomId}.mp4`;
+	const outputPath = `${EXPORT_PATH}${makeFileNameValid(_currentProject.name + (_currentProject.reciter !== '' ? ' (' + _currentProject.reciter + ')' : '')) + '_' + get(currentlyExportingId)}.mp4`;
 
 	// On appelle le script python pour créer la vidéo
-	await toast.promise(
-		invoke('create_video', {
-			folderPath: `${EXPORT_PATH}${randomId}`,
-			audioPath: getFirstAudioOrVideoPath(),
-			transitionMs: Math.floor(
-				_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration
-			),
-			startTime: Math.floor(get(startTime)),
-			endTime: Math.floor(get(endTime) || 0),
-			outputPath: outputPath,
-			topRatio: get(topRatio) / 100,
-			bottomRatio: get(bottomRatio) / 100,
-			dynamicTop:
-				surahsInVideo.size > 1 &&
-				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable // si il y a plusieurs sourates le top avec affichage de la sourate changera
-		}),
-		{
-			loading: 'Creating video (id: ' + randomId + ')',
-			success: 'Video created successfully (' + outputPath + ')',
-			error: (error) => {
-				return 'Error while creating video: ' + error;
-			}
-		},
-		{
-			position: 'bottom-right'
-		}
-	);
+	invoke('create_video', {
+		exportId: get(currentlyExportingId),
+		folderPath: `${EXPORT_PATH}${get(currentlyExportingId)}`,
+		audioPath: getFirstAudioOrVideoPath(),
+		transitionMs: Math.floor(_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration),
+		startTime: Math.floor(get(startTime)),
+		endTime: Math.floor(get(endTime) || 0),
+		outputPath: outputPath,
+		topRatio: get(topRatio) / 100,
+		bottomRatio: get(bottomRatio) / 100,
+		dynamicTop:
+			surahsInVideo.size > 1 &&
+			_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable // si il y a plusieurs sourates le top avec affichage de la sourate changera
+	});
+
+	// Ferme la fenêtre d'export
+	// l'id de la est exportWindow + exportId
+	const webview = WebviewWindow.getByLabel('exportWindow' + get(currentlyExportingId));
+	if (webview) {
+		webview.close();
+	}
 }
 
 async function takeScreenshot(folderName: string, fileName: string) {

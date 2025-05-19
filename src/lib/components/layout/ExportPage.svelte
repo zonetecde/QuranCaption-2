@@ -29,7 +29,7 @@
 
 			<!-- Timeline -->
 			<section class="h-[15%]">
-				<Timeline />
+				<Timeline hideVerticalScrollBar />
 			</section>
 		</section>
 	</section>

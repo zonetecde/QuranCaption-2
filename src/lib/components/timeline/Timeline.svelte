@@ -23,6 +23,7 @@
 	import { startTime, endTime, exportType } from '$lib/stores/ExportStore';
 
 	export let useInPlayer = false; // Est-ce que c'est utilisé en tant que barrre de temps dans le lecteur vidéo ?
+	export let hideVerticalScrollBar = false; // Est-ce que la barre de défilement verticale doit être masquée ?
 
 	onMount(() => {
 		const timeline = document.getElementById('timeline');
@@ -72,7 +73,10 @@
 </script>
 
 <div
-	class={'overflow-x-scroll h-full ' + (useInPlayer ? 'overflow-y-hidden flipped' : '')}
+	class={'overflow-x-scroll h-full ' +
+		(useInPlayer
+			? 'overflow-y-hidden flipped '
+			: ' ' + (hideVerticalScrollBar ? 'overflow-y-hidden' : ''))}
 	on:scroll={(e) => {
 		scrollPosition.set(e.currentTarget.scrollLeft);
 	}}

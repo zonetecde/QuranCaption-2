@@ -21,6 +21,8 @@
 	import toast, { Toaster } from 'svelte-french-toast';
 	import '../app.css';
 	import { loadOtherTexts } from '$lib/stores/OtherTextsStore';
+	import { currentlyExportingVideos } from '$lib/stores/ExportStore';
+	import { listen } from '@tauri-apps/api/event';
 
 	onMount(async () => {
 		initializeStorage();
@@ -122,6 +124,22 @@
 				isEscapePressed.set(true);
 			}
 		};
+
+		// Écouter l'événement video-export-finished émis par Rust
+		const unlisten = await listen('video-export-finished', (event) => {
+			const receivedExportId = event.payload as number;
+
+			console.log('Received export id:', receivedExportId);
+
+			currentlyExportingVideos.update((videos) => {
+				return videos.map((video) => {
+					if (video.exportId === receivedExportId) {
+						video.status = 'finished';
+					}
+					return video;
+				});
+			});
+		});
 	});
 </script>
 

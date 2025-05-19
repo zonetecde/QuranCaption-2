@@ -4,6 +4,7 @@
 use std::process::Command;
 use std::{ format, vec };
 use font_kit::{error::SelectionError, source::SystemSource};
+use tauri::Manager; // Ajouté pour permettre l'émission d'événements
 
 fn main() {
   tauri::Builder::default()
@@ -156,6 +157,7 @@ fn path_to_executable() -> Result<String, String> {
 
 #[tauri::command]
 async fn create_video(
+    export_id: i32,
     folder_path: String,
     audio_path: String,
     transition_ms: i32,
@@ -190,9 +192,9 @@ async fn create_video(
             let status = std::process::Command::new(video_creator_path)
                 .args(&cmd_args)
                 .status()
-                .map_err(|e| format!("Error while executing: {}", e))?;
-
-            if status.success() {
+                .map_err(|e| format!("Error while executing: {}", e))?;            if status.success() {
+                // Émettre un événement pour notifier le frontend que l'exportation est terminée
+                let _ = app_handle.emit_all("video-export-finished", export_id);
                 Ok("Video creation process completed successfully.".to_string())
             } else {
                 Err("Video creation process failed.".to_string())
