@@ -27,7 +27,6 @@ import {
 	triggerSubtitleResize,
 	orientation,
 	quality,
-	currentlyExportingVideos,
 	currentlyExportingId,
 	type VideoExportStatus
 } from '$lib/stores/ExportStore';
@@ -68,30 +67,7 @@ export function openExportWindow() {
 		};
 		exportDetail.outputPath = generateOutputPath(exportDetail);
 
-		toast.promise(exportPromise, {
-			loading:
-				'Capturing video frames... You can start another export or switch projects in the meantime.',
-			success: 'Video frames have been successfully captured.',
-			error: 'An error occurred while capturing video frames.'
-		});
-
-		const justCreated = await createOrUpdateExportDetailsWindow();
-
-		// Attend que la fenêtre load
-		if (justCreated)
-			await new Promise((resolve) => {
-				setTimeout(resolve, 2000);
-			});
-
-		// ajoute l'export à la liste des exports en cours
-		addExport(exportDetail);
-	});
-
-	// Create a promise that resolves when the event tauri://destroyed is triggered
-	const exportPromise = new Promise<void>((resolve, reject) => {
 		webview.once('tauri://destroyed', function () {
-			resolve();
-
 			toast.success(
 				'The export process has started. You can monitor its progress in the opened console.',
 				{
@@ -100,14 +76,25 @@ export function openExportWindow() {
 			);
 
 			// modifie le statut de la vidéo en cours d'export
-			updateExportStatus(exportId, 0, 'Exporting video...');
+			updateExportStatus(exportId, 0, 'Initializing...');
 		});
 
 		webview.once('tauri://error', function (e) {
 			console.error('Error creating the webview window', e);
 			// An error occurred during the creation of the webview window
-			reject(e);
 		});
+
+		await createOrShowExportDetailsWindow();
+
+		// ajoute l'export à la liste des exports en cours
+		// pour être sur que la fenêtre est bien chargée avant d'ajouter l'export
+		for (let i = 0; i < 10; i++) {
+			// attend 500 ms
+			await new Promise((resolve) => {
+				setTimeout(resolve, 500);
+			});
+			addExport(exportDetail);
+		}
 	});
 }
 
@@ -138,29 +125,26 @@ export function generateOutputPath(project: VideoExportStatus) {
 }
 
 // Créer la fenêtre qui affiche tout les exports en cours si elle n'existe pas
-export async function createOrUpdateExportDetailsWindow(): Promise<boolean> {
+export async function createOrShowExportDetailsWindow() {
 	let exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
 
 	if (!exportDetailsWindow) {
 		exportDetailsWindow = new WebviewWindow('exportDetails', {
 			url: '/export-details',
-			resizable: true,
-			decorations: true,
-			width: 600,
-			height: 250,
+			resizable: false,
+			decorations: false,
+			minWidth: 600,
+			minHeight: 250,
 			title: 'Export Details'
 		});
 
 		// Affiche la fenêtre
 		await exportDetailsWindow.show();
-
-		return true;
 	}
 
 	// Si la fenêtre existe déjà, on la met au premier plan
 	await exportDetailsWindow.setFocus();
 	await exportDetailsWindow.show();
-	return false;
 }
 
 /**

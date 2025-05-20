@@ -1,4 +1,4 @@
-import { createOrUpdateExportDetailsWindow } from '$lib/functions/ExportProject';
+import { createOrShowExportDetailsWindow } from '$lib/functions/ExportProject';
 import type { ExportType } from '$lib/models/Project';
 import { appWindow } from '@tauri-apps/api/window';
 import { writable, type Writable } from 'svelte/store';
@@ -18,8 +18,6 @@ export const middleRatio: Writable<number> = writable(50); // default: 60%
 export const bottomRatio: Writable<number> = writable(25); // default: 20%
 
 export const quality: Writable<number> = writable(1); // default: 1
-
-export const currentlyExportingVideos: Writable<VideoExportStatus[]> = writable([]);
 
 export interface VideoExportStatus {
 	exportId: number;

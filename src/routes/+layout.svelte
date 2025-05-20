@@ -21,7 +21,6 @@
 	import toast, { Toaster } from 'svelte-french-toast';
 	import '../app.css';
 	import { loadOtherTexts } from '$lib/stores/OtherTextsStore';
-	import { currentlyExportingVideos } from '$lib/stores/ExportStore';
 	import { listen } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { invoke, window as tauriWindow } from '@tauri-apps/api';

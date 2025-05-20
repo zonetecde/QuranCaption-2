@@ -223,15 +223,21 @@ async fn create_video(
                     if let Ok(line) = line {
                         println!("Output: {}", line);
                         
-                        // Try to find percentage in the line
+                        // Try to find percentage and status in the line
                         if let Some(caps) = re.captures(&line) {
                             if let Some(percentage_match) = caps.get(1) {
                                 if let Ok(percentage) = percentage_match.as_str().parse::<i32>() {
-                                    // Emit event with current progress
+                                    // Extract status from the line
+                                    let status = line.split('|')
+                                        .nth(1)
+                                        .map(|s| s.trim().replace("status: ", ""))
+                                        .unwrap_or_else(|| "Unknown status".to_string());
+                                    
+                                    // Emit event with current progress and status
                                     let payload = serde_json::json!({
                                         "exportId": export_id,
                                         "progress": percentage,
-                                        "status": "Exporting video..."
+                                        "status": status
                                     });
                                     let _ = app_handle.emit_all("updateExportDetailsById", payload);
                                 }

@@ -14,7 +14,9 @@ import time
 from proglog import ProgressBarLogger
 
 class MyBarLogger(ProgressBarLogger):
-    
+    last_percent = 0
+    number_of_reached_100 = 0
+
     def callback(self, **changes):
         # Every time the logger message is updated, this function is called with
         # the `changes` dictionary of the form `parameter: new value`.
@@ -22,9 +24,26 @@ class MyBarLogger(ProgressBarLogger):
             print ('Parameter %s is now %s' % (parameter, value))
     
     def bars_callback(self, bar, attr, value,old_value=None):
+        # pour des raisons inconnues il y a un 100% qui passe en tout premier
+        # ceci permet de l'ignorer
+        
         # Every time the logger progress is updated, this function is called        
-        percentage = (value / self.bars[bar]['total']) * 100
-        print("percentage: " + str(round(percentage)) + "%")
+        percentage = round((value / self.bars[bar]['total']) * 100)
+
+        if percentage != self.last_percent:
+            status = ""
+            if self.number_of_reached_100 == 0:
+                status = "Initializing..."
+            elif self.number_of_reached_100 == 1:
+                status = "Exporting audio..."
+            elif self.number_of_reached_100 == 2:
+                status = "Exporting video..."
+
+            print("percentage: " + str(percentage) + "% | status: " + status)
+            self.last_percent = percentage
+
+            if percentage == 100:
+                self.number_of_reached_100 += 1
 
 logger = MyBarLogger()
 

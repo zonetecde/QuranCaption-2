@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { exportCurrentProjectAsVideo, openExportWindow } from '$lib/functions/ExportProject';
+	import {
+		createOrShowExportDetailsWindow,
+		exportCurrentProjectAsVideo,
+		openExportWindow
+	} from '$lib/functions/ExportProject';
 	import {
 		endTime,
 		startTime,
@@ -230,11 +234,17 @@
 
 <!-- export button -->
 
-<div class="flex justify-center mt-1">
+<div class="grid xl:grid-cols-2 gap-4">
 	<button
 		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
 		on:click={openExportWindow}
 	>
 		Export your video
+	</button>
+	<button
+		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+		on:click={createOrShowExportDetailsWindow}
+	>
+		Open export details window
 	</button>
 </div>
