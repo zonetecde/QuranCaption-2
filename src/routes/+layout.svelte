@@ -149,3 +149,7 @@
 
 <Toaster />
 <slot />
+
+{#if $fullScreenPreview}
+	<div class="absolute inset-0 bg-black z-[20]"></div>
+{/if}

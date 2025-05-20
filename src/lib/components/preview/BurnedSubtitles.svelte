@@ -2,9 +2,7 @@
 	import type { SubtitleClip } from '$lib/models/Timeline';
 
 	import { latinNumberToArabic } from '$lib/functions/Arabic';
-	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import {
-		calculateAdjustedVerticalPosition,
 		fullScreenPreview,
 		showSubtitlesPadding,
 		videoDimensions
@@ -76,29 +74,24 @@
 		text: ''
 	};
 
-	let subtitleTextSize = 1;
+	let subtitleTextSize = 10;
 
 	$: if (
 		// !$isCalculatingNeededHeights  -> c'est quand on appuie sur la checkbox `fitInOneLine`. Ça fait des calculs,
 		// on ne veut pas que la taille du sous-titre change pendant ce temps là
 		// $currentlyExporting -> c'est quand on exporte la vidéo. C'est manuellement géré dans le code de l'export pour éviter plusieurs appels à `calculateSubtitleTextSize`
 		// $videoDimensions -> c'est quand on change la taille de la vidéo. On ne veut pas que la taille du sous-titre change pendant ce temps là
-		(!$isCalculatingNeededHeights && !$currentlyExporting && $videoDimensions) ||
+		(!$isCalculatingNeededHeights && !$currentlyExporting) ||
 		$triggerSubtitleResize ||
-		(!$currentlyExporting &&
-			paragraph &&
-			subtitleSettingsForThisLang.fitOnOneLine &&
-			(($fullScreenPreview &&
-				paragraph.clientHeight > subtitleSettingsForThisLang.neededHeightToFitFullScreen) ||
-				(!$fullScreenPreview &&
-					paragraph.clientHeight > subtitleSettingsForThisLang.neededHeightToFitSmallPreview)))
-	)
+		(!$currentlyExporting && paragraph && subtitleSettingsForThisLang.fitOnOneLine)
+	) {
 		calculateSubtitleTextSize();
+	}
 
 	async function calculateSubtitleTextSize() {
-		// Calcul la taille de la police pour les sous-titres
-		subtitleTextSize = calculateFontSize(subtitleSettingsForThisLang.fontSize);
+		subtitleTextSize = subtitleSettingsForThisLang.fontSize;
 
+		// Calcul la taille de la police pour les sous-titres
 		const p = document.getElementsByClassName(
 			'subtitle-text ' + subtitleLanguage
 		)[0] as HTMLElement;
@@ -111,11 +104,7 @@
 					? subtitleSettingsForThisLang.neededHeightToFitFullScreen
 					: subtitleSettingsForThisLang.neededHeightToFitSmallPreview;
 
-				while (
-					p.clientHeight > usedHeight &&
-					usedHeight !== -1 &&
-					!p.innerHTML.includes('.CALCULATING.')
-				) {
+				while (p.clientHeight > usedHeight && usedHeight !== -1 && !p.innerHTML.includes('|||')) {
 					subtitleTextSize -= 4;
 
 					await new Promise((resolve) => setTimeout(resolve, 1));
@@ -170,18 +159,11 @@ une constante (sinon animation de fade lorsqu'on bouge le curseur dans la timeli
 	{@const enableOutline = subtitleSettingsForThisLang.enableOutline}
 	{@const subtitleOutlineColor = subtitleSettingsForThisLang.outlineColor}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
-	{@const subtitleVerticalPosition = calculateAdjustedVerticalPosition(
-		$videoDimensions.height,
-		$videoDimensions.width,
-		subtitleSettingsForThisLang.verticalPosition,
-		$fullScreenPreview
-	)}
+	{@const subtitleVerticalPosition = subtitleSettingsForThisLang.verticalPosition}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
-		$videoDimensions.width *
-		((subtitleSettingsForThisLang.horizontalPadding +
-			$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding) /
-			100)}
+		subtitleSettingsForThisLang.horizontalPadding +
+		$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
 
 	{#key currentSubtitle.id}
 		<!-- Si on cache la barre de controle alors la vidéo prend toute la height, sinon on soustrait la taille de la barre -->

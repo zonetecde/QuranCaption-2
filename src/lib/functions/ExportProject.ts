@@ -68,13 +68,6 @@ export function openExportWindow() {
 		exportDetail.outputPath = generateOutputPath(exportDetail);
 
 		webview.once('tauri://destroyed', function () {
-			toast.success(
-				'The export process has started. You can monitor its progress in the opened console.',
-				{
-					duration: 3000
-				}
-			);
-
 			// modifie le statut de la vidéo en cours d'export
 			updateExportStatus(exportId, 0, 'Initializing...');
 		});
@@ -84,17 +77,9 @@ export function openExportWindow() {
 			// An error occurred during the creation of the webview window
 		});
 
-		await createOrShowExportDetailsWindow();
+		await createOrShowExportDetailsWindow(exportDetail);
 
-		// ajoute l'export à la liste des exports en cours
-		// pour être sur que la fenêtre est bien chargée avant d'ajouter l'export
-		for (let i = 0; i < 10; i++) {
-			// attend 500 ms
-			await new Promise((resolve) => {
-				setTimeout(resolve, 500);
-			});
-			addExport(exportDetail);
-		}
+		addExport(exportDetail);
 	});
 }
 
@@ -125,13 +110,19 @@ export function generateOutputPath(project: VideoExportStatus) {
 }
 
 // Créer la fenêtre qui affiche tout les exports en cours si elle n'existe pas
-export async function createOrShowExportDetailsWindow() {
+export async function createOrShowExportDetailsWindow(
+	exportDetail: VideoExportStatus | null = null
+) {
 	let exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
 
 	if (!exportDetailsWindow) {
 		exportDetailsWindow = new WebviewWindow('exportDetails', {
-			url: '/export-details',
-			resizable: false,
+			url: exportDetail
+				? '/export-details?' + encodeURIComponent(JSON.stringify(exportDetail))
+				: '/export-details',
+			resizable: true,
+			skipTaskbar: true,
+			alwaysOnTop: true,
 			decorations: false,
 			minWidth: 600,
 			minHeight: 250,
@@ -285,7 +276,8 @@ export async function exportCurrentProjectAsVideo() {
 		exportId: get(currentlyExportingId),
 		folderPath: `${EXPORT_PATH}${get(currentlyExportingId)}`,
 		audioPath: getFirstAudioOrVideoPath(),
-		transitionMs: Math.floor(_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration),
+		transitionMs:
+			Math.floor(_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration) * 2,
 		startTime: Math.floor(get(startTime)),
 		endTime: Math.floor(get(endTime) || 0),
 		outputPath: outputPath,

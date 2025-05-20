@@ -9,10 +9,7 @@
 	export let handlePlayVideoButtonClicked: () => void;
 </script>
 
-<section
-	id="controles"
-	class="absolute bottom-0 h-16 w-full bg-[#141616] border-t-2 border-[#363232]"
->
+<section id="controles" class="h-16 w-full bg-[#141616] border-t-2 border-[#363232]">
 	<div class="flex flex-row items-center justify-center h-full w-full relative">
 		<p class="monospace text-lg absolute left-4 rounded-xl bg-[#110f0f] px-3 py-1">
 			{currentTime[0]}<span class="text-xs">.{currentTime[1]}</span> / {secondsToHHMMSS(

@@ -47,13 +47,15 @@
 		currentProject.set(project);
 
 		// Start the export process
-		exportCurrentProjectAsVideo();
+		setTimeout(() => {
+			exportCurrentProjectAsVideo();
+		}, 2000);
 	});
 </script>
 
 <div class="h-screen min-h-[1080px] flex flex-col overflow-x-hidden" id="container">
 	{#if $currentProject}
-		<VideoPreview hideControls force1920x1080 />
+		<VideoPreview hideControls />
 	{:else}
 		<div class="flex items-center justify-center h-full">
 			<div class="text-2xl">Loading...</div>

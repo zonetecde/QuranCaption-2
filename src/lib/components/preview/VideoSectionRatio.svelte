@@ -44,7 +44,7 @@
 	</div>
 	<!-- Section visualization adjusted to not overlap with control bar -->
 	<div
-		class="absolute right-2 top-0 flex flex-col z-20"
+		class="absolute right-2 top-0 mt-8 flex flex-col z-20"
 		class:bottom-16={!hideControls}
 		class:bottom-0={hideControls}
 		class:h-[calc(100%-4rem)]={!hideControls}
@@ -99,7 +99,7 @@
 	<!-- Video Section Ratio Visualization (horizontal) -->
 	<div
 		bind:this={maindiv}
-		class="absolute inset-0 pointer-events-none"
+		class="absolute inset-0 pointer-events-none -mb-24"
 		class:bottom-16={!hideControls}
 		class:bottom-0={hideControls}
 	>

@@ -2,10 +2,18 @@
 	import Slider from '$lib/components/common/Slider.svelte';
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { ImgFileExt } from '$lib/ext/File';
+	import type { SubtitleTrackSettings } from '$lib/models/Project';
 	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
-	import { currentProject } from '$lib/stores/ProjectStore';
+	import { currentProject, hasAtLeastOneSubtitle } from '$lib/stores/ProjectStore';
 	import { open } from '@tauri-apps/api/dialog';
 
+	let oneSubtitleSettingHasFitInOneLineSettingEnabled = false;
+
+	$: if ($currentProject.projectSettings.subtitlesTracksSettings) {
+		oneSubtitleSettingHasFitInOneLineSettingEnabled = Object.values(
+			$currentProject.projectSettings.subtitlesTracksSettings
+		).some((track: SubtitleTrackSettings) => track.fitOnOneLine);
+	}
 	function backgroundImageButtonClicked() {
 		open({
 			multiple: false,
@@ -36,15 +44,24 @@
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration}
 	/>
 
-	<Slider
-		on:focus={() => showSubtitlesPadding.set(true)}
-		on:blur={() => showSubtitlesPadding.set(false)}
-		title="Horizontal global Padding"
-		min={0}
-		max={50}
-		step={0.1}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
-	/>
+	<div
+		class={oneSubtitleSettingHasFitInOneLineSettingEnabled ? 'opacity-50 pointer-events-none' : ''}
+	>
+		<Slider
+			on:focus={() => showSubtitlesPadding.set(true)}
+			on:blur={() => showSubtitlesPadding.set(false)}
+			title="Horizontal global Padding"
+			min={0}
+			max={800}
+			step={5}
+			bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
+		/>
+		{#if oneSubtitleSettingHasFitInOneLineSettingEnabled}
+			<p class="text-sm text-white mb-2">
+				You need to disable the "Fit in one line" setting for all subtitle tracks to edit this
+			</p>
+		{/if}
+	</div>
 
 	<Slider
 		title="Video Scale"
@@ -119,19 +136,21 @@
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1 flex flex-col">
-	<h1 class="text-lg font-bold mb-2">Surah name</h1>
+	<h1 class="text-lg font-bold mb-2">Surah Name</h1>
 
 	<section class="flex flex-col gap-2">
 		<Toggle
 			text="Display Surah Name"
-			bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
-				.enable}
+			bind:checked={
+				$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable
+			}
 		/>
 		<section class="flex flex-col gap-2">
 			<Toggle
 				text="Display Surah Name in Latin"
-				bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
-					.showLatin}
+				bind:checked={
+					$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.showLatin
+				}
 			/>
 			{#if $currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.showLatin}
 				<div class="flex">
@@ -139,8 +158,10 @@
 					<input
 						type="text"
 						class="ml-1 bg-transparent w-20 border border-slate-500 rounded-lg text-sm px-1"
-						bind:value={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
-							.latinTextBeforeSurahName}
+						bind:value={
+							$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
+								.latinTextBeforeSurahName
+						}
 					/>
 				</div>
 			{/if}
@@ -149,11 +170,12 @@
 
 	<Slider
 		title="Vertical Position"
-		min={-10}
-		max={100}
-		step={0.5}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
-			.verticalPosition}
+		min={-150}
+		max={900}
+		step={5}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition
+		}
 	/>
 
 	<Slider
@@ -161,14 +183,15 @@
 		min={0}
 		max={1}
 		step={0.01}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings
-			.opacity}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.opacity
+		}
 	/>
 	<Slider
 		title="Size"
-		min={10}
-		max={100}
-		step={1}
+		min={1}
+		max={20}
+		step={0.5}
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size}
 	/>
 </div>
@@ -223,8 +246,8 @@
 
 	<Slider
 		title="Font Size"
-		min={0}
-		max={140}
+		min={15}
+		max={100}
 		step={1}
 		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.creatorText.fontSize}
 	/>
@@ -240,11 +263,12 @@
 
 	<Slider
 		title="Vertical Position"
-		min={-100}
-		max={100}
-		step={1}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.creatorText
-			.verticalPosition}
+		min={-700}
+		max={760}
+		step={5}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition
+		}
 	/>
 </div>
 
@@ -256,14 +280,22 @@
 		bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable}
 	/>
 
+	{#if $currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable}
+		<p class="text-sm text-gray-400 mb-4">
+			Note: You may not see it in the preview. Toggle full-screen mode to see it. It will appear at
+			the set start time and last for 4.5 seconds.
+		</p>
+	{/if}
+
 	<Slider
 		title="Start Time"
 		unit="s from start"
 		min={0.5}
 		max={500}
 		step={0.5}
-		bind:bindValue={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton
-			.startTime}
+		bind:bindValue={
+			$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.startTime
+		}
 	/>
 
 	<label for="font-family" class="mt-2 flex items-center"

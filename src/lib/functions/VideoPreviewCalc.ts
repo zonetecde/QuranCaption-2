@@ -27,12 +27,3 @@ export function getDisplayedVideoSize(videoComponent: HTMLVideoElement) {
 
 	return { displayedWidth, displayedHeight };
 }
-
-/**
- * Calcul la taille de la police pour les sous-titres en fonction de la taille de la vidéo
- * @param fontSize La taille de la police mis dans les paramètres
- * @returns La taille de la police pour les sous-titres
- */
-export function calculateFontSize(fontSize: number) {
-	return get(videoDimensions).width / (140 - fontSize);
-}

@@ -9,6 +9,13 @@
 	let currentlyExportingVideos: VideoExportStatus[] = [];
 
 	onMount(async () => {
+		// à la création, donne dans l'url en JSON du projet en cours (la raison pour laquelle on a ouvert la fenetre d'export)
+		const project = window.location.search.split('?')[1];
+		const projectData = JSON.parse(decodeURIComponent(project));
+		currentlyExportingVideos = [projectData, ...currentlyExportingVideos];
+
+		console.log('Project data:', projectData);
+
 		const l1 = await listen('addExport', (event) => {
 			// si l'export existe déjà, ne fait rien
 			if (

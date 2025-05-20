@@ -21,14 +21,14 @@
 <div class="flex-row w-full h-full grid grid-cols-2-template">
 	<section class="flex-grow flex flex-row divide-x-4 divide-[#413f3f]">
 		<!-- Editor -->
-		<section class="w-full divide-y-4 divide-[#413f3f]">
+		<section class="w-full divide-y-4 divide-[#413f3f] flex flex-col">
 			<!-- Video preview -->
-			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : 'h-[85%] max-h-[85%]'}>
+			<section class={$fullScreenPreview ? 'absolute inset-0 z-50' : ''}>
 				<VideoPreview hideControls={$fullScreenPreview} />
 			</section>
 
 			<!-- Timeline -->
-			<section class="h-[15%]">
+			<section class="flex-1 overflow-hidden">
 				<Timeline hideVerticalScrollBar />
 			</section>
 		</section>

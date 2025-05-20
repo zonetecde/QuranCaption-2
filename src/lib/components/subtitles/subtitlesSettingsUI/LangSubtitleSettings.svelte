@@ -76,7 +76,7 @@
 
 				if (temp !== '') {
 					// créer un str qui fait le bon nbre de ligne max
-					let newInnerText = '.';
+					let newInnerText = '|||';
 					for (
 						let i = 1;
 						i <
@@ -84,7 +84,7 @@
 							.maxNumberOfLines;
 						i++
 					) {
-						newInnerText += '<br/>.';
+						newInnerText += '<br/>|||';
 					}
 
 					// met le str dans le sous-titre pour voir la hauteur
@@ -126,6 +126,11 @@
 			$currentProject.projectSettings.subtitlesTracksSettings[
 				subtitleLanguage
 			].neededHeightToFitSmallPreview = heightNeededSmallPreview + 5;
+
+			console.log(
+				'Height needed to fit the subtitle on one line (small preview):',
+				heightNeededSmallPreview
+			);
 		} else {
 			toast.error(
 				'There was an error while trying to find the height needed to fit the subtitle on one line'
@@ -321,9 +326,9 @@
 	<h1 class="text-lg font-bold mb-2">Position</h1>
 	<Slider
 		title="Vertical Position"
-		min={-100}
-		max={100}
-		step={0.1}
+		min={-600}
+		max={760}
+		step={1}
 		bind:bindValue={
 			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition
 		}

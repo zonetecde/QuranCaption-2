@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
 	import type { SurahNameSettings } from '$lib/models/Project';
 	import type { SubtitleClip } from '$lib/models/Timeline';
-	import { calculateAdjustedVerticalPosition, videoDimensions } from '$lib/stores/LayoutStore';
+	import { videoDimensions } from '$lib/stores/LayoutStore';
 	import { getTextName } from '$lib/stores/OtherTextsStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { Mushaf } from '$lib/stores/QuranStore';
@@ -12,8 +11,6 @@
 
 	export let currentSubtitle: SubtitleClip;
 	$: surahNameSettings = $currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings;
-
-	$: $videoDimensions, calculateSubtitleTextSize();
 
 	$: if (currentSubtitle && currentSubtitle.surah !== -1) {
 		latestSurah.set(currentSubtitle.surah);
@@ -34,40 +31,25 @@
 	}
 
 	let size = 1;
-
-	function calculateSubtitleTextSize() {
-		// Calcul la taille de la police pour les sous-titres
-		size =
-			calculateFontSize(
-				$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size
-			) * 0.1;
-	}
 </script>
 
 {#if currentSubtitle && $latestSurah !== -1}
-	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
-	{@const subtitleVerticalPosition = calculateAdjustedVerticalPosition(
-		$videoDimensions.height,
-		$videoDimensions.width,
-		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition,
-		true
-	)}
-	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
-	{@const subtitleHorizontalPadding =
-		$videoDimensions.width *
-		($currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding / 100)}
+	{@const subtitleVerticalPosition =
+		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition}
+	{@const subtitleTextSize =
+		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size}
 
 	{#if surahNameSettings.enable && $latestSurah && $latestSurah !== -1}
 		<div
 			transition:fade
-			class="absolute left-1/2 -translate-x-1/2"
-			style={`--tw-scale-x: ${size}; --tw-scale-y: ${size}; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); width: ${$videoDimensions.width}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
+			class="absolute top-0 left-1/2 -translate-x-1/2"
+			style={`top: ${subtitleVerticalPosition}px; --tw-scale-x: ${subtitleTextSize}; --tw-scale-y: ${subtitleTextSize}; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));`}
 		>
 			<div
 				class="flex items-center justify-center h-full"
 				style="opacity: {surahNameSettings.opacity}"
 			>
-				<div class="text-center flex flex-col" style={`font-size: px;`}>
+				<div class="text-center flex flex-col">
 					{#if $latestSurah >= 1}
 						<img
 							class="size-[100px]"

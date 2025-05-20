@@ -13,7 +13,8 @@
 		middleRatio,
 		bottomRatio,
 		exportType,
-		currentlyExporting
+		currentlyExporting,
+		triggerSubtitleResize
 	} from '$lib/stores/ExportStore';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
@@ -35,9 +36,9 @@
 	import ControlBar from './ControlBar.svelte';
 	import BurnedSurahName from './BurnedSurahName.svelte';
 	import VideoSectionRatio from './VideoSectionRatio.svelte';
+	import BurnedSubscribeButton from './BurnedSubscribeButton.svelte';
 
 	export let hideControls = false;
-	export let force1920x1080 = false;
 
 	onMount(async () => {
 		window.onresize = calculateVideoDimensions;
@@ -89,28 +90,9 @@
 					});
 				}
 			}
+
+			resizeVideoToFitScreen();
 		}, 1);
-	}
-
-	// Pour que le gif 'subscribe' commence au début
-	let gifKey = 0;
-	let prevInRange: number | boolean = false;
-	$: subscribeButtonSettings =
-		$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton;
-	$: subscribeButtonStartTime = subscribeButtonSettings
-		? subscribeButtonSettings.startTime * 1000
-		: 0;
-
-	$: subscribeButtonEndTime = subscribeButtonStartTime + 4500;
-	$: {
-		const currentInRange =
-			$cursorPosition &&
-			$cursorPosition > subscribeButtonStartTime &&
-			$cursorPosition < subscribeButtonEndTime;
-		if (currentInRange && !prevInRange) {
-			gifKey = Date.now();
-		}
-		prevInRange = currentInRange;
 	}
 
 	$: currentTime = secondsToHHMMSS($cursorPosition / 1000); // [0] = HH:MM:SS, [1] = milliseconds
@@ -235,28 +217,100 @@
 			}
 		}, 10);
 	}
+
+	/**
+	 * sorry i cant explain that lol but it works
+	 */
+	function resizeVideoToFitScreen() {
+		const previewContainer = document.getElementById('preview-container');
+		const preview = document.getElementById('preview');
+		// Ajuste le scale de `preview` pour qu'il s'adapte au container sans jamais s'étirer
+		if (previewContainer && preview) {
+			// On met le 1920x1080 ici pour éviter d'avoir un effet bizarre lorsque le component load
+			preview.style.width = '1920px';
+			preview.style.height = '1080px'; // Si on est en plein écran, on met la vidéo à la taille de l'écran
+			if ($fullScreenPreview) {
+				previewContainer.style.width = '100%';
+				previewContainer.style.height = '100%';
+			} else {
+				// Sinon taille du container avec 100px de moins en hauteur
+				previewContainer.style.width = 'auto';
+				previewContainer.style.height = 'calc(100% - 100px)';
+
+				// reset les centrages
+				previewContainer.style.position = 'relative';
+				previewContainer.style.zIndex = '0';
+				previewContainer.style.transform = 'none';
+				previewContainer.style.top = '0';
+				previewContainer.style.left = '0';
+
+				// remove the black div if it exists
+				const blackCovers = document.getElementsByClassName('black-cover');
+				for (let i = 0; i < blackCovers.length; i++) {
+					blackCovers[i].remove();
+				}
+			}
+
+			const containerWidth = previewContainer.clientWidth;
+			const containerHeight = previewContainer.clientHeight - ($fullScreenPreview ? 0 : 432);
+
+			const videoWidth = preview.clientWidth;
+			const videoHeight = preview.clientHeight;
+
+			const widthRatio = containerWidth / videoWidth;
+			const heightRatio = containerHeight / videoHeight;
+
+			// Utilise le plus petit ratio pour éviter l'étirement
+			const scale = Math.min(widthRatio, heightRatio);
+
+			// Applique le scale à la preview
+			preview.style.transform = `scale(${scale})`;
+
+			if (!$fullScreenPreview) {
+				// met la taille de preview-container à la taille de preview
+				previewContainer.style.width = `${videoWidth * scale}px`;
+				previewContainer.style.height = `${videoHeight * scale}px`;
+
+				// center the preview container horizontally
+				previewContainer.style.left = '50%';
+				previewContainer.style.transform = 'translateX(-50%)';
+			} else {
+				// centre la preview verticalement et horizontalement
+				previewContainer.style.position = 'absolute';
+				previewContainer.style.zIndex = '1000';
+				previewContainer.style.inset = '0'; // Utilise inset pour positionner le container
+
+				// Centre le conteneur en mode plein écran
+				const windowHeight = window.innerHeight;
+				const scaledVideoHeight = videoHeight * scale;
+				const topOffset = Math.max(0, (windowHeight - scaledVideoHeight) / 2);
+
+				previewContainer.style.top = `${topOffset}px`;
+				previewContainer.style.left = '50%';
+				previewContainer.style.transform = 'translateX(-50%)';
+
+				previewContainer.style.width = `${videoWidth * scale}px`;
+				previewContainer.style.height = `${videoHeight * scale}px`;
+			}
+		}
+	}
 </script>
 
-<div class="w-full h-full flex flex-col relative overflow-hidden">
-	<div
-		class={'h-full relative bg-black ' +
-			(hideControls ? '' : 'pb-16') +
-			(force1920x1080 ? ' force-1920x1080' : '')}
-		id="preview"
-	>
+<div class="w-full h-full flex flex-col relative overflow-hidden" id="preview-container">
+	<div class={'relative origin-top-left bg-black'} id="preview">
 		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId) || currentSubtitle}
 			{#if currentVideo}
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
 					<video
-						class={'w-full h-full object-contain ' +
+						class={'w-full h-full' +
 							currentVideo.id +
 							' ' +
 							(video.type === 'video' && video.id !== 'black-video' ? '' : 'hidden')}
 						id="video-preview"
 						style="
-							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$videoDimensions.width *
-							($currentProject.projectSettings.translateVideoX / 100)}px);
+							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$currentProject
+							.projectSettings.translateVideoX}px);
 						"
 						src={video.type === 'image'
 							? convertFileSrc('./black-vid.mp4')
@@ -305,36 +359,16 @@
 
 			<BurnedSurahName bind:currentSubtitle />
 
-			<VideoSectionRatio {hideControls} />
+			<BurnedSubscribeButton />
 
-			{#if subscribeButtonSettings && subscribeButtonSettings.enable && $cursorPosition && $cursorPosition > subscribeButtonStartTime && $cursorPosition < subscribeButtonEndTime}
-				<img
-					src={`/icons/subscribe.gif?key=${gifKey}`}
-					alt="Subscribe"
-					class="absolute opacity-50"
-					style={subscribeButtonSettings.position === 'TL'
-						? 'top: 3rem; left: 7rem;'
-						: subscribeButtonSettings.position === 'TR'
-							? 'top: 3rem; right: 7rem;'
-							: subscribeButtonSettings.position === 'BL'
-								? 'bottom: 3rem; left: 7rem;'
-								: subscribeButtonSettings.position === 'BR'
-									? 'bottom: 3rem; right: 7rem;'
-									: subscribeButtonSettings.position === 'TC'
-										? 'top: 3rem; left: 50%; transform: translateX(-50%);'
-										: 'bottom: 1.5rem; left: 50%; transform: translateX(-50%);'}
-					width="200"
-					height="100"
-					transition:fade
-				/>
-			{/if}
+			<VideoSectionRatio {hideControls} />
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
-
-	{#if hideControls === false}
-		<ControlBar {currentTime} {handlePlayVideoButtonClicked} />
-	{/if}
 </div>
+
+{#if !hideControls}
+	<ControlBar {currentTime} {handlePlayVideoButtonClicked} />
+{/if}
 
 <style>
 	.force-1920x1080 {

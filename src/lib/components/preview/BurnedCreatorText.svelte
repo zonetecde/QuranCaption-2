@@ -1,39 +1,23 @@
 <script>
-	import { calculateFontSize } from '$lib/functions/VideoPreviewCalc';
-	import { calculateAdjustedVerticalPosition, videoDimensions } from '$lib/stores/LayoutStore';
+	import { videoDimensions } from '$lib/stores/LayoutStore';
 
 	import { currentProject } from '$lib/stores/ProjectStore';
-
-	let subtitleTextSize = 1;
-
-	$: $videoDimensions, calculateSubtitleTextSize();
-
-	async function calculateSubtitleTextSize() {
-		// Calcul la taille de la police pour les sous-titres
-		subtitleTextSize = calculateFontSize(
-			$currentProject.projectSettings.globalSubtitlesSettings.creatorText.fontSize
-		);
-	}
 </script>
 
 {#if $currentProject.projectSettings.globalSubtitlesSettings.creatorText.enable}
 	<!-- Calcul permettant de calculer la bonne hauteur en fonction de la taille de la vidéo -->
-	{@const subtitleVerticalPosition = calculateAdjustedVerticalPosition(
-		$videoDimensions.height,
-		$videoDimensions.width,
-		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition,
-		true
-	)}
+	{@const subtitleVerticalPosition =
+		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
 	{@const subtitleHorizontalPadding =
-		$videoDimensions.width *
-		($currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding / 100)}
+		$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
 	{@const enableOutline =
 		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.outline}
-
+	{@const subtitleTextSize =
+		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.fontSize}
 	<div
 		class="absolute bottom-0 left-1/2 -translate-x-1/2"
-		style={`width: ${$videoDimensions.width}px; padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
+		style={`padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
 	>
 		<div class="flex items-center justify-center h-full">
 			<p
