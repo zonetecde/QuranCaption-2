@@ -135,6 +135,8 @@ export async function createOrShowExportDetailsWindow() {
 			decorations: false,
 			minWidth: 600,
 			minHeight: 250,
+			width: 600,
+			height: 250,
 			title: 'Export Details'
 		});
 
