@@ -8,6 +8,7 @@
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import toast from 'svelte-french-toast';
 	import RelocateAssetWarning from '../common/RelocateAssetWarning.svelte';
+	import { ASSETS_PATH } from '$lib/ext/LocalStorageWrapper';
 
 	export let asset: Asset;
 
@@ -122,11 +123,10 @@
 			return;
 		}
 
-		const filePathWithoutFileName = asset.filePath.replace(asset.fileName, '');
 		await toast.promise(
 			downloadFromYoutube(
 				asset.fileName,
-				filePathWithoutFileName,
+				ASSETS_PATH!.slice(0, -1),
 				asset.youtubeUrl,
 				asset.type === 'video' ? 'mp4' : 'webm',
 				false
@@ -138,10 +138,12 @@
 			}
 		);
 
+		// update the asset
+		asset.filePath = ASSETS_PATH + asset.fileName;
+		asset.exist = true;
+
 		// save the project
 		await updateUsersProjects($currentProject);
-		// reload the page
-		location.reload();
 	}
 </script>
 

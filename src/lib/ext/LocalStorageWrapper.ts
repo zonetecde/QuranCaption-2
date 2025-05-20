@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/tauri';
 
 export let STORAGE_PATH: string | undefined = undefined;
 export let EXPORT_PATH: string | undefined = undefined;
+export let ASSETS_PATH: string | undefined = undefined;
 
 export async function getLocalStoragePath() {
 	if (STORAGE_PATH) return STORAGE_PATH;
@@ -19,10 +20,19 @@ export async function getExportPath() {
 	return EXPORT_PATH;
 }
 
+export async function getAssetsPath() {
+	if (ASSETS_PATH) return ASSETS_PATH;
+
+	let EXECUTAVLE_PATH = await invoke('path_to_executable');
+	ASSETS_PATH = EXECUTAVLE_PATH + 'assets/';
+	return ASSETS_PATH;
+}
+
 export async function initializeStorage() {
 	try {
 		await createDir(await getLocalStoragePath(), { recursive: true });
 		await createDir(await getExportPath(), { recursive: true });
+		await createDir(await getAssetsPath(), { recursive: true });
 		console.log('Storage initialized');
 	} catch (error) {
 		console.error('Failed to initialize storage:', error);
