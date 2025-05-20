@@ -1,11 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::os::windows::process::CommandExt;
 use std::process::Command;
 use std::{ format, vec };
 use font_kit::{error::SelectionError, source::SystemSource};
 use tauri::Manager; // Ajouté pour permettre l'émission d'événements
+
+#[cfg(target_os = "windows")] // Import uniquement pour Windows
+use std::os::windows::process::CommandExt;
 
 fn main() {
   tauri::Builder::default()
