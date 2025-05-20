@@ -83,8 +83,6 @@
 	async function customizeStyleButtonClicked(e: MouseEvent) {
 		// Si on est sur la page Video Editor, on affiche les paramètres de cette page :
 		if ($currentPage === 'Video editor') {
-			myMenu.$destroy();
-
 			await new Promise((resolve) => setTimeout(resolve, 10));
 
 			videoEditorSelectedTab.set('subtitles settings');
