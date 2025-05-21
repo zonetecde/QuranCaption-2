@@ -3,7 +3,6 @@
 
 use std::process::Command;
 use std::process::Child;
-use std::process::Stdio;
 use std::{ format, vec };
 use font_kit::{error::SelectionError, source::SystemSource};
 use tauri::Manager; // Ajouté pour permettre l'émission d'événements
