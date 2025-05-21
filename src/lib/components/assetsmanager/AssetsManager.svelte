@@ -7,7 +7,7 @@
 	import IconButton from '../common/IconButton.svelte';
 	import AssetViewer from './AssetViewer.svelte';
 	import { onMount } from 'svelte';
-	import { EXPORT_PATH } from '$lib/ext/LocalStorageWrapper';
+	import { ASSETS_PATH } from '$lib/ext/LocalStorageWrapper';
 
 	let ytbDownloadPopup = false;
 	let youtubeUrl = '';
@@ -15,7 +15,7 @@
 	let videoFormat = 'mp4';
 
 	onMount(() => {
-		downloadLocation = EXPORT_PATH!; // par défaut
+		downloadLocation = ASSETS_PATH!; // par défaut
 	});
 
 	/**
