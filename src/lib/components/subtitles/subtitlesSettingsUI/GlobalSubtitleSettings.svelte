@@ -270,8 +270,8 @@
 
 	<Slider
 		title="Vertical Position"
-		min={-700}
-		max={760}
+		min={-900}
+		max={900}
 		step={5}
 		bind:bindValue={
 			$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition

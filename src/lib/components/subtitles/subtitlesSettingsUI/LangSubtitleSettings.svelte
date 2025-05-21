@@ -326,9 +326,9 @@
 	<h1 class="text-lg font-bold mb-2">Position</h1>
 	<Slider
 		title="Vertical Position"
-		min={-600}
-		max={760}
-		step={1}
+		min={-900}
+		max={900}
+		step={5}
 		bind:bindValue={
 			$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].verticalPosition
 		}

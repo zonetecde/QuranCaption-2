@@ -9,15 +9,13 @@
 	{@const subtitleVerticalPosition =
 		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition}
 	<!-- Calcul permettant de calculer la bonne largeur du texte en fonction de la taille de la vidéo -->
-	{@const subtitleHorizontalPadding =
-		$currentProject.projectSettings.globalSubtitlesSettings.horizontalPadding}
 	{@const enableOutline =
 		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.outline}
 	{@const subtitleTextSize =
 		$currentProject.projectSettings.globalSubtitlesSettings.creatorText.fontSize}
 	<div
 		class="absolute bottom-0 left-1/2 -translate-x-1/2"
-		style={`padding: 0px ${subtitleHorizontalPadding}px; top: ${subtitleVerticalPosition}px;`}
+		style={`top: ${subtitleVerticalPosition}px;`}
 	>
 		<div class="flex items-center justify-center h-full">
 			<p
