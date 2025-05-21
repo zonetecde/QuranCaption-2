@@ -237,6 +237,18 @@ def main():
                         help="Set to 1 for dynamic top section (process top section for each image separately, no fade effect), 0 for static top section (default behavior)")
     
     args = parser.parse_args()
+
+    # print des args
+    print("Arguments received:")
+    print(f"Folder path: {args.folder_path}")
+    print(f"Audio path: {args.audio_path}")
+    print(f"Transition duration: {args.transition_ms} ms")
+    print(f"Start time: {args.start_time} ms")
+    print(f"End time: {args.end_time} ms")
+    print(f"Output path: {args.output_path}")
+    print(f"Top ratio: {args.top_ratio}")
+    print(f"Bottom ratio: {args.bottom_ratio}")
+    print(f"Dynamic top: {args.dynamic_top}")
     
     # Configure FFmpeg path
     ffmpeg_path = get_ffmpeg_path()
@@ -248,14 +260,23 @@ def main():
     
     print(f"Starting video creation process...")
     start_time = time.time()
-    
-    # Process images and prepare frames data
+      # Process images and prepare frames data
     frames_data, static_top, static_bottom, dimensions = process_images_to_frames(
         args.folder_path, args.transition_ms, args.top_ratio, args.bottom_ratio, args.dynamic_top
     )
     
-    # Load audio file
-    audio = AudioFileClip(args.audio_path)
+    # Load audio file if exists and is valid
+    audio = None
+    try:
+        if os.path.exists(args.audio_path):
+            audio = AudioFileClip(args.audio_path)
+            print(f"Audio file loaded successfully: {args.audio_path}")
+        else:
+            print(f"Warning: Audio file does not exist: {args.audio_path}")
+            print("Creating video without audio...")
+    except Exception as e:
+        print(f"Error loading audio file: {e}")
+        print("Creating video without audio...")
     
     # Determine video duration based on frames and trim settings
     last_frame_end = frames_data[-1]['end_ms']
@@ -284,25 +305,37 @@ def main():
     
     video = VideoClip(make_frame_wrapper, duration=duration_sec)
     
-    # Trim audio to match video duration - ensure audio won't extend past the video
-    audio_duration = min(duration_sec, audio.duration)
-    trimmed_audio = audio.subclip(start_ms/1000, start_ms/1000 + audio_duration)
-    
-    # Set audio to video
-    final_video = video.set_audio(trimmed_audio)
-    
-    # Write output with appropriate codec and high speed
+    # Set audio to video if audio is available
+    if audio is not None:
+        # Trim audio to match video duration - ensure audio won't extend past the video
+        audio_duration = min(duration_sec, audio.duration)
+        trimmed_audio = audio.subclip(start_ms/1000, start_ms/1000 + audio_duration)
+        
+        # Set audio to video
+        final_video = video.set_audio(trimmed_audio)
+    else:
+        # No audio available - use video without audio
+        final_video = video
+      # Write output with appropriate codec and high speed
     print(f"Rendering video to {args.output_path}...")
+    
+    # Prepare video encoding parameters based on audio availability
+    video_params = {
+        'fps': 30,
+        'codec': 'libx264',
+        'preset': 'ultrafast',  # For fast encoding
+        'threads': 8,           # Use multiple threads
+        'ffmpeg_params': ['-crf', '23'],  # Balance between quality and size
+        'logger': logger
+    }
+    
+    # Add audio codec parameter only if we have audio
+    if audio is not None:
+        video_params['audio_codec'] = 'aac'
+    
     final_video.write_videofile(
         args.output_path,
-        fps=30,
-        codec='libx264',
-        audio_codec='aac',
-        preset='ultrafast',  # For fast encoding
-        threads=8,           # Use multiple threads
-        ffmpeg_params=['-crf', '23'],  # Balance between quality and size
-        logger=logger
-        
+        **video_params
     )
     
     print(f"Video creation completed in {time.time() - start_time:.2f} seconds")
@@ -311,8 +344,6 @@ def main():
     # Once done, remove the dir containing the images with all its content
     if os.path.exists(args.folder_path):
         shutil.rmtree(args.folder_path)
-    # Open the export folder with the video selected
-    os.startfile(os.path.dirname(args.output_path))
 
 if __name__ == "__main__":
     main()
@@ -320,4 +351,4 @@ if __name__ == "__main__":
 
 # ./video_creator.exe "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0
 
-# py video_creator.py "C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "C:\Users\zonedetec\Documents\quran.al.luhaidan\30\audio_2258.webm" 300 0 0 "./output.mp4" 0.25 0.25 0
+# py video_creator.py "C:\Users\zonedetec\Documents\source\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "" 300 0 0 "./output.mp4" 0.25 0.25 0

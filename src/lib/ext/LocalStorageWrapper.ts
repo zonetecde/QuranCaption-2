@@ -9,14 +9,14 @@ export async function getLocalStoragePath() {
 	if (STORAGE_PATH) return STORAGE_PATH;
 
 	let EXECUTAVLE_PATH = await invoke('path_to_executable');
-	STORAGE_PATH = EXECUTAVLE_PATH + 'localStorage/';
+	STORAGE_PATH = EXECUTAVLE_PATH + 'localStorage\\';
 	return STORAGE_PATH;
 }
 export async function getExportPath() {
 	if (EXPORT_PATH) return EXPORT_PATH;
 
 	let EXECUTAVLE_PATH = await invoke('path_to_executable');
-	EXPORT_PATH = EXECUTAVLE_PATH + 'export/';
+	EXPORT_PATH = EXECUTAVLE_PATH + 'export\\';
 	return EXPORT_PATH;
 }
 
@@ -24,7 +24,7 @@ export async function getAssetsPath() {
 	if (ASSETS_PATH) return ASSETS_PATH;
 
 	let EXECUTAVLE_PATH = await invoke('path_to_executable');
-	ASSETS_PATH = EXECUTAVLE_PATH + 'assets/';
+	ASSETS_PATH = EXECUTAVLE_PATH + 'assets\\';
 	return ASSETS_PATH;
 }
 

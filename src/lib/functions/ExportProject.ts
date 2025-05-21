@@ -63,9 +63,13 @@ export function openExportWindow() {
 			portrait: get(orientation) === 'portrait',
 			status: 'Capturing video frames...',
 			outputPath: '',
-			progress: 0
+			progress: 0,
+			hasAudio: getFirstAudioOrVideoPath() !== './black-vid.mp4'
 		};
-		exportDetail.outputPath = generateOutputPath(exportDetail);
+		exportDetail.outputPath = generateOutputPath({
+			projectName: get(currentProject).name,
+			exportId: exportId
+		} as VideoExportStatus);
 
 		webview.once('tauri://destroyed', function () {
 			// modifie le statut de la vidéo en cours d'export
@@ -272,10 +276,15 @@ export async function exportCurrentProjectAsVideo() {
 	} as VideoExportStatus);
 
 	// On appelle le script python pour créer la vidéo
+	let audioPath = getFirstAudioOrVideoPath();
+	if (audioPath === './black-vid.mp4') {
+		audioPath = '';
+	}
+
 	invoke('create_video', {
 		exportId: get(currentlyExportingId),
 		folderPath: `${EXPORT_PATH}${get(currentlyExportingId)}`,
-		audioPath: getFirstAudioOrVideoPath(),
+		audioPath: audioPath,
 		transitionMs:
 			Math.floor(_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration) * 2,
 		startTime: Math.floor(get(startTime)),

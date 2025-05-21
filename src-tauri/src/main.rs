@@ -11,7 +11,7 @@ use std::os::windows::process::CommandExt;
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, open,close])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, open, close, open_file_dir])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -291,4 +291,72 @@ async fn open(path: String) {
 fn close() {
     // Close the application
     std::process::exit(0);
+}
+
+#[tauri::command]
+fn open_file_dir(path: String) {
+    // Vérifie si le chemin existe
+    let file_path = std::path::Path::new(&path);
+    if !file_path.exists() {
+        eprintln!("Le chemin spécifié n'existe pas: {}", path);
+        return;
+    }
+
+    // Sur Windows, utilise /select pour ouvrir l'explorateur avec le fichier sélectionné
+    #[cfg(target_os = "windows")]
+    {
+        if let Err(e) = std::process::Command::new("explorer")
+            .arg("/select,")
+            .arg(file_path)
+            .spawn() {
+            eprintln!("Impossible d'ouvrir l'explorateur de fichiers: {}", e);
+        }
+    }
+
+    // Sur macOS
+    #[cfg(target_os = "macos")]
+    {
+        if file_path.is_file() {
+            // Pour sélectionner un fichier spécifique, on utilise osascript
+            let parent = file_path.parent().unwrap_or(file_path);
+            let filename = file_path.file_name().unwrap_or_default().to_string_lossy();
+            
+            let script = format!(
+                "tell application \"Finder\" to reveal POSIX file \"{}\" activate",
+                file_path.to_string_lossy()
+            );
+            
+            if let Err(e) = std::process::Command::new("osascript")
+                .arg("-e")
+                .arg(script)
+                .spawn() {
+                eprintln!("Impossible d'ouvrir le Finder: {}", e);
+            }
+        } else {
+            // Si c'est un dossier, on l'ouvre simplement
+            if let Err(e) = std::process::Command::new("open")
+                .arg(file_path)
+                .spawn() {
+                eprintln!("Impossible d'ouvrir le dossier: {}", e);
+            }
+        }
+    }
+
+    // Sur Linux
+    #[cfg(target_os = "linux")]
+    {
+        // Sur Linux, on ne peut pas facilement sélectionner un fichier spécifique
+        // On ouvre donc simplement le dossier parent
+        let dir_path = if file_path.is_file() {
+            file_path.parent().unwrap_or(file_path)
+        } else {
+            file_path
+        };
+        
+        if let Err(e) = std::process::Command::new("xdg-open")
+            .arg(dir_path)
+            .spawn() {
+            eprintln!("Impossible d'ouvrir le gestionnaire de fichiers: {}", e);
+        }
+    }
 }

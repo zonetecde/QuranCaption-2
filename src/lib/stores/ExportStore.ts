@@ -28,4 +28,5 @@ export interface VideoExportStatus {
 	status: string;
 	progress: number; // 0-100
 	outputPath: string; // Chemin de sortie du fichier
+	hasAudio: boolean; // Indique si la vidéo a de l'audio
 }

@@ -4,17 +4,42 @@
 	import { getExportPath } from '$lib/ext/LocalStorageWrapper';
 	import type { VideoExportStatus } from '$lib/stores/ExportStore';
 	import TitleBar from './TitleBar.svelte';
+	import { invoke } from '@tauri-apps/api/tauri';
 
 	let listeners: any[] = [];
-	let currentlyExportingVideos: VideoExportStatus[] = [];
+	let currentlyExportingVideos: VideoExportStatus[] = [
+		{
+			projectName: 'Project 1',
+			status: 'Finished',
+			progress: 100,
+			outputPath:
+				'C:\\Users\\zonedetec\\Documents\\source\\tauri\\QuranCaption-2\\src-tauri\\target\\debug\\export\\Al Ikhlas_482040.mp4',
+			exportId: 1,
+			startTime: 0,
+			endTime: 0,
+			portrait: true,
+			hasAudio: true
+		},
+		{
+			projectName: 'Project 2',
+			status: 'Completed',
+			progress: 100,
+			outputPath: getExportPath() + '/output2.mp4',
+			exportId: 2,
+			startTime: 0,
+			endTime: 0,
+			portrait: false,
+			hasAudio: false
+		}
+	];
 
 	onMount(async () => {
 		// à la création, donne dans l'url en JSON du projet en cours (la raison pour laquelle on a ouvert la fenetre d'export)
 		const project = window.location.search.split('?')[1];
-		const projectData = JSON.parse(decodeURIComponent(project));
-		currentlyExportingVideos = [projectData, ...currentlyExportingVideos];
-
-		console.log('Project data:', projectData);
+		if (project) {
+			const projectData = JSON.parse(decodeURIComponent(project));
+			currentlyExportingVideos = [projectData, ...currentlyExportingVideos];
+		}
 
 		const l1 = await listen('addExport', (event) => {
 			// si l'export existe déjà, ne fait rien
@@ -48,6 +73,14 @@
 				currentlyExportingVideos[index].status = event.payload.status;
 				//@ts-ignore
 				currentlyExportingVideos[index].progress = event.payload.progress;
+
+				//@ts-ignore
+				if (event.payload.status === 'Exported') {
+					// ouvre le dossier de l'export
+					setTimeout(() => {
+						invoke('open_file_dir', { path: currentlyExportingVideos[index].outputPath });
+					}, 1000);
+				}
 			}
 		});
 		listeners.push(l2);
@@ -59,6 +92,17 @@
 			listener(); // Call the listener function to remove it
 		});
 	});
+
+	// convertis une chaine longue en une chaine courte avec `...` au milieu
+	function formatPath(path: string) {
+		const maxLength = 50; // Longueur maximale de la chaîne
+		if (path.length > maxLength) {
+			const start = path.slice(0, 20); // Prend les 20 premiers caractères
+			const end = path.slice(-40); // Prend les 20 derniers caractères
+			return `${start}...${end}`; // Concatène les deux parties avec "..."
+		}
+		return path; // Si la chaîne est courte, retourne-la telle quelle
+	}
 </script>
 
 <TitleBar />
@@ -73,10 +117,11 @@
 
 				<div class="grid grid-cols-2-template">
 					<section class="flex flex-col w-full">
-						<div class="text-sm font-bold">Status: {video.status}</div>
-						<p class="text-xs mt-1 col-span-full">
-							Output file: {video.outputPath.split('/').pop()}
-						</p>
+						<div class="text-sm font-bold">
+							Status: {!video.hasAudio && video.status === 'Exporting audio...'
+								? 'Exporting video...' // si l'audio n'est pas exporté alors on passe direct à l'export vidéo
+								: video.status}
+						</div>
 					</section>
 					<section class="flex flex-col ml-4">
 						<div class="w-full bg-gray-700 rounded h-4 relative">
@@ -90,6 +135,15 @@
 						</div>
 					</section>
 				</div>
+
+				<button
+					class="text-xs mt-1 text-left"
+					on:click={() => invoke('open_file_dir', { path: video.outputPath })}
+				>
+					<u>Output file:</u>
+					{formatPath(video.outputPath)}<br />
+					<span class="text-gray-500">Click to open the file's directory</span>
+				</button>
 			</div>
 		{/each}
 	{/if}
