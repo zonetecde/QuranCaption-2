@@ -31,7 +31,7 @@
 
 	<!-- Preview + Subtitles -->
 	<section class="min-w-[120px] flex flex-col overflow-hidden border-l-2 border-[#413f3f]">
-		<div class="h-fit min-h-40">
+		<div class="h-fit">
 			<VideoPreview hideControls />
 		</div>
 		<div class="overflow-hidden h-full">

@@ -39,6 +39,7 @@
 	import BurnedSubscribeButton from './BurnedSubscribeButton.svelte';
 
 	export let hideControls = false;
+	let isPreviewLoading = true;
 
 	onMount(async () => {
 		window.onresize = calculateVideoDimensions;
@@ -293,6 +294,8 @@
 				previewContainer.style.height = `${videoHeight * scale}px`;
 			}
 		}
+
+		isPreviewLoading = false;
 	}
 </script>
 
@@ -364,6 +367,13 @@
 			<VideoSectionRatio {hideControls} />
 		{:else}<div class="w-full h-full bg-black"></div>{/if}
 	</div>
+
+	{#if isPreviewLoading}
+		<div
+			class="absolute inset-0 backdrop-blur bg-black bg-opacity-40"
+			out:fade={{ duration: 200 }}
+		></div>
+	{/if}
 </div>
 
 {#if !hideControls}

@@ -34,7 +34,6 @@
 	onMount(async () => {
 		await initializeStorage();
 
-		// the slug is what after the ? in the URL
 		// récupère dans l'url le paramètre projectId (?projectId=...&exportId=...)
 		const projectId = window.location.search.split('?')[1].split('&')[0].split('=')[1];
 		const exportId = window.location.search.split('?')[1].split('&')[1].split('=')[1];
