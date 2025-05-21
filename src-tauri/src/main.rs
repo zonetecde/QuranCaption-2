@@ -2,16 +2,28 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::process::Command;
+use std::process::Child;
+use std::process::Stdio;
 use std::{ format, vec };
 use font_kit::{error::SelectionError, source::SystemSource};
 use tauri::Manager; // Ajouté pour permettre l'émission d'événements
+use std::collections::HashMap;
+use std::sync::Mutex;
+use once_cell::sync::Lazy;
+use std::io::{BufRead, BufReader};
+use regex::Regex;
 
 #[cfg(target_os = "windows")] // Import uniquement pour Windows
 use std::os::windows::process::CommandExt;
 
+// Stockage global des processus en cours
+static EXPORT_PROCESSES: Lazy<Mutex<HashMap<i32, Child>>> = Lazy::new(|| {
+    Mutex::new(HashMap::new())
+});
+
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, open, close, open_file_dir])
+    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, cancel_export, is_export_running, close, open_file_dir])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -200,23 +212,34 @@ async fn create_video(
             #[cfg(target_os = "windows")]
             {
                 command.creation_flags(0x08000000); // CREATE_NO_WINDOW
-            }
-
-            // Start the process
+            }            // Start the process
             let mut child = command
                 .spawn()
                 .map_err(|e| format!("Error while starting process: {}", e))?;
             
-            // Get stdout handle
-            if let Some(stdout) = child.stdout.take() {
-                use std::io::{BufRead, BufReader};
-                use regex::Regex;
+            // Récupère le stdout avant d'enregistrer le processus
+            let stdout = child.stdout.take();
+            
+            // Enregistre le processus dans le gestionnaire
+            {
+                let mut processes = EXPORT_PROCESSES.lock().unwrap();
+                processes.insert(export_id, child);
+            }
+            
+            // Obtient un nouveau Child pour continuer le traitement
+            let process_id = {
+                let processes = EXPORT_PROCESSES.lock().unwrap();
+                processes.get(&export_id).map(|child| child.id())
+            };
+            
+            println!("Started export process {} with PID: {:?}", export_id, process_id);
+              // Get stdout handle
+            if let Some(stdout) = stdout {
+                // Create a buffered reader
+                let reader = BufReader::new(stdout);
                 
                 // Regex to extract percentage
                 let re = Regex::new(r"percentage:\s*(\d+)%").unwrap();
-                
-                // Create a buffered reader
-                let reader = BufReader::new(stdout);
                 
                 // Read line by line
                 for line in reader.lines() {
@@ -245,45 +268,92 @@ async fn create_video(
                         }
                     }
                 }
-            }
-            
-            // Wait for process to complete
-            let status = child
-                .wait()
-                .map_err(|e| format!("Error while waiting for process: {}", e))?;
+            }            // Wait for process to complete
+            let status = {
+                // Récupère le processus pour attendre sa fin
+                let mut processes = EXPORT_PROCESSES.lock().unwrap();
+                if let Some(mut child) = processes.remove(&export_id) {
+                    // Attend la fin du processus
+                    match child.try_wait() {
+                        Ok(Some(status)) => {
+                            // Le processus s'est déjà terminé
+                            status
+                        },
+                        Ok(None) => {
+                            // Le processus est toujours en cours, attendons sa fin
+                            match child.wait() {
+                                Ok(status) => status,
+                                Err(e) => {
+                                    println!("Erreur en attendant le processus: {}", e);
+                                    // Si on ne peut pas attendre le processus, vérifions s'il a été annulé
+                                    let payload = serde_json::json!({
+                                        "exportId": export_id,
+                                        "progress": 0,
+                                        "status": "Erreur"
+                                    });
+                                    let _ = app_handle.emit_all("updateExportDetailsById", payload);
+                                    return Err(format!("Erreur en attendant le processus: {}", e));
+                                }
+                            }
+                        },
+                        Err(e) => {
+                            println!("Erreur en vérifiant l'état du processus: {}", e);
+                            // En cas d'erreur, on suppose que le processus a échoué
+                            let payload = serde_json::json!({
+                                "exportId": export_id,
+                                "progress": 0,
+                                "status": "Erreur"
+                            });
+                            let _ = app_handle.emit_all("updateExportDetailsById", payload);
+                            return Err(format!("Erreur en vérifiant l'état du processus: {}", e));
+                        }
+                    }
+                } else {
+                    // Si le processus n'existe plus dans la HashMap, c'est qu'il a probablement été annulé
+                    println!("Le processus d'export {} n'existe plus dans la HashMap, probablement annulé", export_id);
+                    return Ok(format!("Processus d'export {} interrompu", export_id));
+                }
+            };
 
             if status.success() {
                 // Emit an event to notify the frontend that the export is complete
                 let payload = serde_json::json!({
                     "exportId": export_id,
                     "progress": 100,
-                    "status": "Exported"
+                    "status": "Exporté"
                 });
                 let _ = app_handle.emit_all("updateExportDetailsById", payload);
-                Ok("Video creation process completed successfully.".to_string())
+                Ok("Processus de création vidéo terminé avec succès.".to_string())
             } else {
-                Err("Video creation process failed.".to_string())
+                // Vérifie si le processus a été tué (code de sortie 1 sur Windows)
+                if status.code() == Some(1) {
+                    // Probablement annulé ou interrompu
+                    println!("Processus {} probablement annulé (code de sortie 1)", export_id);
+                    let payload = serde_json::json!({
+                        "exportId": export_id,
+                        "progress": 0,
+                        "status": "Cancelled"
+                    });
+                    let _ = app_handle.emit_all("updateExportDetailsById", payload);
+                    Ok("Processus de création vidéo annulé.".to_string())
+                } else {
+                    // Si le processus a échoué pour une autre raison
+                    let error_code = status.code().unwrap_or(-1);
+                    println!("Processus d'export {} échoué avec le code {}", export_id, error_code);
+                    let payload = serde_json::json!({
+                        "exportId": export_id,
+                        "progress": 0,
+                        "status": "Erreur"
+                    });
+                    let _ = app_handle.emit_all("updateExportDetailsById", payload);
+                    Err(format!("Processus de création vidéo échoué avec le code {}.", error_code))
+                }
             }
         },
         None => {
             // Handle the case where the path could not be resolved
             Err("Failed to resolve video_creator path".to_string())
         }
-    }
-}
-
-#[tauri::command]
-async fn open(path: String) {
-    let path = std::path::Path::new(&path);
-    let dir_path = if path.is_file() {
-        path.parent().unwrap_or(path)
-    } else {
-        path
-    };
-
-    // Open the directory or file location using the default file explorer
-    if let Err(e) = std::process::Command::new("explorer").arg(dir_path).spawn() {
-        eprintln!("Failed to open directory or file location: {}", e);
     }
 }
 
@@ -298,7 +368,7 @@ fn open_file_dir(path: String) {
     // Vérifie si le chemin existe
     let file_path = std::path::Path::new(&path);
     if !file_path.exists() {
-        eprintln!("Le chemin spécifié n'existe pas: {}", path);
+        eprintln!("File or directory does not exist: {}", path);
         return;
     }
 
@@ -309,7 +379,7 @@ fn open_file_dir(path: String) {
             .arg("/select,")
             .arg(file_path)
             .spawn() {
-            eprintln!("Impossible d'ouvrir l'explorateur de fichiers: {}", e);
+            eprintln!("Unable to open the file manager: {}", e);
         }
     }
 
@@ -330,14 +400,14 @@ fn open_file_dir(path: String) {
                 .arg("-e")
                 .arg(script)
                 .spawn() {
-                eprintln!("Impossible d'ouvrir le Finder: {}", e);
+                eprintln!("Unable to open the file manager: {}", e);
             }
         } else {
             // Si c'est un dossier, on l'ouvre simplement
             if let Err(e) = std::process::Command::new("open")
                 .arg(file_path)
                 .spawn() {
-                eprintln!("Impossible d'ouvrir le dossier: {}", e);
+                eprintln!("Unable to open the folder: {}", e);
             }
         }
     }
@@ -356,7 +426,75 @@ fn open_file_dir(path: String) {
         if let Err(e) = std::process::Command::new("xdg-open")
             .arg(dir_path)
             .spawn() {
-            eprintln!("Impossible d'ouvrir le gestionnaire de fichiers: {}", e);
+            eprintln!("Unable to open the file manager: {}", e);
         }
     }
+}
+
+#[tauri::command]
+async fn cancel_export(export_id: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
+    // Essaie de récupérer et supprimer le processus associé à cet export_id
+    let mut processes = EXPORT_PROCESSES.lock().unwrap();
+    if let Some(mut child) = processes.remove(&export_id) {
+        // Récupère l'ID du processus avant de tenter de le tuer
+        let process_id = child.id();
+        println!("Attempting to stop export process {}, PID: {}", export_id, process_id);
+        
+        // Une approche plus radicale pour Windows
+        #[cfg(target_os = "windows")]
+        {
+            // Utilise taskkill /F /T pour tuer le processus et tous ses enfants
+            let _ = std::process::Command::new("taskkill")
+                .args(&["/F", "/T", "/PID", &process_id.to_string()])
+                .output();
+        }
+        
+        // Tente également de tuer le processus avec l'API standard de Rust
+        let kill_result = child.kill();
+        
+        match kill_result {
+            Ok(_) => {
+                println!("Process {} stopped successfully", process_id);
+            },
+            Err(e) => {
+                println!("Error while stopping process {} with kill(): {}", process_id, e);
+                // Même en cas d'erreur, on ne réinsère pas le processus car on a utilisé taskkill
+            }
+        }
+        
+        // Émet un événement pour informer le frontend que l'export a été annulé
+        let payload = serde_json::json!({
+            "exportId": export_id,
+            "progress": 0,
+            "status": "Cancelled"
+        });
+        let _ = app_handle.emit_all("updateExportDetailsById", payload);
+
+        Ok(format!("Export {} cancelled successfully", export_id))
+    } else {
+        // Si on ne trouve pas le processus dans notre HashMap, on tente de trouver tous les processus video_creator.exe
+        #[cfg(target_os = "windows")]
+        {
+            println!("Recherche de video_creator.exe pour l'export {}", export_id);
+            let _ = std::process::Command::new("taskkill")
+                .args(&["/F", "/IM", "video_creator.exe"])
+                .output();
+        }
+        
+        // Émet quand même un événement d'annulation
+        let payload = serde_json::json!({
+            "exportId": export_id,
+            "progress": 0,
+            "status": "Cancelled"
+        });
+        let _ = app_handle.emit_all("updateExportDetailsById", payload);
+        
+        Err(format!("No process found for export {}. Attempting to forcibly stop all video_creator.exe processes.", export_id))
+    }
+}
+
+#[tauri::command]
+async fn is_export_running(export_id: i32) -> bool {
+    let processes = EXPORT_PROCESSES.lock().unwrap();
+    processes.contains_key(&export_id)
 }

@@ -5,6 +5,7 @@
 	import type { VideoExportStatus } from '$lib/stores/ExportStore';
 	import TitleBar from './TitleBar.svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
+	import { WebviewWindow } from '@tauri-apps/api/window';
 
 	let listeners: any[] = [];
 	let currentlyExportingVideos: VideoExportStatus[] = [];
@@ -34,17 +35,19 @@
 		listeners.push(l1);
 
 		const l2 = await listen('updateExportDetailsById', (event) => {
-			console.log(
-				//@ts-ignore
-				'editing export ' + event.payload.exportId + ' with status ' + event.payload.status
-			);
-
 			//@ts-ignore
 			const index = currentlyExportingVideos.findIndex(
 				//@ts-ignore
 				(video) => video.exportId === event.payload.exportId
 			);
 			if (index !== -1) {
+				if (currentlyExportingVideos[index].status === 'Cancelled') {
+					// refait un cancel export pour être sûre
+					cancelExport(currentlyExportingVideos[index]);
+
+					return; // il se peut qu'un % vienne après le cancel donc l'en empêche
+				}
+
 				//@ts-ignore
 				currentlyExportingVideos[index].status = event.payload.status;
 				//@ts-ignore
@@ -79,6 +82,23 @@
 		}
 		return path; // Si la chaîne est courte, retourne-la telle quelle
 	}
+
+	async function cancelExport(video: VideoExportStatus) {
+		if (video.status === 'Capturing video frames...') {
+			video.status = 'Cancelling...';
+
+			// ferme la fenetre d'export
+			const exportDetailsWindow = WebviewWindow.getByLabel(video.exportId.toString());
+			if (exportDetailsWindow) {
+				await exportDetailsWindow.close();
+				video.status = 'Cancelled';
+			}
+		} else {
+			video.status = 'Cancelling...';
+
+			await invoke('cancel_export', { exportId: video.exportId });
+		}
+	}
 </script>
 
 <TitleBar />
@@ -106,7 +126,7 @@
 						</div>
 					</section>
 					<section class="flex flex-col ml-4">
-						{#if video.status !== 'Exported'}
+						{#if video.status !== 'Exported' && video.status !== 'Cancelled'}
 							<div class="w-full bg-gray-700 rounded h-4 relative mt-0.5">
 								<div
 									class="bg-blue-500 h-4 rounded duration-100 transition-all"
@@ -128,6 +148,14 @@
 						<u>Output file:</u>
 						{formatPath(video.outputPath)}<br />
 						<span class="text-gray-500">Click to open the file's directory</span>
+					</button>
+				{:else if video.status !== 'Cancelled' && video.status !== 'Cancelling...'}
+					<!-- cancel export butto n -->
+					<button
+						class="ml-auto bg-[#8b2f2f] px-2 rounded-md border border-[#492020] mt-1 text-left"
+						on:click={() => cancelExport(video)}
+					>
+						Cancel export
 					</button>
 				{/if}
 			</div>

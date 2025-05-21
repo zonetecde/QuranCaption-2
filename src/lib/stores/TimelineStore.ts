@@ -1,6 +1,7 @@
 import type Timeline from '$lib/models/Timeline';
 import { get, writable, type Writable } from 'svelte/store';
 import { currentProject } from './ProjectStore';
+import { endTime } from './ExportStore';
 
 export const zoom: Writable<number> = writable(30); // 30 px per second
 export const cursorPosition: Writable<number> = writable(0); // in milliseconds, current moment in the timeline / video preview
@@ -44,6 +45,12 @@ export function getVideoDurationInMs(): number {
 					: track.clips[track.clips.length - 1].end
 		);
 	}, 0);
+
+	if (maxEnd === 0) {
+		// retourne le endtime du dernier subtitle clip
+		if (timeline.subtitlesTracks.length === 0) return 0;
+		maxEnd = timeline.subtitlesTracks[0].clips[timeline.subtitlesTracks[0].clips.length - 1].end;
+	}
 
 	return maxEnd;
 }

@@ -7,6 +7,7 @@ name = "Quran-Caption"
 version = "0.4.4"
 dependencies = [
  "font-kit",
+ "once_cell",
  "regex",
  "serde",
  "serde_json",
