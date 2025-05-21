@@ -96,13 +96,6 @@
 
 					// récupère la hauteur
 					heightNeededSmallPreview = subtitleParagraph.clientHeight;
-
-					fullScreenPreview.set(true);
-
-					await new Promise((resolve) => {
-						setTimeout(resolve, 200); // Wait for subtitle to render
-					});
-
 					heightNeededFullScreen = subtitleParagraph.clientHeight;
 
 					// remet le texte original
@@ -157,13 +150,6 @@
 		await new Promise((resolve) => {
 			setTimeout(resolve, 100);
 		});
-
-		toast.success(
-			'To change the max font size, uncheck the checkbox, change the font size and check the checkbox again\n\nNote: This will work when being on fullscreen preview',
-			{
-				duration: 8000
-			}
-		);
 	}
 </script>
 
@@ -350,8 +336,8 @@
 			on:blur={() => showSubtitlesPadding.set(false)}
 			title="Horizontal Padding"
 			min={0}
-			max={50}
-			step={0.1}
+			max={300}
+			step={1}
 			bind:bindValue={
 				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].horizontalPadding
 			}

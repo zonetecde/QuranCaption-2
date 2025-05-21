@@ -101,7 +101,7 @@
 					element.classList.remove('hidden');
 				});
 			} else if (e.key === 'PageUp' || e.key === 'PageDown') {
-				if ($currentPage === 'Subtitles editor' && $isSpeedButtonPressed === false) {
+				if ($isSpeedButtonPressed === false) {
 					isSpeedButtonPressed.set(true);
 					videoSpeed.set($videoSpeed + 1);
 				}
@@ -117,7 +117,7 @@
 			if (e.key === 'Control') {
 				isCtrlPressed.set(false);
 			} else if (e.key === 'PageUp' || e.key === 'PageDown') {
-				if ($currentPage === 'Subtitles editor' && $isSpeedButtonPressed === true) {
+				if ($isSpeedButtonPressed === true) {
 					isSpeedButtonPressed.set(false);
 					videoSpeed.set($videoSpeed - 1);
 				}
