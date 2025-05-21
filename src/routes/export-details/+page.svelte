@@ -7,31 +7,7 @@
 	import { invoke } from '@tauri-apps/api/tauri';
 
 	let listeners: any[] = [];
-	let currentlyExportingVideos: VideoExportStatus[] = [
-		{
-			projectName: 'Project 1',
-			status: 'Finished',
-			progress: 100,
-			outputPath:
-				'C:\\Users\\zonedetec\\Documents\\source\\tauri\\QuranCaption-2\\src-tauri\\target\\debug\\export\\Al Ikhlas_482040.mp4',
-			exportId: 1,
-			startTime: 0,
-			endTime: 0,
-			portrait: true,
-			hasAudio: true
-		},
-		{
-			projectName: 'Project 2',
-			status: 'Completed',
-			progress: 100,
-			outputPath: getExportPath() + '/output2.mp4',
-			exportId: 2,
-			startTime: 0,
-			endTime: 0,
-			portrait: false,
-			hasAudio: false
-		}
-	];
+	let currentlyExportingVideos: VideoExportStatus[] = [];
 
 	onMount(async () => {
 		// à la création, donne dans l'url en JSON du projet en cours (la raison pour laquelle on a ouvert la fenetre d'export)
@@ -113,37 +89,47 @@
 	{#if currentlyExportingVideos.length > 0}
 		{#each currentlyExportingVideos as video}
 			<div class="border rounded-xl border-[#3b3b3b] bg-[#2a2a2a] p-4 flex flex-col gap-y-2">
-				<div class="text-sm">{video.projectName}</div>
+				<div class="text-sm flex">
+					<p class="text-[1rem] font-bold">
+						{video.projectName}
+					</p>
+					<!-- portrait mode on the right corner -->
+					<p class="text-[1rem] ml-auto">
+						{video.portrait ? 'Portrait' : 'Landscape'}
+					</p>
+				</div>
 
-				<div class="grid grid-cols-2-template">
+				<div class="grid grid-cols-2-template mt-1">
 					<section class="flex flex-col w-full">
 						<div class="text-sm font-bold">
-							Status: {!video.hasAudio && video.status === 'Exporting audio...'
-								? 'Exporting video...' // si l'audio n'est pas exporté alors on passe direct à l'export vidéo
-								: video.status}
+							Status: {video.status}
 						</div>
 					</section>
 					<section class="flex flex-col ml-4">
-						<div class="w-full bg-gray-700 rounded h-4 relative">
-							<div
-								class="bg-blue-500 h-4 rounded duration-100 transition-all"
-								style="width: {video.progress}%;"
-							></div>
-							<div class="absolute inset-0 flex items-center justify-center text-sm text-white">
-								{video.progress}%
+						{#if video.status !== 'Exported'}
+							<div class="w-full bg-gray-700 rounded h-4 relative mt-0.5">
+								<div
+									class="bg-blue-500 h-4 rounded duration-100 transition-all"
+									style="width: {video.progress}%;"
+								></div>
+								<div class="absolute inset-0 flex items-center justify-center text-sm text-white">
+									{video.progress}%
+								</div>
 							</div>
-						</div>
+						{/if}
 					</section>
 				</div>
 
-				<button
-					class="text-xs mt-1 text-left"
-					on:click={() => invoke('open_file_dir', { path: video.outputPath })}
-				>
-					<u>Output file:</u>
-					{formatPath(video.outputPath)}<br />
-					<span class="text-gray-500">Click to open the file's directory</span>
-				</button>
+				{#if video.status === 'Exported'}
+					<button
+						class="text-xs mt-1 text-left"
+						on:click={() => invoke('open_file_dir', { path: video.outputPath })}
+					>
+						<u>Output file:</u>
+						{formatPath(video.outputPath)}<br />
+						<span class="text-gray-500">Click to open the file's directory</span>
+					</button>
+				{/if}
 			</div>
 		{/each}
 	{/if}

@@ -16,14 +16,19 @@ from proglog import ProgressBarLogger
 class MyBarLogger(ProgressBarLogger):
     last_percent = 0
     number_of_reached_100 = 0
-
+    has_audio = True  # Par défaut, on suppose qu'il y a de l'audio
+    
+    def set_audio_status(self, has_audio):
+        """Configure si la vidéo a de l'audio ou non"""
+        self.has_audio = has_audio
+    
     def callback(self, **changes):
         # Every time the logger message is updated, this function is called with
         # the `changes` dictionary of the form `parameter: new value`.
         for (parameter, value) in changes.items():
             print ('Parameter %s is now %s' % (parameter, value))
     
-    def bars_callback(self, bar, attr, value,old_value=None):
+    def bars_callback(self, bar, attr, value, old_value=None):
         # pour des raisons inconnues il y a un 100% qui passe en tout premier
         # ceci permet de l'ignorer
         
@@ -35,7 +40,11 @@ class MyBarLogger(ProgressBarLogger):
             if self.number_of_reached_100 == 0:
                 status = "Initializing..."
             elif self.number_of_reached_100 == 1:
-                status = "Exporting audio..."
+                if self.has_audio:
+                    status = "Exporting audio..."
+                else:
+                    # Pas d'audio, on passe directement à l'export vidéo
+                    status = "Exporting video..."
             elif self.number_of_reached_100 == 2:
                 status = "Exporting video..."
 
@@ -264,8 +273,7 @@ def main():
     frames_data, static_top, static_bottom, dimensions = process_images_to_frames(
         args.folder_path, args.transition_ms, args.top_ratio, args.bottom_ratio, args.dynamic_top
     )
-    
-    # Load audio file if exists and is valid
+      # Load audio file if exists and is valid
     audio = None
     try:
         if os.path.exists(args.audio_path):
@@ -277,6 +285,9 @@ def main():
     except Exception as e:
         print(f"Error loading audio file: {e}")
         print("Creating video without audio...")
+    
+    # Mettre à jour l'état du logger en fonction de la présence audio
+    logger.set_audio_status(audio is not None)
     
     # Determine video duration based on frames and trim settings
     last_frame_end = frames_data[-1]['end_ms']

@@ -58,16 +58,13 @@ export function openExportWindow() {
 		const exportDetail: VideoExportStatus = {
 			exportId: exportId,
 			projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')',
-			startTime: get(startTime),
-			endTime: get(endTime) || getVideoDurationInMs(),
 			portrait: get(orientation) === 'portrait',
 			status: 'Capturing video frames...',
 			outputPath: '',
-			progress: 0,
-			hasAudio: getFirstAudioOrVideoPath() !== './black-vid.mp4'
+			progress: 0
 		};
 		exportDetail.outputPath = generateOutputPath({
-			projectName: get(currentProject).name,
+			projectName: exportDetail.projectName,
 			exportId: exportId
 		} as VideoExportStatus);
 
@@ -272,7 +269,7 @@ export async function exportCurrentProjectAsVideo() {
 
 	const outputPath = generateOutputPath({
 		exportId: get(currentlyExportingId)!,
-		projectName: get(currentProject).name
+		projectName: get(currentProject).name + ' (' + get(currentProject).reciter + ')'
 	} as VideoExportStatus);
 
 	// On appelle le script python pour créer la vidéo
