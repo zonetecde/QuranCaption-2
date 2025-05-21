@@ -66,16 +66,23 @@
 	<Slider
 		title="Video Scale"
 		min={0.05}
-		max={2}
+		max={7}
 		step={0.05}
 		bind:bindValue={$currentProject.projectSettings.videoScale}
 	/>
 	<Slider
-		title="Translate Video"
+		title="Translate Video (X)"
 		min={-100}
 		max={100}
 		step={1}
 		bind:bindValue={$currentProject.projectSettings.translateVideoX}
+	/>
+	<Slider
+		title="Translate Video (Y)"
+		min={-1000}
+		max={1000}
+		step={5}
+		bind:bindValue={$currentProject.projectSettings.translateVideoY}
 	/>
 </div>
 
@@ -279,13 +286,6 @@
 		text="Enable Subscribe Button Animation"
 		bind:checked={$currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable}
 	/>
-
-	{#if $currentProject.projectSettings.globalSubtitlesSettings.subscribeButton.enable}
-		<p class="text-sm text-gray-400 mb-4">
-			Note: You may not see it in the preview. Toggle full-screen mode to see it. It will appear at
-			the set start time and last for 4.5 seconds.
-		</p>
-	{/if}
 
 	<Slider
 		title="Start Time"

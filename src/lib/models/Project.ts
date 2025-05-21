@@ -60,6 +60,7 @@ export interface ProjectSettings {
 	globalSubtitlesSettings: GlobalVideoSettings;
 	videoScale: number;
 	translateVideoX: number;
+	translateVideoY: number;
 	bestPerformance: boolean;
 
 	// Dictionnaire contenant les paramères de chaque track

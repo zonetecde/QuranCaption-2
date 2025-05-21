@@ -70,6 +70,50 @@
 				latinTextBeforeSurahName: 'Surah'
 			};
 		}
+		if (project.projectSettings.translateVideoY === undefined) {
+			project.projectSettings.translateVideoY = 0;
+
+			// De plus reset toutes les settings de style car la maj change littéralement tout (demande confirmation avant qd même)
+			const res = await confirm(
+				'The style settings of this project need to be reset, because the last update completely changed the way they work. Do you want to reset them?\nNote: if you say `no`, you will have to reset them manually because everything will be broken'
+			);
+			if (res) {
+				project.projectSettings.videoScale = 1;
+				project.projectSettings.translateVideoX = 0;
+				project.projectSettings.translateVideoY = 0;
+
+				project.projectSettings.globalSubtitlesSettings.horizontalPadding = 100;
+				project.projectSettings.globalSubtitlesSettings.surahNameSettings.size = 3;
+				project.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition = 70;
+
+				project.projectSettings.globalSubtitlesSettings.creatorText.fontSize = 36;
+				project.projectSettings.globalSubtitlesSettings.creatorText.verticalPosition = 755;
+
+				for (const [key, element] of Object.entries(
+					project.projectSettings.subtitlesTracksSettings
+				)) {
+					if (key === 'arabic') {
+						element.fontSize = 91;
+						element.verticalPosition = -167.7;
+						element.horizontalPadding = 0;
+						if (element.fitOnOneLine) {
+							element.neededHeightToFitFullScreen = 142;
+							element.maxNumberOfLines = 1;
+							element.neededHeightToFitSmallPreview = 142;
+						}
+					} else {
+						element.fontSize = 50;
+						element.verticalPosition = 117;
+						element.horizontalPadding = 0;
+						if (element.fitOnOneLine) {
+							element.neededHeightToFitFullScreen = 155;
+							element.maxNumberOfLines = 2;
+							element.neededHeightToFitSmallPreview = 155;
+						}
+					}
+				}
+			}
+		}
 
 		// Set the values for the export settings
 		initExportSettings(project);

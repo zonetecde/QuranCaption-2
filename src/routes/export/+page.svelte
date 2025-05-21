@@ -43,6 +43,11 @@
 
 		initExportSettings(project);
 
+		// Fond noir obligatoire pour les exports
+		project.projectSettings.globalSubtitlesSettings.backgroundColor = 'black';
+		project.projectSettings.globalSubtitlesSettings.backgroundOpacity = 1;
+		project.projectSettings.globalSubtitlesSettings.background = true;
+
 		currentProject.set(project);
 
 		// Start the export process

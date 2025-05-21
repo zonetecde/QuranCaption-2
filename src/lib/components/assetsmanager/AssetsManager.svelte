@@ -6,11 +6,17 @@
 	import toast from 'svelte-french-toast';
 	import IconButton from '../common/IconButton.svelte';
 	import AssetViewer from './AssetViewer.svelte';
+	import { onMount } from 'svelte';
+	import { EXPORT_PATH } from '$lib/ext/LocalStorageWrapper';
 
 	let ytbDownloadPopup = false;
 	let youtubeUrl = '';
 	let downloadLocation = '';
 	let videoFormat = 'mp4';
+
+	onMount(() => {
+		downloadLocation = EXPORT_PATH!; // par défaut
+	});
 
 	/**
 	 * Upload assets from the user's computer
@@ -130,15 +136,17 @@
 
 			<div class="grid grid-cols-2 max-h-10">
 				<!-- button select a download location -->
-				<button
-					class={'w-full h-10 bg-[#272b28] hover:bg-[#0c0c0c] duration-150 text-white mt-4 rounded-md truncate px-1 ' +
-						(downloadLocation ? 'text-sm' : '')}
-					on:click={() => {
-						selectDowloadLocation();
-					}}
-				>
-					{downloadLocation ? downloadLocation : 'Select download location'}
-				</button>
+				<abbr title={downloadLocation}>
+					<button
+						class={'w-full h-10 bg-[#272b28] hover:bg-[#0c0c0c] duration-150 text-white mt-4 rounded-md truncate px-1 ' +
+							(downloadLocation ? 'text-sm' : '')}
+						on:click={() => {
+							selectDowloadLocation();
+						}}
+					>
+						{downloadLocation ? downloadLocation : 'Select download location'}
+					</button>
+				</abbr>
 
 				<!-- webm/mp4 toggle -->
 				<div class="flex flex-col ml-3 mt-3 z-10">

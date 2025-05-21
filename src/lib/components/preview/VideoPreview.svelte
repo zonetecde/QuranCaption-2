@@ -44,6 +44,10 @@
 	onMount(async () => {
 		window.onresize = calculateVideoDimensions;
 		calculateVideoDimensions();
+
+		setTimeout(() => {
+			resizeVideoToFitScreen(); // appel ici au cas où la vidéo est une ressource non trouvée
+		}, 300);
 	});
 
 	onDestroy(() => {
@@ -306,14 +310,15 @@
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
 					<video
-						class={'w-full h-full' +
+						class={'w-full h-full object-contain' +
 							currentVideo.id +
 							' ' +
 							(video.type === 'video' && video.id !== 'black-video' ? '' : 'hidden')}
 						id="video-preview"
 						style="
 							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$currentProject
-							.projectSettings.translateVideoX}px);
+							.projectSettings.translateVideoX}px) translateY({$currentProject.projectSettings
+							.translateVideoY}px);
 						"
 						src={video.type === 'image'
 							? convertFileSrc('./black-vid.mp4')

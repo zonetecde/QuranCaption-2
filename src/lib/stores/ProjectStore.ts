@@ -89,6 +89,7 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 		addedTranslations: [],
 		videoScale: 1,
 		translateVideoX: 0,
+		translateVideoY: 0,
 		bestPerformance: false,
 		individualSubtitlesSettings: {},
 		exportSettings: {
@@ -106,7 +107,7 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			backgroundColor: '#000000',
 			backgroundOpacity: 0.5,
 			fadeDuration: 300,
-			horizontalPadding: 0,
+			horizontalPadding: 100,
 			backgroundImage: '',
 			subscribeButton: {
 				enable: false,
@@ -115,9 +116,9 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			},
 			surahNameSettings: {
 				enable: true,
-				size: 75,
+				size: 3,
 				opacity: 0.8,
-				verticalPosition: 10,
+				verticalPosition: 70,
 				showLatin: true,
 				latinTextBeforeSurahName: 'Surah'
 			},
@@ -126,8 +127,8 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 				enable: true,
 				text: 'Quran Caption',
 				fontFamily: 'Verdana',
-				fontSize: 60,
-				verticalPosition: 75,
+				fontSize: 36,
+				verticalPosition: 755,
 				color: '#ffffff',
 				opacity: 1
 			},
@@ -138,13 +139,13 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 		subtitlesTracksSettings: {
 			arabic: {
 				enableSubtitles: true,
-				fontSize: 100,
+				fontSize: 91,
 				fontFamily: 'Hafs',
 				color: '#ffffff',
 				enableOutline: true,
 				outlineColor: '#000000',
 				outlineThickness: 2,
-				verticalPosition: 0,
+				verticalPosition: -167.7,
 				horizontalPadding: 0,
 				opacity: 1,
 				showVerseNumber: true,
@@ -161,12 +162,12 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 
 export function getDefaultsTranslationSettings(): Project['projectSettings']['subtitlesTracksSettings']['arabic'] {
 	return {
-		fontSize: 91,
+		fontSize: 50,
 		enableOutline: true,
 		outlineColor: '#000000',
 		customTextSeparator: '\\n',
 		outlineThickness: 2,
-		verticalPosition: 25,
+		verticalPosition: 117,
 		horizontalPadding: 0,
 		enableSubtitles: true,
 		fontFamily: 'Verdana',
