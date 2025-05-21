@@ -75,7 +75,7 @@
 
 			// De plus reset toutes les settings de style car la maj change littéralement tout (demande confirmation avant qd même)
 			const res = await confirm(
-				'The style settings of this project need to be reset, because the last update completely changed the way they work. Do you want to reset them?\nNote: if you say `no`, you will have to reset them manually because everything will be broken'
+				'Due to recent updates, the horizontal padding, video scale, translations, subtitle positions, and element sizes in this project need to be reset. Do you approve these changes? (Choosing "No" will require manual adjustments to fix display issues.)'
 			);
 			if (res) {
 				project.projectSettings.videoScale = 1;
