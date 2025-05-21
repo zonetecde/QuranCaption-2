@@ -26,4 +26,5 @@ export interface VideoExportStatus {
 	status: string;
 	progress: number; // 0-100
 	outputPath: string; // Chemin de sortie du fichier
+	date: Date; // Date de l'export
 }

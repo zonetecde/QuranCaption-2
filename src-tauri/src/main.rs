@@ -320,7 +320,7 @@ async fn create_video(
                 let payload = serde_json::json!({
                     "exportId": export_id,
                     "progress": 100,
-                    "status": "Exporté"
+                    "status": "Exported"
                 });
                 let _ = app_handle.emit_all("updateExportDetailsById", payload);
                 Ok("Processus de création vidéo terminé avec succès.".to_string())

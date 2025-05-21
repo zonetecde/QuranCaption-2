@@ -61,7 +61,8 @@ export function openExportWindow() {
 			portrait: get(orientation) === 'portrait',
 			status: 'Capturing video frames...',
 			outputPath: '',
-			progress: 0
+			progress: 0,
+			date: new Date()
 		};
 		exportDetail.outputPath = generateOutputPath({
 			projectName: exportDetail.projectName,
@@ -128,7 +129,7 @@ export async function createOrShowExportDetailsWindow(
 			minWidth: 600,
 			minHeight: 250,
 			width: 600,
-			height: 250,
+			height: 500,
 			title: 'Export Details'
 		});
 

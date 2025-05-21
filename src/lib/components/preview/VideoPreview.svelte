@@ -374,10 +374,7 @@
 	</div>
 
 	{#if isPreviewLoading}
-		<div
-			class="absolute inset-0 backdrop-blur bg-black bg-opacity-40"
-			out:fade={{ duration: 200 }}
-		></div>
+		<div class="absolute inset-0 bg-black" out:fade={{ duration: 500 }}></div>
 	{/if}
 </div>
 

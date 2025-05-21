@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { listen } from '@tauri-apps/api/event';
-	import { getExportPath } from '$lib/ext/LocalStorageWrapper';
+	import {
+		getExportPath,
+		initializeStorage,
+		localStorageWrapper
+	} from '$lib/ext/LocalStorageWrapper';
 	import type { VideoExportStatus } from '$lib/stores/ExportStore';
 	import TitleBar from './TitleBar.svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
@@ -11,6 +15,28 @@
 	let currentlyExportingVideos: VideoExportStatus[] = [];
 
 	onMount(async () => {
+		await initializeStorage();
+
+		// récupère les exports en cours
+		const storedExports = await localStorageWrapper.getItem('exportedVideoDetails');
+		if (storedExports) {
+			currentlyExportingVideos = storedExports;
+
+			// vérifie qu'ils sont tous soit exported soit cancelled, sinon leur status est mis à cancelled
+			currentlyExportingVideos = currentlyExportingVideos.map((video) => {
+				if (
+					video.status === 'Exported' ||
+					video.status === 'Cancelled' ||
+					video.status === 'Cancelling...'
+				) {
+					return video;
+				} else {
+					video.status = 'Cancelled';
+					return video;
+				}
+			});
+		}
+
 		// à la création, donne dans l'url en JSON du projet en cours (la raison pour laquelle on a ouvert la fenetre d'export)
 		const project = window.location.search.split('?')[1];
 		if (project) {
@@ -99,6 +125,11 @@
 			await invoke('cancel_export', { exportId: video.exportId });
 		}
 	}
+
+	$: if (currentlyExportingVideos && currentlyExportingVideos.length > 0) {
+		// save dans le local storage
+		localStorageWrapper.setItem('exportedVideoDetails', currentlyExportingVideos);
+	}
 </script>
 
 <TitleBar />
@@ -108,14 +139,16 @@
 >
 	{#if currentlyExportingVideos.length > 0}
 		{#each currentlyExportingVideos as video}
-			<div class="border rounded-xl border-[#3b3b3b] bg-[#2a2a2a] p-4 flex flex-col gap-y-2">
+			<div
+				class="border rounded-xl border-[#3b3b3b] bg-[#2a2a2a] p-4 flex flex-col gap-y-2 relative"
+			>
 				<div class="text-sm flex">
 					<p class="text-[1rem] font-bold">
 						{video.projectName}
 					</p>
 					<!-- portrait mode on the right corner -->
-					<p class="text-[1rem] ml-auto">
-						{video.portrait ? 'Portrait' : 'Landscape'}
+					<p class="text-[1rem] ml-auto text-sm">
+						{video.portrait ? 'Portrait' : 'Landscape'} - {video.date.toLocaleString()}
 					</p>
 				</div>
 
@@ -156,6 +189,32 @@
 						on:click={() => cancelExport(video)}
 					>
 						Cancel export
+					</button>
+				{/if}
+
+				{#if video.status === 'Exported' || video.status === 'Cancelled'}
+					<button
+						class="absolute bottom-0 right-0 ml-auto bg-[#8b2f2f9a] px-1 py-1 rounded-br-md rounded-tl-md border border-[#492020] mt-1 text-left"
+						on:click={() => {
+							currentlyExportingVideos = currentlyExportingVideos.filter(
+								(v) => v.exportId !== video.exportId
+							);
+						}}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							class="size-6"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+							/>
+						</svg>
 					</button>
 				{/if}
 			</div>
