@@ -48,7 +48,7 @@ class MyBarLogger(ProgressBarLogger):
             elif self.number_of_reached_100 == 2:
                 status = "Exporting video..."
 
-            print("percentage: " + str(percentage) + "% | status: " + status)
+            print("percentage: " + str(percentage) + "% | status: " + status, flush=True)
             self.last_percent = percentage
 
             if percentage == 100:
