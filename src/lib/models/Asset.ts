@@ -24,7 +24,7 @@ export async function downloadFromYoutube(
 	await invoke('download_youtube_video', {
 		format: videoFormat,
 		url: youtubeUrl,
-		path: downloadFolder + '/' + fileName
+		path: downloadFolder + '\\' + fileName
 	}),
 		{
 			loading: 'Downloading ' + (videoFormat === 'webm' ? 'audio' : 'video') + ' from youtube...',
@@ -32,7 +32,7 @@ export async function downloadFromYoutube(
 			error: 'An error occured while downloading the video'
 		};
 
-	if (addToProject) await addAssets([downloadFolder + '/' + fileName], youtubeUrl);
+	if (addToProject) await addAssets([downloadFolder + '\\' + fileName], youtubeUrl);
 }
 
 /**

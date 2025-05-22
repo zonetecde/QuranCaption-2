@@ -35,7 +35,7 @@ jobs:
       - name: Download yt-dlp (macos)
         if: matrix.os == 'macos-latest'
         run: |
-          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.04.30/yt-dlp_macos
+          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.05.22/yt-dlp_macos
           chmod +x yt-dlp
           mv yt-dlp src-tauri/binaries/yt-dlp
 
@@ -52,7 +52,7 @@ jobs:
       - name: Download yt-dlp (windows)
         if: matrix.os == 'windows-latest'
         run: |
-          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/download/2025.03.31/yt-dlp.exe
+          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/download/2025.05.22/yt-dlp.exe
           chmod +x yt-dlp.exe
           mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
 

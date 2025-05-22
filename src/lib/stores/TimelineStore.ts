@@ -48,7 +48,7 @@ export function getVideoDurationInMs(): number {
 
 	if (maxEnd === 0) {
 		// retourne le endtime du dernier subtitle clip
-		if (timeline.subtitlesTracks.length === 0) return 0;
+		if (timeline.subtitlesTracks[0].clips.length === 0) return 0;
 		maxEnd = timeline.subtitlesTracks[0].clips[timeline.subtitlesTracks[0].clips.length - 1].end;
 	}
 

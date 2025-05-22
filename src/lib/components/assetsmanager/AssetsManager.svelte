@@ -123,7 +123,7 @@
 	{#if ytbDownloadPopup}
 		<div class="px-3 h-[240px]">
 			<p class="self-start mt-5">
-				Import from youtube (optional) : <sm class="text-sm opacity-50"
+				Import from youtube : <sm class="text-sm opacity-50"
 					>if the url is invalid, the software will crash!</sm
 				>
 			</p>
