@@ -62,6 +62,7 @@ export interface ProjectSettings {
 	translateVideoX: number;
 	translateVideoY: number;
 	bestPerformance: boolean;
+	isPortrait: boolean;
 
 	// Dictionnaire contenant les paramères de chaque track
 	subtitlesTracksSettings: { [key: string]: SubtitleTrackSettings };

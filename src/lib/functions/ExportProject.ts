@@ -238,7 +238,7 @@ export async function exportCurrentProjectAsVideo() {
 		if (clip.text.split(' ').length >= 9) {
 			waitTime = 120;
 		}
-		if (get(orientation) === 'portrait') {
+		if (get(orientation) === 'portrait' || get(currentProject).projectSettings.isPortrait) {
 			waitTime += 50;
 		}
 
@@ -315,7 +315,8 @@ async function takeScreenshot(folderName: string, fileName: string) {
 	let scale = get(quality);
 
 	// Si en mode portrait, on va prévoir pour le crop 9:16
-	const isPortrait = get(orientation) === 'portrait';
+	const isPortrait =
+		get(orientation) === 'portrait' || get(currentProject).projectSettings.isPortrait;
 
 	// Utilisation de DomToImage pour transformer la div en image
 	try {

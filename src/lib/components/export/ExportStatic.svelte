@@ -18,6 +18,7 @@
 	import { getCurrentCursorTime } from '$lib/stores/VideoPreviewStore';
 	import { onMount } from 'svelte';
 	import Slider from '../common/Slider.svelte';
+	import { currentProject } from '$lib/stores/ProjectStore';
 
 	function millisecondsToTime(ms: number): string {
 		const milliseconds = Math.round((ms % 1000) / 10);
@@ -80,18 +81,30 @@
 </div>
 
 <!-- landscape/portrait -->
-<div class="flex items-center mt-4">
-	<input
-		type="checkbox"
-		id="landscape-mode"
-		class="mr-2"
-		checked={$orientation === 'portrait'}
-		on:change={() => {
-			orientation.set($orientation === 'landscape' ? 'portrait' : 'landscape');
-			console.log('Orientation changed to:', $orientation);
-		}}
-	/>
-	<label for="landscape-mode" class="text-sm font-bold">Portrait mode (TikTok format)</label>
+<div
+	class={'flex  flex-col mt-4 ' +
+		($currentProject.projectSettings.isPortrait ? 'opacity-50 pointer-events-none' : '')}
+>
+	{#if $currentProject.projectSettings.isPortrait}
+		<p class="text-sm font-bold mr-2">
+			Portrait mode is enabled in the global subtitles settings. Disable it to export your video in
+			landscape mode.
+		</p>
+	{/if}
+	<div class="flex items-center">
+		<input
+			type="checkbox"
+			id="landscape-mode"
+			class="mr-2"
+			checked={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+			on:change={() => {
+				orientation.set($orientation === 'landscape' ? 'portrait' : 'landscape');
+				console.log('Orientation changed to:', $orientation);
+			}}
+		/>
+
+		<label for="landscape-mode" class="text-sm font-bold">Portrait mode (TikTok format)</label>
+	</div>
 </div>
 
 <!-- quality (slide bar from 1 to 3) -->

@@ -90,6 +90,7 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 		videoScale: 1,
 		translateVideoX: 0,
 		translateVideoY: 0,
+		isPortrait: false,
 		bestPerformance: false,
 		individualSubtitlesSettings: {},
 		exportSettings: {

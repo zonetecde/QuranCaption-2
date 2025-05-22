@@ -8,6 +8,7 @@
 		topRatio
 	} from '$lib/stores/ExportStore';
 	import { currentPage, videoDimensions } from '$lib/stores/LayoutStore';
+	import { currentProject } from '$lib/stores/ProjectStore';
 
 	export let hideControls;
 
@@ -95,7 +96,7 @@
 	</div>
 {/if}
 
-{#if $currentlyExporting === false && ($currentPage === 'Export' || $currentPage === 'Video editor') && $exportType === 'video-static' && $orientation === 'portrait'}
+{#if ($currentlyExporting === false && ($currentPage === 'Export' || $currentPage === 'Video editor') && $exportType === 'video-static' && $orientation === 'portrait') || $currentProject.projectSettings.isPortrait}
 	<!-- Video Section Ratio Visualization (horizontal) -->
 	<div
 		bind:this={maindiv}

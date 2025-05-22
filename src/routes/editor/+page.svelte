@@ -70,8 +70,10 @@
 				latinTextBeforeSurahName: 'Surah'
 			};
 		}
+		// Migraiton pour la version 4.4
 		if (project.projectSettings.translateVideoY === undefined) {
 			project.projectSettings.translateVideoY = 0;
+			project.projectSettings.isPortrait = false;
 
 			// De plus reset toutes les settings de style car la maj change littéralement tout (demande confirmation avant qd même)
 			const res = await confirm(

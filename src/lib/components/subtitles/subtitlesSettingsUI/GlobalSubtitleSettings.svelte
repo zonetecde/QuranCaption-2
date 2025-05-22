@@ -84,6 +84,15 @@
 		step={5}
 		bind:bindValue={$currentProject.projectSettings.translateVideoY}
 	/>
+
+	<label class="flex items-center mt-3"
+		><span class="mr-1">Portrait Mode (TikTok format) :</span>
+		<input
+			type="checkbox"
+			class="form-checkbox h-5 w-5 text-green-500"
+			bind:checked={$currentProject.projectSettings.isPortrait}
+		/>
+	</label>
 </div>
 
 <div class="border-2 border-slate-500 p-1 rounded-lg -mx-1">
