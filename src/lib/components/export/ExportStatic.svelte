@@ -16,11 +16,12 @@
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
 	import { getCurrentCursorTime } from '$lib/stores/VideoPreviewStore';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import Slider from '../common/Slider.svelte';
 	import { currentProject } from '$lib/stores/ProjectStore';
+	import toast from 'svelte-french-toast';
 
-	function millisecondsToTime(ms: number): string {
+	function millisecondsToTime(ms: number, includeMs: boolean = true): string {
 		const milliseconds = Math.round((ms % 1000) / 10);
 		const seconds = Math.floor(ms / 1000);
 		const minutes = Math.floor(seconds / 60);
@@ -30,6 +31,10 @@
 		const formattedMinutes = (minutes % 60).toString().padStart(2, '0');
 		const formattedSeconds = (seconds % 60).toString().padStart(2, '0');
 		const formattedMilliseconds = milliseconds.toString().padStart(2, '0');
+
+		if (!includeMs) {
+			return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+		}
 
 		return `${formattedHours}:${formattedMinutes}:${formattedSeconds}:${formattedMilliseconds}`;
 	}
@@ -44,6 +49,22 @@
 				break;
 		}
 	}
+
+	onMount(() => {
+		window.addEventListener('keydown', onKeyDown);
+	});
+
+	function onKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			handleSetCurrentTime('end-time');
+		} else if (event.key === 'Backspace') {
+			handleSetCurrentTime('start-time');
+		}
+	}
+
+	onDestroy(() => {
+		window.removeEventListener('keydown', onKeyDown);
+	});
 </script>
 
 <!-- start time input -->
@@ -78,6 +99,20 @@
 			Set current
 		</button>
 	</div>
+</div>
+
+<!-- total time -->
+<div class="flex flex-col gap-2">
+	<label for="total-time" class="text-sm font-bold">
+		Total video duration: {millisecondsToTime(
+			$endTime === null
+				? getVideoDurationInMs() - $startTime
+				: $endTime - $startTime > 0
+					? $endTime - $startTime
+					: 0,
+			false
+		)} (HH:MM:SS)
+	</label>
 </div>
 
 <!-- landscape/portrait -->
@@ -250,7 +285,22 @@
 <div class="grid xl:grid-cols-2 gap-4">
 	<button
 		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-		on:click={openExportWindow}
+		on:click={() => {
+			// Vérifie si le projet est exportable
+			if ($endTime !== null && $startTime > $endTime) {
+				toast.error('Invalid export time range');
+				return;
+			} else if ($endTime !== null && $startTime === $endTime) {
+				toast.error('Please select a time range to export');
+				return;
+			}
+			if ($currentProject.timeline.subtitlesTracks[0].clips.length === 0) {
+				toast.error('The video is empty');
+				return;
+			}
+
+			openExportWindow();
+		}}
 	>
 		Export your video
 	</button>

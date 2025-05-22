@@ -151,19 +151,6 @@ export async function createOrShowExportDetailsWindow(
 export async function exportCurrentProjectAsVideo() {
 	const _currentProject = get(currentProject);
 
-	// Vérifie si le projet est exportable
-	if (get(endTime) !== null && get(startTime) > get(endTime)!) {
-		toast.error('Invalid export time range');
-		return;
-	} else if (get(endTime) !== null && get(startTime) === get(endTime)) {
-		toast.error('Please select a time range to export');
-		return;
-	}
-	if (_currentProject.timeline.subtitlesTracks[0].clips.length === 0) {
-		toast.error('The video is empty');
-		return;
-	}
-
 	// Si il n'y a pas de sous-titre entre le dernier sous-titre et le endTime, on en créer un (silencieux)
 	const lastSubtitle = _currentProject.timeline.subtitlesTracks[0].clips.slice(-1)[0];
 	if (lastSubtitle.end < (get(endTime) || getVideoDurationInMs())) {
