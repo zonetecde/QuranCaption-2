@@ -83,12 +83,12 @@
 				currentlyExportingVideos[index].progress = event.payload.progress;
 
 				//@ts-ignore
-				if (event.payload.status === 'Exported') {
-					// ouvre le dossier de l'export
-					setTimeout(() => {
-						invoke('open_file_dir', { path: currentlyExportingVideos[index].outputPath });
-					}, 1000);
-				}
+				// if (event.payload.status === 'Exported') {
+				// 	// ouvre le dossier de l'export
+				// 	setTimeout(() => {
+				// 		invoke('open_file_dir', { path: currentlyExportingVideos[index].outputPath });
+				// 	}, 1000);
+				// }
 			}
 		});
 		listeners.push(l2);
