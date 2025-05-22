@@ -6,15 +6,17 @@ Programmatically map **multiple Arabic segments** (including overlapping ones) f
 
 **Inputs**:  
 An array of objects, where each object contains:  
-1. `full_verse_arabic` (string): Le numéro de sourate et verset au format "s:v" (ex: "1:1" pour Al-Fatiha verset 1).  
-2. `target_segments_arabic` (array of strings): Arabic phrases to map, which are segments of the complete verse.  
-3. `existing_translation` (string): The pre-translated text of the full verse in another language (e.g., French, English).  
+1. `id` (number): A unique numeric identifier for each input object.
+2. `full_verse_arabic` (string): The surah and verse number in the format "s:v" (e.g., "1:1" for Al-Fatiha verse 1).  
+3. `target_segments_arabic` (array of strings): Arabic phrases to map, which are segments of the complete verse.  
+4. `existing_translation` (string): The pre-translated text of the full verse in another language (e.g., French, English).  
 
 **Input Structure**:  
 ```json
 [
   {
-    "full_verse_arabic": "s:v", // Format: "sourate:verset", ex: "2:255"
+    "id": 1,
+    "full_verse_arabic": "s:v", // Format: "surah:verse", ex: "2:255"
     "target_segments_arabic": ["segment1", "segment2", ...],
     "existing_translation": "Translated verse text"
   },
@@ -25,9 +27,9 @@ An array of objects, where each object contains:
 ---
 
 **Output Requirements**:  
-- Return a **JSON array of arrays**.  
-- Each inner array corresponds to one input object, in the same order.  
-- Each inner array contains the translations for the `target_segments_arabic` of that input, in the same order as provided.  
+- Return a **JSON object** with numeric IDs as keys.
+- Each key corresponds to the ID of one input object.
+- Each value is an array containing the translations for the `target_segments_arabic` of that input, in the same order as provided.  
 - For each segment:  
   - Return the **exact, contiguous substring** from `existing_translation` that corresponds to the Arabic segment.  
   - If no exact substring exists, return `null`.  
@@ -35,10 +37,11 @@ An array of objects, where each object contains:
 
 **Output Structure**:  
 ```json
-[
-  ["translation_segment1", "translation_segment2", ...],
+{
+  "1": ["translation_segment1", "translation_segment2", ...],
+  "2": ["translation_segment1", "translation_segment2", ...],
   ...
-]
+}
 ```
 
 ---
@@ -102,78 +105,89 @@ An array of objects, where each object contains:
 - **Input**:  
   ```json
   {
+    "id": 1,
     "full_verse_arabic": "34:2",
     "target_segments_arabic": ["يَعۡلَمُ مَا يَلِجُ فِي ٱلۡأَرۡضِ", "مَا يَلِجُ فِي ٱلۡأَرۡضِ وَمَا يَخۡرُجُ"],
-    "existing_translation": "Il sait qui pénètre en terre et qui en sort."
+    "existing_translation": "He knows what penetrates into the earth and what emerges from it."
   }
   ```  
 - **Output**:  
   ```json
-  ["Il sait qui pénètre en terre", "qui pénètre en terre et qui en sort."]
+  {
+    "1": ["He knows what penetrates into the earth", "what penetrates into the earth and what emerges from it."]
+  }
   ```  
-- **Explanation**: The second segment overlaps with the first, repeating "qui pénètre en terre".  
+- **Explanation**: The second segment overlaps with the first, repeating "what penetrates into the earth".
 
 #### **Example 2: Full and Partial Segments**  
 - **Input**:  
   ```json
   {
+    "id": 2,
     "full_verse_arabic": "34:1",
     "target_segments_arabic": ["ٱلۡحَمۡدُ لِلَّهِ", "ٱلَّذِي لَهُۥ مَا فِي ٱلسَّمَٰوَٰتِ"],
-    "existing_translation": "Louange à Allah à qui appartient tout ce qui est dans les cieux."
+    "existing_translation": "Praise be to Allah, to Whom belongs whatever is in the heavens."
   }
   ```  
 - **Output**:  
   ```json
-  ["Louange à Allah", "à qui appartient tout ce qui est dans les cieux."]
+  {
+    "2": ["Praise be to Allah", "to Whom belongs whatever is in the heavens."]
+  }
   ```  
-- **Explanation**: Each segment maps to a distinct, contiguous substring, covering the full translation.  
+- **Explanation**: Each segment maps to a distinct, contiguous substring, covering the full translation.
 
 #### **Example 3: Multiple Verses with Overlaps**  
 - **Input**:  
   ```json
   [
     {
+      "id": 1,
       "full_verse_arabic": "2:255",
       "target_segments_arabic": ["لَا تَأْخُذُهُ", "تَأْخُذُهُ سِنَةٌ"],
-      "existing_translation": "Ni le sommeil ni la fatigue ne L'atteignent."
+      "existing_translation": "Neither drowsiness nor sleep overtakes Him."
     },
     {
+      "id": 2,
       "full_verse_arabic": "1:5",
       "target_segments_arabic": ["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"],
-      "existing_translation": "C'est Toi seul que nous adorons et Toi seul dont nous implorons secours."
+      "existing_translation": "You alone we worship and You alone we ask for help."
     }
   ]
   ```  
 - **Output**:  
   ```json
-  [
-    ["Ni le sommeil ni la fatigue ne L'atteignent", "la fatigue ne L'atteignent"],
-    ["C'est Toi seul que nous adorons", "que nous adorons et Toi seul"]
-  ]
+  {
+    "1": ["Neither drowsiness nor sleep overtakes Him", "sleep overtakes Him"],
+    "2": ["You alone we worship", "worship and You alone"]
+  }
   ```  
-- **Explanation**: Overlaps in both verses repeat words ("la fatigue", "que nous adorons") to reflect Arabic segment overlaps.  
+- **Explanation**: Overlaps in both verses repeat words ("sleep overtakes Him", "worship") to reflect Arabic segment overlaps.
 
 #### **Example 4: Non-Mapping Segment**  
 - **Input**:  
   ```json
   {
+    "id": 3,
     "full_verse_arabic": "20:114",
     "target_segments_arabic": ["زِدْنِي عِلْمًا"],
-    "existing_translation": "Seigneur, augmente-moi en savoir."
+    "existing_translation": "My Lord, increase me in knowledge."
   }
   ```  
 - **Output**:  
   ```json
-  [null]
+  {
+    "3": [null]
+  }
   ```  
-- **Explanation**: The segment's translation ("augmente-moi en savoir") is not a contiguous substring due to word order, so it returns `null`.  
+- **Explanation**: The segment's translation ("increase me in knowledge") is not a contiguous substring due to word order, so it returns `null`.
 
 ---
 
 **Edge Cases**:  
-- **Empty Translation**: If `existing_translation` is empty, return `[]` for that input.  
-- **No Matching Substrings**: If all segments lack contiguous matches, return an array of `null` values.  
-- **Empty Input Array**: Return `[]`.  
+- **Empty Translation**: If `existing_translation` is empty, return `{id: []}` for that input.  
+- **No Matching Substrings**: If all segments lack contiguous matches, return an array of `null` values for that ID.  
+- **Empty Input Array**: Return `{}`.  
 - **Single Word Segments**: Map to single words if they correspond exactly, e.g., Arabic `"مَا"` to `"what"`.  
 
 ---

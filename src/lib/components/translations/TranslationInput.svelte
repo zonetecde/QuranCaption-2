@@ -238,6 +238,12 @@
 			(doesSubtitleNeedReview ? 'bg-[#2c2424] ' : '') +
 			(showCustomizationSettings ? 'border-b-2' : '')}
 	>
+		{#if !isSameVerseThanPreviousSubtitle(subtitleIndex) && subtitleIndex !== 0}
+			<p class="absolute top-3 px-2 bg-black bg-opacity-60 right-[100px] text-xs">
+				id: {subtitleIndex}
+			</p>
+		{/if}
+
 		<div class="absolute top-2 right-[4.5rem]">
 			<CustomizeSubtitleStyleButton
 				{subtitle}

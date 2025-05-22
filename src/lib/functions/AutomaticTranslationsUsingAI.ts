@@ -17,8 +17,14 @@ import type { SubtitleClip } from '$lib/models/Timeline';
  * (hadItTranslationEverBeenModified = true pour tous les clips) sont également exclus.
  *
  * @param languageCode Code de langue pour la traduction (ex: "fr", "en", etc.)
+ * @param startPositionIndex Position du premier sous-titre du premier verset à traiter (facultatif)
+ * @param endPositionIndex Position du premier sous-titre du dernier verset à traiter (facultatif)
  */
-export async function generateTranslationsPrompt(languageCode: string) {
+export async function generateTranslationsPrompt(
+	languageCode: string,
+	startPositionIndex: number = -1,
+	endPositionIndex: number = -1
+) {
 	if (languageCode === '') {
 		toast.error('Please enter a language code');
 		return;
@@ -36,24 +42,48 @@ export async function generateTranslationsPrompt(languageCode: string) {
 		toast.error('Language code not found.');
 		return;
 	}
+
 	// remplace @1 par l'input
 	// génère donc l'input - ne contient que les versets incomplets (divisés en plusieurs clips)
 	let input: {
+		id: number; // Position du premier sous-titre du verset dans le tableau complet
 		full_verse_arabic: string; // Texte arabe complet du verset
 		target_segments_arabic: string[]; // Segments en arabe à traduire individuellement
 		existing_translation: string; // Traduction existante du verset complet (référence)
 	}[] = [];
 
+	// récupère les sous-titres
+	const allSubtitles = get(currentProject).timeline.subtitlesTracks[0].clips;
+
+	// Définit les limites de traitement basées sur les paramètres fournis
+	const processingStartIndex = startPositionIndex >= 0 ? startPositionIndex : 0;
+	const processingEndIndex = endPositionIndex >= 0 ? endPositionIndex : allSubtitles.length - 1;
+
+	// On parcourt les clips en les regroupant par verset, mais on ne traite que ceux
+	// qui sont dans la plage d'indices spécifiée
 	let lastVerse = -1;
 	let lastSurah = -1;
 	let allClipOfThisVerse: SubtitleClip[] = [];
+	let verseStartIndex = -1; // Index du premier sous-titre d'un verset
 
-	for (const subtitle of get(currentProject).timeline.subtitlesTracks[0].clips) {
+	for (let i = 0; i < allSubtitles.length; i++) {
+		const subtitle = allSubtitles[i];
+
+		// Ignore les sous-titres en dehors de la plage spécifiée
+		if (i < processingStartIndex || i > processingEndIndex) {
+			// Si on dépasse la fin, on peut arrêter complètement
+			if (i > processingEndIndex) break;
+
+			// Sinon on continue à la prochaine itération
+			continue;
+		}
+
 		if (subtitle.isSilence || subtitle.isCustomText || subtitle.surah < 0) continue;
 
 		if (lastSurah === -1 && lastVerse === -1) {
 			lastSurah = subtitle.surah;
 			lastVerse = subtitle.verse;
+			verseStartIndex = i; // Marque le début d'un nouveau verset
 		}
 
 		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
@@ -68,6 +98,7 @@ export async function generateTranslationsPrompt(languageCode: string) {
 				// N'ajouter le verset que si au moins un clip n'a pas été modifié
 				if (hasUnmodifiedClip) {
 					input.push({
+						id: verseStartIndex, // Utilise l'index du premier sous-titre comme ID
 						full_verse_arabic: allClipOfThisVerse[0].surah + ':' + allClipOfThisVerse[0].verse,
 						target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
 						existing_translation: await getVerseTranslation(
@@ -82,13 +113,14 @@ export async function generateTranslationsPrompt(languageCode: string) {
 			allClipOfThisVerse = [subtitle]; // reset le tableau
 			lastVerse = subtitle.verse;
 			lastSurah = subtitle.surah;
+			verseStartIndex = i; // Marque le début d'un nouveau verset
 		} else {
 			// ajoute le clip
 			allClipOfThisVerse.push(subtitle);
 		}
 	}
-	// ajoute le dernier clip
-	// skip if only one clip (subtitle already complet)
+
+	// Traite le dernier groupe de sous-titres
 	if (allClipOfThisVerse.length > 1) {
 		// Vérifier si au moins un des clips n'a pas été modifié manuellement
 		const hasUnmodifiedClip = allClipOfThisVerse.some(
@@ -98,6 +130,7 @@ export async function generateTranslationsPrompt(languageCode: string) {
 		// N'ajouter le verset que si au moins un clip n'a pas été modifié
 		if (hasUnmodifiedClip) {
 			input.push({
+				id: verseStartIndex, // Utilise l'index du premier sous-titre comme ID
 				full_verse_arabic: allClipOfThisVerse[0].surah + ':' + allClipOfThisVerse[0].verse,
 				target_segments_arabic: allClipOfThisVerse.map((s) => s.text),
 				existing_translation: await getVerseTranslation(
@@ -115,12 +148,14 @@ export async function generateTranslationsPrompt(languageCode: string) {
 		);
 		return;
 	}
+
 	// Journalisation pour débogage (peut être désactivée en production)
 	const debug = false;
 	if (debug) {
 		console.log(`Generating prompt for ${input.length} incomplete verses`);
 		input.forEach((item, index) => {
 			console.log(`Verse ${index + 1}:`);
+			console.log(`  ID (Position): ${item.id}`);
 			console.log(`  Segments: ${item.target_segments_arabic.length}`);
 			console.log(`  First segment: ${item.target_segments_arabic[0]}`);
 		});
@@ -148,25 +183,13 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 	 * Note: Cette fonction ne traite que les versets incomplets (divisés en plusieurs clips),
 	 * conformément à la fonction generateTranslationsPrompt qui ne génère des prompts que
 	 * pour les versets incomplets avec au moins un segment non modifié manuellement.
+	 *	 * Format attendu du JSON:
+	 * {
+	 *   "123": ["Louange à Allah à qui appartient", "tout ce qui est dans les cieux et tout ce qui est"],
+	 *   "456": ["Il sait qui pénètre en terre et qui en sort", "et qui en sort, ce qui descend du ciel"]
+	 * }
 	 *
-	 * Format attendu du JSON:
-	 * [
-	 *   [
-	 *     "Louange à Allah à qui appartient",
-	 *     "tout ce qui est dans les cieux et tout ce qui est",
-	 *     "sur la terre. Et louange à Lui dans l'au-delà.",
-	 *     "Louange à Allah à qui appartient tout ce qui est dans les cieux et tout ce qui est sur la terre. Et louange à Lui dans l'au-delà.",
-	 *     "Et c'est Lui le Sage, le Parfaitement Connaisseur.",
-	 *     "Et louange à Lui dans l'au-delà. Et c'est Lui le Sage, le Parfaitement Connaisseur."
-	 *   ],
-	 *   [
-	 *     "Il sait qui pénètre en terre et qui en sort",
-	 *     "et qui en sort, ce qui descend du ciel",
-	 *     "ce qui descend du ciel et ce qui y remonte",
-	 *     "et ce qui y remonte",
-	 *     "Et c'est Lui le Miséricordieux, le Pardonneur."
-	 *   ]
-	 * ]
+	 * Où 123 et 456 sont les positions des premiers sous-titres de chaque verset dans le tableau complet.
 	 */
 
 	if (raw_json === '') {
@@ -191,8 +214,8 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 	}
 
 	// on vérifie que le json est bien formé
-	if (!Array.isArray(json)) {
-		toast.error('Invalid JSON format. Expected an array.');
+	if (typeof json !== 'object' || json === null) {
+		toast.error('Invalid JSON format. Expected an object with numeric IDs as keys.');
 		return;
 	}
 
@@ -202,78 +225,10 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		toast.error('No project is currently loaded.');
 		return;
 	}
-
 	// Get the subtitle track
 	const subtitleTrack = project.timeline.subtitlesTracks[0];
 	if (!subtitleTrack) {
 		toast.error('No subtitle track found in project.');
-		return;
-	}
-	// Group clips by verse, similar to generateTranslationsPrompt, but only including incomplete verses
-	// with at least one clip that hasn't been manually translated
-	let verseGroups: Map<string, SubtitleClip[]> = new Map();
-	let verseOrder: string[] = []; // To keep track of the order of verses
-
-	// On parcourt les clips en les regroupant par verset
-	let lastVerse = -1;
-	let lastSurah = -1;
-	let allClipOfThisVerse: SubtitleClip[] = [];
-
-	for (const subtitle of subtitleTrack.clips) {
-		if (subtitle.isSilence || subtitle.isCustomText || subtitle.surah < 0) continue;
-
-		if (lastSurah === -1 && lastVerse === -1) {
-			lastSurah = subtitle.surah;
-			lastVerse = subtitle.verse;
-		}
-
-		if (subtitle.surah !== lastSurah || subtitle.verse !== lastVerse) {
-			// Add previous verse group to our maps ONLY if:
-			// 1. It contains more than 1 clip (incomplete verse)
-			// 2. At least one clip hasn't been manually translated
-			if (allClipOfThisVerse.length > 1) {
-				const hasUnmodifiedClip = allClipOfThisVerse.some(
-					(clip) => !clip.hadItTranslationEverBeenModified
-				);
-
-				if (hasUnmodifiedClip) {
-					const key = `${lastSurah}:${lastVerse}`;
-					verseGroups.set(key, [...allClipOfThisVerse]);
-					verseOrder.push(key);
-				}
-			}
-
-			// Reset for new verse
-			allClipOfThisVerse = [subtitle];
-			lastVerse = subtitle.verse;
-			lastSurah = subtitle.surah;
-		} else {
-			// Add clip to current verse
-			allClipOfThisVerse.push(subtitle);
-		}
-	}
-
-	// Add the last verse group if:
-	// 1. It has more than 1 clip (incomplete verse)
-	// 2. At least one clip hasn't been manually translated
-	if (allClipOfThisVerse.length > 1) {
-		const hasUnmodifiedClip = allClipOfThisVerse.some(
-			(clip) => !clip.hadItTranslationEverBeenModified
-		);
-
-		if (hasUnmodifiedClip) {
-			const key = `${lastSurah}:${lastVerse}`;
-			verseGroups.set(key, [...allClipOfThisVerse]);
-			verseOrder.push(key);
-		}
-	}
-
-	// Check if the number of verse groups matches the number of translation arrays
-	if (verseOrder.length !== json.length) {
-		toast.error(
-			`Mismatch between incomplete project verses (${verseOrder.length}) and AI translations (${json.length}). 
-             Make sure you're using the latest prompt from 'Generate Prompt' and that all translations were included in the response.`
-		);
 		return;
 	}
 
@@ -282,37 +237,76 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 	let skippedCount = 0;
 	let newSubtitleClips = [...subtitleTrack.clips]; // Create a copy of the clips array
 
-	verseOrder.forEach((key, verseIndex) => {
-		const clips = verseGroups.get(key);
-		const translations = json[verseIndex];
+	// Appliquer les traductions à partir du JSON avec des IDs (positions des premiers sous-titres)
+	for (const idStr in json) {
+		const id = Number(idStr);
+		const translations = json[idStr];
 
-		if (!clips || !translations || !Array.isArray(translations)) {
+		if (!translations || !Array.isArray(translations)) {
+			toast.error(`Invalid translations format for ID ${id}.`);
 			skippedCount++;
-			return;
+			continue;
 		}
 
-		if (clips.length !== translations.length) {
+		// Vérifier que l'ID correspond à un sous-titre valide
+		if (id < 0 || id >= newSubtitleClips.length) {
+			toast.error(`Invalid subtitle ID: ${id}. Out of range.`);
+			skippedCount++;
+			continue;
+		}
+
+		// Récupérer le premier sous-titre du verset
+		const firstSubtitle = newSubtitleClips[id];
+		if (firstSubtitle.isSilence || firstSubtitle.isCustomText || firstSubtitle.surah < 0) {
+			toast.error(`ID ${id} does not correspond to a valid subtitle.`);
+			skippedCount++;
+			continue;
+		}
+
+		// Identifier tous les sous-titres de ce verset
+		const verseClips: SubtitleClip[] = [];
+
+		// Ajouter le premier sous-titre
+		verseClips.push(firstSubtitle);
+
+		// Chercher les sous-titres suivants du même verset
+		for (let i = id + 1; i < newSubtitleClips.length; i++) {
+			const subtitle = newSubtitleClips[i];
+
+			// S'arrêter si on atteint un silence, un texte personnalisé ou un verset différent
+			if (
+				subtitle.isSilence ||
+				subtitle.isCustomText ||
+				subtitle.surah < 0 ||
+				subtitle.surah !== firstSubtitle.surah ||
+				subtitle.verse !== firstSubtitle.verse
+			) {
+				break;
+			}
+
+			verseClips.push(subtitle);
+		}
+
+		// Vérifier que le nombre de sous-titres correspond au nombre de traductions
+		if (verseClips.length !== translations.length) {
 			toast.error(
-				`For verse ${key}: Segment count mismatch. Found ${clips.length} clips but ${translations.length} translations.`
+				`For verse at position ${id}: Segment count mismatch. Found ${verseClips.length} clips but ${translations.length} translations. Please review this subtitle manually.`,
+				{
+					duration: 7000
+				}
 			);
 			skippedCount++;
-			return;
+			continue;
 		}
 
-		// Apply translations to clips
-		clips.forEach((clip, i) => {
+		// Appliquer les traductions aux sous-titres de ce verset
+		verseClips.forEach((clip, i) => {
 			if (translations[i]) {
-				// Find the matching clip in the original array and update it
-				const clipIndex = newSubtitleClips.findIndex(
-					(c) =>
-						!c.isSilence &&
-						c.surah === clip.surah &&
-						c.verse === clip.verse &&
-						c.start === clip.start
-				);
+				// Trouver l'index du sous-titre dans le tableau complet
+				const clipIndex = newSubtitleClips.findIndex((c) => c === clip);
 
 				if (clipIndex !== -1) {
-					// Create new clip with updated translations
+					// Créer un nouveau sous-titre avec la traduction mise à jour
 					newSubtitleClips[clipIndex] = {
 						...newSubtitleClips[clipIndex],
 						translations: {
@@ -329,7 +323,7 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 				skippedCount++;
 			}
 		});
-	});
+	}
 
 	// Update the project with modified clips
 	currentProject.update((currentValue) => {
