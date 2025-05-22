@@ -30,7 +30,7 @@
 	}
 
 	async function handleClipClicked(e: any) {
-		if ($currentPage === 'Video editor') {
+		if ($currentPage === 'Video editor' || $currentPage === 'Export') {
 			if ($isPreviewPlaying)
 				// move the cursor to the start of the clip
 				setCurrentVideoTime.set(clip.start / 1000);
