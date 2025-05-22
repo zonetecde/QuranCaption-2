@@ -67,6 +67,9 @@
 				(video) => video.exportId === event.payload.exportId
 			);
 			if (index !== -1) {
+				//@ts-ignore
+				console.log('updateExportDetailsById', event.payload.status + ' ' + event.payload.progress);
+
 				if (currentlyExportingVideos[index].status === 'Cancelled') {
 					// refait un cancel export pour être sûre
 					cancelExport(currentlyExportingVideos[index]);

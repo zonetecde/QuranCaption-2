@@ -27,12 +27,7 @@
 <!-- Video Section Ratio Visualization (vertical) -->
 {#if $currentlyExporting === false && $currentPage === 'Export' && $exportType === 'video-static'}
 	<!-- Horizontal separator lines - adjusted to not overlap with control bar -->
-	<div
-		bind:this={maindiv}
-		class="absolute inset-0 pointer-events-none"
-		class:bottom-16={!hideControls}
-		class:bottom-0={hideControls}
-	>
+	<div bind:this={maindiv} class="absolute inset-0 pointer-events-none">
 		<div
 			class="absolute w-full h-0.5 bg-white bg-opacity-30 pointer-events-none z-10"
 			style="top: {$topRatio}%;"
@@ -45,10 +40,9 @@
 	</div>
 	<!-- Section visualization adjusted to not overlap with control bar -->
 	<div
-		class="absolute right-2 top-0 mt-8 flex flex-col z-20"
-		class:bottom-16={!hideControls}
+		class="absolute right-2 top-0 flex flex-col z-20"
 		class:bottom-0={hideControls}
-		class:h-[calc(100%-4rem)]={!hideControls}
+		class:h-[calc(100%)]={!hideControls}
 		class:h-full={hideControls}
 		style="width: 40px;"
 	>
@@ -59,11 +53,6 @@
 				class="relative bg-indigo-600 bg-opacity-40 border border-white border-opacity-30 flex items-center justify-center"
 				style="height: {$topRatio}%;"
 			>
-				<div
-					class="absolute left-full ml-2 text-white text-xs font-bold bg-indigo-600 px-1 rounded shadow-md"
-				>
-					{$topRatio}%
-				</div>
 				<span class="text-white text-xs font-bold transform -rotate-90 shadow-sm">TOP</span>
 			</div>
 
@@ -72,11 +61,6 @@
 				class="relative bg-green-600 bg-opacity-40 border border-white border-opacity-30 flex items-center justify-center"
 				style="height: {$middleRatio}%;"
 			>
-				<div
-					class="absolute left-full ml-2 text-white text-xs font-bold bg-green-600 px-1 rounded shadow-md"
-				>
-					{$middleRatio}%
-				</div>
 				<span class="text-white text-xs font-bold transform -rotate-90 shadow-sm">MIDDLE</span>
 			</div>
 
@@ -85,11 +69,6 @@
 				class="relative bg-amber-600 bg-opacity-40 border border-white border-opacity-30 flex items-center justify-center"
 				style="height: {$bottomRatio}%;"
 			>
-				<div
-					class="absolute left-full ml-2 text-white text-xs font-bold bg-amber-600 px-1 rounded shadow-md"
-				>
-					{$bottomRatio}%
-				</div>
 				<span class="text-white text-xs font-bold transform -rotate-90 shadow-sm">BOTTOM</span>
 			</div>
 		</div>

@@ -234,6 +234,8 @@
 			// On met le 1920x1080 ici pour éviter d'avoir un effet bizarre lorsque le component load
 			preview.style.width = '1920px';
 			preview.style.height = '1080px'; // Si on est en plein écran, on met la vidéo à la taille de l'écran
+			preview.style.minWidth = '1920px';
+			preview.style.minHeight = '1080px';
 			if ($fullScreenPreview) {
 				previewContainer.style.width = '100%';
 				previewContainer.style.height = '100%';

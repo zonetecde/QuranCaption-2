@@ -292,7 +292,8 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 			toast.error(
 				`For verse at position ${id}: Segment count mismatch. Found ${verseClips.length} clips but ${translations.length} translations. Please review this subtitle manually.`,
 				{
-					duration: 7000
+					duration: 6000,
+					position: 'top-left'
 				}
 			);
 			skippedCount++;
