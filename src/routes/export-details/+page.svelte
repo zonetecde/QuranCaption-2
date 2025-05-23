@@ -151,7 +151,16 @@
 					</p>
 					<!-- portrait mode on the right corner -->
 					<p class="text-[1rem] ml-auto text-sm">
-						{video.portrait ? 'Portrait' : 'Landscape'} - {video.date.toLocaleString()}
+						{video.portrait ? 'Portrait' : 'Landscape'} - {new Date(video.date).toLocaleString(
+							'en-GB',
+							{
+								day: '2-digit',
+								month: '2-digit',
+								year: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit'
+							}
+						)}
 					</p>
 				</div>
 
