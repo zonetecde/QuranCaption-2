@@ -49,7 +49,7 @@
 				class="flex items-center justify-center h-full"
 				style="opacity: {surahNameSettings.opacity}"
 			>
-				<div class="text-center flex flex-col">
+				<div class="text-center flex flex-col items-center">
 					{#if $latestSurah >= 1}
 						<img
 							class="size-[100px]"
