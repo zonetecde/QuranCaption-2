@@ -16,8 +16,8 @@ export async function getWordByWordTranslation(
 	type: 'translation' | 'transliteration' = 'translation'
 ): Promise<string[]> {
 	// Vérification des entrées invalides
-	if ([surahNumber, verseNumber].some((n) => n < 1 || n > 114)) {
-		console.error('Numéro de sourate ou verset invalide');
+	if ([surahNumber].some((n) => n < 1 || n > 114) || [verseNumber].some((n) => n < 1 || n > 286)) {
+		console.error('Numéro de sourate invalide');
 		return [];
 	}
 

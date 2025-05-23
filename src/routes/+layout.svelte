@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
+	import { initializeStorage, localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 	import {
 		bestPerformance,
 		currentPage,
@@ -24,6 +24,7 @@
 	import { listen } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { invoke, window as tauriWindow } from '@tauri-apps/api';
+	import { createOrShowExportDetailsWindow } from '$lib/functions/ExportProject';
 
 	onMount(async () => {
 		initializeStorage();
@@ -130,6 +131,29 @@
 		appWindow.onCloseRequested(async (e) => {
 			if (e.windowLabel !== 'main') {
 				return;
+			}
+
+			// regarde is une video est en cours d'export
+			const storedExports = await localStorageWrapper.getItem('exportedVideoDetails');
+			if (storedExports) {
+				let currentlyExportingVideos = storedExports.filter(
+					(video: any) => video.status !== 'Exported' && video.status !== 'Cancelled'
+				);
+
+				if (currentlyExportingVideos.length > 0) {
+					// ontre la fenetre au cas où l'utilisateur veut annuler l'export ou pour qu'ils voyent
+					// les exports en cours
+					await createOrShowExportDetailsWindow();
+
+					const _confirm = await confirm(
+						'Are you sure you want to close the app? All exports in progress will be cancelled.'
+					);
+
+					if (!_confirm) {
+						e.preventDefault();
+						return;
+					}
+				}
 			}
 
 			const webview = tauriWindow.getAll();
