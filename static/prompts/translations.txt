@@ -45,19 +45,20 @@ An array of objects, where each object contains:
 
 ---
 
-**Core Rules**:  
+**Core Rules**:
 
-1. **Exact Substring Matching**:  
-   - Translations must be **verbatim, contiguous substrings** of `existing_translation`.  
-   - Do not reorder, split, or modify words in the translation.  
+1. **Exact Substring Matching**:
+   - Translations must be **verbatim, contiguous substrings** of `existing_translation`.
+   - Do not reorder, split, or modify words in the translation.
+   - Words enclosed in special brackets (e.g., `˹word˺`, `[word]`) within `existing_translation` are part of the text and **must be preserved** in the output segments. Do not omit or alter them.
    - Example:  
      - Arabic segment: `"قَالُوا خَيْرًا"`  
      - `existing_translation`: `"They say, "All the best!""`  
      - **Correct**: `"They say, "All the best!""`  
      - **Incorrect**: `""All the best!""` (omits context) or `"They say good"` (not verbatim).  
 
-2. **Complete Coverage**:  
-   - The union of all non-null translations for an input object must **exactly cover** `existing_translation` without gaps or missing words.  
+2. **Complete Coverage**:
+   - The union of all non-null translation segments in the output **must meticulously and completely reconstruct the entire `existing_translation`** without any gaps, missing words, or alterations. Every word from `existing_translation` must appear in the output segments, correctly allocated.
    - Example:  
      - `existing_translation`: `"A B C D"`  
      - Valid: `["A B", "C D"]`, `["A", "B C D"]`, `["A B", "B C D"]` (overlap allowed).  
@@ -180,6 +181,24 @@ An array of objects, where each object contains:
   }
   ```  
 - **Explanation**: The segment's translation ("increase me in knowledge") is not a contiguous substring due to word order, so it returns `null`.
+
+#### **Example 5: Bracketed Words and Full Coverage**
+- **Input**:
+  ```json
+  {
+    "id": 5,
+    "full_verse_arabic": "27:7",
+    "target_segments_arabic": ["إِذۡ قَالَ مُوسَىٰ لِأَهۡلِهِۦٓ إِنِّيٓ ءَانَسۡتُ نَارٗا", "سَـَٔاتِيكُم مِّنۡهَا بِخَبَرٍ أَوۡ ءَاتِيكُم بِشِهَابٖ قَبَسٖ", "لَّعَلَّكُمۡ تَصۡطَلُونَ"],
+    "existing_translation": "˹Remember˺ when Moses said to his family, “I have spotted a fire. I will either bring you some directions1 from there, or a burning torch so you may warm yourselves.”"
+  }
+  ```
+- **Output**:
+  ```json
+  {
+    "5": ["˹Remember˺ when Moses said to his family, “I have spotted a fire.", "I will either bring you some directions1 from there, or a burning torch", "so you may warm yourselves.”"]
+  }
+  ```
+- **Explanation**: The bracketed word `˹Remember˺` is preserved. The `existing_translation` is fully covered by the output segments, which are contiguous substrings corresponding to the Arabic segments.
 
 ---
 
