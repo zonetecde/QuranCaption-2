@@ -142,7 +142,6 @@ export async function createOrShowExportDetailsWindow(
 	}
 
 	// Si la fenêtre existe déjà, on la met au premier plan
-	await exportDetailsWindow.setFocus();
 	await exportDetailsWindow.show();
 }
 
