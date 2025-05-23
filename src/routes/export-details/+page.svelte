@@ -206,7 +206,7 @@
 
 				{#if video.status === 'Exported' || video.status === 'Cancelled'}
 					<button
-						class="absolute bottom-0 right-0 ml-auto bg-[#8b2f2f9a] px-1 py-1 rounded-br-md rounded-tl-md border border-[#492020] mt-1 text-left"
+						class="absolute bottom-0 right-0 ml-auto bg-[#8b2f2f9a] px-1 py-1 rounded-br-xl rounded-tl-md border border-[#492020] mt-1 text-left"
 						on:click={() => {
 							currentlyExportingVideos = currentlyExportingVideos.filter(
 								(v) => v.exportId !== video.exportId
