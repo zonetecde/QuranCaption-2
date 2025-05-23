@@ -62,17 +62,18 @@ An array of objects, where each object contains:
    - Example:  
      - `existing_translation`: `"A B C D"`  
      - Valid: `["A B", "C D"]`, `["A", "B C D"]`, `["A B", "B C D"]` (overlap allowed).  
-     - Invalid: `["A B", "D"]` (missing "C").  
+     - Invalid: `["A B", "D"]` (missing "C").
 
-3. **Overlapping Segments**:  
-   - Overlapping Arabic segments must map to overlapping translation substrings, repeating words as needed.  
-   - Each segment's translation must include **all words** corresponding to its Arabic text, even if previously included.  
+3. **Overlapping Segments & Full Segment Meaning**:
+   - Overlapping Arabic segments must map to overlapping translation substrings, repeating words as needed.
+   - **Crucially, each segment's translation must fully represent the meaning of its corresponding Arabic text.** This means the translation should cover the *entire* Arabic segment, even if this requires including words already present in the translation of an adjacent segment or extending beyond a minimal match to capture the full sense.
+   - Each segment's translation must include **all words** from `existing_translation` that correspond to its Arabic text, even if those words were part of a previous segment's translation.
    - Example:  
      - `full_verse_arabic`: `"1:5"`  
      - `target_segments_arabic`: `["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"]`  
      - `existing_translation`: `"You alone we worship, and You alone we ask for help."`  
      - **Output**: `["You alone we worship", "worship, and You alone"]`  
-     - **Explanation**: The word "worship" is repeated due to overlap in Arabic segments.  
+     - **Explanation**: The word "worship" is repeated due to overlap in Arabic segments.
 
 4. **Context Preservation**:  
    - Include complete syntactic units (e.g., subjects, verbs, clauses) in the translation substring, even if the Arabic segment is partial, as long as it's contiguous.  
@@ -200,6 +201,37 @@ An array of objects, where each object contains:
   ```
 - **Explanation**: The bracketed word `˹Remember˺` is preserved. The `existing_translation` is fully covered by the output segments, which are contiguous substrings corresponding to the Arabic segments.
 
+#### **Example 6: Emphasizing Full Segment Translation with Overlap**
+- **Input**:
+  ```json
+  {
+    "id": 6,
+    "full_verse_arabic": "42:47",
+    "target_segments_arabic": [
+      "ٱسۡتَجِيبُواْ لِرَبِّكُم مِّن قَبۡلِ أَن يَأۡتِيَ يَوۡمٞ",
+      "مِّن قَبۡلِ أَن يَأۡتِيَ يَوۡمٞ لَّا مَرَدَّ لَهُۥ مِنَ ٱللَّهِۚ",
+      "مَا لَكُم مِّن مَّلۡجَإٖ يَوۡمَئِذٖ",
+      "مَا لَكُم مِّن مَّلۡجَإٖ يَوۡمَئِذٖ وَمَا لَكُم",
+      "وَمَا لَكُم مِّن نَّكِيرٖ"
+    ],
+    "existing_translation": "Répondez à l’appel de votre Seigneur avant que ne vienne un un jour que personne ne pourra empêcher de la part d'Allah. Ce jour-là, nul refuge pour vous et vous ne pourrez point nier (vos péchés)."
+  }
+  ```
+- **Output**:
+  ```json
+  {
+    "6": [
+      "Répondez à l’appel de votre Seigneur avant que ne vienne un un jour",
+      "avant que ne vienne un jour que personne ne pourra empêcher de la part d'Allah.",
+      "Ce jour-là, nul refuge pour vous",
+      "Ce jour-là, nul refuge pour vous et vous ne pourrez",
+      "et vous ne pourrez point nier (vos péchés)."
+    ]
+  }
+  ```
+- **Explanation**: Each translation segment accurately and fully covers its corresponding Arabic segment. For instance, the first segment `"ٱسۡتَجِيبُواْ لِرَبِّكُم مِّن قَبۡلِ أَن يَأۡتِيَ يَوۡمٞ"` is translated as `"Répondez à l’appel de votre Seigneur avant que ne vienne un un jour"`, ensuring the entire meaning `"avant que ne vienne un jour"` is included, not just `"Répondez à l’appel de votre Seigneur"`. This demonstrates correct overlapping and complete translation for each part.
+
+
 ---
 
 **Edge Cases**:  
@@ -215,7 +247,6 @@ An array of objects, where each object contains:
 - Overlaps are expected and must repeat words as needed.  
 - Ensure **no truncation** of translations; include all words corresponding to the Arabic segment's meaning and context.  
 - Validate that translations collectively cover the entire `existing_translation` without gaps.
-
 
 # The input : 
 
