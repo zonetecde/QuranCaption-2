@@ -1,4 +1,3 @@
-// filepath: f:\Programmation\tauri\QuranCaption-2\static\prompts\translations.txt
 **Task**:  
 Programmatically map **multiple Arabic segments** (including overlapping ones) from a set of Quranic verses to their **exact, contiguous substrings** within pre-existing translations. For each verse in the input array, ensure every Arabic segment is matched to a direct substring of `existing_translation`, preserving overlaps and covering all words in the translation.
 
