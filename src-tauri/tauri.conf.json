@@ -33,7 +33,7 @@
 				"all": false,
 				"copyFile": false,
 				"createDir": true,
-				"exists": false,
+				"exists": true,
 				"readDir": true,
 				"readFile": true,
 				"removeDir": true,

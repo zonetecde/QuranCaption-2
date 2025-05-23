@@ -28,7 +28,9 @@ import {
 	orientation,
 	quality,
 	currentlyExportingId,
-	type VideoExportStatus
+	type VideoExportStatus,
+	showWm,
+	enableWm
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -209,6 +211,9 @@ export async function exportCurrentProjectAsVideo() {
 		}
 	}
 
+	let totalTime = 0;
+	let firstWmShown = false;
+	let lastTimeShown = 0;
 	for (let i = iMin; i <= iMax; i++) {
 		let clip = subtitleClips[i];
 
@@ -216,6 +221,23 @@ export async function exportCurrentProjectAsVideo() {
 
 		cursorPosition.set(clip.start + 30);
 		triggerSubtitleResize.set(false);
+
+		if (get(enableWm)) {
+			if (totalTime > 10 * 1000 && firstWmShown === false) {
+				// wm après 10 secondes
+				showWm.set(true);
+				firstWmShown = true;
+			}
+			// ou sinon si on a dépassé 2 minutes, wm toutes les 4 minutes
+			else if (totalTime > 2 * 60 * 1000) {
+				if (lastTimeShown + 4 * 60 * 1000 < totalTime) {
+					showWm.set(true);
+					lastTimeShown = totalTime;
+				} else {
+					showWm.set(false);
+				}
+			}
+		}
 
 		await new Promise((resolve) => {
 			setTimeout(resolve, 40);
@@ -246,6 +268,9 @@ export async function exportCurrentProjectAsVideo() {
 			Math.floor(((i - iMin) / (iMax - iMin)) * 100),
 			'Capturing video frames...'
 		);
+
+		totalTime += clip.end - clip.start;
+		showWm.set(false);
 	}
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 
@@ -282,8 +307,9 @@ export async function exportCurrentProjectAsVideo() {
 		topRatio: get(topRatio) / 100,
 		bottomRatio: get(bottomRatio) / 100,
 		dynamicTop:
-			surahsInVideo.size > 1 &&
-			_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable // si il y a plusieurs sourates le top avec affichage de la sourate changera
+			(surahsInVideo.size > 1 &&
+				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable) ||
+			get(enableWm) // si il y a plusieurs sourates le top avec affichage de la sourate changera
 	});
 
 	// Ferme la fenêtre d'export
@@ -375,4 +401,12 @@ async function takeScreenshot(folderName: string, fileName: string) {
 		console.error('Error while taking screenshot: ', error);
 		toast.error('Error while taking screenshot: ' + error.message);
 	}
+}
+
+export function isVideoExportFinished(exportDetails: VideoExportStatus) {
+	return (
+		exportDetails.status === 'Cancelled' ||
+		exportDetails.status === 'Exported' ||
+		exportDetails.status === 'Error'
+	);
 }

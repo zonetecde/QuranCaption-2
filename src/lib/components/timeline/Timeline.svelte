@@ -158,7 +158,7 @@
 				<!-- Selection area between start and end time -->
 				{#if $startTime >= 0 && ($endTime || getVideoDurationInMs()) > $startTime}
 					<div
-						class="absolute top-5 left-0 h-60 z-50"
+						class="absolute top-5 left-24 lg:left-40 h-60 z-50"
 						style="
 						transform: translateX({($startTime / 1000) * $zoom}px);
 						width: {((($endTime || getVideoDurationInMs()) - $startTime) / 1000) * $zoom}px;
@@ -172,7 +172,7 @@
 				<!-- Start time marker -->
 				{#if $startTime > 0}
 					<div
-						class="absolute top-5 left-0 h-60 z-50 flex items-center border-l-2 border-[#229753]"
+						class="absolute top-5 left-24 lg:left-40 h-60 z-50 flex items-center border-l-2 border-[#229753]"
 						style="transform: translateX({($startTime / 1000) * $zoom}px);"
 					></div>
 				{/if}
@@ -180,7 +180,7 @@
 				<!-- End time marker -->
 				{#if ($endTime || getVideoDurationInMs()) > 0}
 					<div
-						class="absolute top-5 left-0 h-60 z-50 flex items-center border-l-2 border-[#229753]"
+						class="absolute top-5 left-24 lg:left-40 h-60 z-50 flex items-center border-l-2 border-[#229753]"
 						style="transform: translateX({(($endTime || getVideoDurationInMs()) / 1000) *
 							$zoom}px);"
 					></div>

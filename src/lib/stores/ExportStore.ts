@@ -18,6 +18,8 @@ export const middleRatio: Writable<number> = writable(50); // default: 60%
 export const bottomRatio: Writable<number> = writable(25); // default: 20%
 
 export const quality: Writable<number> = writable(1); // default: 1
+export const showWm: Writable<boolean> = writable(false);
+export const enableWm: Writable<boolean> = writable(true);
 
 export interface VideoExportStatus {
 	exportId: number;

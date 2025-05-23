@@ -24,7 +24,10 @@
 	import { listen } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { invoke, window as tauriWindow } from '@tauri-apps/api';
-	import { createOrShowExportDetailsWindow } from '$lib/functions/ExportProject';
+	import {
+		createOrShowExportDetailsWindow,
+		isVideoExportFinished
+	} from '$lib/functions/ExportProject';
 
 	onMount(async () => {
 		initializeStorage();
@@ -137,7 +140,7 @@
 			const storedExports = await localStorageWrapper.getItem('exportedVideoDetails');
 			if (storedExports) {
 				let currentlyExportingVideos = storedExports.filter(
-					(video: any) => video.status !== 'Exported' && video.status !== 'Cancelled'
+					(video: any) => isVideoExportFinished(video) === false
 				);
 
 				if (currentlyExportingVideos.length > 0) {

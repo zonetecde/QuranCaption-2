@@ -226,7 +226,7 @@ def make_frame(t_ms, frames_data, static_top, static_bottom, dimensions, transit
     if static_bottom is not None:
         frame[-static_bottom.shape[0]:] = static_bottom
     
-    return frame
+    return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) # Ajout de la conversion BGR vers RGB
 
 def main():
     parser = argparse.ArgumentParser(description="Create a video from images with fade applied only to the middle section")

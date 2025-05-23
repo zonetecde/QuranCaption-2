@@ -10,6 +10,7 @@
 	import TitleBar from './TitleBar.svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { WebviewWindow } from '@tauri-apps/api/window';
+	import { isVideoExportFinished } from '$lib/functions/ExportProject';
 
 	let listeners: any[] = [];
 	let currentlyExportingVideos: VideoExportStatus[] = [];
@@ -24,11 +25,7 @@
 
 			// vérifie qu'ils sont tous soit exported soit cancelled, sinon leur status est mis à cancelled
 			currentlyExportingVideos = currentlyExportingVideos.map((video) => {
-				if (
-					video.status === 'Exported' ||
-					video.status === 'Cancelled' ||
-					video.status === 'Cancelling...'
-				) {
+				if (isVideoExportFinished(video)) {
 					return video;
 				} else {
 					video.status = 'Cancelled';
@@ -131,6 +128,7 @@
 
 	$: if (currentlyExportingVideos && currentlyExportingVideos.length > 0) {
 		// save dans le local storage
+		console.log('save in local storage', currentlyExportingVideos);
 		localStorageWrapper.setItem('exportedVideoDetails', currentlyExportingVideos);
 	}
 </script>
@@ -171,7 +169,7 @@
 						</div>
 					</section>
 					<section class="flex flex-col ml-4">
-						{#if video.status !== 'Exported' && video.status !== 'Cancelled'}
+						{#if isVideoExportFinished(video) === false}
 							<div class="w-full bg-gray-700 rounded h-4 relative mt-0.5">
 								<div
 									class="bg-blue-500 h-4 rounded duration-100 transition-all"

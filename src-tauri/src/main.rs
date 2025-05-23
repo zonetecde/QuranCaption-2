@@ -301,7 +301,7 @@ async fn create_video(
                             let payload = serde_json::json!({
                                 "exportId": export_id,
                                 "progress": 0,
-                                "status": "Erreur"
+                                "status": "Error"
                             });
                             let _ = app_handle.emit_all("updateExportDetailsById", payload);
                             return Err(format!("Erreur en vérifiant l'état du processus: {}", e));

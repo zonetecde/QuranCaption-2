@@ -1,3 +1,5 @@
+import { enableWm } from '$lib/stores/ExportStore';
+import { fs } from '@tauri-apps/api';
 import { createDir, readTextFile, removeFile, writeTextFile } from '@tauri-apps/api/fs';
 import { invoke } from '@tauri-apps/api/tauri';
 
@@ -33,6 +35,7 @@ export async function initializeStorage() {
 		await createDir(await getLocalStoragePath(), { recursive: true });
 		await createDir(await getExportPath(), { recursive: true });
 		await createDir(await getAssetsPath(), { recursive: true });
+		await initWm();
 		console.log('Storage initialized');
 	} catch (error) {
 		console.error('Failed to initialize storage:', error);
@@ -71,3 +74,11 @@ export const localStorageWrapper = {
 		console.warn('Clear method is not implemented for this wrapper.');
 	}
 };
+
+async function initWm() {
+	// regarde si le fichier `wm` existe dans le dossier localStorage
+	// si oui, set enableWm à false
+	// sinon, set enableWm à true
+	const wmExists = await fs.exists(`${await getLocalStoragePath()}wm`);
+	enableWm.set(!wmExists);
+}
