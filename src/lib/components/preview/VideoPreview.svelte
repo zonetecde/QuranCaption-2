@@ -336,10 +336,6 @@
 					{#if video.type === 'image' || video.id === 'black-video'}
 						<img
 							id="bg-img"
-							style="transform: scale({$currentProject.projectSettings
-								.videoScale}) translateX({$currentProject.projectSettings
-								.translateVideoX}px) translateY({$currentProject.projectSettings
-								.translateVideoY}px);"
 							class={'w-full h-full object-contain' + ($currentlyExporting ? ' opacity-0' : '')}
 							src={video.id === 'black-video' ? backgroundImg : convertFileSrc(video.filePath)}
 							alt={video.filePath}

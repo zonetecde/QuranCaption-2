@@ -303,6 +303,7 @@ export async function exportCurrentProjectAsVideo() {
 
 	// récupère l'image de fond/la vidéo de fond
 	let backgroundPath = '';
+	let isImage: boolean = false;
 	// s'il existe une vidéo on la prend
 	if (
 		_currentProject.timeline.videosTracks[0].clips.length > 0 &&
@@ -316,6 +317,7 @@ export async function exportCurrentProjectAsVideo() {
 		_currentProject.projectSettings.globalSubtitlesSettings.backgroundImage
 	) {
 		backgroundPath = _currentProject.projectSettings.globalSubtitlesSettings.backgroundImage;
+		isImage = true;
 	}
 
 	invoke('create_video', {
@@ -334,9 +336,10 @@ export async function exportCurrentProjectAsVideo() {
 				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable) ||
 			get(enableWm), // si il y a plusieurs sourates le top avec affichage de la sourate changera
 		backgroundFile: backgroundPath,
-		backgroundXTranslation: _currentProject.projectSettings.translateVideoX,
-		backgroundYTranslation: _currentProject.projectSettings.translateVideoY,
-		backgroundScale: _currentProject.projectSettings.videoScale
+		// on desactive les translations/size si c'est une image
+		backgroundXTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoX,
+		backgroundYTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoY,
+		backgroundScale: isImage ? 1 : _currentProject.projectSettings.videoScale
 	});
 
 	// Ferme la fenêtre d'export
