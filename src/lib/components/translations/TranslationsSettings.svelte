@@ -45,6 +45,16 @@
 							userProjects.map(async (userProject) => {
 								if (userProject.id === $currentProject.id) return;
 
+								// if the project has the translation
+								if (
+									userProject.projectSettings.addedTranslations.indexOf(translation) === -1 &&
+									!(
+										userProject.projectSettings.addedTranslations.includes('fra-muhammadhamidul') &&
+										translation === 'fra-muhammadhameedu'
+									)
+								)
+									return;
+
 								await Promise.all(
 									userProject.timeline.subtitlesTracks[0].clips.map(async (userSubtitle) => {
 										if (
@@ -137,11 +147,6 @@
 		$currentProject.timeline.subtitlesTracks[0].clips =
 			$currentProject.timeline.subtitlesTracks[0].clips;
 	}
-
-	let languageCodeToTranslate = '';
-	let aiOutput = '';
-	let startId: string = '-1';
-	let endId: string = '-1';
 </script>
 
 <div class="w-full h-full flex flex-col pt-3 px-3 gap-y-5 bg-[#1f1f1f] overflow-y-scroll">
@@ -221,83 +226,4 @@
 			}}>Fetch translations from other projects</button
 		>
 	</abbr>
-
-	<p class="text-center">-- AI Helper --</p>
-
-	<p class="text-xs text-justify">
-		Use AI to generate subtitle translations by copying existing ones. Add a translation to your
-		project, then enter the desired language code (e.g., "fr" for French) below.
-	</p>
-
-	<p class="text-xs text-justify">
-		If your project has many subtitles and the AI cannot process them all at once, specify a range
-		by entering start and end IDs. Use -1 for the first or last subtitle. Subtitle IDs are shown at
-		the top right of each subtitle input section.
-	</p>
-	<div class="grid grid-cols-2 gap-x-2">
-		<section class="w-full">
-			<p class="text-xs text-justify">Start ID</p>
-			<input
-				type="text"
-				class="border py-2 w-full border-gray-200 rounded-lg duration-100 text-sm bg-[#170f1a] px-2"
-				placeholder="Start ID (-1 for first subtitle)"
-				bind:value={startId}
-			/>
-		</section>
-		<section class="w-full">
-			<p class="text-xs text-justify">End ID</p>
-			<input
-				type="text"
-				class="border py-2 w-full border-gray-200 rounded-lg duration-100 text-sm bg-[#170f1a] px-2"
-				placeholder="End ID (-1 for last subtitle)"
-				bind:value={endId}
-			/>
-		</section>
-	</div>
-
-	<div class="flex flex-col">
-		<input
-			type="text"
-			class="border py-2 border-gray-200 rounded-lg duration-100 text-sm bg-[#170f1a] w-full px-2 border-b-0 rounded-b-none"
-			placeholder="Enter language code (e.g. fr, en, ar)"
-			bind:value={languageCodeToTranslate}
-		/>
-		<button
-			class="border py-2 border-gray-200 rounded-lg text-sm duration-100 bg-[#170f1a] w-full border-t-0 rounded-t-none"
-			id="fetch-translations-button"
-			on:click={() => {
-				generateTranslationsPrompt(
-					languageCodeToTranslate,
-					Number(startId || '-1'),
-					Number(endId || '-1')
-				);
-			}}>Copy AI prompt</button
-		>
-	</div>
-
-	<p class="text-sm text-justify">
-		Once you have copied the prompt, go to <button
-			class="text-blue-300"
-			on:click={() => {
-				openLink('https://grok.com');
-			}}>Grok.com</button
-		> and paste it there. (I found that it is currently the best AI for this task, but you can use any
-		AI you prefer.)
-	</p>
-	<p class="text-sm text-justify">Then, paste what Grok provided here:</p>
-
-	<div class="flex flex-col">
-		<textarea
-			class="border py-2 border-gray-200 rounded-lg duration-100 text-sm bg-[#170f1a] w-full px-2 border-b-0 rounded-b-none"
-			placeholder="Paste AI's response here"
-			bind:value={aiOutput}
-		></textarea>
-		<button
-			class="border py-2 border-gray-200 rounded-lg text-sm duration-100 bg-[#170f1a] w-full border-t-0 rounded-t-none"
-			id="fetch-translations-button"
-			on:click={() => {
-				addAITranslations(aiOutput, languageCodeToTranslate);
-			}}>Add the AI-generated translations</button
-		>
-	</div>
 </div>

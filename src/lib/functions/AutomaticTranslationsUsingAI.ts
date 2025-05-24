@@ -4,6 +4,7 @@ import { get } from 'svelte/store';
 import { getVerseTranslation } from './Translation';
 import { getVerse } from '$lib/stores/QuranStore';
 import type { SubtitleClip } from '$lib/models/Timeline';
+import { showAITranslationPopup } from '$lib/stores/LayoutStore';
 
 /**
  * Génère un prompt pour l'IA afin de traduire les segments de versets incomplets.
@@ -21,13 +22,12 @@ import type { SubtitleClip } from '$lib/models/Timeline';
  * @param endPositionIndex Position du premier sous-titre du dernier verset à traiter (facultatif)
  */
 export async function generateTranslationsPrompt(
-	languageCode: string,
 	startPositionIndex: number = -1,
 	endPositionIndex: number = -1
-) {
-	if (languageCode === '') {
+): Promise<string> {
+	if (get(showAITranslationPopup) === '') {
 		toast.error('Please enter a language code');
-		return;
+		return 'Error: Language code not provided.';
 	}
 
 	// Génère le prompt est le met dans le clipboard
@@ -36,11 +36,11 @@ export async function generateTranslationsPrompt(
 
 	// recupere l'edition de la traduction
 	const edition = get(currentProject).projectSettings.addedTranslations.find((t) =>
-		t.includes(languageCode)
+		t.includes(get(showAITranslationPopup)!)
 	);
 	if (!edition) {
 		toast.error('Language code not found.');
-		return;
+		return 'Error: Language code not found.';
 	}
 
 	// remplace @1 par l'input
@@ -146,7 +146,7 @@ export async function generateTranslationsPrompt(
 		toast.error(
 			'No clips found to generate prompt (either all clips are custom text, full verses, or have already been manually translated).'
 		);
-		return;
+		return 'Error: No clips found to generate prompt.';
 	}
 
 	// Journalisation pour débogage (peut être désactivée en production)
@@ -173,10 +173,10 @@ export async function generateTranslationsPrompt(
 		}
 	);
 
-	return;
+	return promptWithInput;
 }
 
-export function addAITranslations(raw_json: string, languageCode: string) {
+export function addAITranslations(raw_json: string) {
 	/**
 	 * Applique les traductions générées par l'IA aux sous-titres.
 	 *
@@ -198,7 +198,7 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 	}
 
 	const edition = get(currentProject).projectSettings.addedTranslations.find((t) =>
-		t.includes(languageCode)
+		t.includes(get(showAITranslationPopup)!)
 	);
 	if (!edition) {
 		toast.error('Language code not found.');

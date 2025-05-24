@@ -2,6 +2,7 @@
 	import AddNewTranslationPopup from '$lib/components/translations/AddNewTranslationPopup.svelte';
 	import { getVerseTranslation } from '$lib/functions/Translation';
 	import type { Edition } from '$lib/models/Edition';
+	import { showAITranslationPopup } from '$lib/stores/LayoutStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 	import { getEditionFromName } from '$lib/stores/QuranStore';
 	import toast from 'svelte-french-toast';
@@ -72,14 +73,39 @@
 	<div class="flex flex-row">
 		{#each $currentProject.projectSettings.addedTranslations as lang, i}
 			{@const edition = getEditionFromName(lang)}
-			<button
-				class={'bg-[#214627] text-white p-1 xl:p-2 flex gap-x-2 border-2 text-xs xl:text-base border-[#173619] hover:bg-[#2d4b49] duration-200 ' +
+			<section
+				class={'flex flex-row items-center border-b-2 bg-[#214627] border-[#173619] ' +
 					(i === $currentProject.projectSettings.addedTranslations.length - 1
 						? 'rounded-br-lg border-r-2'
 						: 'border-r-0')}
-				on:click={() => handleTranslationHeaderClicked(lang)}
-				>{(edition && `${edition?.language} - ${edition?.author}`) || lang}</button
 			>
+				<button
+					class="hover:bg-[#17311b] px-2 h-full bg-[#214627] duration-200 flex flex-col items-center justify-center border-[#173619] border-2 border-r-0 text-white"
+					on:click={() => showAITranslationPopup.set(lang.slice(0, 2))}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke-width="1.5"
+						stroke="currentColor"
+						class="size-5 mt-1"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+						/>
+					</svg>
+					<p class="text-xs">Ask AI</p>
+				</button>
+
+				<button
+					class={'bg-[#214627] text-white p-1 xl:p-2 flex gap-x-2 border-2 text-xs xl:text-base border-[#173619] border-l-0 hover:bg-[#17311b] duration-200 '}
+					on:click={() => handleTranslationHeaderClicked(lang)}
+					>{(edition && `${edition?.language} - ${edition?.author}`) || lang}</button
+				>
+			</section>
 		{/each}
 	</div>
 
@@ -135,4 +161,5 @@
 				>
 			</div>
 		</div>
-	</div>{/if}
+	</div>
+{/if}

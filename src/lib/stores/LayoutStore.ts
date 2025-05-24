@@ -99,6 +99,7 @@ export const videoEditorSelectedTab: Writable<'assets manager' | 'subtitles sett
 export const onlyShowSubtitlesThatAreNotFullVerses: Writable<boolean> = writable(false); // Afficher uniquement les versets qui ont besoin d'une révision de traduction
 export const onlyShowVersesWhoseTranslationsNeedReview: Writable<boolean> = writable(false); // Afficher uniquement les versets dont les traductions ont besoin d'une révision
 export const isFetchingIA: Writable<boolean> = writable(false); // Indique si on est en train de récupérer les informations de l'IA
+export const showAITranslationPopup: Writable<string | undefined> = writable(undefined); // Indique si le popup de traduction IA est visible
 export const audio: Writable<HTMLAudioElement | undefined> = writable(undefined); // L'audio player pour écouter individuellement les subtitles
 export const playedSubtitleId: Writable<string | undefined> = writable(undefined); // Le fichier audio à écouter
 
