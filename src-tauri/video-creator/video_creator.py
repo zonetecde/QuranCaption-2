@@ -163,6 +163,77 @@ def blend_with_alpha(foreground, background, alpha, position=None):
         result[y:y+h, x:x+w] = blended_region
         return result
 
+def transform_background(background_frame, target_width, target_height, translate_x=0, translate_y=0, scale=1.0):
+    """Apply translation and scaling transformations to background frame."""
+    if background_frame is None:
+        return None
+    
+    # Get original dimensions
+    orig_height, orig_width = background_frame.shape[:2]
+    
+    # Apply scaling first 
+    if scale != 1.0:
+        # Calculate new dimensions after scaling
+        new_width = int(orig_width * scale)
+        new_height = int(orig_height * scale)
+        
+        # Resize the background - keep the full scaled size
+        scaled_bg = cv2.resize(background_frame, (new_width, new_height))
+        transformed_bg = scaled_bg
+    else:
+        # No scaling, just use original
+        transformed_bg = background_frame.copy()
+    
+    # Apply translation - always work with the target canvas size
+    if translate_x != 0 or translate_y != 0 or scale != 1.0:
+        # Create the final canvas
+        final_bg = np.zeros((target_height, target_width, 3), dtype=np.uint8)
+        
+        # Get the current transformed background dimensions
+        src_h, src_w = transformed_bg.shape[:2]
+        
+        # Calculate where to place the transformed background on the canvas
+        # considering the translation
+        dst_x_start = translate_x
+        dst_y_start = translate_y
+        dst_x_end = dst_x_start + src_w
+        dst_y_end = dst_y_start + src_h
+        
+        # Calculate which part of the source we can actually use
+        src_x_start = max(0, -translate_x)
+        src_y_start = max(0, -translate_y)
+        src_x_end = src_w
+        src_y_end = src_h
+        
+        # Adjust destination coordinates to stay within canvas bounds
+        if dst_x_start < 0:
+            src_x_start = -dst_x_start
+            dst_x_start = 0
+        if dst_y_start < 0:
+            src_y_start = -dst_y_start
+            dst_y_start = 0
+        if dst_x_end > target_width:
+            src_x_end = src_w - (dst_x_end - target_width)
+            dst_x_end = target_width
+        if dst_y_end > target_height:
+            src_y_end = src_h - (dst_y_end - target_height)
+            dst_y_end = target_height
+        
+        # Copy the valid region
+        if (src_x_end > src_x_start and src_y_end > src_y_start and 
+            dst_x_end > dst_x_start and dst_y_end > dst_y_start):
+            
+            src_region = transformed_bg[src_y_start:src_y_end, src_x_start:src_x_end]
+            final_bg[dst_y_start:dst_y_end, dst_x_start:dst_x_end] = src_region
+        
+        return final_bg
+    
+    # If no translation and no scaling, just resize to target if needed
+    if transformed_bg.shape[:2] != (target_height, target_width):
+        transformed_bg = cv2.resize(transformed_bg, (target_width, target_height))
+    
+    return transformed_bg
+
 def sort_by_time(filename):
     """Extract the start time from filename for sorting."""
     start_time = int(re.match(r'(\d+)_\d+\.png', filename).group(1))
@@ -341,11 +412,14 @@ def load_background(background_path, dimensions, duration_sec, start_ms, end_ms)
         print(f"Warning: Unsupported background file format: {file_ext}")
         return None, None
 
-def make_frame(t_ms, frames_data, static_top_data, static_bottom_data, dimensions, transition_ms, background_frame=None, background_color_data=None):
+def make_frame(t_ms, frames_data, static_top_data, static_bottom_data, dimensions, transition_ms, background_frame=None, background_color_data=None, bg_transforms=None):
     """Create a frame at the given time."""
     height, width = dimensions
     t = t_ms / 1000.0  # Convert to seconds
     t_ms = int(t * 1000)  # Current time in milliseconds
+    
+    # Unpack background transform parameters
+    bg_x, bg_y, bg_scale = bg_transforms if bg_transforms else (0, 0, 1.0)
     
     # Unpack static data
     static_top, static_top_alpha = static_top_data if static_top_data[0] is not None else (None, None)
@@ -379,10 +453,11 @@ def make_frame(t_ms, frames_data, static_top_data, static_bottom_data, dimension
     
     if next_frame_data and (next_frame_data['start_ms'] - transition_ms <= t_ms < next_frame_data['start_ms']):
         in_transition = True
-        transition_progress = (t_ms - (next_frame_data['start_ms'] - transition_ms)) / transition_ms
-      # Create the frame - start with background if available, otherwise black
+        transition_progress = (t_ms - (next_frame_data['start_ms'] - transition_ms)) / transition_ms    # Create the frame - start with background if available, otherwise black
     if background_frame is not None:
-        frame = background_frame.copy()
+        # Apply transformations to background
+        transformed_bg = transform_background(background_frame, width, height, bg_x, bg_y, bg_scale)
+        frame = transformed_bg.copy() if transformed_bg is not None else background_frame.copy()
     else:
         frame = np.zeros((height, width, 3), dtype=np.uint8)
       # Determine if we're using alpha blending or direct placement
@@ -489,7 +564,7 @@ def main():
                         help="Start time for trimming the final video (in milliseconds, 0 = no trimming)")
     parser.add_argument("end_time", type=int, 
                         help="End time for trimming the final video (in milliseconds, 0 = until the end)")
-    parser.add_argument("output_path", help="Custom path for the output video")
+    parser.add_argument("output_path", help="Custom path for the output video")    
     parser.add_argument("top_ratio", type=float,
                         help="Ratio of the height for the top section (0.0 to 0.5)")
     parser.add_argument("bottom_ratio", type=float,
@@ -498,11 +573,16 @@ def main():
                         help="Set to 1 for dynamic top section (process top section for each image separately, no fade effect), 0 for static top section (default behavior)")
     parser.add_argument("background_path", 
                         help="Path to background image or video file (empty string for no background)")
+    parser.add_argument("background_x", type=int,
+                        help="Background horizontal translation in pixels (0 = no translation)")
+    parser.add_argument("background_y", type=int,
+                        help="Background vertical translation in pixels (0 = no translation)")
+    parser.add_argument("background_scale", type=float,
+                        help="Background scale factor (1.0 = normal size, 1.5 = 1.5x zoom from center)")
     
     args = parser.parse_args()
 
-    # print des args
-    print("Arguments received:")
+    # print des args    print("Arguments received:")
     print(f"Folder path: {args.folder_path}")
     print(f"Audio path: {args.audio_path}")
     print(f"Transition duration: {args.transition_ms} ms")
@@ -513,6 +593,9 @@ def main():
     print(f"Bottom ratio: {args.bottom_ratio}")
     print(f"Dynamic top: {args.dynamic_top}")
     print(f"Background path: {args.background_path}")
+    print(f"Background X translation: {args.background_x} pixels")
+    print(f"Background Y translation: {args.background_y} pixels")
+    print(f"Background scale: {args.background_scale}x")
     
     # Configure FFmpeg path
     ffmpeg_path = get_ffmpeg_path()
@@ -595,14 +678,15 @@ def main():
             use_background_audio = True
         else:
             print("Creating video without audio...")
-    
-    # Mettre à jour l'état du logger en fonction de la présence audio
+      # Mettre à jour l'état du logger en fonction de la présence audio
     logger.set_audio_status(audio is not None)
-      # Create VideoClip with our make_frame function
+    
+    # Create VideoClip with our make_frame function
     def make_frame_wrapper(t):
         # t is in seconds, convert to ms and add start_time offset
         t_ms = int(t * 1000) + start_ms
-          # Get background frame if available
+        
+        # Get background frame if available
         bg_frame = None
         if background_clip == "image":
             bg_frame = background_image_data
@@ -615,7 +699,10 @@ def main():
             except:
                 bg_frame = None
         
-        return make_frame(t_ms, frames_data, static_top, static_bottom, dimensions, args.transition_ms, bg_frame, background_color_data)
+        # Prepare background transform parameters
+        bg_transforms = (args.background_x, args.background_y, args.background_scale)
+        
+        return make_frame(t_ms, frames_data, static_top, static_bottom, dimensions, args.transition_ms, bg_frame, background_color_data, bg_transforms)
     
     video = VideoClip(make_frame_wrapper, duration=duration_sec)
     
@@ -669,10 +756,13 @@ if __name__ == "__main__":
     main()
 
 # Test avec img de fond : 
-# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png"
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png" 0 0 1.0
 
 # test avec video de fond :
-# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\98\video_2476.mp4"
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\98\video_2476.mp4" 0 0 1.0
 
 # test sans fond : 
-# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0 ""
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0 "" 0 0 1.0
+
+# test avec transformations background :
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png" 50 -30 1.5

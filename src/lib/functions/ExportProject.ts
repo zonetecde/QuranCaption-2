@@ -313,7 +313,6 @@ export async function exportCurrentProjectAsVideo() {
 		)!.filePath;
 	} else if (
 		// en deuxieme cas, s'il existe une image de fond on la prend
-		_currentProject.projectSettings.globalSubtitlesSettings.background &&
 		_currentProject.projectSettings.globalSubtitlesSettings.backgroundImage
 	) {
 		backgroundPath = _currentProject.projectSettings.globalSubtitlesSettings.backgroundImage;
@@ -334,7 +333,10 @@ export async function exportCurrentProjectAsVideo() {
 			(surahsInVideo.size > 1 &&
 				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable) ||
 			get(enableWm), // si il y a plusieurs sourates le top avec affichage de la sourate changera
-		backgroundFile: backgroundPath
+		backgroundFile: backgroundPath,
+		backgroundXTranslation: _currentProject.projectSettings.translateVideoX,
+		backgroundYTranslation: _currentProject.projectSettings.translateVideoY,
+		backgroundScale: _currentProject.projectSettings.videoScale
 	});
 
 	// Ferme la fenêtre d'export

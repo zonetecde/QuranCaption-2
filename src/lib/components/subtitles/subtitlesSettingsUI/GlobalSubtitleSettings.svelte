@@ -100,7 +100,7 @@
 
 	<!-- background image -->
 	<label for="background-image" class="flex items-center my-2"
-		><span class="min-w-40 text-sm xl:text-base">Background Image :</span>
+		><span class="min-w-40 text-sm xl:text-base">Background Image:</span>
 
 		<button
 			class="bg-slate-800 border border-black text-white rounded-lg text-sm px-2 py-1 -ml-7 xl:-ml-2"
@@ -125,6 +125,7 @@
 			>
 		{/if}
 	</label>
+	<p class="text-sm text-gray-500 -mt-2 mb-3">Make sure it is 1920x1080</p>
 
 	<Toggle
 		text="Enable Color Overlay"
