@@ -273,14 +273,13 @@ export function addAITranslations(raw_json: string, languageCode: string) {
 		for (let i = id + 1; i < newSubtitleClips.length; i++) {
 			const subtitle = newSubtitleClips[i];
 
-			// S'arrêter si on atteint un silence, un texte personnalisé ou un verset différent
-			if (
-				subtitle.isSilence ||
-				subtitle.isCustomText ||
-				subtitle.surah < 0 ||
-				subtitle.surah !== firstSubtitle.surah ||
-				subtitle.verse !== firstSubtitle.verse
-			) {
+			// Ignorer les silences et textes personnalisés, mais continuer à chercher
+			if (subtitle.isSilence || subtitle.isCustomText || subtitle.surah < 0) {
+				continue;
+			}
+
+			// S'arrêter si on atteint un verset différent
+			if (subtitle.surah !== firstSubtitle.surah || subtitle.verse !== firstSubtitle.verse) {
 				break;
 			}
 
