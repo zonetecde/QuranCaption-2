@@ -213,6 +213,12 @@ export async function exportCurrentProjectAsVideo() {
 	let totalTime = 0;
 	let firstWmShown = false;
 	let lastTimeShown = 0;
+
+	// wait 2 sec
+	await new Promise((resolve) => {
+		setTimeout(resolve, 2000);
+	});
+
 	for (let i = iMin; i <= iMax; i++) {
 		let clip = subtitleClips[i];
 
