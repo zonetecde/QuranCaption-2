@@ -11,7 +11,9 @@
 		middleRatio,
 		bottomRatio,
 		orientation,
-		quality
+		quality,
+		exportType,
+		fps
 	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
@@ -55,6 +57,11 @@
 	});
 
 	function onKeyDown(event: KeyboardEvent) {
+		// vérifie qu'on est pas sur un input
+		if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+			return;
+		}
+
 		if (event.key === 'Enter') {
 			handleSetCurrentTime('end-time');
 		} else if (event.key === 'Backspace') {
@@ -65,6 +72,8 @@
 	onDestroy(() => {
 		window.removeEventListener('keydown', onKeyDown);
 	});
+
+	$: console.log('fps :', $currentProject.projectSettings.exportSettings.fps);
 </script>
 
 <!-- start time input -->
@@ -145,11 +154,35 @@
 <!-- quality (slide bar from 1 to 3) -->
 <div class="flex flex-col mt-4">
 	<p class="font-bold mr-2">Quality</p>
-	<p class="text-sm opacity-80 mt-1">
+	<p class="text-xs opacity-80 mt-1">
 		Adjust the quality of the exported video. Note that higher quality settings may increase export
 		times.<br />1 = 1080p and 2 = 4k.
 	</p>
 	<Slider title="Value" min={1} max={2} step={0.1} bind:bindValue={$quality} unit="x" />
+</div>
+
+<!-- fps number input -->
+<div class="flex flex-col mt-4">
+	<label for="fps" class="text-sm font-bold">FPS (Frames per second)</label>
+	<p class="text-xs opacity-80 mb-2">
+		Adjust the FPS of the exported video. Higher FPS may result in smoother video but larger file
+		sizes.
+	</p>
+	<input
+		id="fps"
+		type="number"
+		min="1"
+		max="120"
+		class="p-2 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+		bind:value={$fps}
+		on:change={() => {
+			if ($fps < 1) {
+				fps.set(1);
+			} else if ($fps > 120) {
+				fps.set(120);
+			}
+		}}
+	/>
 </div>
 
 <!-- Video section ratios -->
@@ -274,9 +307,19 @@
 		</div>
 	</div>
 
-	<p class="text-xs opacity-60 mt-3">
-		Note: All three sections must add up to 100%. Adjusting one value will automatically update the
-		others to maintain this total.
+	<p class="text-sm text-white mt-3">
+		Note: Video with animated background will take longer to export, especially with high quality
+		settings. Ensure your computer meets the requirements for smooth exporting. If you think it is
+		taking too long, you can cancel the export and record your video with OBS (instructions can be
+		found
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<span
+			class="text-blue-500 cursor-pointer hover:underline"
+			on:click={() => {
+				exportType.set('video-obs');
+			}}>here</span
+		>)
 	</p>
 </div>
 

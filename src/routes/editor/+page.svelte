@@ -7,21 +7,11 @@
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
 	import { bestPerformance, currentPage, trimDialog } from '$lib/stores/LayoutStore';
-	import { currentProject, getProjectById, initExportSettings } from '$lib/stores/ProjectStore';
+	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
-	import {
-		startTime,
-		endTime,
-		orientation,
-		exportType,
-		topRatio,
-		middleRatio,
-		bottomRatio,
-		quality,
-		triggerSubtitleResize
-	} from '$lib/stores/ExportStore';
+	import { triggerSubtitleResize, initExportSettings } from '$lib/stores/ExportStore';
 
 	onMount(async () => {
 		// the slug is what after the ? in the URL

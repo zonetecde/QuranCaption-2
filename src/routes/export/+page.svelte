@@ -11,7 +11,7 @@
 		fullScreenPreview,
 		trimDialog
 	} from '$lib/stores/LayoutStore';
-	import { currentProject, getProjectById, initExportSettings } from '$lib/stores/ProjectStore';
+	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
@@ -24,7 +24,8 @@
 		middleRatio,
 		bottomRatio,
 		quality,
-		currentlyExportingId
+		currentlyExportingId,
+		initExportSettings
 	} from '$lib/stores/ExportStore';
 	import VideoPreview from '$lib/components/preview/VideoPreview.svelte';
 	import { exportCurrentProjectAsVideo } from '$lib/functions/ExportProject';

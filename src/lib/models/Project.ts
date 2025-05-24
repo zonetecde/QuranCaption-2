@@ -83,6 +83,7 @@ export interface ExportSettings {
 	middleRatio: number;
 	bottomRatio: number;
 	quality: number;
+	fps: number;
 }
 
 /**

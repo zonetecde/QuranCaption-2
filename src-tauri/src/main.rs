@@ -185,6 +185,7 @@ async fn create_video(
     background_x_translation: f32,
     background_y_translation: f32,
     background_scale: f32,
+    fps: i32,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     let path_resolver: tauri::PathResolver = app_handle.path_resolver();
@@ -208,6 +209,17 @@ async fn create_video(
                 background_y_translation.to_string(),
                 background_scale.to_string(),
             ];
+
+            // ajout parametre optionnel: --fps
+            let cmd_args = if fps > 0 {
+                let mut args = cmd_args.clone();
+                args.push("--fps".to_string());
+                args.push(fps.to_string());
+                args
+            } else {
+                cmd_args
+            };
+
 
             // Execute the command in the background and capture output
             let mut command = std::process::Command::new(video_creator_path);

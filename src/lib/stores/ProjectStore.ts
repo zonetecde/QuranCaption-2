@@ -16,7 +16,8 @@ import {
 	topRatio,
 	middleRatio,
 	bottomRatio,
-	quality
+	quality,
+	fps
 } from './ExportStore';
 
 export const currentProject: Writable<Project> = writable();
@@ -101,7 +102,8 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			topRatio: 25,
 			middleRatio: 50,
 			bottomRatio: 25,
-			quality: 1
+			quality: 1,
+			fps: 30 // default FPS
 		},
 		globalSubtitlesSettings: {
 			background: true,
@@ -271,7 +273,8 @@ export async function updateUsersProjects(
 			topRatio: get(topRatio),
 			middleRatio: get(middleRatio),
 			bottomRatio: get(bottomRatio),
-			quality: get(quality)
+			quality: get(quality),
+			fps: get(fps)
 		};
 	}
 
@@ -317,31 +320,6 @@ export async function updateUsersProjects(
 
 export async function updateUserProjectsDesc(projects: ProjectDesc[]) {
 	await localStorageWrapper.setItem('projects', JSON.stringify(projects));
-}
-
-export function initExportSettings(project: Project) {
-	if (project.projectSettings.exportSettings !== undefined) {
-		startTime.set(project.projectSettings.exportSettings.startTime);
-		endTime.set(project.projectSettings.exportSettings.endTime);
-		orientation.set(project.projectSettings.exportSettings.orientation);
-		exportType.set(project.projectSettings.exportSettings.exportType);
-		topRatio.set(project.projectSettings.exportSettings.topRatio);
-		middleRatio.set(project.projectSettings.exportSettings.middleRatio);
-		bottomRatio.set(project.projectSettings.exportSettings.bottomRatio);
-		quality.set(project.projectSettings.exportSettings.quality);
-	} else {
-		// If the project doesn't have the export settings, set the default values
-		project.projectSettings.exportSettings = {
-			startTime: 0,
-			endTime: null,
-			orientation: 'landscape',
-			exportType: 'video-static',
-			topRatio: 25,
-			middleRatio: 50,
-			bottomRatio: 25,
-			quality: 1
-		};
-	}
 }
 
 /**

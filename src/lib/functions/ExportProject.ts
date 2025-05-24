@@ -30,7 +30,8 @@ import {
 	currentlyExportingId,
 	type VideoExportStatus,
 	showWm,
-	enableWm
+	enableWm,
+	fps
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -339,7 +340,8 @@ export async function exportCurrentProjectAsVideo() {
 		// on desactive les translations/size si c'est une image
 		backgroundXTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoX,
 		backgroundYTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoY,
-		backgroundScale: isImage ? 1 : _currentProject.projectSettings.videoScale
+		backgroundScale: isImage ? 1 : _currentProject.projectSettings.videoScale,
+		fps: get(fps)
 	});
 
 	// Ferme la fenêtre d'export
