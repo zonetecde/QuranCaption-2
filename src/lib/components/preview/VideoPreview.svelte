@@ -306,17 +306,18 @@
 	}
 </script>
 
-<div class="w-full h-full flex flex-col relative overflow-hidden" id="preview-container">
-	<div class={'relative origin-top-left bg-black'} id="preview">
+<div class="w-full h-full flex flex-col relative overflow-hidden bg-black" id="preview-container">
+	<div class={'relative origin-top-left bg-transparent'} id="preview">
 		{#if (currentVideo && currentVideo.assetId) || (currentAudio && currentAudio.assetId) || currentSubtitle}
 			{#if currentVideo}
 				{@const video = getAssetFromId(currentVideo.assetId)}
 				{#if video}
 					<video
-						class={'w-full h-full object-contain' +
+						class={'w-full h-full object-contain ' +
 							currentVideo.id +
 							' ' +
-							(video.type === 'video' && video.id !== 'black-video' ? '' : 'hidden')}
+							(video.type === 'video' && video.id !== 'black-video' ? '' : 'hidden') +
+							($currentlyExporting ? ' opacity-0' : '')}
 						id="video-preview"
 						style="
 							transform: scale({$currentProject.projectSettings.videoScale}) translateX({$currentProject
@@ -335,7 +336,7 @@
 					{#if video.type === 'image' || video.id === 'black-video'}
 						<img
 							id="bg-img"
-							class="w-full h-full object-contain"
+							class={'w-full h-full object-contain' + ($currentlyExporting ? ' opacity-0' : '')}
 							src={video.id === 'black-video' ? backgroundImg : convertFileSrc(video.filePath)}
 							alt={video.filePath}
 						/>

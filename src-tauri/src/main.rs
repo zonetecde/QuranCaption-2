@@ -181,6 +181,7 @@ async fn create_video(
     top_ratio: f32,
     bottom_ratio: f32,
     dynamic_top: bool,
+    background_file: String,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     let path_resolver: tauri::PathResolver = app_handle.path_resolver();
@@ -199,6 +200,7 @@ async fn create_video(
                 top_ratio.to_string(),
                 bottom_ratio.to_string(),
                 if dynamic_top { "1".to_string() } else { "0".to_string() },
+                background_file.clone(),
             ];
 
             // Execute the command in the background and capture output
