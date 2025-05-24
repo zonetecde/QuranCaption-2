@@ -84,37 +84,52 @@ def get_ffmpeg_path():
 
 def load_image_with_alpha(image_path, preserve_alpha=True):
     """Load image with alpha channel preserved if needed."""
-    if preserve_alpha:
-        # Load image with alpha channel
-        img_rgba = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-        
-        if img_rgba is None:
-            return None, None
-        
-        # Check if image has alpha channel
-        if img_rgba.shape[2] == 4:
-            # Convert BGRA to RGBA for consistency
-            img_rgba = cv2.cvtColor(img_rgba, cv2.COLOR_BGRA2RGBA)
-            # Split into color and alpha
-            img_rgb = img_rgba[:, :, :3]
-            alpha = img_rgba[:, :, 3] / 255.0  # Normalize alpha to 0-1
-            return img_rgb, alpha
+    try:
+        if preserve_alpha:
+            # Use numpy to read file data to handle unicode paths
+            with open(image_path, 'rb') as f:
+                file_data = np.frombuffer(f.read(), dtype=np.uint8)
+            
+            # Decode image from buffer with alpha channel
+            img_rgba = cv2.imdecode(file_data, cv2.IMREAD_UNCHANGED)
+            
+            if img_rgba is None:
+                return None, None
+            
+            # Check if image has alpha channel
+            if len(img_rgba.shape) == 3 and img_rgba.shape[2] == 4:
+                # Convert BGRA to RGBA for consistency
+                img_rgba = cv2.cvtColor(img_rgba, cv2.COLOR_BGRA2RGBA)
+                # Split into color and alpha
+                img_rgb = img_rgba[:, :, :3]
+                alpha = img_rgba[:, :, 3] / 255.0  # Normalize alpha to 0-1
+                return img_rgb, alpha
+            else:
+                # No alpha channel, convert BGR to RGB and create full opacity mask
+                if len(img_rgba.shape) == 3:
+                    img_rgb = cv2.cvtColor(img_rgba, cv2.COLOR_BGR2RGB)
+                else:
+                    # Grayscale image
+                    img_rgb = cv2.cvtColor(img_rgba, cv2.COLOR_GRAY2RGB)
+                alpha = np.ones((img_rgb.shape[0], img_rgb.shape[1]), dtype=np.float32)
+                return img_rgb, alpha
         else:
-            # No alpha channel, convert BGR to RGB and create full opacity mask
-            img_rgb = cv2.cvtColor(img_rgba, cv2.COLOR_BGR2RGB)
-            alpha = np.ones((img_rgb.shape[0], img_rgb.shape[1]), dtype=np.float32)
-            return img_rgb, alpha
-    else:
-        # Fast loading without alpha for solid backgrounds
-        img_bgr = cv2.imread(image_path, cv2.IMREAD_COLOR)
-        
-        if img_bgr is None:
-            return None, None
-        
-        # Convert BGR to RGB
-        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-        # Return None for alpha when not needed
-        return img_rgb, None
+            # Fast loading without alpha for solid backgrounds
+            with open(image_path, 'rb') as f:
+                file_data = np.frombuffer(f.read(), dtype=np.uint8)
+            
+            img_bgr = cv2.imdecode(file_data, cv2.IMREAD_COLOR)
+            
+            if img_bgr is None:
+                return None, None
+            
+            # Convert BGR to RGB
+            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            # Return None for alpha when not needed
+            return img_rgb, None
+    except Exception as e:
+        print(f"Error loading image {image_path}: {e}")
+        return None, None
 
 def blend_with_alpha(foreground, background, alpha, position=None):
     """Blend foreground with background using alpha channel."""
@@ -265,20 +280,30 @@ def load_background(background_path, dimensions, duration_sec, start_ms, end_ms)
     
     if file_ext in image_extensions:
         print(f"Loading background image: {background_path}")
-        # Load as image
-        img = cv2.imread(background_path)
-        if img is None:
-            print(f"Warning: Could not load background image: {background_path}")
+        try:
+            # Use numpy to read file data to handle unicode paths
+            with open(background_path, 'rb') as f:
+                file_data = np.frombuffer(f.read(), dtype=np.uint8)
+            
+            # Decode image from buffer
+            img = cv2.imdecode(file_data, cv2.IMREAD_COLOR)
+            
+            if img is None:
+                print(f"Warning: Could not decode background image: {background_path}")
+                return None, None
+            
+            # Convert BGR to RGB for consistency with MoviePy
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            
+            # Resize to match dimensions
+            img = cv2.resize(img, (width, height))
+            
+            print(f"Background image loaded successfully: {img.shape}")
+            return img, None
+            
+        except Exception as e:
+            print(f"Warning: Could not load background image: {e}")
             return None, None
-        
-        # Convert BGR to RGB for consistency with MoviePy
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        
-        # Resize to match dimensions
-        img = cv2.resize(img, (width, height))
-        
-        # Return the same frame for all time points, no audio
-        return img, None
         
     elif file_ext in video_extensions:
         print(f"Loading background video: {background_path}")
@@ -511,10 +536,10 @@ def main():
     duration_sec = (duration_ms - start_ms) / 1000.0
     
     print(f"Video duration will be: {duration_sec:.2f} seconds (from {start_ms}ms to {duration_ms}ms)")
-    
-    # Load background if specified
+      # Load background if specified
     background_clip = None
     background_audio = None
+    background_image_data = None  # Store image data separately
     
     if args.background_path and args.background_path.strip():
         background_data, background_audio = load_background(
@@ -523,9 +548,8 @@ def main():
         
         if background_data is not None:
             if isinstance(background_data, np.ndarray):
-                # It's an image - create a static background frame function
-                def get_background_frame(t):
-                    return background_data
+                # It's an image - store it directly
+                background_image_data = background_data
                 background_clip = "image"
             else:
                 # It's a video clip
@@ -565,11 +589,10 @@ def main():
     def make_frame_wrapper(t):
         # t is in seconds, convert to ms and add start_time offset
         t_ms = int(t * 1000) + start_ms
-        
-        # Get background frame if available
+          # Get background frame if available
         bg_frame = None
         if background_clip == "image":
-            bg_frame = get_background_frame(t)
+            bg_frame = background_image_data
         elif background_clip is not None:
             # Get frame from video clip
             try:
@@ -632,7 +655,11 @@ def main():
 if __name__ == "__main__":
     main()
 
+# Test avec img de fond : 
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png"
 
-# ./video_creator.exe "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0 "background.mp4"
-
+# test avec video de fond :
 # py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\98\video_2476.mp4"
+
+# test sans fond : 
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0 ""
