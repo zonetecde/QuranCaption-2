@@ -191,17 +191,17 @@ def process_images_to_frames(folder_path, transition_ms, top_ratio, bottom_ratio
     # Extract background color from pixel (10,10) for transitions
     background_color = None
     background_alpha = None
-    if has_background and 10 < height and 10 < width:
+    if 10 < height and 10 < width:
         background_color = first_image_rgb[10, 10].copy()  # RGB color
-        if first_image_alpha is not None:
+        if has_background and first_image_alpha is not None:
             background_alpha = first_image_alpha[10, 10]
         else:
             background_alpha = 1.0
         print(f"Background color for transitions: RGB{tuple(background_color)} Alpha:{background_alpha:.3f}")
-    elif not has_background:
-        # For black background (no background video/image)
-        background_color = np.array([0, 0, 0], dtype=np.uint8)
-        background_alpha = 1.0
+    # elif not has_background:
+    #     # For black background (no background video/image)
+    #     background_color = np.array([0, 0, 0], dtype=np.uint8)
+    #     background_alpha = 1.0
     
     # Calculate section heights
     top_height = int(height * top_ratio)
@@ -434,21 +434,30 @@ def make_frame(t_ms, frames_data, static_top_data, static_bottom_data, dimension
                         # Create intermediate frame with background color
                         bg_frame = np.full_like(next_middle, background_color) if background_color is not None else np.zeros_like(next_middle)
                         bg_alpha = np.full_like(next_middle_alpha, background_alpha) if background_alpha is not None else np.ones_like(next_middle_alpha)
-                        
-                        # Blend background color with next image
+                          # Blend background color with next image
                         intermediate = cv2.addWeighted(bg_frame, 1-alpha_factor, next_middle, alpha_factor, 0)
                         intermediate_alpha = bg_alpha * (1-alpha_factor) + next_middle_alpha * alpha_factor
                         frame = blend_with_alpha(intermediate, frame, intermediate_alpha, position=(top_height, 0))
             else:
-                # Without background or alpha: fade RGB values to black
+                # Without background or alpha: fade RGB values to background color (or black if no background color)
                 if transition_progress < 0.5:
                     alpha_factor = 1.0 - transition_progress * 2
-                    fade_frame = cv2.addWeighted(middle_section, alpha_factor, np.zeros_like(middle_section), 1-alpha_factor, 0)
+                    # Use background color if available, otherwise black
+                    if background_color is not None:
+                        bg_frame = np.full_like(middle_section, background_color)
+                    else:
+                        bg_frame = np.zeros_like(middle_section)
+                    fade_frame = cv2.addWeighted(middle_section, alpha_factor, bg_frame, 1-alpha_factor, 0)
                     frame[top_height:top_height+middle_height] = fade_frame
                 else:
                     alpha_factor = (transition_progress - 0.5) * 2
                     next_middle = next_frame_data['middle']
-                    fade_frame = cv2.addWeighted(next_middle, alpha_factor, np.zeros_like(next_middle), 1-alpha_factor, 0)
+                    # Use background color if available, otherwise black
+                    if background_color is not None:
+                        bg_frame = np.full_like(next_middle, background_color)
+                    else:
+                        bg_frame = np.zeros_like(next_middle)
+                    fade_frame = cv2.addWeighted(bg_frame, 1-alpha_factor, next_middle, alpha_factor, 0)
                     frame[top_height:top_height+middle_height] = fade_frame
         else:
             # No transition
