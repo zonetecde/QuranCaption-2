@@ -151,20 +151,54 @@
 	</div>
 </div>
 
+<!-- export button -->
+
+<div class="grid xl:grid-cols-2 gap-4">
+	<button
+		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+		on:click={() => {
+			// Vérifie si le projet est exportable
+			if ($endTime !== null && $startTime > $endTime) {
+				toast.error('Invalid export time range');
+				return;
+			} else if ($endTime !== null && $startTime === $endTime) {
+				toast.error('Please select a time range to export');
+				return;
+			}
+			if ($currentProject.timeline.subtitlesTracks[0].clips.length === 0) {
+				toast.error('The video is empty');
+				return;
+			}
+
+			openExportWindow();
+		}}
+	>
+		Export your video
+	</button>
+	<button
+		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+		on:click={() => createOrShowExportDetailsWindow()}
+	>
+		Open export details window
+	</button>
+</div>
+
+<h3 class="text-xl font-bold mt-8 border-t-2 pt-8">Advanced Settings</h3>
+
 <!-- quality (slide bar from 1 to 3) -->
-<div class="flex flex-col mt-4">
+<div class="flex flex-col">
 	<p class="font-bold mr-2">Quality</p>
 	<p class="text-xs opacity-80 mt-1">
 		Adjust the quality of the exported video. Note that higher quality settings may increase export
 		times.<br />1 = 1080p and 2 = 4k.
 	</p>
-	<Slider title="Value" min={1} max={2} step={0.1} bind:bindValue={$quality} unit="x" />
+	<Slider title="Value" min={0.25} max={2} step={0.1} bind:bindValue={$quality} unit="x" />
 </div>
 
 <!-- fps number input -->
 <div class="flex flex-col mt-4">
-	<label for="fps" class="text-sm font-bold">FPS (Frames per second)</label>
-	<p class="text-xs opacity-80 mb-2">
+	<label for="fps" class="font-bold mr-2">FPS (Frames per second)</label>
+	<p class="text-xs opacity-80 mt-1 mb-1">
 		Adjust the FPS of the exported video. Higher FPS may result in smoother video but larger file
 		sizes.
 	</p>
@@ -308,10 +342,10 @@
 	</div>
 
 	<p class="text-sm text-white mt-3">
-		Note: Video with animated background will take longer to export, especially with high quality
-		settings. Ensure your computer meets the requirements for smooth exporting. If you think it is
-		taking too long, you can cancel the export and record your video with OBS (instructions can be
-		found
+		Note: Videos with animated backgrounds may take longer to export, especially when using
+		high-quality settings. Ensure your computer meets the necessary requirements for smooth
+		exporting. If the process seems to be taking too long, you can cancel the export and use OBS to
+		record your video instead (instructions can be found
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<span
@@ -321,36 +355,4 @@
 			}}>here</span
 		>)
 	</p>
-</div>
-
-<!-- export button -->
-
-<div class="grid xl:grid-cols-2 gap-4">
-	<button
-		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-		on:click={() => {
-			// Vérifie si le projet est exportable
-			if ($endTime !== null && $startTime > $endTime) {
-				toast.error('Invalid export time range');
-				return;
-			} else if ($endTime !== null && $startTime === $endTime) {
-				toast.error('Please select a time range to export');
-				return;
-			}
-			if ($currentProject.timeline.subtitlesTracks[0].clips.length === 0) {
-				toast.error('The video is empty');
-				return;
-			}
-
-			openExportWindow();
-		}}
-	>
-		Export your video
-	</button>
-	<button
-		class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-		on:click={() => createOrShowExportDetailsWindow()}
-	>
-		Open export details window
-	</button>
 </div>
