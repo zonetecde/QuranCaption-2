@@ -3,10 +3,7 @@
 	import { open as openLink } from '@tauri-apps/api/shell';
 </script>
 
-<p>
-	Quran Caption does not currently support exporting videos with a colored, image, or video
-	background. However, you can still export your video using these steps:
-</p>
+<p>If you encounter issues with the video export, you can use OBS Studio to record your video.</p>
 
 <ol class="ml-6 list-disc">
 	<li>

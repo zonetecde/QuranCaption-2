@@ -16,8 +16,8 @@
 		class="w-full p-2 rounded-md bg-[#383737] border-gray-800 outline-none text-white"
 		bind:value={$exportType}
 	>
-		<option value="video-static">Video (with BLACK background)</option>
-		<option value="video-obs">Video (with COLORED/VIDEO/IMAGE background)</option>
+		<option value="video-static">Video</option>
+		<option value="video-obs">Video (through OBS)</option>
 		<option value="sub">Subtitles</option>
 		<option value="ytb-chapters">Youtube chapters</option>
 	</select>
