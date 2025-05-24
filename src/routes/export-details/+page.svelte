@@ -24,7 +24,6 @@
 			currentlyExportingVideos = storedExports;
 
 			// vérifie qu'ils sont tous soit exported soit cancelled, sinon leur status est mis à cancelled
-			console.log('Vérification des exports qui sont en cours pour les cancels...');
 			currentlyExportingVideos = currentlyExportingVideos.map((video) => {
 				if (isVideoExportFinished(video)) {
 					return video;
