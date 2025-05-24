@@ -146,8 +146,31 @@
 	}
 
 	let showRawInputBox = false;
-	function askAIButtonClick() {
+	let pasteAIAnswerMode = false;
+	let rawTextBackup: string = '';
+	async function askAIButtonClick() {
 		showRawInputBox = !showRawInputBox;
+		pasteAIAnswerMode = false;
+		rawText = rawTextBackup; // Restore the raw text if it was previously set
+	}
+
+	async function genPrompt() {
+		if (rawText.length === 0) {
+			toast.error('Please enter the raw text before copying the prompt.');
+			return;
+		}
+
+		// copie le prompt dans le clipboard
+		let promptText: string = await (await fetch('/prompts/poems.txt')).text();
+		promptText = promptText.replace('@1', rawText);
+
+		navigator.clipboard.writeText(promptText);
+
+		toast.success('Prompt copied to clipboard! You can now go to Grok.com and paste it there.', {
+			duration: 12000
+		});
+		pasteAIAnswerMode = true;
+		rawTextBackup = rawText; // Save the raw text for later use
 	}
 
 	let isFetching = false;
@@ -239,6 +262,37 @@
 			});
 		}
 	}
+
+	async function jsonToPoems() {
+		if (!rawText || rawText.length === 0) {
+			toast.error('Please paste the AI response before converting it to poems.');
+			return;
+		}
+		if (!selectedText) return;
+
+		let json: any;
+		try {
+			json = JSON.parse(rawText);
+		} catch (e) {
+			toast.error('Invalid JSON format. Please check the AI response.');
+			return;
+		}
+
+		selectedText.verses = json.verses.map((verse: any, index: number) => {
+			// remove new line from translations
+			for (const lang in verse.translations) {
+				verse.translations[lang] = verse.translations[lang].replace('\n', ' *** ');
+			}
+
+			return {
+				id: verse.id,
+				text: verse.text.replace('\n', ' *** '),
+				translations: verse.translations
+			};
+		});
+
+		toast.success('Successfully converted the AI response to poems!');
+	}
 </script>
 
 {#if selectedText}
@@ -294,13 +348,21 @@
 				<textarea
 					class="absolute right-0 top-8 h-60 w-[500px] ml-1 border-4 border-b border-black bg-[#3c4251] rounded-md px-1 outline-none"
 					bind:value={rawText}
-					placeholder="The raw text containg the verses, the translations and everything else"
+					placeholder={pasteAIAnswerMode
+						? 'Paste AI answer here.\n\nExample:\n\n{\n  "verses": [\n    {\n      "id": 1,\n      "text": "ما لذَّةُ العيشِ إلّا صُحبَةَ الفُقَرا *** هُمُ السّلاطينُ والسّادَةُ الأُمَرا",\n      "translations": {\n        "en": "What delight is there in life except the company of the fuqara? *** They are the sultans, lords, and princes."\n      }\n    }\n  ]\n}'
+						: 'Paste here the raw text of the poem or text you want to format.\n\nExample with one verse:\n\nما لذَّةُ العيشِ إلّا صُحبَةَ الفُقَرا    هُمُ السّلاطينُ والسّادَةُ الأُمَرا\n\nWhat delight is there in life except the company of the fuqara?\nThey are the sultans, lords, and princes.'}
 				></textarea>
 				<button
 					class="absolute right-0 w-[500px] top-[16.9rem] text-white bg-gray-700 px-4 hover:bg-gray-800 border-4 border-t border-black"
-					on:click={sendToAi}
+					on:click={() => {
+						if (pasteAIAnswerMode) {
+							jsonToPoems();
+						} else {
+							genPrompt();
+						}
+					}}
 				>
-					Send to AI
+					<span>{pasteAIAnswerMode ? 'Paste AI answer and click here' : 'Copy prompt'}</span>
 				</button>
 			{/if}
 		</div>
