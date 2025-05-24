@@ -36,6 +36,7 @@ import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
 import { makeFileNameValid } from '$lib/ext/File';
 import { WebviewWindow } from '@tauri-apps/api/window';
+import { getAssetFromId } from '$lib/models/Asset';
 
 export function openExportWindow() {
 	// force save pour mettre à jour les paramètres d'export
@@ -300,6 +301,24 @@ export async function exportCurrentProjectAsVideo() {
 		audioPath = '';
 	}
 
+	// récupère l'image de fond/la vidéo de fond
+	let backgroundPath = '';
+	// s'il existe une vidéo on la prend
+	if (
+		_currentProject.timeline.videosTracks[0].clips.length > 0 &&
+		_currentProject.timeline.videosTracks[0].clips[0].assetId !== 'black-video'
+	) {
+		backgroundPath = getAssetFromId(
+			_currentProject.timeline.videosTracks[0].clips[0].assetId
+		)!.filePath;
+	} else if (
+		// en deuxieme cas, s'il existe une image de fond on la prend
+		_currentProject.projectSettings.globalSubtitlesSettings.background &&
+		_currentProject.projectSettings.globalSubtitlesSettings.backgroundImage
+	) {
+		backgroundPath = _currentProject.projectSettings.globalSubtitlesSettings.backgroundImage;
+	}
+
 	invoke('create_video', {
 		exportId: get(currentlyExportingId),
 		folderPath: `${EXPORT_PATH}${get(currentlyExportingId)}`,
@@ -314,7 +333,8 @@ export async function exportCurrentProjectAsVideo() {
 		dynamicTop:
 			(surahsInVideo.size > 1 &&
 				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable) ||
-			get(enableWm) // si il y a plusieurs sourates le top avec affichage de la sourate changera
+			get(enableWm), // si il y a plusieurs sourates le top avec affichage de la sourate changera
+		backgroundFile: backgroundPath
 	});
 
 	// Ferme la fenêtre d'export
