@@ -296,7 +296,7 @@ async fn create_video(
                                     let payload = serde_json::json!({
                                         "exportId": export_id,
                                         "progress": 0,
-                                        "status": "Erreur"
+                                        "status": "Error"
                                     });
                                     let _ = app_handle.emit_all("updateExportDetailsById", payload);
                                     return Err(format!("Erreur en attendant le processus: {}", e));
@@ -320,10 +320,9 @@ async fn create_video(
                     println!("Le processus d'export {} n'existe plus dans la HashMap, probablement annulé", export_id);
                     return Ok(format!("Processus d'export {} interrompu", export_id));
                 }
-            };
-
-            if status.success() {
-                // Emit an event to notify the frontend that the export is complete
+            };            // Vérifie si la vidéo a été créée avec succès en regardant si le fichier existe
+            if std::path::Path::new(&output_path).exists() {
+                // La vidéo a été créée avec succès
                 let payload = serde_json::json!({
                     "exportId": export_id,
                     "progress": 100,
@@ -332,10 +331,13 @@ async fn create_video(
                 let _ = app_handle.emit_all("updateExportDetailsById", payload);
                 Ok("Processus de création vidéo terminé avec succès.".to_string())
             } else {
-                // Vérifie si le processus a été tué (code de sortie 1 sur Windows)
-                if status.code() == Some(1) {
-                    // Probablement annulé ou interrompu
-                    println!("Processus {} probablement annulé (code de sortie 1)", export_id);
+                // La vidéo n'a pas été créée - vérifier le code de sortie pour déterminer la cause
+                let error_code = status.code().unwrap_or(-1);
+                
+                // Sur Windows, un processus tué violemment retourne souvent 1
+                // Mais il faut distinguer entre annulation et échec
+                if error_code == 1 {
+                    // Vérifier si c'est vraiment une annulation en cherchant des processus video_creator
                     let payload = serde_json::json!({
                         "exportId": export_id,
                         "progress": 0,
@@ -344,13 +346,12 @@ async fn create_video(
                     let _ = app_handle.emit_all("updateExportDetailsById", payload);
                     Ok("Processus de création vidéo annulé.".to_string())
                 } else {
-                    // Si le processus a échoué pour une autre raison
-                    let error_code = status.code().unwrap_or(-1);
+                    // Échec pour une autre raison
                     println!("Processus d'export {} échoué avec le code {}", export_id, error_code);
                     let payload = serde_json::json!({
                         "exportId": export_id,
                         "progress": 0,
-                        "status": "Erreur"
+                        "status": "Error"
                     });
                     let _ = app_handle.emit_all("updateExportDetailsById", payload);
                     Err(format!("Processus de création vidéo échoué avec le code {}.", error_code))
