@@ -380,16 +380,20 @@ def make_frame(t_ms, frames_data, static_top_data, static_bottom_data, dimension
     if next_frame_data and (next_frame_data['start_ms'] - transition_ms <= t_ms < next_frame_data['start_ms']):
         in_transition = True
         transition_progress = (t_ms - (next_frame_data['start_ms'] - transition_ms)) / transition_ms
-    
-    # Create the frame - start with background if available, otherwise black
+      # Create the frame - start with background if available, otherwise black
     if background_frame is not None:
         frame = background_frame.copy()
     else:
         frame = np.zeros((height, width, 3), dtype=np.uint8)
-    
-    # Determine if we're using alpha blending or direct placement
-    use_alpha = background_frame is not None and static_top_alpha is not None
-    
+      # Determine if we're using alpha blending or direct placement
+    # Use alpha blending if we have a background and any alpha data is available
+    use_alpha = background_frame is not None and (
+        static_top_alpha is not None or 
+        static_bottom_alpha is not None or 
+        (current_frame_data and current_frame_data.get('middle_alpha') is not None) or
+        (current_frame_data and current_frame_data.get('top_alpha') is not None)
+    )
+       
     # Add top section
     top_height = 0
     if static_top is not None:

@@ -13,7 +13,7 @@
 				? subtitleVerticalPosition
 				: 60}
 	{@const subtitleTextSize =
-		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size * 1.35}
+		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.size * 1.45}
 
 	<div
 		class="absolute top-0 left-1/2 -translate-x-1/2"
