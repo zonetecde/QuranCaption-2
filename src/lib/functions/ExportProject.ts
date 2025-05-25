@@ -45,7 +45,7 @@ export function openExportWindow() {
 	// force save pour mettre à jour les paramètres d'export
 	updateUsersProjects(get(currentProject));
 
-	const exportId = Math.floor(Math.random() * 1000000); // ID unique pour l'export
+	const exportId = random3lettersId(); // ID unique pour l'export
 
 	// Créer la fenêtre qui va prendre les screenshots
 	const webview = new WebviewWindow(exportId.toString(), {
@@ -95,7 +95,17 @@ export function openExportWindow() {
 	});
 }
 
-function updateExportStatus(exportId: number, progress: number, status: string) {
+function random3lettersId() {
+	// Génère un ID aléatoire de 3 lettres
+	const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	let id = '';
+	for (let i = 0; i < 3; i++) {
+		id += letters[Math.floor(Math.random() * letters.length)];
+	}
+	return id;
+}
+
+function updateExportStatus(exportId: string, progress: number, status: string) {
 	// Met à jour le statut de l'export
 	const exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
 	if (exportDetailsWindow) {
@@ -107,7 +117,7 @@ function updateExportStatus(exportId: number, progress: number, status: string) 
 	}
 }
 
-function updateVersesRange(exportId: number, selectedVersesRange: string) {
+function updateVersesRange(exportId: string, selectedVersesRange: string) {
 	// Met à jour la plage de versets sélectionnée pour l'export
 	const exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
 	if (exportDetailsWindow) {

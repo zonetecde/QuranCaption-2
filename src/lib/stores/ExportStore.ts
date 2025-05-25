@@ -11,7 +11,7 @@ export const orientation: Writable<'landscape' | 'portrait'> = writable('landsca
 export const exportType: Writable<ExportType> = writable('video-static');
 export const currentlyExporting: Writable<boolean> = writable(false); // Indique si on est en train d'exporter
 export const triggerSubtitleResize: Writable<boolean> = writable(false); // Indique si on doit redimensionner les sous-titres
-export const currentlyExportingId: Writable<number | null> = writable(null); // ID de l'exportation en cours
+export const currentlyExportingId: Writable<string | null> = writable(null); // ID de l'exportation en cours
 
 // Video section ratios (in percentage)
 export const topRatio: Writable<number> = writable(25); // default: 20%
@@ -25,7 +25,7 @@ export const fps: Writable<number> = writable(30); // default: 30 FPS
 export const enableWm: Writable<boolean> = writable(true);
 
 export interface VideoExportStatus {
-	exportId: number;
+	exportId: string;
 	projectName: string;
 	portrait: boolean;
 	status: string;
