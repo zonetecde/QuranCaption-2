@@ -369,7 +369,11 @@ export function getProjectPercentageTranslated(project: Project): number {
  * @param project - The project to get the verses range from.
  * @returns The verses range of the project. (ex: ['1:1->1:7', '114:1->114:6'])
  */
-export function getProjectVersesRange(project: Project): string[] {
+export function getProjectVersesRange(
+	project: Project,
+	startClipIndex: number = -1,
+	endClipIndex: number = -1
+): string[] {
 	const versesRange: string[] = [];
 	const clips = project.timeline.subtitlesTracks[0].clips;
 
@@ -377,6 +381,9 @@ export function getProjectVersesRange(project: Project): string[] {
 	let lastValidVerse = 0;
 
 	for (let i = 0; i < clips.length; i++) {
+		if (startClipIndex !== -1 && i < startClipIndex) continue; // skip clips before startClipIndex
+		if (endClipIndex !== -1 && i >= endClipIndex) break; // stop at endClipIndex
+
 		const clip = clips[i];
 
 		// Ignorer les clips de silence
@@ -427,7 +434,8 @@ export function getProjectVersesRange(project: Project): string[] {
 	}
 
 	// remove duplicates
-	return versesRange.filter((v, i, a) => a.indexOf(v) === i);
+	// et si il y a `-)` dans un texte, remplace par `)`
+	return versesRange.filter((v, i, a) => a.indexOf(v) === i).map((v) => v.replace(/-\)/g, ')'));
 }
 
 export function downloadYoutubeChapters() {

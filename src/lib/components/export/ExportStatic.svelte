@@ -122,6 +122,13 @@
 			false
 		)} (HH:MM:SS)
 	</label>
+
+	<p class="text-xs opacity-80">
+		Only clips that are visible for more than 40% of their duration will be exported; others will
+		appear as black frames. This allows you to overlap slightly with adjacent clips to create smooth
+		fade-in and fade-out effects at the beginning and end of your video. Audio fade effects will
+		also be applied at the start and end for seamless transitions.
+	</p>
 </div>
 
 <!-- landscape/portrait -->

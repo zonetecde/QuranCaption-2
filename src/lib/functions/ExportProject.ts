@@ -2,6 +2,7 @@ import { fullScreenPreview, setCurrentVideoTime, videoDimensions } from '$lib/st
 import {
 	currentProject,
 	getFirstAudioOrVideoPath,
+	getProjectVersesRange,
 	updateUsersProjects
 } from '$lib/stores/ProjectStore';
 import {
@@ -38,6 +39,7 @@ import { isEscapePressed } from '$lib/stores/ShortcutStore';
 import { makeFileNameValid } from '$lib/ext/File';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { getAssetFromId } from '$lib/models/Asset';
+import { confirm } from '@tauri-apps/api/dialog';
 
 export function openExportWindow() {
 	// force save pour mettre à jour les paramètres d'export
@@ -68,11 +70,13 @@ export function openExportWindow() {
 			status: 'Capturing video frames...',
 			outputPath: '',
 			progress: 0,
-			date: new Date()
+			date: new Date(),
+			selectedVersesRange: ''
 		};
 		exportDetail.outputPath = generateOutputPath({
 			projectName: exportDetail.projectName,
-			exportId: exportId
+			exportId: exportId,
+			selectedVersesRange: ''
 		} as VideoExportStatus);
 
 		webview.once('tauri://destroyed', function () {
@@ -103,6 +107,17 @@ function updateExportStatus(exportId: number, progress: number, status: string) 
 	}
 }
 
+function updateVersesRange(exportId: number, selectedVersesRange: string) {
+	// Met à jour la plage de versets sélectionnée pour l'export
+	const exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
+	if (exportDetailsWindow) {
+		exportDetailsWindow.emit('updateVersesRangeById', {
+			exportId: exportId,
+			selectedVersesRange: selectedVersesRange
+		});
+	}
+}
+
 function addExport(exportDetail: VideoExportStatus) {
 	// Ajoute l'export à la liste des exports en cours
 	const exportDetailsWindow = WebviewWindow.getByLabel('exportDetails');
@@ -112,7 +127,7 @@ function addExport(exportDetail: VideoExportStatus) {
 }
 
 export function generateOutputPath(project: VideoExportStatus) {
-	const outputPath = `${EXPORT_PATH}${makeFileNameValid(project.projectName) + '_' + project.exportId}.mp4`;
+	const outputPath = `${EXPORT_PATH}${makeFileNameValid(project.projectName) + '_' + project.selectedVersesRange + '_' + project.exportId}.mp4`;
 
 	return outputPath;
 }
@@ -221,6 +236,11 @@ export async function exportCurrentProjectAsVideo() {
 		setTimeout(resolve, 2000);
 	});
 
+	let iMinVerseRange = iMin,
+		iMaxVerseRange = iMax;
+	let fadeDurationBegin = 0;
+	let fadeDurationEnd = 0;
+
 	for (let i = iMin; i <= iMax; i++) {
 		let clip = subtitleClips[i];
 
@@ -244,6 +264,35 @@ export async function exportCurrentProjectAsVideo() {
 					showWm.set(false);
 				}
 			}
+		}
+
+		// Regarde la durée du clip
+		const clipDuration = clip.end - clip.start;
+		// Si c'est le tout premier clip ou le tout dernier clip, et que
+		// startTime ou endTime sont définis, et que la durée affiché du clip correspond à moins de 40% de la durée du clip,
+		// alors on le met en tant que silence
+		if (
+			i === iMin &&
+			get(startTime) !== null &&
+			clip.start < get(startTime)! - clipDuration * 0.7
+		) {
+			clip.isSilence = true;
+			clip.text = '';
+			clip.translations = {};
+			iMinVerseRange = iMin + 1;
+			// fade duration pour le début = temps entre le startTime et la fin du clip
+			fadeDurationBegin = Math.max(0, clip.end - get(startTime)!);
+		} else if (
+			i === iMax &&
+			get(endTime) !== null &&
+			clip.end > get(endTime)! + clipDuration * 0.7
+		) {
+			clip.isSilence = true;
+			clip.text = '';
+			clip.translations = {};
+			iMaxVerseRange = iMax - 1;
+			// fade duration pour la fin = temps entre le endTime et le début du clip
+			fadeDurationEnd = Math.max(0, get(endTime)! - clip.start);
 		}
 
 		await new Promise((resolve) => {
@@ -279,11 +328,19 @@ export async function exportCurrentProjectAsVideo() {
 		totalTime += clip.end - clip.start;
 		showWm.set(false);
 	}
+
+	// Récupère les versets sélectionnés
+	let selectedVersesRange = getProjectVersesRange(_currentProject, iMinVerseRange, iMaxVerseRange);
+	updateVersesRange(get(currentlyExportingId)!, selectedVersesRange.join(', '));
+
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 
 	// On sort du mode plein écran
 	fullScreenPreview.set(false);
 	currentlyExporting.set(false);
+
+	// Enlève tout les doublons dans surahsInVideo
+	surahsInVideo = new Set<number>([...surahsInVideo].sort((a, b) => a - b));
 
 	// Supprime le sous-titre temporaire (ceux qui ont pour id "temporary")
 	_currentProject.timeline.subtitlesTracks[0].clips =
@@ -293,7 +350,8 @@ export async function exportCurrentProjectAsVideo() {
 		exportId: get(currentlyExportingId)!,
 		projectName:
 			get(currentProject).name +
-			(get(currentProject).reciter ? ' (' + get(currentProject).reciter + ')' : '')
+			(get(currentProject).reciter ? ' (' + get(currentProject).reciter + ')' : ''),
+		selectedVersesRange: selectedVersesRange.join(', ')
 	} as VideoExportStatus);
 
 	// On appelle le script python pour créer la vidéo
@@ -305,17 +363,27 @@ export async function exportCurrentProjectAsVideo() {
 	// récupère l'image de fond/la vidéo de fond
 	let backgroundPath = '';
 	let isImage: boolean = false;
-	// s'il existe une vidéo on la prend
+	// s'il existe une vidéo ou une image on la prend en vidéo/img de fond.
+	// vérifie aussi qu'on a pas un overlay qui la cacherait, dans ce cas on
+	// ne prend pas la vidéo/image de fond (ce sera plus rapide pour générer la vidéo)
 	if (
 		_currentProject.timeline.videosTracks[0].clips.length > 0 &&
-		_currentProject.timeline.videosTracks[0].clips[0].assetId !== 'black-video'
+		_currentProject.timeline.videosTracks[0].clips[0].assetId !== 'black-video' &&
+		// S'il y a une vidéo de fond mais qu'elle est caché par l'overlay bg
+		((_currentProject.projectSettings.globalSubtitlesSettings.background &&
+			_currentProject.projectSettings.globalSubtitlesSettings.backgroundOpacity < 1) ||
+			_currentProject.projectSettings.globalSubtitlesSettings.background === false)
 	) {
 		backgroundPath = getAssetFromId(
 			_currentProject.timeline.videosTracks[0].clips[0].assetId
 		)!.filePath;
 	} else if (
 		// en deuxieme cas, s'il existe une image de fond on la prend
-		_currentProject.projectSettings.globalSubtitlesSettings.backgroundImage
+		_currentProject.projectSettings.globalSubtitlesSettings.backgroundImage &&
+		// S'il y a une image de fond mais qu'elle est caché par l'overlay bg
+		((_currentProject.projectSettings.globalSubtitlesSettings.background &&
+			_currentProject.projectSettings.globalSubtitlesSettings.backgroundOpacity < 1) ||
+			_currentProject.projectSettings.globalSubtitlesSettings.background === false)
 	) {
 		backgroundPath = _currentProject.projectSettings.globalSubtitlesSettings.backgroundImage;
 		isImage = true;
@@ -341,6 +409,8 @@ export async function exportCurrentProjectAsVideo() {
 		backgroundXTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoX,
 		backgroundYTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoY,
 		backgroundScale: isImage ? 1 : _currentProject.projectSettings.videoScale,
+		audioFadeStart: Math.floor(fadeDurationBegin),
+		audioFadeEnd: Math.floor(fadeDurationEnd),
 		fps: get(fps)
 	});
 

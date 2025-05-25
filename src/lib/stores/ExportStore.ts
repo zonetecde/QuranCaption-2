@@ -32,6 +32,7 @@ export interface VideoExportStatus {
 	progress: number; // 0-100
 	outputPath: string; // Chemin de sortie du fichier
 	date: Date; // Date de l'export
+	selectedVersesRange: string; // Plage de versets sélectionnée pour l'export
 }
 
 export function initExportSettings(project: Project) {

@@ -64,6 +64,8 @@ class VideoConfig:
     dynamic_top: bool
     background_path: str
     background_transform: BackgroundTransform
+    audio_fade_start: int
+    audio_fade_end: int
     fps: int = DEFAULT_FPS
     threads: int = DEFAULT_THREADS
 
@@ -779,7 +781,6 @@ class OptimizedVideoCreator:
                 duration_ms = self.config.end_time_ms
             else:
                 duration_ms = last_frame_end
-            
             duration_sec = (duration_ms - start_ms) / 1000.0
             print(f"Video duration: {duration_sec:.2f}s ({start_ms}ms to {duration_ms}ms)")
             
@@ -800,6 +801,21 @@ class OptimizedVideoCreator:
                         trimmed_audio = audio.subclip(start_ms/1000, start_ms/1000 + audio_duration)
                     else:
                         trimmed_audio = audio.subclip(0, audio_duration)
+                      # Apply audio fade effects
+                    fade_start_sec = self.config.audio_fade_start / 1000.0
+                    fade_end_sec = self.config.audio_fade_end / 1000.0
+                    
+                    if fade_start_sec > 0 or fade_end_sec > 0:
+                        print(f"Applying audio fade: start={fade_start_sec:.2f}s, end={fade_end_sec:.2f}s")
+                        
+                        # Apply fade-in at the beginning
+                        if fade_start_sec > 0 and fade_start_sec < trimmed_audio.duration:
+                            trimmed_audio = trimmed_audio.audio_fadein(fade_start_sec)
+                        
+                        # Apply fade-out at the end
+                        if fade_end_sec > 0 and fade_end_sec < trimmed_audio.duration:
+                            trimmed_audio = trimmed_audio.audio_fadeout(fade_end_sec)
+                    
                     final_video = video.set_audio(trimmed_audio)
                 except Exception as e:
                     print(f"Warning: Could not set audio: {e}")
@@ -892,6 +908,8 @@ def main():
     parser.add_argument("background_x", type=int, help="Background X translation")
     parser.add_argument("background_y", type=int, help="Background Y translation")
     parser.add_argument("background_scale", type=float, help="Background scale factor")
+    parser.add_argument("audio_fade_start", type=int, help="Audio fade in duration at start (ms)")
+    parser.add_argument("audio_fade_end", type=int, help="Audio fade out duration at end (ms)")
     parser.add_argument("--fps", type=int, default=DEFAULT_FPS, help="Output FPS")
     parser.add_argument("--threads", type=int, default=DEFAULT_THREADS, help="Processing threads")
     
@@ -904,6 +922,7 @@ def main():
     print(f"Transition: {args.transition_ms}ms")
     print(f"Background: {args.background_path}")
     print(f"Transform: X={args.background_x}, Y={args.background_y}, Scale={args.background_scale}")
+    print(f"Audio Fade: Start={args.audio_fade_start}ms, End={args.audio_fade_end}ms")
     print(f"FPS: {args.fps}, Threads: {args.threads}")
     print()
     
@@ -927,6 +946,8 @@ def main():
             translate_y=args.background_y,
             scale=args.background_scale
         ),
+        audio_fade_start=args.audio_fade_start,
+        audio_fade_end=args.audio_fade_end,
         fps=args.fps,
         threads=args.threads
     )

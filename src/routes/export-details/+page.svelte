@@ -10,7 +10,7 @@
 	import TitleBar from './TitleBar.svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { WebviewWindow } from '@tauri-apps/api/window';
-	import { isVideoExportFinished } from '$lib/functions/ExportProject';
+	import { generateOutputPath, isVideoExportFinished } from '$lib/functions/ExportProject';
 
 	let listeners: any[] = [];
 	let currentlyExportingVideos: VideoExportStatus[] = [];
@@ -78,17 +78,26 @@
 				currentlyExportingVideos[index].status = event.payload.status;
 				//@ts-ignore
 				currentlyExportingVideos[index].progress = event.payload.progress;
-
-				//@ts-ignore
-				// if (event.payload.status === 'Exported') {
-				// 	// ouvre le dossier de l'export
-				// 	setTimeout(() => {
-				// 		invoke('open_file_dir', { path: currentlyExportingVideos[index].outputPath });
-				// 	}, 1000);
-				// }
 			}
 		});
 		listeners.push(l2);
+
+		const l3 = await listen('updateVersesRangeById', (event) => {
+			//@ts-ignore
+			const index = currentlyExportingVideos.findIndex(
+				//@ts-ignore
+				(video) => video.exportId === event.payload.exportId
+			);
+			if (index !== -1) {
+				//@ts-ignore
+				currentlyExportingVideos[index].selectedVersesRange = event.payload.selectedVersesRange;
+				//@ts-ignore
+				currentlyExportingVideos[index].outputPath = generateOutputPath(
+					currentlyExportingVideos[index]
+				);
+			}
+		});
+		listeners.push(l3);
 	});
 
 	onDestroy(() => {
@@ -144,10 +153,11 @@
 			>
 				<div class="text-sm flex">
 					<p class="text-[1rem] font-bold">
-						{video.projectName}
+						{video.projectName}<br />
 					</p>
+
 					<!-- portrait mode on the right corner -->
-					<p class="text-[1rem] ml-auto text-sm">
+					<p class="text-[1rem] ml-auto text-sm text-right">
 						{video.portrait ? 'Portrait' : 'Landscape'} - {new Date(video.date).toLocaleString(
 							'en-GB',
 							{
@@ -158,6 +168,9 @@
 								minute: '2-digit'
 							}
 						)}
+
+						<br />
+						<span class="text-xs font-normal">{video.selectedVersesRange || ''}</span>
 					</p>
 				</div>
 

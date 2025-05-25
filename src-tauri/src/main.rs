@@ -185,6 +185,8 @@ async fn create_video(
     background_x_translation: f32,
     background_y_translation: f32,
     background_scale: f32,
+    audio_fade_start: i32,
+    audio_fade_end: i32,
     fps: i32,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
@@ -208,6 +210,8 @@ async fn create_video(
                 background_x_translation.to_string(),
                 background_y_translation.to_string(),
                 background_scale.to_string(),
+                audio_fade_start.to_string(),
+                audio_fade_end.to_string(),
             ];
 
             // ajout parametre optionnel: --fps
