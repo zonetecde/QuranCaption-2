@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { getVerseTranslation } from '$lib/functions/Translation';
-	import { currentProject, getDefaultsTranslationSettings } from '$lib/stores/ProjectStore';
+	import {
+		currentProject,
+		getDefaultsTranslationSettings,
+		getUserProjects
+	} from '$lib/stores/ProjectStore';
 	import { editions } from '$lib/stores/QuranStore';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
 	import { fade } from 'svelte/transition';
 
@@ -26,6 +30,10 @@
 		await Promise.all(
 			$currentProject.timeline.subtitlesTracks[0].clips.map(async (element) => {
 				if (element.verse === -1 || element.surah === -1) return; // Skip if it's not a verse (silence, basmala, etc.
+
+				console.log(
+					`Downloading translation for ${element.surah}:${element.verse} (${selectedEditionName})`
+				);
 
 				// Download the translation for the verse
 				let translation = await getVerseTranslation(
@@ -98,14 +106,67 @@
 
 		toast.success('Translation added');
 	}
+
+	let recentUsedEditions: {
+		id: string;
+		name: string;
+	}[] = [];
+
+	onMount(async () => {
+		// recent editions
+		let userProjects = (await getUserProjects()).reverse();
+
+		for (let i = 0; i < (userProjects.length > 10 ? 10 : userProjects.length); i++) {
+			const element = userProjects[i];
+			element.translations.forEach((trans) => {
+				const edition = $editions.find((edition) => edition.name === trans);
+				if (!edition) return;
+				if (recentUsedEditions.find((edition) => edition.id === trans)) return;
+
+				recentUsedEditions = [
+					...recentUsedEditions,
+					{
+						id: trans,
+						name:
+							edition.language +
+							' - ' +
+							edition.author.slice(0, 30) +
+							(edition.author.length > 30 ? '...' : '')
+					}
+				];
+			});
+		}
+	});
 </script>
 
 <div class="absolute inset-0 z-50 backdrop-blur-sm" transition:fade|global>
 	<div class="w-full h-full flex items-center justify-center">
 		<div
-			class="w-[400px] h-[500px] rounded-2xl bg-[#1b1a1a] border-2 border-[#2e2b2b] shadow-black shadow-2xl flex flex-col items-center gap-y-3 p-2 relative"
+			class="w-[400px] rounded-2xl bg-[#1b1a1a] border-2 border-[#2e2b2b] shadow-black shadow-2xl flex flex-col items-center gap-y-3 p-2 relative"
 		>
 			{#if $editions}
+				<h2 class="text-white text-lg font-bold">Add a new translation</h2>
+				{#if recentUsedEditions.length > 0}
+					<div class="w-full flex flex-col gap-y-2">
+						<p>Recently used :</p>
+					</div>
+					<div class="grid grid-cols-2 flex-row flex-wrap gap-2">
+						{#each recentUsedEditions as edition}
+							<abbr title={edition.name} class="w-full">
+								<button
+									class="truncate w-full text-xs bg-slate-700 text-white p-1 rounded-lg hover:bg-slate-600 duration-100"
+									on:click={() => {
+										selectedEditionName = edition.id;
+										handleTranslationSelected();
+									}}
+								>
+									{edition.name}
+								</button>
+							</abbr>
+						{/each}
+					</div>
+				{/if}
+
 				<select
 					class="w-full bg-transparent border-2 border-slate-500 p-1 rounded-lg outline-none"
 					bind:value={selectedEditionName}
