@@ -246,8 +246,13 @@ export async function exportCurrentProjectAsVideo() {
 		setTimeout(resolve, 2000);
 	});
 
+	// Contient les iMin et iMax des versets sélectionnés
+	// (en enlevant les clips qui apparaissent à moins de 40% de leur durée)
 	let iMinVerseRange = iMin,
 		iMaxVerseRange = iMax;
+
+	// Contient le temps des clips qui apparaissent à moins de 40% de leur durée en début et en fin de vidéo
+	// pour appliquer le fade audio
 	let fadeDurationBegin = 0;
 	let fadeDurationEnd = 0;
 
@@ -259,6 +264,7 @@ export async function exportCurrentProjectAsVideo() {
 		cursorPosition.set(clip.start + 30);
 		triggerSubtitleResize.set(false);
 
+		// Wm
 		if (get(enableWm)) {
 			if (totalTime > 10 * 1000 && firstWmShown === false) {
 				// wm après 10 secondes
@@ -343,6 +349,7 @@ export async function exportCurrentProjectAsVideo() {
 	let selectedVersesRange = getProjectVersesRange(_currentProject, iMinVerseRange, iMaxVerseRange);
 	updateVersesRange(get(currentlyExportingId)!, selectedVersesRange.join(', '));
 
+	// Remet les paramètres
 	_currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
 
 	// On sort du mode plein écran
@@ -356,6 +363,7 @@ export async function exportCurrentProjectAsVideo() {
 	_currentProject.timeline.subtitlesTracks[0].clips =
 		_currentProject.timeline.subtitlesTracks[0].clips.filter((clip) => clip.id !== 'temporary');
 
+	// Génère le nom du fichier de sortie (format : nom projet (recitateur)_versets_exportId.mp4)
 	const outputPath = generateOutputPath({
 		exportId: get(currentlyExportingId)!,
 		projectName:
@@ -365,6 +373,7 @@ export async function exportCurrentProjectAsVideo() {
 	} as VideoExportStatus);
 
 	// On appelle le script python pour créer la vidéo
+	// Récupère le path vers l'audio du projet
 	let audioPath = getFirstAudioOrVideoPath();
 	if (audioPath === './black-vid.mp4') {
 		audioPath = '';
