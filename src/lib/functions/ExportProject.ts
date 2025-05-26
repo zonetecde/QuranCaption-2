@@ -408,7 +408,7 @@ export async function exportCurrentProjectAsVideo() {
 		isImage = true;
 	}
 
-	await invoke('create_video', {
+	invoke('create_video', {
 		exportId: get(currentlyExportingId),
 		folderPath: `${EXPORT_PATH}${get(currentlyExportingId)}`,
 		audioPath: audioPath,
