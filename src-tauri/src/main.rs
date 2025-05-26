@@ -234,7 +234,7 @@ async fn create_video(
 
             #[cfg(target_os = "windows")]
             {
-                // command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+                command.creation_flags(0x08000000); // CREATE_NO_WINDOW
             }            // Start the process
             let mut child = command
                 .spawn()
