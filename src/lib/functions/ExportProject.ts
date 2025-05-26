@@ -408,7 +408,7 @@ export async function exportCurrentProjectAsVideo() {
 		isImage = true;
 	}
 
-	invoke('create_video', {
+	await invoke('create_video', {
 		exportId: get(currentlyExportingId),
 		folderPath: `${EXPORT_PATH}${get(currentlyExportingId)}`,
 		audioPath: audioPath,
@@ -430,7 +430,7 @@ export async function exportCurrentProjectAsVideo() {
 		backgroundScale: isImage ? 1 : _currentProject.projectSettings.videoScale,
 		audioFadeStart: Math.floor(fadeDurationBegin),
 		audioFadeEnd: Math.floor(fadeDurationEnd),
-		fps: get(fps)
+		fps: get(fps) || 30
 	});
 
 	// Ferme la fenêtre d'export

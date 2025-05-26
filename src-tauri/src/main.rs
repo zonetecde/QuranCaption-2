@@ -16,13 +16,13 @@ use regex::Regex;
 use std::os::windows::process::CommandExt;
 
 // Stockage global des processus en cours
-static EXPORT_PROCESSES: Lazy<Mutex<HashMap<i32, Child>>> = Lazy::new(|| {
+static EXPORT_PROCESSES: Lazy<Mutex<HashMap<String, Child>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, cancel_export, is_export_running, close, open_file_dir])
+    .invoke_handler(                                                                                                    tauri::generate_handler![get_video_duration, all_families, get_file_content, do_file_exist, download_youtube_video, path_to_executable, create_video, cancel_export, is_export_running, close, open_file_dir])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -171,7 +171,7 @@ fn path_to_executable() -> Result<String, String> {
 
 #[tauri::command]
 async fn create_video(
-    export_id: i32,
+    export_id: String,
     folder_path: String,
     audio_path: String,
     transition_ms: i32,
@@ -191,7 +191,7 @@ async fn create_video(
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     let path_resolver: tauri::PathResolver = app_handle.path_resolver();
-
+    
     // Attempt to resolve the path to the bundled 'video_creator' binary
     match path_resolver.resolve_resource("binaries/video_creator") {
         Some(video_creator_path) => {
@@ -234,7 +234,7 @@ async fn create_video(
 
             #[cfg(target_os = "windows")]
             {
-                command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+                // command.creation_flags(0x08000000); // CREATE_NO_WINDOW
             }            // Start the process
             let mut child = command
                 .spawn()
@@ -246,7 +246,7 @@ async fn create_video(
             // Enregistre le processus dans le gestionnaire
             {
                 let mut processes = EXPORT_PROCESSES.lock().unwrap();
-                processes.insert(export_id, child);
+                processes.insert(export_id.clone(), child);
             }
             
             // Obtient un nouveau Child pour continuer le traitement
@@ -456,7 +456,7 @@ fn open_file_dir(path: String) {
 }
 
 #[tauri::command]
-async fn cancel_export(export_id: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn cancel_export(export_id: String, app_handle: tauri::AppHandle) -> Result<String, String> {
     // Essaie de récupérer et supprimer le processus associé à cet export_id
     let mut processes = EXPORT_PROCESSES.lock().unwrap();
     if let Some(mut child) = processes.remove(&export_id) {
@@ -518,7 +518,7 @@ async fn cancel_export(export_id: i32, app_handle: tauri::AppHandle) -> Result<S
 }
 
 #[tauri::command]
-async fn is_export_running(export_id: i32) -> bool {
+async fn is_export_running(export_id: String) -> bool {
     let processes = EXPORT_PROCESSES.lock().unwrap();
     processes.contains_key(&export_id)
 }
