@@ -796,12 +796,31 @@ class OptimizedVideoCreator:
             
             if audio:
                 try:
-                    audio_duration = min(duration_sec, audio.duration)
+                    # Calculate audio trimming
                     if self.config.audio_path:
-                        trimmed_audio = audio.subclip(start_ms/1000, start_ms/1000 + audio_duration)
+                        audio_start_sec = start_ms / 1000.0
+                        available_audio_duration = audio.duration - audio_start_sec
+                        
+                        if available_audio_duration > 0:
+                            # Trim audio from start position
+                            trimmed_audio = audio.subclip(audio_start_sec, min(audio.duration, audio_start_sec + duration_sec))
+                            
+                            # Extend with silence if needed
+                            if trimmed_audio.duration < duration_sec:
+                                trimmed_audio = self._extend_audio_with_silence(trimmed_audio, duration_sec)
+                        else:
+                            print(f"Warning: Audio start time {audio_start_sec:.2f}s exceeds audio duration {audio.duration:.2f}s")
+                            # Create silent audio for the entire duration
+                            silent_audio = audio.subclip(0, min(0.1, audio.duration)).volumex(0.0)
+                            trimmed_audio = silent_audio.loop(duration=duration_sec)
                     else:
-                        trimmed_audio = audio.subclip(0, audio_duration)
-                      # Apply audio fade effects
+                        # Background audio case
+                        if audio.duration < duration_sec:
+                            trimmed_audio = self._extend_audio_with_silence(audio, duration_sec)
+                        else:
+                            trimmed_audio = audio.subclip(0, duration_sec)
+                    
+                    # Apply audio fade effects
                     fade_start_sec = self.config.audio_fade_start / 1000.0
                     fade_end_sec = self.config.audio_fade_end / 1000.0
                     
@@ -863,11 +882,11 @@ class OptimizedVideoCreator:
             return False
     
     def _load_audio(self) -> Optional[AudioFileClip]:
-        """Load audio file with fallback to background audio"""
+        """Load audio file with fallback to background audio and silence extension"""
         try:
             if self.config.audio_path and os.path.exists(self.config.audio_path):
                 audio = AudioFileClip(self.config.audio_path)
-                print(f"Audio loaded: {self.config.audio_path}")
+                print(f"Audio loaded: {self.config.audio_path} (duration: {audio.duration:.2f}s)")
                 return audio
             elif self.background_processor and self.background_processor.video_clip and self.background_processor.video_clip.audio:
                 print("Using background video audio")
@@ -877,6 +896,32 @@ class OptimizedVideoCreator:
         except Exception as e:
             print(f"Warning: Could not load audio: {e}")
         return None
+
+    def _extend_audio_with_silence(self, audio: AudioFileClip, target_duration: float) -> AudioFileClip:
+        """Extend audio with silence to match target duration"""
+        try:
+            if audio.duration >= target_duration:
+                return audio
+            
+            print(f"Extending audio from {audio.duration:.2f}s to {target_duration:.2f}s with silence")
+            
+            # Create silence for the remaining duration
+            silence_duration = target_duration - audio.duration
+            
+            # Create a silent audio clip
+            # We use a simple approach: create a very quiet audio clip
+            silent_audio = audio.subclip(0, min(0.1, audio.duration)).volumex(0.0)
+            silent_audio = silent_audio.loop(duration=silence_duration)
+            
+            # Concatenate original audio with silence
+            from moviepy.editor import concatenate_audioclips
+            extended_audio = concatenate_audioclips([audio, silent_audio])
+            
+            return extended_audio
+            
+        except Exception as e:
+            print(f"Warning: Could not extend audio with silence: {e}")
+            return audio
     
     def _cleanup(self):
         """Cleanup resources and temporary files"""
@@ -971,3 +1016,7 @@ if __name__ == "__main__":
 
 # test avec transformations background :
 # py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png" 50 -30 1.5
+
+# Nancy
+
+# py video_creator.py "C:\Users\zonedetec\AppData\Local\Quran Caption\export\2" "C:\Users\zonedetec\Documents\quran.al.luhaidan\49\audio_4008.webm" 300 903034 923081 "./output.mp4" 0.25 0.25 0 "" 0 0 0 1.0 0 0
