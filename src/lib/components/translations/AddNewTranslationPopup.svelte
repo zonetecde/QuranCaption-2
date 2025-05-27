@@ -142,7 +142,7 @@
 <div class="absolute inset-0 z-50 backdrop-blur-sm" transition:fade|global>
 	<div class="w-full h-full flex items-center justify-center">
 		<div
-			class="w-[400px] rounded-2xl bg-[#1b1a1a] border-2 border-[#2e2b2b] shadow-black shadow-2xl flex flex-col items-center gap-y-3 p-2 relative"
+			class="w-[400px] max-h-[700px] rounded-2xl bg-[#1b1a1a] border-2 border-[#2e2b2b] shadow-black shadow-2xl flex flex-col items-center gap-y-3 p-2 relative"
 		>
 			{#if $editions}
 				<h2 class="text-white text-lg font-bold">Add a new translation</h2>
