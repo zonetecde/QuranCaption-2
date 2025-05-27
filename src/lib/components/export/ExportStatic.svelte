@@ -190,6 +190,12 @@
 	</button>
 </div>
 
+<p class="text-xs text-center italic">
+	When exporting your video, a watermark will appear at the top center for a few seconds. If you'd
+	like to remove the watermark, feel free to contact me on Discord or via email for assistance.
+	(it's free dw 😉)
+</p>
+
 <h3 class="text-xl font-bold mt-8 border-t-2 pt-8">Advanced Settings</h3>
 
 <!-- quality (slide bar from 1 to 3) -->
