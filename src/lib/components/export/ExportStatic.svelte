@@ -191,7 +191,7 @@
 	</button>
 </div>
 
-{#if !$showWm}
+{#if $showWm}
 	<p class="text-xs text-center italic">
 		When exporting your video, a watermark will appear at the top center for a few seconds. If you'd
 		like to remove the watermark, feel free to contact me on Discord or via email for assistance.
