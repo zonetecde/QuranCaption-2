@@ -137,9 +137,34 @@ function addExport(exportDetail: VideoExportStatus) {
 }
 
 export function generateOutputPath(project: VideoExportStatus) {
-	const outputPath = `${EXPORT_PATH}${makeFileNameValid(project.projectName) + '_' + project.selectedVersesRange + '_' + project.exportId}.mp4`;
+	const baseFileName = `${makeFileNameValid(project.projectName)}_${project.selectedVersesRange}_${project.exportId}`;
+	const extension = '.mp4';
+	const maxLength = 245 - EXPORT_PATH!.length - extension.length;
 
-	return outputPath;
+	let fileName = baseFileName;
+
+	if (fileName.length > maxLength) {
+		// Calculate available space for selectedVersesRange
+		const projectNamePart = `${makeFileNameValid(project.projectName)}_`;
+		const exportIdPart = `_${project.exportId}`;
+		const availableForVerses = maxLength - projectNamePart.length - exportIdPart.length;
+
+		if (availableForVerses > 10) {
+			// Ensure we have reasonable space
+			const halfSpace = Math.floor((availableForVerses - 3) / 2); // -3 for "..."
+			const versesStart = project.selectedVersesRange.substring(0, halfSpace);
+			const versesEnd = project.selectedVersesRange.substring(
+				project.selectedVersesRange.length - halfSpace
+			);
+			const truncatedVerses = `${versesStart}...${versesEnd}`;
+			fileName = `${projectNamePart}${truncatedVerses}${exportIdPart}`;
+		} else {
+			// If not enough space, just truncate the whole thing
+			fileName = baseFileName.substring(0, maxLength);
+		}
+	}
+
+	return `${EXPORT_PATH}${fileName}${extension}`;
 }
 
 // Créer la fenêtre qui affiche tout les exports en cours si elle n'existe pas
