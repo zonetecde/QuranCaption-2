@@ -13,8 +13,7 @@
 		orientation,
 		quality,
 		exportType,
-		fps,
-		showWm
+		fps
 	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
@@ -191,13 +190,10 @@
 	</button>
 </div>
 
-{#if $showWm}
-	<p class="text-xs text-center italic">
-		When exporting your video, a watermark will appear at the top center for a few seconds. If you'd
-		like to remove the watermark, feel free to contact me on Discord or via email for assistance.
-		(it's free dw <span class=" not-italic">😉</span>)
-	</p>
-{/if}
+<p class="text-sm">
+	I would really appreciate if you could mention @qurancaption in your video description or comment
+	section and share your video with us!
+</p>
 
 <h3 class="text-xl font-bold mt-8 border-t-2 pt-8">Advanced Settings</h3>
 

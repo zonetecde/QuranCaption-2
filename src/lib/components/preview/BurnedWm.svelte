@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { currentlyExporting, showWm } from '$lib/stores/ExportStore';
+	import { currentlyExporting } from '$lib/stores/ExportStore';
 	import { currentProject } from '$lib/stores/ProjectStore';
 </script>
 
-{#if $currentlyExporting && $showWm}
+{#if $currentlyExporting}
 	{@const subtitleVerticalPosition =
 		$currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.verticalPosition + 40}
 	{@const usedVerticalPos =

@@ -30,8 +30,6 @@ import {
 	quality,
 	currentlyExportingId,
 	type VideoExportStatus,
-	showWm,
-	enableWm,
 	fps
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
@@ -289,24 +287,6 @@ export async function exportCurrentProjectAsVideo() {
 		cursorPosition.set(clip.start + 30);
 		triggerSubtitleResize.set(false);
 
-		// Wm
-		if (get(enableWm)) {
-			if (totalTime > 10 * 1000 && firstWmShown === false) {
-				// wm après 10 secondes
-				showWm.set(true);
-				firstWmShown = true;
-			}
-			// ou sinon si on a dépassé 2 minutes, wm toutes les 4 minutes
-			else if (totalTime > 2 * 60 * 1000) {
-				if (lastTimeShown + 4 * 60 * 1000 < totalTime) {
-					showWm.set(true);
-					lastTimeShown = totalTime;
-				} else {
-					showWm.set(false);
-				}
-			}
-		}
-
 		// Regarde la durée du clip
 		const clipDuration = clip.end - clip.start;
 		// Si c'est le tout premier clip ou le tout dernier clip, et que
@@ -367,7 +347,6 @@ export async function exportCurrentProjectAsVideo() {
 		);
 
 		totalTime += clip.end - clip.start;
-		showWm.set(false);
 	}
 
 	// Récupère les versets sélectionnés
@@ -445,9 +424,8 @@ export async function exportCurrentProjectAsVideo() {
 		topRatio: get(topRatio) / 100,
 		bottomRatio: get(bottomRatio) / 100,
 		dynamicTop:
-			(surahsInVideo.size > 1 &&
-				_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable) ||
-			get(enableWm), // si il y a plusieurs sourates le top avec affichage de la sourate changera
+			surahsInVideo.size > 1 &&
+			_currentProject.projectSettings.globalSubtitlesSettings.surahNameSettings.enable, // si il y a plusieurs sourates le top avec affichage de la sourate changera
 		backgroundFile: backgroundPath,
 		// on desactive les translations/size si c'est une image
 		backgroundXTranslation: isImage ? 0 : _currentProject.projectSettings.translateVideoX,
