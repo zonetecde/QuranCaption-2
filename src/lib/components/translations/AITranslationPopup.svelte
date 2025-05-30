@@ -72,12 +72,12 @@
 		Once you have copied the prompt, go to <button
 			class="text-blue-300"
 			on:click={() => {
-				openLink('https://grok.com');
-			}}>Grok.com</button
+				openLink('https://gemini.google.com');
+			}}>Gemini.google.com</button
 		> and paste it there. (I found that it is currently the best AI for this task, but you can use any
 		AI you prefer.)
 	</p>
-	<p class="text-sm text-justify">Then, paste what Grok provided here:</p>
+	<p class="text-sm text-justify">Then, paste what Gemini provided here:</p>
 
 	<div class="flex flex-col mt-4">
 		<textarea

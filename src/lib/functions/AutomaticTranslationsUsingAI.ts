@@ -167,7 +167,7 @@ export async function generateTranslationsPrompt(
 
 	navigator.clipboard.writeText(promptWithInput);
 	toast.success(
-		`Prompt copied to clipboard! Contains ${input.length} incomplete verses. Go to Grok.com and paste it there.`,
+		`Prompt copied to clipboard! Contains ${input.length} incomplete verses. Go to gemini.google.com and paste it there.`,
 		{
 			duration: 7000
 		}

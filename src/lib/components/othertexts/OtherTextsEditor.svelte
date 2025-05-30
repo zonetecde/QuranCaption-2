@@ -166,9 +166,12 @@
 
 		navigator.clipboard.writeText(promptText);
 
-		toast.success('Prompt copied to clipboard! You can now go to Grok.com and paste it there.', {
-			duration: 12000
-		});
+		toast.success(
+			'Prompt copied to clipboard! You can now go to gemini.google.com and paste it there.',
+			{
+				duration: 12000
+			}
+		);
 		pasteAIAnswerMode = true;
 		rawTextBackup = rawText; // Save the raw text for later use
 	}
