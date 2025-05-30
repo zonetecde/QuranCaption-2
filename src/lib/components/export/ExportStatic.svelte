@@ -191,8 +191,8 @@
 </div>
 
 <p class="text-sm">
-	I would really appreciate if you could mention @qurancaption in your video description or comment
-	section and share your video with us!
+	I would really appreciate it if you could mention Quran Caption in your video description or
+	comments section and share your video with me!
 </p>
 
 <h3 class="text-xl font-bold mt-8 border-t-2 pt-8">Advanced Settings</h3>
