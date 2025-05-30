@@ -37,7 +37,6 @@
 	import BurnedSurahName from './BurnedSurahName.svelte';
 	import VideoSectionRatio from './VideoSectionRatio.svelte';
 	import BurnedSubscribeButton from './BurnedSubscribeButton.svelte';
-	import BurnedWm from './BurnedWm.svelte';
 
 	export let hideControls = false;
 	let isPreviewLoading = true;
@@ -370,7 +369,6 @@
 			<BurnedCreatorText />
 
 			<BurnedSurahName bind:currentSubtitle />
-			<BurnedWm />
 
 			<BurnedSubscribeButton />
 
