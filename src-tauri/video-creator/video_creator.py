@@ -213,7 +213,26 @@ class BackgroundProcessor:
         try:
             height, width = self.dimensions
             self.video_clip = VideoFileClip(self.background_path)
-            self.video_clip = self.video_clip.resize((width, height))
+            
+            # Étape 1: Redimensionner pour couvrir complètement la zone (sans crop encore)
+            original_width, original_height = self.video_clip.size
+            original_aspect = original_width / original_height
+            target_aspect = width / height
+            
+            if original_aspect > target_aspect:
+                # La vidéo est plus large, on redimensionne par la hauteur
+                new_height = height
+                new_width = int(height * original_aspect)
+            else:
+                # La vidéo est plus haute, on redimensionne par la largeur
+                new_width = width
+                new_height = int(width / original_aspect)
+            
+            # Redimensionner en gardant l'aspect ratio
+            self.video_clip = self.video_clip.resize((new_width, new_height))
+            
+            # Étape 2: Les transformations seront appliquées dans _transform_frame
+            # On ne fait PAS le crop ici, car les transformations peuvent changer la position
             
             # Calculate trim times
             trim_start = self.start_ms / 1000.0
@@ -233,7 +252,7 @@ class BackgroundProcessor:
                 self.video_clip = self.video_clip.loop(duration=self.duration_sec)
             
             self.is_video = True
-            print(f"Background video loaded: {self.video_clip.duration:.2f}s")
+            print(f"Background video loaded: {self.video_clip.duration:.2f}s, size: {self.video_clip.size}")
             
         except Exception as e:
             print(f"Error loading background video: {e}")
@@ -268,57 +287,55 @@ class BackgroundProcessor:
                 return self.frame_cache[transform_key]
         
         try:
-            # CSS applique : scale() puis translateX() translateY()
-            # On simule cela en appliquant d'abord le scale, puis en calculant les translations
-            
-            # Étape 1: Appliquer le scale comme CSS (redimensionner depuis le centre)
+            # Étape 1: Appliquer le scale depuis le centre (comme CSS scale())
             if self.transform.scale != 1.0:
                 orig_h, orig_w = frame.shape[:2]
                 new_w = int(orig_w * self.transform.scale)
                 new_h = int(orig_h * self.transform.scale)
                 frame = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
             
-            # Créer le canvas de sortie
-            canvas = np.zeros((height, width, 3), dtype=np.uint8)
             src_h, src_w = frame.shape[:2]
             
-            # Étape 2: Calculer la position initiale (centré comme CSS object-contain)
-            # Le comportement object-contain centre l'image dans le conteneur
-            center_x = width // 2
-            center_y = height // 2
+            # Étape 2: Créer le résultat final avec les bonnes dimensions
+            result = np.zeros((height, width, 3), dtype=np.uint8)
             
-            # Position de départ (centrée)
-            start_x = center_x - (src_w // 2)
-            start_y = center_y - (src_h // 2)
+            # Étape 3: Calculer la position après translation
+            # Position du coin supérieur gauche de la frame dans le résultat
+            # Par défaut, on centre la frame
+            start_x = (width - src_w) // 2
+            start_y = (height - src_h) // 2
             
-            # Étape 3: Appliquer les translations (comme CSS translateX/translateY)
-            final_x = start_x + self.transform.translate_x
-            final_y = start_y + self.transform.translate_y
+            # Appliquer les translations en pixels (comme CSS translateX/translateY)
+            start_x += self.transform.translate_x
+            start_y += self.transform.translate_y
             
-            # Calculer les régions de copie
-            src_x_start = max(0, -final_x)
-            src_y_start = max(0, -final_y)
-            src_x_end = min(src_w, width - final_x)
-            src_y_end = min(src_h, height - final_y)
+            # Étape 4: Calculer les régions de copie valides
+            # Source (dans la frame)
+            src_x_start = max(0, -start_x)
+            src_y_start = max(0, -start_y)
+            src_x_end = min(src_w, width - start_x)
+            src_y_end = min(src_h, height - start_y)
             
-            dst_x_start = max(0, final_x)
-            dst_y_start = max(0, final_y)
+            # Destination (dans le résultat)
+            dst_x_start = max(0, start_x)
+            dst_y_start = max(0, start_y)
             dst_x_end = dst_x_start + (src_x_end - src_x_start)
             dst_y_end = dst_y_start + (src_y_end - src_y_start)
             
-            # Copier la région visible
+            # Copier seulement si les régions sont valides
             if (src_x_end > src_x_start and src_y_end > src_y_start and
-                dst_x_end > dst_x_start and dst_y_end > dst_y_start):
+                dst_x_end > dst_x_start and dst_y_end > dst_y_start and
+                dst_x_end <= width and dst_y_end <= height):
                 
-                canvas[dst_y_start:dst_y_end, dst_x_start:dst_x_end] = \
+                result[dst_y_start:dst_y_end, dst_x_start:dst_x_end] = \
                     frame[src_y_start:src_y_end, src_x_start:src_x_end]
             
             # Cache le résultat pour les images statiques
             with self.cache_lock:
                 if self.is_image and len(self.frame_cache) < 10:
-                    self.frame_cache[transform_key] = canvas.copy()
+                    self.frame_cache[transform_key] = result.copy()
             
-            return canvas
+            return result
             
         except Exception as e:
             print(f"Error transforming frame: {e}")
@@ -1009,7 +1026,7 @@ if __name__ == "__main__":
 # py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png" 0 0 1.0
 
 # test avec video de fond :
-# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\98\video_2476.mp4" 0 0 1.0
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\test\video_4673.mp4" 0 0 1.0 0 0
 
 # test sans fond : 
 # py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 0 "./output.mp4" 0.25 0.25 0 "" 0 0 1.0
