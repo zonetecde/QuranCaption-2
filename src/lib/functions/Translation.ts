@@ -76,6 +76,11 @@ function buildTranslationUrl(
 		return edition.link;
 	}
 
+	// Si l'édition fait partie d'une demande spéciale (saeed sato)
+	if (edition.comments === 'SPECIAL_REQUEST_2') {
+		return edition.link.replace('{surah}', surah.toString()).replace('{ayah}', verse.toString());
+	}
+
 	let baseUrl = edition.link.replace('.json', '');
 	if (removeLatin) baseUrl = baseUrl.replace('-la', '');
 	return `${baseUrl}/${surah}/${verse}.json`;
@@ -98,6 +103,11 @@ function extractTextFromResponse(
 			}
 		}
 		return NO_TRANSLATION;
+	} else if (edition.comments === 'SPECIAL_REQUEST_2') {
+		let trans = data.result.translation || NO_TRANSLATION;
+		// remove all the text between brackets (footnotes)
+		trans = trans.replace(/\[.*?\]/g, '');
+		return trans;
 	} else {
 		return data.text;
 	}

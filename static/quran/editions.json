@@ -2099,6 +2099,26 @@
 		"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/jav-unknown.json",
 		"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/jav-unknown.min.json"
 	},
+	"jpn_saeedsato_la": {
+		"name": "jpn-saeedsato-la",
+		"author": "Saeed Sato",
+		"language": "Japanese",
+		"direction": "rtl",
+		"source": "https://quranenc.com/check/japanese_meta/v1.0.0-csv.1 , https://quranenc.com/en/browse/japanese_meta , https://quranenc.com ,",
+		"comments": "SPECIAL_REQUEST_2",
+		"link": "https://quranenc.com/api/v1/translation/aya/japanese_saeedsato/{surah}/{ayah}",
+		"linkmin": "https://quranenc.com/api/v1/translation/aya/japanese_saeedsato/{surah}/{ayah}"
+	},
+	"jpn_saeedsato_lad": {
+		"name": "jpn-saeedsato-lad",
+		"author": "Saeed Sato",
+		"language": "Japanese",
+		"direction": "rtl",
+		"source": "https://quranenc.com/check/japanese_meta/v1.0.0-csv.1 , https://quranenc.com/en/browse/japanese_meta , https://quranenc.com ,",
+		"comments": "SPECIAL_REQUEST_2",
+		"link": "https://quranenc.com/api/v1/translation/aya/japanese_saeedsato/{surah}/{ayah}",
+		"linkmin": "https://quranenc.com/api/v1/translation/aya/japanese_saeedsato/{surah}/{ayah}"
+	},
 	"jpn_ryoichimita_la": {
 		"name": "jpn-ryoichimita-la",
 		"author": "Ryoichi Mita",
