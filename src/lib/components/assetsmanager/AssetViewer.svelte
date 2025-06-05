@@ -42,9 +42,9 @@
 
 				if (lastAssetEndTime !== 0) {
 					toast(
-						"There's currently a bug that prevents the cursor from moving from one video to another. Please consider merging the videos together using a third-party software.",
+						'Please note that the built-in export feature only processes the first clip. Any subsequent clips will be ignored, resulting in a black screen at the end of your video. To avoid this, consider using an external tool to concatenate your videos.',
 						{
-							icon: '⚠️',
+							icon: 'ℹ️',
 							duration: 6000
 						}
 					);
@@ -63,7 +63,7 @@
 
 				if (asset.type === 'image') {
 					toast(
-						'Please note that using the Background Image setting in the Global Subtitles Settings is recommended for a background image.',
+						'Please use the "Background Image" option in the Global Subtitles Settings to add a background image.',
 						{
 							icon: 'ℹ️',
 							duration: 6000
@@ -90,6 +90,16 @@
 					fileEndTime: asset.duration,
 					isMuted: !withAudio
 				});
+
+				if (lastAudioEndTime !== 0) {
+					toast(
+						'Please note that the built-in export feature only processes the first audio clip. Subsequent clips will be ignored, resulting in silence at the end of your video. To include all audio clips, consider using an external tool to concatenate them.',
+						{
+							icon: 'ℹ️',
+							duration: 6000
+						}
+					);
+				}
 				break;
 		}
 
@@ -208,37 +218,31 @@
 	</button>
 
 	{#if isHovered}
-		<div class="absolute -bottom-8 w-full z-40">
+		<div class="flex flex-col w-full mt-4">
 			<button
-				class="w-full bg-[#1b422a] py-2 border-x-4 border-t-4 border-[#423f3f] hover:bg-[#112b1b] rounded-t-xl"
+				class="w-full bg-[#1b422a] py-2 border border-[#423f3f] hover:bg-[#112b1b] rounded-t-xl"
 				on:click={() => handleAddInTheTimelineButtonClicked()}>Add in the timeline</button
 			>
 			{#if asset.type === 'video'}
 				<button
-					class="w-full bg-[#1b422a] py-2 px-1 text-sm border-x-4 border-[#423f3f] hover:bg-[#112b1b]"
+					class="w-full bg-[#1b422a] py-2 px-1 text-sm border-x border-[#423f3f] hover:bg-[#112b1b]"
 					on:click={() => handleAddInTheTimelineButtonClicked(false)}
 					>Add in the timeline without the audio</button
 				>
 			{/if}
 			{#if !asset.exist}
 				<button
-					class="w-full bg-[#1b422a] py-2 border-x-4 border-[#423f3f] hover:bg-[#112b1b]"
+					class="w-full bg-[#1b422a] py-2 border-x border-[#423f3f] hover:bg-[#112b1b]"
 					on:click={() => relocateAsset()}>Relocate asset</button
 				>
 				{#if asset.youtubeUrl}
 					<button
-						class="w-full bg-[#1b422a] py-2 border-x-4 border-b-4 border-[#423f3f] hover:bg-[#112b1b] rounded-b-xl"
+						class="w-full bg-[#1b422a] py-2 border border-[#423f3f] hover:bg-[#112b1b] rounded-b-xl"
 						on:click={() => downloadAssetFromYouTube()}>Download from YouTube</button
 					>
 				{/if}
-			{:else if asset.type === 'video'}
-				<div
-					class="w-full bg-[#1b422a] py-2 border-x-4 border-b-4 border-[#423f3f] rounded-b-xl"
-				></div>
 			{:else}
-				<div
-					class="w-full bg-[#1b422a] py-2 border-x-4 border-b-4 border-[#423f3f] rounded-b-xl"
-				></div>
+				<div class="w-full bg-[#1b422a] py-2 border border-[#423f3f] rounded-b-xl"></div>
 			{/if}
 		</div>
 	{/if}

@@ -31,7 +31,7 @@
 			viewBox="0 0 24 24"
 			stroke-width="1.5"
 			stroke="currentColor"
-			class="size-7 opacity-40"
+			class="size-7 opacity-80"
 		>
 			<path
 				stroke-linecap="round"
@@ -63,9 +63,17 @@
 					Still need help ? Open the
 					<span
 						class="text-blue-400 cursor-pointer"
-						on:click={() => openLink('https://qurancaption-project.vercel.app/documentation')}
+						on:click={() =>
+							openLink('https://qurancaption-project.vercel.app/documentation/captioning-videos')}
 						>online documentation</span
-					> for a video example.
+					>
+					for a video example or join
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<span
+						class="text-blue-400 cursor-pointer"
+						on:click={() => openLink('https://discord.gg/Hxfqq2QA2J')}>the Discord server</span
+					> for more help.
 				</p>
 			</div>
 			<div class="text-xs">
