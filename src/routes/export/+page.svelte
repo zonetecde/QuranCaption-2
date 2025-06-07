@@ -2,10 +2,14 @@
 	import '$lib/stores/OtherTextsStore';
 	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
 	import { onMount } from 'svelte';
-	import { currentlyExportingId, initExportSettings } from '$lib/stores/ExportStore';
+	import {
+		currentlyExportingId,
+		initExportSettings,
+		initExportSettingsFromSettings
+	} from '$lib/stores/ExportStore';
 	import VideoPreview from '$lib/components/preview/VideoPreview.svelte';
 	import { exportCurrentProjectAsVideo } from '$lib/functions/ExportProject';
-	import { initializeStorage } from '$lib/ext/LocalStorageWrapper';
+	import { initializeStorage, localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 
 	onMount(async () => {
 		await initializeStorage();
@@ -17,9 +21,9 @@
 		currentlyExportingId.set(exportId);
 		const project = await getProjectById(projectId);
 
-		initExportSettings(project);
-
-		// Fond noir obligatoire pour les exports
+		// Récupère les paramètres d'export depuis le localStorage
+		const settings = (await localStorageWrapper.getItem('exportsSettings'))[exportId];
+		initExportSettingsFromSettings(settings);
 
 		currentProject.set(project);
 

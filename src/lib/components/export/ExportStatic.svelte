@@ -13,7 +13,8 @@
 		orientation,
 		quality,
 		exportType,
-		fps
+		fps,
+		oneVideoPerAyah
 	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
@@ -74,6 +75,60 @@
 	});
 
 	$: console.log('fps :', $currentProject.projectSettings.exportSettings.fps);
+
+	async function startOneVideoPerAyahExport() {
+		toast(
+			'Starting export for each Ayah. This may take some time depending on the number of Ayahs.'
+		);
+
+		// Fait bouger les curseurs de début et de fin pour que ça corresponde à chaque subtitlesCLip
+		// puis lance pour chacune l'export
+		const startTimeBackup = $startTime;
+		const endTimeBackup = $endTime === null ? getVideoDurationInMs() : $endTime;
+
+		for (let i = 0; i < $currentProject.timeline.subtitlesTracks[0].clips.length; i++) {
+			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
+
+			// Vérifie que le clip est visible complètement
+			if (element.start >= startTimeBackup && element.end <= endTimeBackup) {
+				if (element.surah === -1 || element.verse === -1 || element.isSilence) {
+					// Ignore les clips qui ne sont pas des versets (par exemple, les silences)
+					continue;
+				}
+
+				// Regarde si le(s) clip(s) suivant(s) sont du meme verset/sourate.
+				// si oui, le endtime sera celui du dernier clip de ce verset/sourate
+				let nextElement = $currentProject.timeline.subtitlesTracks[0].clips[i + 1];
+				let actualEndTime = element.end;
+				while (
+					nextElement &&
+					nextElement.verse === element.verse &&
+					nextElement.surah === element.surah
+				) {
+					i++;
+					actualEndTime = nextElement.end;
+					nextElement = $currentProject.timeline.subtitlesTracks[0].clips[i + 1];
+				}
+
+				// Met à jour le curseur de début et de fin
+				startTime.set(element.start - 100); // -100 et +100 pour effet de fondu
+				endTime.set(actualEndTime + 100);
+
+				console.log('EndTime set to:', $endTime, 'StartTime set to:', $startTime);
+
+				// Lance l'export
+				await openExportWindow();
+
+				toast.success(
+					`Exporting video for Ayah ${element.verse} (${element.start} - ${element.end})`
+				);
+			}
+		}
+
+		// Restaure les curseurs de début et de fin
+		startTime.set(startTimeBackup);
+		endTime.set(endTimeBackup);
+	}
 </script>
 
 <!-- start time input -->
@@ -177,7 +232,8 @@
 				return;
 			}
 
-			openExportWindow();
+			if (!$oneVideoPerAyah) openExportWindow();
+			else startOneVideoPerAyahExport();
 		}}
 	>
 		Export your video
@@ -229,6 +285,12 @@
 			}
 		}}
 	/>
+</div>
+
+<!-- Checkbox: one video per ayah -->
+<div class="flex items-center mt-4">
+	<input type="checkbox" id="one-video-per-ayah" class="mr-2" bind:checked={$oneVideoPerAyah} />
+	<label for="one-video-per-ayah" class="text-sm font-bold">One video per ayah</label>
 </div>
 
 <!-- Video section ratios -->

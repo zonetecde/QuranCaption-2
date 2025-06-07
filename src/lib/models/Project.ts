@@ -84,6 +84,7 @@ export interface ExportSettings {
 	bottomRatio: number;
 	quality: number;
 	fps: number;
+	oneVideoPerAyah: boolean;
 }
 
 /**

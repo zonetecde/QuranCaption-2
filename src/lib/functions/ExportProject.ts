@@ -16,7 +16,7 @@ import { fs } from '@tauri-apps/api';
 import { path } from '@tauri-apps/api';
 //@ts-ignore
 import DomToImage from 'dom-to-image';
-import { EXPORT_PATH } from '$lib/ext/LocalStorageWrapper';
+import { EXPORT_PATH, localStorageWrapper } from '$lib/ext/LocalStorageWrapper';
 import { createDir } from '@tauri-apps/api/fs';
 import { invoke } from '@tauri-apps/api/tauri';
 import {
@@ -30,7 +30,11 @@ import {
 	quality,
 	currentlyExportingId,
 	type VideoExportStatus,
-	fps
+	fps,
+	exportType,
+	middleRatio,
+	oneVideoPerAyah,
+	runesToExportSettings
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -39,11 +43,19 @@ import { WebviewWindow } from '@tauri-apps/api/window';
 import { getAssetFromId } from '$lib/models/Asset';
 import { confirm } from '@tauri-apps/api/dialog';
 
-export function openExportWindow() {
+export async function openExportWindow() {
 	// force save pour mettre à jour les paramètres d'export
-	updateUsersProjects(get(currentProject));
+	const exportId = await random3lettersId(); // ID unique pour l'export
 
-	const exportId = random3lettersId(); // ID unique pour l'export
+	// Sauvegarde les paramètres de l'export avec cet ID
+	// (dict avec key: exportId, value: exportsettings)
+	let exportsSettings = await localStorageWrapper.getItem('exportsSettings');
+	if (exportsSettings === null) {
+		exportsSettings = {};
+	}
+	exportsSettings[exportId] = runesToExportSettings();
+
+	await localStorageWrapper.setItem('exportsSettings', exportsSettings);
 
 	// Créer la fenêtre qui va prendre les screenshots
 	const webview = new WebviewWindow(exportId.toString(), {
@@ -93,13 +105,21 @@ export function openExportWindow() {
 	});
 }
 
-function random3lettersId() {
+async function random3lettersId() {
 	// Génère un ID aléatoire de 3 lettres
 	const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	let id = '';
 	for (let i = 0; i < 3; i++) {
 		id += letters[Math.floor(Math.random() * letters.length)];
 	}
+
+	// Vérifie si l'ID existe déjà dans les exports en cours
+	const existingExports = await localStorageWrapper.getItem('exportsSettings');
+	if (existingExports && existingExports[id]) {
+		// Si l'ID existe déjà, on en génère un nouveau
+		return random3lettersId();
+	}
+
 	return id;
 }
 
