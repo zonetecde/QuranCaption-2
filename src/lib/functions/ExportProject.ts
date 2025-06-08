@@ -34,7 +34,8 @@ import {
 	exportType,
 	middleRatio,
 	oneVideoPerAyah,
-	runesToExportSettings
+	runesToExportSettings,
+	forcePortrait
 } from '$lib/stores/ExportStore';
 import { readjustCursorPosition } from './TimelineHelper';
 import { isEscapePressed } from '$lib/stores/ShortcutStore';
@@ -44,6 +45,9 @@ import { getAssetFromId } from '$lib/models/Asset';
 import { confirm } from '@tauri-apps/api/dialog';
 
 export async function openExportWindow() {
+	// force la maj du projet
+	await updateUsersProjects(get(currentProject));
+
 	// force save pour mettre à jour les paramètres d'export
 	const exportId = await random3lettersId(); // ID unique pour l'export
 
@@ -453,6 +457,7 @@ export async function exportCurrentProjectAsVideo() {
 		backgroundScale: isImage ? 1 : _currentProject.projectSettings.videoScale,
 		audioFadeStart: Math.floor(fadeDurationBegin),
 		audioFadeEnd: Math.floor(fadeDurationEnd),
+		forcePortrait: get(forcePortrait) ? 1 : 0,
 		fps: get(fps) || 30
 	});
 

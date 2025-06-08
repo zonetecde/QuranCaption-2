@@ -85,6 +85,7 @@ export interface ExportSettings {
 	quality: number;
 	fps: number;
 	oneVideoPerAyah: boolean;
+	forcePortrait: boolean;
 }
 
 /**

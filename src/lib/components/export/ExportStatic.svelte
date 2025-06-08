@@ -14,7 +14,8 @@
 		quality,
 		exportType,
 		fps,
-		oneVideoPerAyah
+		oneVideoPerAyah,
+		forcePortrait
 	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
@@ -203,9 +204,11 @@
 			id="landscape-mode"
 			class="mr-2"
 			checked={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
-			on:change={() => {
+			on:change={(e) => {
 				orientation.set($orientation === 'landscape' ? 'portrait' : 'landscape');
-				console.log('Orientation changed to:', $orientation);
+
+				// @ts-ignore
+				if (e.target.checked) forcePortrait.set(false);
 			}}
 		/>
 
@@ -290,7 +293,38 @@
 <!-- Checkbox: one video per ayah -->
 <div class="flex items-center mt-4">
 	<input type="checkbox" id="one-video-per-ayah" class="mr-2" bind:checked={$oneVideoPerAyah} />
-	<label for="one-video-per-ayah" class="text-sm font-bold">One video per ayah</label>
+	<label for="one-video-per-ayah" class="text-sm"
+		><b>One video per ayah.</b> This will create a separate video file for each ayah between the
+		<span class="font-bold">start</span>
+		and <span class="font-bold">end</span> time.</label
+	>
+</div>
+
+<!-- Checkbox: force portrait mode -->
+<div
+	class="flex flex-col mt-4 space-y-2"
+	class:opacity-50={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+>
+	{#if $orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+		<p class="text-sm">
+			Please disable the "Portrait" option in the global subtitles settings or on this page to use
+			this feature.
+		</p>
+	{/if}
+
+	<div class="flex items-center">
+		<input
+			type="checkbox"
+			id="force-portrait"
+			class="mr-2"
+			bind:checked={$forcePortrait}
+			disabled={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+		/>
+		<label for="force-portrait" class="text-sm">
+			<b>Force portrait mode.</b> This will export the video in portrait format even though the global
+			"Portrait" option is disabled (adds black bars top/bottom).
+		</label>
+	</div>
 </div>
 
 <!-- Video section ratios -->

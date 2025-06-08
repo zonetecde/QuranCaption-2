@@ -18,7 +18,8 @@ import {
 	bottomRatio,
 	quality,
 	fps,
-	oneVideoPerAyah
+	oneVideoPerAyah,
+	forcePortrait
 } from './ExportStore';
 
 export const currentProject: Writable<Project> = writable();
@@ -105,7 +106,8 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			bottomRatio: 25,
 			quality: 1,
 			fps: 30, // default FPS
-			oneVideoPerAyah: false
+			oneVideoPerAyah: false,
+			forcePortrait: false // default for forcePortrait
 		},
 		globalSubtitlesSettings: {
 			background: true,
@@ -277,7 +279,8 @@ export async function updateUsersProjects(
 			bottomRatio: get(bottomRatio),
 			quality: get(quality),
 			fps: get(fps),
-			oneVideoPerAyah: get(oneVideoPerAyah)
+			oneVideoPerAyah: get(oneVideoPerAyah),
+			forcePortrait: get(forcePortrait)
 		};
 	}
 

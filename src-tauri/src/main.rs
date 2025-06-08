@@ -187,6 +187,7 @@ async fn create_video(
     background_scale: f32,
     audio_fade_start: i32,
     audio_fade_end: i32,
+    force_portrait: i32,
     fps: i32,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
@@ -212,6 +213,7 @@ async fn create_video(
                 background_scale.to_string(),
                 audio_fade_start.to_string(),
                 audio_fade_end.to_string(),
+                force_portrait.to_string(),
             ];
 
             // ajout parametre optionnel: --fps
@@ -287,6 +289,9 @@ async fn create_video(
                                     });
                                     let _ = app_handle.emit_all("updateExportDetailsById", payload);
                                 }
+                            } else {
+                                // If no percentage found, just log the line
+                                println!("No percentage found in line: {}", line);
                             }
                         }
                     }
