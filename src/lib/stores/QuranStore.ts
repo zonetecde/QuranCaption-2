@@ -74,14 +74,7 @@ export function getVerse(surahId: number, verseId: number) {
 
 export function splitVerseInWords(verse: string) {
 	// Split the verse into words by spaces
-	const words = verse.split(' ');
-
-	// la seule est unique exception : dans عَلَىٰٓ إِلۡ يَاسِينَ , il-yaasiin est considéré comme un mot
-	if (words.length === 4 && words[2].startsWith('إِلۡ') && words[3] === 'يَاسِينَ') {
-		words[2] = words[2] + words[3];
-		words.splice(3, 1);
-	}
-	return words;
+	return verse.split(' ');
 }
 
 /**
