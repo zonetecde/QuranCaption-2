@@ -518,7 +518,7 @@ async fn cancel_export(export_id: String, app_handle: tauri::AppHandle) -> Resul
         // });
         // let _ = app_handle.emit_all("updateExportDetailsById", payload);
         
-        // Err(format!("No process found for export {}", export_id))
+        Err(format!("No process found for export {}", export_id))
     }
 }
 
