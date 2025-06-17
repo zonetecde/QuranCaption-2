@@ -187,6 +187,7 @@ async fn create_video(
     background_scale: f32,
     audio_fade_start: i32,
     audio_fade_end: i32,
+    force_portrait: i32,
     fps: i32,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
@@ -212,6 +213,7 @@ async fn create_video(
                 background_scale.to_string(),
                 audio_fade_start.to_string(),
                 audio_fade_end.to_string(),
+                force_portrait.to_string(),
             ];
 
             // ajout parametre optionnel: --fps
@@ -287,6 +289,9 @@ async fn create_video(
                                     });
                                     let _ = app_handle.emit_all("updateExportDetailsById", payload);
                                 }
+                            } else {
+                                // If no percentage found, just log the line
+                                println!("No percentage found in line: {}", line);
                             }
                         }
                     }
@@ -496,24 +501,24 @@ async fn cancel_export(export_id: String, app_handle: tauri::AppHandle) -> Resul
 
         Ok(format!("Export {} cancelled successfully", export_id))
     } else {
-        // Si on ne trouve pas le processus dans notre HashMap, on tente de trouver tous les processus video_creator.exe
-        #[cfg(target_os = "windows")]
-        {
-            println!("Recherche de video_creator.exe pour l'export {}", export_id);
-            let _ = std::process::Command::new("taskkill")
-                .args(&["/F", "/IM", "video_creator.exe"])
-                .output();
-        }
+        // // Si on ne trouve pas le processus dans notre HashMap, on tente de trouver tous les processus video_creator.exe
+        // #[cfg(target_os = "windows")]
+        // {
+        //     println!("Recherche de video_creator.exe pour l'export {}", export_id);
+        //     let _ = std::process::Command::new("taskkill")
+        //         .args(&["/F", "/IM", "video_creator.exe"])
+        //         .output();
+        // }
         
-        // Émet quand même un événement d'annulation
-        let payload = serde_json::json!({
-            "exportId": export_id,
-            "progress": 0,
-            "status": "Cancelled"
-        });
-        let _ = app_handle.emit_all("updateExportDetailsById", payload);
+        // // Émet quand même un événement d'annulation
+        // let payload = serde_json::json!({
+        //     "exportId": export_id,
+        //     "progress": 0,
+        //     "status": "Cancelled"
+        // });
+        // let _ = app_handle.emit_all("updateExportDetailsById", payload);
         
-        Err(format!("No process found for export {}. Attempting to forcibly stop all video_creator.exe processes.", export_id))
+        Err(format!("No process found for export {}", export_id))
     }
 }
 

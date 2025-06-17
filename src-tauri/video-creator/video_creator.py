@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Fixed Video Creator - Version 2.2
-Corrects transition color handling to match original behavior
+Fixed Video Creator - Version 2.4
+Fixes portrait mode dimension calculation and frame scaling
 """
 
 import argparse
@@ -66,6 +66,7 @@ class VideoConfig:
     background_transform: BackgroundTransform
     audio_fade_start: int
     audio_fade_end: int
+    force_portrait: int  # Nouveau paramètre
     fps: int = DEFAULT_FPS
     threads: int = DEFAULT_THREADS
 
@@ -350,6 +351,7 @@ class OptimizedVideoCreator:
         self.frames_data: List[FrameData] = []
         self.static_sections = {}
         self.dimensions = (0, 0)
+        self.output_dimensions = (0, 0)  # Nouvelles dimensions pour le format final
         
         # CORRECTION PRINCIPALE : Variables pour la couleur de transition
         self.background_color = None  # Couleur RGB du pixel [10,10]
@@ -439,20 +441,45 @@ class OptimizedVideoCreator:
         if first_img_rgb is None:
             raise ValueError(f"Could not load first image: {image_files[0]}")
         
-        # Ensure even dimensions for H.264 compatibility
+        # CORRECTION 1: Calcul correct des dimensions selon le mode portrait ou paysage
         orig_height, orig_width = first_img_rgb.shape[:2]
-        width, height = ensure_even_dimensions(orig_width, orig_height)
         
-        if (width, height) != (orig_width, orig_height):
-            print(f"Adjusting dimensions from {orig_width}x{orig_height} to {width}x{height} for codec compatibility")
-            first_img_rgb = cv2.resize(first_img_rgb, (width, height), interpolation=cv2.INTER_LANCZOS4)
+        if self.config.force_portrait == 1:
+            # Mode portrait TikTok : CORRIGER l'inversion
+            # Les frames originales sont en paysage (ex: 1920x1080)
+            # La vidéo finale doit être en portrait (ex: 1080x1920)
+            output_height = orig_width  # 1920 (hauteur finale = largeur originale)
+            output_width = orig_height  # 1080 (largeur finale = hauteur originale)
+            
+            # Les frames gardent leurs dimensions originales (paysage) pour le traitement
+            frame_width, frame_height = ensure_even_dimensions(orig_width, orig_height)
+            
+            # Dimensions finales de la vidéo (portrait) - CORRECTION : ordre correct (height, width)
+            self.output_dimensions = ensure_even_dimensions(output_height, output_width)
+            # self.output_dimensions = (self.output_dimensions[1], self.output_dimensions[0])  # Inverser pour (height, width)
+            
+            print(f"Portrait mode enabled:")
+            print(f"  - Original frame size: {orig_width}x{orig_height}")
+            print(f"  - Frame dimensions (landscape): {frame_width}x{frame_height}")
+            print(f"  - Output dimensions (portrait): {self.output_dimensions[1]}x{self.output_dimensions[0]} (WxH)")
+        else:
+            # Mode paysage normal
+            frame_width, frame_height = ensure_even_dimensions(orig_width, orig_height)
+            self.output_dimensions = (frame_height, frame_width)
+            
+            print(f"Landscape mode: {frame_width}x{frame_height}")
+        
+        # Redimensionner la première image si nécessaire pour les frames
+        if (frame_width, frame_height) != (orig_width, orig_height):
+            first_img_rgb = cv2.resize(first_img_rgb, (frame_width, frame_height), interpolation=cv2.INTER_LANCZOS4)
             if first_img_alpha is not None:
-                first_img_alpha = cv2.resize(first_img_alpha, (width, height), interpolation=cv2.INTER_LANCZOS4)
+                first_img_alpha = cv2.resize(first_img_alpha, (frame_width, frame_height), interpolation=cv2.INTER_LANCZOS4)
         
-        self.dimensions = (height, width)
+        # Dimensions pour le traitement des frames (toujours en paysage)
+        self.dimensions = (frame_height, frame_width)
         
         # CORRECTION : Extraction correcte de la couleur de fond depuis le pixel [10,10]
-        if height > 10 and width > 10:
+        if frame_height > 10 and frame_width > 10:
             self.background_color = first_img_rgb[10, 10].copy()  # RGB
             if self.config.background_path and first_img_alpha is not None:
                 self.background_alpha = first_img_alpha[10, 10]  # Alpha
@@ -466,10 +493,10 @@ class OptimizedVideoCreator:
             self.background_alpha = 1.0
             print("Using black as default background color for transitions")
         
-        # Calculate section heights
-        top_height = int(height * self.config.top_ratio)
-        bottom_height = int(height * self.config.bottom_ratio)
-        middle_height = height - top_height - bottom_height
+        # Calculate section heights (basé sur les dimensions des frames)
+        top_height = int(frame_height * self.config.top_ratio)
+        bottom_height = int(frame_height * self.config.bottom_ratio)
+        middle_height = frame_height - top_height - bottom_height
         
         # Process static sections
         if bottom_height > 0:
@@ -487,7 +514,7 @@ class OptimizedVideoCreator:
         # Process all images with threading
         with ThreadPoolExecutor(max_workers=min(self.config.threads, len(image_files))) as executor:
             futures = {executor.submit(self._process_single_image, img_file, 
-                                     top_height, middle_height, bottom_height, width, height): img_file 
+                                     top_height, middle_height, bottom_height, frame_width, frame_height): img_file 
                       for img_file in image_files}
             
             for future in as_completed(futures):
@@ -547,9 +574,11 @@ class OptimizedVideoCreator:
     def setup_background(self, duration_sec: float, start_ms: int, end_ms: int):
         """Setup background processor"""
         if self.config.background_path and self.config.background_path.strip():
+            # Pour le background, on utilise toujours les dimensions de sortie
+            bg_dimensions = self.output_dimensions if self.config.force_portrait == 1 else self.dimensions
             self.background_processor = BackgroundProcessor(
                 self.config.background_path,
-                self.dimensions,
+                bg_dimensions,
                 self.config.background_transform,
                 duration_sec,
                 start_ms,
@@ -604,10 +633,9 @@ class OptimizedVideoCreator:
             return background
     
     def make_frame_optimized(self, t_seconds: float) -> np.ndarray:
-        """Optimized frame generation"""
+        """Optimized frame generation with portrait support"""
         try:
             t_ms = int(t_seconds * 1000) + self.config.start_time_ms
-            height, width = self.dimensions
             
             # Find current frame data
             current_frame = None
@@ -626,88 +654,154 @@ class OptimizedVideoCreator:
                 else:
                     current_frame = self.frames_data[0]
             
-            # Get background frame
-            bg_frame = None
-            if self.background_processor:
-                bg_frame = self.background_processor.get_frame(t_seconds)
-            
-            # Create base frame
-            if bg_frame is not None:
-                frame = bg_frame.copy()
+            if self.config.force_portrait == 1:
+                return self._make_portrait_frame(t_seconds, current_frame, next_frame, t_ms)
             else:
-                frame = np.zeros((height, width, 3), dtype=np.uint8)
-            
-            # Determine if using alpha blending
-            use_alpha = bg_frame is not None and (
-                any(section[1] is not None for section in self.static_sections.values()) or
-                (current_frame and any([
-                    current_frame.top_alpha is not None,
-                    current_frame.middle_alpha is not None
-                ]))
-            )
-            
-            # Calculate transition
-            in_transition = False
-            transition_progress = 0.0
-            
-            if (next_frame and self.config.transition_ms > 0 and
-                next_frame.start_ms - self.config.transition_ms <= t_ms < next_frame.start_ms):
-                in_transition = True
-                transition_progress = (t_ms - (next_frame.start_ms - self.config.transition_ms)) / self.config.transition_ms
-                transition_progress = max(0.0, min(1.0, transition_progress))
-            
-            # Add sections
-            y_offset = 0
-            
-            # Top section
-            if 'top' in self.static_sections:
-                top_section, top_alpha = self.static_sections['top']
-                if use_alpha and top_alpha is not None:
-                    frame = self.blend_alpha_optimized(top_section, frame, top_alpha, (y_offset, 0))
-                else:
-                    frame[y_offset:y_offset + top_section.shape[0]] = top_section
-                y_offset += top_section.shape[0]
-            elif current_frame and current_frame.top_section is not None:
-                if use_alpha and current_frame.top_alpha is not None:
-                    frame = self.blend_alpha_optimized(current_frame.top_section, frame, 
-                                                     current_frame.top_alpha, (y_offset, 0))
-                else:
-                    frame[y_offset:y_offset + current_frame.top_section.shape[0]] = current_frame.top_section
-                y_offset += current_frame.top_section.shape[0]
-            
-            # Middle section with transition
-            if current_frame and current_frame.middle_section is not None:
-                middle_section = current_frame.middle_section
-                middle_alpha = current_frame.middle_alpha
+                return self._make_landscape_frame(t_seconds, current_frame, next_frame, t_ms)
                 
-                if in_transition and next_frame and next_frame.middle_section is not None:
-                    middle_section = self._apply_transition_with_background_color(
-                        middle_section, next_frame.middle_section, transition_progress,
-                        middle_alpha, next_frame.middle_alpha, use_alpha
-                    )
-                    middle_alpha = self._interpolate_alpha(middle_alpha, next_frame.middle_alpha, transition_progress)
-                
-                if use_alpha and middle_alpha is not None:
-                    frame = self.blend_alpha_optimized(middle_section, frame, middle_alpha, (y_offset, 0))
-                else:
-                    frame[y_offset:y_offset + middle_section.shape[0]] = middle_section
-                y_offset += middle_section.shape[0]
-            
-            # Bottom section
-            if 'bottom' in self.static_sections:
-                bottom_section, bottom_alpha = self.static_sections['bottom']
-                if use_alpha and bottom_alpha is not None:
-                    frame = self.blend_alpha_optimized(bottom_section, frame, bottom_alpha, 
-                                                     (height - bottom_section.shape[0], 0))
-                else:
-                    frame[height - bottom_section.shape[0]:] = bottom_section
-            
-            return frame
-            
         except Exception as e:
             print(f"Error generating frame at {t_seconds}s: {e}")
-            height, width = self.dimensions
-            return np.zeros((height, width, 3), dtype=np.uint8)
+            output_height, output_width = self.output_dimensions
+            return np.zeros((output_height, output_width, 3), dtype=np.uint8)
+    
+    def _make_landscape_frame(self, t_seconds: float, current_frame: FrameData, 
+                            next_frame: Optional[FrameData], t_ms: int) -> np.ndarray:
+        """Generate landscape frame (original behavior)"""
+        height, width = self.dimensions
+        
+        # Get background frame
+        bg_frame = None
+        if self.background_processor:
+            bg_frame = self.background_processor.get_frame(t_seconds)
+        
+        # Create base frame
+        if bg_frame is not None:
+            frame = bg_frame.copy()
+        else:
+            frame = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Determine if using alpha blending
+        use_alpha = bg_frame is not None and (
+            any(section[1] is not None for section in self.static_sections.values()) or
+            (current_frame and any([
+                current_frame.top_alpha is not None,
+                current_frame.middle_alpha is not None
+            ]))
+        )
+        
+        # Calculate transition
+        in_transition = False
+        transition_progress = 0.0
+        
+        if (next_frame and self.config.transition_ms > 0 and
+            next_frame.start_ms - self.config.transition_ms <= t_ms < next_frame.start_ms):
+            in_transition = True
+            transition_progress = (t_ms - (next_frame.start_ms - self.config.transition_ms)) / self.config.transition_ms
+            transition_progress = max(0.0, min(1.0, transition_progress))
+        
+        # Add sections
+        y_offset = 0
+        
+        # Top section
+        if 'top' in self.static_sections:
+            top_section, top_alpha = self.static_sections['top']
+            if use_alpha and top_alpha is not None:
+                frame = self.blend_alpha_optimized(top_section, frame, top_alpha, (y_offset, 0))
+            else:
+                frame[y_offset:y_offset + top_section.shape[0]] = top_section
+            y_offset += top_section.shape[0]
+        elif current_frame and current_frame.top_section is not None:
+            if use_alpha and current_frame.top_alpha is not None:
+                frame = self.blend_alpha_optimized(current_frame.top_section, frame, 
+                                                 current_frame.top_alpha, (y_offset, 0))
+            else:
+                frame[y_offset:y_offset + current_frame.top_section.shape[0]] = current_frame.top_section
+            y_offset += current_frame.top_section.shape[0]
+        
+        # Middle section with transition
+        if current_frame and current_frame.middle_section is not None:
+            middle_section = current_frame.middle_section
+            middle_alpha = current_frame.middle_alpha
+            
+            if in_transition and next_frame and next_frame.middle_section is not None:
+                middle_section = self._apply_transition_with_background_color(
+                    middle_section, next_frame.middle_section, transition_progress,
+                    middle_alpha, next_frame.middle_alpha, use_alpha
+                )
+                middle_alpha = self._interpolate_alpha(middle_alpha, next_frame.middle_alpha, transition_progress)
+            
+            if use_alpha and middle_alpha is not None:
+                frame = self.blend_alpha_optimized(middle_section, frame, middle_alpha, (y_offset, 0))
+            else:
+                frame[y_offset:y_offset + middle_section.shape[0]] = middle_section
+            y_offset += middle_section.shape[0]
+        
+        # Bottom section
+        if 'bottom' in self.static_sections:
+            bottom_section, bottom_alpha = self.static_sections['bottom']
+            if use_alpha and bottom_alpha is not None:
+                frame = self.blend_alpha_optimized(bottom_section, frame, bottom_alpha, 
+                                                 (height - bottom_section.shape[0], 0))
+            else:
+                frame[height - bottom_section.shape[0]:] = bottom_section
+        
+        return frame
+    
+    def _make_portrait_frame(self, t_seconds: float, current_frame: FrameData, 
+                           next_frame: Optional[FrameData], t_ms: int) -> np.ndarray:
+        """CORRECTION 2: Generate portrait frame with proper scaling to fit entirely"""
+        # Générer d'abord la frame paysage
+        landscape_frame = self._make_landscape_frame(t_seconds, current_frame, next_frame, t_ms)
+        
+        # Dimensions de sortie (portrait)
+        output_height, output_width = self.output_dimensions
+        landscape_height, landscape_width = landscape_frame.shape[:2]
+        
+        # Créer le frame portrait avec fond noir
+        portrait_frame = np.zeros((output_height, output_width, 3), dtype=np.uint8)
+        
+        # CORRECTION 2: Calculer le scale pour que la frame paysage rentre ENTIÈREMENT dans le portrait
+        # On veut que toute la frame soit visible, donc on prend le ratio le plus contraignant
+        scale_x = output_width / landscape_width   # Combien on peut mettre en largeur
+        scale_y = output_height / landscape_height  # Combien on peut mettre en hauteur
+        scale = min(scale_x, scale_y)  # Prendre le plus petit pour que tout rentre
+        
+        # Calculer les nouvelles dimensions de la frame après scale
+        new_width = int(landscape_width * scale)
+        new_height = int(landscape_height * scale)
+        
+        # S'assurer que les dimensions sont paires pour H.264
+        new_width, new_height = ensure_even_dimensions(new_width, new_height)
+        
+        # Redimensionner la frame paysage
+        if scale != 1.0:
+            scaled_frame = cv2.resize(landscape_frame, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+        else:
+            scaled_frame = landscape_frame
+        
+        # Calculer la position pour centrer la frame redimensionnée
+        y_offset = (output_height - new_height) // 2
+        x_offset = (output_width - new_width) // 2
+        
+        # S'assurer que les offsets sont valides
+        y_start = max(0, y_offset)
+        y_end = min(output_height, y_offset + new_height)
+        x_start = max(0, x_offset) 
+        x_end = min(output_width, x_offset + new_width)
+        
+        # Calculer les régions source correspondantes
+        src_y_start = max(0, -y_offset)
+        src_y_end = src_y_start + (y_end - y_start)
+        src_x_start = max(0, -x_offset)
+        src_x_end = src_x_start + (x_end - x_start)
+        
+        # Copier la frame redimensionnée au centre du frame portrait
+        if (y_end > y_start and x_end > x_start and 
+            src_y_end <= new_height and src_x_end <= new_width):
+            portrait_frame[y_start:y_end, x_start:x_end] = \
+                scaled_frame[src_y_start:src_y_end, src_x_start:src_x_end]
+        
+        return portrait_frame
     
     def _apply_transition_with_background_color(self, current: np.ndarray, next_img: np.ndarray, 
                                               progress: float, current_alpha: Optional[np.ndarray], 
@@ -956,7 +1050,7 @@ class OptimizedVideoCreator:
 
 def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(description="Fixed Video Creator v2.2 - Correct Transition Colors")
+    parser = argparse.ArgumentParser(description="Fixed Video Creator v2.4 - Fixed Portrait Mode")
     parser.add_argument("folder_path", help="Path to folder containing PNG images")
     parser.add_argument("audio_path", help="Path to audio file")
     parser.add_argument("transition_ms", type=int, help="Transition duration in milliseconds")
@@ -972,12 +1066,13 @@ def main():
     parser.add_argument("background_scale", type=float, help="Background scale factor")
     parser.add_argument("audio_fade_start", type=int, help="Audio fade in duration at start (ms)")
     parser.add_argument("audio_fade_end", type=int, help="Audio fade out duration at end (ms)")
+    parser.add_argument("force_portrait", type=int, help="Force portrait mode for TikTok (1=yes, 0=no)")
     parser.add_argument("--fps", type=int, default=DEFAULT_FPS, help="Output FPS")
     parser.add_argument("--threads", type=int, default=DEFAULT_THREADS, help="Processing threads")
     
     args = parser.parse_args()
     
-    print("=== Video Creator v2.2 - Fixed Transitions ===")
+    print("=== Video Creator v2.4 - Fixed Portrait Mode ===")
     print(f"Input folder: {args.folder_path}")
     print(f"Audio: {args.audio_path}")
     print(f"Output: {args.output_path}")
@@ -985,6 +1080,7 @@ def main():
     print(f"Background: {args.background_path}")
     print(f"Transform: X={args.background_x}, Y={args.background_y}, Scale={args.background_scale}")
     print(f"Audio Fade: Start={args.audio_fade_start}ms, End={args.audio_fade_end}ms")
+    print(f"Portrait Mode: {'Yes' if args.force_portrait == 1 else 'No'}")
     print(f"FPS: {args.fps}, Threads: {args.threads}")
     print()
     
@@ -1010,6 +1106,7 @@ def main():
         ),
         audio_fade_start=args.audio_fade_start,
         audio_fade_end=args.audio_fade_end,
+        force_portrait=args.force_portrait,
         fps=args.fps,
         threads=args.threads
     )
@@ -1021,6 +1118,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Test avec mode portrait CORRIGÉ :
+# py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 2000 "./output_portrait.mp4" 0.25 0.25 0 "" 0 0 1.0 0 0 1
+
+
 
 # Test avec img de fond : 
 # py video_creator.py "F:\Programmation\tauri\QuranCaption-2\src-tauri\target\debug\export\3" "F:\Annexe\Montage vidéo\quran.al.luhaidan\88\audio_3541.webm" 300 0 32000 "./output.mp4" 0.25 0.25 0 "F:\Annexe\Montage vidéo\quran.al.luhaidan\bg sky.png" 0 0 1.0

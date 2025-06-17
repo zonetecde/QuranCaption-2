@@ -72,6 +72,11 @@ export function getVerse(surahId: number, verseId: number) {
 	return quran.surahs[surahId - 1].verses[verseId - 1];
 }
 
+export function splitVerseInWords(verse: string) {
+	// Split the verse into words by spaces
+	return verse.split(' ');
+}
+
 /**
  * Get the number of verses in a surah
  * @param surahId The ID of the surah

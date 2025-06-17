@@ -1,8 +1,8 @@
 import { createOrShowExportDetailsWindow } from '$lib/functions/ExportProject';
 import type Project from '$lib/models/Project';
-import type { ExportType } from '$lib/models/Project';
+import type { ExportSettings, ExportType } from '$lib/models/Project';
 import { appWindow } from '@tauri-apps/api/window';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 
 export const startTime: Writable<number> = writable(0);
 export const endTime: Writable<number | null> = writable(null);
@@ -18,8 +18,11 @@ export const topRatio: Writable<number> = writable(25); // default: 20%
 export const middleRatio: Writable<number> = writable(50); // default: 60%
 export const bottomRatio: Writable<number> = writable(25); // default: 20%
 
+export const forcePortrait: Writable<boolean> = writable(false); // Force portrait mode for the export (horizontal videos as portrait with black bars on top and bottom)
+
 export const quality: Writable<number> = writable(1); // default: 1
 export const fps: Writable<number> = writable(30); // default: 30 FPS
+export const oneVideoPerAyah: Writable<boolean> = writable(false); // default: false
 
 export interface VideoExportStatus {
 	exportId: string;
@@ -32,17 +35,41 @@ export interface VideoExportStatus {
 	selectedVersesRange: string; // Plage de versets sélectionnée pour l'export
 }
 
+export function initExportSettingsFromSettings(settings: ExportSettings) {
+	startTime.set(settings.startTime);
+	endTime.set(settings.endTime);
+	orientation.set(settings.orientation);
+	exportType.set(settings.exportType);
+	topRatio.set(settings.topRatio);
+	middleRatio.set(settings.middleRatio);
+	bottomRatio.set(settings.bottomRatio);
+	quality.set(settings.quality);
+	fps.set(settings.fps);
+	forcePortrait.set(settings.forcePortrait || false); // Set default for forcePortrait if not defined
+}
+
+export function runesToExportSettings() {
+	return {
+		startTime: get(startTime),
+		endTime: get(endTime),
+		orientation: get(orientation),
+		exportType: get(exportType),
+		topRatio: get(topRatio),
+		middleRatio: get(middleRatio),
+		bottomRatio: get(bottomRatio),
+		quality: get(quality),
+		fps: get(fps),
+		oneVideoPerAyah: get(oneVideoPerAyah),
+		forcePortrait: get(forcePortrait)
+	};
+}
+
 export function initExportSettings(project: Project) {
 	if (project.projectSettings.exportSettings !== undefined) {
-		startTime.set(project.projectSettings.exportSettings.startTime);
-		endTime.set(project.projectSettings.exportSettings.endTime);
-		orientation.set(project.projectSettings.exportSettings.orientation);
-		exportType.set(project.projectSettings.exportSettings.exportType);
-		topRatio.set(project.projectSettings.exportSettings.topRatio);
-		middleRatio.set(project.projectSettings.exportSettings.middleRatio);
-		bottomRatio.set(project.projectSettings.exportSettings.bottomRatio);
+		initExportSettingsFromSettings(project.projectSettings.exportSettings);
 		quality.set(project.projectSettings.exportSettings.quality);
 		fps.set(project.projectSettings.exportSettings.fps); // Set default FPS if not defined
+		oneVideoPerAyah.set(project.projectSettings.exportSettings.oneVideoPerAyah || false); // Set default for oneVideoPerAyah if not defined
 	} else {
 		// If the project doesn't have the export settings, set the default values
 		project.projectSettings.exportSettings = {
@@ -54,7 +81,9 @@ export function initExportSettings(project: Project) {
 			middleRatio: 50,
 			bottomRatio: 25,
 			quality: 1,
-			fps: 30 // default FPS
+			fps: 30, // default FPS
+			oneVideoPerAyah: false, // default for oneVideoPerAyah
+			forcePortrait: false // default for forcePortrait
 		};
 	}
 }

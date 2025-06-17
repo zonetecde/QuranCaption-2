@@ -163,10 +163,16 @@
 			}
 
 			if (translationsWithVerseNumber.includes('Arabic') && verse.isLastWordInVerse) {
-				str +=
-					qpcv2Quran[
-						verse.surahNumber + ':' + verse.verseNumber + ':' + (verse.lastWordInVerse + 2)
-					].text;
+				try {
+					str +=
+						qpcv2Quran[
+							verse.surahNumber + ':' + verse.verseNumber + ':' + (verse.lastWordInVerse + 2)
+						].text;
+				} catch (e) {
+					toast.error(
+						`Error getting verse number for Surah ${verse.surahNumber} Verse ${verse.verseNumber}. Please manually add the verse number to the end of the verse text.`
+					);
+				}
 			}
 
 			contentFile += `${str}\n`;

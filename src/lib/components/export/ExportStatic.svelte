@@ -13,7 +13,9 @@
 		orientation,
 		quality,
 		exportType,
-		fps
+		fps,
+		oneVideoPerAyah,
+		forcePortrait
 	} from '$lib/stores/ExportStore';
 
 	import { getVideoDurationInMs } from '$lib/stores/TimelineStore';
@@ -74,6 +76,60 @@
 	});
 
 	$: console.log('fps :', $currentProject.projectSettings.exportSettings.fps);
+
+	async function startOneVideoPerAyahExport() {
+		toast(
+			'Starting export for each Ayah. This may take some time depending on the number of Ayahs.'
+		);
+
+		// Fait bouger les curseurs de début et de fin pour que ça corresponde à chaque subtitlesCLip
+		// puis lance pour chacune l'export
+		const startTimeBackup = $startTime;
+		const endTimeBackup = $endTime === null ? getVideoDurationInMs() : $endTime;
+
+		for (let i = 0; i < $currentProject.timeline.subtitlesTracks[0].clips.length; i++) {
+			const element = $currentProject.timeline.subtitlesTracks[0].clips[i];
+
+			// Vérifie que le clip est visible complètement
+			if (element.start >= startTimeBackup && element.end <= endTimeBackup) {
+				if (element.surah === -1 || element.verse === -1 || element.isSilence) {
+					// Ignore les clips qui ne sont pas des versets (par exemple, les silences)
+					continue;
+				}
+
+				// Regarde si le(s) clip(s) suivant(s) sont du meme verset/sourate.
+				// si oui, le endtime sera celui du dernier clip de ce verset/sourate
+				let nextElement = $currentProject.timeline.subtitlesTracks[0].clips[i + 1];
+				let actualEndTime = element.end;
+				while (
+					nextElement &&
+					nextElement.verse === element.verse &&
+					nextElement.surah === element.surah
+				) {
+					i++;
+					actualEndTime = nextElement.end;
+					nextElement = $currentProject.timeline.subtitlesTracks[0].clips[i + 1];
+				}
+
+				// Met à jour le curseur de début et de fin
+				startTime.set(element.start - 100); // -100 et +100 pour effet de fondu
+				endTime.set(actualEndTime + 100);
+
+				console.log('EndTime set to:', $endTime, 'StartTime set to:', $startTime);
+
+				// Lance l'export
+				await openExportWindow();
+
+				toast.success(
+					`Exporting video for Ayah ${element.verse} (${element.start} - ${element.end})`
+				);
+			}
+		}
+
+		// Restaure les curseurs de début et de fin
+		startTime.set(startTimeBackup);
+		endTime.set(endTimeBackup);
+	}
 </script>
 
 <!-- start time input -->
@@ -148,9 +204,11 @@
 			id="landscape-mode"
 			class="mr-2"
 			checked={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
-			on:change={() => {
+			on:change={(e) => {
 				orientation.set($orientation === 'landscape' ? 'portrait' : 'landscape');
-				console.log('Orientation changed to:', $orientation);
+
+				// @ts-ignore
+				if (e.target.checked) forcePortrait.set(false);
 			}}
 		/>
 
@@ -177,7 +235,8 @@
 				return;
 			}
 
-			openExportWindow();
+			if (!$oneVideoPerAyah) openExportWindow();
+			else startOneVideoPerAyahExport();
 		}}
 	>
 		Export your video
@@ -191,8 +250,13 @@
 </div>
 
 <p class="text-sm">
-	I would really appreciate it if you could mention Quran Caption in your video description or
-	comments section and share your video with me!
+	⚠️ Please note that assets with filenames containing non-Latin characters (such as Arabic letters)
+	may cause export errors. To avoid this, rename the files using Latin characters and re-import them
+	into the software.
+	<br />
+	<br />
+	I would really appreciate it if you could mention Quran Caption in your video description or comments
+	section and share your video with me!
 </p>
 
 <h3 class="text-xl font-bold mt-8 border-t-2 pt-8">Advanced Settings</h3>
@@ -229,6 +293,43 @@
 			}
 		}}
 	/>
+</div>
+
+<!-- Checkbox: one video per ayah -->
+<div class="flex items-center mt-4">
+	<input type="checkbox" id="one-video-per-ayah" class="mr-2" bind:checked={$oneVideoPerAyah} />
+	<label for="one-video-per-ayah" class="text-sm"
+		><b>One video per ayah.</b> This will create a separate video file for each ayah between the
+		<span class="font-bold">start</span>
+		and <span class="font-bold">end</span> time.</label
+	>
+</div>
+
+<!-- Checkbox: force portrait mode -->
+<div
+	class="flex flex-col mt-4 space-y-2"
+	class:opacity-50={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+>
+	{#if $orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+		<p class="text-sm">
+			Please disable the "Portrait" option in the global subtitles settings or on this page to use
+			this feature.
+		</p>
+	{/if}
+
+	<div class="flex items-center">
+		<input
+			type="checkbox"
+			id="force-portrait"
+			class="mr-2"
+			bind:checked={$forcePortrait}
+			disabled={$orientation === 'portrait' || $currentProject.projectSettings.isPortrait}
+		/>
+		<label for="force-portrait" class="text-sm">
+			<b>Force portrait mode.</b> This will export the video in portrait format even though the global
+			"Portrait" option is disabled (adds black bars top/bottom).
+		</label>
+	</div>
 </div>
 
 <!-- Video section ratios -->

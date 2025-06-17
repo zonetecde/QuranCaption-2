@@ -72,29 +72,8 @@
 
 	async function calculateVideoDimensions() {
 		setTimeout(async () => {
-			// tant que la vidéo n'a pas chargé
-			while (videoComponent === undefined || (videoComponent && videoComponent.videoWidth === 0)) {
-				await new Promise((resolve) => setTimeout(resolve, 100));
-			}
-
-			if (videoComponent) {
-				const _videoDimensions = getDisplayedVideoSize(videoComponent);
-
-				if (_videoDimensions.displayedHeight !== 0 && _videoDimensions.displayedWidth !== 0) {
-					videoDimensions.set({
-						width: _videoDimensions.displayedWidth,
-						height: _videoDimensions.displayedHeight
-					});
-				} else {
-					// Image de fond noir
-					const imgElement = document.getElementById('bg-img') as HTMLImageElement;
-
-					videoDimensions.set({
-						width: imgElement.clientWidth,
-						height: imgElement.clientHeight
-					});
-				}
-			}
+			// trigger reactivity
+			videoDimensions.set($videoDimensions);
 
 			resizeVideoToFitScreen();
 		}, 1);

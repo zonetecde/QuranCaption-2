@@ -17,7 +17,9 @@ import {
 	middleRatio,
 	bottomRatio,
 	quality,
-	fps
+	fps,
+	oneVideoPerAyah,
+	forcePortrait
 } from './ExportStore';
 
 export const currentProject: Writable<Project> = writable();
@@ -103,7 +105,9 @@ export function getDefaultsProjectSettings(): Project['projectSettings'] {
 			middleRatio: 50,
 			bottomRatio: 25,
 			quality: 1,
-			fps: 30 // default FPS
+			fps: 30, // default FPS
+			oneVideoPerAyah: false,
+			forcePortrait: false // default for forcePortrait
 		},
 		globalSubtitlesSettings: {
 			background: true,
@@ -274,7 +278,9 @@ export async function updateUsersProjects(
 			middleRatio: get(middleRatio),
 			bottomRatio: get(bottomRatio),
 			quality: get(quality),
-			fps: get(fps)
+			fps: get(fps),
+			oneVideoPerAyah: get(oneVideoPerAyah),
+			forcePortrait: get(forcePortrait)
 		};
 	}
 
@@ -382,7 +388,7 @@ export function getProjectVersesRange(
 
 	for (let i = 0; i < clips.length; i++) {
 		if (startClipIndex !== -1 && i < startClipIndex) continue; // skip clips before startClipIndex
-		if (endClipIndex !== -1 && i >= endClipIndex) break; // stop at endClipIndex
+		if (endClipIndex !== -1 && i > endClipIndex) break; // stop at endClipIndex
 
 		const clip = clips[i];
 

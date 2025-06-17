@@ -5,7 +5,7 @@
 		getDefaultsTranslationSettings,
 		hasSubtitleDefaultIndividualSettings
 	} from '$lib/stores/ProjectStore';
-	import { getNumberOfVerses, getVerse } from '$lib/stores/QuranStore';
+	import { getNumberOfVerses, getVerse, splitVerseInWords } from '$lib/stores/QuranStore';
 	import { cursorPosition } from '$lib/stores/TimelineStore';
 	import { onDestroy, onMount } from 'svelte';
 	import toast from 'svelte-french-toast';
@@ -72,7 +72,7 @@
 	// Split the verse into words
 	$: wordsInSelectedVerse = selectedTextId
 		? getVerseFromText(selectedTextId, verseNumber).split('***')
-		: getVerse(surahNumber, verseNumber).text.split(' ');
+		: splitVerseInWords(getVerse(surahNumber, verseNumber).text);
 
 	// Si on change de verset, on sélectionne le premier mot par défaut
 	$: if (verseNumber || surahNumber) {

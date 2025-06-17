@@ -22,8 +22,8 @@ export const trimDialog: Writable<string | undefined> = writable(undefined); // 
 
 // Video Preview
 export const videoDimensions: Writable<{ width: number; height: number }> = writable({
-	width: 0,
-	height: 0
+	width: 1920,
+	height: 1080
 }); // Les dimensions de la vidéo
 export const videoSpeed: Writable<number> = writable(1); // La vitesse de la vidéo
 export const setCurrentVideoTime: Writable<number | undefined> = writable(undefined); // Change l'endroit où la vidéo est en train de jouer.

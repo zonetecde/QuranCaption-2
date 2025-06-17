@@ -3,6 +3,7 @@
 	import Toggle from '$lib/components/common/Toggle.svelte';
 	import { ImgFileExt } from '$lib/ext/File';
 	import type { SubtitleTrackSettings } from '$lib/models/Project';
+	import { forcePortrait } from '$lib/stores/ExportStore';
 	import { showSubtitlesPadding, userFonts } from '$lib/stores/LayoutStore';
 	import { currentProject, hasAtLeastOneSubtitle } from '$lib/stores/ProjectStore';
 	import { open } from '@tauri-apps/api/dialog';
@@ -91,6 +92,12 @@
 			type="checkbox"
 			class="form-checkbox h-5 w-5 text-green-500"
 			bind:checked={$currentProject.projectSettings.isPortrait}
+			on:change={(e) => {
+				//@ts-ignore
+				if (e.target.checked) {
+					forcePortrait.set(false);
+				}
+			}}
 		/>
 	</label>
 </div>
