@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { downloadFile } from '$lib/ext/Utilities';
 	import type { Surah } from '$lib/models/Quran';
-	import { getTextTranslations } from '$lib/stores/OtherTextsStore';
+	import { getTextTranslations, OtherTexts } from '$lib/stores/OtherTextsStore';
 	import { currentProject, getDefaultsTranslationSettings } from '$lib/stores/ProjectStore';
 	import { cli } from '@tauri-apps/api';
 	import { ask } from '@tauri-apps/api/dialog';
@@ -42,7 +42,7 @@
 		});
 
 		// trigger reactivity
-		selectedText = { ...selectedText };
+		OtherTexts.set($OtherTexts);
 	}
 
 	function removeVerseButtonClick(index: number): any {
@@ -120,7 +120,7 @@
 				];
 			}
 
-			selectedText = { ...selectedText }; // Trigger reactivity
+			OtherTexts.set($OtherTexts);
 		}
 	}
 
@@ -142,7 +142,7 @@
 			});
 		}
 
-		selectedText = { ...selectedText }; // Trigger reactivity
+		OtherTexts.set($OtherTexts);
 	}
 
 	let showRawInputBox = false;
