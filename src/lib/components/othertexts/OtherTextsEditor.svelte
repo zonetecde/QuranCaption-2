@@ -288,7 +288,7 @@
 			}
 
 			return {
-				id: verse.id,
+				id: index + 1,
 				text: verse.text.replace('\n', ' *** '),
 				translations: verse.translations
 			};
