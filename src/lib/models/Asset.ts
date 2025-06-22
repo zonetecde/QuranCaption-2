@@ -2,6 +2,7 @@ import { getFileNameFromPath, getFileType } from '$lib/ext/File';
 import Id from '$lib/ext/Id';
 import { currentProject } from '$lib/stores/ProjectStore';
 import { invoke } from '@tauri-apps/api';
+import { message } from '@tauri-apps/api/dialog';
 import { get } from 'svelte/store';
 
 export default interface Asset {
@@ -66,6 +67,11 @@ export async function addAssets(filePaths: string | string[], youtubeUrl?: strin
 				} catch (e) {
 					console.error(e);
 				}
+
+				if (!youtubeUrl)
+					message(
+						'Please make sure that your audio/video have a constant bitrate, otherwise you might encounter synchronization issues.'
+					);
 			}
 
 			_assets.push({

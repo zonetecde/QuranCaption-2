@@ -4,7 +4,7 @@
 	import type Asset from '$lib/models/Asset';
 	import { downloadFromYoutube, removeAsset } from '$lib/models/Asset';
 	import { currentProject, updateUsersProjects } from '$lib/stores/ProjectStore';
-	import { open } from '@tauri-apps/api/dialog';
+	import { confirm, message, open } from '@tauri-apps/api/dialog';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import toast from 'svelte-french-toast';
 	import RelocateAssetWarning from '../common/RelocateAssetWarning.svelte';
@@ -23,8 +23,20 @@
 
 	function handleAddInTheTimelineButtonClicked(withAudio = true) {
 		switch (asset.type) {
-			case 'video':
 			case 'image':
+				if (asset.type === 'image') {
+					toast(
+						'The background image has been applied to your project. To remove or modify it, please check the background image settings in the project settings.',
+						{
+							icon: 'ℹ️',
+							duration: 6000
+						}
+					);
+
+					$currentProject.projectSettings.globalSubtitlesSettings.backgroundImage = asset.filePath;
+				}
+				break;
+			case 'video':
 				if (
 					$currentProject.timeline.videosTracks[0].clips.length === 1 &&
 					$currentProject.timeline.videosTracks[0].clips[0].id === 'black-video'
@@ -61,16 +73,6 @@
 					isMuted: !withAudio
 				});
 
-				if (asset.type === 'image') {
-					toast(
-						'Please use the "Background Image" option in the Global Subtitles Settings to add a background image.',
-						{
-							icon: 'ℹ️',
-							duration: 6000
-						}
-					);
-				}
-
 				break;
 			case 'audio':
 				const lastAudioEndTime =
@@ -92,11 +94,11 @@
 				});
 
 				if (lastAudioEndTime !== 0) {
-					toast(
-						'Please note that the built-in export feature only processes the first audio clip. Subsequent clips will be ignored, resulting in silence at the end of your video. To include all audio clips, consider using an external tool to concatenate them.',
+					message(
+						'Please note that the built-in export feature only processes the first audio/video clip. Any subsequent clips will be ignored, resulting in silence or a black background at the end of your video. To include all audio/video clips, consider using an external tool to concatenate them.',
 						{
-							icon: 'ℹ️',
-							duration: 6000
+							title: 'Audio Warning',
+							okLabel: 'Understood'
 						}
 					);
 				}

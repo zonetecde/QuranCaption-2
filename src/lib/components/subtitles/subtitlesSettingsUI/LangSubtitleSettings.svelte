@@ -180,8 +180,8 @@
 
 	<div
 		class={!$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fitOnOneLine
-			? ''
-			: 'opacity-50 pointer-events-none'}
+			? 'mb-2'
+			: 'opacity-50 pointer-events-none mb-2'}
 	>
 		<Slider
 			title="Font Size"
@@ -190,6 +190,16 @@
 			step={1}
 			bind:bindValue={
 				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].fontSize
+			}
+		/>
+
+		<Slider
+			title="Line Height"
+			min={0.3}
+			max={3}
+			step={0.1}
+			bind:bindValue={
+				$currentProject.projectSettings.subtitlesTracksSettings[subtitleLanguage].lineHeight
 			}
 		/>
 	</div>
@@ -228,7 +238,7 @@
 			</abbrt>
 		</span>
 	</label>
-	<br />
+
 	<br />
 
 	<label class="mt-2"

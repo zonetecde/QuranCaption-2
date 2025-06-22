@@ -147,6 +147,7 @@ export interface CreatorText {
 export interface SubtitleTrackSettings {
 	enableSubtitles: boolean;
 	fontSize: number;
+	lineHeight: number;
 	fontFamily: string;
 	color: string;
 	enableOutline: boolean;

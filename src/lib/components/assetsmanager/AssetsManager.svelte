@@ -35,14 +35,6 @@
 		}).then((result) => {
 			if (result === null) return;
 
-			toast(
-				'Please make sure that your audio/video have a constant bitrate, otherwise you might encounter synchronization issues.',
-				{
-					duration: 5000,
-					icon: '⚠️'
-				}
-			);
-
 			// Add the selected files to the store
 			addAssets(result);
 		});

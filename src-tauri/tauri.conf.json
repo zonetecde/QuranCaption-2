@@ -20,7 +20,7 @@
 				"all": false,
 				"ask": true,
 				"confirm": true,
-				"message": false,
+				"message": true,
 				"open": true,
 				"save": true
 			},

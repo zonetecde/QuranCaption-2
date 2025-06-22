@@ -177,7 +177,42 @@
 				<div class="grid grid-cols-2-template mt-1">
 					<section class="flex flex-col w-full">
 						<div class="text-sm font-bold">
-							Status: {video.status}
+							<div class="flex items-center gap-x-2">
+								Status: {video.status}
+								{#if video.status === 'Cancelled'}
+									<div class="group">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+											class="size-5 opacity-80"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
+											/>
+										</svg>
+
+										<div
+											class="w-[300px] h-[220px] bg-[#393a3f] rounded-lg text-sm p-4 hidden flex-col group-hover:flex gap-y-3 border-2 border-black z-50"
+										>
+											<h1 class="underline">If you didn't cancel the export, please check:</h1>
+
+											<p>
+												1. That all assets are still on your computer (audio file, video file,
+												background image, etc.)
+											</p>
+											<p>
+												2. That none of your asset file paths contain non-Latin characters (such as
+												Arabic letters).
+											</p>
+										</div>
+									</div>
+								{/if}
+							</div>
 						</div>
 					</section>
 					<section class="flex flex-col ml-4">

@@ -106,6 +106,14 @@
 				}
 			}
 		}
+		// Migration pour l'ajout de lineHeight
+		for (const [key, element] of Object.entries(project.projectSettings.subtitlesTracksSettings)) {
+			if (key === 'arabic' && element.lineHeight === undefined) {
+				element.lineHeight = 1.5;
+			} else if (element.lineHeight === undefined) {
+				element.lineHeight = 1.2;
+			}
+		}
 
 		// Set the values for the export settings
 		initExportSettings(project);
