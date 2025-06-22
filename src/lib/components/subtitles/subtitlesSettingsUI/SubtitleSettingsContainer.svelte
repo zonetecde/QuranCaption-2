@@ -90,51 +90,6 @@
 			$currentProject.projectSettings.globalSubtitlesSettings = globalSubtitlesSettings;
 		}
 	}
-
-	async function checkForCollision() {
-		const subtitleClips = $currentProject.timeline.subtitlesTracks[0].clips;
-
-		const fadeDurationBackup = $currentProject.projectSettings.globalSubtitlesSettings.fadeDuration;
-		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = 0;
-
-		for (let i = 0; i < subtitleClips.length; i++) {
-			const clip = subtitleClips[i];
-
-			cursorPosition.set(clip.start + 100);
-
-			await new Promise((resolve) => {
-				setTimeout(resolve, 100); // Wait for subtitle to render
-			});
-
-			// Get the visible subtitles
-			const subtitleParagraphs = document.getElementsByClassName('subtitle-text');
-			// Check if one collide with another
-			for (let i = 0; i < subtitleParagraphs.length; i++) {
-				const subtitle1 = subtitleParagraphs[i];
-				for (let j = i + 1; j < subtitleParagraphs.length; j++) {
-					const subtitle2 = subtitleParagraphs[j];
-					const subtitle1Rect = subtitle1.getBoundingClientRect();
-					const subtitle2Rect = subtitle2.getBoundingClientRect();
-					if (
-						subtitle1Rect.right > subtitle2Rect.left &&
-						subtitle1Rect.left < subtitle2Rect.right &&
-						subtitle1Rect.bottom > subtitle2Rect.top &&
-						subtitle1Rect.top < subtitle2Rect.bottom
-					) {
-						toast.error('Collision found at ' + milisecondsToMMSS(clip.start));
-
-						$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration =
-							fadeDurationBackup;
-						return;
-					}
-				}
-			}
-		}
-
-		toast.success('No collision were found.');
-
-		$currentProject.projectSettings.globalSubtitlesSettings.fadeDuration = fadeDurationBackup;
-	}
 </script>
 
 <div
@@ -244,17 +199,5 @@
 		<LangSubtitleSettings subtitleLanguage={$selectedSubtitlesLanguage} />
 	{:else}
 		<IndividualSubtitleSettingsContainer />
-	{/if}
-
-	{#if $selectedSubtitlesLanguage !== 'individual'}
-		<div class="flex flex-row items-center justify-center gap-4">
-			<button
-				class="bg-[#383535] py-2.5 mx-auto rounded-xl border-2 border-black w-1/2"
-				on:click={checkForCollision}
-				><abbr title="This button will scan all subtitles added to see if there are any collisions">
-					Check for collisions</abbr
-				></button
-			>
-		</div>
 	{/if}
 </div>
