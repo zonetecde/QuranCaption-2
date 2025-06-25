@@ -194,8 +194,28 @@ async fn create_video(
     let path_resolver: tauri::PathResolver = app_handle.path_resolver();
     
     // Attempt to resolve the path to the bundled 'video_creator' binary
-    match path_resolver.resolve_resource("binaries/video_creator") {
-        Some(video_creator_path) => {
+    match path_resolver.resolve_resource("binaries/video_creator") {        Some(video_creator_path) => {
+            // Validation et debug des paramètres contenant des caractères non-latins
+            println!("Debug - Checking parameters for non-Latin characters:");
+            println!("  folder_path: {}", folder_path);
+            println!("  audio_path: {}", audio_path);
+            println!("  output_path: {}", output_path);
+            println!("  background_file: {}", background_file);
+            
+            // Vérifier que tous les chemins sont valides UTF-8
+            if !folder_path.is_ascii() {
+                println!("Warning: folder_path contains non-ASCII characters: {}", folder_path);
+            }
+            if !audio_path.is_ascii() {
+                println!("Warning: audio_path contains non-ASCII characters: {}", audio_path);
+            }
+            if !output_path.is_ascii() {
+                println!("Warning: output_path contains non-ASCII characters: {}", output_path);
+            }
+            if !background_file.is_ascii() {
+                println!("Warning: background_file contains non-ASCII characters: {}", background_file);
+            }
+            
             // Construct the arguments
             let cmd_args = vec![
                 folder_path.clone(),
@@ -221,23 +241,46 @@ async fn create_video(
                 let mut args = cmd_args.clone();
                 args.push("--fps".to_string());
                 args.push(fps.to_string());
-                args
-            } else {
+                args            } else {
                 cmd_args
             };
 
+            // Debug: Afficher tous les arguments avant l'exécution
+            println!("Debug - Final command arguments:");
+            for (i, arg) in cmd_args.iter().enumerate() {
+                println!("  arg[{}]: {}", i, arg);
+                // Vérifier l'encodage de chaque argument
+                if let Ok(_) = std::str::from_utf8(arg.as_bytes()) {
+                    println!("    UTF-8 valid: ✓");
+                } else {
+                    println!("    UTF-8 invalid: ✗");
+                }
+            }
 
             // Execute the command in the background and capture output
             let mut command = std::process::Command::new(video_creator_path);
             command.args(&cmd_args);
             
-            // Configure to capture stdout
+            // Configure to capture stdout and stderr
             command.stdout(std::process::Stdio::piped());
-
+            command.stderr(std::process::Stdio::piped());
+            
+            // Assurer l'encodage UTF-8 pour les paramètres
             #[cfg(target_os = "windows")]
             {
                 command.creation_flags(0x08000000); // CREATE_NO_WINDOW
-            }            // Start the process
+                // Forcer l'UTF-8 pour Windows
+                command.env("PYTHONIOENCODING", "utf-8");
+                command.env("PYTHONUTF8", "1");
+            }
+            
+            #[cfg(not(target_os = "windows"))]
+            {
+                // Pour Linux/macOS, s'assurer que l'environnement supporte UTF-8
+                command.env("LC_ALL", "C.UTF-8");
+                command.env("LANG", "C.UTF-8");
+                command.env("PYTHONIOENCODING", "utf-8");
+            }// Start the process
             let mut child = command
                 .spawn()
                 .map_err(|e| format!("Error while starting process: {}", e))?;
@@ -264,23 +307,21 @@ async fn create_video(
                 let reader = BufReader::new(stdout);
                 
                 // Regex to extract percentage
-                let re = Regex::new(r"percentage:\s*(\d+)%").unwrap();
-                
-                // Read line by line
-                for line in reader.lines() {
-                    if let Ok(line) = line {
-                        println!("Output: {}", line);
-                        
-                        // Try to find percentage and status in the line
-                        if let Some(caps) = re.captures(&line) {
-                            if let Some(percentage_match) = caps.get(1) {
-                                if let Ok(percentage) = percentage_match.as_str().parse::<i32>() {
+                let re = Regex::new(r"percentage:\s*(\d+)%").unwrap();                // Read line by line avec gestion d'erreur UTF-8
+                for line_result in reader.lines() {
+                    match line_result {
+                        Ok(line) => {
+                            println!("Output: {}", line);
+                            
+                            // Try to find percentage and status in the line
+                            if let Some(caps) = re.captures(&line) {
+                                if let Some(percentage_match) = caps.get(1) {
+                                    if let Ok(percentage) = percentage_match.as_str().parse::<i32>() {
                                     // Extract status from the line
                                     let status = line.split('|')
                                         .nth(1)
                                         .map(|s| s.trim().replace("status: ", ""))
-                                        .unwrap_or_else(|| "Unknown status".to_string());
-                                    
+                                        .unwrap_or_else(|| "Unknown status".to_string());                                    
                                     // Emit event with current progress and status
                                     let payload = serde_json::json!({
                                         "exportId": export_id,
@@ -293,6 +334,12 @@ async fn create_video(
                                 // If no percentage found, just log the line
                                 println!("No percentage found in line: {}", line);
                             }
+                        }
+                        },
+                        Err(e) => {
+                            // Erreur de lecture de ligne (probablement UTF-8)
+                            eprintln!("Error reading line from process output (possible encoding issue): {}", e);
+                            // Continue reading other lines
                         }
                     }
                 }
@@ -501,23 +548,6 @@ async fn cancel_export(export_id: String, app_handle: tauri::AppHandle) -> Resul
 
         Ok(format!("Export {} cancelled successfully", export_id))
     } else {
-        // // Si on ne trouve pas le processus dans notre HashMap, on tente de trouver tous les processus video_creator.exe
-        // #[cfg(target_os = "windows")]
-        // {
-        //     println!("Recherche de video_creator.exe pour l'export {}", export_id);
-        //     let _ = std::process::Command::new("taskkill")
-        //         .args(&["/F", "/IM", "video_creator.exe"])
-        //         .output();
-        // }
-        
-        // // Émet quand même un événement d'annulation
-        // let payload = serde_json::json!({
-        //     "exportId": export_id,
-        //     "progress": 0,
-        //     "status": "Cancelled"
-        // });
-        // let _ = app_handle.emit_all("updateExportDetailsById", payload);
-        
         Err(format!("No process found for export {}", export_id))
     }
 }

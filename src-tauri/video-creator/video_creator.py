@@ -4,12 +4,18 @@ Fixed Video Creator - Version 2.4
 Fixes portrait mode dimension calculation and frame scaling
 """
 
+# URGENT DEBUG: Très tôt dans le script
+print("=== PYTHON SCRIPT STARTING ===", flush=True)
+import sys
+print(f"Python version: {sys.version}", flush=True)
+print(f"Platform: {sys.platform}", flush=True)
+print(f"Encoding - stdin: {sys.stdin.encoding}, stdout: {sys.stdout.encoding}, stderr: {sys.stderr.encoding}", flush=True)
+
 import argparse
 import shutil
 import cv2
 import numpy as np
 import os
-import sys
 import platform
 import time
 import re
@@ -18,6 +24,11 @@ from dataclasses import dataclass
 from typing import Optional, Tuple, List, Union, Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
+
+# Plus de debugging des variables d'environnement
+print(f"PYTHONIOENCODING: {os.environ.get('PYTHONIOENCODING', 'Not set')}", flush=True)
+print(f"LC_ALL: {os.environ.get('LC_ALL', 'Not set')}", flush=True)
+print(f"LANG: {os.environ.get('LANG', 'Not set')}", flush=True)
 import threading
 
 # MoviePy imports
@@ -187,7 +198,7 @@ class BackgroundProcessor:
             elif file_ext in video_exts:
                 self._load_background_video()
         except Exception as e:
-            print(f"Warning: Could not load background: {e}")
+            print(f"Warning: Could not load background: {e}", flush=True)
     
     def _load_background_image(self, width: int, height: int):
         """Load and prepare background image"""
@@ -204,10 +215,10 @@ class BackgroundProcessor:
             
             self.background_data = img_resized
             self.is_image = True
-            print(f"Background image loaded: {img_resized.shape}")
+            print(f"Background image loaded: {img_resized.shape}", flush=True)
             
         except Exception as e:
-            print(f"Error loading background image: {e}")
+            print(f"Error loading background image: {e}", flush=True)
     
     def _load_background_video(self):
         """Load background video"""
@@ -245,7 +256,7 @@ class BackgroundProcessor:
                 if trim_start < self.video_clip.duration:
                     self.video_clip = self.video_clip.subclip(trim_start, trim_end)
                 else:
-                    print(f"Warning: Start time {trim_start}s exceeds video duration {self.video_clip.duration}s")
+                    print(f"Warning: Start time {trim_start}s exceeds video duration {self.video_clip.duration}s", flush=True)
                     return
             
             # Loop video if it's shorter than needed
@@ -253,10 +264,10 @@ class BackgroundProcessor:
                 self.video_clip = self.video_clip.loop(duration=self.duration_sec)
             
             self.is_video = True
-            print(f"Background video loaded: {self.video_clip.duration:.2f}s, size: {self.video_clip.size}")
+            print(f"Background video loaded: {self.video_clip.duration:.2f}s, size: {self.video_clip.size}", flush=True)
             
         except Exception as e:
-            print(f"Error loading background video: {e}")
+            print(f"Error loading background video: {e}", flush=True)
     
     def get_frame(self, t_seconds: float) -> Optional[np.ndarray]:
         """Get background frame at given time"""
@@ -272,7 +283,7 @@ class BackgroundProcessor:
             return self._transform_frame(frame)
             
         except Exception as e:
-            print(f"Warning: Error getting background frame at {t_seconds}s: {e}")
+            print(f"Warning: Error getting background frame at {t_seconds}s: {e}", flush=True)
             return self.background_data.copy() if self.is_image else None
     
     def _transform_frame(self, frame: np.ndarray) -> np.ndarray:
@@ -339,7 +350,7 @@ class BackgroundProcessor:
             return result
             
         except Exception as e:
-            print(f"Error transforming frame: {e}")
+            print(f"Error transforming frame: {e}", flush=True)
             return frame if frame is not None else np.zeros((height, width, 3), dtype=np.uint8)
 
 class OptimizedVideoCreator:
@@ -372,12 +383,12 @@ class OptimizedVideoCreator:
             local_ffmpeg = app_dir / ffmpeg_name
             
             if local_ffmpeg.exists():
-                change_settings({"FFMPEG_BINARY": str(local_ffmpeg)})
-                print(f"Using bundled FFmpeg: {local_ffmpeg}")
+                change_settings({"FFMPEG_BINARY": str(local_ffmpeg)}, flush=True)
+                print(f"Using bundled FFmpeg: {local_ffmpeg}", flush=True)
             else:
-                print("Using system FFmpeg")
+                print("Using system FFmpeg", flush=True)
         except Exception as e:
-            print(f"Warning: FFmpeg setup failed: {e}")
+            print(f"Warning: FFmpeg setup failed: {e}", flush=True)
     
     def load_image_optimized(self, image_path: str, preserve_alpha: bool = True) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
         """Optimized image loading with caching"""
@@ -417,7 +428,7 @@ class OptimizedVideoCreator:
             return result
             
         except Exception as e:
-            print(f"Error loading image {image_path}: {e}")
+            print(f"Error loading image {image_path}: {e}", flush=True)
             return None, None
     
     def process_images(self) -> bool:
@@ -432,7 +443,7 @@ class OptimizedVideoCreator:
         if not image_files:
             raise ValueError("No PNG files found")
         
-        print(f"Processing {len(image_files)} images...")
+        print(f"Processing {len(image_files)} images...", flush=True)
         
         # Load first image for dimensions and background color
         first_img_rgb, first_img_alpha = self.load_image_optimized(
@@ -458,16 +469,16 @@ class OptimizedVideoCreator:
             self.output_dimensions = ensure_even_dimensions(output_height, output_width)
             # self.output_dimensions = (self.output_dimensions[1], self.output_dimensions[0])  # Inverser pour (height, width)
             
-            print(f"Portrait mode enabled:")
-            print(f"  - Original frame size: {orig_width}x{orig_height}")
-            print(f"  - Frame dimensions (landscape): {frame_width}x{frame_height}")
-            print(f"  - Output dimensions (portrait): {self.output_dimensions[1]}x{self.output_dimensions[0]} (WxH)")
+            print(f"Portrait mode enabled:", flush=True)
+            print(f"  - Original frame size: {orig_width}x{orig_height}", flush=True)
+            print(f"  - Frame dimensions (landscape): {frame_width}x{frame_height}", flush=True)
+            print(f"  - Output dimensions (portrait): {self.output_dimensions[1]}x{self.output_dimensions[0]} (WxH)", flush=True)
         else:
             # Mode paysage normal
             frame_width, frame_height = ensure_even_dimensions(orig_width, orig_height)
             self.output_dimensions = (frame_height, frame_width)
             
-            print(f"Landscape mode: {frame_width}x{frame_height}")
+            print(f"Landscape mode: {frame_width}x{frame_height}", flush=True)
         
         # Redimensionner la première image si nécessaire pour les frames
         if (frame_width, frame_height) != (orig_width, orig_height):
@@ -486,12 +497,12 @@ class OptimizedVideoCreator:
             else:
                 self.background_alpha = 1.0  # Opaque par défaut
             
-            print(f"Background color for transitions: RGB{tuple(self.background_color)} Alpha:{self.background_alpha:.3f}")
+            print(f"Background color for transitions: RGB{tuple(self.background_color)} Alpha:{self.background_alpha:.3f}", flush=True)
         else:
             # Fallback si l'image est trop petite
             self.background_color = np.array([0, 0, 0], dtype=np.uint8)  # Noir
             self.background_alpha = 1.0
-            print("Using black as default background color for transitions")
+            print("Using black as default background color for transitions", flush=True)
         
         # Calculate section heights (basé sur les dimensions des frames)
         top_height = int(frame_height * self.config.top_ratio)
@@ -523,11 +534,11 @@ class OptimizedVideoCreator:
                     if frame_data:
                         self.frames_data.append(frame_data)
                 except Exception as e:
-                    print(f"Error processing image: {e}")
+                    print(f"Error processing image: {e}", flush=True)
         
         # Sort by start time
         self.frames_data.sort(key=lambda x: x.start_ms)
-        print(f"Processed {len(self.frames_data)} frames")
+        print(f"Processed {len(self.frames_data)} frames", flush=True)
         return len(self.frames_data) > 0
     
     def _process_single_image(self, img_file: Path, top_height: int, 
@@ -568,7 +579,7 @@ class OptimizedVideoCreator:
             return frame_data
             
         except Exception as e:
-            print(f"Error processing {img_file}: {e}")
+            print(f"Error processing {img_file}: {e}", flush=True)
             return None
     
     def setup_background(self, duration_sec: float, start_ms: int, end_ms: int):
@@ -629,7 +640,7 @@ class OptimizedVideoCreator:
                 
                 return result
         except Exception as e:
-            print(f"Error in alpha blending: {e}")
+            print(f"Error in alpha blending: {e}", flush=True)
             return background
     
     def make_frame_optimized(self, t_seconds: float) -> np.ndarray:
@@ -660,7 +671,7 @@ class OptimizedVideoCreator:
                 return self._make_landscape_frame(t_seconds, current_frame, next_frame, t_ms)
                 
         except Exception as e:
-            print(f"Error generating frame at {t_seconds}s: {e}")
+            print(f"Error generating frame at {t_seconds}s: {e}", flush=True)
             output_height, output_width = self.output_dimensions
             return np.zeros((output_height, output_width, 3), dtype=np.uint8)
     
@@ -848,7 +859,7 @@ class OptimizedVideoCreator:
                     return cv2.addWeighted(bg_frame, 1 - alpha_factor, next_img, alpha_factor, 0)
                     
         except Exception as e:
-            print(f"Error in transition: {e}")
+            print(f"Error in transition: {e}", flush=True)
             return current if progress < 0.5 else next_img
     
     def _interpolate_alpha(self, alpha1: Optional[np.ndarray], alpha2: Optional[np.ndarray], 
@@ -871,7 +882,7 @@ class OptimizedVideoCreator:
                 transition_alpha = self.background_alpha * (1.0 - (progress - 0.5) * 2) + alpha2 * ((progress - 0.5) * 2)
                 return transition_alpha
         except Exception as e:
-            print(f"Error interpolating alpha: {e}")
+            print(f"Error interpolating alpha: {e}", flush=True)
             return alpha1 if alpha1 is not None else alpha2
     
     def create_video(self) -> bool:
@@ -881,7 +892,7 @@ class OptimizedVideoCreator:
         
         try:
             if not self.process_images():
-                print("Failed to process images")
+                print("Failed to process images", flush=True)
                 return False
             
             # Calculate duration
@@ -920,7 +931,7 @@ class OptimizedVideoCreator:
                             if trimmed_audio.duration < duration_sec:
                                 trimmed_audio = self._extend_audio_with_silence(trimmed_audio, duration_sec)
                         else:
-                            print(f"Warning: Audio start time {audio_start_sec:.2f}s exceeds audio duration {audio.duration:.2f}s")
+                            print(f"Warning: Audio start time {audio_start_sec:.2f}s exceeds audio duration {audio.duration:.2f}s", flush=True)
                             # Create silent audio for the entire duration
                             silent_audio = audio.subclip(0, min(0.1, audio.duration)).volumex(0.0)
                             trimmed_audio = silent_audio.loop(duration=duration_sec)
@@ -936,7 +947,7 @@ class OptimizedVideoCreator:
                     fade_end_sec = self.config.audio_fade_end / 1000.0
                     
                     if fade_start_sec > 0 or fade_end_sec > 0:
-                        print(f"Applying audio fade: start={fade_start_sec:.2f}s, end={fade_end_sec:.2f}s")
+                        print(f"Applying audio fade: start={fade_start_sec:.2f}s, end={fade_end_sec:.2f}s", flush=True)
                         
                         # Apply fade-in at the beginning
                         if fade_start_sec > 0 and fade_start_sec < trimmed_audio.duration:
@@ -948,12 +959,12 @@ class OptimizedVideoCreator:
                     
                     final_video = video.set_audio(trimmed_audio)
                 except Exception as e:
-                    print(f"Warning: Could not set audio: {e}")
+                    print(f"Warning: Could not set audio: {e}", flush=True)
                     final_video = video
             else:
                 final_video = video
             
-            print(f"Exporting to {self.config.output_path}...")
+            print(f"Exporting to {self.config.output_path}...", flush=True)
             
             export_params = {
                 'fps': self.config.fps,
@@ -981,13 +992,13 @@ class OptimizedVideoCreator:
             self._cleanup()
             
             elapsed = time.time() - start_time
-            print(f"✅ Video created successfully in {elapsed:.2f}s")
-            print(f"Final duration: {duration_sec:.2f}s")
+            print(f"✅ Video created successfully in {elapsed:.2f}s", flush=True)
+            print(f"Final duration: {duration_sec:.2f}s", flush=True)
             
             return True
             
         except Exception as e:
-            print(f"❌ Error creating video: {e}")
+            print(f"❌ Error creating video: {e}", flush=True)
             import traceback
             traceback.print_exc()
             return False
@@ -997,15 +1008,15 @@ class OptimizedVideoCreator:
         try:
             if self.config.audio_path and os.path.exists(self.config.audio_path):
                 audio = AudioFileClip(self.config.audio_path)
-                print(f"Audio loaded: {self.config.audio_path} (duration: {audio.duration:.2f}s)")
+                print(f"Audio loaded: {self.config.audio_path} (duration: {audio.duration:.2f}s)", flush=True)
                 return audio
             elif self.background_processor and self.background_processor.video_clip and self.background_processor.video_clip.audio:
-                print("Using background video audio")
+                print("Using background video audio", flush=True)
                 return self.background_processor.video_clip.audio
             else:
-                print("No audio available")
+                print("No audio available", flush=True)
         except Exception as e:
-            print(f"Warning: Could not load audio: {e}")
+            print(f"Warning: Could not load audio: {e}", flush=True)
         return None
 
     def _extend_audio_with_silence(self, audio: AudioFileClip, target_duration: float) -> AudioFileClip:
@@ -1014,7 +1025,7 @@ class OptimizedVideoCreator:
             if audio.duration >= target_duration:
                 return audio
             
-            print(f"Extending audio from {audio.duration:.2f}s to {target_duration:.2f}s with silence")
+            print(f"Extending audio from {audio.duration:.2f}s to {target_duration:.2f}s with silence", flush=True)
             
             # Create silence for the remaining duration
             silence_duration = target_duration - audio.duration
@@ -1044,12 +1055,44 @@ class OptimizedVideoCreator:
             
             if os.path.exists(self.config.folder_path):
                 shutil.rmtree(self.config.folder_path)
-                print(f"Cleaned up source folder: {self.config.folder_path}")
+                print(f"Cleaned up source folder: {self.config.folder_path}", flush=True)
         except Exception as e:
-            print(f"Warning: Cleanup failed: {e}")
+            print(f"Warning: Cleanup failed: {e}", flush=True)
 
 def main():
     """Main entry point"""
+    # DEBUG: Forcer l'encodage UTF-8 pour stdout/stderr dès le début
+    try:
+        import sys
+        import io
+        
+        # Debugging des arguments reçus AVANT tout autre traitement
+        print("=== DEBUG: Raw arguments received ===", flush=True)
+        print(f"sys.argv length: {len(sys.argv)}", flush=True)
+        
+        for i, arg in enumerate(sys.argv):
+            try:
+                print(f"argv[{i}]: {repr(arg)} (type: {type(arg).__name__})", flush=True)
+                # Test d'encodage
+                arg_bytes = arg.encode('utf-8')
+                print(f"  -> UTF-8 bytes: {arg_bytes[:50]}{'...' if len(arg_bytes) > 50 else ''}", flush=True)
+                # Test de décodage
+                decoded = arg_bytes.decode('utf-8')
+                print(f"  -> Re-decoded: {repr(decoded)}", flush=True)
+            except Exception as e:
+                print(f"  -> ERROR processing arg[{i}]: {e}", flush=True)
+        
+        print("=== END DEBUG ===", flush=True)
+        
+        # S'assurer que stdout utilise UTF-8
+        if hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8')
+        if hasattr(sys.stderr, 'reconfigure'):
+            sys.stderr.reconfigure(encoding='utf-8')
+        
+    except Exception as e:
+        print(f"DEBUG ERROR: {e}", flush=True)
+    
     parser = argparse.ArgumentParser(description="Fixed Video Creator v2.4 - Fixed Portrait Mode")
     parser.add_argument("folder_path", help="Path to folder containing PNG images")
     parser.add_argument("audio_path", help="Path to audio file")
@@ -1070,18 +1113,33 @@ def main():
     parser.add_argument("--fps", type=int, default=DEFAULT_FPS, help="Output FPS")
     parser.add_argument("--threads", type=int, default=DEFAULT_THREADS, help="Processing threads")
     
+    print("DEBUG: Parsing arguments...", flush=True)
     args = parser.parse_args()
+    print("DEBUG: Arguments parsed successfully", flush=True)
     
     print("=== Video Creator v2.4 - Fixed Portrait Mode ===")
-    print(f"Input folder: {args.folder_path}")
-    print(f"Audio: {args.audio_path}")
-    print(f"Output: {args.output_path}")
-    print(f"Transition: {args.transition_ms}ms")
-    print(f"Background: {args.background_path}")
-    print(f"Transform: X={args.background_x}, Y={args.background_y}, Scale={args.background_scale}")
-    print(f"Audio Fade: Start={args.audio_fade_start}ms, End={args.audio_fade_end}ms")
-    print(f"Portrait Mode: {'Yes' if args.force_portrait == 1 else 'No'}")
-    print(f"FPS: {args.fps}, Threads: {args.threads}")
+    print(f"Input folder: {args.folder_path}", flush=True)
+    
+    # DEBUG: Test spécifique pour le chemin audio
+    try:
+        print("DEBUG: About to print audio path...", flush=True)
+        audio_path_repr = repr(args.audio_path)
+        print(f"DEBUG: audio_path repr: {audio_path_repr}", flush=True)
+        print(f"Audio: {args.audio_path}")
+        print("DEBUG: Audio path printed successfully", flush=True)
+    except Exception as e:
+        print(f"DEBUG: ERROR printing audio path: {e}", flush=True)
+        print(f"DEBUG: Exception type: {type(e).__name__}", flush=True)
+        import traceback
+        traceback.print_exc()
+    
+    print(f"Output: {args.output_path}", flush=True)
+    print(f"Transition: {args.transition_ms}ms", flush=True)
+    print(f"Background: {args.background_path}", flush=True)
+    print(f"Transform: X={args.background_x}, Y={args.background_y}, Scale={args.background_scale}", flush=True)
+    print(f"Audio Fade: Start={args.audio_fade_start}ms, End={args.audio_fade_end}ms", flush=True)
+    print(f"Portrait Mode: {'Yes' if args.force_portrait == 1 else 'No'}", flush=True)
+    print(f"FPS: {args.fps}, Threads: {args.threads}", flush=True)
     print()
     
     if not (0 <= args.top_ratio <= 0.5 and 0 <= args.bottom_ratio <= 0.5 and 
@@ -1138,4 +1196,6 @@ if __name__ == "__main__":
 
 # Nancy
 
-# py video_creator.py "C:\Users\zonedetec\AppData\Local\Quran Caption\export\2" "C:\Users\zonedetec\Documents\quran.al.luhaidan\49\audio_4008.webm" 300 903034 923081 "./output.mp4" 0.25 0.25 0 "" 0 0 0 1.0 0 0
+# py video_creator.py "C:\Users\zonedetec\AppData\Local\Quran Caption\export\2" "C:\Users\zonedetec\Documents\quran.al.luhaidan\49\audio_40كلمة08.webm" 300 0 6000 "./outكلمةput.mp4" 0.25 0.25 0 "" 0 0 0 1.0 0 0 0
+
+# ./video_creator.exe "C:\Users\zonedetec\AppData\Local\Quran Caption\export\2" "C:\Users\zonedetec\Documents\quran.al.luhaidan\49\audio_40كلمة08.webm" 300 0 6000 "./outكلمةput.mp4" 0.25 0.25 0 "" 0 0 0 1.0 0 0 0
