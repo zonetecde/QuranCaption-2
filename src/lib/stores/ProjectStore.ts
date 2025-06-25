@@ -248,6 +248,16 @@ export async function getProjectById(id: string): Promise<Project> {
 	else return createBlankProject('undefined project', '');
 }
 
+export async function getProjectDetailById(id: string): Promise<ProjectDesc> {
+	const projects = await getUserProjects();
+	const project = projects.find((p) => p.id === id);
+	if (project) {
+		return project;
+	} else {
+		throw new Error(`Project with ID ${id} not found`);
+	}
+}
+
 /**
  * Updates the user's projects in local storage.
  * @param project - The project to update.

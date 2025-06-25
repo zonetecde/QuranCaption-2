@@ -7,7 +7,7 @@
 	import TranslationsEditor from '$lib/components/layout/TranslationsEditor.svelte';
 	import VideoEditor from '$lib/components/layout/VideoEditor.svelte';
 	import { bestPerformance, currentPage, trimDialog } from '$lib/stores/LayoutStore';
-	import { currentProject, getProjectById } from '$lib/stores/ProjectStore';
+	import { currentProject, getProjectById, getProjectDetailById } from '$lib/stores/ProjectStore';
 	import { cursorPosition, scrollPosition, zoom } from '$lib/stores/TimelineStore';
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
@@ -18,12 +18,17 @@
 		const slug = window.location.search.split('?')[1];
 
 		const project = await getProjectById(slug);
+		const projectDetail = await getProjectDetailById(slug);
 
 		if (project === undefined) {
 			// If the project is not found, redirect to the home page
 			window.location.href = '/';
 			return;
 		}
+
+		// Met à jour le nom du projet et le récitateur (car il a pu être modifié dans le home screen)
+		project.name = projectDetail.name;
+		project.reciter = projectDetail.reciter;
 
 		cursorPosition.set(project.projectSettings.cursorPosition);
 		zoom.set(project.projectSettings.zoom);
