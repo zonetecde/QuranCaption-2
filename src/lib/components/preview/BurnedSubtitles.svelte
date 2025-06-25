@@ -113,6 +113,15 @@
 				}
 				displaySubtitle = true;
 			} else {
+				// vérifie que aucun sous-titre dans le projet possède fitOnOneLine
+				for (const [key, value] of Object.entries(
+					$currentProject.projectSettings.subtitlesTracksSettings
+				)) {
+					if (value.fitOnOneLine) {
+						return;
+					}
+				}
+
 				// Gérer les collisions entre sous-titres
 				await handleSubtitleCollisions(p);
 			}
