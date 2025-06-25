@@ -250,13 +250,8 @@
 </div>
 
 <p class="text-sm">
-	⚠️ Please note that assets with filenames containing non-Latin characters (such as Arabic letters)
-	may cause export errors. To avoid this, rename the files using Latin characters and re-import them
-	into the software.
-	<br />
-	<br />
-	I would really appreciate it if you could mention Quran Caption in your video description or comments
-	section and share your video with me!
+	I would really appreciate it if you could mention Quran Caption in your video description or
+	comments section and share your video with me!
 </p>
 
 <h3 class="text-xl font-bold mt-8 border-t-2 pt-8">Advanced Settings</h3>
