@@ -3,10 +3,8 @@
 	import ClickableLink from './ClickableLink.svelte';
 </script>
 
-<footer class="w-screen border-t border-[var(--border-color)] py-8">
-	<div
-		class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-[var(--text-secondary)] text-sm"
-	>
+<footer class="w-screen border-t border-color py-8">
+	<div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-secondary text-sm">
 		<div
 			class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 mb-4"
 		>

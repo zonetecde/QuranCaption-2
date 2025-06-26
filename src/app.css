@@ -13,8 +13,103 @@
 	--danger-color: #f85149;
 }
 
+.bg-primary {
+	background-color: var(--bg-primary);
+}
+.bg-secondary {
+	background-color: var(--bg-secondary);
+}
+.bg-accent {
+	background-color: var(--bg-accent);
+}
+.border-color {
+	border-color: var(--border-color);
+}
+.text-secondary {
+	color: var(--text-secondary);
+}
+.text-thirdly {
+	color: var(--text-thirdly);
+}
+.text-accent-primary {
+	color: var(--accent-primary);
+}
+.bg-accent-primary {
+	background-color: var(--accent-primary);
+}
+.text-accent-secondary {
+	color: var(--accent-secondary);
+}
+.danger-color {
+	color: var(--danger-color);
+}
+
 body {
 	background-color: var(--bg-primary);
 	color: white;
 	font-family: 'Inter', sans-serif;
+}
+
+.btn {
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border-color);
+	color: var(--text-secondary);
+	border-radius: 0.375rem;
+	cursor: pointer;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.btn:hover {
+	background-color: var(--bg-accent);
+	border-color: var(--accent-primary);
+	color: white;
+	scale: 1.025;
+}
+
+.btn-accent {
+	background-color: var(--accent-primary);
+	border-color: var(--accent-primary);
+	color: black;
+	border: 1px solid black;
+	border-radius: 0.375rem;
+	cursor: pointer;
+	transition: scale 0.2s ease;
+}
+
+.btn-accent:hover {
+	scale: 1.025;
+}
+
+.btn-icon {
+	display: flex;
+	align-items: center;
+}
+
+input[type='text'] {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 0.5rem;
+	padding: 0.5rem 1rem 0.5rem 0.5rem;
+	font-size: 0.875rem;
+	outline: none;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+input[type='text']:focus {
+	border-color: transparent;
+	box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+input[type='text']::placeholder {
+	color: var(--text-secondary);
+}
+
+input[type='text']:hover {
+	border-color: var(--accent-primary);
 }
