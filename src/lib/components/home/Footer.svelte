@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import ClickableLink from './ClickableLink.svelte';
 </script>
 
 <footer class="w-screen border-t border-[var(--border-color)] py-8">
@@ -9,30 +10,15 @@
 		<div
 			class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 mb-4"
 		>
-			<button
-				class="hover:text-[var(--accent-primary)] transition-colors bg-transparent border-none p-0 cursor-pointer text-[inherit]"
-				onclick={async () => {
-					await openUrl('https://github.com/zonetecde/QuranCaption-2');
-				}}>GitHub Repo</button
-			>
-			<button
-				class="hover:text-[var(--accent-primary)] transition-colors bg-transparent border-none p-0 cursor-pointer text-[inherit]"
-				onclick={async () => {
-					await openUrl('https://qurancaption-project.vercel.app/documentation');
-				}}>Documentation</button
-			>
-			<button
-				class="hover:text-[var(--accent-primary)] transition-colors bg-transparent border-none p-0 cursor-pointer text-[inherit]"
-				onclick={async () => {
-					await openUrl('https://discord.gg/Hxfqq2QA2J');
-				}}>Discord</button
-			>
-			<button
-				class="hover:text-[var(--accent-primary)] transition-colors bg-transparent border-none p-0 cursor-pointer text-[inherit]"
-				onclick={async () => {
-					await openUrl('https://ko-fi.com/vzero');
-				}}>Donate</button
-			>
+			<ClickableLink url="https://github.com/zonetecde/QuranCaption-2" label="GitHub Repo" />
+
+			<ClickableLink
+				url="https://qurancaption-project.vercel.app/documentation"
+				label="Documentation"
+			/>
+			<ClickableLink url="https://discord.gg/Hxfqq2QA2J" label="Discord" />
+
+			<ClickableLink url="https://ko-fi.com/vzero" label="Donate" />
 		</div>
 		<p class="mb-1">© 2025 Quran Caption. Made by Rayane STASZEWSKI.</p>
 		<p>Version 3.0.0</p>
