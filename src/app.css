@@ -1,2 +1,20 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
+
+:root {
+	--bg-primary: #0d1117;
+	--bg-secondary: #161b22;
+	--bg-accent: #21262d;
+	--border-color: #30363d;
+	--text-secondary: #c9d1d9;
+	--text-thirdly: #8b949e;
+	--accent-primary: #58a6ff;
+	--accent-secondary: #3fb950;
+	--danger-color: #f85149;
+}
+
+body {
+	background-color: var(--bg-primary);
+	color: white;
+	font-family: 'Inter', sans-serif;
+}

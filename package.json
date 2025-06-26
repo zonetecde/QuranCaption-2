@@ -44,6 +44,8 @@
 		"vitest-browser-svelte": "^0.1.0"
 	},
 	"dependencies": {
-		"@tauri-apps/cli-win32-x64-msvc": "^2.6.0"
+		"@tauri-apps/cli-win32-x64-msvc": "^2.6.0",
+		"@tauri-apps/plugin-opener": "^2.4.0",
+		"material-icons": "^1.13.14"
 	}
 }
