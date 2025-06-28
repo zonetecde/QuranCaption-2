@@ -1,7 +1,18 @@
-<script>
+<script lang="ts">
+	import { fade } from 'svelte/transition';
 	import InputWithIcon from '../misc/InputWithIcon.svelte';
 	import Footer from './Footer.svelte';
 	import Header from './Header.svelte';
+	import CreateProjectModal from './modals/CreateProjectModal.svelte';
+
+	let createNewProjectModalVisible: boolean = $state(false);
+
+	/**
+	 * Affiche le popup pour créer un nouveau projet.
+	 */
+	function newProjectButtonClick() {
+		createNewProjectModalVisible = true;
+	}
 </script>
 
 <div class="flex flex-col min-h-screen">
@@ -14,7 +25,7 @@
 				<h4 class="text-secondary">Let's create something amazing today.</h4>
 			</section>
 			<section class="ml-auto flex gap-x-4">
-				<button class="btn-accent btn-icon h-12 px-4 xl:px-7">
+				<button class="btn-accent btn-icon h-12 px-4 xl:px-7" onclick={newProjectButtonClick}>
 					<span class="material-icons-outlined mr-2">add_circle_outline</span> New Project
 				</button>
 				<button class="btn btn-icon h-12 px-4 xl:px-7">
@@ -37,7 +48,20 @@
 				</button>
 			</div>
 		</div>
+
+		<div
+			placeholder="Project cards"
+			class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+		>
+			<!-- each loop here -->
+		</div>
 	</div>
 
 	<Footer />
 </div>
+
+{#if createNewProjectModalVisible}
+	<div class="modal-wrapper" transition:fade>
+		<CreateProjectModal close={() => (createNewProjectModalVisible = false)} />
+	</div>
+{/if}

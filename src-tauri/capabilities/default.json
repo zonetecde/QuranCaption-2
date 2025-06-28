@@ -13,6 +13,22 @@
 					"url": "custom:*"
 				}
 			]
-		}
+		},
+		"fs:default",
+		"fs:allow-mkdir",
+		"fs:allow-read-text-file",
+		"fs:allow-write-text-file",
+		"fs:allow-remove",
+		"fs:allow-read-dir",
+		"fs:allow-exists",
+		{
+			"identifier": "fs:scope",
+			"allow": [
+				{
+					"path": "**"
+				}
+			]
+		},
+		"store:default"
 	]
 }
