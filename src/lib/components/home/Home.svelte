@@ -8,16 +8,9 @@
 	import { onMount } from 'svelte';
 	import { projectService } from '$lib/services/ProjectService';
 	import ProjectDetailCard from './ProjectDetailCard.svelte';
+	import { globalState } from '$lib/runes/main.svelte';
 
 	let createNewProjectModalVisible: boolean = $state(false);
-	let userProjectsDetail: ProjectDetail[] = $state([]); // Contient l'ensemble des projets de l'utilisateur
-
-	$inspect(userProjectsDetail);
-
-	onMount(async () => {
-		// Récupère les projets de l'utilisateur
-		userProjectsDetail = await projectService.getAllDetails();
-	});
 
 	/**
 	 * Affiche le popup pour créer un nouveau projet.
@@ -27,10 +20,10 @@
 	}
 </script>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen overflow-x-hidden">
 	<Header />
 
-	<div class="flex-grow p-12">
+	<div class="flex-grow px-6 md:px-12 py-6 md:py-12">
 		<div placeholder="Upper section" class="flex flex-row items-center">
 			<section>
 				<h2 class="text-4xl font-bold">Welcome Back!</h2>
@@ -61,14 +54,14 @@
 			</div>
 		</div>
 
-		{#if userProjectsDetail.length === 0}
+		{#if globalState.userProjectsDetails.length === 0}
 			<p class="mt-4">You don't have any projects yet. Click "New Project" to create one.</p>
 		{:else}
 			<div
 				placeholder="Project cards"
 				class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
 			>
-				{#each userProjectsDetail as projectDetail}
+				{#each globalState.userProjectsDetails as projectDetail}
 					<ProjectDetailCard {projectDetail} />
 				{/each}
 			</div>

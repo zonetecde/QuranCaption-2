@@ -14,8 +14,8 @@ export class Project {
 	/**
 	 * Sauvegarde le projet sur l'ordinateur
 	 */
-	save(): void {
+	async save(): Promise<void> {
 		this.detail.updateTimestamp();
-		projectService.save(this);
+		await projectService.save(this);
 	}
 }

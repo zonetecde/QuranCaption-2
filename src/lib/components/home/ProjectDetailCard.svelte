@@ -2,8 +2,10 @@
 	import type { ProjectDetail } from '$lib/classes';
 	import { projectService } from '$lib/services/ProjectService';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
+	import { confirmModal } from '../modals/ConfirmModal';
+	import { globalState } from '$lib/runes/main.svelte';
 
-	let contextMenu: ContextMenu;
+	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
 	let {
 		projectDetail
@@ -11,12 +13,22 @@
 		projectDetail: ProjectDetail;
 	} = $props();
 
-	function deleteProjectButtonClick(e: MouseEvent): void {
+	async function deleteProjectButtonClick(e: MouseEvent) {
 		if (e.button !== 0) return; // Only handle left click
-		if (confirm(`Are you sure you want to delete the project "${projectDetail.name}"?`)) {
+		// todo: add confirmation dialog
+		if (
+			await confirmModal(`Are you sure you want to delete the project "${projectDetail.name}"?`)
+		) {
 			projectService.delete(projectDetail.id);
-			contextMenu.close();
+			projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
+		} else {
+			contextMenu!.close();
 		}
+	}
+
+	async function openProjectButtonClick() {
+		// Ouvre le projet
+		globalState.currentProject = await projectService.load(projectDetail.id);
 	}
 </script>
 
@@ -37,7 +49,9 @@
 					></span>{projectDetail.status.status}
 				</div>
 			</div>
-			<p class="text-xs text-[var(--text-secondary)] mb-1">Reciter: {projectDetail.reciter}</p>
+			<p class="text-xs text-[var(--text-secondary)] mb-1">
+				Reciter: {projectDetail.reciter || 'not set'}
+			</p>
 			<p class="text-xs text-[var(--text-secondary)] mb-1">
 				Duration: {projectDetail.duration.getFormattedTime()}
 			</p>
@@ -82,10 +96,12 @@
 		</div>
 
 		<div class="flex space-x-2">
-			<button class="btn btn-primary btn-sm flex-grow text-xs">Open</button>
+			<button class="btn btn-primary btn-sm flex-grow text-xs" onclick={openProjectButtonClick}
+				>Open</button
+			>
 			<button
 				class="btn btn-secondary btn-sm p-1.5 flex items-center"
-				onclick={contextMenu.createHandler()}
+				onclick={contextMenu!.createHandler()}
 			>
 				<span class="material-icons-outlined text-sm">more_horiz</span>
 			</button>

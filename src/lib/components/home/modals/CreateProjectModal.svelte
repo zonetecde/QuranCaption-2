@@ -2,20 +2,30 @@
 	import { Project, ProjectContent, ProjectDetail } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { projectService } from '$lib/services/ProjectService';
+	import toast from 'svelte-5-french-toast';
 
 	let { close } = $props();
 
 	let name: string = $state('');
 	let reciter: string = $state('');
 
-	function createProjectButtonClick() {
+	async function createProjectButtonClick() {
+		// Vérifie que le nom du projet n'est pas vide
+		if (name.trim() === '') {
+			toast.error('Project name cannot be empty.');
+			return;
+		}
+
 		let project = new Project(
 			new ProjectDetail(name, reciter),
 			ProjectContent.getDefaultProjectContent()
 		);
 
 		// Sauvegarde le projet sur le disque
-		project.save();
+		await project.save();
+
+		// maj des projets de l'utilisateur
+		await projectService.loadUserProjectsDetails();
 
 		// Ouvre le projet
 		globalState.currentProject = project;

@@ -1,8 +1,9 @@
 import { Project, ProjectContent, ProjectDetail } from '$lib/classes';
 import { load } from '@tauri-apps/plugin-store';
-import { readDir } from '@tauri-apps/plugin-fs';
-import { appDataDir } from '@tauri-apps/api/path';
+import { readDir, remove } from '@tauri-apps/plugin-fs';
+import { appDataDir, join } from '@tauri-apps/api/path';
 import { exists } from '@tauri-apps/plugin-fs';
+import { globalState } from '$lib/runes/main.svelte';
 
 /**
  * Service pour gérer les projets.
@@ -20,13 +21,14 @@ export class ProjectService {
 	 */
 	async save(project: Project) {
 		// Construis le chemin d'accès vers le projet
-		const filePath = `${this.projectsFolder}${project.detail.id}.json`;
+		const filePath = await join(`${this.projectsFolder}${project.detail.id}.json`);
 
 		// Enregistre le projet dans le stockage en séparant les détails du projet
 		// et son contenu
-		const store = await load(filePath);
+		const store = await load(filePath, { autoSave: false });
 		store.set(this.PROJECT_DETAIL_KEY, project.detail);
 		store.set(this.PROJECT_CONTENT_KEY, project.content);
+		await store.save();
 	}
 
 	/**
@@ -36,7 +38,7 @@ export class ProjectService {
 	 */
 	async load(projectId: number): Promise<Project> {
 		// Construis le chemin d'accès vers le projet
-		const filePath = `${this.projectsFolder}${projectId}.json`;
+		const filePath = await join(`${this.projectsFolder}${projectId}.json`);
 
 		// Charge le projet depuis le stockage
 		const store = await load(filePath);
@@ -68,7 +70,7 @@ export class ProjectService {
 	 */
 	async loadDetail(projectId: number): Promise<ProjectDetail> {
 		// Construis le chemin d'accès vers le projet
-		const filePath = `${this.projectsFolder}${projectId}.json`;
+		const filePath = await join(`${this.projectsFolder}${projectId}.json`);
 
 		// Charge le projet depuis le stockage
 		const store = await load(filePath);
@@ -92,23 +94,22 @@ export class ProjectService {
 	 * @param projectId L'id du projet à supprimer
 	 */
 	async delete(projectId: number): Promise<void> {
-		// Construis le chemin d'accès vers le projet
-		const filePath = `${this.projectsFolder}${projectId}.json`;
+		const projectsPath = await join(await appDataDir(), this.projectsFolder);
 
-		// Supprime le fichier du stockage
-		const store = await load(filePath);
-		await store.clear();
+		// Construis le chemin d'accès vers le projet
+		const filePath = await join(projectsPath, `${projectId}.json`);
+
+		await remove(filePath);
 	}
 
 	/**
 	 * Récupère tous les détails des projets existants.
-	 * @returns Une liste de détails de projets
+	 * Met à jour la liste des projets de l'utilisateur dans le globalState.
 	 */
-	async getAllDetails(): Promise<ProjectDetail[]> {
+	async loadUserProjectsDetails() {
 		try {
 			// Récupère le chemin absolu vers le dossier contenant les projets
-			const appDataPath = await appDataDir();
-			const projectsPath = `${appDataPath}/${this.projectsFolder}`;
+			const projectsPath = await join(await appDataDir(), this.projectsFolder);
 
 			// Vérifie que le dossier existe
 			if (!(await exists(projectsPath))) {
@@ -143,7 +144,10 @@ export class ProjectService {
 				}
 			}
 
-			return projects;
+			// Trie les projets par date de création décroissante
+			projects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+			globalState.userProjectsDetails = projects;
 		} catch (error) {
 			return [];
 		}
