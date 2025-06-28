@@ -12,6 +12,14 @@
 	--accent-primary: #58a6ff;
 	--accent-secondary: #3fb950;
 	--danger-color: #f85149;
+
+	/* Context menu */
+	--ctx-menu-background: var(--bg-secondary);
+	--ctx-menu-border: 1px solid var(--border-color);
+	--ctx-menu-border-radius: 0.5rem;
+	--ctx-menu-hover-bg: var(--bg-accent);
+	--ctx-menu-font-size: 0.9rem;
+	--ctx-menu-padding: 0.375rem 0.5rem;
 }
 
 .bg-primary {

@@ -14,8 +14,8 @@
 			ProjectContent.getDefaultProjectContent()
 		);
 
-		// Save le projet
-		projectService.createOrUpdateProject(project);
+		// Sauvegarde le projet sur le disque
+		project.save();
 
 		// Ouvre le projet
 		globalState.currentProject = project;

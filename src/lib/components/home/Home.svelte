@@ -4,8 +4,20 @@
 	import Footer from './Footer.svelte';
 	import Header from './Header.svelte';
 	import CreateProjectModal from './modals/CreateProjectModal.svelte';
+	import type { ProjectDetail } from '$lib/classes';
+	import { onMount } from 'svelte';
+	import { projectService } from '$lib/services/ProjectService';
+	import ProjectDetailCard from './ProjectDetailCard.svelte';
 
 	let createNewProjectModalVisible: boolean = $state(false);
+	let userProjectsDetail: ProjectDetail[] = $state([]); // Contient l'ensemble des projets de l'utilisateur
+
+	$inspect(userProjectsDetail);
+
+	onMount(async () => {
+		// Récupère les projets de l'utilisateur
+		userProjectsDetail = await projectService.getAllDetails();
+	});
 
 	/**
 	 * Affiche le popup pour créer un nouveau projet.
@@ -49,12 +61,18 @@
 			</div>
 		</div>
 
-		<div
-			placeholder="Project cards"
-			class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-		>
-			<!-- each loop here -->
-		</div>
+		{#if userProjectsDetail.length === 0}
+			<p class="mt-4">You don't have any projects yet. Click "New Project" to create one.</p>
+		{:else}
+			<div
+				placeholder="Project cards"
+				class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+			>
+				{#each userProjectsDetail as projectDetail}
+					<ProjectDetailCard {projectDetail} />
+				{/each}
+			</div>
+		{/if}
 	</div>
 
 	<Footer />
