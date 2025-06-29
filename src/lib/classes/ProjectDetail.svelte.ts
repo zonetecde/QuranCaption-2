@@ -5,6 +5,9 @@ import { VerseRange } from './VerseRange';
 import { SerializableBase } from './misc/SerializableBase';
 
 export class ProjectDetail extends SerializableBase {
+	static NAME_MAX_LENGTH: number = 50;
+	static RECITER_MAX_LENGTH: number = 35;
+
 	id: number;
 
 	deleted: boolean = false;
@@ -30,7 +33,7 @@ export class ProjectDetail extends SerializableBase {
 		this.id = Utilities.randomId();
 
 		this.name = $state(name);
-		this.reciter = $state(reciter);
+		this.reciter = $state(reciter || 'not set');
 		this.createdAt = $state(new Date());
 		this.updatedAt = $state(new Date());
 

@@ -1,4 +1,15 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
+	let input: HTMLInputElement | undefined = $state(undefined);
+
+	onMount(() => {
+		if (input) {
+			input.focus();
+			input.select();
+		}
+	});
+
 	let {
 		text,
 		defaultText = '',
@@ -42,13 +53,14 @@
 	<p class="text-secondary mt-4 mb-3">{text}</p>
 
 	<input
+		bind:this={input}
 		bind:value={inputValue}
 		type="text"
 		{maxlength}
 		class="w-full mb-2"
 		{placeholder}
 		onkeydown={handleKeydown}
-		autofocus
+		autocomplete="off"
 	/>
 
 	<p class="text-xs text-right text-secondary mb-3">{inputValue.length}/{maxlength}</p>

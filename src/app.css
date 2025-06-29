@@ -9,6 +9,7 @@
 	--text-secondary: #c9d1d9;
 	--text-placeholder: #656a6e;
 	--text-thirdly: #8b949e;
+	--text-selection: rgba(88, 166, 255, 0.3);
 	--accent-primary: #58a6ff;
 	--accent-secondary: #3fb950;
 	--danger-color: #f85149;
@@ -134,4 +135,9 @@ input[type='text']::placeholder {
 
 input[type='text']:hover {
 	border-color: var(--accent-primary);
+}
+
+input[type='text']::selection {
+	background-color: var(--text-selection);
+	color: white;
 }

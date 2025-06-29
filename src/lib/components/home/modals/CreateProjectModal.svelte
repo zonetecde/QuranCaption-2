@@ -43,22 +43,28 @@
 		bind:value={name}
 		name="name"
 		type="text"
-		maxlength="50"
+		maxlength={ProjectDetail.NAME_MAX_LENGTH}
 		class="w-full mt-1"
 		placeholder="Taraweeh 27th night"
+		autocomplete="off"
 	/>
-	<p class="text-xs text-right mt-1 mr-0.5 text-secondary">{name.length}/50</p>
+	<p class="text-xs text-right mt-1 mr-0.5 text-secondary">
+		{name.length}/{ProjectDetail.NAME_MAX_LENGTH}
+	</p>
 
 	<label for="name" class="mr-2 mt-4">Reciter:</label>
 	<input
 		bind:value={reciter}
 		name="name"
 		type="text"
-		maxlength="35"
+		maxlength={ProjectDetail.RECITER_MAX_LENGTH}
 		class="w-full mt-1"
 		placeholder="Yasser Al Dosari"
+		autocomplete="off"
 	/>
-	<p class="text-xs text-right mt-1 mr-0.5 text-secondary">{reciter.length}/35</p>
+	<p class="text-xs text-right mt-1 mr-0.5 text-secondary">
+		{reciter.length}/{ProjectDetail.RECITER_MAX_LENGTH}
+	</p>
 
 	<button class="mt-3 mx-auto btn-accent px-6 py-2" onclick={createProjectButtonClick}
 		>Create</button

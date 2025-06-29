@@ -80,6 +80,11 @@ export class ProjectService {
 			throw new Error(`Project with ID ${projectId} not found.`);
 		}
 
+		if (onlyDetail) {
+			// Évite de charger le contenu du projet si on ne veut que les détails
+			return new Project(ProjectDetail.fromJSON(detailData));
+		}
+
 		// Utilise la méthode fromJSON automatique pour récupérer l'instance correcte
 		const project = Project.fromJSON(projectData);
 

@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { ProjectDetail } from '$lib/classes';
+	import { ProjectDetail } from '$lib/classes';
 	import { projectService } from '$lib/services/ProjectService';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
-	import { confirmModal } from '../modals/ConfirmModal';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { inputModal } from '../modals/InputModal';
 	import EditableText from '../misc/EditableText.svelte';
+	import ModalManager from '../modals/ModalManager';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -19,7 +18,9 @@
 		if (e.button !== 0) return; // Only handle left click
 		// todo: add confirmation dialog
 		if (
-			await confirmModal(`Are you sure you want to delete the project "${projectDetail.name}"?`)
+			await ModalManager.confirmModal(
+				`Are you sure you want to delete the project "${projectDetail.name}"?`
+			)
 		) {
 			await projectService.delete(projectDetail.id); // Supprime le projet
 			await projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
@@ -31,15 +32,6 @@
 	async function openProjectButtonClick() {
 		// Ouvre le projet
 		globalState.currentProject = await projectService.load(projectDetail.id);
-	}
-
-	async function projectNameClick() {
-		const newName = await inputModal('Enter new project name:', projectDetail.name, 50);
-		if (newName && newName.trim() !== '') {
-			projectDetail.name = newName.trim();
-
-			// await projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
-		}
 	}
 </script>
 
@@ -57,21 +49,32 @@
 				<EditableText
 					text="Enter project name"
 					bind:value={projectDetail.name}
-					maxLength={50}
+					maxLength={ProjectDetail.NAME_MAX_LENGTH}
 					placeholder={projectDetail.name}
+					parentClasses="text-accent"
+					textClasses="text-lg font-semibold"
 					action={async () => {
 						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
 					}}
 				/>
 
 				<div class="status-not-set text-xs flex items-center">
-					<span class="status-dot" style={`background-color: ${projectDetail.status.color};`}
+					<span class="status-dot" style={`background-color: ${projectDetail.status.color}`}
 					></span>{projectDetail.status.status}
 				</div>
 			</div>
-			<p class="text-xs text-[var(--text-secondary)] mb-1">
-				Reciter: {projectDetail.reciter || 'not set'}
-			</p>
+			<div class="flex items-center gap-x-1 text-xs text-[var(--text-secondary)] -mb-0.5">
+				Reciter: <EditableText
+					text="Enter project reciter"
+					bind:value={projectDetail.reciter}
+					maxLength={ProjectDetail.RECITER_MAX_LENGTH}
+					placeholder={projectDetail.reciter}
+					textClasses="font-semibold"
+					action={async () => {
+						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+					}}
+				/>
+			</div>
 			<p class="text-xs text-[var(--text-secondary)] mb-1">
 				Duration: {projectDetail.duration.getFormattedTime()}
 			</p>
