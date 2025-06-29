@@ -6,6 +6,8 @@ import { VerseRange } from './VerseRange';
 export class ProjectDetail {
 	id: number;
 
+	deleted: boolean = false;
+
 	name: string;
 	reciter: string;
 	createdAt: Date;

@@ -4,11 +4,12 @@
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
 	import { confirmModal } from '../modals/ConfirmModal';
 	import { globalState } from '$lib/runes/main.svelte';
+	import { inputModal } from '../modals/InputModal';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
 	let {
-		projectDetail
+		projectDetail = $bindable()
 	}: {
 		projectDetail: ProjectDetail;
 	} = $props();
@@ -19,8 +20,8 @@
 		if (
 			await confirmModal(`Are you sure you want to delete the project "${projectDetail.name}"?`)
 		) {
-			projectService.delete(projectDetail.id);
-			projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
+			await projectService.delete(projectDetail.id); // Supprime le projet
+			await projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
 		} else {
 			contextMenu!.close();
 		}
@@ -29,6 +30,16 @@
 	async function openProjectButtonClick() {
 		// Ouvre le projet
 		globalState.currentProject = await projectService.load(projectDetail.id);
+	}
+
+	async function projectNameClick() {
+		const newName = await inputModal('Enter new project name:', projectDetail.name, 50);
+		if (newName && newName.trim() !== '') {
+			projectDetail.name = newName.trim();
+
+			await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+			// await projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
+		}
 	}
 </script>
 
@@ -43,7 +54,16 @@
 		/>
 		<div class="px-4 pb-4">
 			<div class="flex justify-between items-start mb-2">
-				<h4 class="text-lg font-semibold text-[var(--accent-primary)]">{projectDetail.name}</h4>
+				<button
+					onclick={projectNameClick}
+					class="project-name-container group/name flex items-center text-accent cursor-pointer"
+				>
+					<h4 class="text-lg font-semibold group-hover/name:underline">{projectDetail.name}</h4>
+					<span
+						class="material-icons-outlined text-lg! pt-0.5 ml-2 opacity-0 group-hover/name:opacity-100 transition-opacity duration-100"
+						>edit</span
+					>
+				</button>
 				<div class="status-not-set text-xs flex items-center">
 					<span class="status-dot" style={`background-color: ${projectDetail.status.color};`}
 					></span>{projectDetail.status.status}

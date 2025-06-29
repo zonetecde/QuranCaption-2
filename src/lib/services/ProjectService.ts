@@ -1,6 +1,5 @@
 import { Project, ProjectContent, ProjectDetail } from '$lib/classes';
-import { load } from '@tauri-apps/plugin-store';
-import { readDir, remove } from '@tauri-apps/plugin-fs';
+import { readDir, remove, writeTextFile, readTextFile, create, mkdir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { exists } from '@tauri-apps/plugin-fs';
 import { globalState } from '$lib/runes/main.svelte';
@@ -10,40 +9,79 @@ import { globalState } from '$lib/runes/main.svelte';
  * Utilise JSONProjectStorage pour la persistance des données.
  */
 export class ProjectService {
-	private PROJECT_DETAIL_KEY: string = 'detail';
-	private PROJECT_CONTENT_KEY: string = 'content';
-
 	private projectsFolder: string = 'projects/';
+
+	/**
+	 * S'assure que le dossier des projets existe
+	 */
+	private async ensureProjectsFolder(): Promise<string> {
+		const projectsPath = await join(await appDataDir(), this.projectsFolder);
+		if (!(await exists(projectsPath))) {
+			await mkdir(projectsPath, { recursive: true });
+		}
+		return projectsPath;
+	}
 
 	/**
 	 * Sauvegarde un projet sur l'ordinateur
 	 * @param project Le projet à sauver
 	 */
 	async save(project: Project) {
-		// Construis le chemin d'accès vers le projet
-		const filePath = await join(`${this.projectsFolder}${project.detail.id}.json`);
+		// S'assure que le dossier existe
+		const projectsPath = await this.ensureProjectsFolder();
 
-		// Enregistre le projet dans le stockage en séparant les détails du projet
-		// et son contenu
-		const store = await load(filePath, { autoSave: false });
-		store.set(this.PROJECT_DETAIL_KEY, project.detail);
-		store.set(this.PROJECT_CONTENT_KEY, project.content);
-		await store.save();
+		// Construis le chemin d'accès vers le projet
+		const filePath = await join(projectsPath, `${project.detail.id}.json`);
+
+		// Prépare les données à sauvegarder
+		const projectData = {
+			detail: project.detail,
+			content: project.content
+		};
+
+		// Sauvegarde en JSON
+		await writeTextFile(filePath, JSON.stringify(projectData, null, 2));
+	}
+
+	/**
+	 * Sauvegarde les détails d'un projet.
+	 * @param detail Les détails du projet à sauvegarder
+	 */
+	async saveDetail(detail: ProjectDetail): Promise<void> {
+		// Récupère le projet complet
+		const project = await this.load(detail.id);
+
+		// Met à jour les détails du projet
+		project.detail = detail;
+
+		// Sauvegarde le projet complet
+		await this.save(project);
 	}
 
 	/**
 	 * Charge un projet complet depuis le stockage.
 	 * @param projectId L'id du projet
+	 * @param onlyDetail Si true, ne charge que les détails du projet
 	 * @returns Le projet
 	 */
-	async load(projectId: number): Promise<Project> {
-		// Construis le chemin d'accès vers le projet
-		const filePath = await join(`${this.projectsFolder}${projectId}.json`);
+	async load(projectId: number, onlyDetail: boolean = false): Promise<Project> {
+		// S'assure que le dossier existe
+		const projectsPath = await this.ensureProjectsFolder();
 
-		// Charge le projet depuis le stockage
-		const store = await load(filePath);
-		const detailData = await store.get<any>(this.PROJECT_DETAIL_KEY);
-		const contentData = await store.get<any>(this.PROJECT_CONTENT_KEY);
+		// Construis le chemin d'accès vers le projet
+		const filePath = await join(projectsPath, `${projectId}.json`);
+
+		// Vérifie que le fichier existe
+		if (!(await exists(filePath))) {
+			throw new Error(`Project with ID ${projectId} not found.`);
+		}
+
+		// Lit le fichier JSON
+		const fileContent = await readTextFile(filePath);
+		const projectData = JSON.parse(fileContent);
+
+		const detailData = projectData.detail;
+		const contentData = projectData.content;
 
 		if (!detailData || !contentData) {
 			throw new Error(`Project with ID ${projectId} not found.`);
@@ -57,6 +95,10 @@ export class ProjectService {
 		// Reconstituer tous les objets complexes
 		detail.reviveObjects();
 
+		if (onlyDetail) {
+			return new Project(detail);
+		}
+
 		// Créer une vraie instance de ProjectContent avec les données
 		const content = Object.assign(new ProjectContent(), contentData);
 
@@ -69,24 +111,7 @@ export class ProjectService {
 	 * @returns Les détails du projet
 	 */
 	async loadDetail(projectId: number): Promise<ProjectDetail> {
-		// Construis le chemin d'accès vers le projet
-		const filePath = await join(`${this.projectsFolder}${projectId}.json`);
-
-		// Charge le projet depuis le stockage
-		const store = await load(filePath);
-		const detailData = await store.get<any>(this.PROJECT_DETAIL_KEY);
-
-		if (!detailData) {
-			throw new Error(`Project detail with ID ${projectId} not found.`);
-		}
-		// Créer une vraie instance de ProjectDetail avec les données
-		const detail = Object.assign(
-			new ProjectDetail(detailData.name, detailData.reciter),
-			detailData
-		);
-		// Reconstituer tous les objets complexes
-		detail.reviveObjects();
-		return detail;
+		return (await this.load(projectId, true)).detail;
 	}
 
 	/**
@@ -132,11 +157,7 @@ export class ProjectService {
 						try {
 							// Charger le projet depuis le stockage
 							// et récupérer les détails du projet
-							const detail = await this.loadDetail(projectId);
-
-							if (detail) {
-								projects.push(detail);
-							}
+							projects.push(await this.loadDetail(projectId));
 						} catch (error) {
 							console.warn(`Impossible de charger le projet ${projectId}:`, error);
 						}

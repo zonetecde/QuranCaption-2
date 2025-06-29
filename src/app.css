@@ -40,7 +40,7 @@
 .text-thirdly {
 	color: var(--text-thirdly);
 }
-.text-accent-primary {
+.text-accent {
 	color: var(--accent-primary);
 }
 .bg-accent-primary {

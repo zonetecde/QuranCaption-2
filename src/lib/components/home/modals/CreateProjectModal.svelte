@@ -17,7 +17,7 @@
 		}
 
 		let project = new Project(
-			new ProjectDetail(name, reciter),
+			new ProjectDetail(name.trim(), reciter.trim()),
 			ProjectContent.getDefaultProjectContent()
 		);
 
