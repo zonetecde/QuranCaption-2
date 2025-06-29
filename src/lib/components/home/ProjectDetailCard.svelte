@@ -5,6 +5,7 @@
 	import { confirmModal } from '../modals/ConfirmModal';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { inputModal } from '../modals/InputModal';
+	import EditableText from '../misc/EditableText.svelte';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -37,7 +38,6 @@
 		if (newName && newName.trim() !== '') {
 			projectDetail.name = newName.trim();
 
-			await projectService.saveDetail(projectDetail); // Sauvegarde le projet
 			// await projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
 		}
 	}
@@ -54,16 +54,16 @@
 		/>
 		<div class="px-4 pb-4">
 			<div class="flex justify-between items-start mb-2">
-				<button
-					onclick={projectNameClick}
-					class="project-name-container group/name flex items-center text-accent cursor-pointer"
-				>
-					<h4 class="text-lg font-semibold group-hover/name:underline">{projectDetail.name}</h4>
-					<span
-						class="material-icons-outlined text-lg! pt-0.5 ml-2 opacity-0 group-hover/name:opacity-100 transition-opacity duration-100"
-						>edit</span
-					>
-				</button>
+				<EditableText
+					text="Enter project name"
+					bind:value={projectDetail.name}
+					maxLength={50}
+					placeholder={projectDetail.name}
+					action={async () => {
+						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+					}}
+				/>
+
 				<div class="status-not-set text-xs flex items-center">
 					<span class="status-dot" style={`background-color: ${projectDetail.status.color};`}
 					></span>{projectDetail.status.status}

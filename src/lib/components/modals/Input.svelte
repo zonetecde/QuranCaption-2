@@ -3,11 +3,13 @@
 		text,
 		defaultText = '',
 		maxlength = 100,
+		placeholder = 'Enter text here',
 		resolve
 	}: {
 		text: string;
 		defaultText?: string;
 		maxlength?: number;
+		placeholder?: string;
 		resolve: (result: string) => void;
 	} = $props();
 
@@ -44,7 +46,7 @@
 		type="text"
 		{maxlength}
 		class="w-full mb-2"
-		placeholder="Enter text..."
+		{placeholder}
 		onkeydown={handleKeydown}
 		autofocus
 	/>

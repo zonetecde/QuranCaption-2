@@ -61,8 +61,8 @@
 				placeholder="Project cards"
 				class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
 			>
-				{#each globalState.userProjectsDetails as _, i}
-					<ProjectDetailCard bind:projectDetail={globalState.userProjectsDetails[i]} />
+				{#each globalState.userProjectsDetails as _, index}
+					<ProjectDetailCard bind:projectDetail={globalState.userProjectsDetails[index]} />
 				{/each}
 			</div>
 		{/if}

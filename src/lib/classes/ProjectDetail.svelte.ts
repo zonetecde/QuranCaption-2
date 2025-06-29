@@ -2,8 +2,9 @@ import { Utilities } from '.';
 import { Duration } from './Duration';
 import { Status } from './Status';
 import { VerseRange } from './VerseRange';
+import { SerializableBase } from './misc/SerializableBase';
 
-export class ProjectDetail {
+export class ProjectDetail extends SerializableBase {
 	id: number;
 
 	deleted: boolean = false;
@@ -24,12 +25,14 @@ export class ProjectDetail {
 	}[];
 
 	constructor(name: string, reciter: string) {
+		super();
+
 		this.id = Utilities.randomId();
 
-		this.name = name;
-		this.reciter = reciter;
-		this.createdAt = new Date();
-		this.updatedAt = new Date();
+		this.name = $state(name);
+		this.reciter = $state(reciter);
+		this.createdAt = $state(new Date());
+		this.updatedAt = $state(new Date());
 
 		this.verseRange = new VerseRange();
 		this.percentageCaption = 0;
@@ -44,20 +47,9 @@ export class ProjectDetail {
 	public updateTimestamp(): void {
 		this.updatedAt = new Date();
 	}
-
-	/**
-	 * Après récupération des projets depuis le Store, les objets complexes deviennent des objets simples.
-	 * Cette méthode permet de reconstituer correctement tous les objets.
-	 */
-	public reviveObjects() {
-		// Reconvertir les dates string en objets Date
-		this.createdAt = new Date(this.createdAt);
-		this.updatedAt = new Date(this.updatedAt);
-
-		// Reconstituer l'objet VerseRange
-		this.verseRange = Object.assign(new VerseRange(), this.verseRange);
-
-		// Reconstituer l'objet Duration
-		this.duration = Object.assign(new Duration(0), this.duration);
-	}
 }
+
+// Enregistre les classes enfants pour la désérialisation automatique
+SerializableBase.registerChildClass(ProjectDetail, 'verseRange', VerseRange);
+SerializableBase.registerChildClass(ProjectDetail, 'duration', Duration);
+SerializableBase.registerChildClass(ProjectDetail, 'status', Status);

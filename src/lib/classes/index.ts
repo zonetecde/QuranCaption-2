@@ -1,6 +1,6 @@
 // Exports principaux pour faciliter les imports
 export { Project } from './Project.js';
-export { ProjectDetail } from './ProjectDetail.js';
+export { ProjectDetail } from './ProjectDetail.svelte.js';
 export { ProjectContent } from './ProjectContent.js';
 export { Timeline } from './Timeline.js';
 export { Track, SubtitleTrack } from './Track.js';

@@ -1,4 +1,6 @@
-export class Status {
+import { SerializableBase } from './misc/SerializableBase';
+
+export class Status extends SerializableBase {
 	static readonly EXPORTED = new Status('Exported', '#11ff00');
 	static readonly TO_EXPORT = new Status('To Export', '#e600ff');
 	static readonly TO_CAPTION = new Status('To Caption', '#ffea00');
@@ -9,6 +11,7 @@ export class Status {
 	color: string;
 
 	constructor(status: string, color: string) {
+		super();
 		this.status = status;
 		this.color = color;
 	}

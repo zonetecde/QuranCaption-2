@@ -1,7 +1,10 @@
-export class Duration {
-	private readonly ms: number;
+import { SerializableBase } from './misc/SerializableBase';
+
+export class Duration extends SerializableBase {
+	ms: number;
 
 	constructor(ms: number) {
+		super();
 		this.ms = ms;
 	}
 

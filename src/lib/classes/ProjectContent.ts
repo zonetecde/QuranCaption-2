@@ -3,8 +3,9 @@ import { Asset } from './Asset.js';
 import { ProjectSettings } from './ProjectSettings.js';
 import { SubtitleTrack, Track } from './Track.js';
 import { TrackType } from './enums.js';
+import { SerializableBase } from './misc/SerializableBase.js';
 
-export class ProjectContent {
+export class ProjectContent extends SerializableBase {
 	timeline: Timeline;
 	assets: Asset[];
 	projectSettings: ProjectSettings;
@@ -14,20 +15,27 @@ export class ProjectContent {
 		assets: Asset[] = [],
 		projectSettings: ProjectSettings = new ProjectSettings()
 	) {
+		super();
+
 		this.timeline = timeline;
 		this.assets = assets;
 		this.projectSettings = projectSettings;
 	}
 
 	static getDefaultProjectContent(): ProjectContent {
-		return {
-			timeline: new Timeline([
+		return new ProjectContent(
+			new Timeline([
 				new SubtitleTrack('arabic'),
 				new Track(TrackType.Video),
 				new Track(TrackType.Audio)
 			]),
-			assets: [],
-			projectSettings: ProjectSettings.getDefaultProjectSettings()
-		};
+			[],
+			ProjectSettings.getDefaultProjectSettings()
+		);
 	}
 }
+
+// Enregistre les classes enfants pour la désérialisation automatique
+SerializableBase.registerChildClass(ProjectContent, 'timeline', Timeline);
+SerializableBase.registerChildClass(ProjectContent, 'assets', Asset);
+SerializableBase.registerChildClass(ProjectContent, 'projectSettings', ProjectSettings);

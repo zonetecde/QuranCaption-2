@@ -1,5 +1,11 @@
-export class ProjectSettings {
+import { SerializableBase } from './misc/SerializableBase';
+
+export class ProjectSettings extends SerializableBase {
+	constructor() {
+		super();
+	}
+
 	static getDefaultProjectSettings(): ProjectSettings {
-		return {};
+		return new ProjectSettings();
 	}
 }

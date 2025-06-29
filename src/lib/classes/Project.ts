@@ -1,12 +1,14 @@
 import { projectService } from '$lib/services/ProjectService';
+import { SerializableBase } from './misc/SerializableBase.js';
 import { ProjectContent } from './ProjectContent.js';
-import type { ProjectDetail } from './ProjectDetail.js';
+import { ProjectDetail } from './ProjectDetail.svelte.js';
 
-export class Project {
+export class Project extends SerializableBase {
 	detail: ProjectDetail;
 	content: ProjectContent;
 
 	constructor(detail: ProjectDetail, content: ProjectContent = new ProjectContent()) {
+		super();
 		this.detail = detail;
 		this.content = content;
 	}
@@ -19,3 +21,7 @@ export class Project {
 		await projectService.save(this);
 	}
 }
+
+// Enregistre les classes enfants pour la désérialisation automatique
+SerializableBase.registerChildClass(Project, 'detail', ProjectDetail);
+SerializableBase.registerChildClass(Project, 'content', ProjectContent);

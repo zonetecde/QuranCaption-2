@@ -4,7 +4,8 @@ import Input from './Input.svelte';
 export async function inputModal(
 	text: string,
 	defaultText: string = '',
-	maxlength: number = 100
+	maxlength: number = 100,
+	placeholder: string = 'Enter text here'
 ): Promise<string> {
 	return new Promise<string>((resolve) => {
 		// Créer un conteneur pour le modal
@@ -19,6 +20,7 @@ export async function inputModal(
 				text: text,
 				defaultText: defaultText,
 				maxlength: maxlength,
+				placeholder: placeholder,
 				resolve: (result: string) => {
 					// Nettoyer et résoudre
 					unmount(input);

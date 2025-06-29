@@ -51,7 +51,9 @@
 		"@tauri-apps/plugin-fs": "^2.4.0",
 		"@tauri-apps/plugin-opener": "^2.4.0",
 		"@tauri-apps/plugin-store": "^2.3.0",
+		"class-transformer": "^0.5.1",
 		"material-icons": "^1.13.14",
+		"reflect-metadata": "^0.2.2",
 		"svelte-5-french-toast": "^2.0.4"
 	}
 }

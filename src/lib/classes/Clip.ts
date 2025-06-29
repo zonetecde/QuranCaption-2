@@ -1,10 +1,14 @@
-export class Clip {
+import { SerializableBase } from './misc/SerializableBase';
+import { Utilities } from './misc/Utilities';
+
+export class Clip extends SerializableBase {
 	id: number;
 	startTime: number;
 	endTime: number;
 	duration: number;
 
 	constructor(startTime: number, endTime: number) {
+		super();
 		this.id = Utilities.randomId();
 		this.startTime = startTime;
 		this.endTime = endTime;

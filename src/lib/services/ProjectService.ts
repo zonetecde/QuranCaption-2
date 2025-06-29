@@ -33,14 +33,7 @@ export class ProjectService {
 		// Construis le chemin d'accès vers le projet
 		const filePath = await join(projectsPath, `${project.detail.id}.json`);
 
-		// Prépare les données à sauvegarder
-		const projectData = {
-			detail: project.detail,
-			content: project.content
-		};
-
-		// Sauvegarde en JSON
-		await writeTextFile(filePath, JSON.stringify(projectData, null, 2));
+		await writeTextFile(filePath, JSON.stringify(project.toJSON(), null, 2));
 	}
 
 	/**
@@ -55,7 +48,7 @@ export class ProjectService {
 		project.detail = detail;
 
 		// Sauvegarde le projet complet
-		await this.save(project);
+		await project.save();
 	}
 
 	/**
@@ -87,22 +80,10 @@ export class ProjectService {
 			throw new Error(`Project with ID ${projectId} not found.`);
 		}
 
-		// Créer une vraie instance de ProjectDetail avec les données
-		const detail = Object.assign(
-			new ProjectDetail(detailData.name, detailData.reciter),
-			detailData
-		);
-		// Reconstituer tous les objets complexes
-		detail.reviveObjects();
+		// Utilise la méthode fromJSON automatique pour récupérer l'instance correcte
+		const project = Project.fromJSON(projectData);
 
-		if (onlyDetail) {
-			return new Project(detail);
-		}
-
-		// Créer une vraie instance de ProjectContent avec les données
-		const content = Object.assign(new ProjectContent(), contentData);
-
-		return new Project(detail, content);
+		return project;
 	}
 
 	/**
