@@ -4,11 +4,15 @@
 	import Footer from './Footer.svelte';
 	import Header from './Header.svelte';
 	import CreateProjectModal from './modals/CreateProjectModal.svelte';
-	import type { ProjectDetail } from '$lib/classes';
-	import { onMount } from 'svelte';
-	import { projectService } from '$lib/services/ProjectService';
 	import ProjectDetailCard from './ProjectDetailCard.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
+	import { onMount } from 'svelte';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
+
+	onMount(async () => {
+		// Met les décoration de la fenêtre
+		(await getCurrentWindow()).setDecorations(true);
+	});
 
 	let createNewProjectModalVisible: boolean = $state(false);
 
@@ -59,7 +63,7 @@
 		{:else}
 			<div
 				placeholder="Project cards"
-				class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+				class="mt-4 grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
 			>
 				{#each globalState.userProjectsDetails as _, index}
 					<ProjectDetailCard bind:projectDetail={globalState.userProjectsDetails[index]} />

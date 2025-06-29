@@ -22,7 +22,8 @@
 
 <button
 	onclick={projectNameClick}
-	class={'project-name-container group/name flex items-center cursor-pointer ' + parentClasses}
+	class={'text-left text-nowrap project-name-container group/name flex items-center cursor-pointer ' +
+		parentClasses}
 >
 	<h4 class={'group-hover/name:underline ' + textClasses}>{value}</h4>
 	<span
