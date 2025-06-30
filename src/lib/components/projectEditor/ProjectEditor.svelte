@@ -8,11 +8,6 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { ProjectEditorTabs } from '$lib/classes';
 	import VideoEditor from './tabs/videoEditor/VideoEditor.svelte';
-
-	onMount(async () => {
-		// rend la fenetre no decoration
-		(await getCurrentWindow()).setDecorations(false);
-	});
 </script>
 
 <div class="flex flex-col min-h-screen overflow-x-hidden bg-secondary">

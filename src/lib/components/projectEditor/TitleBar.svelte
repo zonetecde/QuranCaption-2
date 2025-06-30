@@ -27,7 +27,7 @@
 
 <header
 	data-tauri-drag-region
-	class="bg-primary shadow-md p-2 flex items-center justify-between fixed top-0 left-0 right-0 z-50 max-h-10"
+	class="bg-titlebar shadow-md p-2 flex items-center justify-between fixed top-0 left-0 right-0 z-50 max-h-10"
 >
 	<div class="flex items-center space-x-5">
 		<button
@@ -41,13 +41,15 @@
 			<img class="text-indigo-400 w-8 pb-0.25" alt="Logo" src="favicon.png" />
 			<h1 class="text-lg font-semibold text-gray-100 pt-0.75">Quran Caption</h1>
 		</button>
-		<button
-			class="bg-green-700 hover:bg-green-800 duration-100 text-white text-sm px-2 py-1 rounded-md flex items-center space-x-2 cursor-pointer"
-			type="button"
-		>
-			<span class="material-icons text-[20px]!">save</span>
-			<span>Autosave</span>
-		</button>
+		{#if globalState.currentProject}
+			<button
+				class="bg-green-700 hover:bg-green-800 duration-100 text-white text-sm px-2 py-1 rounded-md flex items-center space-x-2 cursor-pointer"
+				type="button"
+			>
+				<span class="material-icons text-[20px]!">save</span>
+				<span>Autosave</span>
+			</button>
+		{/if}
 	</div>
 	<div class="flex items-center space-x-2">
 		<button class="w-10 cursor-pointer rounded-full hover:bg-gray-700" type="button">

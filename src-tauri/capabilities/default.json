@@ -29,7 +29,6 @@
 				}
 			]
 		},
-		"core:window:allow-set-decorations",
 		"core:window:allow-close",
 		"core:window:allow-unmaximize",
 		"core:window:allow-maximize",

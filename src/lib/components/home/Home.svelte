@@ -8,11 +8,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
-
-	onMount(async () => {
-		// Met les décoration de la fenêtre
-		(await getCurrentWindow()).setDecorations(true);
-	});
+	import TitleBar from '../projectEditor/TitleBar.svelte';
 
 	let createNewProjectModalVisible: boolean = $state(false);
 
@@ -24,10 +20,8 @@
 	}
 </script>
 
-<div class="flex flex-col min-h-screen overflow-x-hidden">
-	<Header />
-
-	<div class="flex-grow px-6 md:px-12 py-6 md:py-12">
+<div class="flex flex-col min-h-screen overflow-x-hidden overflow-auto">
+	<div class="flex-grow px-6 md:px-12 pt-6 pb-4 md:pt-22 md:pb-14">
 		<div placeholder="Upper section" class="flex flex-row items-center">
 			<section>
 				<h2 class="text-4xl font-bold">Welcome Back!</h2>

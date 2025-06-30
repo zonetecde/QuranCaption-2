@@ -1,17 +1,17 @@
 <script>
 	import Timeline from '../../timeline/Timeline.svelte';
 	import VideoPreview from '../../videoPreview/VideoPreview.svelte';
+	import AssetsManager from './assetsManager/AssetsManager.svelte';
 </script>
 
-<div class="flex-grow w-screen grid grid-cols-2-template">
-	<!-- Quran and clip explorer -->
+<div class="flex-grow w-screen flex">
+	<!-- Assets -->
 	<section
-		class="min-w-[220px] divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-r-2 border-color border-t-2"
+		class="w-[18%] min-w-[220px] divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-r-2 border-color border-t-2"
 	>
-		<!-- <AssetsManager /> -->
+		<AssetsManager />
 	</section>
-	<section class="flex-grow flex flex-row divide-x-2 divide-color">
-		<!-- Editor -->
+	<section class="flex-grow flex flex-row">
 		<section class="w-full divide-y-2 divide-color flex flex-col">
 			<!-- Video preview -->
 			<section class="flex-grow">
@@ -24,11 +24,14 @@
 			</section>
 		</section>
 	</section>
+	<!-- Settings -->
+	<section
+		class="w-[18%] min-w-[220px] divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-l-2 border-color border-t-2"
+	>
+		<!-- <AssetsManager /> -->
+	</section>
 </div>
 
 <style>
-	/* grid cols 2 : first col 25% the second col 75% */
-	.grid-cols-2-template {
-		grid-template-columns: 25% 75%;
-	}
+	/* Styles personnalisés si nécessaire */
 </style>
