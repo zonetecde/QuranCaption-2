@@ -35,6 +35,11 @@
 .border-color {
 	border-color: var(--border-color);
 }
+.divide-color {
+	:where(& > :not(:last-child)) {
+		border-color: var(--border-color);
+	}
+}
 .text-secondary {
 	color: var(--text-secondary);
 }

@@ -7,5 +7,5 @@ export { Track, SubtitleTrack } from './Track.js';
 export { Clip, AssetClip, SubtitleClip } from './Clip.js';
 export { Asset } from './Asset.js';
 export { ProjectSettings } from './ProjectSettings.js';
-export { TrackType, AssetType } from './enums.js';
+export { TrackType, AssetType, ProjectEditorTabs } from './enums.js';
 export { Utilities } from './misc/Utilities.js';

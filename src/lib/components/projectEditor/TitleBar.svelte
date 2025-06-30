@@ -27,7 +27,7 @@
 
 <header
 	data-tauri-drag-region
-	class="bg-gray-800 shadow-md p-2 flex items-center justify-between fixed top-0 left-0 right-0 z-50 max-h-10 border border-b-0 border-color"
+	class="bg-primary shadow-md p-2 flex items-center justify-between fixed top-0 left-0 right-0 z-50 max-h-10"
 >
 	<div class="flex items-center space-x-5">
 		<button
