@@ -10,6 +10,7 @@ import { globalState } from '$lib/runes/main.svelte';
  */
 export class ProjectService {
 	private projectsFolder: string = 'projects/';
+	private assetsFolder: string = 'assets/';
 
 	/**
 	 * S'assure que le dossier des projets existe
@@ -158,6 +159,14 @@ export class ProjectService {
 		} catch (error) {
 			return [];
 		}
+	}
+
+	/**
+	 * Récupère le chemin du dossier des assets téléchargés.
+	 * @returns Le chemin du dossier des assets
+	 */
+	async getAssetFolder(): Promise<string> {
+		return await join(await appDataDir(), this.assetsFolder);
 	}
 }
 

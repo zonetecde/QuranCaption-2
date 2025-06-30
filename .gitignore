@@ -22,3 +22,6 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 src-tauri/2
+
+# Special
+src-tauri/binaries/*.exe
