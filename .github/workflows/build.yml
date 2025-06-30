@@ -9,7 +9,10 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        include:
+          - os: macos-latest
+          - os: windows-latest
+          - os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -34,10 +37,10 @@ jobs:
 
       # Linux setup
       - name: Install dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libjavascriptcoregtk-4.1-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev p7zip-full libsoup2.4-dev pkg-config
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libjavascriptcoregtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev p7zip-full libsoup2.4-dev pkg-config
 
       - name: Download yt-dlp (macos)
         if: matrix.os == 'macos-latest'
@@ -72,14 +75,14 @@ jobs:
           7z e -y ffmpeg.7z -i'!*/bin/ffmpeg.exe' -osrc-tauri/binaries
 
       - name: Download yt-dlp (linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.05.22/yt-dlp
           chmod +x yt-dlp
           mv yt-dlp src-tauri/binaries/yt-dlp
 
       - name: Download and extract ffprobe and ffmpeg (linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
           tar -xf ffmpeg.tar.xz
@@ -108,7 +111,7 @@ jobs:
 
       # Video creator script for Linux
       - name: Build video creator script (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           cd src-tauri/video-creator
           chmod +x build_mac.sh
@@ -144,7 +147,7 @@ jobs:
           path: src-tauri/target/release/bundle/nsis/Quran Caption_*_x64-setup.exe
 
       - name: Upload Linux AppImage
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         uses: actions/upload-artifact@v4
         with:
           name: linux-artifact
