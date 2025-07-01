@@ -1,6 +1,6 @@
 import { projectService } from '$lib/services/ProjectService';
 import { SerializableBase } from './misc/SerializableBase.js';
-import { ProjectContent } from './ProjectContent.js';
+import { ProjectContent } from './ProjectContent.svelte.js';
 import { ProjectDetail } from './ProjectDetail.svelte.js';
 
 export class Project extends SerializableBase {

@@ -15,4 +15,4 @@
 	<span class="material-icons mr-2 text-base">add_circle_outline</span>Add Asset
 </button>
 
-<div class="text-center text-xs text-gray-500 pt-2 mt-5">Drag and drop files here</div>
+<div class="text-center text-xs text-gray-500 pt-2 mt-2">Drag and drop files here</div>

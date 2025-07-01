@@ -17,9 +17,9 @@ export class ProjectContent extends SerializableBase {
 	) {
 		super();
 
-		this.timeline = timeline;
-		this.assets = assets;
-		this.projectSettings = projectSettings;
+		this.timeline = $state(timeline);
+		this.assets = $state(assets);
+		this.projectSettings = $state(projectSettings);
 	}
 
 	static getDefaultProjectContent(): ProjectContent {

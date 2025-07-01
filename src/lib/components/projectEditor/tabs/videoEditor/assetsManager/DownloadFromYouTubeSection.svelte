@@ -2,17 +2,24 @@
 	import toast from 'svelte-5-french-toast';
 	import { invoke } from '@tauri-apps/api/core';
 	import { projectService } from '$lib/services/ProjectService';
+	import { globalState } from '$lib/runes/main.svelte';
+	import { Asset, AssetType } from '$lib/classes';
+	import { getAssetTypeFromString } from '$lib/classes/enums';
 
 	let url: string = $state('');
 	let type: string = $state('audio'); // Default to audio
 
 	async function downloadAssetFromYouTube() {
 		try {
-			const result = await toast.promise(
+			const downloadPath = await projectService.getAssetFolderForProject(
+				globalState.currentProject!.detail.id
+			);
+
+			const result: any = await toast.promise(
 				invoke('download_from_youtube', {
 					url: url.trim(),
 					type: type,
-					downloadPath: await projectService.getAssetFolder()
+					downloadPath: downloadPath
 				}),
 				{
 					loading: 'Downloading from YouTube...',
@@ -20,7 +27,26 @@
 					error: 'Download failed!'
 				}
 			);
-			console.log('Filename:', result);
+
+			console.log('Result:', result);
+
+			// Ajoute le fichier téléchargé à la liste des assets du projet
+			const newAsset = new Asset(
+				result.file_name,
+				result.file_path,
+				getAssetTypeFromString(type)!,
+				result.duration,
+				true,
+				url
+			);
+
+			// Utilise la syntaxe Svelte 5 pour mettre à jour l'array réactif
+			globalState.currentProject!.content.assets = [
+				...globalState.currentProject!.content.assets,
+				newAsset
+			];
+
+			console.log('Asset added:', globalState.currentProject!.content.assets);
 		} catch (error) {
 			toast.error('Error downloading from YouTube: ' + error);
 		}

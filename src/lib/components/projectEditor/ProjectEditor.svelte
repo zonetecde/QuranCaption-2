@@ -8,6 +8,13 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { ProjectEditorTabs } from '$lib/classes';
 	import VideoEditor from './tabs/videoEditor/VideoEditor.svelte';
+
+	onMount(() => {
+		// Sauvegarde automatique du projet toutes les 5 secondes
+		setInterval(() => {
+			globalState.currentProject?.save();
+		}, 5000);
+	});
 </script>
 
 <div class="flex flex-col min-h-screen overflow-x-hidden bg-secondary">

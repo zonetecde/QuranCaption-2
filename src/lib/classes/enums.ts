@@ -5,10 +5,14 @@ export enum TrackType {
 }
 
 export enum AssetType {
-	Audio = 'Audio',
-	Video = 'Video',
-	Image = 'Image',
-	Unknown = 'Unknown'
+	Audio = 'audio',
+	Video = 'video',
+	Image = 'image',
+	Unknown = 'unknown'
+}
+
+export function getAssetTypeFromString(value: string): AssetType | undefined {
+	return (Object.values(AssetType) as string[]).includes(value) ? (value as AssetType) : undefined;
 }
 
 export enum ProjectEditorTabs {

@@ -89,6 +89,8 @@ export class ProjectService {
 		// Utilise la méthode fromJSON automatique pour récupérer l'instance correcte
 		const project = Project.fromJSON(projectData);
 
+		console.log(project);
+
 		return project;
 	}
 
@@ -165,8 +167,8 @@ export class ProjectService {
 	 * Récupère le chemin du dossier des assets téléchargés.
 	 * @returns Le chemin du dossier des assets
 	 */
-	async getAssetFolder(): Promise<string> {
-		return await join(await appDataDir(), this.assetsFolder);
+	async getAssetFolderForProject(projectId: number): Promise<string> {
+		return await join(await appDataDir(), this.assetsFolder, projectId.toString());
 	}
 }
 

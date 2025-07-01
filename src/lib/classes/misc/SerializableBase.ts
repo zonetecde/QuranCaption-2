@@ -93,14 +93,33 @@ export class SerializableBase {
 		const childClasses = SerializableBase.__childClasses.get(className);
 		if (childClasses) {
 			for (const [propertyKey, ChildClass] of childClasses) {
-				if (data[propertyKey] && typeof data[propertyKey] === 'object') {
+				const propertyValue = data[propertyKey];
+
+				if (propertyValue && typeof propertyValue === 'object') {
 					console.log(`Restoring child class for property: ${propertyKey} in ${className}`);
-					if (ChildClass.fromJSON) {
-						// Si la classe enfant a fromJSON, l'utiliser
-						(instance as any)[propertyKey] = ChildClass.fromJSON(data[propertyKey]);
+
+					// Vérifier si c'est un tableau
+					if (Array.isArray(propertyValue)) {
+						console.log(`Property ${propertyKey} is an array with ${propertyValue.length} items`);
+						(instance as any)[propertyKey] = propertyValue.map((item: any) => {
+							if (item && typeof item === 'object') {
+								if (ChildClass.fromJSON) {
+									return ChildClass.fromJSON(item);
+								} else {
+									return Object.assign(new ChildClass(), item);
+								}
+							}
+							return item;
+						});
 					} else {
-						// Sinon, créer une nouvelle instance et assigner les propriétés
-						(instance as any)[propertyKey] = Object.assign(new ChildClass(), data[propertyKey]);
+						// Objet simple
+						if (ChildClass.fromJSON) {
+							// Si la classe enfant a fromJSON, l'utiliser
+							(instance as any)[propertyKey] = ChildClass.fromJSON(propertyValue);
+						} else {
+							// Sinon, créer une nouvelle instance et assigner les propriétés
+							(instance as any)[propertyKey] = Object.assign(new ChildClass(), propertyValue);
+						}
 					}
 				}
 			}
