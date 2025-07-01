@@ -10,8 +10,6 @@ export class ProjectDetail extends SerializableBase {
 
 	id: number;
 
-	deleted: boolean = false;
-
 	name: string;
 	reciter: string;
 	createdAt: Date;
@@ -27,7 +25,7 @@ export class ProjectDetail extends SerializableBase {
 		percentage: number;
 	}[];
 
-	constructor(name: string, reciter: string) {
+	constructor(name: string = '', reciter: string = '') {
 		super();
 
 		this.id = Utilities.randomId();
@@ -42,6 +40,11 @@ export class ProjectDetail extends SerializableBase {
 		this.status = Status.NOT_SET;
 		this.duration = new Duration(0);
 		this.translations = [];
+	}
+
+	public reviveDates(): void {
+		this.createdAt = new Date(this.createdAt);
+		this.updatedAt = new Date(this.updatedAt);
 	}
 
 	/**

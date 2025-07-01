@@ -13,7 +13,7 @@ export class Asset extends SerializableBase {
 	fromYoutube: boolean;
 	youtubeUrl?: string;
 
-	constructor(filePath: string, youtubeUrl?: string) {
+	constructor(filePath: string = '', youtubeUrl?: string) {
 		super();
 		this.id = Utilities.randomId();
 
@@ -26,16 +26,24 @@ export class Asset extends SerializableBase {
 			this.fromYoutube = false;
 		}
 
-		const fileName = this.getFileName(filePath);
-		this.fileName = fileName;
+		// Si l'arg est undefined (cas de désérialisation)
+		if (filePath) {
+			const fileName = this.getFileName(filePath);
+			this.fileName = fileName;
 
-		const extension = this.getFileExtension(fileName);
-		this.type = this.getAssetType(extension);
+			const extension = this.getFileExtension(fileName);
+			this.type = this.getAssetType(extension);
 
-		this.duration = new Duration(0);
+			this.duration = new Duration(0);
 
-		if (this.type === AssetType.Audio || this.type === AssetType.Video) {
-			this.initializeDuration();
+			if (this.type === AssetType.Audio || this.type === AssetType.Video) {
+				this.initializeDuration();
+			}
+		} else {
+			// Valeurs par défaut pour la désérialisation
+			this.fileName = '';
+			this.type = AssetType.Unknown;
+			this.duration = new Duration(0);
 		}
 	}
 

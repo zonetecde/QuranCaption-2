@@ -89,8 +89,6 @@ export class ProjectService {
 		// Utilise la méthode fromJSON automatique pour récupérer l'instance correcte
 		const project = Project.fromJSON(projectData);
 
-		console.log(project);
-
 		return project;
 	}
 
@@ -155,7 +153,7 @@ export class ProjectService {
 			}
 
 			// Trie les projets par date de création décroissante
-			projects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+			projects.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
 			globalState.userProjectsDetails = projects;
 		} catch (error) {

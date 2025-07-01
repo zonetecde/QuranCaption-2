@@ -71,59 +71,57 @@ export class SerializableBase {
 	/**
 	 * Méthode utilitaire pour restaurer les propriétés depuis un objet plain
 	 */
-	static fromJSON<T extends SerializableBase>(
-		this: new (...args: any[]) => T,
-		data: any,
-		...constructorArgs: any[]
-	): T {
-		const instance = new this(...constructorArgs);
-		const className = this.name;
+	static fromJSON<T extends SerializableBase>(this: new (...args: any[]) => T, data: any): T {
+		// Créer une instance avec des paramètres par défaut pour éviter les erreurs du constructeur
+		// mais permettre l'initialisation des champs privés $state
+		const instance = new this() as any;
 
-		// Copier toutes les propriétés en traitant les dates
-		for (const [key, value] of Object.entries(data)) {
-			if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
-				// Reconvertir les dates
-				(instance as any)[key] = new Date(value);
-			} else {
-				(instance as any)[key] = value;
-			}
-		}
+		// Obtenir les métadonnées des classes enfants pour cette classe
+		const childClasses = (this as any).__childClasses?.get(this.name);
 
-		// Reconstituer les objets enfants enregistrés
-		const childClasses = SerializableBase.__childClasses.get(className);
-		if (childClasses) {
-			for (const [propertyKey, ChildClass] of childClasses) {
-				const propertyValue = data[propertyKey];
+		// Parcourir toutes les propriétés du JSON
+		for (const key in data) {
+			if (Object.prototype.hasOwnProperty.call(data, key)) {
+				const value = data[key];
 
-				if (propertyValue && typeof propertyValue === 'object') {
-					console.log(`Restoring child class for property: ${propertyKey} in ${className}`);
+				// Vérifier si cette propriété doit être désérialisée avec une classe spécifique
+				if (childClasses && childClasses.has(key)) {
+					const ChildClass = childClasses.get(key);
 
-					// Vérifier si c'est un tableau
-					if (Array.isArray(propertyValue)) {
-						console.log(`Property ${propertyKey} is an array with ${propertyValue.length} items`);
-						(instance as any)[propertyKey] = propertyValue.map((item: any) => {
-							if (item && typeof item === 'object') {
-								if (ChildClass.fromJSON) {
-									return ChildClass.fromJSON(item);
-								} else {
-									return Object.assign(new ChildClass(), item);
-								}
+					if (Array.isArray(value)) {
+						// Désérialiser un tableau d'objets
+						instance[key] = value.map((item) => {
+							if (item && typeof item === 'object' && ChildClass.fromJSON) {
+								return ChildClass.fromJSON(item);
+							} else if (typeof item === 'string' && SerializableBase.isDateString(item)) {
+								return new Date(item);
 							}
 							return item;
 						});
+					} else if (value && typeof value === 'object' && ChildClass.fromJSON) {
+						// Désérialiser un objet enfant
+						instance[key] = ChildClass.fromJSON(value);
+					} else if (typeof value === 'string' && SerializableBase.isDateString(value)) {
+						// Convertir les dates dans les propriétés avec classe enfant
+						instance[key] = new Date(value);
 					} else {
-						// Objet simple
-						if (ChildClass.fromJSON) {
-							// Si la classe enfant a fromJSON, l'utiliser
-							(instance as any)[propertyKey] = ChildClass.fromJSON(propertyValue);
-						} else {
-							// Sinon, créer une nouvelle instance et assigner les propriétés
-							(instance as any)[propertyKey] = Object.assign(new ChildClass(), propertyValue);
-						}
+						// Valeur primitive
+						instance[key] = value;
+					}
+
+					console.log('AAAAA ', instance);
+				} else {
+					// Assigner directement la valeur (les propriétés $state seront automatiquement réactives)
+					// Convertir les chaînes de date en objets Date
+					if (typeof value === 'string' && SerializableBase.isDateString(value)) {
+						instance[key] = new Date(value);
+					} else {
+						instance[key] = value;
 					}
 				}
 			}
 		}
+		console.log(instance);
 
 		return instance;
 	}
@@ -131,9 +129,24 @@ export class SerializableBase {
 	/**
 	 * Clone l'objet en passant par la sérialisation/désérialisation
 	 */
-	clone<T extends SerializableBase>(this: T, ...constructorArgs: any[]): T {
+	clone<T extends SerializableBase>(this: T): T {
 		const Constructor = this.constructor as new (...args: any[]) => T;
 		const data = this.toJSON();
-		return (Constructor as any).fromJSON(data, ...constructorArgs);
+		return (Constructor as any).fromJSON(data);
+	}
+
+	/**
+	 * Vérifie si une chaîne de caractères représente une date ISO valide
+	 */
+	private static isDateString(value: string): boolean {
+		// Vérifier le format ISO 8601 (exemple: "2025-07-01T11:41:21.148Z")
+		const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/;
+		if (!isoDateRegex.test(value)) {
+			return false;
+		}
+
+		// Vérifier que la date est valide
+		const date = new Date(value);
+		return !isNaN(date.getTime());
 	}
 }
