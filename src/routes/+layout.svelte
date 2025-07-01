@@ -5,7 +5,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { projectService } from '$lib/services/ProjectService';
 	import { Toaster } from 'svelte-5-french-toast';
-	import TitleBar from '$lib/components/projectEditor/TitleBar.svelte';
+	import TitleBar from '$lib/components/TitleBar.svelte';
 
 	let { children } = $props();
 

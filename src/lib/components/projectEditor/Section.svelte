@@ -1,0 +1,57 @@
+<script lang="ts">
+	import { globalState } from '$lib/runes/main.svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
+
+	let {
+		name,
+		icon,
+		classes,
+		children
+	}: {
+		name: string;
+		icon: string;
+		classes?: string;
+		children: Snippet;
+	} = $props();
+
+	let extended = $state(true);
+
+	onMount(() => {
+		// Init la section dans l'éditeur
+		if (!globalState.projectEditorState.sections[name]) {
+			globalState.projectEditorState.sections[name] = {
+				extended: extended
+			};
+		} else {
+			// Si la section existe déjà, on récupère son état
+			extended = globalState.projectEditorState.sections[name].extended;
+		}
+	});
+
+	$effect(() => {
+		globalState.projectEditorState.sections[name] = {
+			extended: extended
+		};
+	});
+</script>
+
+<div class={'flex ' + classes}>
+	<h3 class="text-sm font-semibold text-gray-100 flex items-center">
+		<span class="material-icons mr-2 text-lg text-indigo-400">{icon}</span>{name}
+	</h3>
+	<!-- dropdownicon -->
+	<button
+		class={'flex items-center ml-auto cursor-pointer transition-all duration-100 ' +
+			(extended ? 'rotate-180' : '')}
+		onclick={() => (extended = !extended)}
+	>
+		<span class="material-icons text-4xl! text-indigo-400">arrow_drop_down</span>
+	</button>
+</div>
+
+{#if extended}
+	<div transition:slide>
+		{@render children()}
+	</div>
+{/if}

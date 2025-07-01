@@ -11,7 +11,7 @@
 	]);
 
 	function setActiveTab(tabValue: ProjectEditorTabs) {
-		globalState.projectEditorState.currentTab = tabValue;
+		globalState.currentProject!.projectEditorState.currentTab = tabValue;
 	}
 </script>
 

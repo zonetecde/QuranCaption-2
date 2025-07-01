@@ -74,16 +74,9 @@ export class ProjectService {
 		const fileContent = await readTextFile(filePath);
 		const projectData = JSON.parse(fileContent);
 
-		const detailData = projectData.detail;
-		const contentData = projectData.content;
-
-		if (!detailData || !contentData) {
-			throw new Error(`Project with ID ${projectId} not found.`);
-		}
-
 		if (onlyDetail) {
 			// Évite de charger le contenu du projet si on ne veut que les détails
-			return new Project(ProjectDetail.fromJSON(detailData));
+			return new Project(ProjectDetail.fromJSON(projectData.detail));
 		}
 
 		// Utilise la méthode fromJSON automatique pour récupérer l'instance correcte
@@ -112,6 +105,10 @@ export class ProjectService {
 		const filePath = await join(projectsPath, `${projectId}.json`);
 
 		await remove(filePath);
+
+		// Supprime le dossier des assets associés au projet
+		const assetsPath = await this.getAssetFolderForProject(projectId);
+		await remove(assetsPath);
 	}
 
 	/**

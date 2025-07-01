@@ -6,9 +6,6 @@
 	import CreateProjectModal from './modals/CreateProjectModal.svelte';
 	import ProjectDetailCard from './ProjectDetailCard.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { onMount } from 'svelte';
-	import { getCurrentWindow } from '@tauri-apps/api/window';
-	import TitleBar from '../projectEditor/TitleBar.svelte';
 
 	let createNewProjectModalVisible: boolean = $state(false);
 
