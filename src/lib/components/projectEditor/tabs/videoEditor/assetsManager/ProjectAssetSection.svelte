@@ -1,3 +1,8 @@
+<script lang="ts">
+	import { globalState } from '$lib/runes/main.svelte';
+	import AssetViewer from './AssetViewer.svelte';
+</script>
+
 <div class="flex">
 	<h3 class="text-sm font-semibold text-gray-100 flex items-center">
 		<span class="material-icons mr-2 text-lg text-indigo-400">folder_open</span>Project Assets
@@ -14,5 +19,11 @@
 >
 	<span class="material-icons mr-2 text-base">add_circle_outline</span>Add Asset
 </button>
+
+<div class="flex flex-col gap-2 mt-2">
+	{#each globalState.currentProject!.content.assets as asset}
+		<AssetViewer {asset} />
+	{/each}
+</div>
 
 <div class="text-center text-xs text-gray-500 pt-2 mt-2">Drag and drop files here</div>

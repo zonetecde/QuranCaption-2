@@ -28,8 +28,6 @@
 				}
 			);
 
-			console.log('Result:', result);
-
 			// Ajoute le fichier téléchargé à la liste des assets du projet
 			const newAsset = new Asset(
 				result.file_name,
@@ -40,13 +38,7 @@
 				url
 			);
 
-			// Utilise la syntaxe Svelte 5 pour mettre à jour l'array réactif
-			globalState.currentProject!.content.assets = [
-				...globalState.currentProject!.content.assets,
-				newAsset
-			];
-
-			console.log('Asset added:', globalState.currentProject!.content.assets);
+			globalState.currentProject!.content.addAsset(newAsset);
 		} catch (error) {
 			toast.error('Error downloading from YouTube: ' + error);
 		}

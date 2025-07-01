@@ -33,6 +33,12 @@ export class ProjectContent extends SerializableBase {
 			ProjectSettings.getDefaultProjectSettings()
 		);
 	}
+
+	addAsset(asset: Asset): void {
+		if (!this.assets.some((a) => a.id === asset.id)) {
+			this.assets.push(asset);
+		}
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
