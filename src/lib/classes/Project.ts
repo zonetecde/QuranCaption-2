@@ -1,19 +1,16 @@
-import { ProjectEditorState } from '$lib/runes/main.svelte.js';
 import { projectService } from '$lib/services/ProjectService';
-import { SerializableBase } from './misc/SerializableBase.js';
-import { ProjectContent } from './ProjectContent.svelte.js';
-import { ProjectDetail } from './ProjectDetail.svelte.js';
+import { ProjectContent, ProjectDetail, ProjectEditorState } from '.';
+import { SerializableBase } from './misc/SerializableBase';
 
 export class Project extends SerializableBase {
 	detail: ProjectDetail;
 	content: ProjectContent;
-	projectEditorState: ProjectEditorState;
+	projectEditorState: ProjectEditorState = new ProjectEditorState();
 
 	constructor(detail: ProjectDetail, content: ProjectContent = new ProjectContent()) {
 		super();
 		this.detail = detail;
 		this.content = content;
-		this.projectEditorState = new ProjectEditorState();
 	}
 
 	/**
@@ -28,3 +25,4 @@ export class Project extends SerializableBase {
 // Enregistre les classes enfants pour la désérialisation automatique
 SerializableBase.registerChildClass(Project, 'detail', ProjectDetail);
 SerializableBase.registerChildClass(Project, 'content', ProjectContent);
+SerializableBase.registerChildClass(Project, 'projectEditorState', ProjectEditorState);

@@ -18,7 +18,8 @@
 <div class="w-full h-11 flex items-center justify-center space-x-1 border-color">
 	{#each tabs as tab}
 		<button
-			class="tab-button flex items-center {globalState.projectEditorState.currentTab === tab.value
+			class="tab-button flex items-center {globalState.currentProject!.projectEditorState
+				.currentTab === tab.value
 				? 'active'
 				: ''}"
 			type="button"

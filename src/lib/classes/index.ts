@@ -1,7 +1,8 @@
 // Exports principaux pour faciliter les imports
-export { Project } from './Project.js';
 export { ProjectDetail } from './ProjectDetail.svelte.js';
 export { ProjectContent } from './ProjectContent.svelte.js';
+export { ProjectEditorState } from '$lib/runes/ProjectEditorState.svelte.js';
+export { Project } from './Project.js';
 export { Timeline } from './Timeline.js';
 export { Track, SubtitleTrack } from './Track.js';
 export { Clip, AssetClip, SubtitleClip } from './Clip.js';

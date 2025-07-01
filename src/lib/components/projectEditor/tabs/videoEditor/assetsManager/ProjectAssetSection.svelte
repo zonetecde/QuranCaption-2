@@ -12,25 +12,25 @@
 	onMount(async () => {
 		unlisten = await getCurrentWebview().onDragDropEvent((event) => {
 			if (event.payload.type === 'over') {
-				if (!globalState.projectEditorState.showDropScreen)
-					globalState.projectEditorState.showDropScreen = true;
+				if (!globalState.currentProject!.projectEditorState.showDropScreen)
+					globalState.currentProject!.projectEditorState.showDropScreen = true;
 			} else if (event.payload.type === 'drop') {
-				if (globalState.projectEditorState.showDropScreen) {
-					globalState.projectEditorState.showDropScreen = false;
+				if (globalState.currentProject!.projectEditorState.showDropScreen) {
+					globalState.currentProject!.projectEditorState.showDropScreen = false;
 					// Ajoute le(s) fichier(s) au projet
 					for (const file of event.payload.paths) {
 						globalState.currentProject?.content.addAsset(file);
 					}
 				}
 			} else {
-				if (globalState.projectEditorState.showDropScreen)
-					globalState.projectEditorState.showDropScreen = false;
+				if (globalState.currentProject!.projectEditorState.showDropScreen)
+					globalState.currentProject!.projectEditorState.showDropScreen = false;
 			}
 		});
 	});
 
 	$effect(() => {
-		if (globalState.projectEditorState.showDropScreen) {
+		if (globalState.currentProject!.projectEditorState.showDropScreen) {
 			const container = document.createElement('div');
 			container.id = 'drop-overlay-container';
 			document.body.appendChild(container);

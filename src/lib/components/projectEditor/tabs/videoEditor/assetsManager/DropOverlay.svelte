@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
 	import { fade } from 'svelte/transition';
 
 	$effect(() => {
-		if (!globalState.projectEditorState.showDropScreen) {
+		if (!globalState.currentProject!.projectEditorState.showDropScreen) {
 			// destroy the `#drop-overlay-container` div
 			const dropOverlayContainer = document.getElementById('drop-overlay-container');
 			if (dropOverlayContainer) {

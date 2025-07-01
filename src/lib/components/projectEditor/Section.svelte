@@ -19,18 +19,18 @@
 
 	onMount(() => {
 		// Init la section dans l'éditeur
-		if (!globalState.projectEditorState.sections[name]) {
-			globalState.projectEditorState.sections[name] = {
+		if (!globalState.currentProject!.projectEditorState.sections[name]) {
+			globalState.currentProject!.projectEditorState.sections[name] = {
 				extended: extended
 			};
 		} else {
 			// Si la section existe déjà, on récupère son état
-			extended = globalState.projectEditorState.sections[name].extended;
+			extended = globalState.currentProject!.projectEditorState.sections[name].extended;
 		}
 	});
 
 	$effect(() => {
-		globalState.projectEditorState.sections[name] = {
+		globalState.currentProject!.projectEditorState.sections[name] = {
 			extended: extended
 		};
 	});

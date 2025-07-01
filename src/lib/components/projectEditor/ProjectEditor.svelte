@@ -20,7 +20,7 @@
 <div class="flex flex-col min-h-full overflow-x-hidden bg-secondary">
 	<Navigator />
 
-	{#if globalState.projectEditorState.currentTab === ProjectEditorTabs.VideoEditor}
+	{#if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.VideoEditor}
 		<VideoEditor />
 	{/if}
 </div>
