@@ -1,17 +1,9 @@
 use std::fs;
 use std::path::Path;
 use std::process::Command;
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize)]
-struct DownloadResult {
-    file_name: String,
-    file_path: String,
-    duration: u64, // durée en millisecondes
-}
 
 #[tauri::command]
-async fn download_from_youtube(url: String, _type: String, download_path: String) -> Result<DownloadResult, String> {
+async fn download_from_youtube(url: String, _type: String, download_path: String) -> Result<String, String> {
     // Créer le dossier de téléchargement s'il n'existe pas
     if let Err(e) = fs::create_dir_all(&download_path) {
         return Err(format!("Unable to create directory: {}", e));
@@ -76,22 +68,10 @@ async fn download_from_youtube(url: String, _type: String, download_path: String
                                 let path = entry.path();
                                 if let Some(ext) = path.extension() {
                                     if ext == extension {
-                                        if let Some(filename) = path.file_name() {
-                                            let file_name = filename.to_string_lossy().to_string();
+                                        if let Some(_filename) = path.file_name() {
                                             let file_path = path.to_string_lossy().to_string();
                                             
-                                            // Obtenir la durée précise avec ffprobe
-                                            let duration_ms = get_precise_duration(&file_path)
-                                                .unwrap_or_else(|e| {
-                                                    println!("Warning: Could not get precise duration: {}", e);
-                                                    0
-                                                });
-                                            
-                                            return Ok(DownloadResult {
-                                                file_name,
-                                                file_path,
-                                                duration: duration_ms,
-                                            });
+                                            return Ok(file_path);
                                         }
                                     }
                                 }
@@ -111,8 +91,10 @@ async fn download_from_youtube(url: String, _type: String, download_path: String
     }
 }
 
+
 // Fonction pour obtenir la durée précise du fichier téléchargé avec ffprobe
-fn get_precise_duration(file_path: &str) -> Result<u64, String> {
+#[tauri::command]
+fn get_duration(file_path: &str) -> Result<u64, String> {
     let ffprobe_path = Path::new("binaries").join("ffprobe");
     
     let output = Command::new(&ffprobe_path)
@@ -152,7 +134,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![download_from_youtube])
+        .invoke_handler(tauri::generate_handler![download_from_youtube, get_duration])
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(

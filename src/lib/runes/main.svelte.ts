@@ -10,6 +10,7 @@ class GlobalState {
 
 class ProjectEditorState {
 	currentTab: ProjectEditorTabs = $state(ProjectEditorTabs.VideoEditor);
+	showDropScreen: boolean = $state(false);
 }
 
 export const globalState = new GlobalState();

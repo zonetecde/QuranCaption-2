@@ -10,7 +10,7 @@
 </script>
 
 <div
-	class="flex flex-col py-2 px-2 bg-gray-800 rounded-lg shadow-md group transition-all duration-300"
+	class="flex flex-col py-2 px-2 bg-gray-800 rounded-lg shadow-md group transition-all duration-300 cursor-grab"
 >
 	{#if asset.type === AssetType.Audio}
 		<div class="audio-player-container">

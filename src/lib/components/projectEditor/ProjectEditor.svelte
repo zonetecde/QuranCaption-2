@@ -7,6 +7,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { ProjectEditorTabs } from '$lib/classes';
 	import VideoEditor from './tabs/videoEditor/VideoEditor.svelte';
+	import DropOverlay from './tabs/videoEditor/assetsManager/DropOverlay.svelte';
 
 	onMount(() => {
 		// Sauvegarde automatique du projet toutes les 5 secondes

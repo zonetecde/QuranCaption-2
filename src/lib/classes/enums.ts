@@ -11,10 +11,6 @@ export enum AssetType {
 	Unknown = 'unknown'
 }
 
-export function getAssetTypeFromString(value: string): AssetType | undefined {
-	return (Object.values(AssetType) as string[]).includes(value) ? (value as AssetType) : undefined;
-}
-
 export enum ProjectEditorTabs {
 	VideoEditor = 'Video editor',
 	SubtitlesEditor = 'Subtitles editor',

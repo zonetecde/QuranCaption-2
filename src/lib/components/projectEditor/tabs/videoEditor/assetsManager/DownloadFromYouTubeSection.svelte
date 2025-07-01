@@ -4,7 +4,6 @@
 	import { projectService } from '$lib/services/ProjectService';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { Asset, AssetType } from '$lib/classes';
-	import { getAssetTypeFromString } from '$lib/classes/enums';
 
 	let url: string = $state('');
 	let type: string = $state('audio'); // Default to audio
@@ -29,16 +28,7 @@
 			);
 
 			// Ajoute le fichier téléchargé à la liste des assets du projet
-			const newAsset = new Asset(
-				result.file_name,
-				result.file_path,
-				getAssetTypeFromString(type)!,
-				result.duration,
-				true,
-				url
-			);
-
-			globalState.currentProject!.content.addAsset(newAsset);
+			globalState.currentProject!.content.addAsset(result, url);
 		} catch (error) {
 			toast.error('Error downloading from YouTube: ' + error);
 		}
