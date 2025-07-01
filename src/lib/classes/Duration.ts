@@ -3,6 +3,10 @@ import { SerializableBase } from './misc/SerializableBase';
 export class Duration extends SerializableBase {
 	ms: number;
 
+	/**
+	 * Crée une nouvelle instance de Duration
+	 * @param ms Durée en millisecondes
+	 */
 	constructor(ms: number) {
 		super();
 		this.ms = ms;

@@ -11,6 +11,12 @@ export class ProjectContent extends SerializableBase {
 	assets: Asset[];
 	projectSettings: ProjectSettings;
 
+	/**
+	 * Crée une instance de ProjectContent.
+	 * @param timeline La timeline du projet, par défaut une nouvelle Timeline vide.
+	 * @param assets La liste des assets du projet, par défaut un tableau vide.
+	 * @param projectSettings Les paramètres du projet, par défaut les paramètres par défaut d'un projet.
+	 */
 	constructor(
 		timeline: Timeline = new Timeline(),
 		assets: Asset[] = [],
@@ -23,6 +29,11 @@ export class ProjectContent extends SerializableBase {
 		this.projectSettings = $state(projectSettings);
 	}
 
+	/**
+	 * Retourne le contenu par défaut d'un projet, avec une timeline contenant
+	 * une piste de sous-titres, une piste vidéo et une piste audio.
+	 * @returns Le contenu par défaut d'un projet
+	 */
 	static getDefaultProjectContent(): ProjectContent {
 		return new ProjectContent(
 			new Timeline([

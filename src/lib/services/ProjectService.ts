@@ -1,7 +1,6 @@
 import { Project, ProjectContent, ProjectDetail } from '$lib/classes';
-import { readDir, remove, writeTextFile, readTextFile, create, mkdir } from '@tauri-apps/plugin-fs';
+import { readDir, remove, writeTextFile, readTextFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
-import { exists } from '@tauri-apps/plugin-fs';
 import { globalState } from '$lib/runes/main.svelte';
 
 /**
@@ -104,11 +103,13 @@ export class ProjectService {
 		// Construis le chemin d'accès vers le projet
 		const filePath = await join(projectsPath, `${projectId}.json`);
 
+		console.log(filePath);
+
 		await remove(filePath);
 
 		// Supprime le dossier des assets associés au projet
 		const assetsPath = await this.getAssetFolderForProject(projectId);
-		await remove(assetsPath);
+		await remove(assetsPath, { recursive: true });
 	}
 
 	/**

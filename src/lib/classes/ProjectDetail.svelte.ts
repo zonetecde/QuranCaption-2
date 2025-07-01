@@ -1,3 +1,4 @@
+import { globalState } from '$lib/runes/main.svelte';
 import { Utilities } from '.';
 import { Duration } from './Duration';
 import { Status } from './Status';
@@ -25,7 +26,12 @@ export class ProjectDetail extends SerializableBase {
 		percentage: number;
 	}[];
 
-	constructor(name: string = '', reciter: string = '') {
+	/**
+	 * Crée une nouvelle instance de ProjectDetail
+	 * @param name Nom du projet
+	 * @param reciter Nom du réciteur
+	 */
+	constructor(name: string, reciter: string) {
 		super();
 
 		this.id = Utilities.randomId();
@@ -40,11 +46,6 @@ export class ProjectDetail extends SerializableBase {
 		this.status = Status.NOT_SET;
 		this.duration = new Duration(0);
 		this.translations = [];
-	}
-
-	public reviveDates(): void {
-		this.createdAt = new Date(this.createdAt);
-		this.updatedAt = new Date(this.updatedAt);
 	}
 
 	/**
