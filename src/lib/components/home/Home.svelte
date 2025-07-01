@@ -20,8 +20,8 @@
 	}
 </script>
 
-<div class="flex flex-col min-h-screen overflow-x-hidden overflow-auto">
-	<div class="flex-grow px-6 md:px-12 pt-6 pb-4 md:pt-22 md:pb-14">
+<div class="flex flex-col min-h-full overflow-x-hidden overflow-auto">
+	<div class="flex-grow px-6 md:px-12 mt-8 xl:mt-14 mb-8">
 		<div placeholder="Upper section" class="flex flex-row items-center">
 			<section>
 				<h2 class="text-4xl font-bold">Welcome Back!</h2>

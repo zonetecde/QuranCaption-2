@@ -17,8 +17,13 @@
 
 <Toaster />
 
-<TitleBar />
+<div class="flex flex-col h-screen overflow-hidden">
+	<!-- Barre de titre fixe -->
+	<TitleBar />
 
-{@render children()}
-
-<DonationFloatingButton />
+	<!-- Zone de contenu avec scroll -->
+	<main class="flex-1 overflow-auto mt-10">
+		{@render children()}
+		<DonationFloatingButton />
+	</main>
+</div>

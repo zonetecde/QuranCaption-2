@@ -7,6 +7,7 @@
 	--bg-secondary: #161b22;
 	--bg-accent: #21262d;
 	--border-color: #30363d;
+	--text-primary: white;
 	--text-secondary: #c9d1d9;
 	--text-placeholder: #656a6e;
 	--text-thirdly: #8b949e;
@@ -65,7 +66,7 @@
 
 body {
 	background-color: var(--bg-primary);
-	color: white;
+	color: var(--text-primary);
 	font-family: 'Inter', sans-serif;
 }
 
@@ -181,4 +182,24 @@ input[type='radio']:hover {
 input[type='radio']::selection {
 	background-color: var(--text-selection);
 	color: white;
+}
+
+/* Scroll bar */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-thumb {
+	background-color: var(--text-thirdly);
+	border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: var(--text-secondary);
+}
+::-webkit-scrollbar-track {
+	background-color: var(--bg-secondary);
+	border-radius: 4px;
+}
+::-webkit-scrollbar-corner {
+	background-color: var(--bg-secondary);
 }

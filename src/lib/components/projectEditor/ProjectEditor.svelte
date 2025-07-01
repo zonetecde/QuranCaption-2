@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
-	import TitleBar from './TitleBar.svelte';
 	import VideoPreview from './videoPreview/VideoPreview.svelte';
 	import Timeline from './timeline/Timeline.svelte';
 	import Navigator from './Navigator.svelte';
@@ -17,8 +16,7 @@
 	});
 </script>
 
-<div class="flex flex-col min-h-screen overflow-x-hidden bg-secondary">
-	<TitleBar />
+<div class="flex flex-col min-h-full overflow-x-hidden bg-secondary">
 	<Navigator />
 
 	{#if globalState.projectEditorState.currentTab === ProjectEditorTabs.VideoEditor}
