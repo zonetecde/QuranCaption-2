@@ -27,13 +27,14 @@ export class Duration extends SerializableBase {
 		const formattedMinutes =
 			alsoRemoveMinIfZero && minutes === 0 && hours === 0
 				? ''
-				: `${minutes.toString().padStart(2, '0')}:`;
-		const formattedSeconds = seconds.toString().padStart(2, '0');
+				: `${minutes.toString().padStart(alsoRemoveMinIfZero ? 1 : 2, '0')}:`;
+
+		const formattedSeconds = seconds.toString().padStart(alsoRemoveMinIfZero ? 1 : 2, '0');
 
 		return `${formattedHours}${formattedMinutes}${formattedSeconds}`;
 	}
 
-	inSeconds(): number {
+	toSeconds(): number {
 		return Math.floor(this.ms / 1000);
 	}
 }

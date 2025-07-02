@@ -23,7 +23,7 @@
 	});
 </script>
 
-<div class="flex flex-col min-h-full overflow-x-hidden bg-secondary">
+<div class="flex flex-col min-h-full bg-secondary">
 	<Navigator />
 
 	{#if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.VideoEditor}
