@@ -108,8 +108,6 @@ export class SerializableBase {
 						// Valeur primitive
 						instance[key] = value;
 					}
-
-					console.log('AAAAA ', instance);
 				} else {
 					// Assigner directement la valeur (les propriétés $state seront automatiquement réactives)
 					// Convertir les chaînes de date en objets Date
@@ -121,7 +119,6 @@ export class SerializableBase {
 				}
 			}
 		}
-		console.log(instance);
 
 		return instance;
 	}

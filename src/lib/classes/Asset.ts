@@ -35,6 +35,9 @@ export class Asset extends SerializableBase {
 		}
 
 		const fileName = this.getFileName(filePath);
+
+		console.log(filePath);
+
 		this.fileName = fileName;
 
 		const extension = this.getFileExtension(fileName);
@@ -54,12 +57,8 @@ export class Asset extends SerializableBase {
 	}
 
 	private getFileName(filePath: string): string {
-		const parts = filePath.split('/');
-		if (parts.length === 0) {
-			// split with backslashes for Windows paths
-			const backslashParts = filePath.split('\\');
-			return backslashParts.length > 0 ? backslashParts[backslashParts.length - 1] : '';
-		}
+		const normalizedPath = filePath.replace(/\\/g, '/');
+		const parts = normalizedPath.split('/');
 		return parts.length > 0 ? parts[parts.length - 1] : '';
 	}
 

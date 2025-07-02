@@ -52,7 +52,7 @@ export class ProjectContent extends SerializableBase {
 			toast.error('This file format is not supported.');
 			return;
 		}
-		this.assets.push(asset);
+		this.assets.unshift(asset);
 	}
 
 	removeAsset(asset: Asset): void {

@@ -1,38 +1,41 @@
 {
-	"$schema": "../gen/schemas/desktop-schema.json",
-	"identifier": "default",
-	"description": "enables the default permissions",
-	"windows": ["main"],
-	"permissions": [
-		"core:default",
-		"opener:default",
-		{
-			"identifier": "opener:allow-open-url",
-			"allow": [
-				{
-					"url": "custom:*"
-				}
-			]
-		},
-		"fs:default",
-		"fs:allow-mkdir",
-		"fs:allow-read-text-file",
-		"fs:allow-write-text-file",
-		"fs:allow-remove",
-		"fs:allow-read-dir",
-		"fs:allow-exists",
-		{
-			"identifier": "fs:scope",
-			"allow": [
-				{
-					"path": "**"
-				}
-			]
-		},
-		"core:window:allow-close",
-		"core:window:allow-unmaximize",
-		"core:window:allow-maximize",
-		"core:window:allow-minimize",
-		"core:window:allow-start-dragging"
-	]
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "enables the default permissions",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "custom:*"
+        }
+      ]
+    },
+    "fs:default",
+    "fs:allow-mkdir",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    "fs:allow-remove",
+    "fs:allow-read-dir",
+    "fs:allow-exists",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    "core:window:allow-close",
+    "core:window:allow-unmaximize",
+    "core:window:allow-maximize",
+    "core:window:allow-minimize",
+    "core:window:allow-start-dragging",
+    "dialog:default"
+  ]
 }

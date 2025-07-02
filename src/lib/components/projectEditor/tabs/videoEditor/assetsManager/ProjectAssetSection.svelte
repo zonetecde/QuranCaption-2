@@ -5,6 +5,7 @@
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
 	import DropOverlay from './DropOverlay.svelte';
 	import Section from '$lib/components/projectEditor/Section.svelte';
+	import { open } from '@tauri-apps/plugin-dialog';
 
 	let unlisten: () => void;
 	let dropZone: HTMLDivElement;
@@ -49,6 +50,21 @@
 	onDestroy(() => {
 		unlisten();
 	});
+
+	async function addAssetButtonClick() {
+		// Open a dialog
+		const files = await open({
+			multiple: true,
+			directory: false
+		});
+
+		if (!files) return;
+
+		for (let i = 0; i < files.length; i++) {
+			const element = files[i];
+			globalState.currentProject?.content.addAsset(element);
+		}
+	}
 </script>
 
 <Section icon="folder_open" name="Project Assets">
@@ -56,6 +72,7 @@
 		<button
 			class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-sm mt-2 cursor-pointer transition-colors duration-200"
 			type="button"
+			onclick={addAssetButtonClick}
 		>
 			<span class="material-icons mr-2 text-base">add_circle_outline</span>Add Asset
 		</button>

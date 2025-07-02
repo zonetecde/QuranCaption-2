@@ -29,7 +29,7 @@
 
 	{#if asset.type === AssetType.Audio}
 		{#if isHovered}
-			<div class="audio-player-container" transition:slide>
+			<div transition:slide>
 				<audio class="w-full opacity-60 mt-3" controls>
 					<source src={convertFileSrc(asset.filePath)} type="audio/mp3" />
 					Your browser does not support the audio element.
@@ -38,7 +38,7 @@
 		{/if}
 	{:else if asset.type === AssetType.Video}
 		{#if isHovered}
-			<div class="video-player-container" transition:slide>
+			<div transition:slide>
 				<video class="w-full mt-3" controls>
 					<track kind="captions" />
 					<source src={convertFileSrc(asset.filePath)} type="video/mp4" />

@@ -103,8 +103,6 @@ export class ProjectService {
 		// Construis le chemin d'accès vers le projet
 		const filePath = await join(projectsPath, `${projectId}.json`);
 
-		console.log(filePath);
-
 		await remove(filePath);
 
 		// Supprime le dossier des assets associés au projet
