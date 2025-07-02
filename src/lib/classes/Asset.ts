@@ -74,26 +74,7 @@ export class Asset extends SerializableBase {
 		const normalizedPath = this.filePath.replace(/\\/g, '/');
 		const parentDir = normalizedPath.substring(0, normalizedPath.lastIndexOf('/'));
 
-		// Reconvertir vers le format Windows si nécessaire
-		const windowsParentDir = parentDir.replace(/\//g, '\\');
-
-		console.log('Parent directory (normalized):', parentDir);
-		console.log('Parent directory (windows):', windowsParentDir);
-		console.log('Original filepath:', this.filePath);
-
-		try {
-			// Essayer d'abord avec le chemin normalisé
-			await openPath(parentDir);
-		} catch (error) {
-			console.error('Error opening normalized path, trying Windows format:', error);
-			try {
-				// Si ça échoue, essayer avec le format Windows
-				await openPath(windowsParentDir);
-			} catch (secondError) {
-				console.error('Error opening Windows path too:', secondError);
-				throw secondError;
-			}
-		}
+		await openPath(parentDir);
 	}
 
 	private getFileName(filePath: string): string {

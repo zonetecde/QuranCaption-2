@@ -18,4 +18,21 @@ export class ProjectEditorState extends SerializableBase {
 			extended: boolean;
 		};
 	} = $state({});
+
+	// Timeline
+	timeline: TimelineState = $state(new TimelineState());
+}
+
+/**
+ * État de la timeline dans l'éditeur de projet.
+ */
+export class TimelineState extends SerializableBase {
+	// Niveau de zoom de la timeline
+	zoom: number = $state(30);
+
+	// Position du curseur dans la timeline
+	cursorPosition: number = $state(0);
+
+	// Position du scroll
+	scrollX: number = $state(0);
 }

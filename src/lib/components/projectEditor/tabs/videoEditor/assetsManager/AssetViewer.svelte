@@ -53,7 +53,7 @@
 	{:else if asset.type === AssetType.Video}
 		{#if isHovered}
 			<div transition:slide>
-				<video class="w-full mt-3" controls>
+				<video class="w-full h-[200px] mt-3" controls>
 					<track kind="captions" />
 					<source src={convertFileSrc(asset.filePath)} type="video/mp4" />
 					Your browser does not support the video tag.
@@ -64,18 +64,6 @@
 
 	{#if isHovered}
 		<div class="mt-2 px-2 py-0.5 flex flex-row gap-x-2 gap-y-1 flex-wrap" transition:slide>
-			<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded">
-				<span class="material-icons text-lg">content_cut</span>
-				Edit
-			</button>
-			<button
-				class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
-				onclick={() => globalState.currentProject?.content.removeAsset(asset)}
-			>
-				<span class="material-icons text-lg">delete</span>
-				Delete
-			</button>
-			<!-- open parent directoylt -->
 			<button
 				class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
 				onclick={async () => {
@@ -84,6 +72,13 @@
 			>
 				<span class="material-icons text-lg">folder_open</span>
 				Open Directory
+			</button>
+			<button
+				class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
+				onclick={() => globalState.currentProject?.content.removeAsset(asset)}
+			>
+				<span class="material-icons text-lg">delete</span>
+				Remove
 			</button>
 		</div>
 	{/if}
