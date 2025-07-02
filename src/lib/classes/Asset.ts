@@ -3,6 +3,8 @@ import { Duration } from './Duration.js';
 import { AssetType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Utilities } from './misc/Utilities.js';
+import { globalState } from '$lib/runes/main.svelte.js';
+import { remove } from '@tauri-apps/plugin-fs';
 
 export class Asset extends SerializableBase {
 	id: number = 0;

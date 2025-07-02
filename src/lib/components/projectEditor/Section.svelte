@@ -1,3 +1,4 @@
+<!-- Représente une section fermable en cliquant sur le bout de flèche -->
 <script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, type Snippet } from 'svelte';

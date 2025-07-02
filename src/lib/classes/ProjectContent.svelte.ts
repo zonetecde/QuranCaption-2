@@ -54,6 +54,15 @@ export class ProjectContent extends SerializableBase {
 		}
 		this.assets.push(asset);
 	}
+
+	removeAsset(asset: Asset): void {
+		const index = this.assets.indexOf(asset);
+		if (index !== -1) {
+			this.assets.splice(index, 1);
+		} else {
+			toast.error('Asset not found in the project content.');
+		}
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
