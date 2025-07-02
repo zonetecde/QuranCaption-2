@@ -78,8 +78,8 @@
 		</button>
 
 		<div class="flex flex-col gap-2 mt-2">
-			{#each globalState.currentProject!.content.assets as asset}
-				<AssetViewer {asset} />
+			{#each globalState.currentProject!.content.assets as asset, i}
+				<AssetViewer bind:asset={globalState.currentProject!.content.assets[i]} />
 			{/each}
 		</div>
 

@@ -3,7 +3,10 @@
 	import { fade } from 'svelte/transition';
 
 	$effect(() => {
-		if (!globalState.currentProject!.projectEditorState.showDropScreen) {
+		if (
+			globalState.currentProject &&
+			!globalState.currentProject.projectEditorState.showDropScreen
+		) {
 			// destroy the `#drop-overlay-container` div
 			const dropOverlayContainer = document.getElementById('drop-overlay-container');
 			if (dropOverlayContainer) {
