@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Duration } from '$lib/classes/Duration';
 	import { globalState } from '$lib/runes/main.svelte';
+	import Track from './track/Track.svelte';
 
 	let totalDuration = new Duration(120000);
 
@@ -134,7 +135,7 @@
 							i % (getTimestampInterval(timelineSettings().zoom) * 2) === 0}
 						style="left: {i * timelineSettings().zoom + 180}px;"
 					>
-						<div class="time-label">
+						<div class="time-label z-5">
 							{new Duration(i * 1000).getFormattedTime(true)}
 						</div>
 						<div class="time-tick"></div>
@@ -175,26 +176,11 @@
 				{/each}
 			</div>
 
-			<!-- Track lanes placeholder -->
+			<!-- Track lanes -->
 			<div class="track-lanes">
-				<div class="track-lane">
-					<div class="track-header">
-						<span class="track-icon">🎵</span>
-						<span class="track-name">Audio Track</span>
-					</div>
-				</div>
-				<div class="track-lane">
-					<div class="track-header">
-						<span class="track-icon">🎬</span>
-						<span class="track-name">Video Track</span>
-					</div>
-				</div>
-				<div class="track-lane">
-					<div class="track-header">
-						<span class="track-icon">💬</span>
-						<span class="track-name">Subtitles</span>
-					</div>
-				</div>
+				<Track name="Subtitles" icon="subtitles" />
+				<Track name="Video Track" icon="movie" />
+				<Track name="Audio Track" icon="music_note" />
 			</div>
 
 			<!-- Main playhead cursor -->
@@ -362,51 +348,6 @@
 		flex-direction: column;
 	}
 
-	.track-lane {
-		flex: 1;
-		min-height: 60px;
-		border-bottom: 1px solid var(--timeline-track-border);
-		position: relative;
-		background: linear-gradient(90deg, var(--timeline-bg-accent) 0%, transparent 200px);
-	}
-
-	.track-lane:hover {
-		background: linear-gradient(90deg, rgba(88, 166, 255, 0.05) 0%, transparent 200px);
-	}
-
-	.track-header {
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		width: 180px;
-		background: linear-gradient(
-			135deg,
-			var(--timeline-bg-accent) 0%,
-			var(--timeline-bg-secondary) 100%
-		);
-		border-right: 1px solid var(--timeline-track-border);
-		display: flex;
-		align-items: center;
-		padding: 0 12px;
-		gap: 8px;
-		z-index: 5;
-	}
-
-	.track-icon {
-		font-size: 16px;
-		opacity: 0.8;
-	}
-
-	.track-name {
-		color: var(--text-secondary);
-		font-size: 12px;
-		font-weight: 500;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		white-space: nowrap;
-	}
-
 	/* Main Playhead Cursor */
 	.playhead-cursor {
 		position: absolute;
@@ -441,15 +382,5 @@
 	/* Responsive adjustments */
 	.timeline-container {
 		height: 260px;
-	}
-
-	@media (max-width: 1280px) {
-		.track-header {
-			width: 150px;
-		}
-
-		.track-name {
-			font-size: 11px;
-		}
 	}
 </style>

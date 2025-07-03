@@ -7,7 +7,7 @@
 <div class="flex-grow w-full max-w-full flex overflow-hidden">
 	<!-- Assets -->
 	<section
-		class="w-[320px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-r-2 border-color border-t-2"
+		class="w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-r-2 border-color border-t-2"
 	>
 		<AssetsManager />
 	</section>
@@ -26,7 +26,7 @@
 	</section>
 	<!-- Settings -->
 	<section
-		class="w-[320px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-l-2 border-color border-t-2"
+		class="w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-l-2 border-color border-t-2"
 	>
 		<!-- <AssetsManager /> -->
 	</section>
