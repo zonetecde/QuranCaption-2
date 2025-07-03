@@ -1,11 +1,18 @@
 <script lang="ts">
 	import { Duration } from '$lib/classes/Duration';
 	import { globalState } from '$lib/runes/main.svelte';
+	import { onMount } from 'svelte';
 	import Track from './track/Track.svelte';
 
 	let totalDuration = new Duration(120000);
 
 	let timelineSettings = $derived(() => globalState.currentProject?.projectEditorState.timeline!);
+
+	let timelineDiv: HTMLDivElement | null = null;
+	onMount(() => {
+		// Restitue le scroll
+		timelineDiv!.scrollLeft = timelineSettings().scrollX;
+	});
 
 	// Fonction pour déterminer l'intervalle d'affichage des timestamps selon le zoom
 	function getTimestampInterval(zoom: number): number {
@@ -91,6 +98,9 @@
 			const ruler = source.parentElement?.querySelector('.timeline-ruler') as HTMLElement;
 			if (ruler) ruler.scrollLeft = source.scrollLeft;
 		}
+
+		// Sauvegarde le scroll dans les paramètres de la timeline
+		timelineSettings().scrollX = source.scrollLeft;
 	}
 
 	function handleMouseWheelWheeling(event: any) {
@@ -113,7 +123,7 @@
 
 <div class="timeline-container" onwheel={handleMouseWheelWheeling}>
 	<!-- Timeline Header -->
-	<div class="timeline-ruler" onscroll={syncScroll}>
+	<div class="timeline-ruler" onscroll={syncScroll} bind:this={timelineDiv}>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="ruler-content"
