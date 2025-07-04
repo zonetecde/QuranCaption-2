@@ -3,6 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
 	import Track from './track/Track.svelte';
+	import { AssetType } from '$lib/classes';
 
 	let totalDuration = new Duration(120000);
 
@@ -188,9 +189,9 @@
 
 			<!-- Track lanes -->
 			<div class="track-lanes">
-				<Track name="Subtitles" icon="subtitles" />
-				<Track name="Video Track" icon="movie" />
-				<Track name="Audio Track" icon="music_note" />
+				{#each globalState.currentProject!.content.timeline.tracks as track, i}
+					<Track bind:track={globalState.currentProject!.content.timeline.tracks[i]} />
+				{/each}
 			</div>
 
 			<!-- Main playhead cursor -->

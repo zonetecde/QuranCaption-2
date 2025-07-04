@@ -1,11 +1,19 @@
 <script lang="ts">
-	let { name, icon } = $props();
+	import type { AssetType, Track } from '$lib/classes';
+
+	let {
+		track = $bindable()
+	}: {
+		track: Track;
+	} = $props();
+
+	//track.getAcceptableAssetTypes existe
 </script>
 
 <div class="track-container track-lane">
 	<div class="track-header">
-		<span class="material-icons text-base opacity-80">{icon}</span>
-		<span class="text-[var(--text-secondary)] text-xs font-medium truncate">{name}</span>
+		<span class="material-icons text-base opacity-80">{track.getIcon()}</span>
+		<span class="text-[var(--text-secondary)] text-xs font-medium truncate">{track.getName()}</span>
 	</div>
 </div>
 
