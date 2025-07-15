@@ -87,7 +87,8 @@ body {
 
 .modal-wrapper {
 	position: fixed;
-	top: 0;
+	top: 2.25rem;
+	padding-bottom: 2.25rem;
 	left: 0;
 	width: 100vw;
 	height: 100vh;
@@ -202,7 +203,7 @@ input[type='radio']::selection {
 /* Scroll bar */
 ::-webkit-scrollbar {
 	width: 8px;
-	height: 14px;
+	height: 10px;
 }
 ::-webkit-scrollbar-thumb {
 	background-color: var(--text-thirdly);

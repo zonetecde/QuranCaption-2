@@ -20,7 +20,7 @@
 <style>
 	.track-lane {
 		flex: 1;
-		min-height: 60px;
+		min-height: 75px;
 		border-bottom: 1px solid var(--timeline-track-border);
 		position: relative;
 		background: linear-gradient(90deg, var(--timeline-bg-accent) 0%, transparent 200px);

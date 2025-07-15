@@ -2,9 +2,15 @@
 	import { AssetType, type Asset } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
-	import { exists } from '@tauri-apps/plugin-fs';
+	import { exists, readDir } from '@tauri-apps/plugin-fs';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import ModalManager from '$lib/components/modals/ModalManager';
+	import { openUrl } from '@tauri-apps/plugin-opener';
+	import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { BaseDirectory, downloadDir } from '@tauri-apps/api/path';
+	import toast from 'svelte-5-french-toast';
+	import Page from '../../../../../../routes/+page.svelte';
 
 	let {
 		asset = $bindable()
@@ -17,6 +23,35 @@
 	onMount(async () => {
 		asset.checkExistence();
 	});
+
+	async function editAsset() {
+		const response = await ModalManager.confirmModal(
+			'This will open a website that allows you to crop and trim your asset. Do you want to proceed?'
+		);
+		if (response) {
+			// tauri open windows on url: https://online-video-cutter.com/
+			const webview = new WebviewWindow('video-editor', {
+				url:
+					asset.type === AssetType.Video
+						? 'https://online-video-cutter.com/'
+						: 'https://mp3cut.net/',
+				width: 1200,
+				height: 800,
+				title: 'Video Editor'
+			});
+
+			webview.once('tauri://close-requested', async function (e) {
+				toast(
+					'If you have downloaded your edited video, you can now import it back into the software',
+					{
+						duration: 7000
+					}
+				);
+
+				webview.close();
+			});
+		}
+	}
 </script>
 
 <div
@@ -79,6 +114,10 @@
 			>
 				<span class="material-icons text-lg">delete</span>
 				Remove
+			</button>
+			<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded" onclick={() => editAsset()}>
+				<span class="material-icons text-lg">edit</span>
+				Edit
 			</button>
 		</div>
 	{/if}

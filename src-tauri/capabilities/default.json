@@ -53,6 +53,8 @@
 		"core:window:allow-maximize",
 		"core:window:allow-minimize",
 		"core:window:allow-start-dragging",
-		"dialog:default"
+		"dialog:default",
+		"core:webview:allow-create-webview",
+		"core:webview:allow-create-webview-window"
 	]
 }
