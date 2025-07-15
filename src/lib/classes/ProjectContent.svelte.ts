@@ -1,7 +1,7 @@
-import { Timeline } from './Timeline.js';
-import { Asset } from './Asset.js';
+import { Timeline } from './Timeline.svelte.js';
+import { Asset } from './Asset.svelte.js';
 import { ProjectSettings } from './ProjectSettings.js';
-import { SubtitleTrack, Track } from './Track.js';
+import { SubtitleTrack, Track } from './Track.svelte.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import toast from 'svelte-5-french-toast';

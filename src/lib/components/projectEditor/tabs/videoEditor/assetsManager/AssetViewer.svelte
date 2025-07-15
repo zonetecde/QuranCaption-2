@@ -10,7 +10,7 @@
 	import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { BaseDirectory, downloadDir } from '@tauri-apps/api/path';
 	import toast from 'svelte-5-french-toast';
-	import Page from '../../../../../../routes/+page.svelte';
+	import { open } from '@tauri-apps/plugin-dialog';
 
 	let {
 		asset = $bindable()
@@ -30,14 +30,16 @@
 		);
 		if (response) {
 			// tauri open windows on url: https://online-video-cutter.com/
-			const webview = new WebviewWindow('video-editor', {
+			const webview = new WebviewWindow('editor', {
 				url:
 					asset.type === AssetType.Video
 						? 'https://online-video-cutter.com/'
-						: 'https://mp3cut.net/',
+						: asset.type === AssetType.Audio
+							? 'https://mp3cut.net/'
+							: 'https://www.iloveimg.com/crop-image',
 				width: 1200,
 				height: 800,
-				title: 'Video Editor'
+				title: 'Editor'
 			});
 
 			webview.once('tauri://close-requested', async function (e) {
@@ -52,6 +54,23 @@
 			});
 		}
 	}
+
+	async function relocateAsset() {
+		// Open a dialog
+		const file = await open({
+			directory: false
+		});
+
+		if (!file) return;
+
+		const element = file;
+		asset.updateFilePath(element);
+	}
+
+	function addInTheTimelineButtonClick() {
+		// Ajoute l'asset à la timeline
+		asset.addToTimeline();
+	}
 </script>
 
 <div
@@ -63,7 +82,7 @@
 >
 	<div class="flex flex-row gap-x-2 items-center relative">
 		<span class="material-icons text-4xl text-indigo-400">
-			{asset.type === 'video' ? 'video_library' : 'music_note'}
+			{asset.type === 'video' ? 'video_library' : asset.type === 'audio' ? 'music_note' : 'image'}
 		</span>
 		<p class={'text-sm font-semibold text-gray-100 truncate ' + (!asset.exists ? 'mr-6' : '')}>
 			{asset.fileName}
@@ -95,19 +114,42 @@
 				</video>
 			</div>
 		{/if}
+	{:else if asset.type === AssetType.Image}
+		{#if isHovered}
+			<div transition:slide>
+				<img
+					class="w-full h-[200px] object-contain mt-3"
+					src={convertFileSrc(asset.filePath)}
+					alt={asset.fileName}
+				/>
+			</div>
+		{/if}
 	{/if}
 
 	{#if isHovered}
 		<div class="mt-2 px-2 py-0.5 flex flex-row gap-x-2 gap-y-1 flex-wrap" transition:slide>
-			<button
-				class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
-				onclick={async () => {
-					await asset.openParentDirectory();
-				}}
-			>
-				<span class="material-icons text-lg">folder_open</span>
-				Open Directory
-			</button>
+			{#if asset.exists}
+				<button
+					class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
+					onclick={async () => {
+						await asset.openParentDirectory();
+					}}
+				>
+					<span class="material-icons text-lg">folder_open</span>
+					Open Directory
+				</button>
+
+				<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded" onclick={editAsset}>
+					<span class="material-icons text-lg">crop</span>
+					Edit
+				</button>
+			{:else}
+				<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded" onclick={relocateAsset}>
+					<span class="material-icons text-lg">folder_open</span>
+					Relocate
+				</button>
+			{/if}
+
 			<button
 				class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
 				onclick={() => globalState.currentProject?.content.removeAsset(asset)}
@@ -115,10 +157,16 @@
 				<span class="material-icons text-lg">delete</span>
 				Remove
 			</button>
-			<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded" onclick={() => editAsset()}>
-				<span class="material-icons text-lg">edit</span>
-				Edit
-			</button>
+
+			{#if asset.exists}
+				<button
+					class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
+					onclick={addInTheTimelineButtonClick}
+				>
+					<span class="material-icons text-lg">add</span>
+					Add in the timeline
+				</button>
+			{/if}
 		</div>
 	{/if}
 </div>

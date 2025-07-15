@@ -1,7 +1,8 @@
 export enum TrackType {
 	Video = 'Video',
 	Audio = 'Audio',
-	Subtitle = 'Subtitle'
+	Subtitle = 'Subtitle',
+	Unknown = 'Unknown'
 }
 
 export enum AssetType {

@@ -1,15 +1,31 @@
 import { AssetType, TrackType } from './enums.js';
-import { Clip } from './Clip.js';
+import { AssetClip, Clip } from './Clip.js';
 import { SerializableBase } from './misc/SerializableBase.js';
+import type { Asset } from './index.js';
 
 export class Track extends SerializableBase {
-	type: TrackType;
-	clips: Clip[];
+	type: TrackType = $state(TrackType.Unknown);
+	clips: Clip[] = $state([]);
 
 	constructor(type: TrackType) {
 		super();
 		this.type = type;
 		this.clips = [];
+	}
+
+	addAsset(asset: Asset) {
+		// Récupère le dernier clip de la piste, s'il existe
+		const lastClip = this.clips.length > 0 ? this.clips[this.clips.length - 1] : null;
+
+		if (lastClip)
+			this.clips.push(
+				new AssetClip(lastClip.endTime + 1, lastClip.endTime + asset.duration.ms + 1, asset.id)
+			);
+		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
+
+		console.log(
+			`Added asset ${asset.fileName} to track ${this.getName()} at time ${this.clips[this.clips.length - 1].startTime}`
+		);
 	}
 
 	getName(): string {

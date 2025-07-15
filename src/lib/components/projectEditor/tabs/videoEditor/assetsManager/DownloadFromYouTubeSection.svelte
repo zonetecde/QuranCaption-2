@@ -11,6 +11,11 @@
 
 	async function downloadAssetFromYouTube() {
 		try {
+			if (!url.trim()) {
+				toast.error('Please enter a valid YouTube video URL.');
+				return;
+			}
+
 			const downloadPath = await projectService.getAssetFolderForProject(
 				globalState.currentProject!.detail.id
 			);
