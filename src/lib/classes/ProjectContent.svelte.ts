@@ -63,6 +63,10 @@ export class ProjectContent extends SerializableBase {
 			toast.error('Asset not found in the project content.');
 		}
 	}
+
+	getAsset(id: number) {
+		return this.assets.find((x) => x.id === id)!;
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
