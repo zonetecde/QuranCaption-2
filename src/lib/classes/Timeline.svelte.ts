@@ -1,3 +1,4 @@
+import { Duration } from './index.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Track } from './Track.svelte.js';
 
@@ -16,6 +17,10 @@ export class Timeline extends SerializableBase {
 		} else {
 			console.error(`Track of type ${trackType} not found.`);
 		}
+	}
+
+	getLongestTrackDuration(): Duration {
+		return new Duration(Math.max(...this.tracks.map((track) => track.getDuration().ms)));
 	}
 }
 

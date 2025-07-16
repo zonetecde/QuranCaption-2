@@ -1,15 +1,25 @@
 <script lang="ts">
-	import { Duration } from '$lib/classes/Duration';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
 	import Track from './track/Track.svelte';
-	import { AssetType } from '$lib/classes';
+	import { Duration } from '$lib/classes';
 
-	let totalDuration = new Duration(120000);
+	let totalDuration = $derived(() => {
+		// Récupère la fin du clip le plus loin dans la timeline
+		const longestClipEnd = globalState.currentProject?.content.timeline.getLongestTrackDuration()!;
+
+		if (!longestClipEnd.isNull())
+			return new Duration(
+				// Ajoute 15 secondes pour pas que la timeline soit au ras bord
+				longestClipEnd.ms + 15000
+			);
+		else return new Duration(120000); // 2 minutes par défaut
+	});
 
 	let timelineSettings = $derived(() => globalState.currentProject?.projectEditorState.timeline!);
 
 	let timelineDiv: HTMLDivElement | null = null;
+
 	onMount(() => {
 		// Restitue le scroll
 		timelineDiv!.scrollLeft = timelineSettings().scrollX;
@@ -122,13 +132,13 @@
 	}
 </script>
 
-<div class="timeline-container" onwheel={handleMouseWheelWheeling}>
+<div class="timeline-container select-none" onwheel={handleMouseWheelWheeling}>
 	<!-- Timeline Header -->
 	<div class="timeline-ruler" onscroll={syncScroll} bind:this={timelineDiv}>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="ruler-content"
-			style="width: {totalDuration.toSeconds() * timelineSettings().zoom + 180}px;"
+			style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
 			onclick={handleRulerClick}
 			onmousemove={handleRulerDrag}
 			role="button"
@@ -138,7 +148,7 @@
 			<div class="ruler-header-spacer"></div>
 
 			<!-- Time markers -->
-			{#each Array.from({ length: totalDuration.toSeconds() }, (_, i) => i) as i}
+			{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
 				{#if shouldShowTimestamp(i, timelineSettings().zoom)}
 					<div
 						class="time-marker"
@@ -169,7 +179,7 @@
 	<div class="timeline-tracks" onscroll={syncScroll}>
 		<div
 			class="tracks-content"
-			style="width: {totalDuration.toSeconds() * timelineSettings().zoom + 180}px;"
+			style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
 			onclick={handleTimelineClick}
 			onmousemove={handleTimelineDrag}
 			onkeydown={handleKeydown}
@@ -178,7 +188,7 @@
 		>
 			<!-- Background grid -->
 			<div class="timeline-grid">
-				{#each Array.from({ length: totalDuration.toSeconds() }, (_, i) => i) as i}
+				{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
 					<div
 						class="grid-line"
 						class:major={shouldShowTimestamp(i, timelineSettings().zoom)}

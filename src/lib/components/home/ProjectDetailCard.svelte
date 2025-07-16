@@ -76,7 +76,7 @@
 				/>
 			</div>
 			<p class="text-xs text-[var(--text-secondary)] mb-1">
-				Duration: {projectDetail.duration.getFormattedTime()}
+				Duration: {projectDetail.duration.getFormattedTime(false)}
 			</p>
 			<p class="text-xs text-[var(--text-secondary)] mb-3">
 				Verses: <span class="font-medium text-[var(--text-primary)]"

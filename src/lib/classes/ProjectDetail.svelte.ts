@@ -1,6 +1,6 @@
 import { globalState } from '$lib/runes/main.svelte';
 import { Utilities } from '.';
-import { Duration } from './Duration';
+import { Duration } from './index.js';
 import { Status } from './Status';
 import { VerseRange } from './VerseRange';
 import { SerializableBase } from './misc/SerializableBase';
@@ -57,6 +57,6 @@ export class ProjectDetail extends SerializableBase {
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
-SerializableBase.registerChildClass(ProjectDetail, 'verseRange', VerseRange);
 SerializableBase.registerChildClass(ProjectDetail, 'duration', Duration);
+SerializableBase.registerChildClass(ProjectDetail, 'verseRange', VerseRange);
 SerializableBase.registerChildClass(ProjectDetail, 'status', Status);

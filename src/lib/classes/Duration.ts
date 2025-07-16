@@ -37,4 +37,8 @@ export class Duration extends SerializableBase {
 	toSeconds(): number {
 		return Math.floor(this.ms / 1000);
 	}
+
+	isNull() {
+		return this.ms === 0;
+	}
 }

@@ -1,4 +1,5 @@
 // Exports principaux pour faciliter les imports
+export { Duration } from './Duration.js';
 export { ProjectDetail } from './ProjectDetail.svelte.js';
 export { ProjectContent } from './ProjectContent.svelte.js';
 export { ProjectEditorState } from '$lib/runes/ProjectEditorState.svelte.js';

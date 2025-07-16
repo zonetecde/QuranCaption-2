@@ -1,11 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
-import { Duration } from './Duration.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Utilities } from './misc/Utilities.js';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { exists, open, remove } from '@tauri-apps/plugin-fs';
 import { globalState } from '$lib/runes/main.svelte.js';
+import { Duration } from './index.js';
 
 export class Asset extends SerializableBase {
 	id: number = $state(0);

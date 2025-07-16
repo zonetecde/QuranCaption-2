@@ -1,5 +1,7 @@
+import { globalState } from '$lib/runes/main.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
+import type { Track } from './Track.svelte';
 
 export class Clip extends SerializableBase {
 	id: number;
@@ -13,6 +15,10 @@ export class Clip extends SerializableBase {
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.duration = endTime - startTime;
+	}
+
+	getWidth() {
+		return (this.duration / 1000) * globalState.currentProject?.projectEditorState.timeline.zoom!;
 	}
 }
 

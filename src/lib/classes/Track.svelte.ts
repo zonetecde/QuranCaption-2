@@ -1,7 +1,8 @@
 import { AssetType, TrackType } from './enums.js';
 import { AssetClip, Clip } from './Clip.js';
 import { SerializableBase } from './misc/SerializableBase.js';
-import type { Asset } from './index.js';
+import { Duration, type Asset } from './index.js';
+import { globalState } from '$lib/runes/main.svelte.js';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -22,10 +23,6 @@ export class Track extends SerializableBase {
 				new AssetClip(lastClip.endTime + 1, lastClip.endTime + asset.duration.ms + 1, asset.id)
 			);
 		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
-
-		console.log(
-			`Added asset ${asset.fileName} to track ${this.getName()} at time ${this.clips[this.clips.length - 1].startTime}`
-		);
 	}
 
 	getName(): string {
@@ -63,6 +60,17 @@ export class Track extends SerializableBase {
 			default:
 				return AssetType.Unknown;
 		}
+	}
+
+	getPixelPerSecond() {
+		return globalState.currentProject?.projectEditorState.timeline.zoom!;
+	}
+
+	getDuration(): Duration {
+		if (this.clips.length === 0) {
+			return new Duration(0);
+		}
+		return new Duration(Math.max(...this.clips.map((clip) => clip.endTime)));
 	}
 }
 

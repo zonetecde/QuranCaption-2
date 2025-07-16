@@ -74,7 +74,7 @@
 </script>
 
 <div
-	class="flex flex-col py-2 px-2 bg-gray-800 rounded-lg shadow-md transition-all duration-300 cursor-grab"
+	class="flex flex-col py-2 px-2 bg-gray-800 rounded-lg shadow-md transition-all duration-300 select-none"
 	role="button"
 	tabindex="0"
 	onmouseenter={() => (isHovered = true)}

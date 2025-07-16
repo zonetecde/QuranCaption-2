@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { AssetType, Track } from '$lib/classes';
+	import Clip from './Clip.svelte';
 
 	let {
 		track = $bindable()
@@ -10,56 +11,26 @@
 	//track.getAcceptableAssetTypes existe
 </script>
 
-<div class="track-container track-lane">
-	<div class="track-header">
+<div
+	class="flex-1 min-h-[75px] border-b border-[var(--timeline-track-border)] relative select-none"
+	style="background: linear-gradient(90deg, var(--timeline-bg-accent) 0%, transparent 200px);"
+>
+	<div
+		class="absolute left-0 top-0 bottom-0 w-[180px] border-r border-[var(--timeline-track-border)] flex items-center px-3 gap-2 z-[5]"
+		style="background: linear-gradient(135deg, var(--timeline-bg-accent) 0%, var(--timeline-bg-secondary) 100%);"
+	>
 		<span class="material-icons text-base opacity-80">{track.getIcon()}</span>
 		<span class="text-[var(--text-secondary)] text-xs font-medium truncate">{track.getName()}</span>
+	</div>
+	<div class="absolute left-[180px] top-0 bottom-0 flex items-center px-3 gap-2 z-[5]">
+		{#each track.clips as clip, index}
+			<Clip {clip} {track} />
+		{/each}
 	</div>
 </div>
 
 <style>
-	.track-lane {
-		flex: 1;
-		min-height: 75px;
-		border-bottom: 1px solid var(--timeline-track-border);
-		position: relative;
-		background: linear-gradient(90deg, var(--timeline-bg-accent) 0%, transparent 200px);
-	}
-
-	.track-lane:hover {
+	.flex-1:hover {
 		background: linear-gradient(90deg, rgba(88, 166, 255, 0.05) 0%, transparent 200px);
-	}
-
-	.track-header {
-		position: absolute;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		width: 180px;
-		background: linear-gradient(
-			135deg,
-			var(--timeline-bg-accent) 0%,
-			var(--timeline-bg-secondary) 100%
-		);
-		border-right: 1px solid var(--timeline-track-border);
-		display: flex;
-		align-items: center;
-		padding: 0 12px;
-		gap: 8px;
-		z-index: 5;
-	}
-
-	.track-icon {
-		font-size: 16px;
-		opacity: 0.8;
-	}
-
-	.track-name {
-		color: var(--text-secondary);
-		font-size: 12px;
-		font-weight: 500;
-		text-overflow: ellipsis;
-		overflow: hidden;
-		white-space: nowrap;
 	}
 </style>
