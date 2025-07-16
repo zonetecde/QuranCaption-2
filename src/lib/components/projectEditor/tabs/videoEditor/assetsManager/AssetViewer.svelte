@@ -67,9 +67,9 @@
 		asset.updateFilePath(element);
 	}
 
-	function addInTheTimelineButtonClick() {
+	function addInTheTimelineButtonClick(video: boolean, audio: boolean) {
 		// Ajoute l'asset à la timeline
-		asset.addToTimeline();
+		asset.addToTimeline(video, audio);
 	}
 </script>
 
@@ -159,13 +159,45 @@
 			</button>
 
 			{#if asset.exists}
-				<button
-					class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-					onclick={addInTheTimelineButtonClick}
-				>
-					<span class="material-icons text-lg">add</span>
-					Add in the timeline
-				</button>
+				{#if asset.type === AssetType.Video}
+					<button
+						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
+						onclick={() => addInTheTimelineButtonClick(true, true)}
+					>
+						<span class="material-icons text-lg">add</span>
+						Add in the timeline (video & audio)
+					</button>
+					<button
+						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
+						onclick={() => addInTheTimelineButtonClick(true, false)}
+					>
+						<span class="material-icons text-lg">add</span>
+						Add in the timeline (only video)
+					</button>
+					<button
+						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
+						onclick={() => addInTheTimelineButtonClick(false, true)}
+					>
+						<span class="material-icons text-lg">add</span>
+						Add in the timeline (only audio)
+					</button>
+				{:else if asset.type === AssetType.Audio}
+					<button
+						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
+						onclick={() => addInTheTimelineButtonClick(false, true)}
+					>
+						<span class="material-icons text-lg">add</span>
+						Add in the timeline
+					</button>
+				{:else if asset.type === AssetType.Image}
+					<button
+						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
+						onclick={() => addInTheTimelineButtonClick(true, false)}
+					>
+						<span class="material-icons text-lg">add</span>
+						Add in the timeline
+					</button>
+				{/if}
 			{/if}
 		</div>
 	{/if}

@@ -51,16 +51,11 @@ export class Asset extends SerializableBase {
 		}
 	}
 
-	addToTimeline() {
-		switch (this.type) {
-			case AssetType.Video:
-			case AssetType.Image:
-				globalState.currentProject?.content.timeline.addAssetToTrack(TrackType.Video, this);
-				break;
-			case AssetType.Audio:
-				globalState.currentProject?.content.timeline.addAssetToTrack(TrackType.Audio, this);
-				break;
-		}
+	addToTimeline(asVideo: boolean, asAudio: boolean) {
+		if (asVideo)
+			globalState.currentProject?.content.timeline.addAssetToTrack(TrackType.Video, this);
+		if (asAudio)
+			globalState.currentProject?.content.timeline.addAssetToTrack(TrackType.Audio, this);
 	}
 
 	private normalizeFilePath(filePath: string): string {
