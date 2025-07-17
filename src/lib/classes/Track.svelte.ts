@@ -25,6 +25,13 @@ export class Track extends SerializableBase {
 		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
 	}
 
+	removeClip(id: number) {
+		const index = this.clips.findIndex((clip) => clip.id === id);
+		if (index !== -1) {
+			this.clips.splice(index, 1);
+		}
+	}
+
 	getName(): string {
 		switch (this.type) {
 			case TrackType.Video:

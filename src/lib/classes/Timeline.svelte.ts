@@ -1,4 +1,4 @@
-import { Duration } from './index.js';
+import { Asset, AssetClip, Duration, TrackType } from './index.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Track } from './Track.svelte.js';
 
@@ -21,6 +21,20 @@ export class Timeline extends SerializableBase {
 
 	getLongestTrackDuration(): Duration {
 		return new Duration(Math.max(...this.tracks.map((track) => track.getDuration().ms)));
+	}
+
+	removeAssetFromTracks(asset: Asset) {
+		this.tracks.forEach((track) => {
+			if (track.type === TrackType.Audio || track.type === TrackType.Video) {
+				for (let i = track.clips.length - 1; i >= 0; i--) {
+					const clip = track.clips[i];
+
+					if (clip && (clip as AssetClip).assetId === asset.id) {
+						track.removeClip(clip.id);
+					}
+				}
+			}
+		});
 	}
 }
 

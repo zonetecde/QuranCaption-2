@@ -35,10 +35,6 @@
 			});
 		}
 	});
-
-	onMount(async () => {
-		console.log('Clip mounted:', clip);
-	});
 </script>
 
 <div

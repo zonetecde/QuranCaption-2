@@ -59,6 +59,9 @@ export class ProjectContent extends SerializableBase {
 		const index = this.assets.indexOf(asset);
 		if (index !== -1) {
 			this.assets.splice(index, 1);
+
+			// Maintenant, supprime l'asset de la timeline
+			this.timeline.removeAssetFromTracks(asset);
 		} else {
 			toast.error('Asset not found in the project content.');
 		}
