@@ -1,6 +1,8 @@
-<script>
+<script lang="ts">
+	import { globalState } from '$lib/runes/main.svelte';
 	import Timeline from '../../timeline/Timeline.svelte';
 	import VideoPreview from '../../videoPreview/VideoPreview.svelte';
+	import DiviseurRedimensionnable from '../DiviseurRedimensionnable.svelte';
 	import AssetsManager from './assetsManager/AssetsManager.svelte';
 </script>
 
@@ -12,14 +14,22 @@
 		<AssetsManager />
 	</section>
 	<section class="flex-1 min-w-0 flex flex-row">
-		<section class="w-full min-w-0 divide-y-2 divide-color flex flex-col">
+		<section class="w-full min-w-0 flex flex-col h-full">
 			<!-- Video preview -->
-			<section class="flex-grow">
+			<section
+				class="overflow-hidden"
+				style="height: {globalState.currentProject!.projectEditorState.videoPreviewHeight}%;"
+			>
 				<VideoPreview />
 			</section>
 
+			<DiviseurRedimensionnable />
+
 			<!-- Timeline -->
-			<section class="overflow-hidden min-w-0">
+			<section
+				class="overflow-hidden min-w-0 timeline-section"
+				style="height: {100 - globalState.currentProject!.projectEditorState.videoPreviewHeight}%;"
+			>
 				<Timeline />
 			</section>
 		</section>
@@ -31,3 +41,6 @@
 		<!-- <AssetsManager /> -->
 	</section>
 </div>
+
+<style>
+</style>

@@ -21,6 +21,9 @@ export class ProjectEditorState extends SerializableBase {
 
 	// Timeline
 	timeline: TimelineState = $state(new TimelineState());
+
+	// Hauteur de la video preview par rapport à la timeline
+	videoPreviewHeight: number = $state(73);
 }
 
 /**

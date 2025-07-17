@@ -338,9 +338,11 @@
 	}
 
 	.tracks-content {
-		height: 220px;
+		min-height: 220px;
+		height: 100%;
 		position: relative;
 		cursor: crosshair;
+		overflow-y: hidden;
 	}
 
 	/* Timeline Grid */
@@ -406,10 +408,5 @@
 	/* Synchronize scroll between ruler and tracks */
 	.timeline-ruler::-webkit-scrollbar {
 		display: none;
-	}
-
-	/* Responsive adjustments */
-	.timeline-container {
-		height: 260px;
 	}
 </style>
