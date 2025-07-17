@@ -21,24 +21,38 @@
 	let asset = globalState.currentProject?.content.getAsset((clip as AssetClip).assetId)!;
 	let file = $state(convertFileSrc(asset.filePath));
 
+	$effect(() => {
+		if (
+			globalState.currentProject?.projectEditorState.timeline.showWaveforms &&
+			track.type === TrackType.Audio
+		) {
+			const wavesurfer = WaveSurfer.create({
+				container: '#clip-' + clip.id,
+				waveColor: '#9d99cc',
+				progressColor: '#9d99cc',
+				url: file,
+				height: 'auto'
+			});
+		}
+	});
+
 	onMount(async () => {
-		await new Promise((resolve) => setTimeout(resolve, 0));
-		const wavesurfer = WaveSurfer.create({
-			container: '#clip-' + clip.id,
-			waveColor: '#4F4A85',
-			progressColor: '#383351',
-			url: file,
-			height: 'auto'
-		});
+		console.log('Clip mounted:', clip);
 	});
 </script>
 
 <div
-	class="absolute top-0 left-0 h-full"
-	id={'clip-' + clip.id}
+	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md"
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
+	transition:fade
 >
-	{#if track.type === TrackType.Video}
-		<div class="absolute inset-0 bg-black z-5 flex overflow-hidden"></div>
+	{#if globalState.currentProject?.projectEditorState.timeline.showWaveforms && track.type === TrackType.Audio}
+		<div class="h-full w-full" id={'clip-' + clip.id}></div>
+	{:else}
+		<div class="absolute inset-0 z-5 flex overflow-hidden px-2">
+			<div class="">
+				<span class="text-xs text-[var(--text-secondary)] font-medium">{asset.fileName}</span>
+			</div>
+		</div>
 	{/if}
 </div>

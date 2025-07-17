@@ -46,6 +46,9 @@
 		const target = event.currentTarget as HTMLElement;
 		if (!target) return;
 
+		//@ts-ignore
+		if (event.target!.closest('.track-left-part')) return;
+
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
 		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
@@ -58,6 +61,11 @@
 
 		const target = event.currentTarget as HTMLElement;
 		if (!target) return;
+
+		//@ts-ignore
+		if (event.target!.closest('.track-left-part')) return;
+
+		console.log(event.target);
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header

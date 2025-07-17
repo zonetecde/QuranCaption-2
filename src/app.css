@@ -15,6 +15,8 @@
 	--accent-primary: #58a6ff;
 	--accent-secondary: #3fb950;
 	--danger-color: #f85149;
+	--timeline-clip-color: rgba(88, 166, 255, 0.4);
+	--timeline-clip-border: rgba(88, 166, 255, 0.7);
 
 	/* Timeline specific colors */
 	--timeline-bg-primary: #0d1117;
@@ -166,6 +168,26 @@ input[type='text']:hover {
 input[type='text']::selection {
 	background-color: var(--text-selection);
 	color: white;
+}
+
+/* pour les inputs checkbox, enleve les outlines lors de la selecton */
+
+input[type='checkbox'] {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	border: 1.5px solid var(--accent-primary);
+	border-radius: 0.5rem;
+	padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+	font-size: 0.875rem;
+	outline: none;
+	cursor: pointer;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+}
+input[type='checkbox']:focus {
+	border-color: transparent;
+	box-shadow: 0 0 0 1px var(--accent-primary);
 }
 
 input[type='radio'] {
