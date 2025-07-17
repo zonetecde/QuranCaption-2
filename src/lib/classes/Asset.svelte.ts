@@ -41,7 +41,7 @@ export class Asset extends SerializableBase {
 
 		this.fileName = fileName;
 
-		const extension = this.getFileExtension(fileName);
+		const extension = this.getFileExtension();
 		this.type = this.getAssetType(extension);
 
 		this.duration = new Duration(0);
@@ -86,13 +86,21 @@ export class Asset extends SerializableBase {
 	}
 
 	async openParentDirectory() {
-		const parentDir = this.getParentDirectory(this.filePath);
+		const parentDir = this.getParentDirectory();
 		await openPath(parentDir);
 	}
 
-	private getParentDirectory(filePath: string): string {
+	getFileNameWithoutExtension(): string {
+		const filenames = this.fileName.split('.');
+		if (filenames.length > 1) {
+			return filenames.slice(0, -1).join('.');
+		}
+		return this.fileName;
+	}
+
+	getParentDirectory(): string {
 		// Normalise le chemin d'abord
-		const normalized = this.normalizeFilePath(filePath);
+		const normalized = this.normalizeFilePath(this.filePath);
 
 		// Trouve le dernier séparateur
 		const lastSeparatorIndex = normalized.lastIndexOf('/');
@@ -130,6 +138,9 @@ export class Asset extends SerializableBase {
 	updateFilePath(element: string) {
 		this.filePath = this.normalizeFilePath(element);
 		this.exists = true; // Réinitialise l'existence à vrai
+		if (this.type === AssetType.Audio || this.type === AssetType.Video) {
+			this.initializeDuration(); // Réinitialise la durée
+		}
 	}
 
 	private getFileName(filePath: string): string {
@@ -142,8 +153,8 @@ export class Asset extends SerializableBase {
 		return '';
 	}
 
-	private getFileExtension(fileName: string): string {
-		const parts = fileName.split('.');
+	getFileExtension(): string {
+		const parts = this.fileName.split('.');
 		if (parts.length > 1) {
 			return parts[parts.length - 1].toLowerCase();
 		}

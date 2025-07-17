@@ -49,10 +49,8 @@
 	{#if globalState.currentProject?.projectEditorState.timeline.showWaveforms && track.type === TrackType.Audio}
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
 	{:else}
-		<div class="absolute inset-0 z-5 flex overflow-hidden px-2">
-			<div class="">
-				<span class="text-xs text-[var(--text-secondary)] font-medium">{asset.fileName}</span>
-			</div>
+		<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">
+			<span class="text-xs text-[var(--text-secondary)] font-medium">{asset.fileName}</span>
 		</div>
 	{/if}
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { AssetType, type Asset } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { convertFileSrc } from '@tauri-apps/api/core';
+	import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 	import { exists, readDir } from '@tauri-apps/plugin-fs';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -26,9 +26,11 @@
 
 	async function editAsset() {
 		const response = await ModalManager.confirmModal(
-			'This will open a website that allows you to crop and trim your asset. Do you want to proceed?'
+			'This will open a website that allows you to crop and trim your asset. Once you are done, you can download the edited file and close the window. The new file will be automatically detected by the application.'
 		);
 		if (response) {
+			let startTime = new Date().getTime();
+
 			// tauri open windows on url: https://online-video-cutter.com/
 			const webview = new WebviewWindow('editor', {
 				url:
@@ -39,16 +41,36 @@
 							: 'https://www.iloveimg.com/crop-image',
 				width: 1200,
 				height: 800,
-				title: 'Editor'
+				title: 'Asset Editor',
+				dragDropEnabled: true
 			});
 
 			webview.once('tauri://close-requested', async function (e) {
-				toast(
-					'If you have downloaded your edited video, you can now import it back into the software',
-					{
-						duration: 7000
+				// check for new file in the download directory
+				try {
+					const newFilePath: string = await invoke('get_new_file_path', {
+						startTime: startTime,
+						assetName: asset.getFileNameWithoutExtension()
+					});
+
+					if (newFilePath) {
+						// move le fichier newFilePath dans le dossier parent du fichier de l'asset
+						const parentDir = asset.getParentDirectory();
+						// ajoute au nom du fichier (edited) pour éviter les conflits
+						const newFileName =
+							asset.getFileNameWithoutExtension() + ' (edited).' + asset.getFileExtension();
+						const newFilePathWithName = parentDir + '/' + newFileName;
+						// déplace le fichier
+						await invoke('move_file', {
+							source: newFilePath,
+							destination: newFilePathWithName
+						});
+						// met à jour le chemin du fichier de l'asset
+						asset.updateFilePath(newFilePathWithName);
 					}
-				);
+				} catch (error) {
+					// Aucun fichier trouvé - probablement l'utilisateur a fermé la fenêtre sans télécharger de fichier
+				}
 
 				webview.close();
 			});

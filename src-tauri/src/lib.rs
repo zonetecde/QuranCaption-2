@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path};
 use std::process::Command;
 
 #[tauri::command]
@@ -139,16 +139,69 @@ fn get_duration(file_path: &str) -> Result<u64, String> {
     }
 }
 
+#[tauri::command]
+fn get_new_file_path(start_time: u64, asset_name: &str) -> Result<String, String> {
+    // get download directory folder (on windows, macos and linux)
+    let download_path = dirs::download_dir()
+        .ok_or_else(|| "Unable to determine download directory".to_string())?
+        .to_string_lossy()
+        .to_string();
+
+    // Search for a file whose creation date is > start_time
+    let entries = fs::read_dir(&download_path)
+        .map_err(|e| format!("Unable to read download directory: {}", e))?;
+
+    for entry in entries {
+        if let Ok(entry) = entry {
+            if let Ok(metadata) = entry.metadata() {
+                if let Ok(created) = metadata.created() {
+                    let created_time = created
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map_err(|_| "Time went backwards")?
+                        .as_millis() as u64;
+
+                    // If the creation date is greater than start_time, check the file name
+                    if created_time > start_time {
+                        let file_path = entry.path();
+                        if let Some(file_name) = file_path.file_name() {
+                            let file_name_str = file_name.to_string_lossy();
+                            let asset_name_trimmed = asset_name.trim();
+
+                            // Check if the file name contains the asset name
+                            if file_name_str.contains(asset_name_trimmed) {
+                                return Ok(file_path.to_string_lossy().to_string());
+                            } else {
+                                return Ok(file_path.to_string_lossy().to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Err("Downloaded file not found".to_string())
+}
+
+#[tauri::command]
+fn move_file(source: String, destination: String) -> Result<(), String> {
+    // If destination exists, remove it first to force the move
+    if std::path::Path::new(&destination).exists() {
+        std::fs::remove_file(&destination).map_err(|e| e.to_string())?;
+    }
+    std::fs::rename(source, destination).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![
+        .plugin(tauri_plugin_opener::init())        .invoke_handler(tauri::generate_handler![
             download_from_youtube,
-            get_duration
+            get_duration,
+            get_new_file_path,
+            move_file
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
