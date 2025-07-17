@@ -85,6 +85,19 @@ export class Track extends SerializableBase {
 		}
 		return new Duration(Math.max(...this.clips.map((clip) => clip.endTime)));
 	}
+
+	getCurrentClip(): Clip | null {
+		const currentTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition ?? 0;
+
+		for (let index = 0; index < this.clips.length; index++) {
+			const element = this.clips[index];
+			if (currentTime >= element.startTime && currentTime <= element.endTime) {
+				return element;
+			}
+		}
+
+		return null;
+	}
 }
 
 export class SubtitleTrack extends Track {

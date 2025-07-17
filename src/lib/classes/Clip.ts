@@ -1,4 +1,5 @@
 import { globalState } from '$lib/runes/main.svelte';
+import type { Asset } from './Asset.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';

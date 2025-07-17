@@ -67,7 +67,7 @@ export class ProjectContent extends SerializableBase {
 		}
 	}
 
-	getAsset(id: number) {
+	getAssetById(id: number) {
 		return this.assets.find((x) => x.id === id)!;
 	}
 }

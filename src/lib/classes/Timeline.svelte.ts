@@ -1,6 +1,7 @@
-import { Asset, AssetClip, Duration, TrackType } from './index.js';
+import { Asset, AssetClip, Clip, Duration, TrackType } from './index.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Track } from './Track.svelte.js';
+import { globalState } from '$lib/runes/main.svelte.js';
 
 export class Timeline extends SerializableBase {
 	tracks: Track[] = $state([]);
@@ -35,6 +36,25 @@ export class Timeline extends SerializableBase {
 				}
 			}
 		});
+	}
+
+	getCurrentElementOnTrack(trackType: TrackType): Asset | null {
+		const track = this.tracks.find((t) => t.type === trackType);
+		const currentClip = track?.getCurrentClip();
+
+		// Vérifier si le clip est un AssetClip (a la propriété assetId)
+		if (
+			currentClip &&
+			'assetId' in currentClip &&
+			typeof (currentClip as any).assetId === 'number'
+		) {
+			// Accéder directement à l'asset via globalState au lieu d'utiliser getAsset()
+			const assetId = (currentClip as any).assetId;
+			const asset = globalState.currentProject?.content.getAssetById(assetId);
+			return asset || null;
+		}
+
+		return null;
 	}
 }
 

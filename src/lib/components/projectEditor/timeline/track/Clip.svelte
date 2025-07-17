@@ -18,7 +18,7 @@
 		return (clip.startTime / 1000) * track.getPixelPerSecond();
 	});
 
-	let asset = globalState.currentProject?.content.getAsset((clip as AssetClip).assetId)!;
+	let asset = globalState.currentProject?.content.getAssetById((clip as AssetClip).assetId)!;
 	let file = $state(convertFileSrc(asset.filePath));
 
 	$effect(() => {

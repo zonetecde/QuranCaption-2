@@ -214,10 +214,10 @@
 				{:else if asset.type === AssetType.Image}
 					<button
 						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-						onclick={() => addInTheTimelineButtonClick(true, false)}
+						onclick={() => {}}
 					>
 						<span class="material-icons text-lg">add</span>
-						Add in the timeline
+						Set as background
 					</button>
 				{/if}
 			{/if}
