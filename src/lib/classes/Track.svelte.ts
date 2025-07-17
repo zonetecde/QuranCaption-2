@@ -29,6 +29,12 @@ export class Track extends SerializableBase {
 		const index = this.clips.findIndex((clip) => clip.id === id);
 		if (index !== -1) {
 			this.clips.splice(index, 1);
+			// Met à jour les timestamps des clips suivants
+			for (let i = index; i < this.clips.length; i++) {
+				const clip = this.clips[i];
+				clip.startTime = i === 0 ? 0 : this.clips[i - 1].endTime + 1;
+				clip.endTime = clip.startTime + clip.duration;
+			}
 		}
 	}
 

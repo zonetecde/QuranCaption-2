@@ -3,7 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
 	import WaveSurfer from 'wavesurfer.js';
 
 	let {
@@ -38,9 +38,9 @@
 </script>
 
 <div
-	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md"
+	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group"
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
-	transition:fade
+	transition:slide={{ duration: 500, axis: 'x' }}
 >
 	{#if globalState.currentProject?.projectEditorState.timeline.showWaveforms && track.type === TrackType.Audio}
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
@@ -49,4 +49,14 @@
 			<span class="text-xs text-[var(--text-secondary)] font-medium">{asset.fileName}</span>
 		</div>
 	{/if}
+
+	<section class="absolute bottom-0.5 left-0.5 z-5">
+		<!-- delete clip -->
+		<button
+			class="text-[var(--text-secondary)] text-sm cursor-pointer opacity-0 group-hover:opacity-100"
+			onclick={() => track.removeClip(clip.id)}
+		>
+			<span class="material-icons">delete</span>
+		</button>
+	</section>
 </div>
