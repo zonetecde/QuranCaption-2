@@ -139,6 +139,7 @@ export class Asset extends SerializableBase {
 		this.filePath = this.normalizeFilePath(element);
 		this.exists = true; // Réinitialise l'existence à vrai
 		if (this.type === AssetType.Audio || this.type === AssetType.Video) {
+			this.duration = new Duration(0);
 			this.initializeDuration(); // Réinitialise la durée
 		}
 	}

@@ -90,6 +90,12 @@
 	}
 
 	function addInTheTimelineButtonClick(video: boolean, audio: boolean) {
+		if (asset.duration.isNull()) {
+			toast('Please wait for the asset to be loaded before adding it to the timeline.', {
+				duration: 3000
+			});
+		}
+
 		// Ajoute l'asset à la timeline
 		asset.addToTimeline(video, audio);
 	}

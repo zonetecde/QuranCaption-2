@@ -2,8 +2,8 @@
 	import { TrackType } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
-	import Page from '../../../../routes/+page.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
+	import { Howl } from 'howler';
 
 	let currentVideo = $derived(() => {
 		return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Video);
@@ -12,19 +12,51 @@
 		return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Audio);
 	});
 
-	$inspect(currentVideo());
-	$inspect(currentAudio());
+	let videoElement = $state<HTMLVideoElement | null>(null);
 
 	$effect(() => {
+		// Si on change la taille de la timeline, on redimensionne la vidéo pour qu'elle s'adapte à l'écran
 		if (globalState.currentProject?.projectEditorState.videoPreviewHeight) {
 			resizeVideoToFitScreen();
+		}
+	});
+
+	$effect(() => {
+		// Si le curseur bouge, alors on doit aussi mettre à jour la vidéo au bon timing
+		if (globalState.currentProject?.projectEditorState.timeline.movePreviewTo) {
+			untrack(() => {
+				const newTime = globalState.currentProject!.projectEditorState.timeline.movePreviewTo;
+				// Met à jour la vidéo en fonction de la position du curseur
+				// cursorPosition est en ms
+				if (currentVideo()) {
+					if (videoElement) {
+						videoElement.currentTime = newTime / 1000; // Convertit en secondes
+					}
+				}
+
+				// Met à jour l'audio en fonction de la position du curseur
+				if (currentAudio()) {
+					console.log('Seeking audio to', newTime);
+					seekAudio(newTime / 1000); // Convertit en secondes
+				}
+			});
 		}
 	});
 
 	onMount(() => {
 		resizeVideoToFitScreen();
 		window.addEventListener('resize', resizeVideoToFitScreen);
+
+		videoElement!.ontimeupdate = handleTimeUpdate;
 	});
+
+	function handleTimeUpdate() {
+		// Lorsque le temps actuel dans le composant <video> ou l'audio change, on met à jour le curseur de la timeline
+		if (videoElement && videoElement!.currentTime) {
+			globalState.currentProject!.projectEditorState.timeline.cursorPosition =
+				videoElement!.currentTime * 1000; // Convertit en millisecondes
+		}
+	}
 
 	function resizeVideoToFitScreen() {
 		const previewContainer = document.getElementById('preview-container');
@@ -76,6 +108,71 @@
 			previewContainer.style.transform += ' translateY(-50%)';
 		}
 	}
+
+	let audioHowl: Howl | null = null;
+	let isPlaying = $state(false);
+	let audioDuration = $state(0);
+	let audioSeek = $state(0);
+	let audioInterval: any = null;
+
+	function setupAudio() {
+		if (audioHowl) {
+			audioHowl.unload();
+			audioHowl = null;
+		}
+		const audioAsset = currentAudio();
+		if (audioAsset) {
+			audioHowl = new Howl({
+				src: [convertFileSrc(audioAsset.filePath)],
+				html5: true, // important pour les gros fichiers et le VBR
+				onload: () => {
+					audioDuration = audioHowl?.duration() || 0;
+				},
+				onend: () => {
+					isPlaying = false;
+					clearInterval(audioInterval);
+				}
+			});
+		}
+	}
+
+	function play() {
+		if (audioHowl) {
+			audioHowl.play();
+			isPlaying = true;
+		}
+		const videoElement = document.querySelector('#preview video') as HTMLVideoElement;
+		if (videoElement) {
+			videoElement.play();
+		}
+	}
+
+	function pause() {
+		if (audioHowl) {
+			audioHowl.pause();
+			isPlaying = false;
+			clearInterval(audioInterval);
+		}
+		const videoElement = document.querySelector('#preview video') as HTMLVideoElement;
+		if (videoElement) {
+			videoElement.pause();
+		}
+	}
+
+	function seekAudio(val: number) {
+		if (audioHowl) {
+			audioHowl.seek(val);
+			audioSeek = val;
+		}
+	}
+
+	$effect(() => {
+		setupAudio();
+		return () => {
+			if (audioHowl) audioHowl.unload();
+			clearInterval(audioInterval);
+		};
+	});
 </script>
 
 <div
@@ -84,10 +181,25 @@
 >
 	<div class={'relative origin-top-left bg-black'} id="preview">
 		{#if currentVideo()}
-			<video src={convertFileSrc(currentVideo()!.filePath)} controls muted></video>
+			<video bind:this={videoElement} src={convertFileSrc(currentVideo()!.filePath)} muted></video>
+		{:else}
+			<video bind:this={videoElement} src="black-vid.mp4" muted></video>
 		{/if}
 	</div>
 </div>
+
+<button
+	class="absolute bottom-2 left-2 z-10 bg-[var(--bg-secondary)] text-[var(--text-secondary)] p-2 rounded hover:bg-[var(--bg-accent)] transition-colors"
+	on:click={() => {
+		if (isPlaying) {
+			pause();
+		} else {
+			play();
+		}
+	}}
+>
+	{isPlaying ? 'Pause' : 'Play'}
+</button>
 
 <style>
 	#preview-container {

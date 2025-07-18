@@ -53,7 +53,8 @@
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
 		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
 
-		globalState.currentProject!.projectEditorState.timeline.cursorPosition = newPosition;
+		timelineSettings().cursorPosition = newPosition;
+		timelineSettings().movePreviewTo = newPosition;
 	}
 
 	function handleTimelineDrag(event: MouseEvent) {
@@ -65,13 +66,12 @@
 		//@ts-ignore
 		if (event.target!.closest('.track-left-part')) return;
 
-		console.log(event.target);
-
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
 		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
 
-		globalState.currentProject!.projectEditorState.timeline.cursorPosition = newPosition;
+		timelineSettings().cursorPosition = newPosition;
+		timelineSettings().movePreviewTo = newPosition;
 	}
 
 	function handleRulerClick(event: MouseEvent) {
@@ -82,7 +82,8 @@
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
 		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
 
-		globalState.currentProject!.projectEditorState.timeline.cursorPosition = newPosition;
+		timelineSettings().cursorPosition = newPosition;
+		timelineSettings().movePreviewTo = newPosition;
 	}
 
 	function handleRulerDrag(event: MouseEvent) {
@@ -95,7 +96,8 @@
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
 		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
 
-		globalState.currentProject!.projectEditorState.timeline.cursorPosition = newPosition;
+		timelineSettings().cursorPosition = newPosition;
+		timelineSettings().movePreviewTo = newPosition;
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -174,7 +176,7 @@
 
 			<!-- Playhead cursor in ruler -->
 			<div
-				class="playhead-ruler"
+				class="playhead-ruler transition-all duration-500"
 				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
 					180}px;"
 			>
@@ -214,7 +216,7 @@
 
 			<!-- Main playhead cursor -->
 			<div
-				class="playhead-cursor"
+				class="playhead-cursor transition-all duration-500"
 				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
 					180}px;"
 			></div>
