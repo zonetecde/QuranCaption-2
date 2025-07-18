@@ -230,7 +230,6 @@
 		background: var(--timeline-bg-primary);
 		border-top: 1px solid var(--border-color);
 		position: relative;
-		overflow: hidden;
 	}
 
 	/* Timeline Ruler */
@@ -336,13 +335,10 @@
 		overflow-y: auto;
 		background: var(--timeline-bg-secondary);
 	}
-
 	.tracks-content {
-		min-height: 220px;
-		height: 100%;
+		min-height: 200px;
 		position: relative;
 		cursor: crosshair;
-		overflow-y: hidden;
 	}
 
 	/* Timeline Grid */
@@ -369,12 +365,11 @@
 		background: var(--timeline-grid-major);
 		opacity: 0.8;
 	}
-
 	/* Track Lanes */
 	.track-lanes {
 		position: relative;
 		z-index: 1;
-		height: 100%;
+		min-height: min-content;
 		display: flex;
 		flex-direction: column;
 	}

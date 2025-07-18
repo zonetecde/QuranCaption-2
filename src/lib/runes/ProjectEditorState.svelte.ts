@@ -31,7 +31,7 @@ export class ProjectEditorState extends SerializableBase {
  */
 export class TimelineState extends SerializableBase {
 	// Niveau de zoom de la timeline
-	zoom: number = $state(30);
+	zoom: number = $state(29.25);
 
 	// Position du curseur dans la timeline
 	cursorPosition: number = $state(0);

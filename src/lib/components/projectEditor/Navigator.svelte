@@ -15,7 +15,7 @@
 	}
 </script>
 
-<div class="w-full h-11 flex items-center justify-center space-x-1 border-color">
+<div class="w-full h-11 flex items-center justify-center space-x-1 border-color flex-shrink-0">
 	{#each tabs as tab}
 		<button
 			class="tab-button flex items-center {globalState.currentProject!.projectEditorState

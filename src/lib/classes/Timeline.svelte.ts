@@ -38,7 +38,13 @@ export class Timeline extends SerializableBase {
 		});
 	}
 
-	getCurrentElementOnTrack(trackType: TrackType): Asset | null {
+	/**
+	 * Retourne la vidéo qui doit être actuellement jouée sur la timeline
+	 * en fonction du type de piste.
+	 * @param trackType Le type de piste
+	 * @returns L'asset actuellement joué sur la piste, ou null si aucun clip n'est trouvé
+	 */
+	getCurrentAssetOnTrack(trackType: TrackType): Asset | null {
 		const track = this.tracks.find((t) => t.type === trackType);
 		const currentClip = track?.getCurrentClip();
 
