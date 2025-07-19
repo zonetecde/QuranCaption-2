@@ -6,15 +6,22 @@
 	import { Howl } from 'howler';
 	import toast from 'svelte-5-french-toast';
 
+	// === ÉTATS RÉACTIFS DÉRIVÉS ===
+	// Récupère les paramètres de la timeline depuis l'état global
 	let getTimelineSettings = $derived(() => {
 		return globalState.currentProject!.projectEditorState.timeline;
 	});
+
+	// Récupère l'asset vidéo actuellement sous le curseur de la timeline
+	// Seulement si movePreviewTo est défini (pour éviter les recalculs inutiles)
 	let currentVideo = $derived(() => {
 		if (getTimelineSettings().movePreviewTo)
 			return untrack(() => {
 				return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Video);
 			});
 	});
+
+	// Récupère l'asset audio actuellement sous le curseur de la timeline
 	let currentAudio = $derived(() => {
 		if (getTimelineSettings().movePreviewTo)
 			return untrack(() => {
@@ -22,40 +29,42 @@
 			});
 	});
 
-	let videoElement = $state<HTMLVideoElement | null>(null);
+	// === ÉTATS LOCAUX ===
+	let videoElement = $state<HTMLVideoElement | null>(null); // Référence à l'élément <video> HTML
 
+	// === EFFETS RÉACTIFS ===
+
+	// Effect qui redimensionne la vidéo quand la hauteur de la prévisualisation change
 	$effect(() => {
-		// Si on change la taille de la timeline, on redimensionne la vidéo pour qu'elle s'adapte à l'écran
 		if (globalState.currentProject?.projectEditorState.videoPreviewHeight) {
 			resizeVideoToFitScreen();
 		}
 	});
 
+	// Effect qui recharge l'audio quand l'asset audio change
 	$effect(() => {
 		if (currentAudio()) {
-			// L'audio a joué n'est plus le même, on doit le recharger
 			untrack(() => {
-				setupAudio();
+				setupAudio(); // Configure le nouveau fichier audio avec Howler
 			});
 		}
 	});
 
+	// Effect principal de synchronisation - se déclenche quand le curseur bouge
 	$effect(() => {
-		// Si le curseur bouge, alors on doit aussi mettre à jour la vidéo au bon timing
 		if (globalState.currentProject?.projectEditorState.timeline.movePreviewTo) {
 			untrack(() => {
 				const wasPlaying = isPlaying;
-				pause(); // On met en pause pour que le onplay() de Howl se délenche et seek l'audio à la bonne position
+				pause(); // Met en pause pour synchroniser proprement
 
-				// Met à jour la vidéo en fonction de la position du curseur
-				// cursorPosition est en ms
+				// Synchronise la vidéo avec la position du curseur
 				if (currentVideo()) {
 					if (videoElement) {
 						videoElement.currentTime = getCurrentVideoTimeToPlay();
 					}
 				}
 
-				// Le sync de l'audio se fait dans le onplay de Howl
+				// La synchronisation audio se fait automatiquement dans le callback onplay de Howl
 
 				if (wasPlaying) {
 					play(); // Reprend la lecture si on était en train de lire
@@ -63,6 +72,13 @@
 			});
 		}
 	});
+
+	// === FONCTIONS DE CALCUL DE TEMPS ===
+
+	/**
+	 * Calcule le temps à jouer dans l'audio en fonction de la position du curseur
+	 * @returns Temps en secondes dans l'audio
+	 */
 	function getCurrentAudioTimeToPlay(): number {
 		const currentClip = globalState
 			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Audio)!
@@ -75,6 +91,10 @@
 		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour Howler
 	}
 
+	/**
+	 * Calcule le temps à jouer dans la vidéo en fonction de la position du curseur
+	 * @returns Temps en secondes dans la vidéo
+	 */
 	function getCurrentVideoTimeToPlay(): number {
 		const currentClip = globalState
 			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)!
@@ -86,34 +106,46 @@
 		const timeInClip = getTimelineSettings().movePreviewTo - currentClip.startTime;
 		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour l'élément video HTML
 	}
-	onMount(() => {
-		resizeVideoToFitScreen();
-		window.addEventListener('resize', resizeVideoToFitScreen);
 
-		// Trigger la réactivité pour mettre la vidéo et l'audio à la position du curseur
+	// === CYCLE DE VIE DU COMPOSANT ===
+	onMount(() => {
+		resizeVideoToFitScreen(); // Redimensionne initial
+		window.addEventListener('resize', resizeVideoToFitScreen); // Écoute le redimensionnement de fenêtre
+
+		// Force la synchronisation initiale vidéo/audio avec la position du curseur
 		triggerVideoAndAudioToFitCursor();
 	});
 
-	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné
+	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo
 	$effect(() => {
 		if (videoElement) {
-			videoElement.ontimeupdate = handleTimeUpdate;
+			videoElement.ontimeupdate = handleVideoTimeUpdate;
 		}
 	});
 
+	/**
+	 * Force le déclenchement de la synchronisation en modifiant movePreviewTo
+	 * Trick pour déclencher l'effect de synchronisation
+	 */
 	function triggerVideoAndAudioToFitCursor() {
 		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition + 1;
 	}
-	function handleTimeUpdate() {
+
+	// === GESTION DES MISES À JOUR DE TEMPS ===
+
+	/**
+	 * Gestionnaire principal pour les mises à jour du curseur de la timeline
+	 * Priorité à l'audio si disponible, sinon utilise la vidéo
+	 */
+	function handleVideoTimeUpdate() {
 		if (audioUpdateInterval) {
 			// Si on a un intervalle de mise à jour audio, on l'utilise car plus précis
 			handleAudioTimeUpdate();
 			return;
 		}
 
-		// Lorsque le temps actuel dans le composant <video> change, on met à jour le curseur de la timeline
+		// Utilise la vidéo pour mettre à jour le curseur de la timeline
 		if (videoElement && videoElement.currentTime !== undefined && isPlaying) {
-			// Calculer la position absolue dans la timeline basée sur la vidéo
 			const currentVideoClip = globalState
 				.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)
 				?.getCurrentClip();
@@ -126,7 +158,10 @@
 		}
 	}
 
-	// Fonction séparée pour mettre à jour le curseur basé sur l'audio
+	/**
+	 * Met à jour le curseur de la timeline basé sur la position de l'audio
+	 * Plus précis que la vidéo pour la synchronisation
+	 */
 	function handleAudioTimeUpdate() {
 		if (audioHowl && isPlaying) {
 			const currentAudioClip = globalState
@@ -142,61 +177,70 @@
 		}
 	}
 
+	// === GESTION DU REDIMENSIONNEMENT ===
+
+	/**
+	 * Redimensionne la vidéo pour qu'elle s'adapte au conteneur sans déformation
+	 * Utilise un système de mise à l'échelle avec ratio préservé
+	 */
 	function resizeVideoToFitScreen() {
 		const previewContainer = document.getElementById('preview-container');
 		const preview = document.getElementById('preview');
-		// Ajuste le scale de `preview` pour qu'il s'adapte au container sans jamais s'étirer
+
 		if (previewContainer && preview) {
-			// On met le 1920x1080 ici pour éviter d'avoir un effet bizarre lorsque le component load
+			// Configuration initiale : taille fixe 1920x1080 pour éviter les effets bizarres au chargement
 			preview.style.width = '1920px';
-			preview.style.height = '1080px'; // Si on est en plein écran, on met la vidéo à la taille de l'écran
+			preview.style.height = '1080px';
 			preview.style.minWidth = '1920px';
 			preview.style.minHeight = '1080px';
 
-			// Sinon taille du container avec 100px de moins en hauteur
+			// Configuration du conteneur
 			previewContainer.style.width = 'auto';
 			previewContainer.style.height = 'calc(100%)';
 
-			// reset les centrages
+			// Reset des transformations précédentes
 			previewContainer.style.position = 'relative';
 			previewContainer.style.zIndex = '0';
 			previewContainer.style.transform = 'none';
 			previewContainer.style.top = '0';
 			previewContainer.style.left = '0';
 
+			// Calcul des ratios pour le redimensionnement proportionnel
 			const containerWidth = previewContainer.clientWidth;
 			const containerHeight = previewContainer.clientHeight;
-
 			const videoWidth = preview.clientWidth;
 			const videoHeight = preview.clientHeight;
-
 			const widthRatio = containerWidth / videoWidth;
 			const heightRatio = containerHeight / videoHeight;
 
-			// Utilise le plus petit ratio pour éviter l'étirement
+			// Utilise le plus petit ratio pour éviter l'étirement (letterboxing/pillarboxing)
 			const scale = Math.min(widthRatio, heightRatio);
 
-			// Applique le scale à la preview
+			// Application de la mise à l'échelle
 			preview.style.transform = `scale(${scale})`;
 
-			// met la taille de preview-container à la taille de preview
+			// Ajustement de la taille du conteneur à la nouvelle taille mise à l'échelle
 			previewContainer.style.width = `${videoWidth * scale}px`;
 			previewContainer.style.height = `${videoHeight * scale}px`;
 
-			// center the preview container horizontally
+			// Centrage horizontal et vertical du conteneur
 			previewContainer.style.left = '50%';
 			previewContainer.style.transform = 'translateX(-50%)';
-
-			// center the preview container vertically
 			previewContainer.style.top = '50%';
 			previewContainer.style.transform += ' translateY(-50%)';
 		}
 	}
-	let audioHowl: Howl | null = null;
-	let isPlaying = $state(false);
-	let audioUpdateInterval: number | null = null;
 
+	// === GESTION AUDIO AVEC HOWLER ===
+	let audioHowl: Howl | null = null; // Instance Howler pour la lecture audio
+	let isPlaying = $state(false); // État de lecture global
+	let audioUpdateInterval: number | null = null; // Intervalle pour la mise à jour du curseur audio
+
+	/**
+	 * Configure et initialise l'instance Howler pour l'audio actuel
+	 */
 	function setupAudio() {
+		// Nettoyage de l'instance précédente
 		if (audioHowl) {
 			audioHowl.unload();
 			audioHowl = null;
@@ -210,37 +254,43 @@
 		if (audioAsset) {
 			audioHowl = new Howl({
 				src: [convertFileSrc(audioAsset.filePath)],
-				html5: true, // important pour les gros fichiers et le VBR
+				html5: true, // Important pour les gros fichiers et le VBR (Variable Bit Rate)
 				onplay: () => {
-					// Sync la position dans l'audio avec la position du curseur
+					// Synchronise la position dans l'audio avec la position du curseur
 					seekAudio(getCurrentAudioTimeToPlay());
 
-					// Démarre la mise à jour régulière du curseur basé sur l'audio (seulement s'il n'y a pas de vidéo)
+					// Démarre la mise à jour régulière du curseur (uniquement s'il n'y a pas de vidéo active)
 					if (!audioUpdateInterval) {
-						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 10); // Met à jour toutes les 10ms
+						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 10); // Mise à jour toutes les 10ms
 					}
 				},
 				onpause: () => {
-					// Arrête la mise à jour du curseur
+					// Arrête la mise à jour du curseur lors de la pause
 					if (audioUpdateInterval) {
 						clearInterval(audioUpdateInterval);
 						audioUpdateInterval = null;
 					}
 				},
 				onend: () => {
-					// Arrête la mise à jour du curseur
+					// Nettoyage et passage au média suivant quand l'audio se termine
 					if (audioUpdateInterval) {
 						clearInterval(audioUpdateInterval);
 						audioUpdateInterval = null;
 					}
-					// Quand l'audio se termine, passe au suivant
 					goNextAudio();
 				}
 			});
 		}
 	}
+
+	// === CONTRÔLES DE LECTURE ===
+
+	/**
+	 * Lance la lecture audio et vidéo
+	 * @param fromButton - Indique si l'action vient du bouton play (pour afficher un toast si nécessaire)
+	 */
 	function play(fromButton: boolean = false) {
-		// Si il n'y a aucun clip vidéo ou audio, on ne peut pas jouer
+		// Vérification de la présence de médias
 		if (!currentVideo() && !currentAudio()) {
 			if (fromButton)
 				toast('No video or audio to play. Please add some media to the timeline.', {
@@ -251,6 +301,7 @@
 
 		isPlaying = true;
 
+		// Lance la lecture audio et vidéo simultanément
 		if (audioHowl) {
 			audioHowl.play();
 		}
@@ -259,9 +310,13 @@
 		}
 	}
 
+	/**
+	 * Met en pause la lecture audio et vidéo
+	 */
 	function pause() {
 		isPlaying = false;
 
+		// Pause audio et vidéo
 		if (audioHowl) {
 			audioHowl.pause();
 		}
@@ -269,7 +324,7 @@
 			videoElement.pause();
 		}
 
-		// Permet de reprendre la vidéo et l'audio à la position du curseur pour la prochaine fois
+		// Prépare la synchronisation pour la prochaine lecture
 		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition;
 
 		// Arrête la mise à jour du curseur audio
@@ -279,24 +334,41 @@
 		}
 	}
 
+	/**
+	 * Navigue vers une position spécifique dans l'audio
+	 * @param val - Position en secondes
+	 */
 	function seekAudio(val: number) {
 		if (audioHowl) {
 			audioHowl.seek(val);
 		}
 	}
+
+	// === NAVIGATION ENTRE MÉDIAS ===
+
+	/**
+	 * Passe au prochain média quand une vidéo se termine
+	 */
 	function goNextVideo() {
-		// Quand une vidéo se termine, on cherche le prochain média (vidéo ou audio)
 		goToNextMedia(true, false);
 	}
+
+	/**
+	 * Passe au prochain média quand un audio se termine
+	 */
 	function goNextAudio() {
-		// Quand un audio se termine, on cherche le prochain média (vidéo ou audio)
 		goToNextMedia(false, true);
 	}
 
+	/**
+	 * Trouve et navigue vers le prochain média dans la timeline
+	 * @param video - Inclure les pistes vidéo dans la recherche
+	 * @param audio - Inclure les pistes audio dans la recherche
+	 */
 	function goToNextMedia(video: boolean = true, audio: boolean = true) {
 		const currentTime = getTimelineSettings().cursorPosition;
 
-		// Trouve tous les clips suivants (vidéo et audio) après la position actuelle
+		// Récupération des pistes vidéo et audio
 		const videoTrack = globalState.currentProject!.content.timeline.tracks.find(
 			(t) => t.type === TrackType.Video
 		);
@@ -306,6 +378,7 @@
 
 		const nextClips: { clip: any; startTime: number }[] = [];
 
+		// Recherche du prochain clip vidéo
 		if (videoTrack && video) {
 			const nextVideoClip = videoTrack.clips.find((clip) => clip.startTime > currentTime - 1000);
 			if (nextVideoClip) {
@@ -313,6 +386,7 @@
 			}
 		}
 
+		// Recherche du prochain clip audio
 		if (audioTrack && audio) {
 			const nextAudioClip = audioTrack.clips.find((clip) => clip.startTime > currentTime - 1000);
 			if (nextAudioClip) {
@@ -328,16 +402,17 @@
 
 			// Avance le curseur au début du prochain clip
 			getTimelineSettings().cursorPosition = earliestClip.startTime;
-
 			triggerVideoAndAudioToFitCursor();
 		}
 	}
 </script>
 
+<!-- Interface utilisateur -->
 <div
 	class="w-full h-full flex flex-col relative overflow-hidden background-primary"
 	id="preview-container"
 >
+	<!-- Conteneur de la prévisualisation vidéo avec mise à l'échelle -->
 	<div class={'relative origin-top-left bg-black'} id="preview">
 		{#if currentVideo()}
 			<video
@@ -350,6 +425,7 @@
 	</div>
 </div>
 
+<!-- Bouton de contrôle play/pause -->
 <button
 	class="absolute bottom-2 left-2 z-10 bg-[var(--bg-secondary)] text-[var(--text-secondary)] p-2 rounded hover:bg-[var(--bg-accent)] transition-colors"
 	onclick={() => {
@@ -364,6 +440,7 @@
 </button>
 
 <style>
+	/* Styles pour assurer un dimensionnement correct */
 	#preview-container {
 		height: 100%;
 		min-height: 0;
