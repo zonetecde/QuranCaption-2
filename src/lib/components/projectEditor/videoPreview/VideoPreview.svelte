@@ -21,7 +21,6 @@
 				return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Audio);
 			});
 	});
-	$inspect(currentAudio());
 
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
@@ -106,6 +105,12 @@
 		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition + 1;
 	}
 	function handleTimeUpdate() {
+		if (audioUpdateInterval) {
+			// Si on a un intervalle de mise à jour audio, on l'utilise car plus précis
+			handleAudioTimeUpdate();
+			return;
+		}
+
 		// Lorsque le temps actuel dans le composant <video> change, on met à jour le curseur de la timeline
 		if (videoElement && videoElement.currentTime !== undefined && isPlaying) {
 			// Calculer la position absolue dans la timeline basée sur la vidéo
@@ -211,7 +216,7 @@
 					seekAudio(getCurrentAudioTimeToPlay());
 
 					// Démarre la mise à jour régulière du curseur basé sur l'audio (seulement s'il n'y a pas de vidéo)
-					if (!currentVideo() && !audioUpdateInterval) {
+					if (!audioUpdateInterval) {
 						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 10); // Met à jour toutes les 10ms
 					}
 				},
@@ -302,14 +307,14 @@
 		const nextClips: { clip: any; startTime: number }[] = [];
 
 		if (videoTrack && video) {
-			const nextVideoClip = videoTrack.clips.find((clip) => clip.startTime > currentTime);
+			const nextVideoClip = videoTrack.clips.find((clip) => clip.startTime > currentTime - 1000);
 			if (nextVideoClip) {
 				nextClips.push({ clip: nextVideoClip, startTime: nextVideoClip.startTime });
 			}
 		}
 
 		if (audioTrack && audio) {
-			const nextAudioClip = audioTrack.clips.find((clip) => clip.startTime > currentTime);
+			const nextAudioClip = audioTrack.clips.find((clip) => clip.startTime > currentTime - 1000);
 			if (nextAudioClip) {
 				nextClips.push({ clip: nextAudioClip, startTime: nextAudioClip.startTime });
 			}
@@ -323,9 +328,9 @@
 
 			// Avance le curseur au début du prochain clip
 			getTimelineSettings().cursorPosition = earliestClip.startTime;
-		}
 
-		triggerVideoAndAudioToFitCursor();
+			triggerVideoAndAudioToFitCursor();
+		}
 	}
 </script>
 

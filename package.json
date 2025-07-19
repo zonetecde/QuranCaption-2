@@ -56,6 +56,7 @@
 		"class-transformer": "^0.5.1",
 		"howler": "^2.2.4",
 		"material-icons": "^1.13.14",
+		"plyr": "^3.7.8",
 		"reflect-metadata": "^0.2.2",
 		"svelte-5-french-toast": "^2.0.4",
 		"wavesurfer.js": "^7.10.0"
