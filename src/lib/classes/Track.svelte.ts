@@ -23,6 +23,12 @@ export class Track extends SerializableBase {
 				new AssetClip(lastClip.endTime + 1, lastClip.endTime + asset.duration.ms + 1, asset.id)
 			);
 		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
+
+		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
+		setTimeout(() => {
+			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
+				globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;
+		}, 0);
 	}
 
 	removeClip(id: number) {

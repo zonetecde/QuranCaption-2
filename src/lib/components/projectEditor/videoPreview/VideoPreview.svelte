@@ -4,6 +4,7 @@
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { onMount, untrack } from 'svelte';
 	import { Howl } from 'howler';
+	import toast from 'svelte-5-french-toast';
 
 	let getTimelineSettings = $derived(() => {
 		return globalState.currentProject!.projectEditorState.timeline;
@@ -19,6 +20,11 @@
 			return untrack(() => {
 				return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Audio);
 			});
+	});
+
+	$inspect(() => {
+		console.log('Current Video:', currentVideo());
+		console.log('Current Audio:', currentAudio());
 	});
 
 	let videoElement = $state<HTMLVideoElement | null>(null);
@@ -257,6 +263,15 @@
 		}
 	}
 	function play() {
+		// Si il n'y a aucun clip vidéo ou audio, on ne peut pas jouer
+		if (!currentVideo() && !currentAudio()) {
+			console.warn('No video or audio to play');
+			toast('No video or audio to play. Please add some media to the timeline.', {
+				duration: 5000
+			});
+			return;
+		}
+
 		isPlaying = true;
 
 		if (audioHowl) {
@@ -372,8 +387,6 @@
 				muted
 				onended={goNextVideo}
 			></video>
-		{:else}
-			<video bind:this={videoElement} src="black-vid.mp4" muted></video>
 		{/if}
 	</div>
 </div>
