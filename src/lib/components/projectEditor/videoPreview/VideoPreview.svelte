@@ -21,11 +21,7 @@
 				return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Audio);
 			});
 	});
-
-	$inspect(() => {
-		console.log('Current Video:', currentVideo());
-		console.log('Current Audio:', currentAudio());
-	});
+	$inspect(currentAudio());
 
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
@@ -42,7 +38,6 @@
 			untrack(() => {
 				setupAudio();
 			});
-			console.log('Audio changed, reloading audio');
 		}
 	});
 
@@ -104,18 +99,15 @@
 	$effect(() => {
 		if (videoElement) {
 			videoElement.ontimeupdate = handleTimeUpdate;
-			console.log('Video element time update handler assigned');
 		}
 	});
 
 	function triggerVideoAndAudioToFitCursor() {
-		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition;
+		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition + 1;
 	}
 	function handleTimeUpdate() {
 		// Lorsque le temps actuel dans le composant <video> change, on met à jour le curseur de la timeline
 		if (videoElement && videoElement.currentTime !== undefined && isPlaying) {
-			console.log('Video time update:', videoElement.currentTime, 'isPlaying:', isPlaying);
-
 			// Calculer la position absolue dans la timeline basée sur la vidéo
 			const currentVideoClip = globalState
 				.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)
@@ -125,26 +117,7 @@
 				// La position du curseur = début du clip + temps écoulé dans la vidéo (en ms)
 				const absolutePosition = currentVideoClip.startTime + videoElement.currentTime * 1000;
 				getTimelineSettings().cursorPosition = absolutePosition;
-				console.log(
-					'Updating cursor position to:',
-					absolutePosition,
-					'from video clip start:',
-					currentVideoClip.startTime,
-					'video time:',
-					videoElement.currentTime
-				);
-			} else {
-				console.warn('No current video clip found');
 			}
-		} else {
-			console.log(
-				'Video time update skipped - videoElement:',
-				!!videoElement,
-				'currentTime:',
-				videoElement?.currentTime,
-				'isPlaying:',
-				isPlaying
-			);
 		}
 	}
 
@@ -160,7 +133,6 @@
 				const audioPositionMs = audioHowl.seek() * 1000;
 				const absolutePosition = currentAudioClip.startTime + audioPositionMs;
 				getTimelineSettings().cursorPosition = absolutePosition;
-				console.log('Audio time update:', audioHowl.seek(), 'seconds =', audioPositionMs, 'ms');
 			}
 		}
 	}
@@ -262,13 +234,13 @@
 			});
 		}
 	}
-	function play() {
+	function play(fromButton: boolean = false) {
 		// Si il n'y a aucun clip vidéo ou audio, on ne peut pas jouer
 		if (!currentVideo() && !currentAudio()) {
-			console.warn('No video or audio to play');
-			toast('No video or audio to play. Please add some media to the timeline.', {
-				duration: 5000
-			});
+			if (fromButton)
+				toast('No video or audio to play. Please add some media to the timeline.', {
+					duration: 5000
+				});
 			return;
 		}
 
@@ -309,29 +281,14 @@
 	}
 	function goNextVideo() {
 		// Quand une vidéo se termine, on cherche le prochain média (vidéo ou audio)
-		goToNextMedia();
+		goToNextMedia(true, false);
 	}
 	function goNextAudio() {
-		// Quand un audio se termine, vérifie d'abord s'il y a encore une vidéo en cours
-		const currentVideoClip = globalState
-			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)
-			?.getCurrentClip();
-
-		if (currentVideoClip) {
-			const currentTime = getTimelineSettings().cursorPosition;
-			// Si on est encore dans la durée de la vidéo actuelle, on continue sans audio
-			if (currentTime < currentVideoClip.endTime) {
-				console.log('Audio ended but video is still playing, continuing video without audio');
-				// On ne fait rien, la vidéo continue naturellement
-				return;
-			}
-		}
-
-		// Sinon, on passe au média suivant
-		goToNextMedia();
+		// Quand un audio se termine, on cherche le prochain média (vidéo ou audio)
+		goToNextMedia(false, true);
 	}
 
-	function goToNextMedia() {
+	function goToNextMedia(video: boolean = true, audio: boolean = true) {
 		const currentTime = getTimelineSettings().cursorPosition;
 
 		// Trouve tous les clips suivants (vidéo et audio) après la position actuelle
@@ -344,14 +301,14 @@
 
 		const nextClips: { clip: any; startTime: number }[] = [];
 
-		if (videoTrack) {
+		if (videoTrack && video) {
 			const nextVideoClip = videoTrack.clips.find((clip) => clip.startTime > currentTime);
 			if (nextVideoClip) {
 				nextClips.push({ clip: nextVideoClip, startTime: nextVideoClip.startTime });
 			}
 		}
 
-		if (audioTrack) {
+		if (audioTrack && audio) {
 			const nextAudioClip = audioTrack.clips.find((clip) => clip.startTime > currentTime);
 			if (nextAudioClip) {
 				nextClips.push({ clip: nextAudioClip, startTime: nextAudioClip.startTime });
@@ -366,12 +323,9 @@
 
 			// Avance le curseur au début du prochain clip
 			getTimelineSettings().cursorPosition = earliestClip.startTime;
-			// Déclenche la mise à jour de la preview
-			triggerVideoAndAudioToFitCursor();
-		} else {
-			// Aucun clip suivant, on met en pause
-			pause();
 		}
+
+		triggerVideoAndAudioToFitCursor();
 	}
 </script>
 
@@ -397,7 +351,7 @@
 		if (isPlaying) {
 			pause();
 		} else {
-			play();
+			play(true);
 		}
 	}}
 >
