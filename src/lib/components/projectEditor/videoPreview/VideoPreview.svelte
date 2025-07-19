@@ -259,7 +259,7 @@
 					// Synchronise la position dans l'audio avec la position du curseur
 					seekAudio(getCurrentAudioTimeToPlay());
 
-					// Démarre la mise à jour régulière du curseur (uniquement s'il n'y a pas de vidéo active)
+					// Démarre la mise à jour régulière du curseur
 					if (!audioUpdateInterval) {
 						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 10); // Mise à jour toutes les 10ms
 					}

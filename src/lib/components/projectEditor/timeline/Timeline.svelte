@@ -47,8 +47,14 @@
 		const target = event.currentTarget as HTMLElement;
 		if (!target) return;
 
-		//@ts-ignore
-		if (event.target!.closest('.track-left-part')) return;
+		// Si l'élément est un bouton ou un élément interactif ou son parent direct, on ne fait rien
+		if (
+			//@ts-ignore
+			event.target!.closest('.track-left-part') ||
+			//@ts-ignore
+			event.target.classList.contains('material-icons')
+		)
+			return;
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
