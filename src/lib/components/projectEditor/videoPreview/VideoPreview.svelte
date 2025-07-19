@@ -212,7 +212,7 @@
 
 					// Démarre la mise à jour régulière du curseur basé sur l'audio (seulement s'il n'y a pas de vidéo)
 					if (!currentVideo() && !audioUpdateInterval) {
-						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 100); // Met à jour toutes les 100ms
+						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 10); // Met à jour toutes les 10ms
 					}
 				},
 				onpause: () => {
