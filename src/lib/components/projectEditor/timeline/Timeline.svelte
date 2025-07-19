@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import Track from './track/Track.svelte';
 	import { Duration } from '$lib/classes';
+	import { slide } from 'svelte/transition';
 
 	let totalDuration = $derived(() => {
 		// Récupère la fin du clip le plus loin dans la timeline
@@ -176,7 +177,7 @@
 
 			<!-- Playhead cursor in ruler -->
 			<div
-				class="playhead-ruler transition-all duration-500"
+				class="playhead-ruler"
 				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
 					180}px;"
 			>
@@ -216,7 +217,7 @@
 
 			<!-- Main playhead cursor -->
 			<div
-				class="playhead-cursor transition-all duration-500"
+				class="playhead-cursor"
 				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
 					180}px;"
 			></div>

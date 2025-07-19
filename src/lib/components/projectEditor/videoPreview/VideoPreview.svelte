@@ -1,15 +1,24 @@
 <script lang="ts">
-	import { TrackType } from '$lib/classes';
+	import { Asset, TrackType } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { onMount, untrack } from 'svelte';
 	import { Howl } from 'howler';
 
+	let getTimelineSettings = $derived(() => {
+		return globalState.currentProject!.projectEditorState.timeline;
+	});
 	let currentVideo = $derived(() => {
-		return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Video);
+		if (getTimelineSettings().movePreviewTo)
+			return untrack(() => {
+				return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Video);
+			});
 	});
 	let currentAudio = $derived(() => {
-		return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Audio);
+		if (getTimelineSettings().movePreviewTo)
+			return untrack(() => {
+				return globalState.currentProject!.content.timeline.getCurrentAssetOnTrack(TrackType.Audio);
+			});
 	});
 
 	let videoElement = $state<HTMLVideoElement | null>(null);
@@ -22,39 +31,131 @@
 	});
 
 	$effect(() => {
+		if (currentAudio()) {
+			// L'audio a joué n'est plus le même, on doit le recharger
+			untrack(() => {
+				setupAudio();
+			});
+			console.log('Audio changed, reloading audio');
+		}
+	});
+
+	$effect(() => {
 		// Si le curseur bouge, alors on doit aussi mettre à jour la vidéo au bon timing
 		if (globalState.currentProject?.projectEditorState.timeline.movePreviewTo) {
 			untrack(() => {
-				const newTime = globalState.currentProject!.projectEditorState.timeline.movePreviewTo;
+				const wasPlaying = isPlaying;
+				pause(); // On met en pause pour que le onplay() de Howl se délenche et seek l'audio à la bonne position
+
 				// Met à jour la vidéo en fonction de la position du curseur
 				// cursorPosition est en ms
 				if (currentVideo()) {
 					if (videoElement) {
-						videoElement.currentTime = newTime / 1000; // Convertit en secondes
+						videoElement.currentTime = getCurrentVideoTimeToPlay();
 					}
 				}
 
-				// Met à jour l'audio en fonction de la position du curseur
-				if (currentAudio()) {
-					console.log('Seeking audio to', newTime);
-					seekAudio(newTime / 1000); // Convertit en secondes
+				// Le sync de l'audio se fait dans le onplay de Howl
+
+				if (wasPlaying) {
+					play(); // Reprend la lecture si on était en train de lire
 				}
 			});
 		}
 	});
+	function getCurrentAudioTimeToPlay(): number {
+		const currentClip = globalState
+			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Audio)!
+			.getCurrentClip();
 
+		if (!currentClip) return 0;
+
+		// Le temps dans l'audio = position du curseur - début du clip
+		const timeInClip = getTimelineSettings().movePreviewTo - currentClip.startTime;
+		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour Howler
+	}
+
+	function getCurrentVideoTimeToPlay(): number {
+		const currentClip = globalState
+			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)!
+			.getCurrentClip();
+
+		if (!currentClip) return 0;
+
+		// Le temps dans la vidéo = position du curseur - début du clip
+		const timeInClip = getTimelineSettings().movePreviewTo - currentClip.startTime;
+		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour l'élément video HTML
+	}
 	onMount(() => {
 		resizeVideoToFitScreen();
 		window.addEventListener('resize', resizeVideoToFitScreen);
 
-		videoElement!.ontimeupdate = handleTimeUpdate;
+		// Trigger la réactivité pour mettre la vidéo et l'audio à la position du curseur
+		triggerVideoAndAudioToFitCursor();
 	});
 
+	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné
+	$effect(() => {
+		if (videoElement) {
+			videoElement.ontimeupdate = handleTimeUpdate;
+			console.log('Video element time update handler assigned');
+		}
+	});
+
+	function triggerVideoAndAudioToFitCursor() {
+		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition;
+	}
 	function handleTimeUpdate() {
-		// Lorsque le temps actuel dans le composant <video> ou l'audio change, on met à jour le curseur de la timeline
-		if (videoElement && videoElement!.currentTime) {
-			globalState.currentProject!.projectEditorState.timeline.cursorPosition =
-				videoElement!.currentTime * 1000; // Convertit en millisecondes
+		// Lorsque le temps actuel dans le composant <video> change, on met à jour le curseur de la timeline
+		if (videoElement && videoElement.currentTime !== undefined && isPlaying) {
+			console.log('Video time update:', videoElement.currentTime, 'isPlaying:', isPlaying);
+
+			// Calculer la position absolue dans la timeline basée sur la vidéo
+			const currentVideoClip = globalState
+				.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)
+				?.getCurrentClip();
+
+			if (currentVideoClip) {
+				// La position du curseur = début du clip + temps écoulé dans la vidéo (en ms)
+				const absolutePosition = currentVideoClip.startTime + videoElement.currentTime * 1000;
+				getTimelineSettings().cursorPosition = absolutePosition;
+				console.log(
+					'Updating cursor position to:',
+					absolutePosition,
+					'from video clip start:',
+					currentVideoClip.startTime,
+					'video time:',
+					videoElement.currentTime
+				);
+			} else {
+				console.warn('No current video clip found');
+			}
+		} else {
+			console.log(
+				'Video time update skipped - videoElement:',
+				!!videoElement,
+				'currentTime:',
+				videoElement?.currentTime,
+				'isPlaying:',
+				isPlaying
+			);
+		}
+	}
+
+	// Fonction séparée pour mettre à jour le curseur basé sur l'audio
+	function handleAudioTimeUpdate() {
+		if (audioHowl && isPlaying) {
+			const currentAudioClip = globalState
+				.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Audio)
+				?.getCurrentClip();
+
+			if (currentAudioClip) {
+				// .seek() retourne la position en secondes, on la convertit en ms
+				const audioPositionMs = audioHowl.seek() * 1000;
+				const absolutePosition = currentAudioClip.startTime + audioPositionMs;
+				getTimelineSettings().cursorPosition = absolutePosition;
+				console.log('Audio time update:', audioHowl.seek(), 'seconds =', audioPositionMs, 'ms');
+			}
 		}
 	}
 
@@ -108,71 +209,155 @@
 			previewContainer.style.transform += ' translateY(-50%)';
 		}
 	}
-
 	let audioHowl: Howl | null = null;
 	let isPlaying = $state(false);
-	let audioDuration = $state(0);
-	let audioSeek = $state(0);
-	let audioInterval: any = null;
+	let audioUpdateInterval: number | null = null;
 
 	function setupAudio() {
 		if (audioHowl) {
 			audioHowl.unload();
 			audioHowl = null;
 		}
+		if (audioUpdateInterval) {
+			clearInterval(audioUpdateInterval);
+			audioUpdateInterval = null;
+		}
+
 		const audioAsset = currentAudio();
 		if (audioAsset) {
 			audioHowl = new Howl({
 				src: [convertFileSrc(audioAsset.filePath)],
 				html5: true, // important pour les gros fichiers et le VBR
-				onload: () => {
-					audioDuration = audioHowl?.duration() || 0;
+				onplay: () => {
+					// Sync la position dans l'audio avec la position du curseur
+					seekAudio(getCurrentAudioTimeToPlay());
+
+					// Démarre la mise à jour régulière du curseur basé sur l'audio (seulement s'il n'y a pas de vidéo)
+					if (!currentVideo() && !audioUpdateInterval) {
+						audioUpdateInterval = setInterval(handleAudioTimeUpdate, 100); // Met à jour toutes les 100ms
+					}
+				},
+				onpause: () => {
+					// Arrête la mise à jour du curseur
+					if (audioUpdateInterval) {
+						clearInterval(audioUpdateInterval);
+						audioUpdateInterval = null;
+					}
 				},
 				onend: () => {
-					isPlaying = false;
-					clearInterval(audioInterval);
+					// Arrête la mise à jour du curseur
+					if (audioUpdateInterval) {
+						clearInterval(audioUpdateInterval);
+						audioUpdateInterval = null;
+					}
+					// Quand l'audio se termine, passe au suivant
+					goNextAudio();
 				}
 			});
 		}
 	}
-
 	function play() {
+		isPlaying = true;
+
 		if (audioHowl) {
 			audioHowl.play();
-			isPlaying = true;
 		}
-		const videoElement = document.querySelector('#preview video') as HTMLVideoElement;
 		if (videoElement) {
 			videoElement.play();
 		}
 	}
 
 	function pause() {
+		isPlaying = false;
+
 		if (audioHowl) {
 			audioHowl.pause();
-			isPlaying = false;
-			clearInterval(audioInterval);
 		}
-		const videoElement = document.querySelector('#preview video') as HTMLVideoElement;
 		if (videoElement) {
 			videoElement.pause();
+		}
+
+		// Permet de reprendre la vidéo et l'audio à la position du curseur pour la prochaine fois
+		getTimelineSettings().movePreviewTo = getTimelineSettings().cursorPosition;
+
+		// Arrête la mise à jour du curseur audio
+		if (audioUpdateInterval) {
+			clearInterval(audioUpdateInterval);
+			audioUpdateInterval = null;
 		}
 	}
 
 	function seekAudio(val: number) {
 		if (audioHowl) {
 			audioHowl.seek(val);
-			audioSeek = val;
 		}
 	}
+	function goNextVideo() {
+		// Quand une vidéo se termine, on cherche le prochain média (vidéo ou audio)
+		goToNextMedia();
+	}
+	function goNextAudio() {
+		// Quand un audio se termine, vérifie d'abord s'il y a encore une vidéo en cours
+		const currentVideoClip = globalState
+			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)
+			?.getCurrentClip();
 
-	$effect(() => {
-		setupAudio();
-		return () => {
-			if (audioHowl) audioHowl.unload();
-			clearInterval(audioInterval);
-		};
-	});
+		if (currentVideoClip) {
+			const currentTime = getTimelineSettings().cursorPosition;
+			// Si on est encore dans la durée de la vidéo actuelle, on continue sans audio
+			if (currentTime < currentVideoClip.endTime) {
+				console.log('Audio ended but video is still playing, continuing video without audio');
+				// On ne fait rien, la vidéo continue naturellement
+				return;
+			}
+		}
+
+		// Sinon, on passe au média suivant
+		goToNextMedia();
+	}
+
+	function goToNextMedia() {
+		const currentTime = getTimelineSettings().cursorPosition;
+
+		// Trouve tous les clips suivants (vidéo et audio) après la position actuelle
+		const videoTrack = globalState.currentProject!.content.timeline.tracks.find(
+			(t) => t.type === TrackType.Video
+		);
+		const audioTrack = globalState.currentProject!.content.timeline.tracks.find(
+			(t) => t.type === TrackType.Audio
+		);
+
+		const nextClips: { clip: any; startTime: number }[] = [];
+
+		if (videoTrack) {
+			const nextVideoClip = videoTrack.clips.find((clip) => clip.startTime > currentTime);
+			if (nextVideoClip) {
+				nextClips.push({ clip: nextVideoClip, startTime: nextVideoClip.startTime });
+			}
+		}
+
+		if (audioTrack) {
+			const nextAudioClip = audioTrack.clips.find((clip) => clip.startTime > currentTime);
+			if (nextAudioClip) {
+				nextClips.push({ clip: nextAudioClip, startTime: nextAudioClip.startTime });
+			}
+		}
+
+		if (nextClips.length > 0) {
+			// Trouve le clip qui commence le plus tôt
+			const earliestClip = nextClips.reduce((earliest, current) =>
+				current.startTime < earliest.startTime ? current : earliest
+			);
+
+			// Avance le curseur au début du prochain clip
+			getTimelineSettings().cursorPosition = earliestClip.startTime;
+			// Déclenche la mise à jour de la preview
+			triggerVideoAndAudioToFitCursor();
+		} else {
+			// Aucun clip suivant, on met en pause
+			pause();
+		}
+	}
 </script>
 
 <div
@@ -181,7 +366,12 @@
 >
 	<div class={'relative origin-top-left bg-black'} id="preview">
 		{#if currentVideo()}
-			<video bind:this={videoElement} src={convertFileSrc(currentVideo()!.filePath)} muted></video>
+			<video
+				bind:this={videoElement}
+				src={convertFileSrc(currentVideo()!.filePath)}
+				muted
+				onended={goNextVideo}
+			></video>
 		{:else}
 			<video bind:this={videoElement} src="black-vid.mp4" muted></video>
 		{/if}
@@ -190,7 +380,7 @@
 
 <button
 	class="absolute bottom-2 left-2 z-10 bg-[var(--bg-secondary)] text-[var(--text-secondary)] p-2 rounded hover:bg-[var(--bg-accent)] transition-colors"
-	on:click={() => {
+	onclick={() => {
 		if (isPlaying) {
 			pause();
 		} else {

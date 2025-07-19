@@ -94,6 +94,7 @@
 			toast('Please wait for the asset to be loaded before adding it to the timeline.', {
 				duration: 3000
 			});
+			return;
 		}
 
 		// Ajoute l'asset à la timeline
