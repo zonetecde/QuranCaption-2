@@ -2,7 +2,7 @@
 export { Duration } from './Duration.js';
 export { ProjectDetail } from './ProjectDetail.svelte.js';
 export { ProjectContent } from './ProjectContent.svelte.js';
-export { ProjectEditorState } from '$lib/runes/ProjectEditorState.svelte.js';
+export { ProjectEditorState } from './ProjectEditorState.svelte.js';
 export { Project } from './Project.js';
 export { Timeline } from './Timeline.svelte.js';
 export { Track, SubtitleTrack } from './Track.svelte.js';

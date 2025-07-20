@@ -1,5 +1,5 @@
-import { ProjectEditorTabs } from '../classes/enums';
-import { SerializableBase } from '../classes/misc/SerializableBase';
+import { ProjectEditorTabs } from './enums';
+import { SerializableBase } from './misc/SerializableBase';
 
 /**
  * État de l'éditeur de projet, utilisé pour gérer l'interface utilisateur et les interactions

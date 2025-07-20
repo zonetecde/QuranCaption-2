@@ -4,6 +4,7 @@
 	import Track from './track/Track.svelte';
 	import { Duration } from '$lib/classes';
 	import { slide } from 'svelte/transition';
+	import ShortcutService from '$lib/services/ShortcutService';
 
 	let totalDuration = $derived(() => {
 		// Récupère la fin du clip le plus loin dans la timeline
@@ -107,12 +108,6 @@
 		timelineSettings().movePreviewTo = newPosition;
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter' || event.key === ' ') {
-			handleTimelineClick(event as any);
-		}
-	}
-
 	// Synchronise le scroll entre la règle et les pistes
 	function syncScroll(event: Event) {
 		const source = event.target as HTMLElement;
@@ -194,12 +189,12 @@
 
 	<!-- Timeline Tracks Area -->
 	<div class="timeline-tracks" onscroll={syncScroll}>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="tracks-content"
+			class="tracks-content outline-none"
 			style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
 			onclick={handleTimelineClick}
 			onmousemove={handleTimelineDrag}
-			onkeydown={handleKeydown}
 			role="button"
 			tabindex="0"
 		>

@@ -2,9 +2,10 @@
 	import { Asset, TrackType } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
-	import { onMount, untrack } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import { Howl } from 'howler';
 	import toast from 'svelte-5-french-toast';
+	import ShortcutService from '$lib/services/ShortcutService';
 
 	// === ÉTATS RÉACTIFS DÉRIVÉS ===
 	// Récupère les paramètres de la timeline depuis l'état global
@@ -114,6 +115,80 @@
 
 		// Force la synchronisation initiale vidéo/audio avec la position du curseur
 		triggerVideoAndAudioToFitCursor();
+		// Set les shortcuts pour le preview
+		ShortcutService.registerShortcut({
+			key: ' ',
+			description: 'Play/Pause the video preview',
+			category: 'Video Preview',
+			preventDefault: true,
+			onKeyDown: (e) => {
+				if (isPlaying) {
+					pause();
+				} else {
+					play(true);
+				}
+			}
+		});
+
+		ShortcutService.registerShortcut({
+			key: 'arrowright',
+			description: 'Move preview forward by 2 seconds',
+			category: 'Video Preview',
+			preventDefault: true,
+			onKeyDown: (e) => {
+				const currentTime = getTimelineSettings().cursorPosition;
+				getTimelineSettings().cursorPosition = currentTime + 2000; // Avance de 2 secondes
+				getTimelineSettings().movePreviewTo = currentTime + 2000;
+			}
+		});
+
+		ShortcutService.registerShortcut({
+			key: 'arrowleft',
+			description: 'Move preview backward by 2 seconds',
+			category: 'Video Preview',
+			preventDefault: true,
+			onKeyDown: (e) => {
+				const currentTime = getTimelineSettings().cursorPosition;
+				getTimelineSettings().cursorPosition = Math.max(1, currentTime - 2000); // Recule de 2 secondes
+				getTimelineSettings().movePreviewTo = Math.max(1, currentTime - 2000);
+			}
+		});
+
+		ShortcutService.registerShortcut({
+			key: ['pagedown', 'pageup'],
+			description: 'Set video speed to 2x',
+			category: 'Video Preview',
+			preventDefault: true,
+			onKeyDown: (e) => {
+				audioSpeed = 2;
+				if (videoElement) {
+					videoElement.playbackRate = 2; // Double la vitesse de lecture
+				}
+				if (audioHowl) {
+					audioHowl.rate(2); // Double la vitesse de lecture audio
+				}
+			},
+			onKeyUp: (e) => {
+				audioSpeed = 1; // Réinitialise la vitesse audio
+
+				if (videoElement) {
+					videoElement.playbackRate = 1;
+				}
+				if (audioHowl) {
+					audioHowl.rate(1);
+				}
+			}
+		});
+	});
+
+	onDestroy(() => {
+		pause(); // Met en pause la lecture pour éviter les fuites de mémoire
+
+		// Enlève tout les shortcuts enregistrés
+		ShortcutService.unregisterShortcut(' ');
+		ShortcutService.unregisterShortcut('arrowright');
+		ShortcutService.unregisterShortcut('arrowleft');
+		ShortcutService.unregisterShortcut('pagedown');
 	});
 
 	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo
@@ -235,6 +310,7 @@
 	let audioHowl: Howl | null = null; // Instance Howler pour la lecture audio
 	let isPlaying = $state(false); // État de lecture global
 	let audioUpdateInterval: number | null = null; // Intervalle pour la mise à jour du curseur audio
+	let audioSpeed = $state(1); // Vitesse de lecture audio
 
 	/**
 	 * Configure et initialise l'instance Howler pour l'audio actuel
@@ -255,6 +331,7 @@
 			audioHowl = new Howl({
 				src: [convertFileSrc(audioAsset.filePath)],
 				html5: true, // Important pour les gros fichiers et le VBR (Variable Bit Rate)
+				rate: audioSpeed, // Vitesse de lecture initiale
 				onplay: () => {
 					// Synchronise la position dans l'audio avec la position du curseur
 					seekAudio(getCurrentAudioTimeToPlay());
