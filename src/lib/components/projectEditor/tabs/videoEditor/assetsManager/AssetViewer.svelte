@@ -26,7 +26,7 @@
 
 	async function editAsset() {
 		const response = await ModalManager.confirmModal(
-			'This will open a website that allows you to crop and trim your asset. Once you are done, you can download the edited file and close the window. The new file will be automatically detected by the application.'
+			'This will open a website that allows you to crop and trim your asset. Once you are done, you can download the edited file and close the window once the download is complete. The new file will be automatically detected by the application.'
 		);
 		if (response) {
 			let startTime = new Date().getTime();

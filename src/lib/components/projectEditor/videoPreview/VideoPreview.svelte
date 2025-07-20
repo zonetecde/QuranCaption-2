@@ -311,6 +311,7 @@
 	let isPlaying = $state(false); // État de lecture global
 	let audioUpdateInterval: number | null = null; // Intervalle pour la mise à jour du curseur audio
 	let audioSpeed = $state(1); // Vitesse de lecture audio
+	let currentlyPlayingAudio: Asset | null | undefined = null; // L'asset audio actuellement joué
 
 	/**
 	 * Configure et initialise l'instance Howler pour l'audio actuel
@@ -327,6 +328,7 @@
 		}
 
 		const audioAsset = currentAudio();
+		currentlyPlayingAudio = audioAsset; // Met à jour l'asset actuellement joué
 		if (audioAsset) {
 			audioHowl = new Howl({
 				src: [convertFileSrc(audioAsset.filePath)],

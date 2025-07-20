@@ -7,7 +7,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { ProjectEditorTabs } from '$lib/classes';
 	import VideoEditor from './tabs/videoEditor/VideoEditor.svelte';
-	import DropOverlay from './tabs/videoEditor/assetsManager/DropOverlay.svelte';
+	import SubtitlesEditor from './tabs/subtitlesEditor/SubtitlesEditor.svelte';
 
 	let saveInterval: any;
 
@@ -28,5 +28,7 @@
 
 	{#if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.VideoEditor}
 		<VideoEditor />
+	{:else if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.SubtitlesEditor}
+		<SubtitlesEditor />
 	{/if}
 </div>
