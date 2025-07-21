@@ -22,8 +22,8 @@ export class ProjectEditorState extends SerializableBase {
 	// Timeline
 	timeline: TimelineState = $state(new TimelineState());
 
-	// Hauteur de la video preview par rapport à la timeline
-	videoPreviewHeight: number = $state(72.5);
+	// Video preview
+	videoPreview: VideoPreviewState = $state(new VideoPreviewState());
 }
 
 /**
@@ -44,4 +44,15 @@ export class TimelineState extends SerializableBase {
 
 	// On montre ou non les wavesforms
 	showWaveforms: boolean = $state(false);
+}
+
+/**
+ * État de la prévisualisation vidéo dans l'éditeur de projet.
+ */
+export class VideoPreviewState extends SerializableBase {
+	// Indique si la prévisualisation vidéo est en pause
+	isPlaying: boolean = $state(false);
+
+	// Hauteur de la video preview par rapport à la timeline
+	videoPreviewHeight: number = $state(72.5);
 }

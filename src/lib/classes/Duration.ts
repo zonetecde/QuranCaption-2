@@ -17,7 +17,7 @@ export class Duration extends SerializableBase {
 	 * selon la durée
 	 * @returns
 	 */
-	public getFormattedTime(alsoRemoveMinIfZero: boolean): string {
+	public getFormattedTime(alsoRemoveMinIfZero: boolean, showMs: boolean = false): string {
 		const totalSeconds = Math.floor(this.ms / 1000);
 		const hours = Math.floor(totalSeconds / 3600);
 		const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -30,6 +30,12 @@ export class Duration extends SerializableBase {
 				: `${minutes.toString().padStart(alsoRemoveMinIfZero ? 1 : 2, '0')}:`;
 
 		const formattedSeconds = seconds.toString().padStart(alsoRemoveMinIfZero ? 1 : 2, '0');
+		if (showMs) {
+			const milliseconds = Math.floor((this.ms % 1000) / 10)
+				.toString()
+				.padStart(2, '0');
+			return `${formattedHours}${formattedMinutes}${formattedSeconds}.${milliseconds}`;
+		}
 
 		return `${formattedHours}${formattedMinutes}${formattedSeconds}`;
 	}

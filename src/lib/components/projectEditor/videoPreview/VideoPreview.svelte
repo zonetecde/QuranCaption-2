@@ -2,10 +2,17 @@
 	import { Asset, TrackType } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
-	import { onDestroy, onMount, untrack } from 'svelte';
+	import { mount, onDestroy, onMount, unmount, untrack } from 'svelte';
 	import { Howl } from 'howler';
 	import toast from 'svelte-5-french-toast';
 	import ShortcutService from '$lib/services/ShortcutService';
+	import VideoPreviewControlsBar from './VideoPreviewControlsBar.svelte';
+
+	let {
+		showControls
+	}: {
+		showControls: boolean;
+	} = $props();
 
 	// === ÉTATS RÉACTIFS DÉRIVÉS ===
 	// Récupère les paramètres de la timeline depuis l'état global
@@ -37,7 +44,7 @@
 
 	// Effect qui redimensionne la vidéo quand la hauteur de la prévisualisation change
 	$effect(() => {
-		if (globalState.currentProject?.projectEditorState.videoPreviewHeight) {
+		if (globalState.currentProject?.projectEditorState.videoPreview.videoPreviewHeight) {
 			resizeVideoToFitScreen();
 		}
 	});
@@ -69,6 +76,35 @@
 
 				if (wasPlaying) {
 					play(); // Reprend la lecture si on était en train de lire
+				}
+			});
+		}
+	});
+
+	// Effect pour que le scroll soit automatique afin de suivre le curseur dans la timeline
+	$effect(() => {
+		if (getTimelineSettings().cursorPosition) {
+			untrack(() => {
+				if (!isPlaying) return;
+
+				// Scroll juqu'à la position du curseur
+				const element = document.getElementById('cursor');
+				const timeline = document.getElementById('timeline');
+
+				if (element && timeline) {
+					// Met le scroll à 0
+					timeline.scrollLeft = 0;
+
+					// Récupère la position du curseur par rapport à la timeline
+					const cursorPositionRelativeToTimeline =
+						element.getBoundingClientRect().left - timeline.getBoundingClientRect().left;
+
+					const newScrollLeftPos = cursorPositionRelativeToTimeline - window.innerWidth / 2 + 300;
+
+					// Scroll pour suivre le curseur
+					timeline.scrollTo({
+						left: newScrollLeftPos
+					});
 				}
 			});
 		}
@@ -108,6 +144,8 @@
 		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour l'élément video HTML
 	}
 
+	let controlsBarComponent: VideoPreviewControlsBar | null = null;
+
 	// === CYCLE DE VIE DU COMPOSANT ===
 	onMount(() => {
 		resizeVideoToFitScreen(); // Redimensionne initial
@@ -115,6 +153,7 @@
 
 		// Force la synchronisation initiale vidéo/audio avec la position du curseur
 		triggerVideoAndAudioToFitCursor();
+
 		// Set les shortcuts pour le preview
 		ShortcutService.registerShortcut({
 			key: ' ',
@@ -122,11 +161,7 @@
 			category: 'Video Preview',
 			preventDefault: true,
 			onKeyDown: (e) => {
-				if (isPlaying) {
-					pause();
-				} else {
-					play(true);
-				}
+				togglePlayPause();
 			}
 		});
 
@@ -179,6 +214,28 @@
 				}
 			}
 		});
+
+		if (showControls) {
+			// Ajoute à après l'élément #video-preview-section le component VideoPreviewControlsBar
+			const videoPreviewSection = document.getElementById('video-preview-section');
+			if (videoPreviewSection) {
+				// l'ajoute après cet élément dans la div parent
+				const parent = videoPreviewSection.parentNode;
+				if (parent) {
+					const controlsBar = document.createElement('div');
+					controlsBar.id = 'video-preview-controls-bar';
+					parent.insertBefore(controlsBar, videoPreviewSection.nextSibling);
+
+					// Monte le composant VideoPreviewControlsBar dans le DOM
+					controlsBarComponent = mount(VideoPreviewControlsBar, {
+						target: controlsBar,
+						props: {
+							togglePlayPause: togglePlayPause
+						}
+					});
+				}
+			}
+		}
 	});
 
 	onDestroy(() => {
@@ -189,6 +246,9 @@
 		ShortcutService.unregisterShortcut('arrowright');
 		ShortcutService.unregisterShortcut('arrowleft');
 		ShortcutService.unregisterShortcut('pagedown');
+
+		// Supprime la controlsbar
+		unmount(controlsBarComponent!);
 	});
 
 	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo
@@ -311,12 +371,22 @@
 	let isPlaying = $state(false); // État de lecture global
 	let audioUpdateInterval: number | null = null; // Intervalle pour la mise à jour du curseur audio
 	let audioSpeed = $state(1); // Vitesse de lecture audio
-	let currentlyPlayingAudio: Asset | null | undefined = null; // L'asset audio actuellement joué
+	let currentlyPlayingAudio: string = ''; // L'asset audio actuellement joué
+
+	function togglePlayPause() {
+		if (isPlaying) {
+			pause();
+		} else {
+			play(true);
+		}
+	}
 
 	/**
 	 * Configure et initialise l'instance Howler pour l'audio actuel
 	 */
 	function setupAudio() {
+		const audioAsset = currentAudio();
+
 		// Nettoyage de l'instance précédente
 		if (audioHowl) {
 			audioHowl.unload();
@@ -327,9 +397,9 @@
 			audioUpdateInterval = null;
 		}
 
-		const audioAsset = currentAudio();
-		currentlyPlayingAudio = audioAsset; // Met à jour l'asset actuellement joué
 		if (audioAsset) {
+			currentlyPlayingAudio = audioAsset.filePath; // Met à jour l'asset actuellement joué
+
 			audioHowl = new Howl({
 				src: [convertFileSrc(audioAsset.filePath)],
 				html5: true, // Important pour les gros fichiers et le VBR (Variable Bit Rate)
@@ -379,6 +449,7 @@
 		}
 
 		isPlaying = true;
+		globalState.currentProject!.projectEditorState.videoPreview.isPlaying = true;
 
 		// Lance la lecture audio et vidéo simultanément
 		if (audioHowl) {
@@ -394,6 +465,7 @@
 	 */
 	function pause() {
 		isPlaying = false;
+		globalState.currentProject!.projectEditorState.videoPreview.isPlaying = false;
 
 		// Pause audio et vidéo
 		if (audioHowl) {
@@ -503,20 +575,6 @@
 		{/if}
 	</div>
 </div>
-
-<!-- Bouton de contrôle play/pause -->
-<button
-	class="absolute bottom-2 left-2 z-10 bg-[var(--bg-secondary)] text-[var(--text-secondary)] p-2 rounded hover:bg-[var(--bg-accent)] transition-colors"
-	onclick={() => {
-		if (isPlaying) {
-			pause();
-		} else {
-			play(true);
-		}
-	}}
->
-	{isPlaying ? 'Pause' : 'Play'}
-</button>
 
 <style>
 	/* Styles pour assurer un dimensionnement correct */

@@ -188,7 +188,7 @@
 	</div>
 
 	<!-- Timeline Tracks Area -->
-	<div class="timeline-tracks" onscroll={syncScroll}>
+	<div class="timeline-tracks" onscroll={syncScroll} id="timeline">
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			class="tracks-content outline-none"
@@ -219,6 +219,7 @@
 			<!-- Main playhead cursor -->
 			<div
 				class="playhead-cursor"
+				id="cursor"
 				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
 					180}px;"
 			></div>

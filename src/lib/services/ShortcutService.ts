@@ -63,7 +63,7 @@ class ShortcutService {
 			if (shortcut.preventDefault !== false) {
 				event.preventDefault();
 			}
-			console.log(`Shortcut triggered: ${shortcut.description} for key: ${key}`);
+
 			shortcut.onKeyDown(event);
 		}
 	}

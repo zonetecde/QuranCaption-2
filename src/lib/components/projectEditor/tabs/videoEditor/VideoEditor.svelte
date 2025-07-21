@@ -2,6 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import Timeline from '../../timeline/Timeline.svelte';
 	import VideoPreview from '../../videoPreview/VideoPreview.svelte';
+	import VideoPreviewControlsBar from '../../videoPreview/VideoPreviewControlsBar.svelte';
 	import DiviseurRedimensionnable from '../DiviseurRedimensionnable.svelte';
 	import AssetsManager from './assetsManager/AssetsManager.svelte';
 </script>
@@ -18,9 +19,11 @@
 			<!-- Video preview -->
 			<section
 				class="overflow-hidden min-h-0"
-				style="height: {globalState.currentProject!.projectEditorState.videoPreviewHeight}%;"
+				id="video-preview-section"
+				style="height: {globalState.currentProject!.projectEditorState.videoPreview
+					.videoPreviewHeight}%;"
 			>
-				<VideoPreview />
+				<VideoPreview showControls />
 			</section>
 
 			<DiviseurRedimensionnable />
@@ -28,7 +31,8 @@
 			<!-- Timeline -->
 			<section
 				class="overflow-hidden min-w-0 timeline-section flex-1 min-h-0"
-				style="height: {100 - globalState.currentProject!.projectEditorState.videoPreviewHeight}%;"
+				style="height: {100 -
+					globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
 			>
 				<Timeline />
 			</section>
