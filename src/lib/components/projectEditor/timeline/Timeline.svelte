@@ -196,7 +196,7 @@
 		<div class="timeline-tracks" onscroll={syncScroll} id="timeline">
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
-				class="tracks-content outline-none"
+				class="tracks-content grid outline-none"
 				style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
 				onclick={handleTimelineClick}
 				onmousemove={handleTimelineDrag}
@@ -346,8 +346,9 @@
 		overflow-y: auto;
 		background: var(--timeline-bg-secondary);
 	}
+
 	.tracks-content {
-		min-height: 200px;
+		min-height: calc(100% - 4px);
 		position: relative;
 		cursor: crosshair;
 	}
@@ -380,7 +381,6 @@
 	.track-lanes {
 		position: relative;
 		z-index: 1;
-		min-height: min-content;
 		display: flex;
 		flex-direction: column;
 	}

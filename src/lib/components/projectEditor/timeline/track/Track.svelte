@@ -15,7 +15,7 @@
 	style="background: linear-gradient(90deg, var(--timeline-bg-accent) 0%, transparent 200px);"
 >
 	<div
-		class="left-0 top-0 bottom-0 w-[180px] border-r border-[var(--timeline-track-border)] flex items-center px-3 gap-2 z-20 track-left-part sticky h-[75px]"
+		class="left-0 top-0 bottom-0 w-[180px] h-full border-r border-[var(--timeline-track-border)] flex items-center px-3 gap-2 z-20 track-left-part sticky h-[75px]"
 		style="background: linear-gradient(135deg, var(--timeline-bg-accent) 0%, var(--timeline-bg-secondary) 100%);"
 	>
 		<span class="material-icons text-base opacity-80">{track.getIcon()}</span>
