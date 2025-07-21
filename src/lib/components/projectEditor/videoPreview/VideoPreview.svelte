@@ -534,7 +534,9 @@
 <section
 	class="overflow-hidden min-h-0"
 	id="video-preview-section"
-	style="height: {globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
+	style={showControls
+		? 'height: {globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;'
+		: ''}
 >
 	<div
 		class="w-full h-full flex flex-col relative overflow-hidden background-primary"
