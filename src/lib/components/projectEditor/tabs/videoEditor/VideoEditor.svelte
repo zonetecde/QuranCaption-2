@@ -17,25 +17,12 @@
 	<section class="flex-1 min-w-0 flex flex-row max-h-full min-h-0">
 		<section class="w-full min-w-0 flex flex-col min-h-0">
 			<!-- Video preview -->
-			<section
-				class="overflow-hidden min-h-0"
-				id="video-preview-section"
-				style="height: {globalState.currentProject!.projectEditorState.videoPreview
-					.videoPreviewHeight}%;"
-			>
-				<VideoPreview showControls />
-			</section>
+			<VideoPreview showControls />
 
 			<DiviseurRedimensionnable />
 
 			<!-- Timeline -->
-			<section
-				class="overflow-hidden min-w-0 timeline-section flex-1 min-h-0"
-				style="height: {100 -
-					globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
-			>
-				<Timeline />
-			</section>
+			<Timeline />
 		</section>
 	</section>
 	<!-- Settings -->

@@ -144,88 +144,94 @@
 	}
 </script>
 
-<div class="timeline-container select-none" onwheel={handleMouseWheelWheeling}>
-	<!-- Timeline Header -->
-	<div class="timeline-ruler" onscroll={syncScroll} bind:this={timelineDiv}>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div
-			class="ruler-content"
-			style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
-			onclick={handleRulerClick}
-			onmousemove={handleRulerDrag}
-			role="button"
-			tabindex="0"
-		>
-			<!-- Header spacer for alignment -->
-			<div class="ruler-header-spacer"></div>
-
-			<!-- Time markers -->
-			{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
-				{#if shouldShowTimestamp(i, timelineSettings().zoom)}
-					<div
-						class="time-marker"
-						class:major={getTimestampInterval(timelineSettings().zoom) >= 10 &&
-							i % (getTimestampInterval(timelineSettings().zoom) * 2) === 0}
-						style="left: {i * timelineSettings().zoom + 180}px;"
-					>
-						<div class="time-label z-5">
-							{new Duration(i * 1000).getFormattedTime(true)}
-						</div>
-						<div class="time-tick"></div>
-					</div>
-				{/if}
-			{/each}
-
-			<!-- Playhead cursor in ruler -->
+<section
+	class="overflow-hidden min-w-0 timeline-section flex-1 min-h-0"
+	style="height: {100 -
+		globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
+>
+	<div class="timeline-container select-none" onwheel={handleMouseWheelWheeling}>
+		<!-- Timeline Header -->
+		<div class="timeline-ruler" onscroll={syncScroll} bind:this={timelineDiv}>
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
-				class="playhead-ruler"
-				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
-					180}px;"
+				class="ruler-content"
+				style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
+				onclick={handleRulerClick}
+				onmousemove={handleRulerDrag}
+				role="button"
+				tabindex="0"
 			>
-				<div class="playhead-handle"></div>
-			</div>
-		</div>
-	</div>
+				<!-- Header spacer for alignment -->
+				<div class="ruler-header-spacer"></div>
 
-	<!-- Timeline Tracks Area -->
-	<div class="timeline-tracks" onscroll={syncScroll} id="timeline">
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div
-			class="tracks-content outline-none"
-			style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
-			onclick={handleTimelineClick}
-			onmousemove={handleTimelineDrag}
-			role="button"
-			tabindex="0"
-		>
-			<!-- Background grid -->
-			<div class="timeline-grid">
+				<!-- Time markers -->
 				{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
-					<div
-						class="grid-line"
-						class:major={shouldShowTimestamp(i, timelineSettings().zoom)}
-						style="left: {i * timelineSettings().zoom + 180}px;"
-					></div>
+					{#if shouldShowTimestamp(i, timelineSettings().zoom)}
+						<div
+							class="time-marker"
+							class:major={getTimestampInterval(timelineSettings().zoom) >= 10 &&
+								i % (getTimestampInterval(timelineSettings().zoom) * 2) === 0}
+							style="left: {i * timelineSettings().zoom + 180}px;"
+						>
+							<div class="time-label z-5">
+								{new Duration(i * 1000).getFormattedTime(true)}
+							</div>
+							<div class="time-tick"></div>
+						</div>
+					{/if}
 				{/each}
-			</div>
 
-			<!-- Track lanes -->
-			<div class="track-lanes">
-				{#each globalState.currentProject!.content.timeline.tracks as track, i}
-					<Track bind:track={globalState.currentProject!.content.timeline.tracks[i]} />
-				{/each}
+				<!-- Playhead cursor in ruler -->
+				<div
+					class="playhead-ruler"
+					style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
+						180}px;"
+				>
+					<div class="playhead-handle"></div>
+				</div>
 			</div>
+		</div>
 
-			<!-- Main playhead cursor -->
+		<!-- Timeline Tracks Area -->
+		<div class="timeline-tracks" onscroll={syncScroll} id="timeline">
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
-				class="playhead-cursor"
-				id="cursor"
-				style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
-					180}px;"
-			></div>
+				class="tracks-content outline-none"
+				style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
+				onclick={handleTimelineClick}
+				onmousemove={handleTimelineDrag}
+				role="button"
+				tabindex="0"
+			>
+				<!-- Background grid -->
+				<div class="timeline-grid">
+					{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
+						<div
+							class="grid-line"
+							class:major={shouldShowTimestamp(i, timelineSettings().zoom)}
+							style="left: {i * timelineSettings().zoom + 180}px;"
+						></div>
+					{/each}
+				</div>
+
+				<!-- Track lanes -->
+				<div class="track-lanes">
+					{#each globalState.currentProject!.content.timeline.tracks as track, i}
+						<Track bind:track={globalState.currentProject!.content.timeline.tracks[i]} />
+					{/each}
+				</div>
+
+				<!-- Main playhead cursor -->
+				<div
+					class="playhead-cursor"
+					id="cursor"
+					style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
+						180}px;"
+				></div>
+			</div>
 		</div>
 	</div>
-</div>
+</section>
 
 <style>
 	.timeline-container {

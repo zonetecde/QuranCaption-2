@@ -54,5 +54,5 @@ export class VideoPreviewState extends SerializableBase {
 	isPlaying: boolean = $state(false);
 
 	// Hauteur de la video preview par rapport à la timeline
-	videoPreviewHeight: number = $state(72.5);
+	videoPreviewHeight: number = $state(68);
 }

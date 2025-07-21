@@ -144,8 +144,6 @@
 		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour l'élément video HTML
 	}
 
-	let controlsBarComponent: VideoPreviewControlsBar | null = null;
-
 	// === CYCLE DE VIE DU COMPOSANT ===
 	onMount(() => {
 		resizeVideoToFitScreen(); // Redimensionne initial
@@ -214,28 +212,6 @@
 				}
 			}
 		});
-
-		if (showControls) {
-			// Ajoute à après l'élément #video-preview-section le component VideoPreviewControlsBar
-			const videoPreviewSection = document.getElementById('video-preview-section');
-			if (videoPreviewSection) {
-				// l'ajoute après cet élément dans la div parent
-				const parent = videoPreviewSection.parentNode;
-				if (parent) {
-					const controlsBar = document.createElement('div');
-					controlsBar.id = 'video-preview-controls-bar';
-					parent.insertBefore(controlsBar, videoPreviewSection.nextSibling);
-
-					// Monte le composant VideoPreviewControlsBar dans le DOM
-					controlsBarComponent = mount(VideoPreviewControlsBar, {
-						target: controlsBar,
-						props: {
-							togglePlayPause: togglePlayPause
-						}
-					});
-				}
-			}
-		}
 	});
 
 	onDestroy(() => {
@@ -246,9 +222,6 @@
 		ShortcutService.unregisterShortcut('arrowright');
 		ShortcutService.unregisterShortcut('arrowleft');
 		ShortcutService.unregisterShortcut('pagedown');
-
-		// Supprime la controlsbar
-		unmount(controlsBarComponent!);
 	});
 
 	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo
@@ -558,23 +531,32 @@
 	}
 </script>
 
-<!-- Interface utilisateur -->
-<div
-	class="w-full h-full flex flex-col relative overflow-hidden background-primary"
-	id="preview-container"
+<section
+	class="overflow-hidden min-h-0"
+	id="video-preview-section"
+	style="height: {globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
 >
-	<!-- Conteneur de la prévisualisation vidéo avec mise à l'échelle -->
-	<div class={'relative origin-top-left bg-black'} id="preview">
-		{#if currentVideo()}
-			<video
-				bind:this={videoElement}
-				src={convertFileSrc(currentVideo()!.filePath)}
-				muted
-				onended={goNextVideo}
-			></video>
-		{/if}
+	<div
+		class="w-full h-full flex flex-col relative overflow-hidden background-primary"
+		id="preview-container"
+	>
+		<!-- Conteneur de la prévisualisation vidéo avec mise à l'échelle -->
+		<div class={'relative origin-top-left bg-black'} id="preview">
+			{#if currentVideo()}
+				<video
+					bind:this={videoElement}
+					src={convertFileSrc(currentVideo()!.filePath)}
+					muted
+					onended={goNextVideo}
+				></video>
+			{/if}
+		</div>
 	</div>
-</div>
+</section>
+
+{#if showControls}
+	<VideoPreviewControlsBar {togglePlayPause} />
+{/if}
 
 <style>
 	/* Styles pour assurer un dimensionnement correct */
