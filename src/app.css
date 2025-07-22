@@ -9,6 +9,10 @@
 	font-style: normal;
 }
 
+.arabic {
+	font-family: 'Hafs', sans-serif;
+}
+
 .monospaced {
 	font-family: 'IBM Plex Mono', monospace;
 }
@@ -232,6 +236,14 @@ input[type='radio']:hover {
 input[type='radio']::selection {
 	background-color: var(--text-selection);
 	color: white;
+}
+
+input[type='number']::-webkit-inner-spin-button {
+	filter: invert(1);
+}
+
+input[type='number']::-webkit-inner-spin-button:hover {
+	opacity: 1;
 }
 
 /* Scroll bar */

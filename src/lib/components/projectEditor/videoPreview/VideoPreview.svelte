@@ -416,7 +416,8 @@
 		if (!currentVideo() && !currentAudio()) {
 			if (fromButton)
 				toast('No video or audio to play. Please add some media to the timeline.', {
-					duration: 5000
+					duration: 5000,
+					position: 'bottom-left'
 				});
 			return;
 		}
