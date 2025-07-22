@@ -22,7 +22,7 @@
 
 		const rect = containerRef.getBoundingClientRect();
 		const newHeight = ((e.clientY - rect.top) / rect.height) * 100;
-		globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight = Math.max(
+		globalState.currentProject!.projectEditorState.upperSectionHeight = Math.max(
 			10,
 			Math.min(90, newHeight)
 		); // Limite entre 10% et 90%

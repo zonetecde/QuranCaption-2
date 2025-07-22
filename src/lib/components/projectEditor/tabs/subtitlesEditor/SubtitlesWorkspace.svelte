@@ -4,7 +4,7 @@
 
 <section
 	class="overflow-hidden min-h-0"
-	style="height: {globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
+	style="height: {globalState.currentProject!.projectEditorState.upperSectionHeight}%;"
 >
 	<div class="w-full h-full border-t-2 border-color">
 		<p>Workspace for subtitles editing</p>

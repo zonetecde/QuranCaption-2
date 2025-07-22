@@ -146,8 +146,7 @@
 
 <section
 	class="overflow-hidden min-w-0 timeline-section flex-1 min-h-0"
-	style="height: {100 -
-		globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;"
+	style="height: {100 - globalState.currentProject!.projectEditorState.upperSectionHeight}%;"
 >
 	<div class="timeline-container select-none" onwheel={handleMouseWheelWheeling}>
 		<!-- Timeline Header -->

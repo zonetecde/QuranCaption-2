@@ -44,7 +44,7 @@
 
 	// Effect qui redimensionne la vidéo quand la hauteur de la prévisualisation change
 	$effect(() => {
-		if (globalState.currentProject?.projectEditorState.videoPreview.videoPreviewHeight) {
+		if (globalState.currentProject?.projectEditorState.upperSectionHeight) {
 			resizeVideoToFitScreen();
 		}
 	});
@@ -535,7 +535,7 @@
 	class="overflow-hidden min-h-0"
 	id="video-preview-section"
 	style={showControls
-		? 'height: {globalState.currentProject!.projectEditorState.videoPreview.videoPreviewHeight}%;'
+		? `height: ${globalState.currentProject!.projectEditorState.upperSectionHeight}%;`
 		: ''}
 >
 	<div

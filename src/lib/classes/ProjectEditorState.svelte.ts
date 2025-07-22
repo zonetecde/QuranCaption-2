@@ -24,6 +24,9 @@ export class ProjectEditorState extends SerializableBase {
 
 	// Video preview
 	videoPreview: VideoPreviewState = $state(new VideoPreviewState());
+
+	// Hauteur de la section supérieure dans chaque onglet
+	upperSectionHeight: number = $state(68);
 }
 
 /**
@@ -52,7 +55,4 @@ export class TimelineState extends SerializableBase {
 export class VideoPreviewState extends SerializableBase {
 	// Indique si la prévisualisation vidéo est en pause
 	isPlaying: boolean = $state(false);
-
-	// Hauteur de la video preview par rapport à la timeline
-	videoPreviewHeight: number = $state(68);
 }
