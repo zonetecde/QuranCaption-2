@@ -37,6 +37,7 @@ export class SubtitleClip extends Clip {
 	verse: number;
 	startWordIndex: number;
 	endWordIndex: number;
+	text: string;
 	translations: { [key: string]: string };
 
 	constructor(
@@ -46,6 +47,7 @@ export class SubtitleClip extends Clip {
 		verse: number,
 		startWordIndex: number,
 		endWordIndex: number,
+		text: string,
 		translations: { [key: string]: string } = {}
 	) {
 		super(startTime, endTime);
@@ -54,5 +56,6 @@ export class SubtitleClip extends Clip {
 		this.startWordIndex = startWordIndex;
 		this.endWordIndex = endWordIndex;
 		this.translations = translations;
+		this.text = text;
 	}
 }

@@ -1,7 +1,13 @@
 <script lang="ts">
-	import { TrackType, type AssetType, type Track } from '$lib/classes';
+	import {
+		TrackType,
+		type AssetType,
+		type Track,
+		type SubtitleClip as SubtitleClipType
+	} from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import Clip from './Clip.svelte';
+	import SubtitleClip from './SubtitleClip.svelte';
 
 	let {
 		track = $bindable()
@@ -43,7 +49,11 @@
 	</div>
 	<div class="absolute left-[180px] top-0 bottom-0 flex items-center px-3 gap-2 z-[5]">
 		{#each track.clips as clip, index}
-			<Clip {clip} {track} />
+			{#if track.type === TrackType.Subtitle}
+				<SubtitleClip bind:clip={track.clips[index] as SubtitleClipType} {track} />
+			{:else}
+				<Clip {clip} {track} />
+			{/if}
 		{/each}
 	</div>
 </div>

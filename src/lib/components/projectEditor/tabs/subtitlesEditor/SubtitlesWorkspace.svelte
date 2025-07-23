@@ -7,9 +7,31 @@
 	let selectedSurahNumber = $state(1); // Default to Surah Al-Fatiha
 	let selectedVerseNumber = $state(1); // Default to verse 1
 
+	let wordsSelector: WordsSelector;
+
 	let selectedVerse = $derived(
 		async () => await Quran.getVerse(selectedSurahNumber, selectedVerseNumber)
 	);
+
+	$effect(() => {
+		selectedVerseNumber;
+		selectedSurahNumber;
+
+		// Lorsqu'on change de sourate, on réinitialise les index de sélection des mots
+		wordsSelector.resetFirstAndLastWordIndex();
+	});
+
+	function goNextVerse() {
+		if (selectedVerseNumber < Quran.getVerseCount(selectedSurahNumber)) {
+			selectedVerseNumber += 1;
+		}
+	}
+
+	function goPreviousVerse() {
+		if (selectedVerseNumber > 1) {
+			selectedVerseNumber -= 1;
+		}
+	}
 </script>
 
 <section
@@ -21,6 +43,12 @@
 		<VersePicker bind:selectedSurahNumber bind:selectedVerseNumber />
 
 		<!-- Affichage des mots du verset -->
-		<WordsSelector {selectedVerse} />
+		<WordsSelector
+			bind:this={wordsSelector}
+			{selectedVerse}
+			{goNextVerse}
+			{goPreviousVerse}
+			getSurahNumber={() => selectedSurahNumber}
+		/>
 	</div>
 </section>

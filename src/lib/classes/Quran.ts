@@ -1,13 +1,45 @@
-export interface Verse {
-	id: number;
-	words: {
-		arabic: string;
-		transliteration: string;
-		translation: string;
-	}[];
+export class Word {
+	arabic: string;
+	transliteration: string;
+	translation: string;
+
+	constructor(arabic: string, transliteration: string, translation: string) {
+		this.arabic = arabic;
+		this.transliteration = transliteration;
+		this.translation = translation;
+	}
+
+	static fromJson(data: any): Word {
+		return new Word(data.c, data.d, data.e);
+	}
 }
 
-export interface Surah {
+export class Verse {
+	id: number;
+	words: Word[];
+
+	constructor(id: number, words: Word[] = []) {
+		this.id = id;
+		this.words = words;
+	}
+
+	static fromJson(id: string, data: any): Verse {
+		const words = data.w.map((word: any) => Word.fromJson(word));
+		return new Verse(parseInt(id), words);
+	}
+
+	getArabicTextBetweenTwoIndexes(startIndex: number, endIndex: number): string {
+		if (startIndex < 0 || endIndex >= this.words.length || startIndex > endIndex) {
+			throw new Error('Invalid index range');
+		}
+		return this.words
+			.slice(startIndex, endIndex + 1)
+			.map((word) => word.arabic)
+			.join(' ');
+	}
+}
+
+export class Surah {
 	id: number;
 	arabic: string;
 	name: string;
@@ -16,6 +48,39 @@ export interface Surah {
 	verses: Verse[];
 	arabicLong: string;
 	revelationPlace: string;
+
+	constructor(
+		id: number,
+		arabic: string,
+		name: string,
+		translation: string,
+		totalAyah: number,
+		arabicLong: string,
+		revelationPlace: string,
+		verses: Verse[] = []
+	) {
+		this.id = id;
+		this.arabic = arabic;
+		this.name = name;
+		this.translation = translation;
+		this.totalAyah = totalAyah;
+		this.arabicLong = arabicLong;
+		this.revelationPlace = revelationPlace;
+		this.verses = verses;
+	}
+
+	static fromJson(data: any): Surah {
+		return new Surah(
+			data.id,
+			data.arabic,
+			data.name,
+			data.translation,
+			data.totalAyah,
+			data.arabicLong,
+			data.revelationPlace,
+			[] // verses will be loaded later
+		);
+	}
 }
 
 export class Quran {
@@ -23,21 +88,14 @@ export class Quran {
 
 	/**
 	 * Charge le Coran depuis le fichier JSON (singleton)
-	 */
-	static async load() {
+	 */ static async load() {
 		if (Quran.surahs.length > 0) {
 			return; // Le Coran est déjà chargé
 		}
 		const response = await fetch('/quran/surahs.json');
-		const data: Surah[] = (await response.json()).map((surah: any) => ({
-			...surah,
-			verses: [] // Initialise les versets vides
-		}));
+		const data: any[] = await response.json();
 
-		this.surahs = data;
-
-		console.log('Quran loaded with', this.surahs, 'surahs');
-		console.log(await this.getSurah(1));
+		this.surahs = data.map((surahData) => Surah.fromJson(surahData));
 	}
 
 	/**
@@ -64,19 +122,13 @@ export class Quran {
 	 */
 	static async getSurah(id: number): Promise<Surah> {
 		const surah = Quran.surahs.find((surah) => surah.id === id)!;
-
 		if (surah.verses.length === 0) {
 			// Charge la sourate depuis le fichier JSON
 			const response = await fetch(`/quran/${id}.json`);
 			const data = await response.json();
-			const verses: Verse[] = Object.entries(data).map(([id, verse]: [string, any]) => ({
-				id: parseInt(id),
-				words: verse.w.map((word: any) => ({
-					arabic: word.c,
-					transliteration: word.d,
-					translation: word.e
-				}))
-			}));
+			const verses: Verse[] = Object.entries(data).map(([verseId, verseData]: [string, any]) =>
+				Verse.fromJson(verseId, verseData)
+			);
 			surah.verses = verses;
 		}
 

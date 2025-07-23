@@ -12,8 +12,8 @@
 
 		if (!longestClipEnd.isNull())
 			return new Duration(
-				// Ajoute 15 secondes pour pas que la timeline soit au ras bord
-				longestClipEnd.ms + 15000
+				// Ajoute 2 minutes pour pas que la timeline soit au ras bord
+				longestClipEnd.ms + 120000
 			);
 		else return new Duration(120000); // 2 minutes par défaut
 	});

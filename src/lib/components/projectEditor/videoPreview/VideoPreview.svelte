@@ -118,7 +118,7 @@
 	 */
 	function getCurrentAudioTimeToPlay(): number {
 		const currentClip = globalState
-			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Audio)!
+			.currentProject!.content.timeline.getFirstTrack(TrackType.Audio)
 			.getCurrentClip();
 
 		if (!currentClip) return 0;
@@ -134,7 +134,7 @@
 	 */
 	function getCurrentVideoTimeToPlay(): number {
 		const currentClip = globalState
-			.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)!
+			.currentProject!.content.timeline.getFirstTrack(TrackType.Video)
 			.getCurrentClip();
 
 		if (!currentClip) return 0;
@@ -255,7 +255,7 @@
 		// Utilise la vidéo pour mettre à jour le curseur de la timeline
 		if (videoElement && videoElement.currentTime !== undefined && isPlaying) {
 			const currentVideoClip = globalState
-				.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Video)
+				.currentProject!.content.timeline.getFirstTrack(TrackType.Video)
 				?.getCurrentClip();
 
 			if (currentVideoClip) {
@@ -273,7 +273,7 @@
 	function handleAudioTimeUpdate() {
 		if (audioHowl && isPlaying) {
 			const currentAudioClip = globalState
-				.currentProject!.content.timeline.tracks.find((t) => t.type === TrackType.Audio)
+				.currentProject!.content.timeline.getFirstTrack(TrackType.Audio)
 				?.getCurrentClip();
 
 			if (currentAudioClip) {
@@ -494,12 +494,8 @@
 		const currentTime = getTimelineSettings().cursorPosition;
 
 		// Récupération des pistes vidéo et audio
-		const videoTrack = globalState.currentProject!.content.timeline.tracks.find(
-			(t) => t.type === TrackType.Video
-		);
-		const audioTrack = globalState.currentProject!.content.timeline.tracks.find(
-			(t) => t.type === TrackType.Audio
-		);
+		const videoTrack = globalState.currentProject!.content.timeline.getFirstTrack(TrackType.Video);
+		const audioTrack = globalState.currentProject!.content.timeline.getFirstTrack(TrackType.Audio);
 
 		const nextClips: { clip: any; startTime: number }[] = [];
 

@@ -1,8 +1,10 @@
 import { AssetType, TrackType } from './enums.js';
-import { AssetClip, Clip } from './Clip.js';
+import { AssetClip, Clip, SubtitleClip } from './Clip.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Duration, type Asset } from './index.js';
 import { globalState } from '$lib/runes/main.svelte.js';
+import type { Verse } from './Quran.js';
+import toast from 'svelte-5-french-toast';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -104,17 +106,32 @@ export class Track extends SerializableBase {
 
 		return null;
 	}
-}
 
-export class SubtitleTrack extends Track {
-	language: string;
+	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number) {
+		const arabicText = verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex);
 
-	constructor(language: string) {
-		super(TrackType.Subtitle);
-		this.language = language;
+		const startTime = this.getDuration().ms + 1;
+		const endTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition || -1;
+
+		if (endTime < startTime) {
+			toast.error('End time must be greater than start time.');
+			return;
+		}
+
+		this.clips.push(
+			new SubtitleClip(
+				startTime,
+				endTime,
+				surah,
+				verse.id,
+				firstWordIndex,
+				lastWordIndex,
+				arabicText,
+				{}
+			)
+		);
 	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
 SerializableBase.registerChildClass(Track, 'clips', Clip);
-SerializableBase.registerChildClass(SubtitleTrack, 'clips', Clip);

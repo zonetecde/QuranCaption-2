@@ -1,7 +1,7 @@
 import { Timeline } from './Timeline.svelte.js';
 import { Asset } from './Asset.svelte.js';
 import { ProjectSettings } from './ProjectSettings.js';
-import { SubtitleTrack, Track } from './Track.svelte.js';
+import { Track } from './Track.svelte.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import toast from 'svelte-5-french-toast';
@@ -37,7 +37,7 @@ export class ProjectContent extends SerializableBase {
 	static getDefaultProjectContent(): ProjectContent {
 		return new ProjectContent(
 			new Timeline([
-				new SubtitleTrack('arabic'),
+				new Track(TrackType.Subtitle),
 				new Track(TrackType.Video),
 				new Track(TrackType.Audio)
 			]),

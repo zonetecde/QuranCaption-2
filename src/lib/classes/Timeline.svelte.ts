@@ -62,6 +62,17 @@ export class Timeline extends SerializableBase {
 
 		return null;
 	}
+
+	/**
+	 * Retourne la première piste de la timeline du type spécifié.
+	 * @param trackType Le type de piste à rechercher (Audio, Video, etc.)
+	 * @returns La première piste trouvée du type spécifié
+	 */
+	getFirstTrack(trackType: TrackType) {
+		const track = this.tracks.find((t) => t.type === trackType);
+		if (!track) throw new Error('Track not found.');
+		return track;
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
