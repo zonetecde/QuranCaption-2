@@ -1,3 +1,4 @@
+import type SubtitlesEditor from '$lib/components/projectEditor/tabs/subtitlesEditor/SubtitlesEditor.svelte';
 import { ProjectEditorTabs } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 
@@ -24,6 +25,9 @@ export class ProjectEditorState extends SerializableBase {
 
 	// Video preview
 	videoPreview: VideoPreviewState = $state(new VideoPreviewState());
+
+	// Subtitles editor
+	subtitlesEditor: SubtitlesEditorState = $state(new SubtitlesEditorState());
 
 	// Hauteur de la section supérieure dans chaque onglet
 	upperSectionHeight: number = $state(68);
@@ -55,4 +59,18 @@ export class TimelineState extends SerializableBase {
 export class VideoPreviewState extends SerializableBase {
 	// Indique si la prévisualisation vidéo est en pause
 	isPlaying: boolean = $state(false);
+}
+
+export class SubtitlesEditorState extends SerializableBase {
+	// Indique la sourate actuellement sélectionnée dans l'éditeur de sous-titres
+	selectedSurah: number = $state(1);
+
+	// Indique le numéro du verset actuellement sélectionné dans l'éditeur de sous-titres
+	selectedVerse: number = $state(1);
+
+	// Indique l'index du premier mot actuellement sélectionné dans l'éditeur de sous-titres
+	startWordIndex: number = $state(0);
+
+	// Indique l'index du dernier mot actuellement sélectionné dans l'éditeur de sous-titres
+	endWordIndex: number = $state(0);
 }

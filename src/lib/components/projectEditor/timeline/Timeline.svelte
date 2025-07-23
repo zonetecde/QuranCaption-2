@@ -18,13 +18,13 @@
 		else return new Duration(120000); // 2 minutes par défaut
 	});
 
-	let timelineSettings = $derived(() => globalState.currentProject?.projectEditorState.timeline!);
+	let timelineState = $derived(() => globalState.currentProject?.projectEditorState.timeline!);
 
 	let timelineDiv: HTMLDivElement | null = null;
 
 	onMount(() => {
 		// Restitue le scroll
-		timelineDiv!.scrollLeft = timelineSettings().scrollX;
+		timelineDiv!.scrollLeft = timelineState().scrollX;
 	});
 
 	// Fonction pour déterminer l'intervalle d'affichage des timestamps selon le zoom
@@ -59,10 +59,10 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
+		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
 
-		timelineSettings().cursorPosition = newPosition;
-		timelineSettings().movePreviewTo = newPosition;
+		timelineState().cursorPosition = newPosition;
+		timelineState().movePreviewTo = newPosition;
 	}
 
 	function handleTimelineDrag(event: MouseEvent) {
@@ -76,10 +76,10 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
+		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
 
-		timelineSettings().cursorPosition = newPosition;
-		timelineSettings().movePreviewTo = newPosition;
+		timelineState().cursorPosition = newPosition;
+		timelineState().movePreviewTo = newPosition;
 	}
 
 	function handleRulerClick(event: MouseEvent) {
@@ -88,10 +88,10 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
+		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
 
-		timelineSettings().cursorPosition = newPosition;
-		timelineSettings().movePreviewTo = newPosition;
+		timelineState().cursorPosition = newPosition;
+		timelineState().movePreviewTo = newPosition;
 	}
 
 	function handleRulerDrag(event: MouseEvent) {
@@ -102,10 +102,10 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineSettings().zoom) * 1000);
+		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
 
-		timelineSettings().cursorPosition = newPosition;
-		timelineSettings().movePreviewTo = newPosition;
+		timelineState().cursorPosition = newPosition;
+		timelineState().movePreviewTo = newPosition;
 	}
 
 	// Synchronise le scroll entre la règle et les pistes
@@ -123,22 +123,22 @@
 		}
 
 		// Sauvegarde le scroll dans les paramètres de la timeline
-		timelineSettings().scrollX = source.scrollLeft;
+		timelineState().scrollX = source.scrollLeft;
 	}
 
 	function handleMouseWheelWheeling(event: any) {
 		// Si la touche CTRL est enfoncée
 		if (event.ctrlKey) {
 			// Zoom avant ou arrière
-			if (event.deltaY > 0 && timelineSettings().zoom > 0.2) {
-				timelineSettings().zoom -= 0.75;
-			} else if (timelineSettings().zoom < 100) {
-				timelineSettings().zoom += 0.75;
+			if (event.deltaY > 0 && timelineState().zoom > 0.2) {
+				timelineState().zoom -= 0.75;
+			} else if (timelineState().zoom < 100) {
+				timelineState().zoom += 0.75;
 			}
 
-			if (timelineSettings().zoom === 10) {
+			if (timelineState().zoom === 10) {
 				// Valeur interdite qui fait beuguer le rendu
-				timelineSettings().zoom = 10.01;
+				timelineState().zoom = 10.01;
 			}
 		}
 	}
@@ -154,7 +154,7 @@
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="ruler-content"
-				style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
+				style="width: {totalDuration().toSeconds() * timelineState().zoom + 180}px;"
 				onclick={handleRulerClick}
 				onmousemove={handleRulerDrag}
 				role="button"
@@ -165,12 +165,12 @@
 
 				<!-- Time markers -->
 				{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
-					{#if shouldShowTimestamp(i, timelineSettings().zoom)}
+					{#if shouldShowTimestamp(i, timelineState().zoom)}
 						<div
 							class="time-marker"
-							class:major={getTimestampInterval(timelineSettings().zoom) >= 10 &&
-								i % (getTimestampInterval(timelineSettings().zoom) * 2) === 0}
-							style="left: {i * timelineSettings().zoom + 180}px;"
+							class:major={getTimestampInterval(timelineState().zoom) >= 10 &&
+								i % (getTimestampInterval(timelineState().zoom) * 2) === 0}
+							style="left: {i * timelineState().zoom + 180}px;"
 						>
 							<div class="time-label z-5">
 								{new Duration(i * 1000).getFormattedTime(true)}
@@ -183,8 +183,7 @@
 				<!-- Playhead cursor in ruler -->
 				<div
 					class="playhead-ruler"
-					style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
-						180}px;"
+					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom + 180}px;"
 				>
 					<div class="playhead-handle"></div>
 				</div>
@@ -196,7 +195,7 @@
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="tracks-content grid outline-none"
-				style="width: {totalDuration().toSeconds() * timelineSettings().zoom + 180}px;"
+				style="width: {totalDuration().toSeconds() * timelineState().zoom + 180}px;"
 				onclick={handleTimelineClick}
 				onmousemove={handleTimelineDrag}
 				role="button"
@@ -207,8 +206,8 @@
 					{#each Array.from({ length: totalDuration().toSeconds() }, (_, i) => i) as i}
 						<div
 							class="grid-line"
-							class:major={shouldShowTimestamp(i, timelineSettings().zoom)}
-							style="left: {i * timelineSettings().zoom + 180}px;"
+							class:major={shouldShowTimestamp(i, timelineState().zoom)}
+							style="left: {i * timelineState().zoom + 180}px;"
 						></div>
 					{/each}
 				</div>
@@ -224,8 +223,7 @@
 				<div
 					class="playhead-cursor"
 					id="cursor"
-					style="left: {(timelineSettings().cursorPosition / 1000) * timelineSettings().zoom +
-						180}px;"
+					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom + 180}px;"
 				></div>
 			</div>
 		</div>

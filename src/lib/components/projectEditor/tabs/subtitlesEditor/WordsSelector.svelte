@@ -1,24 +1,38 @@
 <script lang="ts">
 	import { TrackType } from '$lib/classes';
-	import type { Verse, Word } from '$lib/classes/Quran';
+	import { Quran, type Verse, type Word } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import ShortcutService from '$lib/services/ShortcutService';
 	import { onDestroy, onMount } from 'svelte';
 
-	let {
-		selectedVerse,
-		goNextVerse,
-		goPreviousVerse,
-		getSurahNumber
-	}: {
-		selectedVerse: () => Promise<Verse | undefined>;
-		goNextVerse: () => void;
-		goPreviousVerse: () => void;
-		getSurahNumber: () => number;
-	} = $props();
+	let subtitlesEditorState = $derived(
+		() => globalState.currentProject!.projectEditorState.subtitlesEditor
+	);
 
-	let firstWordIndex = $state(0);
-	let lastWordIndex = $state(0);
+	function goNextVerse() {
+		if (
+			subtitlesEditorState().selectedVerse <
+			Quran.getVerseCount(subtitlesEditorState().selectedSurah)
+		) {
+			subtitlesEditorState().selectedVerse += 1;
+			resetFirstAndLastWordIndex();
+		}
+	}
+
+	function goPreviousVerse() {
+		if (subtitlesEditorState().selectedVerse > 1) {
+			subtitlesEditorState().selectedVerse -= 1;
+			resetFirstAndLastWordIndex();
+		}
+	}
+
+	let selectedVerse = $derived(
+		async () =>
+			await Quran.getVerse(
+				subtitlesEditorState().selectedSurah,
+				subtitlesEditorState().selectedVerse
+			)
+	);
 
 	onMount(() => {
 		// Set up les shortcuts pour sélectionner les mots
@@ -42,7 +56,7 @@
 			description: 'Put the start-of-selection cursor on the end-of-selection cursor.',
 			category: 'Subtitles Editor',
 			onKeyDown: () => {
-				firstWordIndex = lastWordIndex;
+				subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
 			}
 		});
 
@@ -51,8 +65,8 @@
 			description: 'Select all words in the verse.',
 			category: 'Subtitles Editor',
 			onKeyDown: async () => {
-				firstWordIndex = 0;
-				lastWordIndex = (await selectedVerse())!.words.length - 1;
+				subtitlesEditorState().startWordIndex = 0;
+				subtitlesEditorState().endWordIndex = (await selectedVerse())!.words.length - 1;
 			}
 		});
 
@@ -61,7 +75,7 @@
 			description: 'Put the end-of-selection cursor on the last word of the verse.',
 			category: 'Subtitles Editor',
 			onKeyDown: async () => {
-				lastWordIndex = (await selectedVerse())!.words.length - 1;
+				subtitlesEditorState().endWordIndex = (await selectedVerse())!.words.length - 1;
 			}
 		});
 
@@ -81,6 +95,7 @@
 		ShortcutService.unregisterShortcut('r');
 		ShortcutService.unregisterShortcut('v');
 		ShortcutService.unregisterShortcut('c');
+		ShortcutService.unregisterShortcut('Enter');
 	});
 
 	/**
@@ -88,8 +103,8 @@
 	 * Si on est à la fin du verset, passe au verset suivant.
 	 */
 	async function selectNextWord() {
-		if (lastWordIndex < (await selectedVerse())!.words.length - 1) {
-			lastWordIndex += 1;
+		if (subtitlesEditorState().endWordIndex < (await selectedVerse())!.words.length - 1) {
+			subtitlesEditorState().endWordIndex += 1;
 		} else {
 			// Passe au verse suivant si on est à la fin du verset
 			goNextVerse();
@@ -101,11 +116,11 @@
 	 * Si on est au début du verset, passe au verset précédent.
 	 */
 	async function selectPreviousWord() {
-		if (lastWordIndex > firstWordIndex) {
-			lastWordIndex -= 1;
-		} else if (firstWordIndex > 0) {
-			firstWordIndex -= 1;
-			lastWordIndex -= 1;
+		if (subtitlesEditorState().endWordIndex > subtitlesEditorState().startWordIndex) {
+			subtitlesEditorState().endWordIndex -= 1;
+		} else if (subtitlesEditorState().startWordIndex > 0) {
+			subtitlesEditorState().startWordIndex -= 1;
+			subtitlesEditorState().endWordIndex -= 1;
 		} else {
 			// Passe au verse précédent si on est au début du verset
 			goPreviousVerse();
@@ -121,15 +136,22 @@
 			TrackType.Subtitle
 		)!;
 
-		subtitleTrack.addSubtitle(verse, firstWordIndex, lastWordIndex, getSurahNumber());
+		const success = subtitleTrack.addSubtitle(
+			verse,
+			subtitlesEditorState().startWordIndex,
+			subtitlesEditorState().endWordIndex,
+			subtitlesEditorState().selectedSurah
+		);
 
-		await selectNextWord();
-		firstWordIndex = lastWordIndex;
+		if (success) {
+			await selectNextWord();
+			subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
+		}
 	}
 
 	export function resetFirstAndLastWordIndex() {
-		firstWordIndex = 0;
-		lastWordIndex = 0;
+		subtitlesEditorState().startWordIndex = 0;
+		subtitlesEditorState().endWordIndex = 0;
 	}
 </script>
 
@@ -139,7 +161,9 @@
 	{#await selectedVerse() then verse}
 		{#if verse}
 			{#each verse.words as word, index}
-				{@const isSelected = index >= firstWordIndex && index <= lastWordIndex}
+				{@const isSelected =
+					index >= subtitlesEditorState().startWordIndex &&
+					index <= subtitlesEditorState().endWordIndex}
 
 				<button
 					class={'flex flex-col outline-none text-center px-2.5 pt-2 pb-2 cursor-pointer ' +

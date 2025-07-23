@@ -107,7 +107,7 @@ export class Track extends SerializableBase {
 		return null;
 	}
 
-	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number) {
+	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number): boolean {
 		const arabicText = verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex);
 
 		const startTime = this.getDuration().ms + 1;
@@ -115,7 +115,7 @@ export class Track extends SerializableBase {
 
 		if (endTime < startTime) {
 			toast.error('End time must be greater than start time.');
-			return;
+			return false;
 		}
 
 		this.clips.push(
@@ -130,6 +130,8 @@ export class Track extends SerializableBase {
 				{}
 			)
 		);
+
+		return true;
 	}
 }
 
