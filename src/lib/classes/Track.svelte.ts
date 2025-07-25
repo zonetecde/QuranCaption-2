@@ -1,5 +1,5 @@
 import { AssetType, TrackType } from './enums.js';
-import { AssetClip, Clip, SubtitleClip } from './Clip.js';
+import { AssetClip, Clip, SubtitleClip } from './Clip.svelte.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Duration, type Asset } from './index.js';
 import { globalState } from '$lib/runes/main.svelte.js';
@@ -112,6 +112,24 @@ export class Track extends SerializableBase {
 		}
 
 		return null;
+	}
+
+	getClipBefore(id: number) {
+		for (let i = 0; i < this.clips.length; i++) {
+			const element = this.clips[i];
+			if (element.id === id) {
+				return i > 0 ? this.clips[i - 1] : null;
+			}
+		}
+	}
+
+	getClipAfter(id: number) {
+		for (let i = 0; i < this.clips.length; i++) {
+			const element = this.clips[i];
+			if (element.id === id) {
+				return i < this.clips.length - 1 ? this.clips[i + 1] : null;
+			}
+		}
 	}
 
 	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number): boolean {

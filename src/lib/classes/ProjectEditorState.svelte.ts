@@ -43,6 +43,9 @@ export class TimelineState extends SerializableBase {
 	// Position du curseur dans la timeline
 	cursorPosition: number = $state(0);
 
+	// Indique si on doit afficher ou non le curseur de la timeline
+	showCursor: boolean = $state(true);
+
 	// State permettant de trigger le changement du temps de la vidéo et de l'audio dans la preview
 	movePreviewTo: number = $state(0);
 

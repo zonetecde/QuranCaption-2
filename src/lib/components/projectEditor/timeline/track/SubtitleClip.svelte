@@ -17,6 +17,50 @@
 	let positionLeft = $derived(() => {
 		return (clip.startTime / 1000) * track.getPixelPerSecond();
 	});
+
+	let dragStartX: number | null = null;
+
+	function startLeftDragging(e: MouseEvent) {
+		// vient de cliquer sur le bord gauche du clip
+		dragStartX = e.clientX;
+		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+		document.addEventListener('mousemove', onLeftDragging);
+		document.addEventListener('mouseup', stopLeftDragging);
+	}
+
+	function onLeftDragging(e: MouseEvent) {
+		if (dragStartX === null) return;
+
+		clip.updateStartTime(globalState.currentProject?.projectEditorState.timeline.cursorPosition!);
+	}
+
+	function stopLeftDragging() {
+		dragStartX = null;
+		document.removeEventListener('mousemove', onLeftDragging);
+		document.removeEventListener('mouseup', stopLeftDragging);
+		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+	}
+
+	function startRightDragging(e: MouseEvent) {
+		// vient de cliquer sur le bord droit du clip
+		dragStartX = e.clientX;
+		document.addEventListener('mousemove', onRightDragging);
+		document.addEventListener('mouseup', stopRightDragging);
+		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+	}
+
+	function onRightDragging(e: MouseEvent) {
+		if (dragStartX === null) return;
+
+		clip.updateEndTime(globalState.currentProject?.projectEditorState.timeline.cursorPosition!);
+	}
+
+	function stopRightDragging() {
+		dragStartX = null;
+		document.removeEventListener('mousemove', onRightDragging);
+		document.removeEventListener('mouseup', stopRightDragging);
+		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+	}
 </script>
 
 <div
@@ -32,13 +76,15 @@
 		</div>
 	{/if}
 
-	<section class="absolute bottom-0.5 left-0.5 z-5">
-		<!-- delete clip -->
-		<button
-			class="text-[var(--text-secondary)] text-sm cursor-pointer opacity-0 group-hover:opacity-100"
-			onclick={() => track.removeClip(clip.id)}
-		>
-			<span class="material-icons">delete</span>
-		</button>
-	</section>
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="h-full w-1 left-0 cursor-w-resize absolute top-0 bottom-0 z-10"
+		onmousedown={startLeftDragging}
+	></div>
+
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="h-full w-1 right-0 cursor-w-resize absolute top-0 bottom-0 z-10"
+		onmousedown={startRightDragging}
+	></div>
 </div>

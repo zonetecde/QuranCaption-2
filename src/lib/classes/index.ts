@@ -6,7 +6,7 @@ export { ProjectEditorState } from './ProjectEditorState.svelte.js';
 export { Project } from './Project.js';
 export { Timeline } from './Timeline.svelte.js';
 export { Track } from './Track.svelte.js';
-export { Clip, AssetClip, SubtitleClip } from './Clip.js';
+export { Clip, AssetClip, SubtitleClip } from './Clip.svelte.js';
 export { Asset } from './Asset.svelte.js';
 export { ProjectSettings } from './ProjectSettings.js';
 export { TrackType, AssetType, ProjectEditorTabs } from './enums.js';

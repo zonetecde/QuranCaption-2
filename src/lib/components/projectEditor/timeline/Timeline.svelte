@@ -183,7 +183,8 @@
 				<!-- Playhead cursor in ruler -->
 				<div
 					class="playhead-ruler"
-					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom + 180}px;"
+					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom +
+						180}px; opacity: {timelineState().showCursor ? 1 : 0};"
 				>
 					<div class="playhead-handle"></div>
 				</div>
@@ -223,7 +224,8 @@
 				<div
 					class="playhead-cursor"
 					id="cursor"
-					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom + 180}px;"
+					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom +
+						180}px; opacity: {timelineState().showCursor ? 1 : 0};"
 				></div>
 			</div>
 		</div>
