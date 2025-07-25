@@ -188,4 +188,25 @@ class ShortcutService {
 	}
 }
 
+/**
+ * Dictionnaire de raccourcis
+ */
+export const SHORTCUTS = {
+	VIDEO_PREVIEW: {
+		MOVE_FORWARD: 'arrowright',
+		MOVE_BACKWARD: 'arrowleft',
+		PLAY_PAUSE: ' ',
+		INCREASE_SPEED: ['pageup', 'pagedown']
+	},
+	SUBTITLES_EDITOR: {
+		SELECT_NEXT_WORD: 'arrowup',
+		SELECT_PREVIOUS_WORD: 'arrowdown',
+		RESET_START_CURSOR: 'r',
+		SELECT_ALL_WORDS: 'v',
+		SET_END_TO_LAST: 'c',
+		ADD_SUBTITLE: 'enter',
+		REMOVE_LAST_SUBTITLE: 'backspace'
+	}
+};
+
 export default ShortcutService;

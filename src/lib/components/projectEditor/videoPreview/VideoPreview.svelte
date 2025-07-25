@@ -5,7 +5,7 @@
 	import { mount, onDestroy, onMount, unmount, untrack } from 'svelte';
 	import { Howl } from 'howler';
 	import toast from 'svelte-5-french-toast';
-	import ShortcutService from '$lib/services/ShortcutService';
+	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
 	import VideoPreviewControlsBar from './VideoPreviewControlsBar.svelte';
 
 	let {
@@ -154,7 +154,7 @@
 
 		// Set les shortcuts pour le preview
 		ShortcutService.registerShortcut({
-			key: ' ',
+			key: SHORTCUTS.VIDEO_PREVIEW.PLAY_PAUSE,
 			description: 'Play/Pause the video preview',
 			category: 'Video Preview',
 			preventDefault: true,
@@ -164,7 +164,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: 'arrowright',
+			key: SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD,
 			description: 'Move preview forward by 2 seconds',
 			category: 'Video Preview',
 			preventDefault: true,
@@ -176,7 +176,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: 'arrowleft',
+			key: SHORTCUTS.VIDEO_PREVIEW.MOVE_BACKWARD,
 			description: 'Move preview backward by 2 seconds',
 			category: 'Video Preview',
 			preventDefault: true,
@@ -188,7 +188,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: ['pagedown', 'pageup'],
+			key: SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED,
 			description: 'Set video speed to 2x',
 			category: 'Video Preview',
 			preventDefault: true,
@@ -218,10 +218,10 @@
 		pause(); // Met en pause la lecture pour éviter les fuites de mémoire
 
 		// Enlève tout les shortcuts enregistrés
-		ShortcutService.unregisterShortcut(' ');
-		ShortcutService.unregisterShortcut('arrowright');
-		ShortcutService.unregisterShortcut('arrowleft');
-		ShortcutService.unregisterShortcut('pagedown');
+		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.PLAY_PAUSE);
+		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD);
+		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_BACKWARD);
+		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED);
 	});
 
 	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo

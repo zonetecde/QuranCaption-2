@@ -46,6 +46,13 @@ export class Track extends SerializableBase {
 		}
 	}
 
+	removeLastClip() {
+		if (this.clips.length === 0) {
+			return;
+		}
+		this.clips.pop();
+	}
+
 	getName(): string {
 		switch (this.type) {
 			case TrackType.Video:

@@ -2,7 +2,7 @@
 	import { TrackType } from '$lib/classes';
 	import { Quran, type Verse, type Word } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
-	import ShortcutService from '$lib/services/ShortcutService';
+	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
 	import { onDestroy, onMount } from 'svelte';
 
 	let subtitlesEditorState = $derived(
@@ -37,14 +37,14 @@
 	onMount(() => {
 		// Set up les shortcuts pour sélectionner les mots
 		ShortcutService.registerShortcut({
-			key: 'ArrowUp',
+			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_NEXT_WORD,
 			description: 'Select Next Word',
 			category: 'Subtitles Editor',
 			onKeyDown: selectNextWord
 		});
 
 		ShortcutService.registerShortcut({
-			key: 'ArrowDown',
+			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD,
 			description: 'Select Previous Word',
 			category: 'Subtitles Editor',
 			onKeyDown: selectPreviousWord
@@ -52,7 +52,7 @@
 
 		// Set up les shortcuts divers
 		ShortcutService.registerShortcut({
-			key: 'r',
+			key: SHORTCUTS.SUBTITLES_EDITOR.RESET_START_CURSOR,
 			description: 'Put the start-of-selection cursor on the end-of-selection cursor.',
 			category: 'Subtitles Editor',
 			onKeyDown: () => {
@@ -61,7 +61,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: 'v',
+			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_ALL_WORDS,
 			description: 'Select all words in the verse.',
 			category: 'Subtitles Editor',
 			onKeyDown: async () => {
@@ -71,7 +71,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: 'c',
+			key: SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST,
 			description: 'Put the end-of-selection cursor on the last word of the verse.',
 			category: 'Subtitles Editor',
 			onKeyDown: async () => {
@@ -81,21 +81,29 @@
 
 		// Set up les shortcuts d'action
 		ShortcutService.registerShortcut({
-			key: 'Enter',
+			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE,
 			description: 'Add a subtitle with the selected words.',
 			category: 'Subtitles Editor',
 			onKeyDown: addSubtitle
+		});
+
+		ShortcutService.registerShortcut({
+			key: SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE,
+			description: 'Remove the last subtitle.',
+			category: 'Subtitles Editor',
+			onKeyDown: removeLastSubtitle
 		});
 	});
 
 	onDestroy(() => {
 		// Clean up les shortcuts
-		ShortcutService.unregisterShortcut('ArrowUp');
-		ShortcutService.unregisterShortcut('ArrowDown');
-		ShortcutService.unregisterShortcut('r');
-		ShortcutService.unregisterShortcut('v');
-		ShortcutService.unregisterShortcut('c');
-		ShortcutService.unregisterShortcut('Enter');
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SELECT_NEXT_WORD);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.RESET_START_CURSOR);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SELECT_ALL_WORDS);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE);
 	});
 
 	/**
@@ -152,6 +160,14 @@
 	export function resetFirstAndLastWordIndex() {
 		subtitlesEditorState().startWordIndex = 0;
 		subtitlesEditorState().endWordIndex = 0;
+	}
+
+	function removeLastSubtitle(): void {
+		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
+			TrackType.Subtitle
+		)!;
+
+		subtitleTrack.removeLastClip();
 	}
 </script>
 
