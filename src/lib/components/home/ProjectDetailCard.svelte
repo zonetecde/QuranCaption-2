@@ -88,11 +88,14 @@
 					<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
 						<span>Captioning</span>
 						<span class="font-medium text-[var(--text-primary)]"
-							>{projectDetail.percentageCaption}%</span
+							>{projectDetail.percentageCaptioned}%</span
 						>
 					</div>
 					<div class="progress-bar-bg">
-						<div class="progress-bar-fill" style="width: {projectDetail.percentageCaption}%;"></div>
+						<div
+							class="progress-bar-fill"
+							style="width: {projectDetail.percentageCaptioned}%;"
+						></div>
 					</div>
 				</div>
 				<div>

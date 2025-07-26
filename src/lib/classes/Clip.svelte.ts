@@ -17,6 +17,7 @@ export class Clip extends SerializableBase {
 
 	constructor(startTime: number, endTime: number, type: ClipType) {
 		super();
+
 		this.id = Utilities.randomId();
 		this.startTime = startTime;
 		this.endTime = endTime;

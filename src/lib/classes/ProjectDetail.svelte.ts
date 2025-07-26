@@ -1,5 +1,5 @@
 import { globalState } from '$lib/runes/main.svelte';
-import { Utilities } from '.';
+import { TrackType, Utilities } from '.';
 import { Duration } from './index.js';
 import { Status } from './Status';
 import { VerseRange } from './VerseRange';
@@ -18,7 +18,7 @@ export class ProjectDetail extends SerializableBase {
 
 	verseRange: VerseRange;
 	duration: Duration;
-	percentageCaption: number;
+	percentageCaptioned: number;
 	status: Status;
 
 	translations: {
@@ -42,7 +42,7 @@ export class ProjectDetail extends SerializableBase {
 		this.updatedAt = $state(new Date());
 
 		this.verseRange = new VerseRange();
-		this.percentageCaption = 0;
+		this.percentageCaptioned = $state(0);
 		this.status = Status.NOT_SET;
 		this.duration = new Duration(0);
 		this.translations = [];
@@ -53,6 +53,23 @@ export class ProjectDetail extends SerializableBase {
 	 */
 	public updateTimestamp(): void {
 		this.updatedAt = new Date();
+	}
+
+	public updatePercentageCaptioned() {
+		const captionedDuration =
+			globalState.currentProject?.content.timeline.getFirstTrack(TrackType.Subtitle).getDuration()
+				.ms || 0;
+
+		const totalDuration =
+			globalState.currentProject!.content.timeline.getFirstTrack(TrackType.Audio).getDuration()
+				.ms || 0;
+
+		let percentage = (captionedDuration / totalDuration) * 100;
+		if (percentage >= 97) {
+			percentage = 100;
+		}
+
+		globalState.currentProject!.detail.percentageCaptioned = Math.floor(percentage);
 	}
 }
 

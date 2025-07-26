@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import Track from './track/Track.svelte';
 	import { Duration } from '$lib/classes';
 	import { slide } from 'svelte/transition';
@@ -25,6 +25,15 @@
 	onMount(() => {
 		// Restitue le scroll
 		timelineDiv!.scrollLeft = timelineState().scrollX;
+	});
+
+	// Effect pour mettre à jour le pourcentage de la timeline captionnée
+	$effect(() => {
+		if (JSON.stringify(globalState.currentProject!.content.timeline.tracks)) {
+			untrack(() => {
+				globalState.currentProject!.detail.updatePercentageCaptioned();
+			});
+		}
 	});
 
 	// Fonction pour déterminer l'intervalle d'affichage des timestamps selon le zoom

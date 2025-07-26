@@ -2,6 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { openUrl } from '@tauri-apps/plugin-opener';
+	import EditableText from './misc/EditableText.svelte';
 
 	async function minimizeButtonClick() {
 		(await getCurrentWindow()).minimize();
@@ -49,6 +50,12 @@
 				<span class="material-icons text-[20px]!">save</span>
 				<span>Autosave</span>
 			</button>
+
+			<EditableText
+				bind:value={globalState.currentProject.detail.name}
+				text={'Project Name'}
+				parentClasses="absolute left-1/2 -translate-x-1/2 pr-[18px]"
+			></EditableText>
 		{/if}
 	</div>
 	<div class="flex items-center space-x-2">

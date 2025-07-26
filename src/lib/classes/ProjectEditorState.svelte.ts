@@ -76,4 +76,7 @@ export class SubtitlesEditorState extends SerializableBase {
 
 	// Indique l'index du dernier mot actuellement sélectionné dans l'éditeur de sous-titres
 	endWordIndex: number = $state(0);
+
+	// Playback speed
+	playbackSpeed: number = $state(1.0);
 }

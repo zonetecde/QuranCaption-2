@@ -57,6 +57,11 @@ class ShortcutService {
 		const shortcut = this.shortcuts.get(key);
 
 		if (shortcut) {
+			// Vérifie qu'on est pas dans un input
+			if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+				return;
+			}
+
 			event.preventDefault();
 
 			shortcut.onKeyDown(event);

@@ -133,6 +133,9 @@
 		}
 	}
 
+	/**
+	 * Ajoute une sous-titre avec les mots sélectionnés.
+	 */
 	async function addSubtitle() {
 		// Ajoute une sous-titre avec les mots sélectionnés
 		const verse = await selectedVerse();
@@ -155,6 +158,10 @@
 		}
 	}
 
+	/**
+	 * Ajoute un silence à la timeline (shortcut ADD_SILENCE).
+	 * Utilisé pour ajouter un espace vide entre les sous-titres.
+	 */
 	function addSilence(): void {
 		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
 			TrackType.Subtitle
@@ -163,11 +170,18 @@
 		subtitleTrack.addSilence();
 	}
 
-	export function resetFirstAndLastWordIndex() {
+	/**
+	 * Réinitialise les indices de début et de fin des mots sélectionnés.
+	 * Utilisé pour réinitialiser la sélection après un changement de verset
+	 */
+	function resetFirstAndLastWordIndex() {
 		subtitlesEditorState().startWordIndex = 0;
 		subtitlesEditorState().endWordIndex = 0;
 	}
 
+	/**
+	 * Supprime le dernier sous-titre de la timeline (shortcut REMOVE_LAST_SUBTITLE).
+	 */
 	function removeLastSubtitle(): void {
 		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
 			TrackType.Subtitle
@@ -176,6 +190,9 @@
 		subtitleTrack.removeLastClip();
 	}
 
+	/**
+	 * Définit la fin du dernier sous-titre à la position actuelle du curseur (shortcut SET_LAST_SUBTITLE_END).
+	 */
 	function setLastSubtitleEnd(): void {
 		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
 			TrackType.Subtitle
@@ -186,6 +203,29 @@
 			lastSubtitle.setEndTime(
 				globalState.currentProject!.projectEditorState.timeline.cursorPosition
 			);
+		}
+	}
+
+	/**
+	 * Gère le clic sur un mot dans le sélecteur de mots.
+	 * Met à jour les indices de début et de fin des mots sélectionnés.
+	 * @param wordIndex L'index du mot cliqué.
+	 */
+	function handleWordClick(wordIndex: number): any {
+		if (wordIndex < subtitlesEditorState().startWordIndex) {
+			subtitlesEditorState().startWordIndex = wordIndex;
+			subtitlesEditorState().endWordIndex = wordIndex;
+		} else if (wordIndex > subtitlesEditorState().endWordIndex) {
+			subtitlesEditorState().endWordIndex = wordIndex;
+		} else {
+			// Si le mot est déjà sélectionné, on le désélectionne
+			if (
+				wordIndex >= subtitlesEditorState().startWordIndex &&
+				wordIndex <= subtitlesEditorState().endWordIndex
+			) {
+				subtitlesEditorState().startWordIndex = wordIndex;
+				subtitlesEditorState().endWordIndex = wordIndex;
+			}
 		}
 	}
 </script>
@@ -203,6 +243,7 @@
 				<button
 					class={'flex flex-col outline-none text-center px-2.5 pt-2 pb-2 cursor-pointer ' +
 						(isSelected ? 'word-selected' : 'word-not-selected')}
+					onclick={() => handleWordClick(index)}
 				>
 					<p class="text-center w-full">{word.arabic}</p>
 					<p class="xl:text-sm text-xs text-thirdly">{word.translation}</p>

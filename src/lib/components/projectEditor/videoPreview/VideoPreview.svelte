@@ -180,24 +180,32 @@
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED,
 			onKeyDown: (e) => {
-				audioSpeed = 2;
-				if (videoElement) {
-					videoElement.playbackRate = 2; // Double la vitesse de lecture
-				}
-				if (audioHowl) {
-					audioHowl.rate(2); // Double la vitesse de lecture audio
-				}
+				setPlaybackSpeed(
+					globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed * 2
+				);
 			},
 			onKeyUp: (e) => {
-				audioSpeed = 1; // Réinitialise la vitesse audio
-
-				if (videoElement) {
-					videoElement.playbackRate = 1;
-				}
-				if (audioHowl) {
-					audioHowl.rate(1);
-				}
+				setPlaybackSpeed(
+					globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed
+				);
 			}
+		});
+	});
+
+	function setPlaybackSpeed(speed: number) {
+		audioSpeed = speed; // Met à jour la vitesse audio
+		if (videoElement) {
+			videoElement.playbackRate = speed;
+		}
+		if (audioHowl) {
+			audioHowl.rate(speed);
+		}
+	}
+
+	$effect(() => {
+		let speed = globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed;
+		untrack(() => {
+			setPlaybackSpeed(speed);
 		});
 	});
 
