@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { SubtitleClip, TrackType, type AssetClip, type Clip, type Track } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { convertFileSrc } from '@tauri-apps/api/core';
-	import { onMount } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
-	import WaveSurfer from 'wavesurfer.js';
+	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
 
 	let {
 		clip = $bindable(),
@@ -14,6 +12,8 @@
 		track: Track;
 	} = $props();
 
+	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
+
 	let positionLeft = $derived(() => {
 		return (clip.startTime / 1000) * track.getPixelPerSecond();
 	});
@@ -21,11 +21,13 @@
 	let dragStartX: number | null = null;
 
 	function startLeftDragging(e: MouseEvent) {
-		// vient de cliquer sur le bord gauche du clip
-		dragStartX = e.clientX;
-		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
-		document.addEventListener('mousemove', onLeftDragging);
-		document.addEventListener('mouseup', stopLeftDragging);
+		if (e.button === 0) {
+			// vient de cliquer sur le bord gauche du clip
+			dragStartX = e.clientX;
+			globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+			document.addEventListener('mousemove', onLeftDragging);
+			document.addEventListener('mouseup', stopLeftDragging);
+		}
 	}
 
 	function onLeftDragging(e: MouseEvent) {
@@ -61,6 +63,8 @@
 		document.removeEventListener('mouseup', stopRightDragging);
 		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
 	}
+
+	function addSilence(e: MouseEvent): void {}
 </script>
 
 <div
@@ -72,7 +76,9 @@
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
 	{:else}
 		<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">
-			<span class="text-xs text-[var(--text-secondary)] font-medium">{clip.text}</span>
+			<span class="text-xs text-[var(--text-secondary)] font-medium mx-auto my-auto" dir="rtl"
+				>{clip.text}</span
+			>
 		</div>
 	{/if}
 
@@ -80,6 +86,10 @@
 	<div
 		class="h-full w-1 left-0 cursor-w-resize absolute top-0 bottom-0 z-10"
 		onmousedown={startLeftDragging}
+		oncontextmenu={(e) => {
+			e.preventDefault();
+			contextMenu!.show(e);
+		}}
 	></div>
 
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -88,3 +98,11 @@
 		onmousedown={startRightDragging}
 	></div>
 </div>
+
+<ContextMenu bind:this={contextMenu}>
+	<Item onclick={addSilence}
+		><div class="btn-icon">
+			<span class="material-icons-outlined text-sm mr-1">space_bar</span>Add silence
+		</div></Item
+	>
+</ContextMenu>

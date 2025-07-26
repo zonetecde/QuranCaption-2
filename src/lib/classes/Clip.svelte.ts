@@ -56,10 +56,6 @@ export class Clip extends SerializableBase {
 
 		this.startTime = newStartTime;
 		this.duration = this.endTime - this.startTime;
-
-		console.log(
-			`Clip ${this.id} updated startTime to ${this.startTime}, duration is now ${this.duration}ms`
-		);
 	}
 	updateEndTime(newEndTime: number) {
 		// Vérification 1: Le clip actuel doit avoir au minimum 100ms de durée
@@ -96,10 +92,6 @@ export class Clip extends SerializableBase {
 
 		this.endTime = newEndTime;
 		this.duration = this.endTime - this.startTime;
-
-		console.log(
-			`Clip ${this.id} updated endTime to ${this.endTime}, duration is now ${this.duration}ms`
-		);
 	}
 }
 

@@ -2,12 +2,9 @@
  * Interface représentant un raccourci clavier
  */
 interface Shortcut {
-	keys: string[]; // Modifié pour supporter plusieurs clés
-	description: string;
-	category: string;
+	keys: string[];
 	onKeyDown: (event: KeyboardEvent) => void;
 	onKeyUp?: (event: KeyboardEvent) => void;
-	preventDefault?: boolean;
 }
 
 /**
@@ -60,9 +57,7 @@ class ShortcutService {
 		const shortcut = this.shortcuts.get(key);
 
 		if (shortcut) {
-			if (shortcut.preventDefault !== false) {
-				event.preventDefault();
-			}
+			event.preventDefault();
 
 			shortcut.onKeyDown(event);
 		}
@@ -76,9 +71,8 @@ class ShortcutService {
 		const shortcut = this.shortcuts.get(key);
 
 		if (shortcut?.onKeyUp) {
-			if (shortcut.preventDefault !== false) {
-				event.preventDefault();
-			}
+			event.preventDefault();
+
 			shortcut.onKeyUp(event);
 		}
 	}
@@ -89,27 +83,21 @@ class ShortcutService {
 		const keyArray = Array.isArray(keys) ? keys : [keys];
 		return keyArray.map((key) => key.toLowerCase());
 	}
-
 	/**
 	 * Enregistre un nouveau raccourci
 	 */
 	static registerShortcut(options: {
-		key: string | string[]; // Accepte maintenant une clé ou un tableau de clés
-		description: string;
-		category: string;
+		key: { keys: string[]; description: string; category: string };
 		onKeyDown: (event: KeyboardEvent) => void;
 		onKeyUp?: (event: KeyboardEvent) => void;
 		preventDefault?: boolean;
 	}): void {
-		const normalizedKeys = this.normalizeKeys(options.key);
+		const normalizedKeys = this.normalizeKeys(options.key.keys);
 
 		const shortcut: Shortcut = {
 			keys: normalizedKeys,
-			description: options.description,
-			category: options.category,
 			onKeyDown: options.onKeyDown,
-			onKeyUp: options.onKeyUp,
-			preventDefault: options.preventDefault ?? true
+			onKeyUp: options.onKeyUp
 		};
 
 		// Enregistre le raccourci pour chaque clé
@@ -117,12 +105,15 @@ class ShortcutService {
 			this.shortcuts.set(key, shortcut);
 		});
 	}
-
 	/**
 	 * Supprime un raccourci
 	 */
-	static unregisterShortcut(key: string | string[]): boolean {
-		const normalizedKeys = this.normalizeKeys(key);
+	static unregisterShortcut(key: {
+		keys: string[];
+		description: string;
+		category: string;
+	}): boolean {
+		const normalizedKeys = this.normalizeKeys(key.keys);
 		let hasDeleted = false;
 
 		normalizedKeys.forEach((normalizedKey) => {
@@ -140,52 +131,6 @@ class ShortcutService {
 		const normalizedKey = key.toLowerCase();
 		return this.shortcuts.has(normalizedKey);
 	}
-
-	/**
-	 * Obtient les informations d'un raccourci
-	 */
-	static getShortcut(key: string): Shortcut | undefined {
-		const normalizedKey = key.toLowerCase();
-		return this.shortcuts.get(normalizedKey);
-	}
-	/**
-	 * Obtient tous les raccourcis d'une catégorie
-	 */
-	static getShortcutsByCategory(category: string): Shortcut[] {
-		return Array.from(this.shortcuts.values()).filter((shortcut) => shortcut.category === category);
-	}
-
-	/**
-	 * Obtient toutes les clés associées à un raccourci spécifique
-	 */
-	static getKeysForShortcut(key: string): string[] {
-		const normalizedKey = key.toLowerCase();
-		const shortcut = this.shortcuts.get(normalizedKey);
-		return shortcut ? shortcut.keys : [];
-	}
-
-	/**
-	 * Obtient tous les raccourcis enregistrés (dédupliqués)
-	 */
-	static getAllShortcuts(): Shortcut[] {
-		const uniqueShortcuts = new Map<string, Shortcut>();
-
-		// Déduplication basée sur la description + catégorie pour éviter les doublons
-		// dus aux clés multiples
-		for (const shortcut of this.shortcuts.values()) {
-			const key = `${shortcut.category}:${shortcut.description}`;
-			uniqueShortcuts.set(key, shortcut);
-		}
-
-		return Array.from(uniqueShortcuts.values());
-	}
-
-	/**
-	 * Supprime tous les raccourcis
-	 */
-	static clearAllShortcuts(): void {
-		this.shortcuts.clear();
-	}
 }
 
 /**
@@ -193,19 +138,63 @@ class ShortcutService {
  */
 export const SHORTCUTS = {
 	VIDEO_PREVIEW: {
-		MOVE_FORWARD: 'arrowright',
-		MOVE_BACKWARD: 'arrowleft',
-		PLAY_PAUSE: ' ',
-		INCREASE_SPEED: ['pageup', 'pagedown']
+		MOVE_FORWARD: {
+			keys: ['arrowright'],
+			description: 'Move preview forward by 2 seconds',
+			category: 'Video Preview'
+		},
+		MOVE_BACKWARD: {
+			keys: ['arrowleft'],
+			description: 'Move preview backward by 2 seconds',
+			category: 'Video Preview'
+		},
+		PLAY_PAUSE: {
+			keys: [' '],
+			description: 'Play/Pause the video preview',
+			category: 'Video Preview'
+		},
+		INCREASE_SPEED: {
+			keys: ['pageup', 'pagedown'],
+			description: 'Set video speed to 2x',
+			category: 'Video Preview'
+		}
 	},
 	SUBTITLES_EDITOR: {
-		SELECT_NEXT_WORD: 'arrowup',
-		SELECT_PREVIOUS_WORD: 'arrowdown',
-		RESET_START_CURSOR: 'r',
-		SELECT_ALL_WORDS: 'v',
-		SET_END_TO_LAST: 'c',
-		ADD_SUBTITLE: 'enter',
-		REMOVE_LAST_SUBTITLE: 'backspace'
+		SELECT_NEXT_WORD: {
+			keys: ['arrowup'],
+			description: 'Select Next Word',
+			category: 'Subtitles Editor'
+		},
+		SELECT_PREVIOUS_WORD: {
+			keys: ['arrowdown'],
+			description: 'Select Previous Word',
+			category: 'Subtitles Editor'
+		},
+		RESET_START_CURSOR: {
+			keys: ['r'],
+			description: 'Put the start-of-selection cursor on the end-of-selection cursor.',
+			category: 'Subtitles Editor'
+		},
+		SELECT_ALL_WORDS: {
+			keys: ['v'],
+			description: 'Select all words in the verse.',
+			category: 'Subtitles Editor'
+		},
+		SET_END_TO_LAST: {
+			keys: ['c'],
+			description: 'Put the end-of-selection cursor on the last word of the verse.',
+			category: 'Subtitles Editor'
+		},
+		ADD_SUBTITLE: {
+			keys: ['enter'],
+			description: 'Add a subtitle with the selected words.',
+			category: 'Subtitles Editor'
+		},
+		REMOVE_LAST_SUBTITLE: {
+			keys: ['backspace'],
+			description: 'Remove the last subtitle.',
+			category: 'Subtitles Editor'
+		}
 	}
 };
 

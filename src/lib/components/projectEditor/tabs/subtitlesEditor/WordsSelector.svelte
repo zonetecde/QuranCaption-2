@@ -33,28 +33,21 @@
 				subtitlesEditorState().selectedVerse
 			)
 	);
-
 	onMount(() => {
 		// Set up les shortcuts pour sélectionner les mots
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_NEXT_WORD,
-			description: 'Select Next Word',
-			category: 'Subtitles Editor',
 			onKeyDown: selectNextWord
 		});
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD,
-			description: 'Select Previous Word',
-			category: 'Subtitles Editor',
 			onKeyDown: selectPreviousWord
 		});
 
 		// Set up les shortcuts divers
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.RESET_START_CURSOR,
-			description: 'Put the start-of-selection cursor on the end-of-selection cursor.',
-			category: 'Subtitles Editor',
 			onKeyDown: () => {
 				subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
 			}
@@ -62,8 +55,6 @@
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_ALL_WORDS,
-			description: 'Select all words in the verse.',
-			category: 'Subtitles Editor',
 			onKeyDown: async () => {
 				subtitlesEditorState().startWordIndex = 0;
 				subtitlesEditorState().endWordIndex = (await selectedVerse())!.words.length - 1;
@@ -72,8 +63,6 @@
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST,
-			description: 'Put the end-of-selection cursor on the last word of the verse.',
-			category: 'Subtitles Editor',
 			onKeyDown: async () => {
 				subtitlesEditorState().endWordIndex = (await selectedVerse())!.words.length - 1;
 			}
@@ -82,15 +71,11 @@
 		// Set up les shortcuts d'action
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE,
-			description: 'Add a subtitle with the selected words.',
-			category: 'Subtitles Editor',
 			onKeyDown: addSubtitle
 		});
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE,
-			description: 'Remove the last subtitle.',
-			category: 'Subtitles Editor',
 			onKeyDown: removeLastSubtitle
 		});
 	});
@@ -172,7 +157,7 @@
 </script>
 
 <section
-	class="w-full items-center h-full flex flex-row-reverse py-10 xl:leading-[4.5rem] leading-[4rem] my-auto px-6 overflow-y-auto xl:pb-20 flex-wrap text-4xl xl:text-5xl arabic content-center"
+	class="w-full items-center h-full flex flex-row-reverse py-10 xl:leading-[4.5rem] leading-[4rem] my-auto px-6 overflow-y-auto xl:pb-20 flex-wrap text-4xl xl:text-5xl arabic content-center pt-40 2xl:pt-0"
 >
 	{#await selectedVerse() then verse}
 		{#if verse}

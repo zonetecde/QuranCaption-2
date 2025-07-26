@@ -151,13 +151,9 @@
 
 		// Force la synchronisation initiale vidéo/audio avec la position du curseur
 		triggerVideoAndAudioToFitCursor();
-
 		// Set les shortcuts pour le preview
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.PLAY_PAUSE,
-			description: 'Play/Pause the video preview',
-			category: 'Video Preview',
-			preventDefault: true,
 			onKeyDown: (e) => {
 				togglePlayPause();
 			}
@@ -165,9 +161,6 @@
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD,
-			description: 'Move preview forward by 2 seconds',
-			category: 'Video Preview',
-			preventDefault: true,
 			onKeyDown: (e) => {
 				const currentTime = getTimelineSettings().cursorPosition;
 				getTimelineSettings().cursorPosition = currentTime + 2000; // Avance de 2 secondes
@@ -177,9 +170,6 @@
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.MOVE_BACKWARD,
-			description: 'Move preview backward by 2 seconds',
-			category: 'Video Preview',
-			preventDefault: true,
 			onKeyDown: (e) => {
 				const currentTime = getTimelineSettings().cursorPosition;
 				getTimelineSettings().cursorPosition = Math.max(1, currentTime - 2000); // Recule de 2 secondes
@@ -189,9 +179,6 @@
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED,
-			description: 'Set video speed to 2x',
-			category: 'Video Preview',
-			preventDefault: true,
 			onKeyDown: (e) => {
 				audioSpeed = 2;
 				if (videoElement) {
