@@ -5,30 +5,37 @@ import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
 
+type ClipType = 'Silence' | 'Subtitle' | 'Asset';
+
 export class Clip extends SerializableBase {
 	id: number;
 	startTime: number = $state(0);
 	endTime: number = $state(0);
 	duration: number = $state(0);
 
-	constructor(startTime: number, endTime: number) {
+	type: ClipType;
+
+	constructor(startTime: number, endTime: number, type: ClipType) {
 		super();
 		this.id = Utilities.randomId();
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.duration = endTime - startTime;
+		this.type = type;
 	}
 
 	getWidth() {
 		return (this.duration / 1000) * globalState.currentProject?.projectEditorState.timeline.zoom!;
 	}
+
+	/**
+	 * Met à jour l'heure de début du clip tout en modifiant l'heure de fin du clip précédent pour éviter les chevauchements.
+	 * @param newStartTime La nouvelle heure de début.
+	 */
 	updateStartTime(newStartTime: number) {
 		// Vérification 1: Le clip actuel doit avoir au minimum 100ms de durée
 		const newCurrentClipDuration = this.endTime - newStartTime;
 		if (newCurrentClipDuration < 100) {
-			console.log(
-				`Cannot update startTime for clip ${this.id}: current clip duration would be ${newCurrentClipDuration}ms (minimum 100ms required)`
-			);
 			return;
 		}
 
@@ -44,9 +51,6 @@ export class Clip extends SerializableBase {
 			const newPreviousClipDuration = newStartTime - 1 - previousClip.startTime;
 
 			if (newPreviousClipDuration < 100) {
-				console.log(
-					`Cannot update startTime for clip ${this.id}: previous clip duration would be ${newPreviousClipDuration}ms (minimum 100ms required)`
-				);
 				return;
 			}
 
@@ -54,16 +58,17 @@ export class Clip extends SerializableBase {
 			previousClip.duration = previousClip.endTime - previousClip.startTime;
 		}
 
-		this.startTime = newStartTime;
-		this.duration = this.endTime - this.startTime;
+		this.setStartTime(newStartTime);
 	}
+
+	/**
+	 * Met à jour l'heure de fin du clip tout en modifiant l'heure de début du clip suivant pour éviter les chevauchements.
+	 * @param newEndTime La nouvelle heure de fin.
+	 */
 	updateEndTime(newEndTime: number) {
 		// Vérification 1: Le clip actuel doit avoir au minimum 100ms de durée
 		const newCurrentClipDuration = newEndTime - this.startTime;
 		if (newCurrentClipDuration < 100) {
-			console.log(
-				`Cannot update endTime for clip ${this.id}: current clip duration would be ${newCurrentClipDuration}ms (minimum 100ms required)`
-			);
 			return;
 		}
 
@@ -79,17 +84,30 @@ export class Clip extends SerializableBase {
 			const newNextClipDuration = nextClip.endTime - (newEndTime + 1);
 
 			if (newNextClipDuration < 100) {
-				console.log(
-					`Cannot update endTime for clip ${this.id}: next clip duration would be ${newNextClipDuration}ms (minimum 100ms required)`
-				);
 				return;
 			}
 
 			// Met à jour le startTime du clip suivant
-			nextClip.startTime = newEndTime + 1;
-			nextClip.duration = nextClip.endTime - nextClip.startTime;
+			nextClip.setStartTime(newEndTime + 1);
 		}
 
+		this.setEndTime(newEndTime);
+	}
+
+	/**
+	 * Met à jour l'heure de début du clip et recalcule la durée.
+	 * @param newStartTime La nouvelle heure de début.
+	 */
+	setStartTime(newStartTime: number) {
+		this.startTime = newStartTime;
+		this.duration = this.endTime - this.startTime;
+	}
+
+	/**
+	 * Met à jour l'heure de fin du clip et recalcule la durée.
+	 * @param newEndTime La nouvelle heure de fin.
+	 */
+	setEndTime(newEndTime: number) {
 		this.endTime = newEndTime;
 		this.duration = this.endTime - this.startTime;
 	}
@@ -99,7 +117,7 @@ export class AssetClip extends Clip {
 	assetId: number;
 
 	constructor(startTime: number, endTime: number, assetId: number) {
-		super(startTime, endTime);
+		super(startTime, endTime, 'Asset');
 		this.assetId = assetId;
 	}
 }
@@ -122,12 +140,18 @@ export class SubtitleClip extends Clip {
 		text: string,
 		translations: { [key: string]: string } = {}
 	) {
-		super(startTime, endTime);
+		super(startTime, endTime, 'Subtitle');
 		this.surah = surah;
 		this.verse = verse;
 		this.startWordIndex = startWordIndex;
 		this.endWordIndex = endWordIndex;
 		this.translations = translations;
 		this.text = text;
+	}
+}
+
+export class SilenceClip extends Clip {
+	constructor(startTime: number, endTime: number) {
+		super(startTime, endTime, 'Silence');
 	}
 }

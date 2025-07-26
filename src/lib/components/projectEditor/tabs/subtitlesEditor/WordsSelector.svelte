@@ -4,6 +4,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
 	import { onDestroy, onMount } from 'svelte';
+	import toast from 'svelte-5-french-toast';
 
 	let subtitlesEditorState = $derived(
 		() => globalState.currentProject!.projectEditorState.subtitlesEditor
@@ -78,6 +79,11 @@
 			key: SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE,
 			onKeyDown: removeLastSubtitle
 		});
+
+		ShortcutService.registerShortcut({
+			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE,
+			onKeyDown: addSilence
+		});
 	});
 
 	onDestroy(() => {
@@ -140,6 +146,14 @@
 			await selectNextWord();
 			subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
 		}
+	}
+
+	function addSilence(): void {
+		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
+			TrackType.Subtitle
+		)!;
+
+		subtitleTrack.addSilence();
 	}
 
 	export function resetFirstAndLastWordIndex() {

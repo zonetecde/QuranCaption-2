@@ -194,6 +194,11 @@ export const SHORTCUTS = {
 			keys: ['backspace'],
 			description: 'Remove the last subtitle.',
 			category: 'Subtitles Editor'
+		},
+		ADD_SILENCE: {
+			keys: ['s'],
+			description: 'Add silence to the timeline.',
+			category: 'Subtitles Editor'
 		}
 	}
 };

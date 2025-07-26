@@ -36,7 +36,6 @@
 </script>
 
 <!-- Diviseur redimensionnable -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="h-0.75 bg-secondary cursor-row-resize flex-shrink-0 diviseur {isDragging
 		? 'bg-blue-500'

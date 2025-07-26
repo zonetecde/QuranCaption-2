@@ -49,11 +49,7 @@ export class Timeline extends SerializableBase {
 		const currentClip = track?.getCurrentClip();
 
 		// Vérifier si le clip est un AssetClip (a la propriété assetId)
-		if (
-			currentClip &&
-			'assetId' in currentClip &&
-			typeof (currentClip as any).assetId === 'number'
-		) {
+		if (currentClip && 'assetId' in currentClip) {
 			// Accéder directement à l'asset via globalState au lieu d'utiliser getAsset()
 			const assetId = (currentClip as any).assetId;
 			const asset = globalState.currentProject?.content.getAssetById(assetId);

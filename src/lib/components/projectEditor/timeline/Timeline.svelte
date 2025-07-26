@@ -59,7 +59,7 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
+		const newPosition = Math.max(1, (clickX / timelineState().zoom) * 1000);
 
 		timelineState().cursorPosition = newPosition;
 		timelineState().movePreviewTo = newPosition;
@@ -76,7 +76,7 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
+		const newPosition = Math.max(1, (clickX / timelineState().zoom) * 1000);
 
 		timelineState().cursorPosition = newPosition;
 		timelineState().movePreviewTo = newPosition;
@@ -88,7 +88,7 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
+		const newPosition = Math.max(1, (clickX / timelineState().zoom) * 1000);
 
 		timelineState().cursorPosition = newPosition;
 		timelineState().movePreviewTo = newPosition;
@@ -102,7 +102,7 @@
 
 		const rect = target.getBoundingClientRect();
 		const clickX = event.clientX - rect.left - 180; // Soustrait la largeur du header
-		const newPosition = Math.max(0, (clickX / timelineState().zoom) * 1000);
+		const newPosition = Math.max(1, (clickX / timelineState().zoom) * 1000);
 
 		timelineState().cursorPosition = newPosition;
 		timelineState().movePreviewTo = newPosition;
@@ -151,7 +151,6 @@
 	<div class="timeline-container select-none" onwheel={handleMouseWheelWheeling}>
 		<!-- Timeline Header -->
 		<div class="timeline-ruler" onscroll={syncScroll} bind:this={timelineDiv}>
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="ruler-content"
 				style="width: {totalDuration().toSeconds() * timelineState().zoom + 180}px;"
@@ -193,7 +192,6 @@
 
 		<!-- Timeline Tracks Area -->
 		<div class="timeline-tracks" onscroll={syncScroll} id="timeline">
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<div
 				class="tracks-content grid outline-none"
 				style="width: {totalDuration().toSeconds() * timelineState().zoom + 180}px;"

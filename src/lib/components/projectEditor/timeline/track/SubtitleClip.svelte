@@ -64,35 +64,47 @@
 		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
 	}
 
-	function addSilence(e: MouseEvent): void {}
+	function addSilence(): void {
+		// Ajoute un silence à gauche du clip
+		track.addSilence(clip.id);
+	}
+
+	function removeSubtitle(): void {
+		// Supprime le clip de sous-titre
+		// Le setTimeout est nécessaire sinon le contextmenu ne se ferme pas
+		setTimeout(() => {
+			track.removeClip(clip.id, true);
+		}, 0);
+	}
 </script>
 
 <div
-	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group"
+	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden"
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
 	transition:slide={{ duration: 500, axis: 'x' }}
+	oncontextmenu={(e) => {
+		e.preventDefault();
+		contextMenu!.show(e);
+	}}
 >
-	{#if globalState.currentProject?.projectEditorState.timeline.showWaveforms && track.type === TrackType.Audio}
-		<div class="h-full w-full" id={'clip-' + clip.id}></div>
-	{:else}
-		<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">
+	{#if clip.type === 'Subtitle'}
+		<div class="absolute inset-0 z-5 flex px-2 py-2">
 			<span class="text-xs text-[var(--text-secondary)] font-medium mx-auto my-auto" dir="rtl"
 				>{clip.text}</span
 			>
 		</div>
+	{:else if clip.type === 'Silence'}
+		<div
+			class="absolute inset-0 z-5 flex px-2 py-2"
+			style="background: repeating-linear-gradient(45deg, transparent 0px, transparent 8px, var(--timeline-clip-color) 8px, var(--timeline-clip-color) 16px);"
+		></div>
 	{/if}
 
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="h-full w-1 left-0 cursor-w-resize absolute top-0 bottom-0 z-10"
 		onmousedown={startLeftDragging}
-		oncontextmenu={(e) => {
-			e.preventDefault();
-			contextMenu!.show(e);
-		}}
 	></div>
 
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="h-full w-1 right-0 cursor-w-resize absolute top-0 bottom-0 z-10"
 		onmousedown={startRightDragging}
@@ -100,9 +112,14 @@
 </div>
 
 <ContextMenu bind:this={contextMenu}>
-	<Item onclick={addSilence}
+	<Item on:click={addSilence}
 		><div class="btn-icon">
-			<span class="material-icons-outlined text-sm mr-1">space_bar</span>Add silence
+			<span class="material-icons-outlined text-sm mr-1">space_bar</span>Add silence (on the left)
+		</div></Item
+	>
+	<Item on:click={removeSubtitle}
+		><div class="btn-icon">
+			<span class="material-icons-outlined text-sm mr-1">remove</span>Remove subtitle
 		</div></Item
 	>
 </ContextMenu>
