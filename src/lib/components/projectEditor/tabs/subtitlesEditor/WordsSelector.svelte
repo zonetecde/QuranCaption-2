@@ -84,6 +84,11 @@
 			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE,
 			onKeyDown: addSilence
 		});
+
+		ShortcutService.registerShortcut({
+			key: SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END,
+			onKeyDown: setLastSubtitleEnd
+		});
 	});
 
 	onDestroy(() => {
@@ -95,6 +100,8 @@
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END);
 	});
 
 	/**
@@ -167,6 +174,19 @@
 		)!;
 
 		subtitleTrack.removeLastClip();
+	}
+
+	function setLastSubtitleEnd(): void {
+		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
+			TrackType.Subtitle
+		)!;
+
+		const lastSubtitle = subtitleTrack.getLastClip();
+		if (lastSubtitle) {
+			lastSubtitle.setEndTime(
+				globalState.currentProject!.projectEditorState.timeline.cursorPosition
+			);
+		}
 	}
 </script>
 

@@ -8,6 +8,7 @@
 	import { ProjectEditorTabs } from '$lib/classes';
 	import VideoEditor from './tabs/videoEditor/VideoEditor.svelte';
 	import SubtitlesEditor from './tabs/subtitlesEditor/SubtitlesEditor.svelte';
+	import toast from 'svelte-5-french-toast';
 
 	let saveInterval: any;
 

@@ -199,6 +199,11 @@ export const SHORTCUTS = {
 			keys: ['s'],
 			description: 'Add silence to the timeline.',
 			category: 'Subtitles Editor'
+		},
+		SET_LAST_SUBTITLE_END: {
+			keys: ['m'],
+			description: 'Set the end time of the last subtitle to the current playback position.',
+			category: 'Subtitles Editor'
 		}
 	}
 };

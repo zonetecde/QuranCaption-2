@@ -148,6 +148,10 @@ export class Track extends SerializableBase {
 		}
 	}
 
+	getLastClip() {
+		return this.clips[this.clips.length - 1] || null;
+	}
+
 	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number): boolean {
 		const arabicText = verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex);
 
