@@ -25,6 +25,9 @@
 	onMount(() => {
 		// Restitue le scroll
 		timelineDiv!.scrollLeft = timelineState().scrollX;
+
+		// Au cas où il serait en false après un changement de taille de sous-titre
+		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
 	});
 
 	// Effect pour mettre à jour le pourcentage de la timeline captionnée
