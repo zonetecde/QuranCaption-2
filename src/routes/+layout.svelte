@@ -8,11 +8,6 @@
 	import TitleBar from '$lib/components/TitleBar.svelte';
 
 	let { children } = $props();
-
-	onMount(async () => {
-		// Récupère les projets de l'utilisateur au chargement de l'application
-		await projectService.loadUserProjectsDetails();
-	});
 </script>
 
 <Toaster />

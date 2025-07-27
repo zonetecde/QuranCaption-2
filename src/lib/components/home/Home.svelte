@@ -6,6 +6,8 @@
 	import CreateProjectModal from './modals/CreateProjectModal.svelte';
 	import ProjectDetailCard from './ProjectDetailCard.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
+	import { onMount } from 'svelte';
+	import { projectService } from '$lib/services/ProjectService';
 
 	let createNewProjectModalVisible: boolean = $state(false);
 
@@ -15,6 +17,11 @@
 	function newProjectButtonClick() {
 		createNewProjectModalVisible = true;
 	}
+
+	onMount(async () => {
+		// Récupère les projets de l'utilisateur au chargement de l'application
+		await projectService.loadUserProjectsDetails();
+	});
 </script>
 
 <div class="flex flex-col min-h-full overflow-x-hidden overflow-auto">
