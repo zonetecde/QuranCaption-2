@@ -5,6 +5,7 @@
 <div class="flex flex-col px-3 pt-3">
 	<h2 class="text-center font-bold">Subtitles Editor Settings</h2>
 	<br />
+
 	<div class="flex items-center flex-col space-x-2 mb-3 gap-y-2">
 		<span class="text-sm text-left">Playback Speed</span>
 
@@ -25,6 +26,31 @@
 			{/each}
 		</div>
 
+		<br />
+
+		<div class="flex items-center space-x-2 mt-auto">
+			<label class="text-sm" for="showWordTranslation">Show Word Translation</label>
+			<input
+				id="showWordTranslation"
+				type="checkbox"
+				bind:checked={
+					globalState.currentProject!.projectEditorState.subtitlesEditor.showWordTranslation
+				}
+				class="toggle toggle-primary"
+			/>
+		</div>
+
+		<div class="flex items-center space-x-2">
+			<label class="text-sm" for="showWordTransliteration">Show Word Transliteration</label>
+			<input
+				id="showWordTransliteration"
+				type="checkbox"
+				bind:checked={
+					globalState.currentProject!.projectEditorState.subtitlesEditor.showWordTransliteration
+				}
+				class="toggle toggle-primary"
+			/>
+		</div>
 		<br />
 		<span class="text-sm text-left">Percentage caption</span>
 		<div class="w-full bg-gray-200 rounded-full h-3.5 dark:bg-gray-700 relative">

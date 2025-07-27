@@ -79,4 +79,10 @@ export class SubtitlesEditorState extends SerializableBase {
 
 	// Playback speed
 	playbackSpeed: number = $state(1.0);
+
+	// Affiche la traduction des mots
+	showWordTranslation: boolean = $state(true);
+
+	// Affiche la translittération des mots
+	showWordTransliteration: boolean = $state(false);
 }

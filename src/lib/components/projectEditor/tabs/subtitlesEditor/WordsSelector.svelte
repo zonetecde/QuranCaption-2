@@ -246,7 +246,12 @@
 					onclick={() => handleWordClick(index)}
 				>
 					<p class="text-center w-full">{word.arabic}</p>
-					<p class="xl:text-sm text-xs text-thirdly">{word.translation}</p>
+					{#if subtitlesEditorState().showWordTranslation}
+						<p class="xl:text-sm text-xs text-thirdly">{word.translation}</p>
+					{/if}
+					{#if subtitlesEditorState().showWordTransliteration}
+						<p class="xl:text-sm text-xs text-thirdly">{word.transliteration}</p>
+					{/if}
 				</button>
 			{/each}
 		{/if}
