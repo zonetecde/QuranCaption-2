@@ -1,0 +1,54 @@
+[
+  {
+    "id": 102,
+    "city": "makkah",
+    "name": {
+      "translated": "The Rivalry in world increase",
+      "transliterated": "At-Takathur",
+      "codepoints": [
+        1575,
+        1604,
+        1578,
+        1603,
+        1575,
+        1579,
+        1585
+      ]
+    },
+    "ayahs": 8,
+    "slug": "at-takathur",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "La course aux richesses vous distrait,"
+  ],
+  [
+    2,
+    "jusqu’à ce que vous visitiez les tombes ."
+  ],
+  [
+    3,
+    "Mais non ! Vous saurez bientôt !"
+  ],
+  [
+    4,
+    "(Encore une fois) ! Vous saurez bientôt !"
+  ],
+  [
+    5,
+    "Sûrement ! Si vous saviez de science certaine ."
+  ],
+  [
+    6,
+    "Vous verrez, certes, la Fournaise."
+  ],
+  [
+    7,
+    "Puis, vous la verrez certes, avec l’œil de certitude."
+  ],
+  [
+    8,
+    "Puis, assurément, vous serez interrogés, ce jour-là, sur les délices."
+  ]
+]

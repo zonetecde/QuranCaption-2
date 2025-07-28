@@ -1,0 +1,40 @@
+[
+  {
+    "id": 113,
+    "city": "makkah",
+    "name": {
+      "translated": "The Daybreak",
+      "transliterated": "Al-Falaq",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1604,
+        1602
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-falaq",
+    "translator": null
+  },
+  [
+    1,
+    "Dize: Amparo-me no Senhor da Alvorada;"
+  ],
+  [
+    2,
+    "Do mal de quem por Ele foi criado."
+  ],
+  [
+    3,
+    "Do mal da tenebrosa noite, quando se estende."
+  ],
+  [
+    4,
+    "Do mal dos que praticam ciências ocultas."
+  ],
+  [
+    5,
+    "Do mal do invejoso, quando inveja!"
+  ]
+]

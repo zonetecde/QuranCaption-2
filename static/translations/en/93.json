@@ -1,0 +1,64 @@
+[
+  {
+    "id": 93,
+    "city": "makkah",
+    "name": {
+      "translated": "The Morning Hours",
+      "transliterated": "Ad-Duhaa",
+      "codepoints": [
+        1575,
+        1604,
+        1590,
+        1581,
+        1609
+      ]
+    },
+    "ayahs": 11,
+    "slug": "ad-duhaa",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "By the morning sunlight,"
+  ],
+  [
+    2,
+    "and the night when it falls still!"
+  ],
+  [
+    3,
+    "Your Lord ˹O Prophet˺ has not abandoned you, nor has He become hateful ˹of you˺."
+  ],
+  [
+    4,
+    "And the next life is certainly far better for you than this one."
+  ],
+  [
+    5,
+    "And ˹surely˺ your Lord will give so much to you that you will be pleased."
+  ],
+  [
+    6,
+    "Did He not find you as an orphan then sheltered you?"
+  ],
+  [
+    7,
+    "Did He not find you unguided then guided you?"
+  ],
+  [
+    8,
+    "And did He not find you needy then satisfied your needs?"
+  ],
+  [
+    9,
+    "So do not oppress the orphan,"
+  ],
+  [
+    10,
+    "nor repulse the beggar."
+  ],
+  [
+    11,
+    "And proclaim the blessings of your Lord."
+  ]
+]

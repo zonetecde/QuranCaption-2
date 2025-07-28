@@ -1,0 +1,40 @@
+[
+  {
+    "id": 111,
+    "city": "makkah",
+    "name": {
+      "translated": "The Palm Fiber",
+      "transliterated": "Al-Masad",
+      "codepoints": [
+        1575,
+        1604,
+        1605,
+        1587,
+        1583
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-masad",
+    "translator": null
+  },
+  [
+    1,
+    "Que pereça o poder de Abu Láhab e que ele pereça também!"
+  ],
+  [
+    2,
+    "De nada lhe valerão os seus bens, nem tudo quanto lucrou."
+  ],
+  [
+    3,
+    "Entrará no fogo flamígero,"
+  ],
+  [
+    4,
+    "Bem como a sua mulher, a portadora de lenha,"
+  ],
+  [
+    5,
+    "Que levará ao pescoço uma corda de esparto."
+  ]
+]

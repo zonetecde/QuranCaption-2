@@ -1,0 +1,67 @@
+[
+  {
+    "id": 100,
+    "city": "makkah",
+    "name": {
+      "translated": "The Courser",
+      "transliterated": "Al-'Adiyat",
+      "codepoints": [
+        1575,
+        1604,
+        1593,
+        1575,
+        1583,
+        1610,
+        1575,
+        1578
+      ]
+    },
+    "ayahs": 11,
+    "slug": "al-adiyat",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Par les coursiers qui halètent,"
+  ],
+  [
+    2,
+    "qui font jaillir des étincelles,"
+  ],
+  [
+    3,
+    "qui attaquent au matin."
+  ],
+  [
+    4,
+    "et font ainsi voler la poussière,"
+  ],
+  [
+    5,
+    "et pénètrent au centre de la troupe ennemie."
+  ],
+  [
+    6,
+    "L’homme est, certes, ingrat envers son Seigneur ;"
+  ],
+  [
+    7,
+    "et pourtant, il est certes, témoin de cela ;"
+  ],
+  [
+    8,
+    "et pour l’amour des richesses il est certes ardent."
+  ],
+  [
+    9,
+    "Ne sait-il donc pas que lorsque ce qui est dans les tombes sera bouleversé,"
+  ],
+  [
+    10,
+    "et que sera dévoilé ce qui est dans les poitrines,"
+  ],
+  [
+    11,
+    "ce jour-là, certes, leur Seigneur sera Parfaitement Connaisseur d’eux ?"
+  ]
+]

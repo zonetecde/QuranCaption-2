@@ -1,6 +1,8 @@
+import { SerializableBase } from './misc/SerializableBase';
+
 export type TranslationStatus = 'completed by default' | 'to translate' | 'translated';
 
-export class Translation {
+export class Translation extends SerializableBase {
 	// L'indice du mot de début de la traduction dans le texte original
 	startWordIndex: number;
 
@@ -22,6 +24,7 @@ export class Translation {
 		text: string,
 		status: TranslationStatus
 	) {
+		super();
 		this.startWordIndex = $state(startWordIndex);
 		this.endWordIndex = $state(endWordIndex);
 		this.text = $state(text);

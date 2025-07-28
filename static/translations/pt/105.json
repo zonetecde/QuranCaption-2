@@ -1,0 +1,40 @@
+[
+  {
+    "id": 105,
+    "city": "makkah",
+    "name": {
+      "translated": "The Elephant",
+      "transliterated": "Al-Fil",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1610,
+        1604
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-fil",
+    "translator": null
+  },
+  [
+    1,
+    "Não reparaste no que o teu Senhor fez, com os possuidores dos elefantes?"
+  ],
+  [
+    2,
+    "Acaso, não desbaratou Ele as suas conspirações,"
+  ],
+  [
+    3,
+    "Enviando contra eles um bando de criaturas aladas,"
+  ],
+  [
+    4,
+    "Que lhes arrojaram pedras de argila endurecida"
+  ],
+  [
+    5,
+    "E os deixou como plantações devastadas (pelo gado)?"
+  ]
+]

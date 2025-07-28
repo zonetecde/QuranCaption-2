@@ -1,0 +1,50 @@
+[
+  {
+    "id": 107,
+    "city": "makkah",
+    "name": {
+      "translated": "The Small kindnesses",
+      "transliterated": "Al-Ma'un",
+      "codepoints": [
+        1575,
+        1604,
+        1605,
+        1575,
+        1593,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-maun",
+    "translator": null
+  },
+  [
+    1,
+    "Tens reparado em quem nega a religião?"
+  ],
+  [
+    2,
+    "É quem repele o órfão,"
+  ],
+  [
+    3,
+    "E não estimula (os demais) à alimentação dos necessitados."
+  ],
+  [
+    4,
+    "Ai, pois, dos praticantes das orações,"
+  ],
+  [
+    5,
+    "Que são negligentes em suas orações,"
+  ],
+  [
+    6,
+    "Que as fazem por ostentação,"
+  ],
+  [
+    7,
+    "Negando-se, contudo, a prestar obséquios!"
+  ]
+]

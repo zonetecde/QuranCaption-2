@@ -1,0 +1,32 @@
+[
+  {
+    "id": 103,
+    "city": "makkah",
+    "name": {
+      "translated": "The Declining Day",
+      "transliterated": "Al-'Asr",
+      "codepoints": [
+        1575,
+        1604,
+        1593,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "al-asr",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Bij de tijd."
+  ],
+  [
+    2,
+    "Voorwaar, de mens lijdt zeker verlies."
+  ],
+  [
+    3,
+    "Behalve degenen die geloven en goede daden verrichten en elkaar aansporen tot de Waarheid en elkaar aansporen tot geduld."
+  ]
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "id": 99,
+    "city": "madinah",
+    "name": {
+      "translated": "The Earthquake",
+      "transliterated": "Az-Zalzalah",
+      "codepoints": [
+        1575,
+        1604,
+        1586,
+        1604,
+        1586,
+        1604,
+        1577
+      ]
+    },
+    "ayahs": 8,
+    "slug": "az-zalzalah",
+    "translator": null
+  },
+  [
+    1,
+    "Quando a terra executar o seu tremor predestinado,"
+  ],
+  [
+    2,
+    "E descarregar os seus fardos,"
+  ],
+  [
+    3,
+    "O homem dirá: Que ocorre com ela?"
+  ],
+  [
+    4,
+    "Nesse dia, ela declarará as suas notícias,"
+  ],
+  [
+    5,
+    "Porque o teu Senhor lhas terá revelado."
+  ],
+  [
+    6,
+    "Nesse dia, os homens comparecerão, em massa, para verem as suas obras."
+  ],
+  [
+    7,
+    "Quem tiver feito o bem, quer seja do peso de um átomo, vê-lo-á."
+  ],
+  [
+    8,
+    "Quem tiver feito o mal, quer seja do peso de um átomo, vê-lo-á."
+  ]
+]

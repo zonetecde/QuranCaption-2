@@ -1,0 +1,40 @@
+[
+  {
+    "id": 97,
+    "city": "makkah",
+    "name": {
+      "translated": "The Power",
+      "transliterated": "Al-Qadr",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1583,
+        1585
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-qadr",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Voorwaar, Wij hebben hem (de Koran) neergezonden in de Waardevolle Nacht (Lailatoel Qadr)."
+  ],
+  [
+    2,
+    "En wat doet jullie weten wat de Waardevolle Nacht is?"
+  ],
+  [
+    3,
+    "De Waardevolle Nacht is beter dan duizend maanden."
+  ],
+  [
+    4,
+    "De Engelen en de Geest (Djibrîl) daalden in haar neer met de toestemming van hun Heer, voor elke beschikking."
+  ],
+  [
+    5,
+    "Vrede heerst (in deze nacht), tot aan de ochtendschemering."
+  ]
+]

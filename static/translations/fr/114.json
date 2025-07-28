@@ -1,0 +1,44 @@
+[
+  {
+    "id": 114,
+    "city": "makkah",
+    "name": {
+      "translated": "Mankind",
+      "transliterated": "An-Nas",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1575,
+        1587
+      ]
+    },
+    "ayahs": 6,
+    "slug": "an-nas",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Dis : \"Je cherche protection auprès du Seigneur des hommes."
+  ],
+  [
+    2,
+    "Le Souverain des hommes,"
+  ],
+  [
+    3,
+    "Dieu des hommes,"
+  ],
+  [
+    4,
+    "contre le mal du mauvais conseiller, furtif,"
+  ],
+  [
+    5,
+    "qui insuffle des mauvaises pensées dans les poitrines des hommes,"
+  ],
+  [
+    6,
+    "qu’il (le conseiller) soit un djinn, ou un être humain\"."
+  ]
+]

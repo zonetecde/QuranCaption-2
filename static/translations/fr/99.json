@@ -1,0 +1,54 @@
+[
+  {
+    "id": 99,
+    "city": "madinah",
+    "name": {
+      "translated": "The Earthquake",
+      "transliterated": "Az-Zalzalah",
+      "codepoints": [
+        1575,
+        1604,
+        1586,
+        1604,
+        1586,
+        1604,
+        1577
+      ]
+    },
+    "ayahs": 8,
+    "slug": "az-zalzalah",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Quand la terre tremblera d’un violent tremblement,"
+  ],
+  [
+    2,
+    "et que la terre fera sortir ses fardeaux ,"
+  ],
+  [
+    3,
+    "et que l’homme dira : \"Qu’a-t-elle ?\""
+  ],
+  [
+    4,
+    "Ce jour-là, elle contera son histoire,"
+  ],
+  [
+    5,
+    "selon ce que ton Seigneur lui aura révélé [ordonné]."
+  ],
+  [
+    6,
+    "Ce jour-là, les gens sortiront séparément pour que leur soient montrées leurs œuvres."
+  ],
+  [
+    7,
+    "Quiconque fait un bien fût-ce du poids d’un atome, le verra,"
+  ],
+  [
+    8,
+    "et quiconque fait un mal fût-ce du poids d’un atome, le verra"
+  ]
+]

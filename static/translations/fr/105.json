@@ -1,0 +1,40 @@
+[
+  {
+    "id": 105,
+    "city": "makkah",
+    "name": {
+      "translated": "The Elephant",
+      "transliterated": "Al-Fil",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1610,
+        1604
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-fil",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "N’as-tu pas vu comment ton Seigneur a agi envers les gens de l’Eléphant ."
+  ],
+  [
+    2,
+    "N’a-t-Il pas rendu leur ruse complètement vaine ?"
+  ],
+  [
+    3,
+    "et envoyé sur eux des oiseaux par volées."
+  ],
+  [
+    4,
+    "qui leur lançaient des pierres d’argile ?"
+  ],
+  [
+    5,
+    "Et Il les a rendus semblables à une paille mâchée."
+  ]
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": 97,
+    "city": "makkah",
+    "name": {
+      "translated": "The Power",
+      "transliterated": "Al-Qadr",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1583,
+        1585
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-qadr",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "Indeed, ˹it is˺ We ˹Who˺ sent this ˹Quran˺ down on the Night of Glory."
+  ],
+  [
+    2,
+    "And what will make you realize what the Night of Glory is?"
+  ],
+  [
+    3,
+    "The Night of Glory is better than a thousand months."
+  ],
+  [
+    4,
+    "That night the angels and the ˹holy˺ spirit descend, by the permission of their Lord, for every ˹decreed˺ matter."
+  ],
+  [
+    5,
+    "It is all peace until the break of dawn."
+  ]
+]

@@ -1,0 +1,66 @@
+[
+  {
+    "id": 101,
+    "city": "makkah",
+    "name": {
+      "translated": "The Calamity",
+      "transliterated": "Al-Qari'ah",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1575,
+        1585,
+        1593,
+        1577
+      ]
+    },
+    "ayahs": 11,
+    "slug": "al-qariah",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Le fracas!"
+  ],
+  [
+    2,
+    "Qu’est-ce que le fracas?"
+  ],
+  [
+    3,
+    "Et qui te dira ce qu’est le fracas?"
+  ],
+  [
+    4,
+    "C’est le jour où les gens seront comme des papillons éparpillés,"
+  ],
+  [
+    5,
+    "et les montagnes comme de la laine cardée ;"
+  ],
+  [
+    6,
+    "quant à celui dont la balance sera lourde."
+  ],
+  [
+    7,
+    "il sera dans une vie agréable ;"
+  ],
+  [
+    8,
+    "et quant à celui dont la balance sera légère,"
+  ],
+  [
+    9,
+    "sa mère [destination] est un abîme très profond."
+  ],
+  [
+    10,
+    "Et qui te dira ce que c’est ?"
+  ],
+  [
+    11,
+    "C’est un Feu ardent."
+  ]
+]

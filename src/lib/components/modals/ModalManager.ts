@@ -33,6 +33,12 @@ export default class ModalManager {
 		placeholder: string = 'Enter text here'
 	): Promise<string> {
 		return new Promise<string>((resolve) => {
+			// Supprime l'ancien modal s'il existe
+			const existingModal = document.querySelector('.modal-wrapper');
+			if (existingModal) {
+				document.body.removeChild(existingModal);
+			}
+
 			// Créer un conteneur pour le modal
 			const container = document.createElement('div');
 			container.className = 'modal-wrapper';

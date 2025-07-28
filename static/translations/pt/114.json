@@ -1,0 +1,44 @@
+[
+  {
+    "id": 114,
+    "city": "makkah",
+    "name": {
+      "translated": "Mankind",
+      "transliterated": "An-Nas",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1575,
+        1587
+      ]
+    },
+    "ayahs": 6,
+    "slug": "an-nas",
+    "translator": null
+  },
+  [
+    1,
+    "Dize: Amparo-me no Senhor dos humanos,"
+  ],
+  [
+    2,
+    "O Rei dos humanos,"
+  ],
+  [
+    3,
+    "O Deus dos humanos,"
+  ],
+  [
+    4,
+    "Contra o mal do sussurro do malfeitor,"
+  ],
+  [
+    5,
+    "Que sussurra aos corações dos humanos,"
+  ],
+  [
+    6,
+    "Entre gênios e humanos!"
+  ]
+]

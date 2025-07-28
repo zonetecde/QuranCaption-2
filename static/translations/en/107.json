@@ -1,0 +1,50 @@
+[
+  {
+    "id": 107,
+    "city": "makkah",
+    "name": {
+      "translated": "The Small kindnesses",
+      "transliterated": "Al-Ma'un",
+      "codepoints": [
+        1575,
+        1604,
+        1605,
+        1575,
+        1593,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-maun",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "Have you seen the one who denies the ˹final˺ Judgment?"
+  ],
+  [
+    2,
+    "That is the one who repulses the orphan,"
+  ],
+  [
+    3,
+    "and does not encourage the feeding of the poor."
+  ],
+  [
+    4,
+    "So woe to those ˹hypocrites˺ who pray"
+  ],
+  [
+    5,
+    "yet are unmindful of their prayers;"
+  ],
+  [
+    6,
+    "those who ˹only˺ show off,"
+  ],
+  [
+    7,
+    "and refuse to give ˹even the simplest˺ aid. "
+  ]
+]

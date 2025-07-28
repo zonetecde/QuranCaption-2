@@ -1,0 +1,32 @@
+[
+  {
+    "id": 103,
+    "city": "makkah",
+    "name": {
+      "translated": "The Declining Day",
+      "transliterated": "Al-'Asr",
+      "codepoints": [
+        1575,
+        1604,
+        1593,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "al-asr",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "By the ˹passage of˺ time!"
+  ],
+  [
+    2,
+    "Surely humanity is in ˹grave˺ loss,"
+  ],
+  [
+    3,
+    "except those who have faith, do good, and urge each other to the truth, and urge each other to perseverance."
+  ]
+]

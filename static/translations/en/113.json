@@ -1,0 +1,40 @@
+[
+  {
+    "id": 113,
+    "city": "makkah",
+    "name": {
+      "translated": "The Daybreak",
+      "transliterated": "Al-Falaq",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1604,
+        1602
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-falaq",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "Say, ˹O Prophet,˺ “I seek refuge in the Lord of the daybreak"
+  ],
+  [
+    2,
+    "from the evil of whatever He has created,"
+  ],
+  [
+    3,
+    "and from the evil of the night when it grows dark,"
+  ],
+  [
+    4,
+    "and from the evil of those ˹witches casting spells by˺ blowing onto knots,"
+  ],
+  [
+    5,
+    "and from the evil of an envier when they envy.”"
+  ]
+]

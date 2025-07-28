@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "city": "makkah",
+    "name": {
+      "translated": "The Opener",
+      "transliterated": "Al-Fatihah",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1575,
+        1578,
+        1581,
+        1577
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-fatihah",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Au nom d’Allah, le Tout Miséricordieux, le Très Miséricordieux. "
+  ],
+  [
+    2,
+    "Louange à Allah, Seigneur de l’Univers."
+  ],
+  [
+    3,
+    "Le Tout Miséricordieux, le Très Miséricordieux,"
+  ],
+  [
+    4,
+    "Maître du Jour de la Rétribution."
+  ],
+  [
+    5,
+    "C’est Toi [Seul] que nous adorons, et c’est Toi [Seul] dont nous implorons secours."
+  ],
+  [
+    6,
+    "Guide-nous dans le droit chemin,"
+  ],
+  [
+    7,
+    "Le chemin de ceux que Tu as comblés de faveurs, non pas de ceux qui ont encouru Ta colère, ni des égarés. "
+  ]
+]

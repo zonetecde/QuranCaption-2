@@ -1,0 +1,32 @@
+[
+  {
+    "id": 110,
+    "city": "madinah",
+    "name": {
+      "translated": "The Divine Support",
+      "transliterated": "An-Nasr",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "an-nasr",
+    "translator": null
+  },
+  [
+    1,
+    "Quando te chegar o socorro de Deus e o triunfo,"
+  ],
+  [
+    2,
+    "E vires entrar a gente, em massa, na religião de Deus,"
+  ],
+  [
+    3,
+    "Celebra, então, os louvores do teu Senhor, e implora o Seu perdão, porque Ele é Remissório."
+  ]
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": 97,
+    "city": "makkah",
+    "name": {
+      "translated": "The Power",
+      "transliterated": "Al-Qadr",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1583,
+        1585
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-qadr",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "Invero lo abbiamo fatto scendere nella Notte del Destino."
+  ],
+  [
+    2,
+    "E chi potrà farti comprendere cos'è la Notte del Destino?"
+  ],
+  [
+    3,
+    "La Notte del Destino è migliore di mille mesi."
+  ],
+  [
+    4,
+    "In essa discendono gli angeli e lo Spirito, con il permesso del loro Signore, per [fissare] ogni decreto."
+  ],
+  [
+    5,
+    "È pace, fino al levarsi dell'alba."
+  ]
+]

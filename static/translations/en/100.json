@@ -1,0 +1,67 @@
+[
+  {
+    "id": 100,
+    "city": "makkah",
+    "name": {
+      "translated": "The Courser",
+      "transliterated": "Al-'Adiyat",
+      "codepoints": [
+        1575,
+        1604,
+        1593,
+        1575,
+        1583,
+        1610,
+        1575,
+        1578
+      ]
+    },
+    "ayahs": 11,
+    "slug": "al-adiyat",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "’ By the galloping, panting horses,"
+  ],
+  [
+    2,
+    "striking sparks of fire ˹with their hoofs˺,"
+  ],
+  [
+    3,
+    "launching raids at dawn,"
+  ],
+  [
+    4,
+    "stirring up ˹clouds of˺ dust,"
+  ],
+  [
+    5,
+    "and penetrating into the heart of enemy lines!"
+  ],
+  [
+    6,
+    "Surely humankind is ungrateful to their Lord—"
+  ],
+  [
+    7,
+    "and they certainly attest to this—"
+  ],
+  [
+    8,
+    "and they are truly extreme in their love of ˹worldly˺ gains."
+  ],
+  [
+    9,
+    "Do they not know that when the contents of the graves will be spilled out,"
+  ],
+  [
+    10,
+    "and the secrets of the hearts will be laid bare—"
+  ],
+  [
+    11,
+    "surely their Lord is All-Aware of them on that Day."
+  ]
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "id": 109,
+    "city": "makkah",
+    "name": {
+      "translated": "The Disbelievers",
+      "transliterated": "Al-Kafirun",
+      "codepoints": [
+        1575,
+        1604,
+        1603,
+        1575,
+        1601,
+        1585,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 6,
+    "slug": "al-kafirun",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "Say, ˹O Prophet,˺ “O you disbelievers!"
+  ],
+  [
+    2,
+    "I do not worship what you worship,"
+  ],
+  [
+    3,
+    "nor do you worship what I worship."
+  ],
+  [
+    4,
+    "I will never worship what you worship,"
+  ],
+  [
+    5,
+    "nor will you ever worship what I worship."
+  ],
+  [
+    6,
+    "You have your way, and I have my Way.”"
+  ]
+]

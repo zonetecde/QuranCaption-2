@@ -1,0 +1,40 @@
+[
+  {
+    "id": 111,
+    "city": "makkah",
+    "name": {
+      "translated": "The Palm Fiber",
+      "transliterated": "Al-Masad",
+      "codepoints": [
+        1575,
+        1604,
+        1605,
+        1587,
+        1583
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-masad",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "May the hands of Abu Lahab perish, and he ˹himself˺ perish!"
+  ],
+  [
+    2,
+    "Neither his wealth nor ˹worldly˺ gains will benefit him."
+  ],
+  [
+    3,
+    "He will burn in a flaming Fire,"
+  ],
+  [
+    4,
+    "and ˹so will˺ his wife, the carrier of ˹thorny˺ kindling,"
+  ],
+  [
+    5,
+    "around her neck will be a rope of palm-fibre."
+  ]
+]

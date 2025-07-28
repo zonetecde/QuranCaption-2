@@ -1,0 +1,44 @@
+[
+  {
+    "id": 114,
+    "city": "makkah",
+    "name": {
+      "translated": "Mankind",
+      "transliterated": "An-Nas",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1575,
+        1587
+      ]
+    },
+    "ayahs": 6,
+    "slug": "an-nas",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "Say, ˹O Prophet,˺ “I seek refuge in the Lord of humankind,"
+  ],
+  [
+    2,
+    "the Master of humankind,"
+  ],
+  [
+    3,
+    "the God of humankind,"
+  ],
+  [
+    4,
+    "from the evil of the lurking whisperer—"
+  ],
+  [
+    5,
+    "who whispers into the hearts of humankind—"
+  ],
+  [
+    6,
+    "from among jinn and humankind.”"
+  ]
+]

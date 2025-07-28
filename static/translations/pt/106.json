@@ -1,0 +1,35 @@
+[
+  {
+    "id": 106,
+    "city": "makkah",
+    "name": {
+      "translated": "Quraysh",
+      "transliterated": "Quraysh",
+      "codepoints": [
+        1602,
+        1585,
+        1610,
+        1588
+      ]
+    },
+    "ayahs": 4,
+    "slug": "quraysh",
+    "translator": null
+  },
+  [
+    1,
+    "Pelo convênio dos coraixitas,"
+  ],
+  [
+    2,
+    "O convênio das viagens de inverno e de verão!"
+  ],
+  [
+    3,
+    "Que adorem o Senhor desta Casa,"
+  ],
+  [
+    4,
+    "Que os provê contra a fome e os salvaguarda do temor!"
+  ]
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "id": 106,
+    "city": "makkah",
+    "name": {
+      "translated": "Quraysh",
+      "transliterated": "Quraysh",
+      "codepoints": [
+        1602,
+        1585,
+        1610,
+        1588
+      ]
+    },
+    "ayahs": 4,
+    "slug": "quraysh",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "A cause de l'habitude des Quraysh ,"
+  ],
+  [
+    2,
+    "De leur habitude [concernant] les voyages d’hiver et d’été ."
+  ],
+  [
+    3,
+    "Qu’ils adorent donc le Seigneur de cette Maison (la Kaaba)."
+  ],
+  [
+    4,
+    "qui les a nourris contre la faim et rassurés de la crainte!"
+  ]
+]

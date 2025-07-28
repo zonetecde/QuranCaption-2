@@ -1,0 +1,33 @@
+[
+  {
+    "id": 108,
+    "city": "makkah",
+    "name": {
+      "translated": "The Abundance",
+      "transliterated": "Al-Kawthar",
+      "codepoints": [
+        1575,
+        1604,
+        1603,
+        1608,
+        1579,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "al-kawthar",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Nous t’avons certes, accordé l’Abondance."
+  ],
+  [
+    2,
+    "Accomplis la Ṣalāt pour ton Seigneur et sacrifie."
+  ],
+  [
+    3,
+    "Celui qui te hait sera certes, sans postérité."
+  ]
+]

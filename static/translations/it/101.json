@@ -1,0 +1,66 @@
+[
+  {
+    "id": 101,
+    "city": "makkah",
+    "name": {
+      "translated": "The Calamity",
+      "transliterated": "Al-Qari'ah",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1575,
+        1585,
+        1593,
+        1577
+      ]
+    },
+    "ayahs": 11,
+    "slug": "al-qariah",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "La Percotente,"
+  ],
+  [
+    2,
+    "cos’è mai la Percotente?"
+  ],
+  [
+    3,
+    "E chi potrà farti comprendere cos’è la Percotente?"
+  ],
+  [
+    4,
+    "Il Giorno in cui gli uomini saranno come falene disperse,"
+  ],
+  [
+    5,
+    "e le montagne come fiocchi di lana cardata,"
+  ],
+  [
+    6,
+    "colui le cui bilance saranno pesanti"
+  ],
+  [
+    7,
+    "avrà una vita felice;"
+  ],
+  [
+    8,
+    "colui che invece avrà bilance leggere,"
+  ],
+  [
+    9,
+    "avrà per dimora il Baratro."
+  ],
+  [
+    10,
+    "E chi potrà farti comprendere cos’è?"
+  ],
+  [
+    11,
+    "È un Fuoco ardente."
+  ]
+]
