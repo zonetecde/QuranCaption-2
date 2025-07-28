@@ -26,10 +26,5 @@ export class ProjectTranslation extends SerializableBase {
 		const object: any = await (await fetch('/translations/editions.json')).json();
 
 		globalState.availableTranslations = object;
-
-		console.log(
-			'Available translations loaded:',
-			globalState.availableTranslations['French'].translations[2].link
-		);
 	}
 }

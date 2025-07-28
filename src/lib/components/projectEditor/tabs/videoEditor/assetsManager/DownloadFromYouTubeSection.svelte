@@ -42,43 +42,98 @@
 </script>
 
 <Section icon="cloud_download" name="Download from YouTube" classes="mt-7">
-	<input
-		type="text"
-		class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 mt-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-		placeholder="Enter YouTube video URL"
-		bind:value={url}
-	/>
+	<!-- URL Input with enhanced styling -->
+	<div class="mt-4 space-y-4">
+		<div class="relative">
+			<input
+				type="text"
+				class="w-full bg-secondary border border-color rounded-lg py-3 px-4 text-sm text-primary
+				       placeholder-[var(--text-placeholder)] focus:outline-none focus:ring-2
+				       focus:ring-[var(--accent-primary)] focus:border-transparent transition-all duration-200
+				       hover:border-[var(--accent-primary)]"
+				placeholder="Enter YouTube video URL"
+				bind:value={url}
+			/>
+			<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+				<span class="material-icons text-thirdly text-lg">link</span>
+			</div>
+		</div>
 
-	<!-- choice : video or audio -->
-	<span class="text-sm text-gray-500 mt-3">Choose the type of media you want to download</span>
+		<!-- Media Type Selection -->
+		<div class="bg-accent border border-color rounded-lg p-4 space-y-3">
+			<h4 class="text-sm font-medium text-secondary">Choose media type to download</h4>
 
-	<div class="flex items-center mt-2">
-		<input
-			type="radio"
-			id="audio"
-			name="mediaType"
-			value="audio"
-			checked
-			class=" mr-2"
-			onchange={() => (type = 'audio')}
-		/>
-		<label for="audio" class="text-sm text-gray-100 cursor-pointer">Audio</label>
-		<input
-			type="radio"
-			id="video"
-			name="mediaType"
-			value="video"
-			class="mr-2 ml-4"
-			onchange={() => (type = 'video')}
-		/>
-		<label for="video" class="text-sm text-gray-100 cursor-pointer">Video</label>
+			<div class="flex items-start flex-col gap-6">
+				<label class="flex items-center gap-2 cursor-pointer group">
+					<input
+						type="radio"
+						name="mediaType"
+						value="audio"
+						checked
+						class="w-4 h-4 text-[var(--accent-primary)] bg-secondary border-2 border-[var(--accent-primary)]
+						       focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-200"
+						onchange={() => (type = 'audio')}
+					/>
+					<div class="flex items-center gap-2">
+						<span
+							class="material-icons text-lg text-accent group-hover:text-[var(--accent-primary)] transition-colors duration-200"
+						>
+							music_note
+						</span>
+						<span
+							class="text-sm font-medium text-primary group-hover:text-white transition-colors duration-200"
+						>
+							Audio Only
+						</span>
+					</div>
+				</label>
+
+				<label class="flex items-center gap-2 cursor-pointer group">
+					<input
+						type="radio"
+						name="mediaType"
+						value="video"
+						class="w-4 h-4 text-[var(--accent-primary)] bg-secondary border-2 border-[var(--accent-primary)]
+						       focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-200"
+						onchange={() => (type = 'video')}
+					/>
+					<div class="flex items-center gap-2">
+						<span
+							class="material-icons text-lg text-accent group-hover:text-[var(--accent-primary)] transition-colors duration-200"
+						>
+							videocam
+						</span>
+						<span
+							class="text-sm font-medium text-primary group-hover:text-white transition-colors duration-200"
+						>
+							Video & Audio
+						</span>
+					</div>
+				</label>
+			</div>
+		</div>
+
+		<!-- Download Button -->
+		<button
+			class="w-full btn-accent flex items-center justify-center gap-2 py-3 px-4 rounded-lg
+			       text-sm font-medium transition-all duration-200 hover:scale-[1.02]
+			       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+			       shadow-lg hover:shadow-xl"
+			type="button"
+			onclick={downloadAssetFromYouTube}
+			disabled={!url.trim()}
+		>
+			<span class="material-icons text-lg">download</span>
+			Download from YouTube
+		</button>
+
+		<!-- Info hint -->
+		<div class="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+			<span class="material-icons text-sm text-blue-400 mt-0.5">info</span>
+			<p class="text-xs text-blue-300 leading-relaxed">
+				The downloaded file will be automatically added to your project assets.
+			</p>
+		</div>
 	</div>
-
-	<button
-		class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-sm mt-4 cursor-pointer transition-colors duration-200"
-		type="button"
-		onclick={downloadAssetFromYouTube}
-	>
-		<span class="material-icons mr-2 text-base">download</span>Download
-	</button>
+	<br />
 </Section>

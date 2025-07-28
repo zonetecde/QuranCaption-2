@@ -103,31 +103,48 @@
 </script>
 
 <div
-	class="flex flex-col py-2 px-2 bg-gray-800 rounded-lg shadow-md transition-all duration-300 select-none"
+	class="flex flex-col p-4 bg-secondary border border-color rounded-xl shadow-lg transition-all duration-300 select-none
+	       bg-accent hover:border-[var(--accent-primary)] hover:shadow-xl hover:shadow-blue-500/10 hover:scale-[1.02] group"
 	role="button"
 	tabindex="0"
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
 >
-	<div class="flex flex-row gap-x-2 items-center relative">
-		<span class="material-icons text-4xl text-indigo-400">
-			{asset.type === 'video' ? 'video_library' : asset.type === 'audio' ? 'music_note' : 'image'}
-		</span>
-		<p class={'text-sm font-semibold text-gray-100 truncate ' + (!asset.exists ? 'mr-6' : '')}>
-			{asset.fileName}
-		</p>
+	<div class="flex flex-row gap-3 items-center relative">
+		<div
+			class="flex-shrink-0 p-2 rounded-lg bg-accent transition-colors duration-300
+		            group-hover:bg-[var(--accent-primary)] group-hover:text-black"
+		>
+			<span
+				class="material-icons text-3xl text-accent transition-colors duration-300
+			             group-hover:text-black"
+			>
+				{asset.type === 'video' ? 'video_library' : asset.type === 'audio' ? 'music_note' : 'image'}
+			</span>
+		</div>
+		<div class="flex-1 min-w-0">
+			<p
+				class="text-sm font-semibold text-primary truncate group-hover:text-white transition-colors duration-300"
+			>
+				{asset.fileName}
+			</p>
+			<p class="text-xs text-thirdly mt-1 group-hover:text-gray-300 transition-colors duration-300">
+				{asset.type.charAt(0).toUpperCase() + asset.type.slice(1)} Asset
+			</p>
+		</div>
 		<!-- warning icon -->
 		{#if !asset.exists}
-			<span class="material-icons text-orange-400 absolute right-0.5" title="File not found on disk"
-				>warning</span
-			>
+			<div class="flex-shrink-0 p-1 rounded-full bg-red-500/20 border border-red-500/30">
+				<span class="material-icons text-lg text-red-400" title="File not found on disk"
+					>warning</span
+				>
+			</div>
 		{/if}
 	</div>
-
 	{#if asset.type === AssetType.Audio}
 		{#if isHovered}
-			<div transition:slide>
-				<audio class="w-full opacity-60 mt-3" controls>
+			<div transition:slide class="mt-4 p-3 bg-accent rounded-lg border border-color">
+				<audio class="w-full h-8 opacity-80" controls>
 					<source src={convertFileSrc(asset.filePath)} type="audio/mp3" />
 					Your browser does not support the audio element.
 				</audio>
@@ -135,8 +152,8 @@
 		{/if}
 	{:else if asset.type === AssetType.Video}
 		{#if isHovered}
-			<div transition:slide>
-				<video class="w-full h-[200px] mt-3" controls>
+			<div transition:slide class="mt-4 p-2 bg-accent rounded-lg border border-color">
+				<video class="w-full h-[180px] rounded-lg object-cover" controls>
 					<track kind="captions" />
 					<source src={convertFileSrc(asset.filePath)} type="video/mp4" />
 					Your browser does not support the video tag.
@@ -145,88 +162,114 @@
 		{/if}
 	{:else if asset.type === AssetType.Image}
 		{#if isHovered}
-			<div transition:slide>
+			<div transition:slide class="mt-4 p-2 bg-accent rounded-lg border border-color">
 				<img
-					class="w-full h-[200px] object-contain mt-3"
+					class="w-full h-[180px] object-contain rounded-lg"
 					src={convertFileSrc(asset.filePath)}
 					alt={asset.fileName}
 				/>
 			</div>
 		{/if}
 	{/if}
-
 	{#if isHovered}
-		<div class="mt-2 px-2 py-0.5 flex flex-row gap-x-2 gap-y-1 flex-wrap" transition:slide>
-			{#if asset.exists}
-				<button
-					class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
-					onclick={async () => {
-						await asset.openParentDirectory();
-					}}
-				>
-					<span class="material-icons text-lg">folder_open</span>
-					Open Directory
-				</button>
+		<div class="mt-4 space-y-3" transition:slide>
+			<!-- Action Buttons -->
+			<div class="flex flex-wrap gap-2">
+				{#if asset.exists}
+					<button
+						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+						       hover:scale-105 transition-all duration-200"
+						onclick={async () => {
+							await asset.openParentDirectory();
+						}}
+					>
+						<span class="material-icons text-lg">folder_open</span>
+						Open Directory
+					</button>
 
-				<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded" onclick={editAsset}>
-					<span class="material-icons text-lg">crop</span>
-					Edit
-				</button>
-			{:else}
-				<button class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded" onclick={relocateAsset}>
-					<span class="material-icons text-lg">folder_open</span>
-					Relocate
-				</button>
-			{/if}
-
-			<button
-				class="btn btn-icon gap-x-2 text-white py-1 px-3 rounded"
-				onclick={() => globalState.currentProject?.content.removeAsset(asset)}
-			>
-				<span class="material-icons text-lg">delete</span>
-				Remove
-			</button>
-
-			{#if asset.exists}
-				{#if asset.type === AssetType.Video}
 					<button
-						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-						onclick={() => addInTheTimelineButtonClick(true, true)}
+						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+						       hover:scale-105 transition-all duration-200"
+						onclick={editAsset}
 					>
-						<span class="material-icons text-lg">add</span>
-						Add in the timeline (video & audio)
+						<span class="material-icons text-lg">crop</span>
+						Edit
 					</button>
+				{:else}
 					<button
-						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-						onclick={() => addInTheTimelineButtonClick(true, false)}
+						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+						       hover:scale-105 transition-all duration-200"
+						onclick={relocateAsset}
 					>
-						<span class="material-icons text-lg">add</span>
-						Add in the timeline (only video)
-					</button>
-					<button
-						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-						onclick={() => addInTheTimelineButtonClick(false, true)}
-					>
-						<span class="material-icons text-lg">add</span>
-						Add in the timeline (only audio)
-					</button>
-				{:else if asset.type === AssetType.Audio}
-					<button
-						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-						onclick={() => addInTheTimelineButtonClick(false, true)}
-					>
-						<span class="material-icons text-lg">add</span>
-						Add in the timeline
-					</button>
-				{:else if asset.type === AssetType.Image}
-					<button
-						class="btn-accent w-full btn-icon gap-x-2 text-white py-1 px-3 rounded text-sm"
-						onclick={() => {}}
-					>
-						<span class="material-icons text-lg">add</span>
-						Set as background
+						<span class="material-icons text-lg">folder_open</span>
+						Relocate
 					</button>
 				{/if}
+
+				<button
+					class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+					       hover:scale-105 transition-all duration-200 text-red-400 hover:text-red-300
+					       hover:bg-red-500/10"
+					onclick={() => globalState.currentProject?.content.removeAsset(asset)}
+				>
+					<span class="material-icons text-lg">delete</span>
+					Remove
+				</button>
+			</div>
+
+			<!-- Timeline Actions -->
+			{#if asset.exists}
+				<div class="space-y-2 pt-2 border-t border-color">
+					<h4 class="text-xs font-medium text-thirdly uppercase tracking-wide">Add to Timeline</h4>
+					{#if asset.type === AssetType.Video}
+						<div class="space-y-2">
+							<button
+								class="btn-accent w-full flex items-center justify-center gap-2 text-sm font-medium
+								       py-3 px-4 rounded-lg hover:scale-[1.02] transition-all duration-200"
+								onclick={() => addInTheTimelineButtonClick(true, true)}
+							>
+								<span class="material-icons text-lg">video_library</span>
+								Video & Audio
+							</button>
+							<div class="grid grid-cols-2 gap-2">
+								<button
+									class="btn-accent flex items-center justify-center gap-2 text-xs font-medium
+									       py-2 px-3 rounded-lg hover:scale-[1.02] transition-all duration-200"
+									onclick={() => addInTheTimelineButtonClick(true, false)}
+								>
+									<span class="material-icons text-sm">videocam</span>
+									Video Only
+								</button>
+								<button
+									class="btn-accent flex items-center justify-center gap-2 text-xs font-medium
+									       py-2 px-3 rounded-lg hover:scale-[1.02] transition-all duration-200"
+									onclick={() => addInTheTimelineButtonClick(false, true)}
+								>
+									<span class="material-icons text-sm">music_note</span>
+									Audio Only
+								</button>
+							</div>
+						</div>
+					{:else if asset.type === AssetType.Audio}
+						<button
+							class="btn-accent w-full flex items-center justify-center gap-2 text-sm font-medium
+							       py-3 px-4 rounded-lg hover:scale-[1.02] transition-all duration-200"
+							onclick={() => addInTheTimelineButtonClick(false, true)}
+						>
+							<span class="material-icons text-lg">music_note</span>
+							Add to Timeline
+						</button>
+					{:else if asset.type === AssetType.Image}
+						<button
+							class="btn-accent w-full flex items-center justify-center gap-2 text-sm font-medium
+							       py-3 px-4 rounded-lg hover:scale-[1.02] transition-all duration-200"
+							onclick={() => {}}
+						>
+							<span class="material-icons text-lg">image</span>
+							Set as Background
+						</button>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	{/if}

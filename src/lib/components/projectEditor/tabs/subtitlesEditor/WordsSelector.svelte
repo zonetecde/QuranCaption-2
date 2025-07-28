@@ -190,6 +190,8 @@
 		)!;
 
 		subtitleTrack.removeLastClip();
+
+		globalState.currentProject!.detail.updatePercentageCaptioned();
 	}
 
 	/**

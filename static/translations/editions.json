@@ -695,7 +695,7 @@
 			}
 		]
 	},
-	"Chinese(simplified)": {
+	"Ch. (simp.)": {
 		"flag": "https://flagsapi.com/CN/flat/64.png",
 		"translations": [
 			{
@@ -733,7 +733,7 @@
 			}
 		]
 	},
-	"Chinese(traditional)": {
+	"Ch. (trad.)": {
 		"flag": "https://flagsapi.com/TW/flat/64.png",
 		"translations": [
 			{
@@ -893,6 +893,17 @@
 		"flag": "https://flagsapi.com/NL/flat/64.png",
 		"translations": [
 			{
+				"key": "nld_sofianssiregar",
+				"name": "nld-sofianssiregar",
+				"author": "Sofian S. Siregar",
+				"language": "Dutch",
+				"direction": "ltr",
+				"source": "http://tanzil.net",
+				"comments": "Ponctuation",
+				"link": "translations/nl/{chapter}.json",
+				"linkmin": "translations/nl/{chapter}.json"
+			},
+			{
 				"key": "nld_fredleemhuis",
 				"name": "nld-fredleemhuis",
 				"author": "Fred Leemhuis",
@@ -914,17 +925,7 @@
 				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/nld-salomokeyzer.json",
 				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/nld-salomokeyzer.min.json"
 			},
-			{
-				"key": "nld_sofianssiregar",
-				"name": "nld-sofianssiregar",
-				"author": "Sofian S. Siregar",
-				"language": "Dutch",
-				"direction": "ltr",
-				"source": "http://tanzil.net",
-				"comments": "Ponctuation",
-				"link": "translations/nl/{chapter}.json",
-				"linkmin": "translations/nl/{chapter}.json"
-			},
+
 			{
 				"key": "nld_unknown",
 				"name": "nld-unknown",
@@ -941,6 +942,17 @@
 	"English": {
 		"flag": "https://flagsapi.com/GB/flat/64.png",
 		"translations": [
+			{
+				"key": "eng_mustafakhattaba",
+				"name": "eng-mustafakhattaba",
+				"author": "Mustafa Khattab Allah Edition",
+				"language": "English",
+				"direction": "ltr",
+				"source": "",
+				"comments": "Ponctuation",
+				"link": "translations/en/{chapter}.json",
+				"linkmin": "translations/en/{chapter}.json"
+			},
 			{
 				"key": "eng_abdelhaleem",
 				"name": "eng-abdelhaleem",
@@ -1326,17 +1338,7 @@
 				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-muhammadtaqiusm.json",
 				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-muhammadtaqiusm.min.json"
 			},
-			{
-				"key": "eng_mustafakhattaba",
-				"name": "eng-mustafakhattaba",
-				"author": "Mustafa Khattab Allah Edition",
-				"language": "English",
-				"direction": "ltr",
-				"source": "",
-				"comments": "Ponctuation",
-				"link": "translations/en/{chapter}.json",
-				"linkmin": "translations/en/{chapter}.json"
-			},
+
 			{
 				"key": "eng_njdawood",
 				"name": "eng-njdawood",
@@ -1505,7 +1507,7 @@
 		]
 	},
 	"Esperanto": {
-		"flag": "https://flagsapi.com/UN/flat/64.png",
+		"flag": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Flag_of_Esperanto.svg",
 		"translations": [
 			{
 				"key": "epo_hadiabdollahian",
@@ -1567,17 +1569,6 @@
 		"flag": "https://flagsapi.com/FR/flat/64.png",
 		"translations": [
 			{
-				"key": "fra_islamicfoundati",
-				"name": "fra-islamicfoundati",
-				"author": "Islamic Foundation",
-				"language": "French",
-				"direction": "ltr",
-				"source": "https://quranenc.com/check/french_montada/v1.0.0-csv.1 , https://quranenc.com/en/browse/french_montada , https://quranenc.com ,",
-				"comments": "",
-				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.json",
-				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.min.json"
-			},
-			{
 				"key": "fra_muhammadhameedu",
 				"name": "fra-muhammadhameedu",
 				"author": "Muhammad Hameedullah",
@@ -1588,6 +1579,18 @@
 				"link": "translations/fr/{chapter}.json",
 				"linkmin": "translations/fr/{chapter}.json"
 			},
+			{
+				"key": "fra_islamicfoundati",
+				"name": "fra-islamicfoundati",
+				"author": "Islamic Foundation",
+				"language": "French",
+				"direction": "ltr",
+				"source": "https://quranenc.com/check/french_montada/v1.0.0-csv.1 , https://quranenc.com/en/browse/french_montada , https://quranenc.com ,",
+				"comments": "",
+				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.json",
+				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.min.json"
+			},
+
 			{
 				"key": "fra_rashidmaash",
 				"name": "fra-rashidmaash",
@@ -1748,7 +1751,7 @@
 		]
 	},
 	"Hebrew": {
-		"flag": "https://flagsapi.com/IL/flat/64.png",
+		"flag": "https://flagsapi.com/PS/flat/64.png",
 		"translations": [
 			{
 				"key": "heb_darusalamhousei",
@@ -2582,17 +2585,6 @@
 		"flag": "https://flagsapi.com/PT/flat/64.png",
 		"translations": [
 			{
-				"key": "por_helminasr",
-				"name": "por-helminasr",
-				"author": "Helmi Nasr",
-				"language": "Portuguese",
-				"direction": "ltr",
-				"source": "https://quranenc.com/check/portuguese_nasr/v1.3.0-csv.1 , https://quranenc.com/en/browse/portuguese_nasr , https://quranenc.com ,",
-				"comments": "",
-				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/por-helminasr.json",
-				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/por-helminasr.min.json"
-			},
-			{
 				"key": "por_samirelhayek",
 				"name": "por-samirelhayek",
 				"author": "Samir El Hayek",
@@ -2602,6 +2594,17 @@
 				"comments": "Ponctuation",
 				"link": "translations/pt/{chapter}.json",
 				"linkmin": "translations/pt/{chapter}.json"
+			},
+			{
+				"key": "por_helminasr",
+				"name": "por-helminasr",
+				"author": "Helmi Nasr",
+				"language": "Portuguese",
+				"direction": "ltr",
+				"source": "https://quranenc.com/check/portuguese_nasr/v1.3.0-csv.1 , https://quranenc.com/en/browse/portuguese_nasr , https://quranenc.com ,",
+				"comments": "",
+				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/por-helminasr.json",
+				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/por-helminasr.min.json"
 			}
 		]
 	},

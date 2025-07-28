@@ -3,7 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import AddTranslationModal from './modal/AddTranslationModal.svelte';
 
-	let addTranslationPopupVisible = $state(true);
+	let addTranslationPopupVisible = $state(false);
 
 	function addTranslationButtonClick() {
 		// Affiche le pop-up pour ajouter une nouvelle traduction
