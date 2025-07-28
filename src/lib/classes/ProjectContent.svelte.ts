@@ -5,11 +5,13 @@ import { Track } from './Track.svelte.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import toast from 'svelte-5-french-toast';
+import { ProjectTranslation } from './index.js';
 
 export class ProjectContent extends SerializableBase {
 	timeline: Timeline;
 	assets: Asset[];
 	projectSettings: ProjectSettings;
+	projectTranslation: ProjectTranslation;
 
 	/**
 	 * Crée une instance de ProjectContent.
@@ -20,13 +22,15 @@ export class ProjectContent extends SerializableBase {
 	constructor(
 		timeline: Timeline = new Timeline(),
 		assets: Asset[] = [],
-		projectSettings: ProjectSettings = new ProjectSettings()
+		projectSettings: ProjectSettings = new ProjectSettings(),
+		projectTranslation: ProjectTranslation = new ProjectTranslation()
 	) {
 		super();
 
 		this.timeline = $state(timeline);
 		this.assets = $state(assets);
 		this.projectSettings = $state(projectSettings);
+		this.projectTranslation = $state(projectTranslation);
 	}
 
 	/**
@@ -76,3 +80,4 @@ export class ProjectContent extends SerializableBase {
 SerializableBase.registerChildClass(ProjectContent, 'timeline', Timeline);
 SerializableBase.registerChildClass(ProjectContent, 'assets', Asset);
 SerializableBase.registerChildClass(ProjectContent, 'projectSettings', ProjectSettings);
+SerializableBase.registerChildClass(ProjectContent, 'projectTranslation', ProjectTranslation);

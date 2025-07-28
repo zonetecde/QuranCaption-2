@@ -1,6 +1,8 @@
 // Exports principaux pour faciliter les imports
 export { Duration } from './Duration.js';
 export { ProjectDetail } from './ProjectDetail.svelte.js';
+export { ProjectTranslation } from './ProjectTranslation.svelte.js';
+export { Translation } from './Translation.svelte.js';
 export { ProjectContent } from './ProjectContent.svelte.js';
 export { ProjectEditorState } from './ProjectEditorState.svelte.js';
 export { Project } from './Project.js';

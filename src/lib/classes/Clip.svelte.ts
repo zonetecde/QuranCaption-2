@@ -1,5 +1,5 @@
 import { globalState } from '$lib/runes/main.svelte';
-import { TrackType } from '.';
+import { TrackType, Translation } from '.';
 import type { Asset } from './Asset.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
@@ -129,7 +129,7 @@ export class SubtitleClip extends Clip {
 	startWordIndex: number;
 	endWordIndex: number;
 	text: string;
-	translations: { [key: string]: string };
+	translations: { [key: string]: Translation };
 
 	constructor(
 		startTime: number,
@@ -139,7 +139,7 @@ export class SubtitleClip extends Clip {
 		startWordIndex: number,
 		endWordIndex: number,
 		text: string,
-		translations: { [key: string]: string } = {}
+		translations: { [key: string]: Translation } = {}
 	) {
 		super(startTime, endTime, 'Subtitle');
 		this.surah = surah;
@@ -156,3 +156,6 @@ export class SilenceClip extends Clip {
 		super(startTime, endTime, 'Silence');
 	}
 }
+
+// Enregistre les classes enfants pour la sérialisation
+SerializableBase.registerChildClass(SubtitleClip, 'translations', Translation);

@@ -9,6 +9,7 @@
 	import VideoEditor from './tabs/videoEditor/VideoEditor.svelte';
 	import SubtitlesEditor from './tabs/subtitlesEditor/SubtitlesEditor.svelte';
 	import toast from 'svelte-5-french-toast';
+	import TranslationsEditor from './tabs/translationsEditor/TranslationsEditor.svelte';
 
 	let saveInterval: any;
 
@@ -31,5 +32,7 @@
 		<VideoEditor />
 	{:else if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.SubtitlesEditor}
 		<SubtitlesEditor />
+	{:else if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.Translations}
+		<TranslationsEditor />
 	{/if}
 </div>

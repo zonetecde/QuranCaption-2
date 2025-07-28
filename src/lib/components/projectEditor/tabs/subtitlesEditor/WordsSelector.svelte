@@ -233,7 +233,7 @@
 </script>
 
 <section
-	class="w-full items-center h-full flex flex-row-reverse py-10 xl:leading-[4.5rem] leading-[4rem] my-auto px-6 overflow-y-auto xl:pb-20 flex-wrap text-4xl xl:text-5xl arabic content-center pt-40 2xl:pt-0"
+	class="w-full items-center flex flex-row-reverse xl:leading-[4.5rem] leading-[4rem] my-auto px-6 flex-wrap text-4xl xl:text-5xl arabic py-2 overflow-y-auto"
 >
 	{#await selectedVerse() then verse}
 		{#if verse}
@@ -243,7 +243,7 @@
 					index <= subtitlesEditorState().endWordIndex}
 
 				<button
-					class={'flex flex-col outline-none text-center px-2.5 pt-2 pb-2 cursor-pointer ' +
+					class={'flex flex-col outline-none text-center px-2.5 py-2 cursor-pointer ' +
 						(isSelected ? 'word-selected' : 'word-not-selected')}
 					onclick={() => handleWordClick(index)}
 				>

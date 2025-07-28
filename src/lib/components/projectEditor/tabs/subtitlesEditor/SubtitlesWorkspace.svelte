@@ -9,7 +9,7 @@
 	class="overflow-hidden min-h-0 bg-[#0d0d0d]"
 	style="height: {globalState.currentProject!.projectEditorState.upperSectionHeight}%;"
 >
-	<div class="w-full h-full border-t-2 border-color py-1 px-1.5">
+	<div class="w-full h-full flex flex-col border-t-2 border-color py-1 px-1.5">
 		<!-- Sélecteur de verset -->
 		<VersePicker />
 
