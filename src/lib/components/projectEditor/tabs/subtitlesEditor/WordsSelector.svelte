@@ -155,6 +155,7 @@
 		if (success) {
 			await selectNextWord();
 			subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
+			globalState.currentProject!.detail.updatePercentageCaptioned();
 		}
 	}
 
@@ -167,7 +168,8 @@
 			TrackType.Subtitle
 		)!;
 
-		subtitleTrack.addSilence();
+		const success = subtitleTrack.addSilence();
+		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
 	}
 
 	/**

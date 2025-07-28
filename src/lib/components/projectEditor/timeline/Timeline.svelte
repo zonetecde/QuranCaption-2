@@ -30,15 +30,6 @@
 		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
 	});
 
-	// Effect pour mettre à jour le pourcentage de la timeline captionnée
-	$effect(() => {
-		if (JSON.stringify(globalState.currentProject!.content.timeline.tracks)) {
-			untrack(() => {
-				globalState.currentProject!.detail.updatePercentageCaptioned();
-			});
-		}
-	});
-
 	// Fonction pour déterminer l'intervalle d'affichage des timestamps selon le zoom
 	function getTimestampInterval(zoom: number): number {
 		if (zoom >= 50) return 1; // Chaque seconde
