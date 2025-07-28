@@ -2,7 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 </script>
 
-<div class="bg-secondary border border-color rounded-lg py-6 px-3 space-y-6">
+<div class="bg-secondary h-full border border-color rounded-lg py-6 px-3 space-y-6 border-r-0">
 	<h2 class="text-center text-xl font-bold text-primary mb-4 pb-2 border-b border-color">
 		Subtitles Editor Settings
 	</h2>
@@ -13,10 +13,10 @@
 		<div class="flex items-center justify-center gap-2">
 			{#each [0.5, 1, 1.5, 2, 2.5] as speed}
 				<button
-					class="px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer border {globalState
+					class="px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer hover:scale-105 border {globalState
 						.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed === speed
-						? 'bg-accent-primary text-black border-transparent shadow-lg shadow-blue-500/25 scale-105'
-						: 'bg-secondary text-secondary border-color hover:bg-accent hover:text-primary hover:border-[var(--accent-primary)] hover:scale-105'}"
+						? 'bg-accent-primary text-black border-transparent shadow-lg shadow-blue-500/25'
+						: 'bg-secondary text-secondary border-color hover:bg-accent hover:text-primary hover:border-[var(--accent-primary)]'}"
 					on:click={() => {
 						globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed = speed;
 					}}

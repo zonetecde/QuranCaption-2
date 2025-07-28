@@ -234,46 +234,102 @@
 	}
 </script>
 
-<section
-	class="w-full items-center flex flex-row-reverse xl:leading-[4.5rem] leading-[4rem] my-auto px-6 flex-wrap text-4xl xl:text-5xl arabic py-2 overflow-y-auto"
->
-	{#await selectedVerse() then verse}
-		{#if verse}
-			{#each verse.words as word, index}
-				{@const isSelected =
-					index >= subtitlesEditorState().startWordIndex &&
-					index <= subtitlesEditorState().endWordIndex}
+<section class="w-full h-full overflow-y-auto bg-secondary border border-color rounded-lg">
+	<div
+		class="min-h-full flex flex-row-reverse flex-wrap justify-start content-center xl:leading-[4.5rem] lg:leading-[3rem] leading-[2.5rem]
+	           px-6 text-4xl xl:text-5xl arabic py-4"
+	>
+		{#await selectedVerse() then verse}
+			{#if verse}
+				{#each verse.words as word, index}
+					{@const isSelected =
+						index >= subtitlesEditorState().startWordIndex &&
+						index <= subtitlesEditorState().endWordIndex}
+					{@const isFirstSelected = isSelected && index === subtitlesEditorState().startWordIndex}
+					{@const isLastSelected = isSelected && index === subtitlesEditorState().endWordIndex}
+					{@const isSingleSelected =
+						isSelected &&
+						subtitlesEditorState().startWordIndex === subtitlesEditorState().endWordIndex}
+					{@const isMiddleSelected = isSelected && !isFirstSelected && !isLastSelected}
 
-				<button
-					class={'flex flex-col outline-none text-center px-2.5 py-2 cursor-pointer ' +
-						(isSelected ? 'word-selected' : 'word-not-selected')}
-					onclick={() => handleWordClick(index)}
-				>
-					<p class="text-center w-full">{word.arabic}</p>
-					{#if subtitlesEditorState().showWordTranslation}
-						<p class="xl:text-sm text-xs text-thirdly">{word.translation}</p>
-					{/if}
-					{#if subtitlesEditorState().showWordTransliteration}
-						<p class="xl:text-sm text-xs text-thirdly">{word.transliteration}</p>
-					{/if}
-				</button>
-			{/each}
-		{/if}
-	{:catch error}
-		<p class="text-red-500">Error loading verse: {error.message}</p>
-	{/await}
+					<button
+						class="word-button flex h-fit flex-col outline-none text-center px-3 cursor-pointer
+					       transition-all border-2 duration-200 border-transparent py-3 -mx-0.5
+					       {isSelected
+							? `word-selected text-white  ${
+									isSingleSelected
+										? 'word-first-selected word-last-selected'
+										: isLastSelected
+											? 'word-first-selected'
+											: isFirstSelected
+												? 'word-last-selected'
+												: 'word-middle-selected'
+								}`
+							: 'word-not-selected text-primary hover:bg-accent hover:border-color rounded-lg'}"
+						onclick={() => handleWordClick(index)}
+					>
+						<p class="text-center w-full font-medium">{word.arabic}</p>
+						{#if subtitlesEditorState().showWordTranslation}
+							<p class="xl:text-sm text-xs text-thirdly mt-1 font-normal opacity-80">
+								{word.translation}
+							</p>
+						{/if}
+						{#if subtitlesEditorState().showWordTransliteration}
+							<p class="xl:text-sm text-xs text-thirdly mt-0.5 font-normal opacity-70 italic">
+								{word.transliteration}
+							</p>
+						{/if}
+					</button>
+				{/each}
+			{/if}
+		{:catch error}
+			<div class="w-full flex items-center justify-center p-8">
+				<div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-center gap-3">
+					<span class="material-icons text-red-400">error</span>
+					<p class="text-red-400 text-sm">Error loading verse: {error.message}</p>
+				</div>
+			</div>
+		{/await}
+	</div>
 </section>
 
 <style>
 	.word-selected {
-		background-color: #fbff0027;
+		background-color: var(--selected-word-bg);
+		border-top: 2px solid var(--accent-primary);
+		border-bottom: 2px solid var(--accent-primary);
+	}
+
+	.word-first-selected {
+		border-left: 2px solid var(--accent-primary);
+		border-radius: 12px 0 0 12px;
+	}
+
+	.word-last-selected {
+		border-right: 2px solid var(--accent-primary);
+		border-radius: 0 12px 12px 0;
+	}
+
+	.word-middle-selected {
+		border-radius: 0;
+		border-left: 2px solid transparent;
+		border-right: 2px solid transparent;
+	}
+
+	/* Si un seul mot est sélectionné, il doit avoir des bords arrondis partout */
+	.word-first-selected.word-last-selected {
+		border-radius: 12px;
+		border: 2px solid var(--accent-primary);
 	}
 
 	.word-selected:hover {
-		background-color: #5f5b20e1;
+		background: var(--bg-accent);
+		z-index: 10;
+		position: relative;
 	}
 
 	.word-not-selected:hover {
-		background-color: #ffffff2f;
+		background-color: var(--bg-accent);
+		border-color: var(--border-color);
 	}
 </style>
