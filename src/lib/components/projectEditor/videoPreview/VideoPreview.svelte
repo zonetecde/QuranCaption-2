@@ -117,9 +117,7 @@
 	 * @returns Temps en secondes dans l'audio
 	 */
 	function getCurrentAudioTimeToPlay(): number {
-		const currentClip = globalState
-			.currentProject!.content.timeline.getFirstTrack(TrackType.Audio)
-			.getCurrentClip();
+		const currentClip = globalState.getAudioTrack.getCurrentClip();
 
 		if (!currentClip) return 0;
 
@@ -133,9 +131,7 @@
 	 * @returns Temps en secondes dans la vidéo
 	 */
 	function getCurrentVideoTimeToPlay(): number {
-		const currentClip = globalState
-			.currentProject!.content.timeline.getFirstTrack(TrackType.Video)
-			.getCurrentClip();
+		const currentClip = globalState.getVideoTrack.getCurrentClip();
 
 		if (!currentClip) return 0;
 
@@ -256,9 +252,7 @@
 
 		// Utilise la vidéo pour mettre à jour le curseur de la timeline
 		if (videoElement && videoElement.currentTime !== undefined && isPlaying) {
-			const currentVideoClip = globalState
-				.currentProject!.content.timeline.getFirstTrack(TrackType.Video)
-				?.getCurrentClip();
+			const currentVideoClip = globalState.getVideoTrack.getCurrentClip();
 
 			if (currentVideoClip) {
 				// La position du curseur = début du clip + temps écoulé dans la vidéo (en ms)
@@ -274,9 +268,7 @@
 	 */
 	function handleAudioTimeUpdate() {
 		if (audioHowl && isPlaying) {
-			const currentAudioClip = globalState
-				.currentProject!.content.timeline.getFirstTrack(TrackType.Audio)
-				?.getCurrentClip();
+			const currentAudioClip = globalState.getAudioTrack?.getCurrentClip();
 
 			if (currentAudioClip) {
 				// .seek() retourne la position en secondes, on la convertit en ms
@@ -496,8 +488,8 @@
 		const currentTime = getTimelineSettings().cursorPosition;
 
 		// Récupération des pistes vidéo et audio
-		const videoTrack = globalState.currentProject!.content.timeline.getFirstTrack(TrackType.Video);
-		const audioTrack = globalState.currentProject!.content.timeline.getFirstTrack(TrackType.Audio);
+		const videoTrack = globalState.getVideoTrack;
+		const audioTrack = globalState.getAudioTrack;
 
 		const nextClips: { clip: any; startTime: number }[] = [];
 

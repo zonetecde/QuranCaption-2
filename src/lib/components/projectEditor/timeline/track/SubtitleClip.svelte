@@ -87,7 +87,7 @@
 		contextMenu!.show(e);
 	}}
 >
-	{#if clip.type === 'Subtitle'}
+	{#if clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle'}
 		<div class="absolute inset-0 z-5 flex px-2 py-2">
 			<span class="text-xs text-[var(--text-secondary)] font-medium mx-auto my-auto" dir="rtl"
 				>{clip.text}</span

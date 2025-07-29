@@ -1,6 +1,8 @@
 {
 	"Achinese": {
 		"flag": "https://flagsapi.com/ID/flat/64.png",
+		"basmala": "Dengan nama Allah Yang Maha Pemurah lagi Maha Penyayang",
+		"istiadhah": "Saya berlindung kepada Allah dari syaitan yang terkutuk",
 		"translations": [
 			{
 				"key": "ace_tgkhmahjiddinju",
@@ -17,6 +19,8 @@
 	},
 	"Afar": {
 		"flag": "https://flagsapi.com/DJ/flat/64.png",
+		"basmala": "Bismi Allaahi arraHmaani arraHiim",
+		"istiadhah": "AuuDhu billaahi minash shayTaanir rajiim",
 		"translations": [
 			{
 				"key": "aar_sheikhmahmoudab",
@@ -33,6 +37,8 @@
 	},
 	"Afrikaans": {
 		"flag": "https://flagsapi.com/ZA/flat/64.png",
+		"basmala": "In die naam van Allah, die Barmhartige, die Genadige",
+		"istiadhah": "Ek soek beskerming by Allah teen die vervloekte Satan",
 		"translations": [
 			{
 				"key": "afr_imammabaker",
@@ -49,6 +55,8 @@
 	},
 	"Albanian": {
 		"flag": "https://flagsapi.com/AL/flat/64.png",
+		"basmala": "Në emër të Allahut, të Gjithëmëshirshmit, Mëshirëplotit",
+		"istiadhah": "Kërkoj strehim tek Allahu nga djalli i mallkuar",
 		"translations": [
 			{
 				"key": "sqi_fetimehdiu",
@@ -109,6 +117,8 @@
 	},
 	"Amharic": {
 		"flag": "https://flagsapi.com/ET/flat/64.png",
+		"basmala": "በአላህ ስም በሩህሩህ በመሃሪው",
+		"istiadhah": "ከተረገመው ሰይጣን አላህን እጠይቃለሁ",
 		"translations": [
 			{
 				"key": "amh_muhammedsadiqan",
@@ -125,6 +135,8 @@
 	},
 	"Arabic": {
 		"flag": "https://flagsapi.com/SA/flat/64.png",
+		"basmala": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+		"istiadhah": "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
 		"translations": [
 			{
 				"key": "ara_jalaladdinalmah",
@@ -372,6 +384,8 @@
 	},
 	"Assamese": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "আল্লাহৰ নামত, যি দয়ালু আৰু কৰুণাময়",
+		"istiadhah": "মই শাপগ্ৰস্ত চয়তানৰ পৰা আল্লাহৰ ওচৰত আশ্ৰয় বিচাৰো",
 		"translations": [
 			{
 				"key": "asm_shaykhrafeequli",
@@ -388,6 +402,8 @@
 	},
 	"Azerbaijani": {
 		"flag": "https://flagsapi.com/AZ/flat/64.png",
+		"basmala": "Allah adı ilə, Rəhman və Rəhim olan",
+		"istiadhah": "Lənətlənmiş şeytandan Allah-a sığınıram",
 		"translations": [
 			{
 				"key": "aze_alikhanmusayev",
@@ -426,6 +442,8 @@
 	},
 	"Bambara": {
 		"flag": "https://flagsapi.com/ML/flat/64.png",
+		"basmala": "Allah togo la, hinɛ ni badenya la",
+		"istiadhah": "N bε tugu Allah la, saytan juguman ma",
 		"translations": [
 			{
 				"key": "bam_deenmuhammad",
@@ -464,6 +482,8 @@
 	},
 	"Bengali": {
 		"flag": "https://flagsapi.com/BD/flat/64.png",
+		"basmala": "আল্লাহর নামে, যিনি করুণাময়, পরম দয়ালু",
+		"istiadhah": "আমি অভিশপ্ত শয়তান থেকে আল্লাহর কাছে আশ্রয় চাই",
 		"translations": [
 			{
 				"key": "ben_abubakrzakaria",
@@ -502,6 +522,8 @@
 	},
 	"Berber": {
 		"flag": "https://flagsapi.com/MA/flat/64.png",
+		"basmala": "S yisem n Rebbi, Win iḥennen, Win yeṛḥamen",
+		"istiadhah": "Ttabaɛ-d ɣer Rebbi seg ccitan amalɛun",
 		"translations": [
 			{
 				"key": "ber_ramdaneatmansou",
@@ -518,6 +540,8 @@
 	},
 	"Bosnian": {
 		"flag": "https://flagsapi.com/BA/flat/64.png",
+		"basmala": "U ime Allaha, Milostivog, Samilosnog",
+		"istiadhah": "Tražim zaštitu kod Allaha od prokletog šejtana",
 		"translations": [
 			{
 				"key": "bos_besimkorkut",
@@ -589,6 +613,8 @@
 	},
 	"Bulgarian": {
 		"flag": "https://flagsapi.com/BG/flat/64.png",
+		"basmala": "В името на Аллах, Милостивия, Милосърдния",
+		"istiadhah": "Търся защита при Аллах от прокълнатия Сатана",
 		"translations": [
 			{
 				"key": "bul_tzvetantheophan",
@@ -605,6 +631,8 @@
 	},
 	"Burmese": {
 		"flag": "https://flagsapi.com/MM/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "mya_alinuyin",
@@ -654,6 +682,8 @@
 	},
 	"Catalan": {
 		"flag": "https://flagsapi.com/ES/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "cat_yousseflyoussi",
@@ -670,6 +700,8 @@
 	},
 	"Chichewa": {
 		"flag": "https://flagsapi.com/MW/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "nya_alhajiyusufmuha",
@@ -697,6 +729,8 @@
 	},
 	"Ch. (simp.)": {
 		"flag": "https://flagsapi.com/CN/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "zho_majian",
@@ -735,6 +769,8 @@
 	},
 	"Ch. (trad.)": {
 		"flag": "https://flagsapi.com/TW/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "zho_anonymousgroupo",
@@ -762,6 +798,8 @@
 	},
 	"Croatian": {
 		"flag": "https://flagsapi.com/HR/flat/64.png",
+		"basmala": "U ime Allaha, Milostivog, Samilosnog",
+		"istiadhah": "Tražim zaštitu kod Allaha od prokletog Sotone",
 		"translations": [
 			{
 				"key": "hrv_unknown",
@@ -778,6 +816,8 @@
 	},
 	"Czech": {
 		"flag": "https://flagsapi.com/CZ/flat/64.png",
+		"basmala": "Ve jménu Alláha, Milosrdného, Slitovného",
+		"istiadhah": "Hledám útočiště u Alláha před prokletým Satanem",
 		"translations": [
 			{
 				"key": "ces_arnykl",
@@ -816,6 +856,8 @@
 	},
 	"Dagbani": {
 		"flag": "https://flagsapi.com/GH/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "dag_muhammadbabaght",
@@ -832,6 +874,8 @@
 	},
 	"Danish": {
 		"flag": "https://flagsapi.com/DK/flat/64.png",
+		"basmala": "I Allahs navn, den Barmhjertige, den Nådige",
+		"istiadhah": "Jeg søger tilflugt hos Allah mod den forbandede Satan",
 		"translations": [
 			{
 				"key": "dan_hadiabdollahian",
@@ -859,6 +903,8 @@
 	},
 	"Dari": {
 		"flag": "https://flagsapi.com/AF/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "prs_mawlawimuhammad",
@@ -875,6 +921,8 @@
 	},
 	"Divehi": {
 		"flag": "https://flagsapi.com/MV/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "div_officeofthepres",
@@ -891,6 +939,8 @@
 	},
 	"Dutch": {
 		"flag": "https://flagsapi.com/NL/flat/64.png",
+		"basmala": "In de naam van Allah, de Barmhartige, de Genadige",
+		"istiadhah": "Ik zoek bescherming bij Allah tegen de vervloekte Satan",
 		"translations": [
 			{
 				"key": "nld_sofianssiregar",
@@ -925,7 +975,6 @@
 				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/nld-salomokeyzer.json",
 				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/nld-salomokeyzer.min.json"
 			},
-
 			{
 				"key": "nld_unknown",
 				"name": "nld-unknown",
@@ -941,6 +990,8 @@
 	},
 	"English": {
 		"flag": "https://flagsapi.com/GB/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "eng_mustafakhattaba",
@@ -1349,7 +1400,6 @@
 				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-muhammadtaqiusm.json",
 				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/eng-muhammadtaqiusm.min.json"
 			},
-
 			{
 				"key": "eng_njdawood",
 				"name": "eng-njdawood",
@@ -1519,6 +1569,8 @@
 	},
 	"Esperanto": {
 		"flag": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Flag_of_Esperanto.svg",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "epo_hadiabdollahian",
@@ -1535,6 +1587,8 @@
 	},
 	"Filipino": {
 		"flag": "https://flagsapi.com/PH/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "fil_abdullatifeduar",
@@ -1562,6 +1616,8 @@
 	},
 	"Finnish": {
 		"flag": "https://flagsapi.com/FI/flat/64.png",
+		"basmala": "Allahin nimessä, Armollisen, Laupiaiden",
+		"istiadhah": "Etsin turvaa Allahilta kirotulta Saatanalta",
 		"translations": [
 			{
 				"key": "fin_unknown",
@@ -1578,6 +1634,8 @@
 	},
 	"French": {
 		"flag": "https://flagsapi.com/FR/flat/64.png",
+		"basmala": "Au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux",
+		"istiadhah": "Je cherche refuge auprès d'Allah contre Satan le maudit",
 		"translations": [
 			{
 				"key": "fra_muhammadhameedu",
@@ -1601,7 +1659,6 @@
 				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.json",
 				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/fra-islamicfoundati.min.json"
 			},
-
 			{
 				"key": "fra_rashidmaash",
 				"name": "fra-rashidmaash",
@@ -1628,6 +1685,8 @@
 	},
 	"Fulah": {
 		"flag": "https://flagsapi.com/SN/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "ful_rowadtranslatio",
@@ -1644,6 +1703,8 @@
 	},
 	"Ganda": {
 		"flag": "https://flagsapi.com/UG/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "lug_fareeqmusa",
@@ -1660,6 +1721,8 @@
 	},
 	"German": {
 		"flag": "https://flagsapi.com/DE/flat/64.png",
+		"basmala": "Im Namen Allahs, des Gnädigen, des Barmherzigen",
+		"istiadhah": "Ich suche Zuflucht bei Allah vor Satan, dem Verfluchten",
 		"translations": [
 			{
 				"key": "deu_aburidamuhammad",
@@ -1720,6 +1783,8 @@
 	},
 	"Gujarati": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "અલ્લાહના નામે, જે દયાળુ અને કરુણાશીલ છે",
+		"istiadhah": "હું શાપિત શેતાનથી અલ્લાહની પાસે આશ્રય માગું છું",
 		"translations": [
 			{
 				"key": "guj_rabilaalomari",
@@ -1736,6 +1801,8 @@
 	},
 	"Hausa": {
 		"flag": "https://flagsapi.com/NG/flat/64.png",
+		"basmala": "Da sunan Allah, Mai rahama, Mai jin kai",
+		"istiadhah": "Ina neman mafaka ga Allah daga Shaidan mai la'ana",
 		"translations": [
 			{
 				"key": "hau_abubakarmahmood",
@@ -1763,6 +1830,8 @@
 	},
 	"Hebrew": {
 		"flag": "https://flagsapi.com/PS/flat/64.png",
+		"basmala": "בשם אללה, הרחמן והחנון",
+		"istiadhah": "אני מבקש מקלט אצל אללה מהשטן הארור",
 		"translations": [
 			{
 				"key": "heb_darusalamhousei",
@@ -1790,6 +1859,8 @@
 	},
 	"Hindi": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "अल्लाह के नाम से, जो दयालु और कृपालु है",
+		"istiadhah": "मैं शापित शैतान से अल्लाह की शरण मांगता हूं",
 		"translations": [
 			{
 				"key": "hin_maulanaazizulha",
@@ -1828,6 +1899,8 @@
 	},
 	"Hungarian": {
 		"flag": "https://flagsapi.com/HU/flat/64.png",
+		"basmala": "Allah nevében, a Kegyelmes, az Irgalmas",
+		"istiadhah": "Menedéket keresek Allahnál az átkozott Sátán ellen",
 		"translations": [
 			{
 				"key": "hun_drahmedabdelrah",
@@ -1844,6 +1917,8 @@
 	},
 	"Indonesian": {
 		"flag": "https://flagsapi.com/ID/flat/64.png",
+		"basmala": "Dengan nama Allah Yang Maha Pemurah lagi Maha Penyayang",
+		"istiadhah": "Aku berlindung kepada Allah dari setan yang terkutuk",
 		"translations": [
 			{
 				"key": "ind_indonesianislam",
@@ -1915,6 +1990,8 @@
 	},
 	"Iranun": {
 		"flag": "https://flagsapi.com/PH/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "ilp_abdulazizgroaal",
@@ -1931,6 +2008,8 @@
 	},
 	"Italian": {
 		"flag": "https://flagsapi.com/IT/flat/64.png",
+		"basmala": "Nel nome di Allah, il Compassionevole, il Misericordioso",
+		"istiadhah": "Cerco rifugio in Allah da Satana il maledetto",
 		"translations": [
 			{
 				"key": "ita_hamzarobertopic",
@@ -1947,6 +2026,8 @@
 	},
 	"Japanese": {
 		"flag": "https://flagsapi.com/JP/flat/64.png",
+		"basmala": "慈悲あまねく慈愛深きアッラーの御名において",
+		"istiadhah": "呪われた悪魔からアッラーの御加護を求めます",
 		"translations": [
 			{
 				"key": "jpn_ryoichimita",
@@ -1963,6 +2044,8 @@
 	},
 	"Javanese": {
 		"flag": "https://flagsapi.com/ID/flat/64.png",
+		"basmala": "Kanthi asmane Allah ingkang Maha Asih lan Maha Welasan",
+		"istiadhah": "Aku ngungsi marang Allah saka setan ingkang kinalenatan",
 		"translations": [
 			{
 				"key": "jav_unknown",
@@ -1979,6 +2062,8 @@
 	},
 	"Kannada": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "ದಯಾಳು ಮತ್ತು ಕರುಣಾಮಯನಾದ ಅಲ್ಲಾಹನ ಹೆಸರಿನಲ್ಲಿ",
+		"istiadhah": "ನಾನು ಶಾಪಗ್ರಸ್ತ ಸೈತಾನನಿಂದ ಅಲ್ಲಾಹನ ಆಶ್ರಯವನ್ನು ಹುಡುಕುತ್ತೇನೆ",
 		"translations": [
 			{
 				"key": "kan_abdussalamputhi",
@@ -1995,6 +2080,8 @@
 	},
 	"Kazakh": {
 		"flag": "https://flagsapi.com/KZ/flat/64.png",
+		"basmala": "Мейірімді, Ешкімге мейірім көрсететін Алланың атымен",
+		"istiadhah": "Мен қарғыс алған шайтаннан Алланың қорғауын сұраймын",
 		"translations": [
 			{
 				"key": "kaz_khalifahaltai",
@@ -2022,6 +2109,8 @@
 	},
 	"Kendayan": {
 		"flag": "https://flagsapi.com/ID/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "knx_unknown",
@@ -2038,6 +2127,8 @@
 	},
 	"Khmer": {
 		"flag": "https://flagsapi.com/KH/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "khm_cambodianmuslim",
@@ -2054,6 +2145,8 @@
 	},
 	"Kinyarwanda": {
 		"flag": "https://flagsapi.com/RW/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "kin_rmcrwanda",
@@ -2081,6 +2174,8 @@
 	},
 	"Kirghiz": {
 		"flag": "https://flagsapi.com/KG/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "kir_shamsaldinhakim",
@@ -2097,6 +2192,8 @@
 	},
 	"Korean": {
 		"flag": "https://flagsapi.com/KR/flat/64.png",
+		"basmala": "자비로우시고 자애로우신 알라의 이름으로",
+		"istiadhah": "저는 저주받은 사탄으로부터 알라의 보호를 구합니다",
 		"translations": [
 			{
 				"key": "kor_hamidchoi",
@@ -2124,6 +2221,8 @@
 	},
 	"Kurdish": {
 		"flag": "https://flagsapi.com/IQ/flat/64.png",
+		"basmala": "Bi navê Xwedê, yê dilovan û mihriban",
+		"istiadhah": "Ez ji şeytanê nefretî penaberiya Xwedê dixwazim",
 		"translations": [
 			{
 				"key": "kur_burhanmuhammada",
@@ -2151,6 +2250,8 @@
 	},
 	"Kurmanji": {
 		"flag": "https://flagsapi.com/TR/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "kmr_unknown",
@@ -2167,6 +2268,8 @@
 	},
 	"Latin": {
 		"flag": "https://flagsapi.com/VA/flat/64.png",
+		"basmala": "In nomine Dei, misericordis, clementis",
+		"istiadhah": "Confugium quaero apud Deum a Satana maledicto",
 		"translations": [
 			{
 				"key": "lat_hadiabdollahian",
@@ -2183,6 +2286,8 @@
 	},
 	"Lingala": {
 		"flag": "https://flagsapi.com/CD/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "lin_zakariyamuhamme",
@@ -2199,6 +2304,8 @@
 	},
 	"Luyia": {
 		"flag": "https://flagsapi.com/KE/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "luy_mohammadramadha",
@@ -2215,6 +2322,8 @@
 	},
 	"Macedonian": {
 		"flag": "https://flagsapi.com/MK/flat/64.png",
+		"basmala": "Во име на Алах, Милостивиот, Сомилосниот",
+		"istiadhah": "Барам заштита кај Алах од проколнатиот Сатана",
 		"translations": [
 			{
 				"key": "mkd_macedonianschol",
@@ -2242,6 +2351,8 @@
 	},
 	"Malay": {
 		"flag": "https://flagsapi.com/MY/flat/64.png",
+		"basmala": "Dengan nama Allah Yang Maha Pemurah lagi Maha Mengasihani",
+		"istiadhah": "Aku berlindung kepada Allah daripada syaitan yang terkutuk",
 		"translations": [
 			{
 				"key": "msa_abdullahmuhamma",
@@ -2258,6 +2369,8 @@
 	},
 	"Malayalam": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "കരുണാമയനും ദയാലുവുമായ അല്ലാഹുവിന്റെ നാമത്തിൽ",
+		"istiadhah": "ശപിക്കപ്പെട്ട പിശാചിൽ നിന്ന് ഞാൻ അല്ലാഹുവിന്റെ അഭയം തേടുന്നു",
 		"translations": [
 			{
 				"key": "mal_abdulhameedmada",
@@ -2296,6 +2409,8 @@
 	},
 	"Maltese": {
 		"flag": "https://flagsapi.com/MT/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "mlt_martinrzammitmu",
@@ -2312,6 +2427,8 @@
 	},
 	"Maranao": {
 		"flag": "https://flagsapi.com/PH/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "mrw_guroalimsaroman",
@@ -2328,6 +2445,8 @@
 	},
 	"Marathi": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "दयाळू आणि कृपाळू अल्लाहच्या नावाने",
+		"istiadhah": "मी शापित सैतानापासून अल्लाहचा आश्रय घेतो",
 		"translations": [
 			{
 				"key": "mar_muhammadshafiia",
@@ -2344,6 +2463,8 @@
 	},
 	"Nepali": {
 		"flag": "https://flagsapi.com/NP/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "nep_ahlalhadithcent",
@@ -2360,6 +2481,8 @@
 	},
 	"Norwegian": {
 		"flag": "https://flagsapi.com/NO/flat/64.png",
+		"basmala": "I Allahs navn, den Barmhjertige, den Nådige",
+		"istiadhah": "Jeg søker tilflukt hos Allah fra den forbannede Satan",
 		"translations": [
 			{
 				"key": "nor_einarberg",
@@ -2376,6 +2499,8 @@
 	},
 	"Oromo": {
 		"flag": "https://flagsapi.com/ET/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "orm_ghaliapapurapag",
@@ -2392,6 +2517,8 @@
 	},
 	"Panjabi": {
 		"flag": "https://flagsapi.com/PK/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "pan_drmuhamadhabibb",
@@ -2408,6 +2535,8 @@
 	},
 	"Persian": {
 		"flag": "https://flagsapi.com/IR/flat/64.png",
+		"basmala": "به نام خداوند رحمان رحیم",
+		"istiadhah": "از شیطان رانده شده به خدا پناه می‌برم",
 		"translations": [
 			{
 				"key": "fas_abdolmohammaday",
@@ -2578,6 +2707,8 @@
 	},
 	"Polish": {
 		"flag": "https://flagsapi.com/PL/flat/64.png",
+		"basmala": "W imię Allaha, Miłosiernego, Litościwego",
+		"istiadhah": "Szukam schronienia u Allaha przed przeklętym Szatanem",
 		"translations": [
 			{
 				"key": "pol_jozefabielawski",
@@ -2594,6 +2725,8 @@
 	},
 	"Portuguese": {
 		"flag": "https://flagsapi.com/PT/flat/64.png",
+		"basmala": "Em nome de Allah, o Clemente, o Misericordioso",
+		"istiadhah": "Busco refúgio em Allah contra Satanás, o maldito",
 		"translations": [
 			{
 				"key": "por_samirelhayek",
@@ -2621,6 +2754,8 @@
 	},
 	"Pushto": {
 		"flag": "https://flagsapi.com/AF/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "pus_abdulwalikhan",
@@ -2648,6 +2783,8 @@
 	},
 	"Romanian": {
 		"flag": "https://flagsapi.com/RO/flat/64.png",
+		"basmala": "În numele lui Allah, Cel Milostiv, Îndurătorul",
+		"istiadhah": "Caut refugiu la Allah de Satana cel blestemat",
 		"translations": [
 			{
 				"key": "ron_georgegrigore",
@@ -2686,6 +2823,8 @@
 	},
 	"Rundi": {
 		"flag": "https://flagsapi.com/BI/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "run_sheikhamissirad",
@@ -2702,6 +2841,8 @@
 	},
 	"Russian": {
 		"flag": "https://flagsapi.com/RU/flat/64.png",
+		"basmala": "Во имя Аллаха, Милостивого, Милосердного",
+		"istiadhah": "Ищу защиты у Аллаха от проклятого Сатаны",
 		"translations": [
 			{
 				"key": "rus_abuadel",
@@ -2784,6 +2925,8 @@
 	},
 	"Serbian": {
 		"flag": "https://flagsapi.com/RS/flat/64.png",
+		"basmala": "У име Алаха, Милостивог, Самилосног",
+		"istiadhah": "Тражим заштиту код Алаха од проклетог Сотоне",
 		"translations": [
 			{
 				"key": "srp_rowwadtranslati",
@@ -2800,6 +2943,8 @@
 	},
 	"Shona": {
 		"flag": "https://flagsapi.com/ZW/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "sna_abdullahjmadini",
@@ -2816,6 +2961,8 @@
 	},
 	"Sindhi": {
 		"flag": "https://flagsapi.com/PK/flat/64.png",
+		"basmala": "الله جي نالي سان، جيڪو رحمان ۽ رحيم آهي",
+		"istiadhah": "آئون لعنتي شيطان کان الله جي پناهه گهران ٿو",
 		"translations": [
 			{
 				"key": "snd_tajmehmoodamrot",
@@ -2832,6 +2979,8 @@
 	},
 	"Sinhala": {
 		"flag": "https://flagsapi.com/LK/flat/64.png",
+		"basmala": "කරුණාවන්ත සහ දයාවන්ත අල්ලාහ්ගේ නාමයෙන්",
+		"istiadhah": "මම ශාපවලට ලක්වූ සාතන්ගෙන් අල්ලාහ්ගේ ආරක්ෂාව සොයමි",
 		"translations": [
 			{
 				"key": "sin_naseemismailand",
@@ -2859,6 +3008,8 @@
 	},
 	"Slovak": {
 		"flag": "https://flagsapi.com/SK/flat/64.png",
+		"basmala": "V mene Allaha, Milosrdného, Zľutovného",
+		"istiadhah": "Hľadám útočisko u Allaha pred prekliατým Satanom",
 		"translations": [
 			{
 				"key": "slk_hadiabdollahian",
@@ -2875,6 +3026,8 @@
 	},
 	"Somali": {
 		"flag": "https://flagsapi.com/SO/flat/64.png",
+		"basmala": "Magaca Illaah ee Raxmaanka Raxiimka ah",
+		"istiadhah": "Waxaan u magangalyoonayaa Illaah Shaydaanka inkaaranka ah",
 		"translations": [
 			{
 				"key": "som_abdullahhasanja",
@@ -2913,6 +3066,8 @@
 	},
 	"Sotho": {
 		"flag": "https://flagsapi.com/LS/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "sot_sheikheliaskeke",
@@ -2929,6 +3084,8 @@
 	},
 	"Spanish": {
 		"flag": "https://flagsapi.com/ES/flat/64.png",
+		"basmala": "En el nombre de Allah, el Clemente, el Misericordioso",
+		"istiadhah": "Busco refugio en Allah contra Satanás, el maldito",
 		"translations": [
 			{
 				"key": "spa_abdulqadermouhe",
@@ -3011,6 +3168,8 @@
 	},
 	"Swahili": {
 		"flag": "https://flagsapi.com/KE/flat/64.png",
+		"basmala": "Kwa jina la Allah, Mwingi wa rehema, Mwenye kurehemu",
+		"istiadhah": "Nakimbilia kwa Allah kutoka kwa Shetani aliyelaaniwa",
 		"translations": [
 			{
 				"key": "swa_abdullahmuhamma",
@@ -3038,6 +3197,8 @@
 	},
 	"Swedish": {
 		"flag": "https://flagsapi.com/SE/flat/64.png",
+		"basmala": "I Allahs namn, den Barmhärtige, den Nådige",
+		"istiadhah": "Jag söker skydd hos Allah från den förbannelsen Satan",
 		"translations": [
 			{
 				"key": "swe_knutbernstrom",
@@ -3054,6 +3215,8 @@
 	},
 	"Tajik": {
 		"flag": "https://flagsapi.com/TJ/flat/64.png",
+		"basmala": "Ба номи Худованди Раҳмони Раҳим",
+		"istiadhah": "Аз шайтони ронда шуда ба Худо паноҳ мебарам",
 		"translations": [
 			{
 				"key": "tgk_abdolmohammaday",
@@ -3092,6 +3255,8 @@
 	},
 	"Tamil": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "கருணையுள்ள அல்லாஹ்வின் பெயரால்",
+		"istiadhah": "நான் சபிக்கப்பட்ட சைத்தானிடமிருந்து அல்லாஹ்விடம் பாதுகாப்பு தேடுகிறேன்",
 		"translations": [
 			{
 				"key": "tam_abdulhameedbaqa",
@@ -3119,6 +3284,8 @@
 	},
 	"Tatar": {
 		"flag": "https://flagsapi.com/RU/flat/64.png",
+		"basmala": "Рәхимле, Рәхмәтле Аллаһ исеме белән",
+		"istiadhah": "Ләгънәтле шайтаннан Аллаһка сыенам",
 		"translations": [
 			{
 				"key": "tat_yakubibnnugman",
@@ -3135,6 +3302,8 @@
 	},
 	"Telugu": {
 		"flag": "https://flagsapi.com/IN/flat/64.png",
+		"basmala": "దయాళువు మరియు కరుణామయుడైన అల్లాహ్ పేరుతో",
+		"istiadhah": "నేను శాపగ్రస్తుడైన సైతాను నుండి అల్లాహ్ దగ్గర ఆశ్రయం తీసుకుంటాను",
 		"translations": [
 			{
 				"key": "tel_abdulraheemmoha",
@@ -3162,6 +3331,8 @@
 	},
 	"Thai": {
 		"flag": "https://flagsapi.com/TH/flat/64.png",
+		"basmala": "ในนามของอัลลอห์ ผู้ทรงเมตตา ผู้ทรงกรุณา",
+		"istiadhah": "ข้าพเจ้าขอความคุ้มครองจากอัลลอห์จากซาตานผู้ถูกสาปแช่ง",
 		"translations": [
 			{
 				"key": "tha_groupfromthesoc",
@@ -3189,6 +3360,8 @@
 	},
 	"Turkish": {
 		"flag": "https://flagsapi.com/TR/flat/64.png",
+		"basmala": "Rahman ve Rahim olan Allah'ın adıyla",
+		"istiadhah": "Lanetli şeytandan Allah'a sığınırım",
 		"translations": [
 			{
 				"key": "tur_abdulbakigolpin",
@@ -3513,6 +3686,8 @@
 	},
 	"Twi": {
 		"flag": "https://flagsapi.com/GH/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "twi_sheikhharounism",
@@ -3529,6 +3704,8 @@
 	},
 	"Uighur": {
 		"flag": "https://flagsapi.com/CN/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "uig_muhammadsaleh",
@@ -3556,6 +3733,8 @@
 	},
 	"Ukrainian": {
 		"flag": "https://flagsapi.com/UA/flat/64.png",
+		"basmala": "В ім'я Аллаха, Милостивого, Милосердного",
+		"istiadhah": "Шукаю захисту в Аллаха від проклятого Сатани",
 		"translations": [
 			{
 				"key": "ukr_drmikhailoyaqub",
@@ -3605,6 +3784,8 @@
 	},
 	"Urdu": {
 		"flag": "https://flagsapi.com/PK/flat/64.png",
+		"basmala": "اللہ کے نام سے جو رحمان اور رحیم ہے",
+		"istiadhah": "میں ملعون شیطان سے اللہ کی پناہ مانگتا ہوں",
 		"translations": [
 			{
 				"key": "urd_abulaalamaududi",
@@ -3731,6 +3912,8 @@
 	},
 	"Uzbek": {
 		"flag": "https://flagsapi.com/UZ/flat/64.png",
+		"basmala": "Mehribon va rahmli Alloh nomi bilan",
+		"istiadhah": "La'natlangan shaytonndan Allohga panoh so'rayman",
 		"translations": [
 			{
 				"key": "uzb_alaaudeenmansou",
@@ -3769,6 +3952,8 @@
 	},
 	"Vietnamese": {
 		"flag": "https://flagsapi.com/VN/flat/64.png",
+		"basmala": "Nhân danh Allah, Đấng Từ Bi, Đấng Thương Xót",
+		"istiadhah": "Tôi cầu xin Allah bảo vệ khỏi Satan bị nguyền rủa",
 		"translations": [
 			{
 				"key": "vie_hassanabdulkari",
@@ -3796,6 +3981,8 @@
 	},
 	"Xhosa": {
 		"flag": "https://flagsapi.com/ZA/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "xho_imaamismaaeelng",
@@ -3812,6 +3999,8 @@
 	},
 	"Yau": {
 		"flag": "https://flagsapi.com/PG/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "yuw_muhammadbinabdu",
@@ -3828,6 +4017,8 @@
 	},
 	"Yoruba": {
 		"flag": "https://flagsapi.com/NG/flat/64.png",
+		"basmala": "Ni oruko Allah, aanu ati alaanu",
+		"istiadhah": "Mo wa aabo lodo Allah lati owo esu ti a fi epe",
 		"translations": [
 			{
 				"key": "yor_shaykhaburahima",
@@ -3844,6 +4035,8 @@
 	},
 	"Zulu": {
 		"flag": "https://flagsapi.com/ZA/flat/64.png",
+		"basmala": "In the name of Allah, the Most Gracious, the Most Merciful",
+		"istiadhah": "I seek refuge with Allah from Satan the cursed",
 		"translations": [
 			{
 				"key": "zul_iqembulezifundi",

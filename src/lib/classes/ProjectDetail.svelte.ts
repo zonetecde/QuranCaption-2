@@ -56,13 +56,9 @@ export class ProjectDetail extends SerializableBase {
 	}
 
 	public updatePercentageCaptioned() {
-		const captionedDuration =
-			globalState.currentProject?.content.timeline.getFirstTrack(TrackType.Subtitle).getDuration()
-				.ms || 0;
+		const captionedDuration = globalState.getSubtitleTrack.getDuration().ms || 0;
 
-		const totalDuration =
-			globalState.currentProject!.content.timeline.getFirstTrack(TrackType.Audio).getDuration()
-				.ms || 0;
+		const totalDuration = globalState.getAudioTrack.getDuration().ms || 0;
 
 		let percentage = (captionedDuration / totalDuration) * 100;
 		if (percentage >= 97) {

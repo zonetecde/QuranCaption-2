@@ -1,5 +1,12 @@
 import { AssetType, TrackType } from './enums.js';
-import { AssetClip, Clip, SilenceClip, SubtitleClip } from './Clip.svelte.js';
+import {
+	AssetClip,
+	Clip,
+	PredefinedSubtitleClip,
+	SilenceClip,
+	SubtitleClip,
+	type PredefinedSubtitleType
+} from './Clip.svelte.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Duration, type Asset } from './index.js';
 import { globalState } from '$lib/runes/main.svelte.js';
@@ -172,6 +179,8 @@ export class Track extends SerializableBase {
 				firstWordIndex,
 				lastWordIndex,
 				arabicText,
+				verse.words.length === lastWordIndex - firstWordIndex + 1, // isFullVerse
+				verse.words.length - lastWordIndex - 1 === 0, // isLastWordsOfVerse
 				{}
 			)
 		);
@@ -239,6 +248,20 @@ export class Track extends SerializableBase {
 		}
 
 		return false;
+	}
+
+	addPredefinedSubtitle(text: string, type: PredefinedSubtitleType): boolean {
+		const startTime = this.getDuration().ms + 1;
+		const endTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition || -1;
+
+		if (endTime < startTime) {
+			toast.error('End time must be greater than start time.');
+			return false;
+		}
+
+		this.clips.push(new PredefinedSubtitleClip(startTime, endTime, text, type));
+
+		return true;
 	}
 }
 

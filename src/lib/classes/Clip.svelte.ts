@@ -5,7 +5,7 @@ import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
 
-type ClipType = 'Silence' | 'Subtitle' | 'Asset';
+type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Asset';
 
 export class Clip extends SerializableBase {
 	id: number;
@@ -41,9 +41,7 @@ export class Clip extends SerializableBase {
 		}
 
 		// Met à jour la endTime du clip à sa gauche pour éviter les chevauchements
-		const track: Track = globalState.currentProject?.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		)!;
+		const track: Track = globalState.getSubtitleTrack;
 
 		const previousClip = track.getClipBefore(this.id);
 
@@ -74,9 +72,7 @@ export class Clip extends SerializableBase {
 		}
 
 		// Met à jour la startTime du clip à sa droite pour éviter les chevauchements
-		const track: Track = globalState.currentProject?.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		)!;
+		const track: Track = globalState.getSubtitleTrack;
 
 		const nextClip = track.getClipAfter(this.id);
 
@@ -112,6 +108,11 @@ export class Clip extends SerializableBase {
 		this.endTime = newEndTime;
 		this.duration = this.endTime - this.startTime;
 	}
+
+	getVerseKey(): string {
+		//@ts-ignore
+		return `${this.surah}:${this.verse}`;
+	}
 }
 
 export class AssetClip extends Clip {
@@ -129,6 +130,8 @@ export class SubtitleClip extends Clip {
 	startWordIndex: number;
 	endWordIndex: number;
 	text: string;
+	isFullVerse: boolean; // Indique si ce clip contient l'intégralité du verset
+	isLastWordsOfVerse: boolean = false; // Indique si ce clip contient les derniers mots du verset
 	translations: { [key: string]: Translation };
 
 	constructor(
@@ -139,6 +142,8 @@ export class SubtitleClip extends Clip {
 		startWordIndex: number,
 		endWordIndex: number,
 		text: string,
+		isFullVerse: boolean,
+		isLastWordsOfVerse: boolean,
 		translations: { [key: string]: Translation } = {}
 	) {
 		super(startTime, endTime, 'Subtitle');
@@ -148,12 +153,35 @@ export class SubtitleClip extends Clip {
 		this.endWordIndex = endWordIndex;
 		this.translations = translations;
 		this.text = text;
+
+		this.isFullVerse = isFullVerse;
+		this.isLastWordsOfVerse = isLastWordsOfVerse;
 	}
 }
 
 export class SilenceClip extends Clip {
 	constructor(startTime: number, endTime: number) {
 		super(startTime, endTime, 'Silence');
+	}
+}
+
+export type PredefinedSubtitleType =
+	| 'Basmala'
+	| 'Istiadhah'
+	| 'Sadaqallahul Azim'
+	| 'Takbir'
+	| 'Other';
+
+export class PredefinedSubtitleClip extends Clip {
+	text: string;
+	predefinedSubtitleType: PredefinedSubtitleType;
+	translations: { [key: string]: Translation };
+
+	constructor(startTime: number, endTime: number, text: string, type: PredefinedSubtitleType) {
+		super(startTime, endTime, 'Pre-defined Subtitle');
+		this.text = $state(text);
+		this.predefinedSubtitleType = type;
+		this.translations = $state({});
 	}
 }
 

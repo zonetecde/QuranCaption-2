@@ -41,7 +41,7 @@ export class TimelineState extends SerializableBase {
 	zoom: number = $state(29.25);
 
 	// Position du curseur dans la timeline
-	cursorPosition: number = $state(0);
+	cursorPosition: number = $state(1);
 
 	// Indique si on doit afficher ou non le curseur de la timeline
 	showCursor: boolean = $state(true);

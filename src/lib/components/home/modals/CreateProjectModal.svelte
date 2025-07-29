@@ -47,6 +47,11 @@
 		class="w-full mt-1"
 		placeholder="Taraweeh 27th night"
 		autocomplete="off"
+		onkeydown={(event) => {
+			if (event.key === 'Enter') {
+				createProjectButtonClick();
+			}
+		}}
 	/>
 	<p class="text-xs text-right mt-1 mr-0.5 text-secondary">
 		{name.length}/{ProjectDetail.NAME_MAX_LENGTH}
@@ -61,6 +66,11 @@
 		class="w-full mt-1"
 		placeholder="Yasser Al Dosari"
 		autocomplete="off"
+		onkeydown={(event) => {
+			if (event.key === 'Enter') {
+				createProjectButtonClick();
+			}
+		}}
 	/>
 	<p class="text-xs text-right mt-1 mr-0.5 text-secondary">
 		{reciter.length}/{ProjectDetail.RECITER_MAX_LENGTH}

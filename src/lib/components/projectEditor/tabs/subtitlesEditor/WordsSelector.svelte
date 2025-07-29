@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { TrackType } from '$lib/classes';
+	import type { PredefinedSubtitleType } from '$lib/classes/Clip.svelte';
 	import { Quran, type Verse, type Word } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
@@ -89,6 +90,17 @@
 			key: SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END,
 			onKeyDown: setLastSubtitleEnd
 		});
+
+		ShortcutService.registerShortcut({
+			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_BASMALA,
+			onKeyDown: () => addPredefinedSubtitle('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'Basmala')
+		});
+
+		ShortcutService.registerShortcut({
+			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_ISTIADHAH,
+			onKeyDown: () =>
+				addPredefinedSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', 'Istiadhah')
+		});
 	});
 
 	onDestroy(() => {
@@ -102,6 +114,8 @@
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_BASMALA);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_ISTIADHAH);
 	});
 
 	/**
@@ -141,9 +155,7 @@
 		const verse = await selectedVerse();
 		if (!verse) return;
 
-		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		)!;
+		const subtitleTrack = globalState.getSubtitleTrack;
 
 		const success = subtitleTrack.addSubtitle(
 			verse,
@@ -164,11 +176,16 @@
 	 * Utilisé pour ajouter un espace vide entre les sous-titres.
 	 */
 	function addSilence(): void {
-		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		)!;
+		const subtitleTrack = globalState.getSubtitleTrack;
 
 		const success = subtitleTrack.addSilence();
+		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
+	}
+
+	function addPredefinedSubtitle(text: string, type: PredefinedSubtitleType) {
+		const subtitleTrack = globalState.getSubtitleTrack;
+
+		const success = subtitleTrack.addPredefinedSubtitle(text, type);
 		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
 	}
 
@@ -185,9 +202,7 @@
 	 * Supprime le dernier sous-titre de la timeline (shortcut REMOVE_LAST_SUBTITLE).
 	 */
 	function removeLastSubtitle(): void {
-		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		)!;
+		const subtitleTrack = globalState.getSubtitleTrack;
 
 		subtitleTrack.removeLastClip();
 
@@ -198,9 +213,7 @@
 	 * Définit la fin du dernier sous-titre à la position actuelle du curseur (shortcut SET_LAST_SUBTITLE_END).
 	 */
 	function setLastSubtitleEnd(): void {
-		const subtitleTrack = globalState.currentProject!.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		)!;
+		const subtitleTrack = globalState.getSubtitleTrack;
 
 		const lastSubtitle = subtitleTrack.getLastClip();
 		if (lastSubtitle) {

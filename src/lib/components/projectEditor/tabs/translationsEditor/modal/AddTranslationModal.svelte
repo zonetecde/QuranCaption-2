@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Edition, Project, ProjectContent, ProjectDetail } from '$lib/classes';
+	import { Edition, Project, ProjectContent, ProjectDetail, TrackType } from '$lib/classes';
 	import Section from '$lib/components/projectEditor/Section.svelte';
+	import SubtitleClip from '$lib/components/projectEditor/timeline/track/SubtitleClip.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { projectService } from '$lib/services/ProjectService';
 	import { onMount } from 'svelte';
@@ -47,12 +48,16 @@
 
 	async function addTranslationButtonClick() {
 		if (selectedTranslation) {
-			// Add translation logic here
-			console.log('Adding translation:', selectedTranslation);
-			toast.success(`Translation "${selectedTranslation.author}" added successfully!`);
+			// Ajoute la traduction au projet
+			globalState.currentProject?.content.projectTranslation.addTranslation(
+				selectedTranslation,
+				translationPreview
+			);
+
 			close();
 		}
 	}
+
 	$effect(() => {
 		if (selectedTranslation) {
 			// Récupère toutes les traductions des versets du projet avec cette traduction
@@ -227,7 +232,8 @@
 						<!-- Translation preview -->
 						<div class="space-y-3">
 							{#each Object.entries(translationPreview) as [verseKey, translation]}
-								{@const [surah, verse] = verseKey.split(':')}
+								{@const [surah, verse] =
+									verseKey.split(':').length === 2 ? verseKey.split(':') : [null, null]}
 								<div
 									class="bg-secondary border border-color rounded-lg p-4 hover:border-accent-primary transition-all duration-200"
 								>
@@ -236,9 +242,11 @@
 										<span
 											class="bg-accent-primary text-black px-2 py-1 rounded-md text-xs font-semibold"
 										>
-											{surah}:{verse}
+											{verseKey}
 										</span>
-										<span class="text-xs text-thirdly">Surah {surah}, Verse {verse}</span>
+										{#if surah && verse}
+											<span class="text-xs text-thirdly">Surah {surah}, Verse {verse}</span>
+										{/if}
 									</div>
 
 									<!-- Translation text -->
@@ -311,7 +319,7 @@
 											></div>
 
 											<!-- Content -->
-											<div class="pr-8">
+											<div class="pr-8 cursor-pointer">
 												<h4
 													class="font-semibold text-primary group-hover:text-accent-primary transition-colors duration-200 flex items-center"
 												>
@@ -325,7 +333,7 @@
 
 											<!-- Hover effect -->
 											<div
-												class="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent to-accent-primary opacity-0 group-hover:opacity-5 transition-opacity duration-200"
+												class="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent to-accent-primary opacity-0 group-hover:opacity-5 transition-opacity duration-200 cursor-pointer"
 											></div>
 										</button>
 									{/each}

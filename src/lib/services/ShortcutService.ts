@@ -209,6 +209,16 @@ export const SHORTCUTS = {
 			keys: ['m'],
 			description: 'Set the end time of the last subtitle to the current playback position.',
 			category: 'Subtitles Editor'
+		},
+		ADD_BASMALA: {
+			keys: ['b'],
+			description: 'Add a subtitle with the basmala ("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")',
+			category: 'Subtitles Editor'
+		},
+		ADD_ISTIADHAH: {
+			keys: ['a'],
+			description: `Add a subtitle with the isti'adhah ("أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ")`,
+			category: 'Subtitles Editor'
 		}
 	}
 };

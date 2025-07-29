@@ -4,22 +4,23 @@ import type { Edition } from './Edition';
 import { TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import toast from 'svelte-5-french-toast';
+import { PredefinedSubtitleTranslation, Translation, VerseTranslation } from './Translation.svelte';
 
 export class ProjectTranslation extends SerializableBase {
-	NO_TRANSLATION = 'No translation found';
+	private TEXT_NO_TRANSLATION_AVAILABLE = 'No translation found';
 
 	// Liste des traductions ajoutées au projet
-	addedTranslations: string[];
+	addedTranslations: Edition[];
 
 	// Contient les traductions originales du Coran utilisées dans le projet
-	quranTranslations: {
+	versesTranslations: {
 		[key: string]: { [key: string]: string }; // Clé: langue, Valeur: { clé du verset: texte de la traduction }
 	};
 
 	constructor() {
 		super();
-		this.addedTranslations = [];
-		this.quranTranslations = {};
+		this.addedTranslations = $state([]);
+		this.versesTranslations = $state({});
 	}
 
 	/**
@@ -51,14 +52,14 @@ export class ProjectTranslation extends SerializableBase {
 		if (cached) return cached;
 
 		// Récupère l'édition de traduction par son nom
-		if (!edition) return this.NO_TRANSLATION;
+		if (!edition) return this.TEXT_NO_TRANSLATION_AVAILABLE;
 
 		// Load les traductions de toute la sourate si pas déjà chargée
 		await this.loadSurahTranslation(edition, surah);
 
 		// Construit l'URL de la traduction
 		const cachedAfterLoad = globalState.caches.get(cacheKey);
-		return cachedAfterLoad || this.NO_TRANSLATION;
+		return cachedAfterLoad || this.TEXT_NO_TRANSLATION_AVAILABLE;
 	}
 
 	/**
@@ -66,7 +67,7 @@ export class ProjectTranslation extends SerializableBase {
 	 */
 	private async loadSurahTranslation(edition: Edition, surah: number): Promise<void> {
 		// Check if we already have some verses from this surah cached
-		const surahCacheKey = `${edition.author}_${surah}_loaded`;
+		const surahCacheKey = `${edition.name}_${surah}_loaded`;
 		if (globalState.caches.has(surahCacheKey)) {
 			return; // Already loaded
 		}
@@ -85,7 +86,7 @@ export class ProjectTranslation extends SerializableBase {
 
 			// Cache all verses from the surah
 			for (const verseData of verses) {
-				const cacheKey = `${edition.author}_${surah}_${verseData.verse}`;
+				const cacheKey = `${edition.name}_${surah}_${verseData.verse}`;
 				const processedText = this.processTranslationText(verseData.text, edition);
 				globalState.caches.set(cacheKey, processedText);
 			}
@@ -95,24 +96,6 @@ export class ProjectTranslation extends SerializableBase {
 		} catch (error) {
 			toast.error('Error fetching surah translation');
 		}
-	}
-
-	/**
-	 * Build translation URL based on edition type
-	 */
-	private buildTranslationUrl(edition: Edition, surah: number, verse: number): string {
-		// Si l'édition fait partie des 5 traductions prises via une autre API (pour les poncutations en fin de verset)
-		if (edition.comments === 'Ponctuation') {
-			return edition.link.replace('{chapter}', surah.toString());
-		}
-
-		// Si l'édition fait partie d'une demande spéciale (saheeh international)
-		if (edition.comments === 'Saheeh International') {
-			return edition.link;
-		}
-
-		let baseUrl = edition.link.replace('.json', '');
-		return `${baseUrl}/${surah}/${verse}.json`;
 	}
 
 	/**
@@ -132,29 +115,6 @@ export class ProjectTranslation extends SerializableBase {
 		// Pour les éditions normales, on prend juste la sourate complète
 		let baseUrl = edition.link.replace('.json', '');
 		return `${baseUrl}/${surah}.json`;
-	}
-	/**
-	 * Extract the text from the response based on the used API
-	 */
-	private extractTextFromResponse(
-		data: any,
-		surah: number,
-		verse: number,
-		edition: Edition
-	): string {
-		if (edition.comments === 'Ponctuation') {
-			return data[verse][1];
-		} else if (edition.comments === 'Saheeh International') {
-			for (const key in data['quran']['en.sahih']) {
-				const item = data['quran']['en.sahih'][key];
-				if (item.surah === surah && item.ayah === verse) {
-					return item.verse;
-				}
-			}
-			return this.NO_TRANSLATION;
-		} else {
-			return data.text;
-		}
 	}
 
 	/**
@@ -213,7 +173,7 @@ export class ProjectTranslation extends SerializableBase {
 				.replaceAll('( ', '(');
 		}
 
-		return processed;
+		return processed.trim();
 	}
 
 	/**
@@ -223,16 +183,22 @@ export class ProjectTranslation extends SerializableBase {
 	 */
 	async getAllProjectSubtitlesTranslations(edition: Edition) {
 		// Récupère toutes les traductions des sous-titres du projet pour une traduction donnée
-		const link = edition.linkmin;
+		const translations: { [key: string]: string } = {};
 
 		const versesInProject = new Set<string>();
-		for (const subtitle of globalState.currentProject!.content.timeline.getFirstTrack(
-			TrackType.Subtitle
-		).clips as SubtitleClip[]) {
-			versesInProject.add(subtitle.surah + ':' + subtitle.verse);
+
+		for (const predefinedSubtitle of globalState.getPredefinedSubtitleClips) {
+			// Ajoute les versets des sous-titres pré-définis
+			if (predefinedSubtitle.predefinedSubtitleType === 'Basmala') {
+				translations['Basmala'] = globalState.availableTranslations[edition.language].basmala;
+			} else if (predefinedSubtitle.predefinedSubtitleType === 'Istiadhah') {
+				translations['Istiadhah'] = globalState.availableTranslations[edition.language].istiadhah;
+			}
 		}
 
-		const translations: { [key: string]: string } = {};
+		for (const subtitle of globalState.getSubtitleClips) {
+			versesInProject.add(subtitle.getVerseKey());
+		}
 
 		// Télécharge les traductions pour chaque verset
 		for (const verseKey of versesInProject) {
@@ -242,5 +208,55 @@ export class ProjectTranslation extends SerializableBase {
 		}
 
 		return translations;
+	}
+
+	/**
+	 * Ajoute une traduction au projet
+	 * @param edition L'édition de traduction à ajouter
+	 * @param downloadedTranslations Les traductions téléchargées pour cette édition
+	 */
+	addTranslation(edition: Edition, downloadedTranslations: Record<string, string>) {
+		this.addedTranslations.push(edition);
+
+		// Pour chaque sous-titre du projet, ajoute la traduction correspondante
+		for (const subtitle of globalState.getSubtitleClips) {
+			// Récupère la traduction à partir du dictionnaire de traductions téléchargées
+			const verseKey = subtitle.getVerseKey();
+			const translationText =
+				downloadedTranslations[verseKey] || this.TEXT_NO_TRANSLATION_AVAILABLE;
+
+			if (!this.versesTranslations[edition.name]) {
+				this.versesTranslations[edition.name] = {};
+			}
+
+			this.versesTranslations[edition.name][verseKey] = translationText;
+
+			// Ajoute la traduction à l'objet de traduction du clip
+			subtitle.translations[edition.name] = new VerseTranslation(
+				0,
+				translationText.split(' ').length - 1, // Par défaut toute la traduction est sélectionnée
+				translationText,
+				subtitle.isFullVerse ? 'completed by default' : 'to review'
+			);
+		}
+
+		// Ajoute maintenant la traduction des sous-titre pré-définis
+		const lang = globalState.availableTranslations[edition.language];
+
+		for (const subtitle of globalState.getPredefinedSubtitleClips) {
+			switch (subtitle.predefinedSubtitleType) {
+				case 'Basmala':
+					const translationText = lang.basmala;
+					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation(translationText);
+					break;
+				case 'Istiadhah':
+					const istiadhahText = lang.istiadhah;
+					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation(istiadhahText);
+					break;
+				case 'Other':
+					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation('');
+					break;
+			}
+		}
 	}
 }
