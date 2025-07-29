@@ -1,4 +1,4 @@
-export class Translation {
+export class Edition {
 	constructor(
 		public key: string,
 		public name: string,

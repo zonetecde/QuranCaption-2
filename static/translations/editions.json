@@ -900,8 +900,8 @@
 				"direction": "ltr",
 				"source": "http://tanzil.net",
 				"comments": "Ponctuation",
-				"link": "translations/nl/{chapter}.json",
-				"linkmin": "translations/nl/{chapter}.json"
+				"link": "/translations/nl/{chapter}.json",
+				"linkmin": "/translations/nl/{chapter}.json"
 			},
 			{
 				"key": "nld_fredleemhuis",
@@ -950,8 +950,19 @@
 				"direction": "ltr",
 				"source": "",
 				"comments": "Ponctuation",
-				"link": "translations/en/{chapter}.json",
-				"linkmin": "translations/en/{chapter}.json"
+				"link": "/translations/en-mustafakhattab/{chapter}.json",
+				"linkmin": "/translations/en-mustafakhattab/{chapter}.json"
+			},
+			{
+				"key": "eng_saheehinternational",
+				"name": "eng-saheehinternational",
+				"author": "Saheeh International",
+				"language": "English",
+				"direction": "ltr",
+				"source": "https://api.globalquran.com/complete/en.sahih.json",
+				"comments": "Saheeh International",
+				"link": "/translations/en-saheehinternational/saheehinternational.json",
+				"linkmin": "/translations/en-saheehinternational/saheehinternational.min.json"
 			},
 			{
 				"key": "eng_abdelhaleem",
@@ -1576,8 +1587,8 @@
 				"direction": "ltr",
 				"source": "https://quranenc.com/check/french_hameedullah/v1.0.0-csv.1 , https://quranenc.com/en/browse/french_hameedullah , https://quranenc.com ,",
 				"comments": "Ponctuation",
-				"link": "translations/fr/{chapter}.json",
-				"linkmin": "translations/fr/{chapter}.json"
+				"link": "/translations/fr/{chapter}.json",
+				"linkmin": "/translations/fr/{chapter}.json"
 			},
 			{
 				"key": "fra_islamicfoundati",
@@ -1929,8 +1940,8 @@
 				"direction": "ltr",
 				"source": "http://tanzil.net",
 				"comments": "Ponctuation",
-				"link": "translations/it/{chapter}.json",
-				"linkmin": "translations/it/{chapter}.json"
+				"link": "/translations/it/{chapter}.json",
+				"linkmin": "/translations/it/{chapter}.json"
 			}
 		]
 	},
@@ -2592,8 +2603,8 @@
 				"direction": "ltr",
 				"source": "http://tanzil.net",
 				"comments": "Ponctuation",
-				"link": "translations/pt/{chapter}.json",
-				"linkmin": "translations/pt/{chapter}.json"
+				"link": "/translations/pt/{chapter}.json",
+				"linkmin": "/translations/pt/{chapter}.json"
 			},
 			{
 				"key": "por_helminasr",

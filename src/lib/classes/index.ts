@@ -2,6 +2,7 @@
 export { Duration } from './Duration.js';
 export { ProjectDetail } from './ProjectDetail.svelte.js';
 export { ProjectTranslation } from './ProjectTranslation.svelte.js';
+export { Edition } from './Edition.js';
 export { Translation } from './Translation.svelte.js';
 export { ProjectContent } from './ProjectContent.svelte.js';
 export { ProjectEditorState } from './ProjectEditorState.svelte.js';

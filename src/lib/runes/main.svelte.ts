@@ -1,5 +1,4 @@
-import type { Project, ProjectDetail } from '$lib/classes';
-import type { Translation } from '$lib/classes/jsonDeserialization/Translation';
+import type { Edition, Project, ProjectDetail } from '$lib/classes';
 
 class GlobalState {
 	// Liste des détails des projets de l'utilisateur
@@ -13,9 +12,12 @@ class GlobalState {
 		string,
 		{
 			flag: string;
-			translations: Translation[];
+			translations: Edition[];
 		}
 	> = $state({});
+
+	// Cache pour le téléchargement des traductions
+	caches = $state(new Map<string, string>());
 }
 
 export const globalState = new GlobalState();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Asset, TrackType } from '$lib/classes';
+	import { Asset, ProjectEditorTabs, TrackType } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { mount, onDestroy, onMount, unmount, untrack } from 'svelte';
@@ -180,14 +180,10 @@
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED,
 			onKeyDown: (e) => {
-				setPlaybackSpeed(
-					globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed * 2
-				);
+				setPlaybackSpeed(getSpeed() * 2);
 			},
 			onKeyUp: (e) => {
-				setPlaybackSpeed(
-					globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed
-				);
+				setPlaybackSpeed(getSpeed());
 			}
 		});
 	});
@@ -203,11 +199,22 @@
 	}
 
 	$effect(() => {
-		let speed = globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed;
+		const speed = getSpeed();
 		untrack(() => {
 			setPlaybackSpeed(speed);
 		});
 	});
+
+	function getSpeed() {
+		let speed = globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed;
+		if (
+			globalState.currentProject?.projectEditorState.currentTab !==
+			ProjectEditorTabs.SubtitlesEditor
+		) {
+			speed = 1; // Réinitialise la vitesse si on n'est pas dans l'éditeur de sous-titres
+		}
+		return speed;
+	}
 
 	onDestroy(() => {
 		pause(); // Met en pause la lecture pour éviter les fuites de mémoire
