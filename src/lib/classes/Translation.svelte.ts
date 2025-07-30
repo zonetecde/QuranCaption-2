@@ -1,3 +1,6 @@
+import { globalState } from '$lib/runes/main.svelte';
+import type { SubtitleClip } from './Clip.svelte';
+import type { Edition } from './Edition';
 import { SerializableBase } from './misc/SerializableBase';
 
 export type TranslationStatus = 'completed by default' | 'to review' | 'reviewed';
@@ -21,13 +24,13 @@ export class Translation extends SerializableBase {
 
 export class VerseTranslation extends Translation {
 	// L'indice du mot de début de la traduction dans le texte original
-	startWordIndex: number;
+	startWordIndex: number = $state(0);
 
 	// L'indice du mot de fin de la traduction dans le texte original
-	endWordIndex: number;
+	endWordIndex: number = $state(0);
 
 	// Indique si la traduction ne se base pas sur la traduction originale
-	isBruteForce: boolean;
+	isBruteForce: boolean = $state(false);
 
 	constructor(
 		startWordIndex: number,
@@ -36,9 +39,9 @@ export class VerseTranslation extends Translation {
 		status: TranslationStatus
 	) {
 		super(text, status);
-		this.startWordIndex = $state(startWordIndex);
-		this.endWordIndex = $state(endWordIndex);
-		this.isBruteForce = $state(false);
+		this.startWordIndex = startWordIndex;
+		this.endWordIndex = endWordIndex;
+		this.isBruteForce = false;
 		this.type = 'verse';
 	}
 }

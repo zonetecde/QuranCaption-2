@@ -161,6 +161,10 @@ export class Track extends SerializableBase {
 
 	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number): boolean {
 		const arabicText = verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex);
+		const wbwTranslation = verse.getWordByWordTranslationBetweenTwoIndexes(
+			firstWordIndex,
+			lastWordIndex
+		);
 
 		const startTime = this.getDuration().ms + 1;
 		const endTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition || -1;
@@ -179,6 +183,7 @@ export class Track extends SerializableBase {
 				firstWordIndex,
 				lastWordIndex,
 				arabicText,
+				wbwTranslation,
 				verse.words.length === lastWordIndex - firstWordIndex + 1, // isFullVerse
 				verse.words.length - lastWordIndex - 1 === 0, // isLastWordsOfVerse
 				{}

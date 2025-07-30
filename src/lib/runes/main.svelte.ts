@@ -4,7 +4,8 @@ import {
 	type Edition,
 	type Project,
 	type ProjectDetail,
-	type PredefinedSubtitleClip
+	type PredefinedSubtitleClip,
+	ProjectTranslation
 } from '$lib/classes';
 
 class GlobalState {
@@ -52,6 +53,10 @@ class GlobalState {
 	get getPredefinedSubtitleClips(): PredefinedSubtitleClip[] {
 		const clips = this.getSubtitleTrack.clips;
 		return clips.filter((clip) => clip.type === 'Pre-defined Subtitle') as PredefinedSubtitleClip[];
+	}
+
+	get getProjectTranslation(): ProjectTranslation {
+		return this.currentProject!.content.projectTranslation;
 	}
 }
 

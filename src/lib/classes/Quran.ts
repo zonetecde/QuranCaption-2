@@ -37,6 +37,16 @@ export class Verse {
 			.map((word) => word.arabic)
 			.join(' ');
 	}
+
+	getWordByWordTranslationBetweenTwoIndexes(startIndex: number, endIndex: number): string {
+		if (startIndex < 0 || endIndex >= this.words.length || startIndex > endIndex) {
+			throw new Error('Invalid index range');
+		}
+		return this.words
+			.slice(startIndex, endIndex + 1)
+			.map((word) => word.translation)
+			.join(' ');
+	}
 }
 
 export class Surah {

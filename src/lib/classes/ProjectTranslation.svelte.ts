@@ -15,7 +15,7 @@ export class ProjectTranslation extends SerializableBase {
 
 	// Contient les traductions originales du Coran utilisées dans le projet
 	versesTranslations: {
-		[key: string]: { [key: string]: string }; // Clé: langue, Valeur: { clé du verset: texte de la traduction }
+		[key: string]: { [key: string]: string }; // Clé: édition, Valeur: { clé du verset: texte de la traduction }
 	};
 
 	constructor() {
@@ -39,6 +39,13 @@ export class ProjectTranslation extends SerializableBase {
 		globalState.availableTranslations = object;
 	}
 
+	getVerseTranslation(edition: Edition, subtitle: SubtitleClip): string {
+		return (
+			this.versesTranslations[edition.name]?.[subtitle.getVerseKey()] ||
+			this.TEXT_NO_TRANSLATION_AVAILABLE
+		);
+	}
+
 	/**
 	 * Récupère la traduction d'un verset spécifique dans une édition donnée
 	 * @param surah Le numéro de la sourate
@@ -46,7 +53,7 @@ export class ProjectTranslation extends SerializableBase {
 	 * @param edition L'édition de traduction à utiliser
 	 * @returns La traduction ou 'No translation found' si non trouvée
 	 */
-	async getVerseTranslation(edition: Edition, surah: number, verse: number): Promise<string> {
+	async downloadVerseTranslation(edition: Edition, surah: number, verse: number): Promise<string> {
 		// Regarde si la traduction est déjà dans le cache
 		const cacheKey = `${edition.name}_${surah}_${verse}`;
 		const cached = globalState.caches.get(cacheKey);
@@ -204,7 +211,7 @@ export class ProjectTranslation extends SerializableBase {
 		// Télécharge les traductions pour chaque verset
 		for (const verseKey of versesInProject) {
 			const [surah, verse] = verseKey.split(':').map(Number);
-			const translationText = await this.getVerseTranslation(edition, surah, verse);
+			const translationText = await this.downloadVerseTranslation(edition, surah, verse);
 			translations[verseKey] = translationText;
 		}
 

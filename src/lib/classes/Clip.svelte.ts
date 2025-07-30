@@ -1,9 +1,10 @@
 import { globalState } from '$lib/runes/main.svelte';
-import { TrackType, Translation } from '.';
+import { Edition, TrackType, Translation } from '.';
 import type { Asset } from './Asset.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
+import type { VerseTranslation } from './Translation.svelte';
 
 type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Asset';
 
@@ -109,6 +110,20 @@ export class Clip extends SerializableBase {
 		this.duration = this.endTime - this.startTime;
 	}
 
+	/**
+	 * Retourne la traduction associée à l'édition spécifiée.
+	 * @param edition L'édition pour laquelle obtenir la traduction.
+	 * @return La traduction associée à l'édition.
+	 */
+	getTranslation(edition: Edition): Translation {
+		//@ts-ignore
+		return this.translations[edition.name];
+	}
+
+	/**
+	 * Retourne la clé du verset au format "Surah:Verse".
+	 * @returns La clé du verset.
+	 */
 	getVerseKey(): string {
 		//@ts-ignore
 		return `${this.surah}:${this.verse}`;
@@ -130,9 +145,10 @@ export class SubtitleClip extends Clip {
 	startWordIndex: number;
 	endWordIndex: number;
 	text: string;
+	wbwTranslation: string; // Traduction mot à mot
 	isFullVerse: boolean; // Indique si ce clip contient l'intégralité du verset
-	isLastWordsOfVerse: boolean = false; // Indique si ce clip contient les derniers mots du verset
-	translations: { [key: string]: Translation };
+	isLastWordsOfVerse: boolean; // Indique si ce clip contient les derniers mots du verset
+	translations: { [key: string]: Translation } = $state({});
 
 	constructor(
 		startTime: number,
@@ -142,20 +158,22 @@ export class SubtitleClip extends Clip {
 		startWordIndex: number,
 		endWordIndex: number,
 		text: string,
+		wbwTranslation: string,
 		isFullVerse: boolean,
 		isLastWordsOfVerse: boolean,
 		translations: { [key: string]: Translation } = {}
 	) {
 		super(startTime, endTime, 'Subtitle');
-		this.surah = surah;
-		this.verse = verse;
-		this.startWordIndex = startWordIndex;
-		this.endWordIndex = endWordIndex;
+		this.surah = $state(surah);
+		this.verse = $state(verse);
+		this.startWordIndex = $state(startWordIndex);
+		this.endWordIndex = $state(endWordIndex);
 		this.translations = translations;
-		this.text = text;
+		this.text = $state(text);
+		this.wbwTranslation = $state(wbwTranslation);
 
-		this.isFullVerse = isFullVerse;
-		this.isLastWordsOfVerse = isLastWordsOfVerse;
+		this.isFullVerse = $state(isFullVerse);
+		this.isLastWordsOfVerse = $state(isLastWordsOfVerse);
 	}
 }
 
@@ -184,6 +202,3 @@ export class PredefinedSubtitleClip extends Clip {
 		this.translations = $state({});
 	}
 }
-
-// Enregistre les classes enfants pour la sérialisation
-SerializableBase.registerChildClass(SubtitleClip, 'translations', Translation);
