@@ -5,12 +5,13 @@ import { TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import toast from 'svelte-5-french-toast';
 import { PredefinedSubtitleTranslation, Translation, VerseTranslation } from './Translation.svelte';
+import ModalManager from '$lib/components/modals/ModalManager';
 
 export class ProjectTranslation extends SerializableBase {
 	private TEXT_NO_TRANSLATION_AVAILABLE = 'No translation found';
 
 	// Liste des traductions ajoutées au projet
-	addedTranslations: Edition[];
+	addedTranslationEditions: Edition[];
 
 	// Contient les traductions originales du Coran utilisées dans le projet
 	versesTranslations: {
@@ -19,7 +20,7 @@ export class ProjectTranslation extends SerializableBase {
 
 	constructor() {
 		super();
-		this.addedTranslations = $state([]);
+		this.addedTranslationEditions = $state([]);
 		this.versesTranslations = $state({});
 	}
 
@@ -215,8 +216,18 @@ export class ProjectTranslation extends SerializableBase {
 	 * @param edition L'édition de traduction à ajouter
 	 * @param downloadedTranslations Les traductions téléchargées pour cette édition
 	 */
-	addTranslation(edition: Edition, downloadedTranslations: Record<string, string>) {
-		this.addedTranslations.push(edition);
+	async addTranslation(edition: Edition, downloadedTranslations: Record<string, string>) {
+		// Vérifie si l'édition est déjà ajoutée
+		if (this.addedTranslationEditions.some((e) => e.name === edition.name)) {
+			const response = await ModalManager.confirmModal(
+				`The translation ${edition.author} is already added. Do you want to reset it?` +
+					` This will replace all existing translations for this edition.`
+			);
+			if (!response) return;
+		} else {
+			edition.showInTranslationsEditor = true; // Par défaut
+			this.addedTranslationEditions.push(edition);
+		}
 
 		// Pour chaque sous-titre du projet, ajoute la traduction correspondante
 		for (const subtitle of globalState.getSubtitleClips) {
@@ -256,6 +267,43 @@ export class ProjectTranslation extends SerializableBase {
 				case 'Other':
 					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation('');
 					break;
+			}
+		}
+	}
+
+	async resetTranslation(edition: Edition) {
+		const response = await ModalManager.confirmModal(
+			`Are you sure you want to reset the translation for ${edition.author}? This will replace all existing translations for this edition.`
+		);
+
+		if (!response) return;
+
+		// Réinitialise la traduction pour l'édition donnée
+		const translations = await this.getAllProjectSubtitlesTranslations(edition);
+
+		// Supprime l'édition de la liste des traductions ajoutées
+		await this.removeTranslation(edition, true);
+
+		this.addTranslation(edition, translations);
+	}
+
+	async removeTranslation(edition: Edition, force: boolean = false) {
+		if (!force) {
+			const response = await ModalManager.confirmModal(
+				`Are you sure you want to remove the translation for ${edition.author}? This will remove all translations for this edition.`
+			);
+
+			if (!response) return;
+		}
+
+		this.addedTranslationEditions = this.addedTranslationEditions.filter(
+			(e) => e.name !== edition.name
+		);
+
+		// Supprime les traductions de l'édition dans les clips de sous-titres
+		for (const subtitle of globalState.getSubtitleClips) {
+			if (subtitle.translations[edition.name]) {
+				delete subtitle.translations[edition.name];
 			}
 		}
 	}

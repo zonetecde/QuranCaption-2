@@ -9,10 +9,6 @@
 
 	let { close } = $props();
 
-	onMount(() => {
-		// Récupère toutes les traductions disponibles
-		globalState.currentProject!.content.projectTranslation.loadAvailableTranslations();
-	});
 	let selectedLanguage: string | null = $state(null);
 	let selectedTranslation: Edition | null = $state(null);
 	let searchQuery: string = $state('');

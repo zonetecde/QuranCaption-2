@@ -10,7 +10,7 @@
 <div class="flex-grow w-full max-w-full flex overflow-hidden h-full min-h-0">
 	<!-- Assets -->
 	<section
-		class="w-[300px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-auto flex flex-col border-r-2 border-color border-t-2"
+		class="w-[300px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
 	>
 		<AssetsManager />
 	</section>

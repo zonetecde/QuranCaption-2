@@ -9,17 +9,31 @@
 </script>
 
 <div
-	class="bg-secondary border-color border rounded-4xl w-[600px] px-4 pt-6 pb-4 shadow-2xl shadow-black flex flex-col relative"
+	class="bg-secondary border border-color rounded-2xl w-[500px] max-w-[90vw] p-6 shadow-2xl shadow-black/50
+	       flex flex-col relative backdrop-blur-sm"
 >
-	<p class="mb-3">Confirm</p>
+	<!-- Header with icon -->
+	<div class="flex items-center gap-3 mb-6">
+		<div class="flex items-center justify-center w-10 h-10 bg-accent rounded-full">
+			<span class="material-icons text-lg text-accent">help_outline</span>
+		</div>
+		<h2 class="text-lg font-semibold text-primary">Confirmation</h2>
+	</div>
 
-	<hr />
+	<!-- Divider -->
+	<div
+		class="w-full h-px bg-gradient-to-r from-transparent via-border-color to-transparent mb-6"
+	></div>
 
-	<p class="text-secondary mt-4">{text}</p>
+	<!-- Content -->
+	<div class="mb-8">
+		<p class="text-secondary leading-relaxed text-sm">{text}</p>
+	</div>
 
-	<div class="flex justify-end mt-3">
+	<!-- Action buttons -->
+	<div class="flex justify-end gap-3">
 		<button
-			class="btn px-4 py-2 mr-2"
+			class="btn px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105"
 			onclick={() => {
 				resolve(false);
 			}}
@@ -27,7 +41,8 @@
 			Cancel
 		</button>
 		<button
-			class="btn-accent px-4 py-2"
+			class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105
+			       shadow-lg hover:shadow-xl"
 			onclick={() => {
 				resolve(true);
 			}}

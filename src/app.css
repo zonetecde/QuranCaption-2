@@ -94,8 +94,20 @@
 .text-accent-secondary {
 	color: var(--accent-secondary);
 }
+.bg-accent-secondary {
+	background-color: var(--accent-secondary);
+}
+.border-accent-secondary {
+	border-color: var(--accent-secondary);
+}
 .danger-color {
 	color: var(--danger-color);
+}
+.bg-danger-color {
+	background-color: var(--danger-color);
+}
+.border-danger-color {
+	border-color: var(--danger-color);
 }
 
 body {

@@ -3,9 +3,11 @@
 </script>
 
 <div class="bg-secondary h-full border border-color rounded-lg py-6 px-3 space-y-6 border-r-0">
-	<h2 class="text-center text-xl font-bold text-primary mb-4 pb-2 border-b border-color">
-		Subtitles Editor Settings
-	</h2>
+	<!-- En-tête avec icône -->
+	<div class="flex gap-x-2 items-center justify-center">
+		<span class="material-icons text-accent text-xl">subtitles</span>
+		<h2 class="text-xl font-bold text-primary">Subtitles Editor</h2>
+	</div>
 
 	<!-- Playback Speed Section -->
 	<div class="space-y-3">

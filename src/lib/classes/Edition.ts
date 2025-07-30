@@ -8,6 +8,7 @@ export class Edition {
 		public source: string,
 		public comments: string,
 		public link: string,
-		public linkmin: string
+		public linkmin: string,
+		public showInTranslationsEditor: boolean = true
 	) {}
 }

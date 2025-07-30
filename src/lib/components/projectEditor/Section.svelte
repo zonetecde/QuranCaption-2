@@ -38,8 +38,12 @@
 </script>
 
 <div class={'flex ' + classes}>
-	<h3 class="text-sm font-semibold text-gray-100 flex items-center">
-		<span class="material-icons mr-2 text-lg text-indigo-400">{icon}</span>{name}
+	<h3 class="text-sm font-semibold text-gray-100 flex items-center truncate">
+		{#if icon.includes('png') || icon.includes('svg')}
+			<img src={icon} alt={name} class="w-6 h-6 mr-2" />{name}
+		{:else}
+			<span class="material-icons mr-2 text-lg text-indigo-400">{icon}</span>{name}
+		{/if}
 	</h3>
 	<!-- dropdownicon -->
 	<button
