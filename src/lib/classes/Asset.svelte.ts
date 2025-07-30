@@ -52,10 +52,8 @@ export class Asset extends SerializableBase {
 	}
 
 	addToTimeline(asVideo: boolean, asAudio: boolean) {
-		if (asVideo)
-			globalState.currentProject?.content.timeline.addAssetToTrack(TrackType.Video, this);
-		if (asAudio)
-			globalState.currentProject?.content.timeline.addAssetToTrack(TrackType.Audio, this);
+		if (asVideo) globalState.getVideoTrack.addAsset(this);
+		if (asAudio) globalState.getAudioTrack.addAsset(this);
 	}
 
 	private normalizeFilePath(filePath: string): string {

@@ -109,25 +109,6 @@ export class Clip extends SerializableBase {
 		this.endTime = newEndTime;
 		this.duration = this.endTime - this.startTime;
 	}
-
-	/**
-	 * Retourne la traduction associée à l'édition spécifiée.
-	 * @param edition L'édition pour laquelle obtenir la traduction.
-	 * @return La traduction associée à l'édition.
-	 */
-	getTranslation(edition: Edition): Translation {
-		//@ts-ignore
-		return this.translations[edition.name];
-	}
-
-	/**
-	 * Retourne la clé du verset au format "Surah:Verse".
-	 * @returns La clé du verset.
-	 */
-	getVerseKey(): string {
-		//@ts-ignore
-		return `${this.surah}:${this.verse}`;
-	}
 }
 
 export class AssetClip extends Clip {
@@ -139,7 +120,31 @@ export class AssetClip extends Clip {
 	}
 }
 
-export class SubtitleClip extends Clip {
+export class ClipWithTranslation extends Clip {
+	translations: { [key: string]: Translation } = $state({});
+
+	constructor(
+		startTime: number,
+		endTime: number,
+		type: ClipType,
+		translations: { [key: string]: Translation } = {}
+	) {
+		super(startTime, endTime, type);
+		this.translations = translations;
+	}
+
+	/**
+	 * Retourne la traduction associée à l'édition spécifiée.
+	 * @param edition L'édition pour laquelle obtenir la traduction.
+	 * @return La traduction associée à l'édition.
+	 */
+	getTranslation(edition: Edition): Translation {
+		//@ts-ignore
+		return this.translations[edition.name];
+	}
+}
+
+export class SubtitleClip extends ClipWithTranslation {
 	surah: number;
 	verse: number;
 	startWordIndex: number;
@@ -148,7 +153,6 @@ export class SubtitleClip extends Clip {
 	wbwTranslation: string; // Traduction mot à mot
 	isFullVerse: boolean; // Indique si ce clip contient l'intégralité du verset
 	isLastWordsOfVerse: boolean; // Indique si ce clip contient les derniers mots du verset
-	translations: { [key: string]: Translation } = $state({});
 
 	constructor(
 		startTime: number,
@@ -163,7 +167,7 @@ export class SubtitleClip extends Clip {
 		isLastWordsOfVerse: boolean,
 		translations: { [key: string]: Translation } = {}
 	) {
-		super(startTime, endTime, 'Subtitle');
+		super(startTime, endTime, 'Subtitle', translations);
 		this.surah = $state(surah);
 		this.verse = $state(verse);
 		this.startWordIndex = $state(startWordIndex);
@@ -174,6 +178,14 @@ export class SubtitleClip extends Clip {
 
 		this.isFullVerse = $state(isFullVerse);
 		this.isLastWordsOfVerse = $state(isLastWordsOfVerse);
+	}
+
+	/**
+	 * Retourne la clé du verset au format "Surah:Verse".
+	 * @returns La clé du verset.
+	 */
+	getVerseKey(): string {
+		return `${this.surah}:${this.verse}`;
 	}
 }
 
@@ -190,15 +202,13 @@ export type PredefinedSubtitleType =
 	| 'Takbir'
 	| 'Other';
 
-export class PredefinedSubtitleClip extends Clip {
+export class PredefinedSubtitleClip extends ClipWithTranslation {
 	text: string;
 	predefinedSubtitleType: PredefinedSubtitleType;
-	translations: { [key: string]: Translation };
 
 	constructor(startTime: number, endTime: number, text: string, type: PredefinedSubtitleType) {
-		super(startTime, endTime, 'Pre-defined Subtitle');
+		super(startTime, endTime, 'Pre-defined Subtitle', {});
 		this.text = $state(text);
 		this.predefinedSubtitleType = type;
-		this.translations = $state({});
 	}
 }

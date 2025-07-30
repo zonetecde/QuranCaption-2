@@ -3,22 +3,22 @@ import type { SubtitleClip } from './Clip.svelte';
 import type { Edition } from './Edition';
 import { SerializableBase } from './misc/SerializableBase';
 
-export type TranslationStatus = 'completed by default' | 'to review' | 'reviewed';
+export type TranslationStatus = 'completed by default' | 'to review' | 'reviewed' | 'undefined';
 
 export class Translation extends SerializableBase {
 	// Le texte de la traduction
-	text: string;
+	text: string = $state('');
 
 	// Status
-	status: TranslationStatus;
+	status: TranslationStatus = $state('undefined');
 
 	// Type de la traduction
 	type: 'verse' | 'predefined' | 'other' = 'other';
 
 	constructor(text: string, status: TranslationStatus) {
 		super();
-		this.text = $state(text);
-		this.status = $state(status);
+		this.text = text;
+		this.status = status;
 	}
 }
 

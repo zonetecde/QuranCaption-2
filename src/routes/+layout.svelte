@@ -6,8 +6,14 @@
 	import { projectService } from '$lib/services/ProjectService';
 	import { Toaster } from 'svelte-5-french-toast';
 	import TitleBar from '$lib/components/TitleBar.svelte';
+	import { initializeClassRegistry } from '$lib/classes/ClassRegistry';
+	import { on } from 'svelte/events';
 
 	let { children } = $props();
+
+	onMount(() => {
+		initializeClassRegistry();
+	});
 </script>
 
 <Toaster />

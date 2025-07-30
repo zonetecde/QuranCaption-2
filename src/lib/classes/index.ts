@@ -11,6 +11,5 @@ export { Timeline } from './Timeline.svelte.js';
 export { Track } from './Track.svelte.js';
 export { Clip, AssetClip, SubtitleClip, PredefinedSubtitleClip } from './Clip.svelte.js';
 export { Asset } from './Asset.svelte.js';
-export { ProjectSettings } from './ProjectSettings.js';
 export { TrackType, AssetType, ProjectEditorTabs } from './enums.js';
 export { Utilities } from './misc/Utilities.js';

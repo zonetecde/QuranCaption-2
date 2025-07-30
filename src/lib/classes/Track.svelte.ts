@@ -23,23 +23,6 @@ export class Track extends SerializableBase {
 		this.clips = [];
 	}
 
-	addAsset(asset: Asset) {
-		// Récupère le dernier clip de la piste, s'il existe
-		const lastClip = this.clips.length > 0 ? this.clips[this.clips.length - 1] : null;
-
-		if (lastClip)
-			this.clips.push(
-				new AssetClip(lastClip.endTime + 1, lastClip.endTime + asset.duration.ms + 1, asset.id)
-			);
-		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
-
-		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
-		setTimeout(() => {
-			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
-				globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;
-		}, 0);
-	}
-
 	/**
 	 * Supprime un clip de la piste.
 	 * @param id L'ID du clip à supprimer.
@@ -157,6 +140,35 @@ export class Track extends SerializableBase {
 
 	getLastClip() {
 		return this.clips[this.clips.length - 1] || null;
+	}
+}
+
+export class AssetTrack extends Track {
+	constructor(type: TrackType) {
+		super(type);
+	}
+
+	addAsset(asset: Asset) {
+		// Récupère le dernier clip de la piste, s'il existe
+		const lastClip = this.clips.length > 0 ? this.clips[this.clips.length - 1] : null;
+
+		if (lastClip)
+			this.clips.push(
+				new AssetClip(lastClip.endTime + 1, lastClip.endTime + asset.duration.ms + 1, asset.id)
+			);
+		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
+
+		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
+		setTimeout(() => {
+			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
+				globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;
+		}, 0);
+	}
+}
+
+export class SubtitleTrack extends Track {
+	constructor() {
+		super(TrackType.Subtitle);
 	}
 
 	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number): boolean {

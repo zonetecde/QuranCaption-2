@@ -1,7 +1,6 @@
 import { Timeline } from './Timeline.svelte.js';
 import { Asset } from './Asset.svelte.js';
-import { ProjectSettings } from './ProjectSettings.js';
-import { Track } from './Track.svelte.js';
+import { AssetTrack, SubtitleTrack, Track } from './Track.svelte.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import toast from 'svelte-5-french-toast';
@@ -10,26 +9,22 @@ import { ProjectTranslation } from './index.js';
 export class ProjectContent extends SerializableBase {
 	timeline: Timeline;
 	assets: Asset[];
-	projectSettings: ProjectSettings;
 	projectTranslation: ProjectTranslation;
 
 	/**
 	 * Crée une instance de ProjectContent.
 	 * @param timeline La timeline du projet, par défaut une nouvelle Timeline vide.
 	 * @param assets La liste des assets du projet, par défaut un tableau vide.
-	 * @param projectSettings Les paramètres du projet, par défaut les paramètres par défaut d'un projet.
 	 */
 	constructor(
 		timeline: Timeline = new Timeline(),
 		assets: Asset[] = [],
-		projectSettings: ProjectSettings = new ProjectSettings(),
 		projectTranslation: ProjectTranslation = new ProjectTranslation()
 	) {
 		super();
 
 		this.timeline = $state(timeline);
 		this.assets = $state(assets);
-		this.projectSettings = $state(projectSettings);
 		this.projectTranslation = $state(projectTranslation);
 	}
 
@@ -41,12 +36,11 @@ export class ProjectContent extends SerializableBase {
 	static getDefaultProjectContent(): ProjectContent {
 		return new ProjectContent(
 			new Timeline([
-				new Track(TrackType.Subtitle),
-				new Track(TrackType.Video),
-				new Track(TrackType.Audio)
+				new SubtitleTrack(),
+				new AssetTrack(TrackType.Video),
+				new AssetTrack(TrackType.Audio)
 			]),
-			[],
-			ProjectSettings.getDefaultProjectSettings()
+			[]
 		);
 	}
 
@@ -79,5 +73,4 @@ export class ProjectContent extends SerializableBase {
 // Enregistre les classes enfants pour la désérialisation automatique
 SerializableBase.registerChildClass(ProjectContent, 'timeline', Timeline);
 SerializableBase.registerChildClass(ProjectContent, 'assets', Asset);
-SerializableBase.registerChildClass(ProjectContent, 'projectSettings', ProjectSettings);
 SerializableBase.registerChildClass(ProjectContent, 'projectTranslation', ProjectTranslation);
