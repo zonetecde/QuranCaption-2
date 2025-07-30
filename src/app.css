@@ -304,3 +304,18 @@ input[type='number']::-webkit-inner-spin-button:hover {
 .timeline-scrollbar::-webkit-scrollbar-corner {
 	background: var(--timeline-bg-secondary);
 }
+
+input[type='number'] {
+	@apply border rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent hover:border-[var(--accent-primary)] transition-all duration-200;
+
+	background-color: var(--bg-accent);
+	border-color: var(--border-color);
+	color: var(--text-primary);
+}
+
+select {
+	@apply border rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent hover:border-[var(--accent-primary)] transition-all duration-200;
+	background-color: var(--bg-accent);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+}

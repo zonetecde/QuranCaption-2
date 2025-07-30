@@ -44,8 +44,7 @@
 					bind:checked={
 						globalState.currentProject!.projectEditorState.subtitlesEditor.showWordTranslation
 					}
-					class="w-5 h-5 rounded border-2 border-[var(--accent-primary)] bg-secondary checked:bg-[var(--accent-primary)]
-					       focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-200 cursor-pointer"
+					class="w-5 h-5"
 				/>
 			</div>
 
@@ -62,8 +61,7 @@
 					bind:checked={
 						globalState.currentProject!.projectEditorState.subtitlesEditor.showWordTransliteration
 					}
-					class="w-5 h-5 rounded border-2 border-[var(--accent-primary)] bg-secondary checked:bg-[var(--accent-primary)]
-					       focus:ring-2 focus:ring-[var(--accent-primary)]/50 transition-all duration-200 cursor-pointer"
+					class="w-5 h-5"
 				/>
 			</div>
 		</div>
