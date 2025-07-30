@@ -2,7 +2,8 @@
 	import type { Edition, SubtitleClip, Translation } from '$lib/classes';
 	import { VerseTranslation } from '$lib/classes/Translation.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { slide } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import { fade, slide } from 'svelte/transition';
 
 	let {
 		edition,
@@ -18,6 +19,12 @@
 	let isDragging = $state(false);
 	let dragStartIndex = $state(-1);
 	let isHovered = $state(false);
+
+	let originalTranslation: string = $state('');
+
+	onMount(() => {
+		originalTranslation = globalState.getProjectTranslation.getVerseTranslation(edition, subtitle);
+	});
 
 	function wordClicked(i: number): any {
 		if (translation().type === 'verse') {
@@ -35,7 +42,16 @@
 					translation().endWordIndex = i;
 				}
 			}
+
+			updateTranslationText();
 		}
+	}
+
+	function updateTranslationText() {
+		translation().text = originalTranslation
+			.split(' ')
+			.slice(translation().startWordIndex, translation().endWordIndex + 1)
+			.join(' ');
 	}
 
 	function handleMouseDown(i: number, event: MouseEvent): void {
@@ -53,6 +69,7 @@
 			const endIndex = Math.max(dragStartIndex, i);
 			translation().startWordIndex = startIndex;
 			translation().endWordIndex = endIndex;
+			updateTranslationText();
 		}
 	}
 
@@ -94,18 +111,13 @@
 		</div>
 	</div>
 	{#if translation().type === 'verse'}
-		{@const originalTranslation = globalState.getProjectTranslation.getVerseTranslation(
-			edition,
-			subtitle
-		)}
-
 		{#if isHovered}
 			<!-- Affiche la traduction complète du verset mot à mot -->
 			<div
 				class="flex flex-row select-none flex-wrap items-center gap-y-1"
 				role="presentation"
 				onmouseup={handleGlobalMouseUp}
-				transition:slide
+				transition:fade
 			>
 				{#each originalTranslation.split(' ') as word, i}
 					{@const isSelected = translation().startWordIndex <= i && i <= translation().endWordIndex}
@@ -144,10 +156,7 @@
 			<div class="p-2 bg-secondary border border-color rounded-md">
 				<p class="text-xs text-thirdly mb-1">Subtitle translation:</p>
 				<p class="text-sm font-medium">
-					{originalTranslation
-						.split(' ')
-						.slice(translation().startWordIndex, translation().endWordIndex + 1)
-						.join(' ')}
+					{translation().text}
 				</p>
 			</div>
 		{/if}
