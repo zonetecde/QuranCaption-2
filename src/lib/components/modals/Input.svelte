@@ -64,10 +64,7 @@
 				bind:value={inputValue}
 				type="text"
 				{maxlength}
-				class="w-full bg-accent border border-color rounded-lg px-4 py-3 text-primary
-				       placeholder-[var(--text-placeholder)] focus:outline-none focus:ring-2
-				       focus:ring-[var(--accent-primary)] focus:border-transparent transition-all duration-200
-				       hover:border-[var(--accent-primary)]"
+				class="w-full"
 				{placeholder}
 				onkeydown={handleKeydown}
 				autocomplete="off"
