@@ -8,12 +8,48 @@
 	import toast from 'svelte-5-french-toast';
 
 	let { close } = $props();
-
 	let selectedLanguage: string | null = $state(null);
-	let selectedTranslation: Edition | null = $state(null);
+	let selectedTranslations: Edition[] = $state([]);
 	let searchQuery: string = $state('');
-	let translationPreview: Record<string, string> = $state({});
+	let translationPreviews: Record<string, Record<string, string>> = $state({});
 	let isLoadingPreview = $state(false);
+
+	// Helper function to check if a translation is selected
+	function isTranslationSelected(translation: Edition): boolean {
+		return selectedTranslations.some((t) => t.name === translation.name);
+	}
+
+	// Toggle translation selection
+	function toggleTranslationSelection(translation: Edition, language: string) {
+		if (isTranslationSelected(translation)) {
+			// Remove from selection
+			selectedTranslations = selectedTranslations.filter((t) => t.name !== translation.name);
+			delete translationPreviews[translation.name];
+		} else {
+			// Add to selection
+			selectedTranslations = [...selectedTranslations, translation];
+			selectedLanguage = language;
+			// Load preview for this translation
+			loadTranslationPreview(translation);
+		}
+	}
+
+	// Load preview for a specific translation
+	async function loadTranslationPreview(translation: Edition) {
+		if (translationPreviews[translation.name]) return; // Already loaded
+
+		isLoadingPreview = true;
+		try {
+			const preview =
+				await globalState.currentProject!.content.projectTranslation.getAllProjectSubtitlesTranslations(
+					translation
+				);
+			translationPreviews[translation.name] = preview;
+		} catch (error) {
+			translationPreviews[translation.name] = {};
+		}
+		isLoadingPreview = false;
+	}
 
 	// Computed filtered translations based on search
 	const filteredTranslations = $derived(() => {
@@ -41,40 +77,25 @@
 
 		return filtered;
 	});
-
 	async function addTranslationButtonClick() {
-		if (selectedTranslation) {
-			// Ajoute la traduction au projet
-			globalState.currentProject?.content.projectTranslation.addTranslation(
-				selectedTranslation,
-				translationPreview
-			);
-
-			close();
+		if (selectedTranslations.length > 0) {
+			try {
+				// Add all selected translations to the project in a single operation
+				for (const translation of selectedTranslations) {
+					const preview = translationPreviews[translation.name] || {};
+					globalState.currentProject?.content.projectTranslation.addTranslation(
+						translation,
+						preview
+					);
+				}
+				close();
+			} catch (error) {
+				toast.error('Failed to add translations to project');
+				console.error('Error adding translations:', error);
+			}
 		}
 	}
-
-	$effect(() => {
-		if (selectedTranslation) {
-			// Récupère toutes les traductions des versets du projet avec cette traduction
-			isLoadingPreview = true;
-			globalState
-				.currentProject!.content.projectTranslation.getAllProjectSubtitlesTranslations(
-					selectedTranslation
-				)
-				.then((translations) => {
-					translationPreview = translations;
-					isLoadingPreview = false;
-				})
-				.catch(() => {
-					translationPreview = {};
-					isLoadingPreview = false;
-				});
-		} else {
-			translationPreview = {};
-			isLoadingPreview = false;
-		}
-	});
+	// Remove the old $effect since we handle preview loading manually now
 </script>
 
 <div
@@ -122,7 +143,7 @@
 	</div>
 	<!-- Content area -->
 	<div class="flex-1 overflow-hidden">
-		{#if selectedTranslation}
+		{#if selectedTranslations.length > 0}
 			<!-- Two column layout: Selection + Preview -->
 			<div class="h-full flex">
 				<!-- Left column: Selection -->
@@ -130,7 +151,7 @@
 					<div class="mb-4">
 						<h3 class="text-lg font-semibold text-primary mb-2">Available Translations</h3>
 						<p class="text-sm text-thirdly">
-							Choose a different translation or continue with selected one
+							{selectedTranslations.length} translation{selectedTranslations.length > 1 ? 's' : ''} selected
 						</p>
 					</div>
 
@@ -155,20 +176,11 @@
 								<!-- Translations -->
 								<div class="p-3 space-y-2">
 									{#each translations as translationDetail}
+										{@const isSelected = isTranslationSelected(translationDetail)}
 										<button
-											class="w-full p-3 bg-secondary border border-color rounded-lg hover:border-accent-primary transition-all duration-200 text-left {selectedTranslation ===
-											translationDetail
-												? 'border-accent-primary bg-[rgba(88,166,255,0.1)]'
-												: ''}"
-											onclick={() => {
-												if (selectedTranslation === translationDetail) {
-													selectedTranslation = null;
-													selectedLanguage = null;
-													return;
-												}
-												selectedLanguage = language;
-												selectedTranslation = translationDetail;
-											}}
+											class="w-full p-3 bg-secondary border border-color rounded-lg hover:border-accent-primary transition-all duration-200 text-left
+											       {isSelected ? 'border-accent-primary bg-[rgba(88,166,255,0.1)]' : ''}"
+											onclick={() => toggleTranslationSelection(translationDetail, language)}
 										>
 											<div class="flex items-center justify-between">
 												<div class="flex items-center gap-2">
@@ -179,9 +191,13 @@
 														>{translationDetail.author}</span
 													>
 												</div>
-												{#if selectedTranslation === translationDetail}
+												{#if isSelected}
 													<span class="material-icons text-accent-primary text-sm"
 														>check_circle</span
+													>
+												{:else}
+													<span class="material-icons text-thirdly text-sm opacity-50"
+														>radio_button_unchecked</span
 													>
 												{/if}
 											</div>
@@ -196,9 +212,9 @@
 				<!-- Right column: Preview -->
 				<div class="w-1/2 overflow-y-auto px-6 py-4">
 					<div class="mb-4">
-						<h3 class="text-lg font-semibold text-primary mb-2">Translation Preview</h3>
+						<h3 class="text-lg font-semibold text-primary mb-2">Translation Previews</h3>
 						<p class="text-sm text-thirdly">
-							Preview of "{selectedTranslation.author}" for your project verses
+							Preview of selected translations for your project verses
 						</p>
 					</div>
 
@@ -212,7 +228,7 @@
 								<p class="text-sm text-thirdly">Loading translation preview...</p>
 							</div>
 						</div>
-					{:else if Object.keys(translationPreview).length === 0}
+					{:else if selectedTranslations.length === 0}
 						<!-- Empty state -->
 						<div class="flex items-center justify-center py-12">
 							<div class="text-center">
@@ -221,32 +237,105 @@
 								>
 									<span class="material-icons text-thirdly">translate</span>
 								</div>
-								<p class="text-sm text-thirdly">No verses found in your project</p>
+								<p class="text-sm text-thirdly">Select translations to see preview</p>
+							</div>
+						</div>{:else if selectedTranslations.length === 1}
+						<!-- Single translation - Full preview -->
+						{@const translation = selectedTranslations[0]}
+						{@const preview = translationPreviews[translation.name] || {}}
+
+						<div class="mb-4">
+							<div class="flex items-center gap-2 mb-2">
+								<span class="material-icons text-accent-primary text-sm">translate</span>
+								<h4 class="font-medium text-primary">{translation.author}</h4>
 							</div>
 						</div>
+
+						{#if Object.keys(preview).length === 0}
+							<div class="flex items-center justify-center py-12">
+								<div class="text-center">
+									<div
+										class="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-3 mx-auto"
+									>
+										<span class="material-icons text-thirdly">translate</span>
+									</div>
+									<p class="text-sm text-thirdly">No verses found for this translation</p>
+								</div>
+							</div>
+						{:else}
+							<!-- Full translation preview -->
+							<div class="space-y-3">
+								{#each Object.entries(preview) as [verseKey, translationText]}
+									{@const [surah, verse] =
+										verseKey.split(':').length === 2 ? verseKey.split(':') : [null, null]}
+									<div
+										class="bg-secondary border border-color rounded-lg p-4 hover:border-accent-primary transition-all duration-200"
+									>
+										<!-- Verse reference -->
+										<div class="flex items-center gap-2 mb-2">
+											<span
+												class="bg-accent-primary text-black px-2 py-1 rounded-md text-xs font-semibold"
+											>
+												{verseKey}
+											</span>
+											{#if surah && verse}
+												<span class="text-xs text-thirdly">Surah {surah}, Verse {verse}</span>
+											{/if}
+										</div>
+
+										<!-- Translation text -->
+										<p class="text-sm text-primary leading-relaxed">{translationText}</p>
+									</div>
+								{/each}
+							</div>
+						{/if}
 					{:else}
-						<!-- Translation preview -->
-						<div class="space-y-3">
-							{#each Object.entries(translationPreview) as [verseKey, translation]}
-								{@const [surah, verse] =
-									verseKey.split(':').length === 2 ? verseKey.split(':') : [null, null]}
-								<div
-									class="bg-secondary border border-color rounded-lg p-4 hover:border-accent-primary transition-all duration-200"
-								>
-									<!-- Verse reference -->
-									<div class="flex items-center gap-2 mb-2">
-										<span
-											class="bg-accent-primary text-black px-2 py-1 rounded-md text-xs font-semibold"
-										>
-											{verseKey}
-										</span>
-										{#if surah && verse}
-											<span class="text-xs text-thirdly">Surah {surah}, Verse {verse}</span>
+						<!-- Multiple translations - Condensed preview showing first 3 verses max per translation -->
+						<div class="space-y-4">
+							{#each selectedTranslations as translation}
+								{@const preview = translationPreviews[translation.name] || {}}
+								<div class="border border-color rounded-lg p-4 bg-secondary">
+									<div class="flex items-center gap-2 mb-3">
+										<span class="material-icons text-accent-primary text-sm">translate</span>
+										<h4 class="font-medium text-primary">{translation.author}</h4>
+										{#if Object.keys(preview).length > 0}
+											<span class="text-xs text-thirdly bg-accent px-2 py-1 rounded">
+												{Object.keys(preview).length} verses
+											</span>
 										{/if}
 									</div>
 
-									<!-- Translation text -->
-									<p class="text-sm text-primary leading-relaxed">{translation}</p>
+									{#if Object.keys(preview).length === 0}
+										<p class="text-xs text-thirdly italic">Loading preview...</p>
+									{:else}
+										<!-- Show max 3 verses per translation in condensed mode -->
+										<div class="space-y-2">
+											{#each Object.entries(preview).slice(0, 3) as [verseKey, translationText]}
+												<div class="bg-accent rounded p-3 border border-color">
+													<div class="flex items-center gap-2 mb-2">
+														<span
+															class="bg-accent-primary text-black px-2 py-1 rounded text-xs font-semibold"
+														>
+															{verseKey}
+														</span>
+													</div>
+													<!-- Truncate long texts in condensed mode -->
+													<p class="text-xs text-primary leading-relaxed line-clamp-2">
+														{translationText.length > 120
+															? translationText.substring(0, 120) + '...'
+															: translationText}
+													</p>
+												</div>
+											{/each}
+											{#if Object.keys(preview).length > 3}
+												<div class="text-center">
+													<span class="text-xs text-thirdly bg-bg-secondary px-3 py-1 rounded-full">
+														+{Object.keys(preview).length - 3} more verses
+													</span>
+												</div>
+											{/if}
+										</div>
+									{/if}
 								</div>
 							{/each}
 						</div>
@@ -302,17 +391,23 @@
 							<div class="p-4">
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									{#each translations as translationDetail}
+										{@const isSelected = isTranslationSelected(translationDetail)}
 										<button
-											class="group relative p-4 bg-secondary border border-color rounded-lg hover:border-accent-primary hover:bg-[rgba(88,166,255,0.05)] transition-all duration-200 text-left cursor-pointer"
-											onclick={() => {
-												selectedLanguage = language;
-												selectedTranslation = translationDetail;
-											}}
+											class="group relative p-4 bg-secondary border border-color rounded-lg hover:border-accent-primary hover:bg-[rgba(88,166,255,0.05)] transition-all duration-200 text-left cursor-pointer
+											       {isSelected ? 'border-accent-primary bg-[rgba(88,166,255,0.1)]' : ''}"
+											onclick={() => toggleTranslationSelection(translationDetail, language)}
 										>
 											<!-- Selection indicator -->
 											<div
-												class="absolute top-2 right-2 w-5 h-5 rounded-full border-2 border-accent-primary group-hover:bg-accent-primary transition-all duration-200 flex items-center justify-center"
-											></div>
+												class="absolute top-2 right-2 w-5 h-5 rounded-full border-2 border-accent-primary flex items-center justify-center transition-all duration-200
+												       {isSelected
+													? 'bg-accent-primary'
+													: 'group-hover:bg-accent-primary group-hover:bg-opacity-20'}"
+											>
+												{#if isSelected}
+													<span class="material-icons text-black text-xs">check</span>
+												{/if}
+											</div>
 
 											<!-- Content -->
 											<div class="pr-8 cursor-pointer">
@@ -341,20 +436,22 @@
 			</div>
 		{/if}
 	</div>
-
 	<!-- Footer with action buttons -->
 	<div class="border-t border-color bg-primary px-6 py-4">
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-2 text-sm text-thirdly">
-				{#if selectedTranslation}
+				{#if selectedTranslations.length > 0}
 					<span class="material-icons text-accent-secondary">check_circle</span>
-					<span
-						>Selected: <strong class="text-accent-primary">{selectedTranslation.author}</strong>
-						({selectedLanguage})</span
-					>
+					<span>
+						Selected: <strong class="text-accent-primary">{selectedTranslations.length}</strong>
+						translation{selectedTranslations.length > 1 ? 's' : ''}
+						{#if selectedTranslations.length === 1}
+							(<strong class="text-accent-primary">{selectedTranslations[0].author}</strong>)
+						{/if}
+					</span>
 				{:else}
 					<span class="material-icons">info</span>
-					<span>Please select a translation to continue</span>
+					<span>Please select one or more translations to continue</span>
 				{/if}
 			</div>
 
@@ -363,10 +460,10 @@
 				<button
 					class="btn-accent px-6 py-2.5 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 					onclick={addTranslationButtonClick}
-					disabled={!selectedTranslation}
+					disabled={selectedTranslations.length === 0}
 				>
 					<span class="material-icons text-lg">add</span>
-					Add Translation
+					Add Translation{selectedTranslations.length > 1 ? 's' : ''}
 				</button>
 			</div>
 		</div>
@@ -392,6 +489,14 @@
 
 	.overflow-y-auto::-webkit-scrollbar-thumb:hover {
 		background: var(--timeline-scrollbar-hover);
+	}
+	/* Line clamp utility for text truncation */
+	.line-clamp-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
 	/* Smooth animations */
