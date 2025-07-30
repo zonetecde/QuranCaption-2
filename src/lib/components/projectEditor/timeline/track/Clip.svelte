@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import WaveSurfer from 'wavesurfer.js';
+	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
 
 	let {
 		clip = $bindable(),
@@ -13,6 +14,8 @@
 		clip: Clip;
 		track: Track;
 	} = $props();
+
+	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
 	let positionLeft = $derived(() => {
 		return (clip.startTime / 1000) * track.getPixelPerSecond();
@@ -35,12 +38,22 @@
 			});
 		}
 	});
+
+	function removeClip() {
+		setTimeout(() => {
+			track.removeClip(clip.id);
+		});
+	}
 </script>
 
 <div
 	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group"
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
 	transition:slide={{ duration: 500, axis: 'x' }}
+	oncontextmenu={(e) => {
+		e.preventDefault();
+		contextMenu!.show(e);
+	}}
 >
 	{#if globalState.currentProject?.projectEditorState.timeline.showWaveforms && track.type === TrackType.Audio}
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
@@ -54,9 +67,17 @@
 		<!-- delete clip -->
 		<button
 			class="text-[var(--text-secondary)] text-sm cursor-pointer opacity-0 group-hover:opacity-100"
-			onclick={() => track.removeClip(clip.id)}
+			onclick={removeClip}
 		>
 			<span class="material-icons">delete</span>
 		</button>
 	</section>
 </div>
+
+<ContextMenu bind:this={contextMenu}>
+	<Item on:click={removeClip}
+		><div class="btn-icon">
+			<span class="material-icons-outlined text-sm mr-1">remove</span>Remove clip
+		</div></Item
+	>
+</ContextMenu>
