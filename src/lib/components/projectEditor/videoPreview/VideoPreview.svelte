@@ -402,17 +402,55 @@
 	// === CONTRÔLES DE LECTURE ===
 
 	/**
+	 * Joue l'audio silencieux quand aucun média n'est disponible
+	 * Simule la présence d'un asset et clip pour le bon fonctionnement
+	 */
+	function playSilentAudio() {
+		// Nettoie l'instance audio précédente
+		if (audioHowl) {
+			audioHowl.unload();
+			audioHowl = null;
+		}
+
+		// Crée une nouvelle instance Howl pour silent.ogg
+		audioHowl = new Howl({
+			src: ['/silent.ogg'], // Chemin vers le fichier silent.ogg dans static/
+			html5: true,
+			loop: true, // Répète en boucle pour simuler une lecture continue
+			volume: 0, // Volume à 0 pour être réellement silencieux
+			onplay: () => {
+				isPlaying = true;
+				globalState.currentProject!.projectEditorState.videoPreview.isPlaying = true;
+
+				// Démarre la mise à jour du curseur
+				if (!audioUpdateInterval) {
+					audioUpdateInterval = setInterval(() => {
+						// Avance le curseur manuellement de 10ms à chaque intervalle
+						getTimelineSettings().cursorPosition += 10;
+					}, 10);
+				}
+			},
+			onpause: () => {
+				// Arrête la mise à jour du curseur
+				if (audioUpdateInterval) {
+					clearInterval(audioUpdateInterval);
+					audioUpdateInterval = null;
+				}
+			}
+		});
+
+		audioHowl.play();
+	}
+
+	/**
 	 * Lance la lecture audio et vidéo
 	 * @param fromButton - Indique si l'action vient du bouton play (pour afficher un toast si nécessaire)
 	 */
 	function play(fromButton: boolean = false) {
 		// Vérification de la présence de médias
 		if (!currentVideo() && !currentAudio()) {
-			if (fromButton)
-				toast('No video or audio to play. Please add some media to the timeline.', {
-					duration: 5000,
-					position: 'bottom-left'
-				});
+			// Si aucun média, joue silent.ogg pour simuler une lecture
+			playSilentAudio();
 			return;
 		}
 
@@ -464,12 +502,23 @@
 	}
 
 	// === NAVIGATION ENTRE MÉDIAS ===
-
 	/**
 	 * Passe au prochain média quand une vidéo se termine
 	 */
 	function goNextVideo() {
-		goToNextMedia(true, false);
+		const currentTime = getTimelineSettings().cursorPosition;
+		const videoTrack = globalState.getVideoTrack;
+
+		// Cherche la prochaine vidéo uniquement
+		if (videoTrack) {
+			const nextVideoClip = videoTrack.clips.find((clip) => clip.startTime > currentTime - 1000);
+			if (nextVideoClip) {
+				// Avance le curseur au début de la prochaine vidéo
+				getTimelineSettings().cursorPosition = nextVideoClip.startTime;
+				triggerVideoAndAudioToFitCursor();
+			}
+			// Si aucune prochaine vidéo, ne fait rien (continue avec fond noir)
+		}
 	}
 
 	/**
@@ -508,7 +557,6 @@
 				nextClips.push({ clip: nextAudioClip, startTime: nextAudioClip.startTime });
 			}
 		}
-
 		if (nextClips.length > 0) {
 			// Trouve le clip qui commence le plus tôt
 			const earliestClip = nextClips.reduce((earliest, current) =>
@@ -518,7 +566,11 @@
 			// Avance le curseur au début du prochain clip
 			getTimelineSettings().cursorPosition = earliestClip.startTime;
 			triggerVideoAndAudioToFitCursor();
+		} else if (audio && !video) {
+			// Seulement si on cherche de l'audio ET qu'on n'en trouve pas, joue silent
+			playSilentAudio();
 		}
+		// Sinon ne fait rien (cas vidéo qui se termine sans prochaine vidéo)
 	}
 </script>
 
