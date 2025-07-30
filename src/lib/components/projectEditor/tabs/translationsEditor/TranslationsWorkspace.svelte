@@ -22,7 +22,7 @@
 	);
 </script>
 
-<section class="min-h-0 bg-primary border border-color rounded-lg shadow-lg h-full">
+<section class="min-h-0 bg-primary border border-color rounded-lg shadow-lg h-full overflow-y-auto">
 	{#if globalState.currentProject!.content.projectTranslation.addedTranslationEditions.length === 0}
 		<div class="flex items-center flex-col gap-y-3 justify-center h-full pb-10">
 			<p class="text-thirdly">No translations added yet.</p>
@@ -39,7 +39,7 @@
 					<section class="border border-color rounded px-4 py-4 text-primary">
 						<p class="text-3xl arabic text-right" dir="rtl">{_subtitle.text}</p>
 						{#if _subtitle.wbwTranslation}
-							<p class="text-sm text-thirdly text-left" dir="rtl">
+							<p class="text-sm text-thirdly text-right mt-1 italic" dir="rtl">
 								{_subtitle.wbwTranslation}
 							</p>
 						{/if}

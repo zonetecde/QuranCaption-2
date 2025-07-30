@@ -34,10 +34,10 @@
 			/>
 		</section>
 	</section>
-	<!--
+
 	<section
 		class="w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-l-2 border-color border-t-2"
-	></section> -->
+	></section>
 </div>
 
 {#if addTranslationModalVisibility}
