@@ -18,7 +18,7 @@
 <div class="flex-grow w-full max-w-full flex overflow-hidden h-full min-h-0">
 	<!-- Assets -->
 	<section
-		class="w-[300px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
+		class="w-[230px] 2xl:w-[300px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
 	>
 		<TranslationsEditorSettings
 			setAddTranslationModalVisibility={(visible: boolean) =>
@@ -36,7 +36,7 @@
 	</section>
 
 	<section
-		class="w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border-l-2 border-color border-t-2"
+		class="hidden 2xl:block w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex-col border-l-2 border-color border-t-2"
 	></section>
 </div>
 

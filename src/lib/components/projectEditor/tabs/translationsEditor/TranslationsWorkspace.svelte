@@ -98,7 +98,7 @@
 								{edition}
 								bind:subtitle={globalState.getSubtitleTrack.clips[i] as SubtitleClip}
 								previousSubtitle={i > 0
-									? (globalState.getSubtitleTrack.clips[i - 1] as SubtitleClip)
+									? (globalState.getSubtitleTrack.getSubtitleBefore(i) as SubtitleClip)
 									: undefined}
 							/>
 						{/each}

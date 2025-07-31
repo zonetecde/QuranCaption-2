@@ -2,7 +2,7 @@
 	import type { Edition, SubtitleClip, Translation } from '$lib/classes';
 	import { VerseTranslation } from '$lib/classes/Translation.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 
 	let {
@@ -29,8 +29,6 @@
 	let previousSubtitleTranslationStartIndex: number = $state(-1);
 	let previousSubtitleTranslationEndIndex: number = $state(-1);
 
-	$inspect(translation());
-
 	onMount(() => {
 		if (translation().type === 'verse') {
 			originalTranslation = globalState.getProjectTranslation.getVerseTranslation(
@@ -43,16 +41,32 @@
 	$effect(() => {
 		// Si le sous-titre d'avant est la continuité du verset:
 		if (
+			translation().type === 'verse' &&
 			previousSubtitle &&
 			previousSubtitle.type === 'Subtitle' &&
 			previousSubtitle.verse === subtitle.verse &&
-			previousSubtitle.surah === subtitle.surah &&
-			previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex
+			previousSubtitle.surah === subtitle.surah
 		) {
 			// Alors on highlight toute la traduction du sous-titre précédent
 			const verseTrans = previousSubtitle.getTranslation(edition) as VerseTranslation;
 			previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
 			previousSubtitleTranslationEndIndex = verseTrans.endWordIndex;
+
+			// Si c'est la continuité du verset précédent, on met à jour la traduction
+			if (
+				previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex &&
+				verseTrans.status === 'reviewed' // vérifie que la traduction du sous-titre précédent n'est pas vide
+			) {
+				// Commence la sélection de la traduction du verset actuel à celle de fin de la traduction du sous-titre précédent
+				if (translation().status !== 'reviewed') {
+					translation().startWordIndex = previousSubtitleTranslationEndIndex + 1;
+					if (translation().startWordIndex > translation().endWordIndex) {
+						translation().endWordIndex = originalTranslation.split(' ').length - 1;
+					}
+					updateTranslationText();
+					translation().status = 'automatically trimmed';
+				}
+			}
 		}
 	});
 
@@ -74,6 +88,7 @@
 			}
 
 			updateTranslationText();
+			translation().status = 'reviewed';
 		}
 	}
 
@@ -123,6 +138,12 @@
 	}}
 >
 	{#if translation()}
+		{@const status = translation().status}
+		{@const isCompleted =
+			status === 'completed by default' ||
+			status === 'reviewed' ||
+			status === 'automatically trimmed'}
+
 		<!-- En-tête avec flag et info -->
 		<div class="flex items-center gap-3 pb-2 border-b border-color">
 			<div class="flex items-center gap-2">
@@ -136,6 +157,34 @@
 				<div>
 					<p class="text-primary text-sm font-medium">{edition.language}</p>
 					<p class="text-thirdly text-xs">{edition.author}</p>
+				</div>
+			</div>
+
+			<div class="ml-auto">
+				<div class="flex items-center gap-2">
+					<span class="text-xs text-secondary font-medium">Status:</span>
+					<div
+						class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 {isCompleted
+							? 'bg-green-900/20 text-green-400 border border-green-800/30 hover:bg-green-900/30'
+							: 'bg-orange-900/20 text-orange-400 border border-orange-800/30 hover:bg-orange-900/30'}"
+					>
+						<div
+							class="w-1.5 h-1.5 rounded-full {isCompleted ? 'bg-green-500' : 'bg-orange-500'}"
+						></div>
+						{#if status === 'completed by default'}
+							Completed by default
+						{:else if status === 'automatically trimmed'}
+							Automatically trimmed
+						{:else if status === 'to review'}
+							To review
+						{:else if status === 'reviewed'}
+							Reviewed
+						{:else if status === 'undefined'}
+							Undefined
+						{:else}
+							{status}
+						{/if}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -160,10 +209,12 @@
 						i <= previousSubtitleTranslationEndIndex}
 					<button
 						class="translation-word text-sm cursor-pointer px-1 py-1 transition-all duration-200 border-2 border-transparent
-						{isPreviousSubtitleTranslation ? 'bg-yellow-500/10 rounded-none border-yellow-400/10' : ''}
+						{isPreviousSubtitleTranslation
+							? 'bg-yellow-500/10 hover:bg-yellow-500/20! hover:border-yellow-400/20! rounded-none border-yellow-400/10'
+							: ''}
 						{isSelected
 							? // Effet jaune si le mot est sélectionné alors que pourtant il ne devrait pas comme c'est la suite de la traduction du verset précédent
-								`translation-word-selected ${isPreviousSubtitleTranslation ? 'bg-yellow-500/10! border-yellow-400/10!' : ''} text-white ${
+								`translation-word-selected ${isPreviousSubtitleTranslation ? 'bg-yellow-500/70! border-yellow-400/70! hover:bg-yellow-500/80! hover:border-yellow-400/80!' : ''} text-white ${
 									isSingleSelected
 										? 'translation-word-first-selected translation-word-last-selected'
 										: isLastSelected
@@ -198,6 +249,7 @@
 						bind:checked={(subtitle.translations[edition.name] as VerseTranslation).isBruteForce}
 						onchange={(e) => {
 							if ((e.target as HTMLInputElement).checked) {
+								translation().status = 'reviewed';
 								setTimeout(() => {
 									if (translationInput) {
 										translationInput.focus();
@@ -218,6 +270,7 @@
 					class="text-sm font-medium"
 					ondblclick={() => {
 						(subtitle.translations[edition.name] as VerseTranslation).isBruteForce = true;
+						translation().status = 'reviewed';
 						// Met le focus sur l'input de traduction
 						setTimeout(() => {
 							if (translationInput) {
@@ -231,7 +284,7 @@
 			{:else}
 				<!-- prettier-ignore -->
 				<input
-			bind:this={translationInput}
+				bind:this={translationInput}
 				type="text"
 				bind:value={(subtitle.translations[edition.name] as VerseTranslation).text}
 				class="w-full bg-secondary text-primary border border-color rounded-md px-2 py-1 text-sm"

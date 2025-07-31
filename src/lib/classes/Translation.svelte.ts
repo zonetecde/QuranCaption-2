@@ -3,7 +3,12 @@ import type { SubtitleClip } from './Clip.svelte';
 import type { Edition } from './Edition';
 import { SerializableBase } from './misc/SerializableBase';
 
-export type TranslationStatus = 'completed by default' | 'to review' | 'reviewed' | 'undefined';
+export type TranslationStatus =
+	| 'completed by default'
+	| 'automatically trimmed'
+	| 'to review'
+	| 'reviewed'
+	| 'undefined';
 
 export class Translation extends SerializableBase {
 	// Le texte de la traduction
@@ -32,15 +37,10 @@ export class VerseTranslation extends Translation {
 	// Indique si la traduction ne se base pas sur la traduction originale
 	isBruteForce: boolean = $state(false);
 
-	constructor(
-		startWordIndex: number,
-		endWordIndex: number,
-		text: string,
-		status: TranslationStatus
-	) {
+	constructor(text: string, status: TranslationStatus) {
 		super(text, status);
-		this.startWordIndex = startWordIndex;
-		this.endWordIndex = endWordIndex;
+		this.startWordIndex = 0;
+		this.endWordIndex = text.split(' ').length - 1;
 		this.isBruteForce = false;
 		this.type = 'verse';
 	}

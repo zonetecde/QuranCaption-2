@@ -10,7 +10,7 @@
 <div class="flex-grow w-full max-w-full flex overflow-hidden h-full min-h-0">
 	<!-- Assets -->
 	<section
-		class="w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
+		class="w-[225px] 2xl:w-[300px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
 	>
 		<SubtitlesEditorSettings />
 	</section>
@@ -27,7 +27,7 @@
 	</section>
 	<!-- Settings -->
 	<section
-		class="w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border border-color rounded-lg border-l-0"
+		class="w-[150px] 2xl:w-[250px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col border border-color rounded-lg border-l-0"
 	>
 		<VideoPreview showControls={false} />
 	</section>

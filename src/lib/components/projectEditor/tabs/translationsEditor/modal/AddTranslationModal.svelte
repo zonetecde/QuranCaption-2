@@ -118,7 +118,7 @@
 
 			<!-- Close button -->
 			<button
-				class="w-8 h-8 rounded-full hover:bg-[rgba(255,255,255,0.1)] flex items-center justify-center transition-all duration-200 text-secondary hover:text-primary"
+				class="w-8 h-8 rounded-full hover:bg-[rgba(255,255,255,0.1)] flex items-center justify-center transition-all duration-200 text-secondary hover:text-primary cursor-pointer"
 				onclick={close}
 			>
 				<span class="material-icons text-lg">close</span>

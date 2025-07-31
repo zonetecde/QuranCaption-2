@@ -167,7 +167,7 @@
 
 		const subtitleTrack = globalState.getSubtitleTrack;
 
-		const success = subtitleTrack.addSubtitle(
+		const success = await subtitleTrack.addSubtitle(
 			verse,
 			subtitlesEditorState().startWordIndex,
 			subtitlesEditorState().endWordIndex,

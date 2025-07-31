@@ -12,6 +12,7 @@ import { Duration, type Asset } from './index.js';
 import { globalState } from '$lib/runes/main.svelte.js';
 import type { Verse } from './Quran.js';
 import toast from 'svelte-5-french-toast';
+import { VerseTranslation } from './Translation.svelte.js';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -171,7 +172,12 @@ export class SubtitleTrack extends Track {
 		super(TrackType.Subtitle);
 	}
 
-	addSubtitle(verse: Verse, firstWordIndex: number, lastWordIndex: number, surah: number): boolean {
+	async addSubtitle(
+		verse: Verse,
+		firstWordIndex: number,
+		lastWordIndex: number,
+		surah: number
+	): Promise<boolean> {
 		const arabicText = verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex);
 		const wbwTranslation = verse.getWordByWordTranslationBetweenTwoIndexes(
 			firstWordIndex,
@@ -186,6 +192,13 @@ export class SubtitleTrack extends Track {
 			return false;
 		}
 
+		const isFullVerse = verse.words.length === lastWordIndex - firstWordIndex + 1;
+		const isLastWordsOfVerse = verse.words.length - lastWordIndex - 1 === 0;
+
+		// Prépare les traductions du sous-titre
+		let translations: { [key: string]: VerseTranslation } =
+			await globalState.getProjectTranslation.getTranslations(surah, verse.id, isFullVerse);
+
 		this.clips.push(
 			new SubtitleClip(
 				startTime,
@@ -196,9 +209,9 @@ export class SubtitleTrack extends Track {
 				lastWordIndex,
 				arabicText,
 				wbwTranslation,
-				verse.words.length === lastWordIndex - firstWordIndex + 1, // isFullVerse
-				verse.words.length - lastWordIndex - 1 === 0, // isLastWordsOfVerse
-				{}
+				isFullVerse, // isFullVerse
+				isLastWordsOfVerse, // isLastWordsOfVerse
+				translations // translations
 			)
 		);
 
@@ -279,6 +292,23 @@ export class SubtitleTrack extends Track {
 		this.clips.push(new PredefinedSubtitleClip(startTime, endTime, text, type));
 
 		return true;
+	}
+
+	/**
+	 * Renvoie le clip de sous-titre avant l'index spécifié.
+	 * @param i L'index du clip pour lequel on veut trouver le clip de sous-titre précédent.
+	 * @returns Le clip de sous-titre précédent ou null s'il n'existe pas.
+	 */
+	getSubtitleBefore(i: number): SubtitleClip | null {
+		if (i <= 0) {
+			return null;
+		}
+
+		do {
+			i--;
+		} while (i >= 0 && !(this.clips[i] instanceof SubtitleClip));
+
+		return this.clips[i] as SubtitleClip | null;
 	}
 }
 

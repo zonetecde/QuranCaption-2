@@ -252,8 +252,6 @@ export class ProjectTranslation extends SerializableBase {
 
 			// Ajoute la traduction à l'objet de traduction du clip
 			subtitle.translations[edition.name] = new VerseTranslation(
-				0,
-				translationText.split(' ').length - 1, // Par défaut toute la traduction est sélectionnée
 				translationText,
 				subtitle.isFullVerse ? 'completed by default' : 'to review'
 			);
@@ -314,5 +312,41 @@ export class ProjectTranslation extends SerializableBase {
 				delete subtitle.translations[edition.name];
 			}
 		}
+	}
+
+	/**
+	 * Lorsqu'on ajoute un sous-titre au projet après avoir ajouté une traduction,
+	 * on doit récupérer les traductions pour ce verset de toutes les éditions ajoutées.
+	 * @param surah Le numéro de la sourate
+	 * @param verse Le numéro du verset
+	 */
+	async getTranslations(
+		surah: number,
+		verse: number,
+		isFullVerse: boolean
+	): Promise<{
+		[key: string]: VerseTranslation;
+	}> {
+		const translations: { [key: string]: VerseTranslation } = {};
+		if (globalState.getProjectTranslation.addedTranslationEditions.length > 0) {
+			for (const translationEdition of globalState.getProjectTranslation.addedTranslationEditions) {
+				const translation = await globalState.getProjectTranslation.downloadVerseTranslation(
+					translationEdition,
+					surah,
+					verse
+				);
+
+				// Ajoute la traduction à l'objet translations
+				globalState.getProjectTranslation.versesTranslations[translationEdition.name][
+					surah + ':' + verse
+				] = translation;
+
+				translations[translationEdition.name] = new VerseTranslation(
+					translation,
+					isFullVerse ? 'completed by default' : 'to review'
+				);
+			}
+		}
+		return translations;
 	}
 }
