@@ -187,6 +187,20 @@ export class SubtitleClip extends ClipWithTranslation {
 	getVerseKey(): string {
 		return `${this.surah}:${this.verse}`;
 	}
+
+	getTextWithVerseNumber(): string {
+		if (this.isLastWordsOfVerse) {
+			return this.text + ` ${this.latinToArabicNumbers(this.verse)}`;
+		}
+		return this.text;
+	}
+
+	private latinToArabicNumbers(n: number): string {
+		return n.toString().replace(/\d/g, (digit) => {
+			const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+			return arabicDigits[parseInt(digit, 10)];
+		});
+	}
 }
 
 export class SilenceClip extends Clip {

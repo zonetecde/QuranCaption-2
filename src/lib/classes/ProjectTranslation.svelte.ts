@@ -174,6 +174,7 @@ export class ProjectTranslation extends SerializableBase {
 			processed = processed
 				.replaceAll(' .', '.')
 				.replaceAll(' ,', ',')
+				.replaceAll(' ', ' ') // Remplace les espaces insécables par des espaces normaux
 				.replaceAll(' ;', ';')
 				.replaceAll(' ]', ']')
 				.replaceAll('[ ', '[')

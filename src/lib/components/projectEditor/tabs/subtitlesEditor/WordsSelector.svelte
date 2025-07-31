@@ -21,10 +21,20 @@
 		}
 	}
 
-	function goPreviousVerse() {
+	async function goPreviousVerse() {
 		if (subtitlesEditorState().selectedVerse > 1) {
 			subtitlesEditorState().selectedVerse -= 1;
-			resetFirstAndLastWordIndex();
+
+			// Met le curseur à la fin du verset précédent
+			// Récupère le verset précédent
+			const previousVerse = await Quran.getVerse(
+				subtitlesEditorState().selectedSurah,
+				subtitlesEditorState().selectedVerse
+			);
+			if (previousVerse) {
+				subtitlesEditorState().startWordIndex = previousVerse.words.length - 1;
+				subtitlesEditorState().endWordIndex = previousVerse.words.length - 1;
+			}
 		}
 	}
 
@@ -267,7 +277,7 @@
 
 					<button
 						class="word-button flex h-fit flex-col outline-none text-center px-3 cursor-pointer
-					       transition-all border-2 duration-200 border-transparent py-3 -mx-0.5
+					       transition-all border-2 duration-200 border-transparent py-3 -mx-0.5 select-none
 					       {isSelected
 							? `word-selected text-white  ${
 									isSingleSelected
