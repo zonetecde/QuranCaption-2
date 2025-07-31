@@ -194,10 +194,21 @@
 					<span class="text-xs">Manually edit</span>
 					<!-- prettier-ignore -->
 					<input
-				type="checkbox"
-				bind:checked={(subtitle.translations[edition.name] as VerseTranslation).isBruteForce}
-				class="w-2 h-2 scale-75 rounded"
-			/>
+						type="checkbox"
+						bind:checked={(subtitle.translations[edition.name] as VerseTranslation).isBruteForce}
+						onchange={(e) => {
+							if ((e.target as HTMLInputElement).checked) {
+								setTimeout(() => {
+									if (translationInput) {
+										translationInput.focus();
+									}
+								}, 0);
+							} else {
+								updateTranslationText();
+							}
+						}}
+						class="w-2 h-2 scale-75 rounded"
+					/>
 				</label>
 			{/if}
 
