@@ -49,14 +49,16 @@
 		) {
 			// Alors on highlight toute la traduction du sous-titre précédent
 			const verseTrans = previousSubtitle.getTranslation(edition) as VerseTranslation;
-			previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
-			previousSubtitleTranslationEndIndex = verseTrans.endWordIndex;
 
 			// Si c'est la continuité du verset précédent, on met à jour la traduction
 			if (
-				previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex &&
+				previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex && // Vérifie que le sous-titre précédent se termine juste avant le début du sous-titre actuel
 				verseTrans.status === 'reviewed' // vérifie que la traduction du sous-titre précédent n'est pas vide
 			) {
+				// Met à jour les indices de début et de fin de la traduction du sous-titre précédent
+				previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
+				previousSubtitleTranslationEndIndex = verseTrans.endWordIndex;
+
 				// Commence la sélection de la traduction du verset actuel à celle de fin de la traduction du sous-titre précédent
 				if (translation().status !== 'reviewed') {
 					translation().startWordIndex = previousSubtitleTranslationEndIndex + 1;
