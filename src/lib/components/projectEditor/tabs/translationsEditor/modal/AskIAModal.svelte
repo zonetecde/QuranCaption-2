@@ -13,10 +13,14 @@
 		close: () => void;
 		edition: Edition;
 	} = $props();
-
 	let aiPrompt: string = $state('');
 	let aiResponse: string = $state('');
 
+	// Variables pour le slider de sélection de plage
+	let totalVerses: number = $state(0);
+	let startIndex: number = $state(0);
+	let endIndex: number = $state(0);
+	let fullVerseArray: any[] = $state([]);
 	// Fonction pour traiter la réponse de l'IA et mettre à jour les traductions
 	function setTranslationsFromAIResponse(aiResponseStr: string): void {
 		try {
@@ -30,12 +34,13 @@
 			let processedVerses = 0;
 			let successfulVerses = 0;
 
-			// Récupère les données indexées pour mapper les réponses aux sous-titres
+			// Utilise le tableau filtré pour le mapping
+			const filteredArray = fullVerseArray.slice(startIndex, endIndex + 1);
 			const indexToSubtitleMapping: {
 				[key: number]: { subtitles: any[]; verseKey: string; translation: any[] };
 			} = {};
 
-			let index = 0;
+			// Reconstruit le mapping pour les versets sélectionnés
 			let verses: { [key: string]: SubtitleClip[] } = {};
 
 			// Collecte les sous-titres par verset
@@ -52,43 +57,17 @@
 				verses[verseKey].push(subtitle);
 			}
 
-			// Si tout les sous-titres d'un même verset on un status qui montre que c'est déjà traduit, on ne les traite pas
-			for (const verseKey in verses) {
-				const subtitlesForVerse = verses[verseKey];
+			// Filtre seulement les versets qui sont dans la plage sélectionnée
+			for (let i = 0; i < filteredArray.length; i++) {
+				const verseData = filteredArray[i];
+				const verseKey = verseData.verseKey;
 
-				if (
-					subtitlesForVerse.every((subtitle) =>
-						subtitle.translations[edition.name]?.isStatusComplete()
-					)
-				) {
-					delete verses[verseKey]; // Supprime le verset s'il est déjà traduit
-				}
-			}
-
-			// Construit le mapping index -> sous-titres
-			for (const verseKey in verses) {
-				const subtitlesForVerse = verses[verseKey];
-				const translation = globalState.getProjectTranslation.getVerseTranslation(
-					edition,
-					verseKey
-				);
-
-				let translationWords = [];
-				for (let i = 0; i < translation.split(' ').length; i++) {
-					const element = translation.split(' ')[i];
-					translationWords.push({
-						i: i,
-						w: element
-					});
-				}
-
-				if (subtitlesForVerse.length > 0) {
-					indexToSubtitleMapping[index] = {
-						subtitles: subtitlesForVerse,
+				if (verses[verseKey]) {
+					indexToSubtitleMapping[i] = {
+						subtitles: verses[verseKey],
 						verseKey: verseKey,
-						translation: translationWords
+						translation: verseData.translation
 					};
-					index++;
 				}
 			}
 
@@ -232,28 +211,24 @@
 	onMount(async () => {
 		generatePrompt();
 	});
-
 	async function generatePrompt() {
-		// Génère déjà le prompt
+		// Génère le tableau complet des versets
 		const array = [];
-
 		let index = 0;
-
 		let verses: { [key: string]: SubtitleClip[] } = {};
 
 		for (let i: number = 0; i < globalState.getSubtitleClips.length; i++) {
 			const subtitle = globalState.getSubtitleClips[i];
-
 			const verseKey = subtitle.getVerseKey();
 
 			if (verses[verseKey] === undefined) {
 				if (subtitle.isFullVerse) continue; // Si verset complet la traduction est faite par défaut
-
 				verses[verseKey] = [];
 			}
 
 			verses[verseKey].push(subtitle);
 		}
+
 		// Si tout les sous-titres d'un même verset on un status qui montre que c'est déjà traduit, on ne les traite pas
 		for (const verseKey in verses) {
 			const subtitlesForVerse = verses[verseKey];
@@ -298,7 +273,27 @@
 			}
 		}
 
-		const json = JSON.stringify(array);
+		// Stocke le tableau complet et initialise les valeurs du slider
+		fullVerseArray = array;
+		totalVerses = array.length;
+		startIndex = 0;
+		endIndex = Math.max(0, totalVerses - 1);
+
+		// Génère le prompt initial avec tous les versets
+		await updatePromptWithRange();
+	}
+
+	async function updatePromptWithRange() {
+		// Filtre le tableau selon la plage sélectionnée
+		const filteredArray = fullVerseArray.slice(startIndex, endIndex + 1);
+
+		// Réindexe les éléments filtrés pour que l'index commence à 0
+		const reindexedArray = filteredArray.map((item, index) => ({
+			...item,
+			index: index
+		}));
+
+		const json = JSON.stringify(reindexedArray);
 		let prompt = await (await fetch('/prompts/translation.txt')).text();
 
 		aiPrompt = prompt + '\n\n' + json;
@@ -430,6 +425,98 @@
 				</div>
 			{:else}
 				<!-- Normal AI workflow -->
+
+				<!-- Range Selection Section -->
+				{#if totalVerses > 1}
+					<div class="space-y-3">
+						<div class="flex items-center gap-2">
+							<span class="material-icons text-accent text-lg">tune</span>
+							<h3 class="text-lg font-semibold text-primary">Verse Selection</h3>
+							<span class="bg-accent text-black px-2 py-1 rounded-md text-xs font-semibold">
+								{totalVerses} verses found
+							</span>
+						</div>
+						<div class="bg-accent border border-color rounded-lg p-4">
+							<div class="mb-4">
+								<div class="flex items-center justify-between mb-2">
+									<label class="text-sm font-medium text-secondary">
+										Select verse range to include in prompt:
+									</label>
+									<div class="text-sm text-primary font-mono">
+										Indices {startIndex} to {endIndex} ({endIndex - startIndex + 1} verses)
+									</div>
+								</div>
+
+								<!-- Custom dual-handle slider -->
+								<div class="relative mt-6 mb-6">
+									<!-- Track background -->
+									<div class="w-full h-2 bg-secondary rounded-full relative">
+										<!-- Active track between handles -->
+										<div
+											class="absolute h-2 bg-accent-primary rounded-full"
+											style="left: {(startIndex / Math.max(1, totalVerses - 1)) *
+												100}%; width: {((endIndex - startIndex) / Math.max(1, totalVerses - 1)) *
+												100}%;"
+										></div>
+									</div>
+
+									<!-- Start handle -->
+									<input
+										type="range"
+										min="0"
+										max={totalVerses - 1}
+										bind:value={startIndex}
+										oninput={(e) => {
+											const newStart = parseInt(e.target.value);
+											if (newStart > endIndex) {
+												endIndex = newStart;
+											}
+											startIndex = newStart;
+											updatePromptWithRange();
+										}}
+										class="absolute top-0 w-full h-2 appearance-none bg-transparent cursor-pointer range-slider"
+									/>
+
+									<!-- End handle -->
+									<input
+										type="range"
+										min="0"
+										max={totalVerses - 1}
+										bind:value={endIndex}
+										oninput={(e) => {
+											const newEnd = parseInt(e.target.value);
+											if (newEnd < startIndex) {
+												startIndex = newEnd;
+											}
+											endIndex = newEnd;
+											updatePromptWithRange();
+										}}
+										class="absolute top-0 w-full h-2 appearance-none bg-transparent cursor-pointer range-slider"
+									/>
+								</div>
+
+								<!-- Verse preview -->
+								<div class="grid grid-cols-2 gap-4 text-xs">
+									<div class="bg-secondary border border-color rounded-lg p-3">
+										<div class="font-medium text-accent-primary mb-1">
+											Start: Index {startIndex}
+										</div>
+										<div class="text-thirdly">
+											Verse: {fullVerseArray[startIndex]?.verseKey || 'N/A'}
+										</div>
+									</div>
+									<div class="bg-secondary border border-color rounded-lg p-3">
+										<div class="font-medium text-accent-primary mb-1">End: Index {endIndex}</div>
+										<div class="text-thirdly">
+											Verse: {fullVerseArray[endIndex]?.verseKey || 'N/A'}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				{/if}
+
 				<!-- Prompt section -->
 				<div class="space-y-3">
 					<div class="flex items-center gap-2">
@@ -614,5 +701,66 @@
 	.bg-accent-primary:hover::before,
 	.bg-accent-secondary:hover::before {
 		left: 100%;
+	}
+
+	/* Custom dual-handle range slider styles */
+	.range-slider {
+		pointer-events: none;
+	}
+
+	.range-slider::-webkit-slider-thumb {
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--accent-primary);
+		border: 3px solid var(--bg-primary);
+		cursor: pointer;
+		pointer-events: all;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		transition: all 0.2s ease;
+		position: relative;
+		z-index: 2;
+	}
+
+	.range-slider::-webkit-slider-thumb:hover {
+		transform: scale(1.1);
+		box-shadow: 0 3px 8px rgba(88, 166, 255, 0.4);
+	}
+
+	.range-slider::-webkit-slider-thumb:active {
+		transform: scale(1.05);
+		box-shadow: 0 1px 4px rgba(88, 166, 255, 0.6);
+	}
+
+	.range-slider::-moz-range-thumb {
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: var(--accent-primary);
+		border: 3px solid var(--bg-primary);
+		cursor: pointer;
+		pointer-events: all;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		transition: all 0.2s ease;
+	}
+
+	.range-slider::-moz-range-thumb:hover {
+		transform: scale(1.1);
+		box-shadow: 0 3px 8px rgba(88, 166, 255, 0.4);
+	}
+
+	.range-slider::-moz-range-track {
+		background: transparent;
+		height: 8px;
+	}
+
+	.range-slider:focus {
+		outline: none;
+	}
+
+	.range-slider:focus::-webkit-slider-thumb {
+		box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
 	}
 </style>
