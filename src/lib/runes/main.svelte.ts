@@ -61,6 +61,10 @@ class GlobalState {
 	get getProjectTranslation(): ProjectTranslation {
 		return this.currentProject!.content.projectTranslation;
 	}
+
+	get getTranslationsState() {
+		return this.currentProject!.projectEditorState.translationsEditor;
+	}
 }
 
 export const globalState = new GlobalState();

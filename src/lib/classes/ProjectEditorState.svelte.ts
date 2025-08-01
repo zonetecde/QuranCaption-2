@@ -93,6 +93,26 @@ export class SubtitlesEditorState extends SerializableBase {
 export class TranslationsEditorState extends SerializableBase {
 	// Indique si l'utilisateur montre les instructions pour utiliser l'IA
 	showAIInstructions: boolean = $state(false);
+
+	// Indique le filtre actuellement appliqué dans l'éditeur de traductions
+	filter: { [statut: string]: boolean } = $state({
+		'to review': true,
+		'ai error': true,
+		'ai trimmed': true,
+		'automatically trimmed': true,
+		reviewed: true,
+		'completed by default': false
+	});
+
+	checkOnlyFilters(list: string[]) {
+		for (const key in this.filter) {
+			if (list.includes(key)) {
+				this.filter[key] = true;
+			} else {
+				this.filter[key] = false;
+			}
+		}
+	}
 }
 
 SerializableBase.registerChildClass(ProjectEditorState, 'timeline', TimelineState);

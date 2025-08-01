@@ -57,7 +57,6 @@ export class SerializableBase {
 		if (obj instanceof Date) {
 			return obj.toISOString();
 		}
-
 		const result: any = {}; // Ajouter le nom de la classe si c'est un objet SerializableBase
 		if (obj instanceof SerializableBase) {
 			// Rechercher d'abord dans le registre en utilisant le constructeur de l'objet
@@ -71,7 +70,15 @@ export class SerializableBase {
 				}
 			}
 
-			// Si on n'a pas trouvé dans le registre, utiliser la propriété statique ou le nom du constructeur
+			// Si on n'a pas trouvé dans le registre, essayer avec le nom du constructeur directement
+			if (!className) {
+				const constructorName = obj.constructor.name;
+				if (SerializableBase.__classRegistry.has(constructorName)) {
+					className = constructorName;
+				}
+			}
+
+			// Si toujours pas trouvé, utiliser la propriété statique ou le nom du constructeur
 			if (!className) {
 				className = (obj.constructor as any).__className || obj.constructor.name;
 			}
