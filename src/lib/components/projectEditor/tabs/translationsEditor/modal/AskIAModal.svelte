@@ -432,16 +432,18 @@
 						<div class="flex items-center gap-2">
 							<span class="material-icons text-accent text-lg">tune</span>
 							<h3 class="text-lg font-semibold text-primary">Verse Selection</h3>
-							<span class="bg-accent text-black px-2 py-1 rounded-md text-xs font-semibold">
+							<span class="bg-accent px-2 py-1 rounded-md text-xs font-semibold">
 								{totalVerses} verses found
 							</span>
 						</div>
 						<div class="bg-accent border border-color rounded-lg p-4">
 							<div class="mb-4">
 								<div class="flex items-center justify-between mb-2">
-									<label class="text-sm font-medium text-secondary">
-										Select verse range to include in prompt:
-									</label>
+									<p class="text-sm font-medium text-secondary">
+										Select verse range to include in prompt: <span class="italic"
+											>(in case prompt is too long)</span
+										>
+									</p>
 									<div class="text-sm text-primary font-mono">
 										Indices {startIndex} to {endIndex} ({endIndex - startIndex + 1} verses)
 									</div>
@@ -467,6 +469,7 @@
 										max={totalVerses - 1}
 										bind:value={startIndex}
 										oninput={(e) => {
+											//@ts-ignore
 											const newStart = parseInt(e.target.value);
 											if (newStart > endIndex) {
 												endIndex = newStart;
@@ -484,6 +487,7 @@
 										max={totalVerses - 1}
 										bind:value={endIndex}
 										oninput={(e) => {
+											//@ts-ignore
 											const newEnd = parseInt(e.target.value);
 											if (newEnd < startIndex) {
 												startIndex = newEnd;
