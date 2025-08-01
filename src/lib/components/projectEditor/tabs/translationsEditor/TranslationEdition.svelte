@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Edition, SubtitleClip, Translation } from '$lib/classes';
+	import { SubtitleClip, type Edition, type Translation } from '$lib/classes';
 	import { VerseTranslation } from '$lib/classes/Translation.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
@@ -33,7 +33,7 @@
 		if (translation().type === 'verse') {
 			originalTranslation = globalState.getProjectTranslation.getVerseTranslation(
 				edition,
-				subtitle
+				subtitle.getVerseKey()
 			);
 		}
 	});
@@ -139,10 +139,7 @@
 >
 	{#if translation()}
 		{@const status = translation().status}
-		{@const isCompleted =
-			status === 'completed by default' ||
-			status === 'reviewed' ||
-			status === 'automatically trimmed'}
+		{@const isCompleted = translation().isStatusComplete()}
 
 		<!-- En-tête avec flag et info -->
 		<div class="flex items-center gap-3 pb-2 border-b border-color">
@@ -179,6 +176,10 @@
 							To review
 						{:else if status === 'reviewed'}
 							Reviewed
+						{:else if status === 'ai trimmed'}
+							AI trimmed
+						{:else if status === 'ai error'}
+							AI error
 						{:else if status === 'undefined'}
 							Undefined
 						{:else}

@@ -6,8 +6,10 @@ import { SerializableBase } from './misc/SerializableBase';
 export type TranslationStatus =
 	| 'completed by default'
 	| 'automatically trimmed'
+	| 'ai trimmed'
 	| 'to review'
 	| 'reviewed'
+	| 'ai error'
 	| 'undefined';
 
 export class Translation extends SerializableBase {
@@ -25,6 +27,15 @@ export class Translation extends SerializableBase {
 		this.text = text;
 		this.status = status;
 	}
+
+	isStatusComplete(): boolean {
+		return (
+			this.status === 'completed by default' ||
+			this.status === 'reviewed' ||
+			this.status === 'automatically trimmed' ||
+			this.status === 'ai trimmed'
+		);
+	}
 }
 
 export class VerseTranslation extends Translation {
@@ -39,6 +50,9 @@ export class VerseTranslation extends Translation {
 
 	constructor(text: string, status: TranslationStatus) {
 		super(text, status);
+
+		if (text === undefined) return; // déserialisation
+
 		this.startWordIndex = 0;
 		this.endWordIndex = text.split(' ').length - 1;
 		this.isBruteForce = false;

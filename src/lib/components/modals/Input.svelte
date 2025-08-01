@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fade, slide } from 'svelte/transition';
 
 	let input: HTMLInputElement | undefined = $state(undefined);
 
@@ -46,6 +47,7 @@
 <div
 	class="bg-secondary border border-color rounded-2xl w-[500px] max-w-[90vw] p-6 shadow-2xl shadow-black/50
 	       flex flex-col relative backdrop-blur-sm"
+	transition:fade
 >
 	<!-- Header with icon -->
 	<div class="flex items-center gap-3 mb-6">

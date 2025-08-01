@@ -226,3 +226,6 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 		this.predefinedSubtitleType = type;
 	}
 }
+
+SerializableBase.registerChildClass(SubtitleClip, 'translations', Translation);
+SerializableBase.registerChildClass(ClipWithTranslation, 'translations', Translation);

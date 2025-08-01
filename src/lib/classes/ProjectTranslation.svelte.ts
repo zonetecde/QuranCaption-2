@@ -39,11 +39,8 @@ export class ProjectTranslation extends SerializableBase {
 		globalState.availableTranslations = object;
 	}
 
-	getVerseTranslation(edition: Edition, subtitle: SubtitleClip): string {
-		return (
-			this.versesTranslations[edition.name]?.[subtitle.getVerseKey()] ||
-			this.TEXT_NO_TRANSLATION_AVAILABLE
-		);
+	getVerseTranslation(edition: Edition, verseKey: string): string {
+		return this.versesTranslations[edition.name]?.[verseKey] || this.TEXT_NO_TRANSLATION_AVAILABLE;
 	}
 
 	/**
