@@ -213,6 +213,32 @@ export class SerializableBase {
 							}
 							return item;
 						});
+					} else if (value && typeof value === 'object' && !Array.isArray(value)) {
+						// Vérifier si c'est un dictionnaire d'objets (comme translations)
+						const deserializedDict: any = {};
+						for (const dictKey in value) {
+							if (Object.prototype.hasOwnProperty.call(value, dictKey)) {
+								const dictValue = value[dictKey];
+								if (
+									dictValue &&
+									typeof dictValue === 'object' &&
+									dictValue.__className &&
+									SerializableBase.__classRegistry.has(dictValue.__className)
+								) {
+									// Désérialiser automatiquement l'objet avec sa classe appropriée
+									const ItemClass = SerializableBase.__classRegistry.get(dictValue.__className);
+									deserializedDict[dictKey] = ItemClass.fromJSON(dictValue);
+								} else if (
+									typeof dictValue === 'string' &&
+									SerializableBase.isDateString(dictValue)
+								) {
+									deserializedDict[dictKey] = new Date(dictValue);
+								} else {
+									deserializedDict[dictKey] = dictValue;
+								}
+							}
+						}
+						instance[key] = deserializedDict;
 					} else if (typeof value === 'string' && SerializableBase.isDateString(value)) {
 						// Convertir les chaînes de date en objets Date
 						instance[key] = new Date(value);

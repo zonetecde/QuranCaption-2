@@ -64,6 +64,8 @@ export class PredefinedSubtitleTranslation extends Translation {
 	constructor(text: string) {
 		super(text, 'completed by default');
 
+		if (text === undefined) return; // déserialisation
+
 		if (text.length > 0) {
 			this.type = 'predefined';
 		} else {

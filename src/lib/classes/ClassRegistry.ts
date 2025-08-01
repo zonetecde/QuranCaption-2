@@ -57,8 +57,8 @@ export function initializeClassRegistry() {
 	SerializableBase.registerClass('TimelineState', TimelineState);
 
 	// Classes de traduction
+	SerializableBase.registerClass('ProjectTranslation', ProjectTranslation);
 	SerializableBase.registerClass('Translation', Translation);
 	SerializableBase.registerClass('VerseTranslation', VerseTranslation);
 	SerializableBase.registerClass('PredefinedSubtitleTranslation', PredefinedSubtitleTranslation);
-	SerializableBase.registerClass('ProjectTranslation', ProjectTranslation);
 }
