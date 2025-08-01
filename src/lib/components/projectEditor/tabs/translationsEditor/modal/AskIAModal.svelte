@@ -16,7 +16,7 @@
 
 	let aiPrompt: string = $state('');
 	let aiResponse: string = $state('');
-	let showInstructions: boolean = $state(false);
+
 	// Fonction pour traiter la réponse de l'IA et mettre à jour les traductions
 	function setTranslationsFromAIResponse(aiResponseStr: string): void {
 		try {
@@ -291,7 +291,7 @@
 					array.push({
 						index: index++,
 						verseKey: verseKey,
-						segments: verse,
+						segments: verse.map((subtitle) => subtitle.text),
 						translation: translationWords
 					});
 				}
@@ -337,7 +337,9 @@
 	<div class="px-6 py-3 border-b border-color bg-primary">
 		<button
 			class="w-full bg-accent border border-color rounded-lg p-3 transition-all duration-200 hover:bg-[rgba(88,166,255,0.1)]"
-			onclick={() => (showInstructions = !showInstructions)}
+			onclick={() =>
+				(globalState.currentProject!.projectEditorState.translationsEditor.showAIInstructions =
+					!globalState.currentProject!.projectEditorState.translationsEditor.showAIInstructions)}
 		>
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-3">
@@ -349,12 +351,16 @@
 					<div class="text-left">
 						<h3 class="text-sm font-semibold text-primary">How to use AI Translation</h3>
 						<p class="text-xs text-thirdly">
-							Click to {showInstructions ? 'hide' : 'show'} detailed instructions
+							Click to {globalState.currentProject!.projectEditorState.translationsEditor
+								.showAIInstructions
+								? 'hide'
+								: 'show'} detailed instructions
 						</p>
 					</div>
 				</div>
 				<span
-					class="material-icons text-secondary transition-transform duration-200 {showInstructions
+					class="material-icons text-secondary transition-transform duration-200 {globalState
+						.currentProject!.projectEditorState.translationsEditor.showAIInstructions
 						? 'rotate-180'
 						: ''}"
 				>
@@ -363,7 +369,7 @@
 			</div>
 		</button>
 
-		{#if showInstructions}
+		{#if globalState.currentProject!.projectEditorState.translationsEditor.showAIInstructions}
 			<div
 				class="mt-3 p-4 bg-secondary border border-color rounded-lg"
 				transition:slide={{ duration: 200 }}

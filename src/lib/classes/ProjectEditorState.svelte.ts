@@ -29,6 +29,9 @@ export class ProjectEditorState extends SerializableBase {
 	// Subtitles editor
 	subtitlesEditor: SubtitlesEditorState = $state(new SubtitlesEditorState());
 
+	// Translations editor
+	translationsEditor: TranslationsEditorState = $state(new TranslationsEditorState());
+
 	// Hauteur de la section supérieure dans chaque onglet
 	upperSectionHeight: number = $state(68);
 }
@@ -86,3 +89,17 @@ export class SubtitlesEditorState extends SerializableBase {
 	// Affiche la translittération des mots
 	showWordTransliteration: boolean = $state(false);
 }
+
+export class TranslationsEditorState extends SerializableBase {
+	// Indique si l'utilisateur montre les instructions pour utiliser l'IA
+	showAIInstructions: boolean = $state(false);
+}
+
+SerializableBase.registerChildClass(ProjectEditorState, 'timeline', TimelineState);
+SerializableBase.registerChildClass(
+	ProjectEditorState,
+	'translationsEditor',
+	TranslationsEditorState
+);
+SerializableBase.registerChildClass(ProjectEditorState, 'videoPreview', VideoPreviewState);
+SerializableBase.registerChildClass(ProjectEditorState, 'subtitlesEditor', SubtitlesEditorState);
