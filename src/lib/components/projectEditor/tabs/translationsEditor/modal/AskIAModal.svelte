@@ -230,6 +230,10 @@
 	}
 
 	onMount(async () => {
+		generatePrompt();
+	});
+
+	async function generatePrompt() {
 		// Génère déjà le prompt
 		const array = [];
 
@@ -250,7 +254,6 @@
 
 			verses[verseKey].push(subtitle);
 		}
-
 		// Si tout les sous-titres d'un même verset on un status qui montre que c'est déjà traduit, on ne les traite pas
 		for (const verseKey in verses) {
 			const subtitlesForVerse = verses[verseKey];
@@ -260,49 +263,46 @@
 					subtitle.translations[edition.name]?.isStatusComplete()
 				)
 			) {
-				delete verses[verseKey]; // Supprime le verset s'il est déjà traduit			}
+				delete verses[verseKey]; // Supprime le verset s'il est déjà traduit
 			}
-
-			// Vérifier s'il reste des versets à traiter
-			if (Object.keys(verses).length === 0) {
-				aiPrompt =
-					'All verses have already been translated for this edition. No AI assistance needed.';
-				return;
-			}
-
-			for (const verseKey in verses) {
-				const verse = verses[verseKey];
-				const translation = globalState.getProjectTranslation.getVerseTranslation(
-					edition,
-					verseKey
-				);
-
-				let translationWords = [];
-
-				for (let i = 0; i < translation.split(' ').length; i++) {
-					const element = translation.split(' ')[i];
-					translationWords.push({
-						i: i,
-						w: element
-					});
-				}
-
-				if (verse.length > 0) {
-					array.push({
-						index: index++,
-						verseKey: verseKey,
-						segments: verse.map((subtitle) => subtitle.text),
-						translation: translationWords
-					});
-				}
-			}
-
-			const json = JSON.stringify(array);
-			let prompt = await (await fetch('/prompts/translation.txt')).text();
-
-			aiPrompt = prompt + '\n\n' + json;
 		}
-	});
+
+		// Vérifier s'il reste des versets à traiter
+		if (Object.keys(verses).length === 0) {
+			aiPrompt =
+				'All verses have already been translated for this edition. No AI assistance needed.';
+			return;
+		}
+
+		for (const verseKey in verses) {
+			const verse = verses[verseKey];
+			const translation = globalState.getProjectTranslation.getVerseTranslation(edition, verseKey);
+
+			let translationWords = [];
+
+			for (let i = 0; i < translation.split(' ').length; i++) {
+				const element = translation.split(' ')[i];
+				translationWords.push({
+					i: i,
+					w: element
+				});
+			}
+
+			if (verse.length > 0) {
+				array.push({
+					index: index++,
+					verseKey: verseKey,
+					segments: verse.map((subtitle) => subtitle.text),
+					translation: translationWords
+				});
+			}
+		}
+
+		const json = JSON.stringify(array);
+		let prompt = await (await fetch('/prompts/translation.txt')).text();
+
+		aiPrompt = prompt + '\n\n' + json;
+	}
 </script>
 
 <div
@@ -381,8 +381,7 @@
 							>1</span
 						>
 						<p>
-							Copy the generated prompt below and paste it in <span
-								class="text-accent font-medium -mx-1"
+							Copy the generated prompt below and paste it in <span class="text-accent font-medium"
 								><ClickableLink url="https://grok.com/" label="Grok" /></span
 							> (Recommended)
 						</p>
