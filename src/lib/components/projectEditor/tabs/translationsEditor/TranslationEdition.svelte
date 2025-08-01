@@ -64,7 +64,12 @@
 						translation().endWordIndex = originalTranslation.split(' ').length - 1;
 					}
 					updateTranslationText();
-					translation().status = 'automatically trimmed';
+
+					// Si c'est les derniers mots du verset, normalement le trim est fait automatiquement
+					// donc on met le status à 'automatically trimmed'
+					// sinon on le met à 'to review' car il faut encore trim la fin de la traduction
+					if (subtitle.isLastWordsOfVerse) translation().status = 'automatically trimmed';
+					else translation().status = 'to review';
 				}
 			}
 		}

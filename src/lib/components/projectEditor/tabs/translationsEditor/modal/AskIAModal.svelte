@@ -6,7 +6,6 @@
 	import { onMount } from 'svelte';
 	import toast from 'svelte-5-french-toast';
 	import { slide } from 'svelte/transition';
-
 	let {
 		close,
 		edition
@@ -17,6 +16,7 @@
 
 	let aiPrompt: string = $state('');
 	let aiResponse: string = $state('');
+	let showInstructions: boolean = $state(false);
 	// Fonction pour traiter la réponse de l'IA et mettre à jour les traductions
 	function setTranslationsFromAIResponse(aiResponseStr: string): void {
 		try {
@@ -333,32 +333,78 @@
 			</button>
 		</div>
 	</div>
-
-	<!-- Instructions section -->
-	<div class="px-6 py-4 border-b border-color bg-primary">
-		<div class="bg-accent border border-color rounded-lg p-4">
-			<div class="flex items-start gap-3">
-				<div
-					class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-				>
-					<span class="material-icons text-white text-sm">info</span>
-				</div>
-				<div class="flex-1">
-					<h3 class="text-sm font-semibold text-primary mb-2">How to use AI Translation</h3>
-					<div class="space-y-2 text-sm text-secondary">
-						<p>
-							1. Copy the generated prompt below and paste it in
-							<span class="text-accent font-medium">
-								<ClickableLink url="https://gemini.google.com/" label="Gemini" />
-							</span>
+	<!-- Instructions section - Collapsible -->
+	<div class="px-6 py-3 border-b border-color bg-primary">
+		<button
+			class="w-full bg-accent border border-color rounded-lg p-3 transition-all duration-200 hover:bg-[rgba(88,166,255,0.1)]"
+			onclick={() => (showInstructions = !showInstructions)}
+		>
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<div
+						class="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+					>
+						<span class="material-icons text-white text-sm">info</span>
+					</div>
+					<div class="text-left">
+						<h3 class="text-sm font-semibold text-primary">How to use AI Translation</h3>
+						<p class="text-xs text-thirdly">
+							Click to {showInstructions ? 'hide' : 'show'} detailed instructions
 						</p>
-						<p>2. Wait for the AI to generate the JSON response</p>
-						<p>3. Copy the JSON response and paste it in the response field</p>
-						<p>4. Click "Apply Translations" to update your subtitles</p>
+					</div>
+				</div>
+				<span
+					class="material-icons text-secondary transition-transform duration-200 {showInstructions
+						? 'rotate-180'
+						: ''}"
+				>
+					expand_more
+				</span>
+			</div>
+		</button>
+
+		{#if showInstructions}
+			<div
+				class="mt-3 p-4 bg-secondary border border-color rounded-lg"
+				transition:slide={{ duration: 200 }}
+			>
+				<div class="space-y-2 text-sm text-secondary">
+					<div class="flex items-start gap-2">
+						<span
+							class="flex-shrink-0 w-5 h-5 bg-accent-primary text-black rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+							>1</span
+						>
+						<p>
+							Copy the generated prompt below and paste it in <span
+								class="text-accent font-medium -mx-1"
+								><ClickableLink url="https://grok.com/" label="Grok" /></span
+							> (Recommended)
+						</p>
+					</div>
+					<div class="flex items-start gap-2">
+						<span
+							class="flex-shrink-0 w-5 h-5 bg-accent-primary text-black rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+							>2</span
+						>
+						<p>Wait for the AI to generate the JSON response</p>
+					</div>
+					<div class="flex items-start gap-2">
+						<span
+							class="flex-shrink-0 w-5 h-5 bg-accent-primary text-black rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+							>3</span
+						>
+						<p>Copy the JSON response and paste it in the response field below</p>
+					</div>
+					<div class="flex items-start gap-2">
+						<span
+							class="flex-shrink-0 w-5 h-5 bg-accent-primary text-black rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+							>4</span
+						>
+						<p>Click "Apply Translations" to update your subtitles</p>
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 	<!-- Content area -->
 	<div class="flex-1 overflow-hidden flex flex-col">
@@ -405,12 +451,11 @@
 								Copy Prompt
 							</button>
 						</div>
-
 						<textarea
 							id="ai-prompt"
 							readonly
 							bind:value={aiPrompt}
-							class="w-full h-40 bg-secondary border border-color rounded-lg p-3 text-sm text-primary resize-none font-mono leading-relaxed"
+							class="w-full h-32 bg-secondary border border-color rounded-lg p-3 text-sm text-primary resize-none font-mono leading-relaxed"
 							placeholder="Generating prompt..."
 						></textarea>
 					</div>
@@ -439,12 +484,11 @@
 								Apply Translations
 							</button>
 						</div>
-
 						<textarea
 							id="ai-response"
 							bind:value={aiResponse}
-							class="w-full h-40 bg-secondary border border-color rounded-lg p-3 text-sm text-primary resize-none font-mono leading-relaxed focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-opacity-20 transition-all duration-200"
-							placeholder="Paste the JSON response from Gemini here..."
+							class="w-full h-32 bg-secondary border border-color rounded-lg p-3 text-sm text-primary resize-none font-mono leading-relaxed focus:border-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-opacity-20 transition-all duration-200"
+							placeholder="Paste the JSON response from the AI here..."
 						></textarea>
 
 						{#if aiResponse.trim()}
