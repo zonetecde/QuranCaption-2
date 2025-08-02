@@ -255,22 +255,23 @@ export class ProjectTranslation extends SerializableBase {
 		}
 
 		// Ajoute maintenant la traduction des sous-titre pré-définis
-		const lang = globalState.availableTranslations[edition.language];
-
 		for (const subtitle of globalState.getPredefinedSubtitleClips) {
-			switch (subtitle.predefinedSubtitleType) {
-				case 'Basmala':
-					const translationText = lang.basmala;
-					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation(translationText);
-					break;
-				case 'Istiadhah':
-					const istiadhahText = lang.istiadhah;
-					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation(istiadhahText);
-					break;
-				case 'Other':
-					subtitle.translations[edition.name] = new PredefinedSubtitleTranslation('');
-					break;
-			}
+			subtitle.translations[edition.name] = this.getPredefinedSubtitleTranslation(
+				edition,
+				subtitle.predefinedSubtitleType
+			);
+		}
+	}
+
+	getPredefinedSubtitleTranslation(edition: Edition, type: string): PredefinedSubtitleTranslation {
+		const lang = globalState.availableTranslations[edition.language];
+		switch (type) {
+			case 'Basmala':
+				return new PredefinedSubtitleTranslation(lang.basmala);
+			case 'Istiadhah':
+				return new PredefinedSubtitleTranslation(lang.istiadhah);
+			default:
+				return new PredefinedSubtitleTranslation('');
 		}
 	}
 

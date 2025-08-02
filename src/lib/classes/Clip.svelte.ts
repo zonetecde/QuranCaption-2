@@ -4,7 +4,7 @@ import type { Asset } from './Asset.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
-import type { VerseTranslation } from './Translation.svelte';
+import { PredefinedSubtitleTranslation, type VerseTranslation } from './Translation.svelte';
 
 type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Asset';
 
@@ -217,12 +217,27 @@ export type PredefinedSubtitleType =
 	| 'Other';
 
 export class PredefinedSubtitleClip extends ClipWithTranslation {
-	text: string;
-	predefinedSubtitleType: PredefinedSubtitleType;
+	text: string = $state('');
+	predefinedSubtitleType: PredefinedSubtitleType = $state('Other');
 
 	constructor(startTime: number, endTime: number, text: string, type: PredefinedSubtitleType) {
-		super(startTime, endTime, 'Pre-defined Subtitle', {});
-		this.text = $state(text);
+		if (startTime === undefined) {
+			// Déserialisation
+			super(0, 0, 'Pre-defined Subtitle');
+			return;
+		}
+
+		// Ajoute les traductions du clip
+		let translations: { [key: string]: Translation } = {};
+
+		// Récupère les traductions ajoutées au projet
+		for (const edition of globalState.getProjectTranslation.addedTranslationEditions) {
+			translations[edition.name] =
+				globalState.getProjectTranslation.getPredefinedSubtitleTranslation(edition, type);
+		}
+
+		super(startTime, endTime, 'Pre-defined Subtitle', translations);
+		this.text = text;
 		this.predefinedSubtitleType = type;
 	}
 }
