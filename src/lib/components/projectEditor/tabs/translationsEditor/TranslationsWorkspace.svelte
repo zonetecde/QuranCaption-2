@@ -3,7 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { fade } from 'svelte/transition';
 	import TranslationEdition from './TranslationEdition.svelte';
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { ClipWithTranslation } from '$lib/classes/Clip.svelte';
 	import NoTranslationsToShow from './NoTranslationsToShow.svelte';
 
@@ -102,10 +102,28 @@
 
 		return false;
 	}
+
+	onMount(() => {
+		// Le timeout sert à attendre que le DOM soit complètement chargé (donc que les traductions soient affichées)
+		setTimeout(() => {
+			// Remet la position du scroll à la dernière position sauvegardée
+			const savedScrollPosition = globalState.getTranslationsState.scrollPosition;
+			const workspace = document.getElementById('translations-workspace');
+			if (workspace) {
+				workspace.scrollTop = savedScrollPosition;
+			}
+		}, 0);
+	});
 </script>
 
 <section
 	class="min-h-0 bg-secondary border border-color rounded-lg shadow-lg h-full overflow-y-auto"
+	id="translations-workspace"
+	onscroll={(e) => {
+		// Sauvegarde la position du scroll
+		const pos = (e.target as HTMLElement).scrollTop;
+		globalState.getTranslationsState.scrollPosition = pos;
+	}}
 >
 	{#if globalState.currentProject!.content.projectTranslation.addedTranslationEditions.length === 0}
 		<div class="flex items-center flex-col gap-6 justify-center h-full pb-10">
