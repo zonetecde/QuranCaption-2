@@ -13,11 +13,22 @@
 	let showAskIAModal = $state(false);
 	let aiModalTranslationEdition: Edition | null = $state(null);
 
-	let numberOfSubtitlesWithStatus = $derived((test: string) => {
+	/**
+	 * Récupère le nombre de sous-titres ayant un statut spécifique.
+	 */
+	let numberOfSubtitlesWithStatus = $derived((status: string) => {
+		// Permet de trigger la réactivité en forçant la lecture des status
+		const _ = globalState.getSubtitleClips.map((clip) => {
+			for (const key in clip.translations) {
+				const value = clip.translations[key];
+				const _ = value.status;
+			}
+		});
+
 		return globalState.getSubtitleClips.filter((clip) => {
 			for (const key in clip.translations) {
 				const value = clip.translations[key];
-				if (value.status === test) {
+				if (value.status === status) {
 					return true;
 				}
 			}

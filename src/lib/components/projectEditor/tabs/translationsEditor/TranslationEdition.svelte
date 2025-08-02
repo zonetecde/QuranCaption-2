@@ -53,7 +53,8 @@
 			// Si c'est la continuité du verset précédent, on met à jour la traduction
 			if (
 				previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex && // Vérifie que le sous-titre précédent se termine juste avant le début du sous-titre actuel
-				verseTrans.status === 'reviewed' // vérifie que la traduction du sous-titre précédent n'est pas vide
+				verseTrans.status === 'reviewed' && // vérifie que la traduction du sous-titre précédent n'est pas vide
+				!verseTrans.isBruteForce // vérifie que la traduction du sous-titre précédent a été trimmed via l'outil
 			) {
 				// Met à jour les indices de début et de fin de la traduction du sous-titre précédent
 				previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
