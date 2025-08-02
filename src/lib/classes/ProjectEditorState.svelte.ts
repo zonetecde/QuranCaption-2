@@ -95,7 +95,7 @@ export class TranslationsEditorState extends SerializableBase {
 	showAIInstructions: boolean = $state(false);
 
 	// Indique le filtre actuellement appliqué dans l'éditeur de traductions
-	filter: { [statut: string]: boolean } = $state({
+	filters: { [statut: string]: boolean } = $state({
 		'to review': true,
 		'ai error': true,
 		'ai trimmed': true,
@@ -105,13 +105,22 @@ export class TranslationsEditorState extends SerializableBase {
 	});
 
 	checkOnlyFilters(list: string[]) {
-		for (const key in this.filter) {
+		for (const key in this.filters) {
 			if (list.includes(key)) {
-				this.filter[key] = true;
+				this.filters[key] = true;
 			} else {
-				this.filter[key] = false;
+				this.filters[key] = false;
 			}
 		}
+
+		this.triggerReactivity();
+	}
+
+	triggerReactivity() {
+		// Pour forcer la réactivité
+		this.filters = {
+			...this.filters
+		};
 	}
 }
 

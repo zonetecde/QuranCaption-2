@@ -26,9 +26,9 @@
 </script>
 
 <div
-	class="bg-secondary h-full border border-color rounded-lg py-6 px-2 space-y-6 border-r-0 relative overflow-hidden"
+	class="bg-secondary h-full border border-color rounded-lg py-6 px-2 space-y-6 border-r-0 relative overflow-y-auto"
 >
-	<div class="relative z-10 overflow-y-auto h-full overflow-x-hidden">
+	<div class="relative z-10 overflow-x-hidden">
 		<!-- En-tête avec icône -->
 		<div class="flex gap-x-2 items-center justify-center mb-6">
 			<span class="material-icons text-accent text-xl">translate</span>
@@ -146,7 +146,11 @@
 							<input
 								type="checkbox"
 								id="filter-checkbox-{filter}"
-								bind:checked={globalState.getTranslationsState.filter[filter]}
+								bind:checked={globalState.getTranslationsState.filters[filter]}
+								onchange={() => {
+									// Pour forcer la réactivité
+									globalState.getTranslationsState.triggerReactivity();
+								}}
 								class="w-4 h-4 rounded transition-all duration-200 focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-bg-accent"
 							/>
 							<span class="text-sm text-secondary font-medium capitalize">
@@ -166,11 +170,10 @@
 					{/each}
 				</div>
 			</div>
-
 			<!-- Boutons d'action rapide -->
-			<div class="space-y-2">
+			<div class="space-y-2 px-1">
 				<button
-					class="btn w-full px-4 py-2.5 text-sm font-medium hover:bg-accent-primary hover:border-accent-primary hover:text-black transition-all duration-200 flex items-center justify-center gap-2"
+					class="btn w-full px-4 py-2.5 text-sm font-medium hover:bg-accent-primary hover:border-accent-primary hover:text-black transition-all duration-200 flex items-center justify-center gap-2 relative hover:z-10"
 					onclick={() => {
 						globalState.getTranslationsState.checkOnlyFilters([
 							'to review',
@@ -185,7 +188,7 @@
 				</button>
 
 				<button
-					class="btn w-full px-4 py-2.5 text-sm font-medium hover:bg-orange-500 hover:border-orange-500 hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+					class="btn w-full px-4 py-2.5 text-sm font-medium hover:bg-orange-500 hover:border-orange-500 hover:text-white transition-all duration-200 flex items-center justify-center gap-2 relative hover:z-10"
 					onclick={() => {
 						globalState.getTranslationsState.checkOnlyFilters(['to review', 'ai error']);
 					}}
