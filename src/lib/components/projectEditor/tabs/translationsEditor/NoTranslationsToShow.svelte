@@ -44,8 +44,6 @@
 						Object.keys(globalState.getTranslationsState.filters).forEach((key) => {
 							globalState.getTranslationsState.filters[key] = true;
 						});
-
-						globalState.getTranslationsState.triggerReactivity();
 					}}
 				>
 					<span class="material-icons text-accent group-hover:text-accent-primary text-lg"

@@ -115,15 +115,6 @@ export class TranslationsEditorState extends SerializableBase {
 				this.filters[key] = false;
 			}
 		}
-
-		this.triggerReactivity();
-	}
-
-	triggerReactivity() {
-		// Pour forcer la réactivité
-		this.filters = {
-			...this.filters
-		};
 	}
 }
 

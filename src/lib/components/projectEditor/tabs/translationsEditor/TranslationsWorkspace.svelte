@@ -24,19 +24,22 @@
 		)
 	);
 
-	$effect(() => {
-		if (globalState.getProjectTranslation.addedTranslationEditions) {
-			untrack(() => {
-				// Trigger la réactivité des filtres pour afficher les traductions ajoutées/supprimées
-				globalState.getTranslationsState.triggerReactivity();
-			});
-		}
-	});
-
 	// Le format est : { [sous-titreId]: [edition1, edition2, ...] }
 	let allowedTranslations: { [key: string]: string[] } = $state({});
 
 	$effect(() => {
+		// Permet de trigger la réactivité en forçant la lecture des status
+		for (const key in globalState.getTranslationsState.filters) {
+			const value = globalState.getTranslationsState.filters[key];
+			const _ = value;
+		}
+
+		// Aussi lorsqu'on ajoute/supprime une édition de traduction
+		for (const edition of globalState.currentProject!.content.projectTranslation
+			.addedTranslationEditions) {
+			const _ = edition.name;
+		}
+
 		// Met à jour les traductions à afficher en fonction des filtres
 		const filter = globalState.getTranslationsState.filters;
 

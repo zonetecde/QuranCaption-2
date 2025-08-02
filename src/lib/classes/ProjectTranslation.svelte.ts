@@ -289,8 +289,6 @@ export class ProjectTranslation extends SerializableBase {
 		await this.removeTranslation(edition, true);
 
 		await this.addTranslation(edition, translations);
-
-		globalState.getTranslationsState.triggerReactivity();
 	}
 
 	async removeTranslation(edition: Edition, force: boolean = false) {

@@ -24,6 +24,11 @@
 				const _ = value.status;
 			}
 		});
+		// Pareille lorsqu'on ajoute/supprime une édition de traduction
+		for (const edition of globalState.currentProject!.content.projectTranslation
+			.addedTranslationEditions) {
+			const _ = edition.name;
+		}
 
 		return globalState.getSubtitleClips.filter((clip) => {
 			for (const key in clip.translations) {
@@ -158,10 +163,6 @@
 								type="checkbox"
 								id="filter-checkbox-{filter}"
 								bind:checked={globalState.getTranslationsState.filters[filter]}
-								onchange={() => {
-									// Pour forcer la réactivité
-									globalState.getTranslationsState.triggerReactivity();
-								}}
 								class="w-4 h-4 rounded transition-all duration-200 focus:ring-2 focus:ring-accent-primary focus:ring-offset-2 focus:ring-offset-bg-accent"
 							/>
 							<span class="text-sm text-secondary font-medium capitalize">
