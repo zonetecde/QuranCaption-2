@@ -7,6 +7,7 @@
 	import toast from 'svelte-5-french-toast';
 	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
 	import VideoPreviewControlsBar from './VideoPreviewControlsBar.svelte';
+	import VideoOverlay from '../tabs/styleEditor/VideoOverlay.svelte';
 
 	let {
 		showControls
@@ -595,6 +596,9 @@
 					onended={goNextVideo}
 				></video>
 			{/if}
+
+			<!-- Contient l'affichage des sous-titres et de tout les autres style -->
+			<VideoOverlay />
 		</div>
 	</div>
 </section>

@@ -4,12 +4,15 @@ import { AssetTrack, SubtitleTrack, Track } from './Track.svelte.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import toast from 'svelte-5-french-toast';
-import { ProjectTranslation } from './index.js';
+import { ProjectTranslation, VideoStyle } from './index.js';
 
 export class ProjectContent extends SerializableBase {
 	timeline: Timeline;
 	assets: Asset[];
 	projectTranslation: ProjectTranslation;
+
+	// Style
+	videoStyle: VideoStyle;
 
 	/**
 	 * Crée une instance de ProjectContent.
@@ -19,13 +22,15 @@ export class ProjectContent extends SerializableBase {
 	constructor(
 		timeline: Timeline = new Timeline(),
 		assets: Asset[] = [],
-		projectTranslation: ProjectTranslation = new ProjectTranslation()
+		projectTranslation: ProjectTranslation = new ProjectTranslation(),
+		videoStyle: VideoStyle = new VideoStyle()
 	) {
 		super();
 
 		this.timeline = $state(timeline);
 		this.assets = $state(assets);
 		this.projectTranslation = $state(projectTranslation);
+		this.videoStyle = $state(videoStyle);
 	}
 
 	/**
@@ -74,3 +79,4 @@ export class ProjectContent extends SerializableBase {
 SerializableBase.registerChildClass(ProjectContent, 'timeline', Timeline);
 SerializableBase.registerChildClass(ProjectContent, 'assets', Asset);
 SerializableBase.registerChildClass(ProjectContent, 'projectTranslation', ProjectTranslation);
+SerializableBase.registerChildClass(ProjectContent, 'VideoStyle', VideoStyle);

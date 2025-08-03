@@ -23,7 +23,7 @@ import { ProjectTranslation } from './ProjectTranslation.svelte';
 import { VerseRange } from './VerseRange';
 import { Duration } from './Duration';
 import { Status } from './Status';
-import { Asset } from '.';
+import { Asset, VideoStyle } from '.';
 
 /**
  * Enregistre automatiquement toutes les classes sérialisables pour permettre
@@ -34,6 +34,9 @@ export function initializeClassRegistry() {
 	SerializableBase.registerClass('VerseRange', VerseRange);
 	SerializableBase.registerClass('Duration', Duration);
 	SerializableBase.registerClass('Status', Status);
+
+	// Classes de style
+	SerializableBase.registerClass('VideoStyle', VideoStyle);
 
 	// Classes de clips
 	SerializableBase.registerClass('Clip', Clip);

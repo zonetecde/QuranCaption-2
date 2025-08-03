@@ -310,6 +310,22 @@ export class SubtitleTrack extends Track {
 
 		return this.clips[i] as SubtitleClip | null;
 	}
+
+	getCurrentSubtitleToDisplay(): SubtitleClip | PredefinedSubtitleClip | null {
+		const cursorPos = globalState.currentProject!.projectEditorState.timeline.cursorPosition;
+		for (let i = 0; i < this.clips.length; i++) {
+			const clip = this.clips[i];
+
+			if (
+				cursorPos >= clip.startTime &&
+				cursorPos <= clip.endTime &&
+				(clip instanceof SubtitleClip || clip instanceof PredefinedSubtitleClip)
+			) {
+				return clip;
+			}
+		}
+		return null;
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique
