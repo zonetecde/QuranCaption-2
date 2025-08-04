@@ -59,6 +59,11 @@
 	--ctx-menu-padding: 0.375rem 0.5rem;
 }
 
+/* Pour tout les p, hN, span etc empecher la selection de texte */
+* {
+	user-select: none;
+}
+
 .bg-titlebar {
 	background-color: var(--bg-titlebar);
 }

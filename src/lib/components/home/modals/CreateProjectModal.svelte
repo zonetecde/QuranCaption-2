@@ -29,7 +29,7 @@
 
 		let project = new Project(
 			new ProjectDetail(name.trim(), reciter.trim()),
-			ProjectContent.getDefaultProjectContent()
+			await ProjectContent.getDefaultProjectContent()
 		);
 
 		// Sauvegarde le projet sur le disque

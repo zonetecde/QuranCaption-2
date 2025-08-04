@@ -1,0 +1,433 @@
+{
+	"text": {
+		"name": "Text Styling",
+		"description": "Control the appearance and formatting of subtitle text",
+		"icon": "text_fields",
+		"styles": {
+			"text-color": {
+				"name": "Text Color",
+				"description": "Change the color of the text",
+				"value": "#ffffff",
+				"valueType": "color",
+				"css": "color: {value};",
+				"applyGlobally": false,
+				"icon": "palette"
+			},
+			"font-size": {
+				"name": "Font Size",
+				"description": "Adjust the size of the text",
+				"value": "24",
+				"valueType": "number",
+				"valueMin": 12,
+				"valueMax": 120,
+				"css": "font-size: {value}px;",
+				"applyGlobally": false,
+				"icon": "format_size"
+			},
+			"font-family": {
+				"name": "Font Family",
+				"description": "Select the font family for the text",
+				"value": "Arial",
+				"valueType": "select",
+				"options": [
+					"Arial",
+					"Helvetica",
+					"Times New Roman",
+					"Georgia",
+					"Verdana",
+					"Comic Sans MS",
+					"Impact",
+					"Trebuchet MS"
+				],
+				"css": "font-family: '{value}', sans-serif;",
+				"applyGlobally": false,
+				"icon": "font_download"
+			},
+			"font-weight": {
+				"name": "Font Weight",
+				"description": "Set the thickness of the font",
+				"value": "normal",
+				"valueType": "select",
+				"options": ["normal", "bold", "lighter", "bolder"],
+				"css": "font-weight: {value};",
+				"applyGlobally": false,
+				"icon": "format_bold"
+			},
+			"text-transform": {
+				"name": "Text Transform",
+				"description": "Transform the case of the text",
+				"value": "none",
+				"valueType": "select",
+				"options": ["none", "uppercase", "lowercase", "capitalize"],
+				"css": "text-transform: {value};",
+				"applyGlobally": false,
+				"icon": "text_format"
+			},
+			"letter-spacing": {
+				"name": "Letter Spacing",
+				"description": "Adjust spacing between characters",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": -5,
+				"valueMax": 10,
+				"css": "letter-spacing: {value}px;",
+				"applyGlobally": false,
+				"icon": "horizontal_distribute"
+			},
+			"line-height": {
+				"name": "Line Height",
+				"description": "Adjust spacing between lines",
+				"value": "1.2",
+				"valueType": "number",
+				"valueMin": 0.8,
+				"valueMax": 3,
+				"step": 0.1,
+				"css": "line-height: {value};",
+				"applyGlobally": false,
+				"icon": "format_line_spacing"
+			},
+			"max-height": {
+				"name": "Max Height",
+				"description": "Limit text height and auto-adjust font size to fit",
+				"value": "none",
+				"valueType": "select",
+				"options": ["none", "50", "100", "150", "200"],
+				"css": "max-height: {value}px; font-size: clamp(12px, 4vw, 48px);",
+				"applyGlobally": false,
+				"icon": "height"
+			}
+		}
+	},
+	"positioning": {
+		"name": "Position & Layout",
+		"description": "Control the position and spacing of subtitles on screen",
+		"icon": "open_with",
+		"styles": {
+			"vertical-position": {
+				"name": "Vertical Position",
+				"description": "Change the vertical position of the text",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": -540,
+				"valueMax": 540,
+				"css": "transform: translateY({value}px);",
+				"applyGlobally": false,
+				"icon": "vertical_align_center"
+			},
+			"horizontal-position": {
+				"name": "Horizontal Position",
+				"description": "Change the horizontal position of the text",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": -960,
+				"valueMax": 960,
+				"css": "transform: translateX({value}px);",
+				"applyGlobally": false,
+				"icon": "horizontal_rule"
+			},
+			"horizontal-padding": {
+				"name": "Horizontal Padding",
+				"description": "Change the horizontal padding of the text",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 200,
+				"css": "padding-left: {value}px; padding-right: {value}px;",
+				"applyGlobally": false,
+				"icon": "horizontal_distribute"
+			},
+			"text-align": {
+				"name": "Text Alignment",
+				"description": "Set the alignment of the text",
+				"value": "center",
+				"valueType": "select",
+				"options": ["left", "center", "right", "justify"],
+				"css": "text-align: {value};",
+				"applyGlobally": false,
+				"icon": "format_align_center"
+			},
+			"max-width": {
+				"name": "Max Width",
+				"description": "Set maximum width for subtitle container",
+				"value": "80",
+				"valueType": "number",
+				"valueMin": 20,
+				"valueMax": 100,
+				"css": "max-width: {value}%;",
+				"applyGlobally": false,
+				"icon": "width_normal"
+			}
+		}
+	},
+	"background": {
+		"name": "Background & Container",
+		"description": "Style the background and container of subtitles",
+		"icon": "square",
+		"styles": {
+			"background-enable": {
+				"name": "Enable Background",
+				"description": "Enable or disable background styling",
+				"value": "false",
+				"valueType": "boolean",
+				"css": "",
+				"applyGlobally": false,
+				"icon": "toggle_on"
+			},
+			"background-color": {
+				"name": "Background Color",
+				"description": "Add a background color behind the text",
+				"value": "rgba(0,0,0,0.8)",
+				"valueType": "color",
+				"css": "background-color: {value};",
+				"applyGlobally": false,
+				"icon": "format_color_fill"
+			},
+			"background-opacity": {
+				"name": "Background Opacity",
+				"description": "Control the transparency of the background",
+				"value": "80",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 100,
+				"css": "background-color: rgba(0, 0, 0, {value}%);",
+				"applyGlobally": false,
+				"icon": "opacity"
+			},
+			"border-radius": {
+				"name": "Border Radius",
+				"description": "Round the corners of the background",
+				"value": "8",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 50,
+				"css": "border-radius: {value}px;",
+				"applyGlobally": false,
+				"icon": "rounded_corner"
+			},
+			"padding": {
+				"name": "Internal Padding",
+				"description": "Add space inside the subtitle container",
+				"value": "8",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 50,
+				"css": "padding: {value}px;",
+				"applyGlobally": false,
+				"icon": "crop_free"
+			}
+		}
+	},
+	"shadow": {
+		"name": "Shadow Effects",
+		"description": "Add shadow effects to text and containers",
+		"icon": "filter_drama",
+		"styles": {
+			"shadow-enable": {
+				"name": "Enable Shadows",
+				"description": "Enable or disable shadow effects",
+				"value": "true",
+				"valueType": "boolean",
+				"css": "",
+				"applyGlobally": false,
+				"icon": "toggle_on"
+			},
+			"text-shadow": {
+				"name": "Text Shadow",
+				"description": "Add shadow effect to the text",
+				"value": "2",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 10,
+				"css": "text-shadow: {value}px {value}px 4px rgba(0, 0, 0, 0.8);",
+				"applyGlobally": false,
+				"icon": "text_fields"
+			},
+			"box-shadow": {
+				"name": "Container Shadow",
+				"description": "Add shadow to the subtitle container",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 20,
+				"css": "box-shadow: 0 {value}px {value}px rgba(0, 0, 0, 0.3);",
+				"applyGlobally": false,
+				"icon": "square"
+			}
+		}
+	},
+	"outline": {
+		"name": "Text Outline",
+		"description": "Add outlines and strokes around text",
+		"icon": "border_outer",
+		"styles": {
+			"outline-enable": {
+				"name": "Enable Outline",
+				"description": "Enable or disable text outline",
+				"value": "false",
+				"valueType": "boolean",
+				"css": "",
+				"applyGlobally": false,
+				"icon": "toggle_on"
+			},
+			"text-outline": {
+				"name": "Outline Width",
+				"description": "Set the width of the text outline",
+				"value": "1",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 5,
+				"css": "-webkit-text-stroke: {value}px;",
+				"applyGlobally": false,
+				"icon": "line_weight"
+			},
+			"text-outline-color": {
+				"name": "Outline Color",
+				"description": "Set the color of the text outline",
+				"value": "#000000",
+				"valueType": "color",
+				"css": "-webkit-text-stroke-color: {value};",
+				"applyGlobally": false,
+				"icon": "palette"
+			}
+		}
+	},
+	"border": {
+		"name": "Container Border",
+		"description": "Add borders around subtitle containers",
+		"icon": "border_all",
+		"styles": {
+			"border-enable": {
+				"name": "Enable Border",
+				"description": "Enable or disable container border",
+				"value": "false",
+				"valueType": "boolean",
+				"css": "",
+				"applyGlobally": false,
+				"icon": "toggle_on"
+			},
+			"border-width": {
+				"name": "Border Width",
+				"description": "Set the width of the border",
+				"value": "1",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 10,
+				"css": "border: {value}px solid;",
+				"applyGlobally": false,
+				"icon": "line_weight"
+			},
+			"border-color": {
+				"name": "Border Color",
+				"description": "Set the color of the border",
+				"value": "#ffffff",
+				"valueType": "color",
+				"css": "border-color: {value};",
+				"applyGlobally": false,
+				"icon": "palette"
+			},
+			"border-style": {
+				"name": "Border Style",
+				"description": "Choose the style of the border",
+				"value": "solid",
+				"valueType": "select",
+				"options": ["solid", "dashed", "dotted", "double", "groove", "ridge"],
+				"css": "border-style: {value};",
+				"applyGlobally": false,
+				"icon": "more_horiz"
+			}
+		}
+	},
+	"effects": {
+		"name": "Visual Effects",
+		"description": "Add visual effects and filters to enhance subtitle appearance",
+		"icon": "auto_fix_high",
+		"styles": {
+			"opacity": {
+				"name": "Text Opacity",
+				"description": "Control the transparency of the text",
+				"value": "100",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 100,
+				"css": "opacity: {value}%;",
+				"applyGlobally": false,
+				"icon": "opacity"
+			},
+			"blur": {
+				"name": "Blur Effect",
+				"description": "Apply blur effect to the text",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 10,
+				"css": "filter: blur({value}px);",
+				"applyGlobally": false,
+				"icon": "blur_on"
+			},
+			"brightness": {
+				"name": "Brightness",
+				"description": "Adjust the brightness of the text",
+				"value": "100",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 200,
+				"css": "filter: brightness({value}%);",
+				"applyGlobally": false,
+				"icon": "brightness_6"
+			},
+			"contrast": {
+				"name": "Contrast",
+				"description": "Adjust the contrast of the text",
+				"value": "100",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 200,
+				"css": "filter: contrast({value}%);",
+				"applyGlobally": false,
+				"icon": "contrast"
+			}
+		}
+	},
+	"animation": {
+		"name": "Animation & Transitions",
+		"description": "Add motion and transition effects to subtitles",
+		"icon": "animation",
+		"styles": {
+			"fade-duration": {
+				"name": "Fade Duration",
+				"description": "Duration of fade in/out effect in seconds",
+				"value": "0.3",
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 2,
+				"step": 0.1,
+				"css": "transition: opacity {value}s ease-in-out;",
+				"applyGlobally": true,
+				"icon": "fade"
+			},
+			"scale": {
+				"name": "Scale",
+				"description": "Scale the size of the subtitle",
+				"value": "1",
+				"valueType": "number",
+				"valueMin": 0.5,
+				"valueMax": 2,
+				"step": 0.1,
+				"css": "transform: scale({value});",
+				"applyGlobally": false,
+				"icon": "zoom_in"
+			},
+			"rotation": {
+				"name": "Rotation",
+				"description": "Rotate the subtitle in degrees",
+				"value": "0",
+				"valueType": "number",
+				"valueMin": -180,
+				"valueMax": 180,
+				"css": "transform: rotate({value}deg);",
+				"applyGlobally": false,
+				"icon": "rotate_right"
+			}
+		}
+	}
+}

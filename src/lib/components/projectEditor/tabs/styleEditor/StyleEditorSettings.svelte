@@ -1,3 +1,11 @@
+<script lang="ts">
+	import { globalState } from '$lib/runes/main.svelte';
+
+	const styles = $derived(() => {
+		return globalState.currentProject!.content.videoStyle.styles;
+	});
+</script>
+
 <div
 	class="bg-secondary h-full border border-color rounded-lg py-6 px-2 space-y-6 relative overflow-hidden"
 >

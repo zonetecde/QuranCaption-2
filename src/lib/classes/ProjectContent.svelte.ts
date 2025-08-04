@@ -38,14 +38,16 @@ export class ProjectContent extends SerializableBase {
 	 * une piste de sous-titres, une piste vidéo et une piste audio.
 	 * @returns Le contenu par défaut d'un projet
 	 */
-	static getDefaultProjectContent(): ProjectContent {
+	static async getDefaultProjectContent(): Promise<ProjectContent> {
 		return new ProjectContent(
 			new Timeline([
 				new SubtitleTrack(),
 				new AssetTrack(TrackType.Video),
 				new AssetTrack(TrackType.Audio)
 			]),
-			[]
+			[],
+			new ProjectTranslation(),
+			await VideoStyle.getDefaultVideoStyle()
 		);
 	}
 
@@ -79,4 +81,4 @@ export class ProjectContent extends SerializableBase {
 SerializableBase.registerChildClass(ProjectContent, 'timeline', Timeline);
 SerializableBase.registerChildClass(ProjectContent, 'assets', Asset);
 SerializableBase.registerChildClass(ProjectContent, 'projectTranslation', ProjectTranslation);
-SerializableBase.registerChildClass(ProjectContent, 'VideoStyle', VideoStyle);
+SerializableBase.registerChildClass(ProjectContent, 'videoStyle', VideoStyle);
