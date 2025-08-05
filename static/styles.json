@@ -7,7 +7,7 @@
 			"text-color": {
 				"name": "Text Color",
 				"description": "Change the color of the text",
-				"defaultValue": "#ffffff",
+				"value": "#ffffff",
 				"valueType": "color",
 				"css": "color: {value};",
 				"tailwind": false,
@@ -17,7 +17,7 @@
 			"font-size": {
 				"name": "Font Size",
 				"description": "Adjust the size of the text",
-				"defaultValue": "48",
+				"value": 48,
 				"valueType": "number",
 				"valueMin": 16,
 				"valueMax": 200,
@@ -29,7 +29,7 @@
 			"font-family": {
 				"name": "Font Family",
 				"description": "Select the font family for the text",
-				"defaultValue": "Arial",
+				"value": "Arial",
 				"valueType": "select",
 				"options": [
 					"Arial",
@@ -49,7 +49,7 @@
 			"font-weight": {
 				"name": "Font Weight",
 				"description": "Set the thickness of the font",
-				"defaultValue": "normal",
+				"value": "normal",
 				"valueType": "select",
 				"options": ["normal", "bold", "lighter", "bolder"],
 				"css": "font-weight: {value};",
@@ -60,7 +60,7 @@
 			"text-transform": {
 				"name": "Text Transform",
 				"description": "Transform the case of the text",
-				"defaultValue": "none",
+				"value": "none",
 				"valueType": "select",
 				"options": ["none", "uppercase", "lowercase", "capitalize"],
 				"css": "text-transform: {value};",
@@ -71,7 +71,7 @@
 			"letter-spacing": {
 				"name": "Letter Spacing",
 				"description": "Adjust spacing between characters",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": -10,
 				"valueMax": 20,
@@ -83,7 +83,7 @@
 			"line-height": {
 				"name": "Line Height",
 				"description": "Adjust spacing between lines",
-				"defaultValue": "1.2",
+				"value": 1.2,
 				"valueType": "number",
 				"valueMin": 0.8,
 				"valueMax": 3,
@@ -96,7 +96,7 @@
 			"max-height": {
 				"name": "Max Height",
 				"description": "Limit text height and auto-adjust font size to fit",
-				"defaultValue": "none",
+				"value": "none",
 				"valueType": "select",
 				"options": ["none", "100", "200", "300", "400", "500"],
 				"css": "max-height: {value}px; font-size: clamp(16px, 4vw, 120px);",
@@ -114,7 +114,7 @@
 			"vertical-position": {
 				"name": "Vertical Position",
 				"description": "Change the vertical position of the text (pixels from center)",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": -540,
 				"valueMax": 540,
@@ -127,7 +127,7 @@
 			"horizontal-position": {
 				"name": "Horizontal Position",
 				"description": "Change the horizontal position of the text (pixels from center)",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": -960,
 				"valueMax": 960,
@@ -140,7 +140,7 @@
 			"horizontal-padding": {
 				"name": "Horizontal Padding",
 				"description": "Change the horizontal padding of the text",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 400,
@@ -152,7 +152,7 @@
 			"text-align": {
 				"name": "Text Alignment",
 				"description": "Set the alignment of the text",
-				"defaultValue": "center",
+				"value": "center",
 				"valueType": "select",
 				"options": ["left", "center", "right", "justify"],
 				"css": "text-align: {value};",
@@ -163,7 +163,7 @@
 			"max-width": {
 				"name": "Max Width",
 				"description": "Set maximum width for subtitle container",
-				"defaultValue": "80",
+				"value": 80,
 				"valueType": "number",
 				"valueMin": 20,
 				"valueMax": 100,
@@ -182,7 +182,7 @@
 			"background-enable": {
 				"name": "Enable Background",
 				"description": "Enable or disable background styling",
-				"defaultValue": "false",
+				"value": false,
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
@@ -192,7 +192,7 @@
 			"background-color": {
 				"name": "Background Color",
 				"description": "Add a background color behind the text",
-				"defaultValue": "rgba(0,0,0,0.8)",
+				"value": "rgba(0,0,0,0.8)",
 				"valueType": "color",
 				"css": "background-color: {value};",
 				"tailwind": false,
@@ -202,7 +202,7 @@
 			"background-opacity": {
 				"name": "Background Opacity",
 				"description": "Control the transparency of the background",
-				"defaultValue": "80",
+				"value": 80,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 100,
@@ -214,7 +214,7 @@
 			"border-radius": {
 				"name": "Border Radius",
 				"description": "Round the corners of the background",
-				"defaultValue": "8",
+				"value": 8,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 100,
@@ -226,7 +226,7 @@
 			"padding": {
 				"name": "Internal Padding",
 				"description": "Add space inside the subtitle container",
-				"defaultValue": "16",
+				"value": 16,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 100,
@@ -245,7 +245,7 @@
 			"shadow-enable": {
 				"name": "Enable Shadows",
 				"description": "Enable or disable shadow effects",
-				"defaultValue": "true",
+				"value": true,
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
@@ -255,7 +255,7 @@
 			"text-shadow": {
 				"name": "Text Shadow",
 				"description": "Add shadow effect to the text",
-				"defaultValue": "4",
+				"value": 4,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 20,
@@ -267,7 +267,7 @@
 			"box-shadow": {
 				"name": "Container Shadow",
 				"description": "Add shadow to the subtitle container",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 40,
@@ -286,7 +286,7 @@
 			"outline-enable": {
 				"name": "Enable Outline",
 				"description": "Enable or disable text outline",
-				"defaultValue": "false",
+				"value": false,
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
@@ -296,7 +296,7 @@
 			"text-outline": {
 				"name": "Outline Width",
 				"description": "Set the width of the text outline",
-				"defaultValue": "2",
+				"value": 2,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 10,
@@ -308,7 +308,7 @@
 			"text-outline-color": {
 				"name": "Outline Color",
 				"description": "Set the color of the text outline",
-				"defaultValue": "#000000",
+				"value": "#000000",
 				"valueType": "color",
 				"css": "-webkit-text-stroke-color: {value};",
 				"tailwind": false,
@@ -325,7 +325,7 @@
 			"border-enable": {
 				"name": "Enable Border",
 				"description": "Enable or disable container border",
-				"defaultValue": "false",
+				"value": false,
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
@@ -335,7 +335,7 @@
 			"border-width": {
 				"name": "Border Width",
 				"description": "Set the width of the border",
-				"defaultValue": "2",
+				"value": 2,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 20,
@@ -347,7 +347,7 @@
 			"border-color": {
 				"name": "Border Color",
 				"description": "Set the color of the border",
-				"defaultValue": "#ffffff",
+				"value": "#ffffff",
 				"valueType": "color",
 				"css": "border-color: {value};",
 				"tailwind": false,
@@ -357,7 +357,7 @@
 			"border-style": {
 				"name": "Border Style",
 				"description": "Choose the style of the border",
-				"defaultValue": "solid",
+				"value": "solid",
 				"valueType": "select",
 				"options": ["solid", "dashed", "dotted", "double", "groove", "ridge"],
 				"css": "border-style: {value};",
@@ -375,7 +375,7 @@
 			"opacity": {
 				"name": "Text Opacity",
 				"description": "Control the transparency of the text",
-				"defaultValue": "100",
+				"value": 100,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 100,
@@ -387,7 +387,7 @@
 			"blur": {
 				"name": "Blur Effect",
 				"description": "Apply blur effect to the text",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 20,
@@ -400,7 +400,7 @@
 			"brightness": {
 				"name": "Brightness",
 				"description": "Adjust the brightness of the text",
-				"defaultValue": "100",
+				"value": 100,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 200,
@@ -413,7 +413,7 @@
 			"contrast": {
 				"name": "Contrast",
 				"description": "Adjust the contrast of the text",
-				"defaultValue": "100",
+				"value": 100,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 200,
@@ -432,13 +432,12 @@
 		"styles": {
 			"fade-duration": {
 				"name": "Fade Duration",
-				"description": "Duration of fade in/out effect in seconds",
-				"defaultValue": "0.3",
+				"description": "Duration of fade in/out effect in milliseconds",
+				"value": 500,
 				"valueType": "number",
 				"valueMin": 0,
-				"valueMax": 2,
-				"step": 0.1,
-				"css": "transition: opacity {value}s ease-in-out;",
+				"valueMax": 2000,
+				"css": "transition: opacity {value}ms ease-in-out;",
 				"tailwind": false,
 				"applyGlobally": true,
 				"icon": "fade"
@@ -446,7 +445,7 @@
 			"scale": {
 				"name": "Scale",
 				"description": "Scale the size of the subtitle",
-				"defaultValue": "100",
+				"value": 100,
 				"valueType": "number",
 				"valueMin": 25,
 				"valueMax": 300,
@@ -459,7 +458,7 @@
 			"rotation": {
 				"name": "Rotation",
 				"description": "Rotate the subtitle in degrees",
-				"defaultValue": "0",
+				"value": 0,
 				"valueType": "number",
 				"valueMin": -180,
 				"valueMax": 180,

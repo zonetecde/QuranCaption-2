@@ -3,7 +3,9 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { untrack } from 'svelte';
 
-	const fadeDuration = 500;
+	const fadeDuration = $derived(() => {
+		return globalState.getVideoStyle.animation.styles['fade-duration'].value as number;
+	});
 
 	let getTimelineSettings = $derived(() => {
 		return globalState.currentProject!.projectEditorState.timeline;
@@ -29,7 +31,7 @@
 		const currentTime = getTimelineSettings().cursorPosition;
 		const endTime = subtitle.endTime;
 		const timeLeft = endTime - currentTime;
-		const halfFade = fadeDuration / 2;
+		const halfFade = fadeDuration() / 2;
 
 		if (timeLeft <= halfFade) {
 			return Math.max(0, timeLeft / halfFade);
@@ -49,15 +51,17 @@
 <div class="w-full h-full">
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
 		{#if currentSubtitle() && currentSubtitle()!.id}
-			<p class="arabic absolute" style="opacity: {subtitleOpacity()}">{currentSubtitle()!.text}</p>
+			<p class={'arabic absolute ' + {}} style="opacity: {subtitleOpacity()};">
+				{currentSubtitle()!.text}
+			</p>
 
-			{#each Object.keys(currentSubtitleTranslations()!) as edition}
+			<!-- {#each Object.keys(currentSubtitleTranslations()!) as edition}
 				{@const translation = (currentSubtitleTranslations()! as Record<string, Translation>)[
 					edition
 				]}
 
-				<p class="translation absolute" style="opacity: {subtitleOpacity()}">{translation.text}</p>
-			{/each}
+				<p class="translation absolute" style="opacity: {subtitleOpacity()};">{translation.text}</p>
+			{/each} -->
 		{/if}
 	</div>
 </div>

@@ -1,4 +1,4 @@
-import { Project, ProjectContent, ProjectDetail } from '$lib/classes';
+import { Project, ProjectContent, ProjectDetail, VideoStyle } from '$lib/classes';
 import { readDir, remove, writeTextFile, readTextFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { globalState } from '$lib/runes/main.svelte';
@@ -80,6 +80,12 @@ export class ProjectService {
 
 		// Utilise la méthode fromJSON automatique pour récupérer l'instance correcte
 		const project = Project.fromJSON(projectData);
+
+		// Si le projet ne contient pas de styles vidéo, on initialise avec un style par défaut
+		if (Object.keys(project.content.videoStyle.styles).length === 0) {
+			// Si les styles ne sont pas définis, on initialise avec un style par défaut
+			project.content.videoStyle = await VideoStyle.getDefaultVideoStyle();
+		}
 
 		return project;
 	}

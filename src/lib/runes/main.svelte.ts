@@ -65,6 +65,10 @@ class GlobalState {
 	get getTranslationsState() {
 		return this.currentProject!.projectEditorState.translationsEditor;
 	}
+
+	get getVideoStyle() {
+		return this.currentProject!.content.videoStyle.styles;
+	}
 }
 
 export const globalState = new GlobalState();
