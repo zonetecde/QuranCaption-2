@@ -175,6 +175,19 @@
 				"icon": "format_align_center"
 			},
 			{
+				"id": "width",
+				"name": "Width",
+				"description": "Set width of subtitle container",
+				"value": 80,
+				"valueType": "number",
+				"valueMin": 20,
+				"valueMax": 100,
+				"css": "width: {value}%;",
+				"tailwind": false,
+				"applyGlobally": false,
+				"icon": "width_full"
+			},
+			{
 				"id": "max-width",
 				"name": "Max Width",
 				"description": "Set maximum width for subtitle container",
@@ -268,7 +281,7 @@
 				"id": "shadow-enable",
 				"name": "Enable Shadows",
 				"description": "Enable or disable shadow effects",
-				"value": true,
+				"value": false,
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
@@ -283,10 +296,21 @@
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 20,
-				"css": "text-shadow: {value}px {value}px 8px rgba(0, 0, 0, 0.8);",
+				"css": "text-shadow: {value}px {value}px 8px var(--text-shadow-color);",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "text_fields"
+			},
+			{
+				"id": "text-shadow-color",
+				"name": "Shadow Color",
+				"description": "Set the color of the text shadow",
+				"value": "#000000",
+				"valueType": "color",
+				"css": "--text-shadow-color: {value};",
+				"tailwind": false,
+				"applyGlobally": false,
+				"icon": "palette"
 			},
 			{
 				"id": "box-shadow",
@@ -296,10 +320,21 @@
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 40,
-				"css": "box-shadow: 0 {value}px {value}px rgba(0, 0, 0, 0.3);",
+				"css": "box-shadow: 0 {value}px {value}px var(--box-shadow-color);",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "square"
+			},
+			{
+				"id": "box-shadow-color",
+				"name": "Shadow Color",
+				"description": "Set the color of the container shadow",
+				"value": "#000000",
+				"valueType": "color",
+				"css": "--box-shadow-color: {value};",
+				"tailwind": false,
+				"applyGlobally": false,
+				"icon": "palette"
 			}
 		]
 	},

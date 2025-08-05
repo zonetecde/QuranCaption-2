@@ -139,6 +139,7 @@ export class VideoStyle extends SerializableBase {
 
 				// Propriétés spécifiques à ignorer
 				if (style.id === 'max-height' && style.value === 'none') continue;
+				if (style.id === 'font-family' && style.value === 'Hafs') continue; // Gérer par une classe Tailwind
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
@@ -161,6 +162,12 @@ export class VideoStyle extends SerializableBase {
 
 		for (const category of this.styles) {
 			for (const style of category.styles) {
+				if (style.id === 'font-family' && style.value === 'Hafs') {
+					// Utilise la police Hafs pour les styles de texte
+					tailwindClasses += 'arabic ';
+					continue;
+				}
+
 				// Ignore les styles qui ne sont pas des classes Tailwind
 				if (!style.tailwind || !style.tailwindClass) continue;
 

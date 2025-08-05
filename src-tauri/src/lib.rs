@@ -2,6 +2,8 @@ use std::fs;
 use std::path::{Path};
 use std::process::Command;
 
+use font_kit::source::SystemSource;
+
 #[tauri::command]
 async fn download_from_youtube(
     url: String,
@@ -190,6 +192,28 @@ fn move_file(source: String, destination: String) -> Result<(), String> {
     }
     std::fs::rename(source, destination).map_err(|e| e.to_string())
 }
+#[tauri::command]
+fn get_system_fonts() -> Result<Vec<String>, String> {
+    let source = SystemSource::new();
+    let fonts = source.all_fonts().map_err(|e| e.to_string())?;
+    let mut font_names = Vec::new();
+    let mut seen_names = std::collections::HashSet::new();
+
+    for font in fonts {
+        // Load the font to get its properties
+        let handle = font.load().map_err(|e| e.to_string())?;
+        let family = handle.family_name();
+        
+        // Only add the font name if we haven't seen it before
+        if seen_names.insert(family.clone()) {
+            font_names.push(family);
+        }
+    }
+
+    // Sort the font names alphabetically for better usability
+    font_names.sort();
+    Ok(font_names)
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -201,7 +225,8 @@ pub fn run() {
             download_from_youtube,
             get_duration,
             get_new_file_path,
-            move_file
+            move_file,
+            get_system_fonts
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
