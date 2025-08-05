@@ -58,7 +58,7 @@
 					<input type="text" bind:value={style.value} class="w-16" />
 				</div>
 			{:else if style.valueType === 'boolean'}
-				<div class="flex gap-x-2 items-center">
+				<div class="flex gap-x-2 items-center mt-2">
 					<input type="checkbox" bind:checked={style.value as boolean} class="w-4 h-4" />
 					<span class="text-xs text-secondary">Enabled</span>
 				</div>

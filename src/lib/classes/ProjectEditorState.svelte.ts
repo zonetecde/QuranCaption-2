@@ -32,8 +32,19 @@ export class ProjectEditorState extends SerializableBase {
 	// Translations editor
 	translationsEditor: TranslationsEditorState = $state(new TranslationsEditorState());
 
+	// Styles editor
+	stylesEditor: StylesEditorState = $state(new StylesEditorState());
+
 	// Hauteur de la section supérieure dans chaque onglet
 	upperSectionHeight: number = $state(68);
+}
+
+export class StylesEditorState extends SerializableBase {
+	// Indique la position du scroll dans l'éditeur de styles
+	scrollPosition: number = $state(0);
+
+	// Indique quel est la sélection actuelle dans l'éditeur de styles (global/arabic/translation)
+	currentSelection: 'global' | 'arabic' | string = $state('global');
 }
 
 /**
@@ -126,3 +137,4 @@ SerializableBase.registerChildClass(
 );
 SerializableBase.registerChildClass(ProjectEditorState, 'videoPreview', VideoPreviewState);
 SerializableBase.registerChildClass(ProjectEditorState, 'subtitlesEditor', SubtitlesEditorState);
+SerializableBase.registerChildClass(ProjectEditorState, 'stylesEditor', StylesEditorState);
