@@ -37,7 +37,7 @@
 	});
 </script>
 
-<div class={'flex ' + classes}>
+<div class={'flex ' + classes} onclick={() => (extended = !extended)}>
 	<h3 class="text-sm font-semibold text-gray-100 flex items-center truncate">
 		{#if icon.includes('png') || icon.includes('svg')}
 			<img src={icon} alt={name} class="w-6 h-6 mr-2" />{name}
@@ -49,7 +49,6 @@
 	<button
 		class={'flex items-center ml-auto cursor-pointer transition-all duration-100 ' +
 			(extended ? 'rotate-180' : '')}
-		onclick={() => (extended = !extended)}
 	>
 		<span class="material-icons text-4xl! text-indigo-400">arrow_drop_down</span>
 	</button>
