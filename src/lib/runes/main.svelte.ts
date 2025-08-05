@@ -67,7 +67,7 @@ class GlobalState {
 	}
 
 	get getVideoStyle() {
-		return this.currentProject!.content.videoStyle.styles;
+		return this.currentProject!.content.videoStyle;
 	}
 }
 

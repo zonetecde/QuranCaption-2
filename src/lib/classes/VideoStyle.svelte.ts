@@ -1,3 +1,5 @@
+import { SerializableBase } from './misc/SerializableBase';
+
 export type StyleValueType = 'color' | 'number' | 'select' | 'boolean';
 
 // Types spécifiques pour les catégories de styles
@@ -116,11 +118,12 @@ export interface Category {
 
 export type StylesData = Record<string, Category>;
 
-export class VideoStyle {
+export class VideoStyle extends SerializableBase {
 	styles: TypedStylesData = {} as TypedStylesData;
 	lastUpdated: Date = new Date();
 
 	constructor(styles: TypedStylesData = {} as TypedStylesData, lastUpdated: Date = new Date()) {
+		super();
 		this.styles = styles;
 		this.lastUpdated = lastUpdated;
 	}
@@ -175,73 +178,38 @@ export class VideoStyle {
 	}
 
 	/**
-	 * Méthodes d'accès typées pour chaque catégorie avec autocomplétion complète
-	 */
-	get text(): TextCategory | undefined {
-		return this.styles.text;
-	}
-
-	get positioning(): PositioningCategory | undefined {
-		return this.styles.positioning;
-	}
-
-	get background(): BackgroundCategory | undefined {
-		return this.styles.background;
-	}
-
-	get shadow(): ShadowCategory | undefined {
-		return this.styles.shadow;
-	}
-
-	get outline(): OutlineCategory | undefined {
-		return this.styles.outline;
-	}
-
-	get border(): BorderCategory | undefined {
-		return this.styles.border;
-	}
-
-	get effects(): EffectsCategory | undefined {
-		return this.styles.effects;
-	}
-
-	get animation(): AnimationCategory | undefined {
-		return this.styles.animation;
-	}
-
-	/**
 	 * Méthodes helper typées pour accéder facilement aux styles
 	 */
 	getTextStyle(styleName: TextStyleName): ExtendedStyle | undefined {
-		return this.text?.styles[styleName];
+		return this.styles.text.styles[styleName];
 	}
 
 	getPositioningStyle(styleName: PositioningStyleName): ExtendedStyle | undefined {
-		return this.positioning?.styles[styleName];
+		return this.styles.positioning.styles[styleName];
 	}
 
 	getBackgroundStyle(styleName: BackgroundStyleName): ExtendedStyle | undefined {
-		return this.background?.styles[styleName];
+		return this.styles.background.styles[styleName];
 	}
 
 	getShadowStyle(styleName: ShadowStyleName): ExtendedStyle | undefined {
-		return this.shadow?.styles[styleName];
+		return this.styles.shadow.styles[styleName];
 	}
 
 	getOutlineStyle(styleName: OutlineStyleName): ExtendedStyle | undefined {
-		return this.outline?.styles[styleName];
+		return this.styles.outline.styles[styleName];
 	}
 
 	getBorderStyle(styleName: BorderStyleName): ExtendedStyle | undefined {
-		return this.border?.styles[styleName];
+		return this.styles.border.styles[styleName];
 	}
 
 	getEffectsStyle(styleName: EffectsStyleName): ExtendedStyle | undefined {
-		return this.effects?.styles[styleName];
+		return this.styles.effects.styles[styleName];
 	}
 
 	getAnimationStyle(styleName: AnimationStyleName): ExtendedStyle | undefined {
-		return this.animation?.styles[styleName];
+		return this.styles.animation.styles[styleName];
 	}
 
 	/**
@@ -329,6 +297,7 @@ export class VideoStyle {
 		}
 		return false;
 	}
+
 	/**
 	 * Génère le CSS pour tous les styles actifs
 	 */
@@ -338,12 +307,15 @@ export class VideoStyle {
 		for (const categoryName in this.styles) {
 			const category = (this.styles as any)[categoryName];
 			for (const styleName in category.styles) {
-				const style = category.styles[styleName];
+				const style = category.styles[styleName] as ExtendedStyle;
 
-				// Pour les styles boolean, on n'applique le CSS que si la valeur est true
-				if (style.valueType === 'boolean' && !style.value) {
-					continue;
+				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
+				// alors si la catégorie est désactivée, on ne génère pas le CSS de tout les autres styles
+				if (style.valueType === 'boolean' && !style.value && !styleName.includes('Enable')) {
+					break;
 				}
+
+				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
 				// Remplace {value} par la valeur actuelle
 				let cssRule = style.css.replace(/{value}/g, String(style.value));
@@ -354,35 +326,34 @@ export class VideoStyle {
 			}
 		}
 
+		console.log('Generated CSS:', css);
+
 		return css;
 	}
 
-	/**
-	 * Génère le CSS pour une catégorie spécifique
-	 */
-	generateCategoryCSS(categoryName: string): string {
-		const category = this.getCategory(categoryName);
-		if (!category) return '';
+	generateTailwind(): string {
+		let tailwindClasses = '';
 
-		let css = '';
+		for (const categoryName in this.styles) {
+			const category = (this.styles as any)[categoryName];
+			for (const styleName in category.styles) {
+				const style = category.styles[styleName] as ExtendedStyle;
 
-		for (const styleName in category.styles) {
-			const style = category.styles[styleName];
+				// Ignore les styles qui ne sont pas des classes Tailwind
+				if (!style.tailwind || !style.tailwindClass) continue;
 
-			// Pour les styles boolean, on n'applique le CSS que si la valeur est true
-			if (style.valueType === 'boolean' && !style.value) {
-				continue;
-			}
+				// Remplace {value} par la valeur actuelle
+				let tailwindClass = style.tailwindClass.replace(/{value}/g, String(style.value));
 
-			// Remplace {value} par la valeur actuelle
-			let cssRule = style.css.replace(/{value}/g, String(style.value));
-
-			if (cssRule.trim()) {
-				css += cssRule + '\n';
+				if (tailwindClass.trim()) {
+					tailwindClasses += tailwindClass + ' ';
+				}
 			}
 		}
 
-		return css;
+		console.log('Generated Tailwind classes:', tailwindClasses);
+
+		return tailwindClasses.trim();
 	}
 
 	/**
@@ -392,12 +363,5 @@ export class VideoStyle {
 		const defaultStyle = await VideoStyle.getDefaultVideoStyle();
 		this.styles = defaultStyle.styles;
 		this.lastUpdated = new Date();
-	}
-
-	/**
-	 * Clone l'instance actuelle
-	 */
-	clone(): VideoStyle {
-		return new VideoStyle(JSON.parse(JSON.stringify(this.styles)), new Date(this.lastUpdated));
 	}
 }

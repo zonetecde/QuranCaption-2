@@ -4,7 +4,7 @@
 	import { untrack } from 'svelte';
 
 	const fadeDuration = $derived(() => {
-		return globalState.getVideoStyle.animation.styles['fade-duration'].value as number;
+		return globalState.getVideoStyle.styles.animation.styles['fade-duration'].value as number;
 	});
 
 	let getTimelineSettings = $derived(() => {
@@ -46,12 +46,23 @@
 
 		return 1;
 	});
+
+	let globalCss = $derived(() => {
+		return globalState.getVideoStyle.generateCSS();
+	});
+
+	let globalTailwind = $derived(() => {
+		return globalState.getVideoStyle.generateTailwind();
+	});
 </script>
 
 <div class="w-full h-full">
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
 		{#if currentSubtitle() && currentSubtitle()!.id}
-			<p class={'arabic absolute ' + {}} style="opacity: {subtitleOpacity()};">
+			<p
+				class={'arabic absolute ' + globalTailwind()}
+				style="opacity: {subtitleOpacity()}; {globalCss()}"
+			>
 				{currentSubtitle()!.text}
 			</p>
 
