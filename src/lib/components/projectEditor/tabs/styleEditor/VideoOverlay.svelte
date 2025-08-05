@@ -4,8 +4,10 @@
 	import { untrack } from 'svelte';
 
 	const fadeDuration = $derived(() => {
-		return globalState.getVideoStyle.styles.animation.styles['fade-duration'].value as number;
+		return globalState.getVideoStyle.getStyle('animation', 'fade-duration').value as number;
 	});
+
+	$inspect(fadeDuration());
 
 	let getTimelineSettings = $derived(() => {
 		return globalState.currentProject!.projectEditorState.timeline;
@@ -28,23 +30,25 @@
 		const subtitle = currentSubtitle();
 		if (!subtitle) return 0;
 
+		let maxOpacity = globalState.getVideoStyle.getStyle('effects', 'opacity').value as number;
+
 		const currentTime = getTimelineSettings().cursorPosition;
 		const endTime = subtitle.endTime;
 		const timeLeft = endTime - currentTime;
 		const halfFade = fadeDuration() / 2;
 
 		if (timeLeft <= halfFade) {
-			return Math.max(0, timeLeft / halfFade);
+			return Math.max(0, (timeLeft / halfFade) * maxOpacity);
 		}
 
 		const startTime = subtitle.startTime;
 		const timeSinceStart = currentTime - startTime;
 
 		if (timeSinceStart <= halfFade) {
-			return Math.min(1, timeSinceStart / halfFade);
+			return Math.min(maxOpacity, (timeSinceStart / halfFade) * maxOpacity);
 		}
 
-		return 1;
+		return maxOpacity;
 	});
 
 	let globalCss = $derived(() => {

@@ -59,43 +59,8 @@ export type StyleName =
 	| EffectsStyleName
 	| AnimationStyleName;
 
-// Interface étendue pour un style avec des propriétés optionnelles
-export interface ExtendedStyle extends Style {
-	tailwind?: boolean;
-	tailwindClass?: string;
-}
-
-// Interface pour une catégorie avec types spécifiques
-export interface TypedCategory<T extends string = string> {
-	name: string;
-	description: string;
-	icon: string;
-	styles: Record<T, ExtendedStyle>;
-}
-
-// Types spécifiques pour chaque catégorie
-export type TextCategory = TypedCategory<TextStyleName>;
-export type PositioningCategory = TypedCategory<PositioningStyleName>;
-export type BackgroundCategory = TypedCategory<BackgroundStyleName>;
-export type ShadowCategory = TypedCategory<ShadowStyleName>;
-export type OutlineCategory = TypedCategory<OutlineStyleName>;
-export type BorderCategory = TypedCategory<BorderStyleName>;
-export type EffectsCategory = TypedCategory<EffectsStyleName>;
-export type AnimationCategory = TypedCategory<AnimationStyleName>;
-
-// Type pour la structure complète des styles avec autocomplétion
-export interface TypedStylesData {
-	text: TextCategory;
-	positioning: PositioningCategory;
-	background: BackgroundCategory;
-	shadow: ShadowCategory;
-	outline: OutlineCategory;
-	border: BorderCategory;
-	effects: EffectsCategory;
-	animation: AnimationCategory;
-}
-
 export interface Style {
+	id: string;
 	name: string;
 	description: string;
 	value: string | number | boolean;
@@ -105,22 +70,35 @@ export interface Style {
 	step?: number;
 	options?: string[];
 	css: string;
+	tailwind?: boolean;
+	tailwindClass?: string;
 	applyGlobally: boolean;
 	icon: string;
 }
 
+export interface Category {
+	id: string;
+	name: string;
+	description: string;
+	icon: string;
+	styles: Style[];
+}
+
+// Type pour la structure complète des styles avec array
+export type StylesData = Category[];
+
 export class VideoStyle extends SerializableBase {
-	styles: TypedStylesData = {} as TypedStylesData;
+	styles: StylesData = $state([]);
 	lastUpdated: Date = new Date();
 
-	constructor(styles: TypedStylesData = {} as TypedStylesData, lastUpdated: Date = new Date()) {
+	constructor(styles: StylesData = [], lastUpdated: Date = new Date()) {
 		super();
 		this.styles = styles;
 		this.lastUpdated = lastUpdated;
 	}
 
 	static async getDefaultVideoStyle(): Promise<VideoStyle> {
-		const styles: TypedStylesData = await (await fetch('./styles.json')).json();
+		const styles: StylesData = await (await fetch('./styles.json')).json();
 
 		if (styles) {
 			return new VideoStyle(styles, new Date());
@@ -130,26 +108,42 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	/**
+	 * Obtient une catégorie de styles par son ID
+	 */
+	getCategory(categoryId: StyleCategoryName): Category {
+		return this.styles.find((category) => category.id === categoryId)!;
+	}
+
+	/**
+	 * Obtient un style spécifique dans une catégorie
+	 */
+	getStyle(categoryId: StyleCategoryName, styleId: StyleName): Style {
+		const category = this.getCategory(categoryId);
+		return category!.styles.find((style) => style.id === styleId)!;
+	}
+
+	/**
 	 * Génère le CSS pour tous les styles actifs
 	 */
 	generateCSS(): string {
 		let css = '';
 
-		for (const categoryName in this.styles) {
-			const category = (this.styles as any)[categoryName];
-			for (const styleName in category.styles) {
-				const style = category.styles[styleName] as ExtendedStyle;
-
+		for (const category of this.styles) {
+			for (const style of category.styles) {
 				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
 				// alors si la catégorie est désactivée, on ne génère pas le CSS de tout les autres styles
-				if (style.valueType === 'boolean' && !style.value && !styleName.includes('Enable')) {
+				console.log(style.id);
+				if (style.valueType === 'boolean' && !style.value && style.id.includes('enable')) {
 					break;
 				}
+
+				// Propriétés spécifiques à ignorer
+				if (style.id === 'max-height' && style.value === 'none') continue;
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
 				// Remplace {value} par la valeur actuelle
-				let cssRule = style.css.replace(/{value}/g, String(style.value));
+				let cssRule = style.css.replaceAll(/{value}/g, String(style.value));
 
 				if (cssRule.trim()) {
 					css += cssRule + '\n';
@@ -165,16 +159,13 @@ export class VideoStyle extends SerializableBase {
 	generateTailwind(): string {
 		let tailwindClasses = '';
 
-		for (const categoryName in this.styles) {
-			const category = (this.styles as any)[categoryName];
-			for (const styleName in category.styles) {
-				const style = category.styles[styleName] as ExtendedStyle;
-
+		for (const category of this.styles) {
+			for (const style of category.styles) {
 				// Ignore les styles qui ne sont pas des classes Tailwind
 				if (!style.tailwind || !style.tailwindClass) continue;
 
 				// Remplace {value} par la valeur actuelle
-				let tailwindClass = style.tailwindClass.replace(/{value}/g, String(style.value));
+				let tailwindClass = style.tailwindClass.replaceAll(/{value}/g, String(style.value));
 
 				if (tailwindClass.trim()) {
 					tailwindClasses += tailwindClass + ' ';

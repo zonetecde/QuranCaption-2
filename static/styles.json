@@ -1,10 +1,12 @@
-{
-	"text": {
+[
+	{
+		"id": "text",
 		"name": "Text Styling",
 		"description": "Control the appearance and formatting of subtitle text",
 		"icon": "text_fields",
-		"styles": {
-			"text-color": {
+		"styles": [
+			{
+				"id": "text-color",
 				"name": "Text Color",
 				"description": "Change the color of the text",
 				"value": "#ffffff",
@@ -14,7 +16,8 @@
 				"applyGlobally": false,
 				"icon": "palette"
 			},
-			"font-size": {
+			{
+				"id": "font-size",
 				"name": "Font Size",
 				"description": "Adjust the size of the text",
 				"value": 48,
@@ -26,7 +29,8 @@
 				"applyGlobally": false,
 				"icon": "format_size"
 			},
-			"font-family": {
+			{
+				"id": "font-family",
 				"name": "Font Family",
 				"description": "Select the font family for the text",
 				"value": "Arial",
@@ -46,7 +50,8 @@
 				"applyGlobally": false,
 				"icon": "font_download"
 			},
-			"font-weight": {
+			{
+				"id": "font-weight",
 				"name": "Font Weight",
 				"description": "Set the thickness of the font",
 				"value": "normal",
@@ -57,7 +62,8 @@
 				"applyGlobally": false,
 				"icon": "format_bold"
 			},
-			"text-transform": {
+			{
+				"id": "text-transform",
 				"name": "Text Transform",
 				"description": "Transform the case of the text",
 				"value": "none",
@@ -68,7 +74,8 @@
 				"applyGlobally": false,
 				"icon": "text_format"
 			},
-			"letter-spacing": {
+			{
+				"id": "letter-spacing",
 				"name": "Letter Spacing",
 				"description": "Adjust spacing between characters",
 				"value": 0,
@@ -80,7 +87,8 @@
 				"applyGlobally": false,
 				"icon": "horizontal_distribute"
 			},
-			"line-height": {
+			{
+				"id": "line-height",
 				"name": "Line Height",
 				"description": "Adjust spacing between lines",
 				"value": 1.2,
@@ -93,7 +101,8 @@
 				"applyGlobally": false,
 				"icon": "format_line_spacing"
 			},
-			"max-height": {
+			{
+				"id": "max-height",
 				"name": "Max Height",
 				"description": "Limit text height and auto-adjust font size to fit",
 				"value": "none",
@@ -104,14 +113,16 @@
 				"applyGlobally": false,
 				"icon": "height"
 			}
-		}
+		]
 	},
-	"positioning": {
+	{
+		"id": "positioning",
 		"name": "Position & Layout",
 		"description": "Control the position and spacing of subtitles on screen",
 		"icon": "open_with",
-		"styles": {
-			"vertical-position": {
+		"styles": [
+			{
+				"id": "vertical-position",
 				"name": "Vertical Position",
 				"description": "Change the vertical position of the text (pixels from center)",
 				"value": 0,
@@ -124,7 +135,8 @@
 				"applyGlobally": false,
 				"icon": "vertical_align_center"
 			},
-			"horizontal-position": {
+			{
+				"id": "horizontal-position",
 				"name": "Horizontal Position",
 				"description": "Change the horizontal position of the text (pixels from center)",
 				"value": 0,
@@ -137,7 +149,8 @@
 				"applyGlobally": false,
 				"icon": "horizontal_rule"
 			},
-			"horizontal-padding": {
+			{
+				"id": "horizontal-padding",
 				"name": "Horizontal Padding",
 				"description": "Change the horizontal padding of the text",
 				"value": 0,
@@ -149,7 +162,8 @@
 				"applyGlobally": false,
 				"icon": "horizontal_distribute"
 			},
-			"text-align": {
+			{
+				"id": "text-align",
 				"name": "Text Alignment",
 				"description": "Set the alignment of the text",
 				"value": "center",
@@ -160,7 +174,8 @@
 				"applyGlobally": false,
 				"icon": "format_align_center"
 			},
-			"max-width": {
+			{
+				"id": "max-width",
 				"name": "Max Width",
 				"description": "Set maximum width for subtitle container",
 				"value": 80,
@@ -172,14 +187,16 @@
 				"applyGlobally": false,
 				"icon": "width_normal"
 			}
-		}
+		]
 	},
-	"background": {
+	{
+		"id": "background",
 		"name": "Background & Container",
 		"description": "Style the background and container of subtitles",
 		"icon": "square",
-		"styles": {
-			"background-enable": {
+		"styles": [
+			{
+				"id": "background-enable",
 				"name": "Enable Background",
 				"description": "Enable or disable background styling",
 				"value": false,
@@ -189,7 +206,8 @@
 				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
-			"background-color": {
+			{
+				"id": "background-color",
 				"name": "Background Color",
 				"description": "Add a background color behind the text",
 				"value": "rgba(0,0,0,0.8)",
@@ -199,7 +217,8 @@
 				"applyGlobally": false,
 				"icon": "format_color_fill"
 			},
-			"background-opacity": {
+			{
+				"id": "background-opacity",
 				"name": "Background Opacity",
 				"description": "Control the transparency of the background",
 				"value": 80,
@@ -211,7 +230,8 @@
 				"applyGlobally": false,
 				"icon": "opacity"
 			},
-			"border-radius": {
+			{
+				"id": "border-radius",
 				"name": "Border Radius",
 				"description": "Round the corners of the background",
 				"value": 8,
@@ -223,7 +243,8 @@
 				"applyGlobally": false,
 				"icon": "rounded_corner"
 			},
-			"padding": {
+			{
+				"id": "padding",
 				"name": "Internal Padding",
 				"description": "Add space inside the subtitle container",
 				"value": 16,
@@ -235,14 +256,16 @@
 				"applyGlobally": false,
 				"icon": "crop_free"
 			}
-		}
+		]
 	},
-	"shadow": {
+	{
+		"id": "shadow",
 		"name": "Shadow Effects",
 		"description": "Add shadow effects to text and containers",
 		"icon": "filter_drama",
-		"styles": {
-			"shadow-enable": {
+		"styles": [
+			{
+				"id": "shadow-enable",
 				"name": "Enable Shadows",
 				"description": "Enable or disable shadow effects",
 				"value": true,
@@ -252,7 +275,8 @@
 				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
-			"text-shadow": {
+			{
+				"id": "text-shadow",
 				"name": "Text Shadow",
 				"description": "Add shadow effect to the text",
 				"value": 4,
@@ -264,7 +288,8 @@
 				"applyGlobally": false,
 				"icon": "text_fields"
 			},
-			"box-shadow": {
+			{
+				"id": "box-shadow",
 				"name": "Container Shadow",
 				"description": "Add shadow to the subtitle container",
 				"value": 0,
@@ -276,14 +301,16 @@
 				"applyGlobally": false,
 				"icon": "square"
 			}
-		}
+		]
 	},
-	"outline": {
+	{
+		"id": "outline",
 		"name": "Text Outline",
 		"description": "Add outlines and strokes around text",
 		"icon": "border_outer",
-		"styles": {
-			"outline-enable": {
+		"styles": [
+			{
+				"id": "outline-enable",
 				"name": "Enable Outline",
 				"description": "Enable or disable text outline",
 				"value": false,
@@ -293,7 +320,8 @@
 				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
-			"text-outline": {
+			{
+				"id": "text-outline",
 				"name": "Outline Width",
 				"description": "Set the width of the text outline",
 				"value": 2,
@@ -305,7 +333,8 @@
 				"applyGlobally": false,
 				"icon": "line_weight"
 			},
-			"text-outline-color": {
+			{
+				"id": "text-outline-color",
 				"name": "Outline Color",
 				"description": "Set the color of the text outline",
 				"value": "#000000",
@@ -315,14 +344,16 @@
 				"applyGlobally": false,
 				"icon": "palette"
 			}
-		}
+		]
 	},
-	"border": {
+	{
+		"id": "border",
 		"name": "Container Border",
 		"description": "Add borders around subtitle containers",
 		"icon": "border_all",
-		"styles": {
-			"border-enable": {
+		"styles": [
+			{
+				"id": "border-enable",
 				"name": "Enable Border",
 				"description": "Enable or disable container border",
 				"value": false,
@@ -332,7 +363,8 @@
 				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
-			"border-width": {
+			{
+				"id": "border-width",
 				"name": "Border Width",
 				"description": "Set the width of the border",
 				"value": 2,
@@ -344,7 +376,8 @@
 				"applyGlobally": false,
 				"icon": "line_weight"
 			},
-			"border-color": {
+			{
+				"id": "border-color",
 				"name": "Border Color",
 				"description": "Set the color of the border",
 				"value": "#ffffff",
@@ -354,7 +387,8 @@
 				"applyGlobally": false,
 				"icon": "palette"
 			},
-			"border-style": {
+			{
+				"id": "border-style",
 				"name": "Border Style",
 				"description": "Choose the style of the border",
 				"value": "solid",
@@ -365,26 +399,30 @@
 				"applyGlobally": false,
 				"icon": "more_horiz"
 			}
-		}
+		]
 	},
-	"effects": {
+	{
+		"id": "effects",
 		"name": "Visual Effects",
 		"description": "Add visual effects and filters to enhance subtitle appearance",
 		"icon": "auto_fix_high",
-		"styles": {
-			"opacity": {
+		"styles": [
+			{
+				"id": "opacity",
 				"name": "Text Opacity",
 				"description": "Control the transparency of the text",
-				"value": 100,
+				"value": 1,
 				"valueType": "number",
 				"valueMin": 0,
-				"valueMax": 100,
-				"css": "opacity: {value}%;",
+				"valueMax": 1,
+				"step": 0.05,
+				"css": "",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "opacity"
 			},
-			"blur": {
+			{
+				"id": "blur",
 				"name": "Blur Effect",
 				"description": "Apply blur effect to the text",
 				"value": 0,
@@ -397,7 +435,8 @@
 				"applyGlobally": false,
 				"icon": "blur_on"
 			},
-			"brightness": {
+			{
+				"id": "brightness",
 				"name": "Brightness",
 				"description": "Adjust the brightness of the text",
 				"value": 100,
@@ -410,7 +449,8 @@
 				"applyGlobally": false,
 				"icon": "brightness_6"
 			},
-			"contrast": {
+			{
+				"id": "contrast",
 				"name": "Contrast",
 				"description": "Adjust the contrast of the text",
 				"value": 100,
@@ -423,26 +463,29 @@
 				"applyGlobally": false,
 				"icon": "contrast"
 			}
-		}
+		]
 	},
-	"animation": {
+	{
+		"id": "animation",
 		"name": "Animation & Transitions",
 		"description": "Add motion and transition effects to subtitles",
 		"icon": "animation",
-		"styles": {
-			"fade-duration": {
+		"styles": [
+			{
+				"id": "fade-duration",
 				"name": "Fade Duration",
 				"description": "Duration of fade in/out effect in milliseconds",
 				"value": 500,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 2000,
-				"css": "transition: opacity {value}ms ease-in-out;",
+				"css": "",
 				"tailwind": false,
 				"applyGlobally": true,
 				"icon": "fade"
 			},
-			"scale": {
+			{
+				"id": "scale",
 				"name": "Scale",
 				"description": "Scale the size of the subtitle",
 				"value": 100,
@@ -455,7 +498,8 @@
 				"applyGlobally": false,
 				"icon": "zoom_in"
 			},
-			"rotation": {
+			{
+				"id": "rotation",
 				"name": "Rotation",
 				"description": "Rotate the subtitle in degrees",
 				"value": 0,
@@ -468,6 +512,6 @@
 				"applyGlobally": false,
 				"icon": "rotate_right"
 			}
-		}
+		]
 	}
-}
+]
