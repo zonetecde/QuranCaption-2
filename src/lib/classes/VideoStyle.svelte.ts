@@ -22,7 +22,8 @@ export type TextStyleName =
 	| 'text-transform'
 	| 'letter-spacing'
 	| 'line-height'
-	| 'max-height';
+	| 'max-height'
+	| 'font-size-reactive';
 
 export type PositioningStyleName =
 	| 'vertical-position'
@@ -122,6 +123,18 @@ export class VideoStyle extends SerializableBase {
 		return category!.styles.find((style) => style.id === styleId)!;
 	}
 
+	setStyle(
+		categoryId: StyleCategoryName,
+		styleId: StyleName,
+		value: string | number | boolean
+	): void {
+		const category = this.getCategory(categoryId);
+		const style = category.styles.find((style) => style.id === styleId);
+		if (style) {
+			style.value = value;
+		}
+	}
+
 	/**
 	 * Génère le CSS pour tous les styles actifs
 	 */
@@ -140,6 +153,7 @@ export class VideoStyle extends SerializableBase {
 				// Propriétés spécifiques à ignorer
 				if (style.id === 'max-height' && style.value === 'none') continue;
 				if (style.id === 'font-family' && style.value === 'Hafs') continue; // Gérer par une classe Tailwind
+				if (style.id === 'max-height' && style.value === 'none') break; // Ignore les propriétés après qui dépendent de max-height
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
