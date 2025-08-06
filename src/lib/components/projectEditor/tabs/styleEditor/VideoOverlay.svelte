@@ -4,10 +4,9 @@
 	import { untrack } from 'svelte';
 
 	const fadeDuration = $derived(() => {
-		return globalState.getVideoStyle.getStyle('animation', 'fade-duration').value as number;
+		return globalState.getVideoStyle.getStyle('global', 'animation', 'fade-duration')
+			.value as number;
 	});
-
-	$inspect(fadeDuration());
 
 	let getTimelineSettings = $derived(() => {
 		return globalState.currentProject!.projectEditorState.timeline;
@@ -26,11 +25,12 @@
 	});
 
 	// Calcul de l'opacité des sous-titres
-	let subtitleOpacity = $derived(() => {
+	let subtitleOpacity = $derived((target: string) => {
 		const subtitle = currentSubtitle();
 		if (!subtitle) return 0;
 
-		let maxOpacity = globalState.getVideoStyle.getStyle('effects', 'opacity').value as number;
+		let maxOpacity = globalState.getVideoStyle.getStyle(target, 'effects', 'opacity')
+			.value as number;
 
 		const currentTime = getTimelineSettings().cursorPosition;
 		const endTime = subtitle.endTime;
@@ -51,12 +51,12 @@
 		return maxOpacity;
 	});
 
-	let globalCss = $derived(() => {
-		return globalState.getVideoStyle.generateCSS();
+	let getCss = $derived((target: string) => {
+		return globalState.getVideoStyle.generateCSS(target);
 	});
 
-	let globalTailwind = $derived(() => {
-		return globalState.getVideoStyle.generateTailwind();
+	let getTailwind = $derived((target: string) => {
+		return globalState.getVideoStyle.generateTailwind(target);
 	});
 
 	let helperStyles = $derived(() => {
@@ -64,8 +64,8 @@
 
 		// Si on a certains styles qu'on modifie, on ajoute des styles pour afficher ce qu'ils font
 		if (
-			globalState.sectionsState['width'].extended ||
-			globalState.sectionsState['max-height'].extended
+			globalState.getSectionsState['width'].extended ||
+			globalState.getSectionsState['max-height'].extended
 		) {
 			classes += 'bg-[#11A2AF] ';
 		}
@@ -90,21 +90,23 @@
 		lastSubtitleId = currentSubtitle()!.id;
 
 		globalState.currentProject!.projectEditorState.timeline.movePreviewTo;
-		globalState.getVideoStyle.getStyle('text', 'max-height').value;
-		globalState.getVideoStyle.getStyle('text', 'font-size').value;
+		globalState.getVideoStyle.getStyle('arabic', 'text', 'max-height').value;
+		globalState.getVideoStyle.getStyle('arabic', 'text', 'font-size').value;
 
 		untrack(async () => {
 			if (
-				globalState.getVideoStyle.getStyle('text', 'max-height').value !== 'none' ||
+				globalState.getVideoStyle.getStyle('arabic', 'text', 'max-height').value !== 'none' ||
 				currentSubtitle()!.id
 			) {
 				// Make the font-size responsive
-				const maxHeight = globalState.getVideoStyle.getStyle('text', 'max-height').value as string;
+				const maxHeight = globalState.getVideoStyle.getStyle('arabic', 'text', 'max-height')
+					.value as string;
 				const maxHeightValue = parseFloat(maxHeight);
 
-				let fontSize = globalState.getVideoStyle.getStyle('text', 'font-size').value as number;
+				let fontSize = globalState.getVideoStyle.getStyle('arabic', 'text', 'font-size')
+					.value as number;
 
-				globalState.getVideoStyle.setStyle('text', 'font-size-reactive', fontSize);
+				globalState.getVideoStyle.setStyle('arabic', 'text', 'font-size-reactive', fontSize);
 
 				await new Promise((resolve) => {
 					setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
@@ -116,7 +118,7 @@
 					while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 						fontSize -= 5;
 
-						globalState.getVideoStyle.setStyle('text', 'font-size-reactive', fontSize);
+						globalState.getVideoStyle.setStyle('arabic', 'text', 'font-size-reactive', fontSize);
 
 						await new Promise((resolve) => {
 							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
@@ -132,8 +134,8 @@
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
 		{#if currentSubtitle() && currentSubtitle()!.id}
 			<p
-				class={'arabic absolute subtitle ' + globalTailwind() + helperStyles()}
-				style="opacity: {subtitleOpacity()}; {globalCss()}"
+				class={'arabic absolute subtitle ' + getTailwind('arabic') + helperStyles()}
+				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic')}"
 			>
 				{currentSubtitle()!.text}
 			</p>

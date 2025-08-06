@@ -20,18 +20,18 @@
 
 	onMount(() => {
 		// Init la section dans l'éditeur
-		if (!globalState.sectionsState[name]) {
-			globalState.sectionsState[name] = {
+		if (!globalState.getSectionsState[name]) {
+			globalState.getSectionsState[name] = {
 				extended: extended
 			};
 		} else {
 			// Si la section existe déjà, on récupère son état
-			extended = globalState.sectionsState[name].extended;
+			extended = globalState.getSectionsState[name].extended;
 		}
 	});
 
 	$effect(() => {
-		globalState.sectionsState[name] = {
+		globalState.getSectionsState[name] = {
 			extended: extended
 		};
 	});

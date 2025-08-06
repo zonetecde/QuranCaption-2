@@ -1,0 +1,24 @@
+[
+	{
+		"id": "animation",
+		"name": "Animation & Transitions",
+		"description": "Add motion and transition effects to subtitles",
+		"icon": "animation",
+		"styles": [
+			{
+				"id": "fade-duration",
+				"name": "Fade Duration",
+				"description": "Duration of fade in/out effect in milliseconds",
+				"value": 500,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 4000,
+				"step": 50,
+				"css": "",
+				"tailwind": false,
+				"applyGlobally": true,
+				"icon": "fade"
+			}
+		]
+	}
+]

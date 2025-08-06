@@ -1,3 +1,4 @@
+import { globalState } from '$lib/runes/main.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 
 export type StyleValueType = 'color' | 'number' | 'select' | 'boolean';
@@ -89,46 +90,74 @@ export interface Category {
 export type StylesData = Category[];
 
 export class VideoStyle extends SerializableBase {
-	styles: StylesData = $state([]);
+	styles: {
+		[target: string]: StylesData;
+	} = $state({});
+
 	lastUpdated: Date = new Date();
 
-	constructor(styles: StylesData = [], lastUpdated: Date = new Date()) {
+	constructor(styles: { [target: string]: StylesData } = {}, lastUpdated: Date = new Date()) {
 		super();
 		this.styles = styles;
 		this.lastUpdated = lastUpdated;
 	}
 
-	static async getDefaultVideoStyle(): Promise<VideoStyle> {
-		const styles: StylesData = await (await fetch('./styles.json')).json();
+	static async setDefaultStylesToDefaultOne(): Promise<VideoStyle> {
+		const globalStyles: StylesData = await (await fetch('./globalStyles.json')).json();
+		const styles: StylesData = await VideoStyle.getDefaultStyles();
 
 		if (styles) {
-			return new VideoStyle(styles, new Date());
+			const dict: any = {};
+			dict['global'] = globalStyles;
+			dict['arabic'] = styles;
+
+			// // Ajoute les styles par défaut pour les traductions
+			// for (const translation of globalState.getProjectTranslation.addedTranslationEditions) {
+			// 	dict[translation.name] = styles;
+			// }
+
+			return new VideoStyle(
+				{
+					global: globalStyles,
+					arabic: styles
+					// ...dict
+				},
+				new Date()
+			);
 		}
 
 		return new VideoStyle();
 	}
 
+	static async getDefaultStyles(): Promise<StylesData> {
+		const styles: StylesData = await (await fetch('./styles.json')).json();
+
+		return styles;
+	}
 	/**
 	 * Obtient une catégorie de styles par son ID
 	 */
-	getCategory(categoryId: StyleCategoryName): Category {
-		return this.styles.find((category) => category.id === categoryId)!;
+	getCategory(target: string, categoryId: StyleCategoryName): Category {
+		return this.styles[target].find((category) => category.id === categoryId)!;
 	}
 
 	/**
 	 * Obtient un style spécifique dans une catégorie
 	 */
-	getStyle(categoryId: StyleCategoryName, styleId: StyleName): Style {
-		const category = this.getCategory(categoryId);
+	getStyle(target: string, categoryId: StyleCategoryName, styleId: StyleName): Style {
+		console.log('Getting style:', styleId, 'from category:', categoryId, 'for target:', target);
+
+		const category = this.getCategory(target, categoryId);
 		return category!.styles.find((style) => style.id === styleId)!;
 	}
 
 	setStyle(
+		target: string,
 		categoryId: StyleCategoryName,
 		styleId: StyleName,
 		value: string | number | boolean
 	): void {
-		const category = this.getCategory(categoryId);
+		const category = this.getCategory(target, categoryId);
 		const style = category.styles.find((style) => style.id === styleId);
 		if (style) {
 			style.value = value;
@@ -138,10 +167,10 @@ export class VideoStyle extends SerializableBase {
 	/**
 	 * Génère le CSS pour tous les styles actifs
 	 */
-	generateCSS(): string {
+	generateCSS(target: string): string {
 		let css = '';
 
-		for (const category of this.styles) {
+		for (const category of this.styles[target]) {
 			for (const style of category.styles) {
 				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
 				// alors si la catégorie est désactivée, on ne génère pas le CSS de tout les autres styles
@@ -171,10 +200,10 @@ export class VideoStyle extends SerializableBase {
 		return css;
 	}
 
-	generateTailwind(): string {
+	generateTailwind(target: string): string {
 		let tailwindClasses = '';
 
-		for (const category of this.styles) {
+		for (const category of this.styles[target]) {
 			for (const style of category.styles) {
 				if (style.id === 'font-family' && style.value === 'Hafs') {
 					// Utilise la police Hafs pour les styles de texte
@@ -203,7 +232,7 @@ export class VideoStyle extends SerializableBase {
 	 * Remet tous les styles à leurs valeurs par défaut
 	 */
 	async resetToDefaults(): Promise<void> {
-		const defaultStyle = await VideoStyle.getDefaultVideoStyle();
+		const defaultStyle = await VideoStyle.setDefaultStylesToDefaultOne();
 		this.styles = defaultStyle.styles;
 		this.lastUpdated = new Date();
 	}

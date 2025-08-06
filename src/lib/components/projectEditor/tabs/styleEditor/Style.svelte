@@ -13,17 +13,17 @@
 
 	onMount(() => {
 		// Par défaut fermé
-		if (!globalState.sectionsState[style.id])
-			globalState.sectionsState[style.id] = {
+		if (!globalState.getSectionsState[style.id])
+			globalState.getSectionsState[style.id] = {
 				extended: false
 			};
-		else expanded = globalState.sectionsState[style.id].extended;
+		else expanded = globalState.getSectionsState[style.id].extended;
 	});
 
 	let expanded = $state(false);
 
 	$effect(() => {
-		globalState.sectionsState[style.id] = {
+		globalState.getSectionsState[style.id] = {
 			extended: expanded
 		};
 	});
@@ -55,7 +55,7 @@
 						type="range"
 						min={style.valueMin}
 						max={style.valueMax}
-						step={style.step}
+						step={style.step || 1}
 						bind:value={style.value}
 					/>
 
@@ -64,7 +64,7 @@
 						type="number"
 						min={style.valueMin}
 						max={style.valueMax}
-						step={style.step}
+						step={style.step || 1}
 						bind:value={style.value}
 						class="w-20"
 					/>

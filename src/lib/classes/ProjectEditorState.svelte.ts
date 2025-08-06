@@ -45,6 +45,16 @@ export class StylesEditorState extends SerializableBase {
 
 	// Indique quel est la sélection actuelle dans l'éditeur de styles (global/arabic/translation)
 	currentSelection: 'global' | 'arabic' | string = $state('global');
+
+	// Indique quelle traduction est actuellement sélectionnée dans l'éditeur de styles
+	currentSelectionTranslation: string = $state('');
+
+	getCurrentSelection(): 'global' | 'arabic' | string {
+		if (this.currentSelection === 'global' || this.currentSelection === 'arabic') {
+			return this.currentSelection;
+		}
+		return this.currentSelectionTranslation;
+	}
 }
 
 /**

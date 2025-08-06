@@ -70,8 +70,12 @@ class GlobalState {
 		return this.currentProject!.content.videoStyle;
 	}
 
-	get sectionsState() {
+	get getSectionsState() {
 		return this.currentProject!.projectEditorState.sections;
+	}
+
+	get getStylesState() {
+		return this.currentProject!.projectEditorState.stylesEditor;
 	}
 }
 
