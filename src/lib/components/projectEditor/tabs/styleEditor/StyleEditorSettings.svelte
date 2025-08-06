@@ -12,10 +12,8 @@
 	let stylesContainer: HTMLDivElement | undefined;
 
 	onMount(() => {
-		if (stylesContainer) {
-			stylesContainer.scrollTop =
-				globalState.currentProject!.projectEditorState.stylesEditor.scrollPosition;
-		}
+		stylesContainer!.scrollTop =
+			globalState.currentProject!.projectEditorState.stylesEditor.scrollPosition;
 	});
 </script>
 
@@ -26,7 +24,7 @@
 		<h2 class="text-xl font-bold text-primary">Video Style</h2>
 	</div>
 	<div
-		class="flex flex-col gap-y-2 px-2 bg-[var(--bg-primary)]/60 rounded-lg border border-[var(--border-color)]/50 overflow-y-auto h-full"
+		class="flex flex-col gap-y-2 px-2 bg-[var(--bg-primary)]/60 rounded-lg border border-[var(--border-color)]/50 overflow-y-auto h-full pb-40"
 		bind:this={stylesContainer}
 		onscroll={(e) => {
 			globalState.currentProject!.projectEditorState.stylesEditor.scrollPosition =

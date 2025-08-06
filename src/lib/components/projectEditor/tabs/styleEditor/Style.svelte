@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Style } from '$lib/classes/VideoStyle.svelte';
+	import { globalState } from '$lib/runes/main.svelte';
 	import { invoke } from '@tauri-apps/api/core';
+	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	let {
@@ -9,23 +11,38 @@
 		style: Style;
 	} = $props();
 
-	let expended = $state(false);
+	onMount(() => {
+		// Par défaut fermé
+		if (!globalState.sectionsState[style.id])
+			globalState.sectionsState[style.id] = {
+				extended: false
+			};
+		else expanded = globalState.sectionsState[style.id].extended;
+	});
+
+	let expanded = $state(false);
+
+	$effect(() => {
+		globalState.sectionsState[style.id] = {
+			extended: expanded
+		};
+	});
 </script>
 
 <div
 	class={'flex flex-col duration-150 ' +
-		(expended ? 'bg-blue-200/10 rounded-2xl mb-2 px-3 py-2' : 'hover:bg-white/10')}
+		(expanded ? 'bg-blue-200/10 rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md')}
 >
 	<div
 		class={'flex items-center justify-between py-1 px-1 cursor-pointer ' +
-			(expended ? 'border-b border-white/30' : '')}
-		onclick={() => (expended = !expended)}
+			(expanded ? 'border-b border-white/30' : '')}
+		onclick={() => (expanded = !expanded)}
 	>
 		<span class="text-sm text-primary">{style.name}</span>
 		<span class="text-xs text-secondary">{style.value}</span>
 	</div>
 
-	{#if expended}
+	{#if expanded}
 		<div class="my-2" transition:slide>
 			<!-- Contenu supplémentaire à afficher lorsque l'élément est développé -->
 			<p class="text-xs text-secondary">{style.description}</p>
@@ -49,7 +66,7 @@
 						max={style.valueMax}
 						step={style.step}
 						bind:value={style.value}
-						class="w-16"
+						class="w-20"
 					/>
 				</div>
 			{:else if style.valueType === 'color'}

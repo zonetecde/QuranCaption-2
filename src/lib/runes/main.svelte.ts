@@ -69,6 +69,10 @@ class GlobalState {
 	get getVideoStyle() {
 		return this.currentProject!.content.videoStyle;
 	}
+
+	get sectionsState() {
+		return this.currentProject!.projectEditorState.sections;
+	}
 }
 
 export const globalState = new GlobalState();

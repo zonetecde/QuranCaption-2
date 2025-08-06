@@ -150,17 +150,17 @@
 				"icon": "horizontal_rule"
 			},
 			{
-				"id": "horizontal-padding",
-				"name": "Horizontal Padding",
-				"description": "Change the horizontal padding of the text",
-				"value": 0,
+				"id": "width",
+				"name": "Width",
+				"description": "Set width of subtitle container",
+				"value": 80,
 				"valueType": "number",
-				"valueMin": 0,
-				"valueMax": 400,
-				"css": "padding-left: {value}px; padding-right: {value}px;",
+				"valueMin": 10,
+				"valueMax": 100,
+				"css": "width: {value}%;",
 				"tailwind": false,
 				"applyGlobally": false,
-				"icon": "horizontal_distribute"
+				"icon": "width_full"
 			},
 			{
 				"id": "text-align",
@@ -173,32 +173,6 @@
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "format_align_center"
-			},
-			{
-				"id": "width",
-				"name": "Width",
-				"description": "Set width of subtitle container",
-				"value": 80,
-				"valueType": "number",
-				"valueMin": 20,
-				"valueMax": 100,
-				"css": "width: {value}%;",
-				"tailwind": false,
-				"applyGlobally": false,
-				"icon": "width_full"
-			},
-			{
-				"id": "max-width",
-				"name": "Max Width",
-				"description": "Set maximum width for subtitle container",
-				"value": 80,
-				"valueType": "number",
-				"valueMin": 20,
-				"valueMax": 100,
-				"css": "max-width: {value}%;",
-				"tailwind": false,
-				"applyGlobally": false,
-				"icon": "width_normal"
 			}
 		]
 	},

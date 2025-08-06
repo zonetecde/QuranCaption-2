@@ -58,13 +58,24 @@
 	let globalTailwind = $derived(() => {
 		return globalState.getVideoStyle.generateTailwind();
 	});
+
+	let helperStyles = $derived(() => {
+		let classes = ' ';
+
+		// Si on a certains styles qu'on modifie, on ajoute des styles pour afficher ce qu'ils font
+		if (globalState.sectionsState['width'].extended) {
+			classes += 'bg-[#A1A2FF]';
+		}
+
+		return classes;
+	});
 </script>
 
 <div class="w-full h-full">
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
 		{#if currentSubtitle() && currentSubtitle()!.id}
 			<p
-				class={'arabic absolute ' + globalTailwind()}
+				class={'arabic absolute ' + globalTailwind() + helperStyles()}
 				style="opacity: {subtitleOpacity()}; {globalCss()}"
 			>
 				{currentSubtitle()!.text}
