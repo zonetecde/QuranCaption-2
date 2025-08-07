@@ -64,8 +64,9 @@
 
 		// Si on a certains styles qu'on modifie, on ajoute des styles pour afficher ce qu'ils font
 		if (
-			globalState.getSectionsState['width'].extended ||
-			globalState.getSectionsState['max-height'].extended
+			globalState.getSectionsState['width'] &&
+			(globalState.getSectionsState['width'].extended ||
+				globalState.getSectionsState['max-height'].extended)
 		) {
 			classes += 'bg-[#11A2AF] ';
 		}
@@ -79,6 +80,8 @@
 	 * Gère le max-height (fit on N lines) et la taille de police réactive des sous-titres
 	 */
 	$effect(() => {
+		if (!currentSubtitle()) return;
+
 		currentSubtitle()!.id;
 
 		// si le sous-titre actuel n'a pas changé (pendant la lecture vidéo)
@@ -140,13 +143,20 @@
 				{currentSubtitle()!.text}
 			</p>
 
-			<!-- {#each Object.keys(currentSubtitleTranslations()!) as edition}
+			{#each Object.keys(currentSubtitleTranslations()!) as edition}
 				{@const translation = (currentSubtitleTranslations()! as Record<string, Translation>)[
 					edition
 				]}
 
-				<p class="translation absolute" style="opacity: {subtitleOpacity()};">{translation.text}</p>
-			{/each} -->
+				{#if globalState.getVideoStyle.styles[edition]}
+					<p
+						class={'translation absolute ' + getTailwind(edition) + helperStyles()}
+						style="opacity: {subtitleOpacity(edition)}; {getCss(edition)}"
+					>
+						{translation.text}
+					</p>
+				{/if}
+			{/each}
 		{/if}
 	</div>
 </div>

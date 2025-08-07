@@ -20,7 +20,7 @@
 				"id": "font-size",
 				"name": "Font Size",
 				"description": "Adjust the size of the text",
-				"value": 48,
+				"value": 60,
 				"valueType": "number",
 				"valueMin": 16,
 				"valueMax": 200,

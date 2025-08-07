@@ -261,6 +261,9 @@ export class ProjectTranslation extends SerializableBase {
 				subtitle.predefinedSubtitleType
 			);
 		}
+
+		// Ajoute les styles de traduction par défaut
+		await globalState.getVideoStyle.addStylesForEdition(edition.name);
 	}
 
 	getPredefinedSubtitleTranslation(edition: Edition, type: string): PredefinedSubtitleTranslation {

@@ -111,19 +111,19 @@ export class VideoStyle extends SerializableBase {
 			dict['global'] = globalStyles;
 			dict['arabic'] = styles;
 
-			// // Ajoute les styles par défaut pour les traductions
-			// for (const translation of globalState.getProjectTranslation.addedTranslationEditions) {
-			// 	dict[translation.name] = styles;
-			// }
-
-			return new VideoStyle(
+			const videoStyle = new VideoStyle(
 				{
 					global: globalStyles,
 					arabic: styles
-					// ...dict
 				},
 				new Date()
 			);
+
+			videoStyle.setStyle('arabic', 'text', 'font-family', 'Hafs');
+			videoStyle.setStyle('arabic', 'text', 'font-size', 90);
+			videoStyle.setStyle('arabic', 'positioning', 'vertical-position', -100);
+
+			return videoStyle;
 		}
 
 		return new VideoStyle();
@@ -170,6 +170,8 @@ export class VideoStyle extends SerializableBase {
 	generateCSS(target: string): string {
 		let css = '';
 
+		if (!this.styles[target]) return '';
+
 		for (const category of this.styles[target]) {
 			for (const style of category.styles) {
 				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
@@ -203,6 +205,8 @@ export class VideoStyle extends SerializableBase {
 	generateTailwind(target: string): string {
 		let tailwindClasses = '';
 
+		if (!this.styles[target]) return '';
+
 		for (const category of this.styles[target]) {
 			for (const style of category.styles) {
 				if (style.id === 'font-family' && style.value === 'Hafs') {
@@ -226,6 +230,19 @@ export class VideoStyle extends SerializableBase {
 		console.log('Generated Tailwind classes:', tailwindClasses);
 
 		return tailwindClasses.trim();
+	}
+
+	async addStylesForEdition(name: string) {
+		if (!this.styles[name]) {
+			const defaultStyles = await VideoStyle.getDefaultStyles();
+
+			this.styles[name] = defaultStyles;
+
+			// Styles par défaut pour les traductions
+			this.setStyle(name, 'text', 'font-size', 60); // Définit la taille de police par défaut
+			this.setStyle(name, 'text', 'font-family', 'Georgia'); // Définit la police par défaut
+			this.setStyle(name, 'positioning', 'vertical-position', 100); // Définit la hauteur de ligne par défaut
+		}
 	}
 
 	/**

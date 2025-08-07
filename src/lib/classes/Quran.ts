@@ -98,7 +98,8 @@ export class Quran {
 
 	/**
 	 * Charge le Coran depuis le fichier JSON (singleton)
-	 */ static async load() {
+	 */
+	static async load() {
 		if (Quran.surahs.length > 0) {
 			return; // Le Coran est déjà chargé
 		}

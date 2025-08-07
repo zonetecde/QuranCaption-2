@@ -16,7 +16,6 @@
 
 	async function deleteProjectButtonClick(e: MouseEvent) {
 		if (e.button !== 0) return; // Only handle left click
-		// todo: add confirmation dialog
 		if (
 			await ModalManager.confirmModal(
 				`Are you sure you want to delete the project "${projectDetail.name}"?`
