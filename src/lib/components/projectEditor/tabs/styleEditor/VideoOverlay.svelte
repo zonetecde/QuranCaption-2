@@ -97,38 +97,42 @@
 		globalState.getVideoStyle.getStyle('arabic', 'text', 'font-size').value;
 
 		untrack(async () => {
-			if (
-				globalState.getVideoStyle.getStyle('arabic', 'text', 'max-height').value !== 'none' ||
-				currentSubtitle()!.id
-			) {
-				// Make the font-size responsive
-				const maxHeight = globalState.getVideoStyle.getStyle('arabic', 'text', 'max-height')
-					.value as string;
-				const maxHeightValue = parseFloat(maxHeight);
+			let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
 
-				let fontSize = globalState.getVideoStyle.getStyle('arabic', 'text', 'font-size')
-					.value as number;
+			targets.forEach(async (target) => {
+				if (
+					globalState.getVideoStyle.getStyle(target, 'text', 'max-height').value !== 'none' ||
+					currentSubtitle()!.id
+				) {
+					// Make the font-size responsive
+					const maxHeight = globalState.getVideoStyle.getStyle(target, 'text', 'max-height')
+						.value as string;
+					const maxHeightValue = parseFloat(maxHeight);
 
-				globalState.getVideoStyle.setStyle('arabic', 'text', 'font-size-reactive', fontSize);
+					let fontSize = globalState.getVideoStyle.getStyle(target, 'text', 'font-size')
+						.value as number;
 
-				await new Promise((resolve) => {
-					setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
-				});
+					globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
 
-				const subtitles = document.querySelectorAll('.subtitle');
-				subtitles.forEach(async (subtitle) => {
-					// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
-					while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
-						fontSize -= 5;
+					await new Promise((resolve) => {
+						setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
+					});
 
-						globalState.getVideoStyle.setStyle('arabic', 'text', 'font-size-reactive', fontSize);
+					const subtitles = document.querySelectorAll('.' + target);
+					subtitles.forEach(async (subtitle) => {
+						// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
+						while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
+							fontSize -= 5;
 
-						await new Promise((resolve) => {
-							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
-						});
-					}
-				});
-			}
+							globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
+
+							await new Promise((resolve) => {
+								setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
+							});
+						}
+					});
+				}
+			});
 		});
 	});
 </script>
@@ -150,7 +154,11 @@
 
 				{#if globalState.getVideoStyle.styles[edition]}
 					<p
-						class={'translation absolute ' + getTailwind(edition) + helperStyles()}
+						class={'translation absolute subtitle ' +
+							edition +
+							' ' +
+							getTailwind(edition) +
+							helperStyles()}
 						style="opacity: {subtitleOpacity(edition)}; {getCss(edition)}"
 					>
 						{translation.text}
