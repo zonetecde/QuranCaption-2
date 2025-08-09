@@ -3,6 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { fade, slide } from 'svelte/transition';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
+	import type { SubtitleTrack } from '$lib/classes/Track.svelte';
 
 	let {
 		clip = $bindable(),
@@ -66,7 +67,7 @@
 
 	function addSilence(): void {
 		// Ajoute un silence à gauche du clip
-		track.addSilence(clip.id);
+		(track as SubtitleTrack).addSilence(clip.id);
 	}
 
 	function removeSubtitle(): void {
@@ -76,15 +77,24 @@
 			track.removeClip(clip.id, true);
 		}, 0);
 	}
+
+	function editStyle(e: MouseEvent): void {}
 </script>
 
 <div
-	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden"
+	class={'absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden duration-200 ' +
+		(globalState.getStylesState.isSelected(clip.id) ? 'border-yellow-500/60 bg-yellow-200/20' : '')}
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
 	transition:slide={{ duration: 500, axis: 'x' }}
 	oncontextmenu={(e) => {
 		e.preventDefault();
 		contextMenu!.show(e);
+	}}
+	onclick={(e) => {
+		// Sélectionne le clip si on est dans la page de style
+		if (globalState.currentProject!.projectEditorState.currentTab === 'Style') {
+			globalState.getStylesState.toggleSelection(clip);
+		}
 	}}
 >
 	{#if clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle'}
@@ -112,6 +122,13 @@
 </div>
 
 <ContextMenu bind:this={contextMenu}>
+	{#if globalState.currentProject!.projectEditorState.currentTab === 'Style'}
+		<Item on:click={editStyle}
+			><div class="btn-icon">
+				<span class="material-icons-outlined text-sm mr-1">auto_fix_high</span>Edit style
+			</div></Item
+		>
+	{/if}
 	<Item on:click={addSilence}
 		><div class="btn-icon">
 			<span class="material-icons-outlined text-sm mr-1">space_bar</span>Add silence (on the left)

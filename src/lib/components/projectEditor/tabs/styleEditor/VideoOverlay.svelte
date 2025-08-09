@@ -100,38 +100,40 @@
 			let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
 
 			targets.forEach(async (target) => {
-				if (
-					globalState.getVideoStyle.getStyle(target, 'text', 'max-height').value !== 'none' ||
-					currentSubtitle()!.id
-				) {
-					// Make the font-size responsive
-					const maxHeight = globalState.getVideoStyle.getStyle(target, 'text', 'max-height')
-						.value as string;
-					const maxHeightValue = parseFloat(maxHeight);
+				try {
+					if (
+						globalState.getVideoStyle.getStyle(target, 'text', 'max-height').value !== 'none' ||
+						currentSubtitle()!.id
+					) {
+						// Make the font-size responsive
+						const maxHeight = globalState.getVideoStyle.getStyle(target, 'text', 'max-height')
+							.value as string;
+						const maxHeightValue = parseFloat(maxHeight);
 
-					let fontSize = globalState.getVideoStyle.getStyle(target, 'text', 'font-size')
-						.value as number;
+						let fontSize = globalState.getVideoStyle.getStyle(target, 'text', 'font-size')
+							.value as number;
 
-					globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
+						globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
 
-					await new Promise((resolve) => {
-						setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
-					});
+						await new Promise((resolve) => {
+							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
+						});
 
-					const subtitles = document.querySelectorAll('.' + target);
-					subtitles.forEach(async (subtitle) => {
-						// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
-						while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
-							fontSize -= 5;
+						const subtitles = document.querySelectorAll('.' + target);
+						subtitles.forEach(async (subtitle) => {
+							// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
+							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
+								fontSize -= 5;
 
-							globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
+								globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
 
-							await new Promise((resolve) => {
-								setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
-							});
-						}
-					});
-				}
+								await new Promise((resolve) => {
+									setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
+								});
+							}
+						});
+					}
+				} catch (error) {}
 			});
 		});
 	});

@@ -1,4 +1,5 @@
 import type SubtitlesEditor from '$lib/components/projectEditor/tabs/subtitlesEditor/SubtitlesEditor.svelte';
+import type { SubtitleClip } from './Clip.svelte';
 import { ProjectEditorTabs } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 
@@ -52,11 +53,26 @@ export class StylesEditorState extends SerializableBase {
 	// Indique la requête de recherche actuelle dans l'éditeur de styles
 	searchQuery: string = $state('');
 
+	// Indique les sous-titres actuellement sélectionnés dans l'éditeur de styles
+	selectedSubtitles: SubtitleClip[] = $state([]);
+
 	getCurrentSelection(): 'global' | 'arabic' | string {
 		if (this.currentSelection === 'global' || this.currentSelection === 'arabic') {
 			return this.currentSelection;
 		}
 		return this.currentSelectionTranslation;
+	}
+
+	isSelected(id: number) {
+		return this.selectedSubtitles.some((subtitle) => subtitle.id === id);
+	}
+
+	toggleSelection(clip: SubtitleClip) {
+		if (this.isSelected(clip.id)) {
+			this.selectedSubtitles = this.selectedSubtitles.filter((subtitle) => subtitle.id !== clip.id);
+		} else {
+			this.selectedSubtitles.push(clip);
+		}
 	}
 }
 
