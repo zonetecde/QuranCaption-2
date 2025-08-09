@@ -19,6 +19,11 @@
 		return (clip.startTime / 1000) * track.getPixelPerSecond();
 	});
 
+	// Détecte s'il existe des overrides de style pour ce clip (utilise VideoStyle)
+	const hasOverrides = $derived(() => {
+		return (globalState.getVideoStyle as any)?.hasAnyOverrideForClip?.(clip.id) ?? false;
+	});
+
 	let dragStartX: number | null = null;
 
 	function startLeftDragging(e: MouseEvent) {
@@ -83,14 +88,17 @@
 
 <div
 	class={'absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden duration-200 ' +
-		(globalState.getStylesState.isSelected(clip.id) ? 'border-yellow-500/60 bg-yellow-200/20' : '')}
+		(globalState.getStylesState.isSelected(clip.id)
+			? 'border-yellow-500/60 bg-yellow-200/20 '
+			: '') +
+		(globalState.currentProject!.projectEditorState.currentTab === 'Style' ? 'cursor-pointer' : '')}
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
 	transition:slide={{ duration: 500, axis: 'x' }}
 	oncontextmenu={(e) => {
 		e.preventDefault();
 		contextMenu!.show(e);
 	}}
-	onclick={(e) => {
+	onclick={() => {
 		// Sélectionne le clip si on est dans la page de style
 		if (globalState.currentProject!.projectEditorState.currentTab === 'Style') {
 			globalState.getStylesState.toggleSelection(clip);
@@ -98,6 +106,16 @@
 	}}
 >
 	{#if clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle'}
+		<!-- Icône override (haut gauche) -->
+		{#if hasOverrides()}
+			<span
+				class="material-icons-outlined text-[10px] absolute top-0.5 left-0.5 opacity-80"
+				title="Styles individuels appliqués"
+			>
+				auto_fix_high
+			</span>
+		{/if}
+
 		<div class="absolute inset-0 z-5 flex px-2 py-2">
 			<span class="text-xs text-[var(--text-secondary)] font-medium mx-auto my-auto" dir="rtl"
 				>{clip.text}</span

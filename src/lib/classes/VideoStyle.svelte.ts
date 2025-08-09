@@ -265,6 +265,40 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	/**
+	 * Indique si un clip possède au moins un override de style.
+	 * Optionnellement, restreint par target et/ou catégorie.
+	 */
+	hasAnyOverrideForClip(clipId: number, target?: string, categoryId?: StyleCategoryName): boolean {
+		const byClip = this.overrides?.[clipId];
+		if (!byClip) return false;
+
+		// Si un target est spécifié
+		if (target) {
+			const byTarget = byClip[target];
+			if (!byTarget) return false;
+
+			// Si une catégorie est spécifiée
+			if (categoryId) {
+				const byCategory = byTarget[categoryId];
+				return !!(byCategory && Object.keys(byCategory).length > 0);
+			}
+
+			// Sinon, vérifie toute catégorie de ce target
+			return Object.values(byTarget).some((cat) => !!cat && Object.keys(cat as any).length > 0);
+		}
+
+		// Sans filtre, vérifie tous les targets et catégories
+		for (const t in byClip) {
+			const byTarget = byClip[t as keyof typeof byClip] as any;
+			for (const c in byTarget) {
+				const byCategory = byTarget[c];
+				if (byCategory && Object.keys(byCategory).length > 0) return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Génère le CSS pour tous les styles actifs (fusion globale + overrides clip si fournis)
 	 */
 	generateCSS(target: string, clipId?: number): string {

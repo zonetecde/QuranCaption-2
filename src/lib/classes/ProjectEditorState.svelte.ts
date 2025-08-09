@@ -1,5 +1,5 @@
 import type SubtitlesEditor from '$lib/components/projectEditor/tabs/subtitlesEditor/SubtitlesEditor.svelte';
-import type { SubtitleClip } from './Clip.svelte';
+import { SubtitleClip } from './Clip.svelte';
 import { ProjectEditorTabs } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 
@@ -68,6 +68,8 @@ export class StylesEditorState extends SerializableBase {
 	}
 
 	toggleSelection(clip: SubtitleClip) {
+		if (clip instanceof SubtitleClip === false) return;
+
 		if (this.isSelected(clip.id)) {
 			this.selectedSubtitles = this.selectedSubtitles.filter((subtitle) => subtitle.id !== clip.id);
 		} else {
