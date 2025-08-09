@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { type Style, type Category, VideoStyle } from '$lib/classes/VideoStyle.svelte';
+	import {
+		type Style,
+		type Category,
+		VideoStyle,
+		type StyleCategoryName
+	} from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
 	import Section from '../../Section.svelte';
@@ -107,6 +112,8 @@
 									categoryIndex
 								].styles[styleIndex]
 							}
+							target={globalState.getStylesState.getCurrentSelection()}
+							categoryId={category.id as StyleCategoryName}
 						/>
 					{/if}
 				{/each}

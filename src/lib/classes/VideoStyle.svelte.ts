@@ -89,10 +89,24 @@ export interface Category {
 // Type pour la structure complète des styles avec array
 export type StylesData = Category[];
 
+// Stockage des overrides par clip
+export type ClipStyleOverrides = {
+	[clipId: number]: {
+		[target: string]: {
+			[categoryId in StyleCategoryName]?: {
+				[styleId in StyleName]?: string | number | boolean;
+			};
+		};
+	};
+};
+
 export class VideoStyle extends SerializableBase {
 	styles: {
 		[target: string]: StylesData;
 	} = $state({});
+
+	// Overrides spécifiques aux clips sélectionnés
+	overrides: ClipStyleOverrides = $state({});
 
 	lastUpdated: Date = new Date();
 
@@ -160,40 +174,111 @@ export class VideoStyle extends SerializableBase {
 		if (style) {
 			style.value = value;
 		}
+		this.lastUpdated = new Date();
+	}
+
+	// Définit un style pour un ou plusieurs clips sélectionnés (override partiel)
+	setStyleForClips(
+		clipIds: number[],
+		target: string,
+		categoryId: StyleCategoryName,
+		styleId: StyleName,
+		value: string | number | boolean
+	) {
+		for (const clipId of clipIds) {
+			if (!this.overrides[clipId]) this.overrides[clipId] = {} as any;
+			if (!this.overrides[clipId][target]) this.overrides[clipId][target] = {} as any;
+			if (!this.overrides[clipId][target][categoryId])
+				this.overrides[clipId][target][categoryId] = {} as any;
+
+			this.overrides[clipId][target][categoryId]![styleId] = value;
+		}
+		this.lastUpdated = new Date();
+	}
+
+	// Retourne la valeur effective (override clip si présent, sinon valeur globale)
+	getEffectiveValue(
+		target: string,
+		categoryId: StyleCategoryName,
+		styleId: StyleName,
+		clipId?: number
+	): string | number | boolean {
+		if (
+			clipId !== undefined &&
+			this.overrides[clipId] &&
+			this.overrides[clipId][target] &&
+			this.overrides[clipId][target][categoryId] &&
+			this.overrides[clipId][target][categoryId]![styleId] !== undefined
+		) {
+			return this.overrides[clipId][target][categoryId]![styleId]!;
+		}
+		return this.getStyle(target, categoryId, styleId).value;
+	}
+
+	hasOverrideForAny(
+		clipIds: number[],
+		target: string,
+		categoryId: StyleCategoryName,
+		styleId: StyleName
+	): boolean {
+		return clipIds.some((clipId) => {
+			return !!(
+				this.overrides[clipId] &&
+				this.overrides[clipId][target] &&
+				this.overrides[clipId][target][categoryId] &&
+				this.overrides[clipId][target][categoryId]![styleId] !== undefined
+			);
+		});
 	}
 
 	/**
-	 * Génère le CSS pour tous les styles actifs
+	 * Génère le CSS pour tous les styles actifs (fusion globale + overrides clip si fournis)
 	 */
-	generateCSS(target: string): string {
+	generateCSS(target: string, clipId?: number): string {
 		let css = '';
 
 		if (!this.styles[target]) return '';
 
 		for (const category of this.styles[target]) {
+			let skipCategory = false;
+
 			for (const style of category.styles) {
+				const effectiveValue = this.getEffectiveValue(
+					target,
+					category.id as StyleCategoryName,
+					style.id as StyleName,
+					clipId
+				);
+
 				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
-				// alors si la catégorie est désactivée, on ne génère pas le CSS de tout les autres styles
-				if (style.valueType === 'boolean' && !style.value && style.id.includes('enable')) {
-					break;
+				// si la propriété d'activation est false, on ne génère pas le CSS des autres styles
+				if (style.valueType === 'boolean' && style.id.includes('enable')) {
+					if (!Boolean(effectiveValue)) {
+						skipCategory = true;
+						break;
+					} else {
+						continue; // ne pas générer la règle pour le flag lui-même
+					}
 				}
 
+				if (skipCategory) break;
+
 				// Propriétés spécifiques à ignorer
-				if (style.id === 'max-height' && style.value === 'none') continue;
-				if (style.id === 'font-family' && style.value === 'Hafs') continue; // Gérer par une classe Tailwind
-				if (style.id === 'max-height' && style.value === 'none') break; // Ignore les propriétés après qui dépendent de max-height
+				if (style.id === 'max-height' && String(effectiveValue) === 'none') continue;
+				if (style.id === 'font-family' && String(effectiveValue) === 'Hafs') continue; // Gérer par une classe Tailwind
+				if (style.id === 'max-height' && String(effectiveValue) === 'none') break; // Ignore les propriétés après qui dépendent de max-height
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
-				// Cas particulier pour l'alignement vertical du texte, le CSS est différent et donc est dans un objet dans l'attribut `css` qui dépend de la valeur
+				// Cas particulier pour l'alignement vertical/horizontal du texte
 				if (style.id === 'vertical-text-alignment' || style.id === 'horizontal-text-alignment') {
-					//@ts-ignore
-					css += style.css[style.value] + '\n';
+					// @ts-ignore: style.css peut être un objet map
+					css += style.css[effectiveValue as any] + '\n';
 					continue;
 				}
 
-				// Remplace {value} par la valeur actuelle
-				let cssRule = style.css.replaceAll(/{value}/g, String(style.value));
+				// Remplace {value} par la valeur effective
+				let cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
 
 				if (cssRule.trim()) {
 					css += cssRule + '\n';
@@ -251,6 +336,7 @@ export class VideoStyle extends SerializableBase {
 	async resetToDefaults(): Promise<void> {
 		const defaultStyle = await VideoStyle.setDefaultStylesToDefaultOne();
 		this.styles = defaultStyle.styles;
+		this.overrides = {};
 		this.lastUpdated = new Date();
 	}
 }

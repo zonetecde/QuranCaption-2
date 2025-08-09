@@ -4,11 +4,16 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import type { StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
 
 	let {
-		style = $bindable()
+		style = $bindable(),
+		target,
+		categoryId
 	}: {
 		style: Style;
+		target: string;
+		categoryId: StyleCategoryName;
 	} = $props();
 
 	onMount(() => {
@@ -27,6 +32,66 @@
 			extended: expanded
 		};
 	});
+
+	// Gestion sélection de clips
+	const selectedClipIds = $derived(() =>
+		globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map((s) => s.id)
+	);
+
+	function getEffectiveForSelection(): {
+		value: any;
+		mixed: boolean;
+		overridden: boolean;
+	} {
+		if (selectedClipIds().length === 0) {
+			return { value: style.value, mixed: false, overridden: false };
+		}
+
+		const values = selectedClipIds().map((id) =>
+			globalState.getVideoStyle.getEffectiveValue(target, categoryId, style.id as StyleName, id)
+		);
+		const first = values[0];
+		const mixed = values.some((v) => String(v) !== String(first));
+		const overridden = globalState.getVideoStyle.hasOverrideForAny(
+			selectedClipIds(),
+			target,
+			categoryId,
+			style.id as StyleName
+		);
+		return { value: mixed ? first : first, mixed, overridden };
+	}
+
+	let inputValue: any = style.value;
+	$effect(() => {
+		const eff = getEffectiveForSelection();
+		inputValue = eff.value;
+	});
+
+	function coerce(val: any) {
+		if (style.valueType === 'number') return Number(val);
+		if (style.valueType === 'boolean') return Boolean(val);
+		return val as any;
+	}
+
+	function applyValue(v: any) {
+		const value = coerce(v);
+		if (selectedClipIds().length > 0) {
+			globalState.getVideoStyle.setStyleForClips(
+				selectedClipIds(),
+				target,
+				categoryId,
+				style.id as StyleName,
+				value
+			);
+		} else {
+			globalState.getVideoStyle.setStyle(target, categoryId, style.id as StyleName, value);
+		}
+		// Déclenche un refresh éventuel (ex: max-height fit)
+		if (style.id === 'max-height') {
+			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
+				globalState.currentProject!.projectEditorState.timeline.movePreviewTo + 1;
+		}
+	}
 </script>
 
 <div
@@ -43,7 +108,22 @@
 		onclick={() => (expanded = !expanded)}
 	>
 		<span class="text-sm text-primary">{style.name}</span>
-		<span class="text-xs text-secondary">{style.value}</span>
+		{#key selectedClipIds().length + String(inputValue)}
+			<span class="text-xs text-secondary">
+				{#if selectedClipIds().length > 0}
+					{#if getEffectiveForSelection().mixed}
+						(mixte)
+					{:else}
+						{String(inputValue)}
+					{/if}
+					{#if getEffectiveForSelection().overridden}
+						•
+					{/if}
+				{:else}
+					{String(style.value)}
+				{/if}
+			</span>
+		{/key}
 	</div>
 
 	{#if expanded}
@@ -60,7 +140,9 @@
 						min={style.valueMin}
 						max={style.valueMax}
 						step={style.step || 1}
-						bind:value={style.value}
+						value={inputValue}
+						oninput={(e) => (inputValue = (e.target as HTMLInputElement).value)}
+						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
 					/>
 
 					<!-- met aussi un input number -->
@@ -69,30 +151,43 @@
 						min={style.valueMin}
 						max={style.valueMax}
 						step={style.step || 1}
-						bind:value={style.value}
+						value={inputValue}
+						oninput={(e) => (inputValue = (e.target as HTMLInputElement).value)}
+						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
 						class="w-20"
 					/>
 				</div>
 			{:else if style.valueType === 'color'}
 				<div class="flex gap-x-2 items-center">
-					<input type="color" bind:value={style.value} class="w-full" />
-					<input type="text" bind:value={style.value} class="w-16" />
+					<input
+						type="color"
+						value={String(inputValue)}
+						class="w-full"
+						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
+					/>
+					<input
+						type="text"
+						value={String(inputValue)}
+						class="w-16"
+						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
+					/>
 				</div>
 			{:else if style.valueType === 'boolean'}
 				<div class="flex gap-x-2 items-center mt-2">
-					<input type="checkbox" bind:checked={style.value as boolean} class="w-4 h-4" />
+					<input
+						type="checkbox"
+						checked={Boolean(inputValue)}
+						class="w-4 h-4"
+						onchange={(e) => applyValue((e.target as HTMLInputElement).checked)}
+					/>
 					<span class="text-xs text-secondary">Enabled</span>
 				</div>
 			{:else if style.valueType === 'select'}
 				<select
-					bind:value={style.value}
 					class="w-full mt-1"
-					onchange={() => {
-						if (style.id === 'max-height') {
-							// Permet de trigger le recalcul de la taille de police dans la preview.
-							globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
-								globalState.currentProject!.projectEditorState.timeline.movePreviewTo + 1;
-						}
+					value={String(inputValue)}
+					onchange={(e) => {
+						applyValue((e.target as HTMLSelectElement).value);
 					}}
 				>
 					{#if style.id === 'font-family'}

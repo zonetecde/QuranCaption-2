@@ -24,13 +24,15 @@
 		return currentSubtitle()!.translations;
 	});
 
-	// Calcul de l'opacité des sous-titres
+	// Calcul de l'opacité des sous-titres (prend en compte les overrides par clip)
 	let subtitleOpacity = $derived((target: string) => {
 		const subtitle = currentSubtitle();
 		if (!subtitle) return 0;
 
-		let maxOpacity = globalState.getVideoStyle.getStyle(target, 'effects', 'opacity')
-			.value as number;
+		const clipId = subtitle.id;
+		let maxOpacity = Number(
+			globalState.getVideoStyle.getEffectiveValue(target, 'effects', 'opacity', clipId)
+		);
 
 		const currentTime = getTimelineSettings().cursorPosition;
 		const endTime = subtitle.endTime;
@@ -51,8 +53,8 @@
 		return maxOpacity;
 	});
 
-	let getCss = $derived((target: string) => {
-		return globalState.getVideoStyle.generateCSS(target);
+	let getCss = $derived((target: string, clipId?: number) => {
+		return globalState.getVideoStyle.generateCSS(target, clipId);
 	});
 
 	let getTailwind = $derived((target: string) => {
@@ -144,7 +146,7 @@
 		{#if currentSubtitle() && currentSubtitle()!.id}
 			<p
 				class={'arabic absolute subtitle ' + getTailwind('arabic') + helperStyles()}
-				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic')}"
+				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)}"
 			>
 				{currentSubtitle()!.text}
 			</p>
@@ -157,7 +159,7 @@
 				{#if globalState.getVideoStyle.styles[edition]}
 					<p
 						class={`translation absolute subtitle ${edition} ${getTailwind(edition)} ${helperStyles()}`}
-						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition)}`}
+						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
 						{translation.text}
 					</p>
