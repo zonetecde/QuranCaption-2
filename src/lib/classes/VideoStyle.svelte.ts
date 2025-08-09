@@ -297,7 +297,6 @@ export class VideoStyle extends SerializableBase {
 				if (skipCategory) break;
 
 				// Propriétés spécifiques à ignorer
-				if (style.id === 'max-height' && String(effectiveValue) === 'none') continue;
 				if (style.id === 'font-family' && String(effectiveValue) === 'Hafs') continue; // Gérer par une classe Tailwind
 				if (style.id === 'max-height' && String(effectiveValue) === 'none') break; // Ignore les propriétés après qui dépendent de max-height
 
