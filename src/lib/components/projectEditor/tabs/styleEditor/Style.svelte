@@ -106,51 +106,33 @@
 
 <div
 	class={'flex flex-col duration-150 ' +
-		(expanded ? 'rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md') +
-		(getEffectiveForSelection().overridden && selectedClipIds().length > 0
-			? ' ring-2 ring-amber-400/60 bg-amber-500/10 '
-			: expanded
-				? ' bg-blue-200/10 '
-				: '')}
+		(expanded ? 'bg-blue-200/10 rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md')}
 >
 	<div
-		class={'flex items-center justify-between py-1 px-1 ' +
+		class={'flex items-center justify-between py-1 px-1 cursor-pointer ' +
 			(expanded
 				? 'border-b border-white/30'
 				: globalState.getStylesState.searchQuery
 					? 'bg-yellow-400/40'
 					: '')}
-		onclick={() => {
-			expanded = !expanded;
-		}}
+		onclick={() => (expanded = !expanded)}
 	>
-		<div class="flex items-center gap-2">
-			<span class="text-sm text-primary">{style.name}</span>
-		</div>
+		<span class="text-sm text-primary">{style.name}</span>
 		{#key selectedClipIds().length + String(inputValue)}
-			<div class="flex items-center gap-2">
-				<span class="text-xs text-secondary">
-					{#if selectedClipIds().length > 0}
-						{#if getEffectiveForSelection().mixed}
-							(mixte)
-						{:else}
-							{String(inputValue)}
-						{/if}
-						{#if getEffectiveForSelection().overridden}
-							•
-						{/if}
+			<span class="text-xs text-secondary">
+				{#if selectedClipIds().length > 0}
+					{#if getEffectiveForSelection().mixed}
+						(mixte)
 					{:else}
-						{String(style.value)}
+						{String(inputValue)}
 					{/if}
-				</span>
-				{#if selectedClipIds().length > 0 && getEffectiveForSelection().overridden}
-					<button
-						class="btn text-xs px-3 py-1 border border-amber-300/40 text-amber-200 hover:bg-amber-400/20"
-						onclick={clearOverride}
-						title="Reset to parent style">Reset</button
-					>
+					{#if getEffectiveForSelection().overridden}
+						•
+					{/if}
+				{:else}
+					{String(style.value)}
 				{/if}
-			</div>
+			</span>
 		{/key}
 	</div>
 
@@ -169,8 +151,10 @@
 						max={style.valueMax}
 						step={style.step || 1}
 						value={inputValue}
-						oninput={(e) => (inputValue = (e.target as HTMLInputElement).value)}
-						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
+						oninput={(e) => {
+							inputValue = (e.target as HTMLInputElement).value;
+							applyValue((e.target as HTMLInputElement).value);
+						}}
 					/>
 
 					<!-- met aussi un input number -->
@@ -180,8 +164,10 @@
 						max={style.valueMax}
 						step={style.step || 1}
 						value={inputValue}
-						oninput={(e) => (inputValue = (e.target as HTMLInputElement).value)}
-						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
+						oninput={(e) => {
+							inputValue = (e.target as HTMLInputElement).value;
+							applyValue((e.target as HTMLInputElement).value);
+						}}
 						class="w-20"
 					/>
 				</div>
@@ -191,13 +177,13 @@
 						type="color"
 						value={String(inputValue)}
 						class="w-full"
-						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
+						oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
 					/>
 					<input
 						type="text"
 						value={String(inputValue)}
 						class="w-16"
-						onchange={(e) => applyValue((e.target as HTMLInputElement).value)}
+						oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
 					/>
 				</div>
 			{:else if style.valueType === 'boolean'}
@@ -206,7 +192,7 @@
 						type="checkbox"
 						checked={Boolean(inputValue)}
 						class="w-4 h-4"
-						onchange={(e) => applyValue((e.target as HTMLInputElement).checked)}
+						oninput={(e) => applyValue((e.target as HTMLInputElement).checked)}
 					/>
 					<span class="text-xs text-secondary">Enabled</span>
 				</div>
