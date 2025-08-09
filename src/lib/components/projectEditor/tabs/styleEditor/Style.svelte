@@ -61,7 +61,7 @@
 		return { value: mixed ? first : first, mixed, overridden };
 	}
 
-	let inputValue: any = style.value;
+	let inputValue: any = $state(style.value);
 	$effect(() => {
 		const eff = getEffectiveForSelection();
 		inputValue = eff.value;
@@ -92,37 +92,65 @@
 				globalState.currentProject!.projectEditorState.timeline.movePreviewTo + 1;
 		}
 	}
+
+	function clearOverride() {
+		if (selectedClipIds().length === 0) return;
+		globalState.getVideoStyle.clearStyleForClips(
+			selectedClipIds(),
+			target,
+			categoryId,
+			style.id as StyleName
+		);
+	}
 </script>
 
 <div
 	class={'flex flex-col duration-150 ' +
-		(expanded ? 'bg-blue-200/10 rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md')}
+		(expanded ? 'rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md') +
+		(getEffectiveForSelection().overridden && selectedClipIds().length > 0
+			? ' ring-2 ring-amber-400/60 bg-amber-500/10 '
+			: expanded
+				? ' bg-blue-200/10 '
+				: '')}
 >
 	<div
-		class={'flex items-center justify-between py-1 px-1 cursor-pointer ' +
+		class={'flex items-center justify-between py-1 px-1 ' +
 			(expanded
 				? 'border-b border-white/30'
 				: globalState.getStylesState.searchQuery
 					? 'bg-yellow-400/40'
 					: '')}
-		onclick={() => (expanded = !expanded)}
+		onclick={() => {
+			expanded = !expanded;
+		}}
 	>
-		<span class="text-sm text-primary">{style.name}</span>
+		<div class="flex items-center gap-2">
+			<span class="text-sm text-primary">{style.name}</span>
+		</div>
 		{#key selectedClipIds().length + String(inputValue)}
-			<span class="text-xs text-secondary">
-				{#if selectedClipIds().length > 0}
-					{#if getEffectiveForSelection().mixed}
-						(mixte)
+			<div class="flex items-center gap-2">
+				<span class="text-xs text-secondary">
+					{#if selectedClipIds().length > 0}
+						{#if getEffectiveForSelection().mixed}
+							(mixte)
+						{:else}
+							{String(inputValue)}
+						{/if}
+						{#if getEffectiveForSelection().overridden}
+							•
+						{/if}
 					{:else}
-						{String(inputValue)}
+						{String(style.value)}
 					{/if}
-					{#if getEffectiveForSelection().overridden}
-						•
-					{/if}
-				{:else}
-					{String(style.value)}
+				</span>
+				{#if selectedClipIds().length > 0 && getEffectiveForSelection().overridden}
+					<button
+						class="btn text-xs px-3 py-1 border border-amber-300/40 text-amber-200 hover:bg-amber-400/20"
+						onclick={clearOverride}
+						title="Reset to parent style">Reset</button
+					>
 				{/if}
-			</span>
+			</div>
 		{/key}
 	</div>
 

@@ -196,6 +196,39 @@ export class VideoStyle extends SerializableBase {
 		this.lastUpdated = new Date();
 	}
 
+	// Supprime l'override pour un style donné sur une liste de clips
+	clearStyleForClips(
+		clipIds: number[],
+		target: string,
+		categoryId: StyleCategoryName,
+		styleId: StyleName
+	) {
+		for (const clipId of clipIds) {
+			const byClip = this.overrides[clipId];
+			if (!byClip) continue;
+			const byTarget = byClip[target];
+			if (!byTarget) continue;
+			const byCategory = byTarget[categoryId];
+			if (!byCategory) continue;
+
+			if (byCategory[styleId] !== undefined) {
+				delete byCategory[styleId];
+			}
+
+			// Nettoyage des objets vides
+			if (Object.keys(byCategory).length === 0) {
+				delete byTarget[categoryId];
+			}
+			if (Object.keys(byTarget).length === 0) {
+				delete byClip[target];
+			}
+			if (Object.keys(byClip).length === 0) {
+				delete this.overrides[clipId];
+			}
+		}
+		this.lastUpdated = new Date();
+	}
+
 	// Retourne la valeur effective (override clip si présent, sinon valeur globale)
 	getEffectiveValue(
 		target: string,
