@@ -60,15 +60,19 @@
 		</div>
 
 		{#if globalState.getStylesState.currentSelection === 'translation'}
-			<select
-				class="mt-1"
-				bind:value={globalState.getStylesState.currentSelectionTranslation}
-				transition:slide
-			>
-				{#each globalState.getProjectTranslation.addedTranslationEditions as translation}
-					<option value={translation.name}>{translation.author}</option>
-				{/each}
-			</select>
+			{#if globalState.getProjectTranslation.addedTranslationEditions.length > 0}
+				<select
+					class="mt-1"
+					bind:value={globalState.getStylesState.currentSelectionTranslation}
+					transition:slide
+				>
+					{#each globalState.getProjectTranslation.addedTranslationEditions as translation}
+						<option value={translation.name}>{translation.author}</option>
+					{/each}
+				</select>
+			{:else}
+				<p class="text-secondary text-sm mt-1 text-center">You have no translations yet.</p>
+			{/if}
 		{/if}
 
 		<!-- search bar -->

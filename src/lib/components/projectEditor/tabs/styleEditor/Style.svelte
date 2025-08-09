@@ -35,7 +35,11 @@
 >
 	<div
 		class={'flex items-center justify-between py-1 px-1 cursor-pointer ' +
-			(expanded ? 'border-b border-white/30' : '')}
+			(expanded
+				? 'border-b border-white/30'
+				: globalState.getStylesState.searchQuery
+					? 'bg-yellow-400/40'
+					: '')}
 		onclick={() => (expanded = !expanded)}
 	>
 		<span class="text-sm text-primary">{style.name}</span>
