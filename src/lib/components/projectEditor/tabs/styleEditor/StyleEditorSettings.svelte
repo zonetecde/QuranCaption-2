@@ -31,8 +31,6 @@
 
 			globalState.getVideoStyle.styles[translation.name] = await VideoStyle.getDefaultStyles();
 		}
-
-		console.log('Styles loaded:', globalState.getVideoStyle.styles);
 	});
 </script>
 

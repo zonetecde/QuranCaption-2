@@ -80,7 +80,17 @@
 					<span class="text-xs text-secondary">Enabled</span>
 				</div>
 			{:else if style.valueType === 'select'}
-				<select bind:value={style.value} class="w-full mt-1">
+				<select
+					bind:value={style.value}
+					class="w-full mt-1"
+					onchange={() => {
+						if (style.id === 'max-height') {
+							// Permet de trigger le recalcul de la taille de police dans la preview.
+							globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
+								globalState.currentProject!.projectEditorState.timeline.movePreviewTo + 1;
+						}
+					}}
+				>
 					{#if style.id === 'font-family'}
 						{#await invoke('get_system_fonts')}
 							<option value="" disabled selected>Loading fonts...</option>

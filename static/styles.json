@@ -35,16 +35,7 @@
 				"description": "Select the font family for the text",
 				"value": "Arial",
 				"valueType": "select",
-				"options": [
-					"Arial",
-					"Helvetica",
-					"Times New Roman",
-					"Georgia",
-					"Verdana",
-					"Comic Sans MS",
-					"Impact",
-					"Trebuchet MS"
-				],
+				"options": [],
 				"css": "font-family: '{value}', sans-serif;",
 				"tailwind": false,
 				"applyGlobally": false,
@@ -108,7 +99,7 @@
 				"value": "none",
 				"valueType": "select",
 				"options": ["none", "100", "125", "150", "175", "200", "300", "400"],
-				"css": "max-height: {value}px;",
+				"css": "max-height: {value}px; height: {value}px;",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "height"
@@ -175,16 +166,37 @@
 				"icon": "width_full"
 			},
 			{
-				"id": "text-align",
-				"name": "Text Alignment",
+				"id": "horizontal-text-alignment",
+				"name": "Horizontal Text Alignment",
 				"description": "Set the alignment of the text",
 				"value": "center",
 				"valueType": "select",
 				"options": ["left", "center", "right", "justify"],
-				"css": "text-align: {value};",
+				"css": {
+					"left": "text-align: left; justify-content: flex-start;",
+					"center": "text-align: center; justify-content: center;",
+					"right": "text-align: right; justify-content: flex-end;",
+					"justify": "text-align: justify; justify-content: space-between;"
+				},
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "format_align_center"
+			},
+			{
+				"id": "vertical-text-alignment",
+				"name": "Vertical Text Alignment",
+				"description": "Align text vertically when paragraph height is large",
+				"value": "center",
+				"valueType": "select",
+				"options": ["top", "center", "bottom"],
+				"css": {
+					"top": "display: flex; align-items: flex-start;",
+					"center": "display: flex; align-items: center;",
+					"bottom": "display: flex; align-items: flex-end;"
+				},
+				"tailwind": false,
+				"applyGlobally": false,
+				"icon": "vertical_align_center"
 			}
 		]
 	},

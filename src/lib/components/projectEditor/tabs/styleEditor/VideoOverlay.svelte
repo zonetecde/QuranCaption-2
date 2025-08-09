@@ -154,12 +154,8 @@
 
 				{#if globalState.getVideoStyle.styles[edition]}
 					<p
-						class={'translation absolute subtitle ' +
-							edition +
-							' ' +
-							getTailwind(edition) +
-							helperStyles()}
-						style="opacity: {subtitleOpacity(edition)}; {getCss(edition)}"
+						class={`translation absolute subtitle ${edition} ${getTailwind(edition)} ${helperStyles()}`}
+						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition)}`}
 					>
 						{translation.text}
 					</p>

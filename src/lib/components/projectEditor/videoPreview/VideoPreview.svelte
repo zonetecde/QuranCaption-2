@@ -342,7 +342,6 @@
 	let currentlyPlayingAudio: string = ''; // L'asset audio actuellement joué
 
 	function togglePlayPause() {
-		console.log('Toggle play/pause called');
 		if (isPlaying) {
 			pause();
 		} else {

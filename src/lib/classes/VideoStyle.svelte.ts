@@ -145,8 +145,6 @@ export class VideoStyle extends SerializableBase {
 	 * Obtient un style spécifique dans une catégorie
 	 */
 	getStyle(target: string, categoryId: StyleCategoryName, styleId: StyleName): Style {
-		console.log('Getting style:', styleId, 'from category:', categoryId, 'for target:', target);
-
 		const category = this.getCategory(target, categoryId);
 		return category!.styles.find((style) => style.id === styleId)!;
 	}
@@ -176,7 +174,6 @@ export class VideoStyle extends SerializableBase {
 			for (const style of category.styles) {
 				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
 				// alors si la catégorie est désactivée, on ne génère pas le CSS de tout les autres styles
-				console.log(style.id);
 				if (style.valueType === 'boolean' && !style.value && style.id.includes('enable')) {
 					break;
 				}
@@ -188,6 +185,13 @@ export class VideoStyle extends SerializableBase {
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
+				// Cas particulier pour l'alignement vertical du texte, le CSS est différent et donc est dans un objet dans l'attribut `css` qui dépend de la valeur
+				if (style.id === 'vertical-text-alignment' || style.id === 'horizontal-text-alignment') {
+					//@ts-ignore
+					css += style.css[style.value] + '\n';
+					continue;
+				}
+
 				// Remplace {value} par la valeur actuelle
 				let cssRule = style.css.replaceAll(/{value}/g, String(style.value));
 
@@ -196,8 +200,6 @@ export class VideoStyle extends SerializableBase {
 				}
 			}
 		}
-
-		console.log('Generated CSS:', css);
 
 		return css;
 	}
@@ -226,8 +228,6 @@ export class VideoStyle extends SerializableBase {
 				}
 			}
 		}
-
-		console.log('Generated Tailwind classes:', tailwindClasses);
 
 		return tailwindClasses.trim();
 	}
