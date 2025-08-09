@@ -89,6 +89,22 @@
 				bind:value={globalState.getStylesState.searchQuery}
 			/>
 		</div>
+
+		<!-- Clips actuellement sélectionnés -->
+		{#if globalState.getStylesState.selectedSubtitles.length > 0}
+			<p class="text-secondary text-sm mt-3 flex items-center gap-x-2">
+				<span
+					class="material-icons-outlined cursor-pointer"
+					onclick={() => {
+						globalState.getStylesState.clearSelection();
+					}}
+					title="Clear selection"
+				>
+					clear
+				</span>{globalState.getStylesState.selectedSubtitles.length} clip(s) selected. Styles will only
+				be applied to these clips.
+			</p>
+		{/if}
 	</div>
 	<div
 		class="flex flex-col gap-y-2 px-2 bg-[var(--bg-primary)]/60 rounded-lg border border-[var(--border-color)]/50 overflow-y-auto pb-10 rounded-t-none border-t-2 flex-1"
@@ -98,26 +114,33 @@
 				stylesContainer?.scrollTop || 0;
 		}}
 	>
-		{#each styles() as category}
-			<Section name={category.name} icon={category.icon} classes="-mb-1">
-				{#each category.styles as style, styleIndex}
-					{@const categoryIndex = styles().findIndex((c) => c.id === category.id)}
-					{#if globalState.getStylesState.searchQuery === '' || style.name
-							.toLowerCase()
-							.includes(globalState.getStylesState.searchQuery.toLowerCase())}
-						<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
-						<StyleComponent
-							bind:style={
-								globalState.getVideoStyle.styles[globalState.getStylesState.getCurrentSelection()][
-									categoryIndex
-								].styles[styleIndex]
-							}
-							target={globalState.getStylesState.getCurrentSelection()}
-							categoryId={category.id as StyleCategoryName}
-						/>
-					{/if}
-				{/each}
-			</Section>
-		{/each}
+		{#if globalState.getStylesState.getCurrentSelection() === 'global' && globalState.getStylesState.selectedSubtitles.length > 0}
+			<p class="text-secondary text-sm mt-4">
+				You cannot edit global styles when clips are selected, because global styles apply to the
+				entire video. Please clear your selection first.
+			</p>
+		{:else}
+			{#each styles() as category}
+				<Section name={category.name} icon={category.icon} classes="-mb-1">
+					{#each category.styles as style, styleIndex}
+						{@const categoryIndex = styles().findIndex((c) => c.id === category.id)}
+						{#if globalState.getStylesState.searchQuery === '' || style.name
+								.toLowerCase()
+								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
+							<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
+							<StyleComponent
+								bind:style={
+									globalState.getVideoStyle.styles[
+										globalState.getStylesState.getCurrentSelection()
+									][categoryIndex].styles[styleIndex]
+								}
+								target={globalState.getStylesState.getCurrentSelection()}
+								categoryId={category.id as StyleCategoryName}
+							/>
+						{/if}
+					{/each}
+				</Section>
+			{/each}
+		{/if}
 	</div>
 </div>

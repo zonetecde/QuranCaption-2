@@ -79,6 +79,11 @@
 		// Supprime le clip de sous-titre
 		// Le setTimeout est nécessaire sinon le contextmenu ne se ferme pas
 		setTimeout(() => {
+			// S'il était dans les clips sélectionnés, on le retire
+			if (globalState.getStylesState.isSelected(clip.id)) {
+				globalState.getStylesState.removeSelection(clip.id);
+			}
+
 			track.removeClip(clip.id, true);
 		}, 0);
 	}

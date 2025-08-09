@@ -185,6 +185,10 @@ export class VideoStyle extends SerializableBase {
 		styleId: StyleName,
 		value: string | number | boolean
 	) {
+		// Les styles du target 'global' sont uniques et ne peuvent pas être individualisés
+		if (target === 'global') {
+			return;
+		}
 		for (const clipId of clipIds) {
 			if (!this.overrides[clipId]) this.overrides[clipId] = {} as any;
 			if (!this.overrides[clipId][target]) this.overrides[clipId][target] = {} as any;
@@ -203,6 +207,10 @@ export class VideoStyle extends SerializableBase {
 		categoryId: StyleCategoryName,
 		styleId: StyleName
 	) {
+		// Aucun override à supprimer pour 'global' (non supporté)
+		if (target === 'global') {
+			return;
+		}
 		for (const clipId of clipIds) {
 			const byClip = this.overrides[clipId];
 			if (!byClip) continue;
@@ -236,6 +244,10 @@ export class VideoStyle extends SerializableBase {
 		styleId: StyleName,
 		clipId?: number
 	): string | number | boolean {
+		// Le target 'global' ignore toujours les overrides
+		if (target === 'global') {
+			return this.getStyle(target, categoryId, styleId).value;
+		}
 		if (
 			clipId !== undefined &&
 			this.overrides[clipId] &&
@@ -254,6 +266,8 @@ export class VideoStyle extends SerializableBase {
 		categoryId: StyleCategoryName,
 		styleId: StyleName
 	): boolean {
+		// Jamais d'override pour 'global'
+		if (target === 'global') return false;
 		return clipIds.some((clipId) => {
 			return !!(
 				this.overrides[clipId] &&
@@ -267,6 +281,7 @@ export class VideoStyle extends SerializableBase {
 	/**
 	 * Indique si un clip possède au moins un override de style.
 	 * Optionnellement, restreint par target et/ou catégorie.
+	 * Le target 'global' est toujours ignoré.
 	 */
 	hasAnyOverrideForClip(clipId: number, target?: string, categoryId?: StyleCategoryName): boolean {
 		const byClip = this.overrides?.[clipId];
@@ -274,6 +289,8 @@ export class VideoStyle extends SerializableBase {
 
 		// Si un target est spécifié
 		if (target) {
+			// Ignorer explicitement 'global'
+			if (target === 'global') return false;
 			const byTarget = byClip[target];
 			if (!byTarget) return false;
 
@@ -287,8 +304,9 @@ export class VideoStyle extends SerializableBase {
 			return Object.values(byTarget).some((cat) => !!cat && Object.keys(cat as any).length > 0);
 		}
 
-		// Sans filtre, vérifie tous les targets et catégories
+		// Sans filtre, vérifie tous les targets et catégories (en excluant 'global')
 		for (const t in byClip) {
+			if (t === 'global') continue;
 			const byTarget = byClip[t as keyof typeof byClip] as any;
 			for (const c in byTarget) {
 				const byCategory = byTarget[c];

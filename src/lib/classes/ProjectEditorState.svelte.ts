@@ -76,6 +76,14 @@ export class StylesEditorState extends SerializableBase {
 			this.selectedSubtitles.push(clip);
 		}
 	}
+
+	removeSelection(id: number) {
+		this.selectedSubtitles = this.selectedSubtitles.filter((subtitle) => subtitle.id !== id);
+	}
+
+	clearSelection() {
+		this.selectedSubtitles = [];
+	}
 }
 
 /**
