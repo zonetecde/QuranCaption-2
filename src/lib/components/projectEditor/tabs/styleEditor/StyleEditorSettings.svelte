@@ -101,8 +101,10 @@
 					title="Clear selection"
 				>
 					clear
-				</span>{globalState.getStylesState.selectedSubtitles.length} clip(s) selected. Styles will only
-				be applied to these clips.
+				</span>{globalState.getStylesState.selectedSubtitles.length} clip{globalState.getStylesState
+					.selectedSubtitles.length > 1
+					? 's'
+					: ''} selected. Styles will only be applied to these clips.
 			</p>
 		{/if}
 	</div>

@@ -61,6 +61,14 @@
 		return { value: mixed ? first : first, mixed, overridden };
 	}
 
+	// Drapeaux visuels
+	const isMixed = $derived(() =>
+		selectedClipIds().length > 0 ? getEffectiveForSelection().mixed : false
+	);
+	const isOverridden = $derived(() =>
+		selectedClipIds().length > 0 ? getEffectiveForSelection().overridden : false
+	);
+
 	let inputValue: any = $state(style.value);
 	$effect(() => {
 		const eff = getEffectiveForSelection();
@@ -106,7 +114,12 @@
 
 <div
 	class={'flex flex-col duration-150 ' +
-		(expanded ? 'bg-blue-200/10 rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md')}
+		(expanded ? 'bg-blue-200/10 rounded-2xl my-2 px-3 py-2' : 'hover:bg-white/10 rounded-md') +
+		(isMixed()
+			? ' border border-fuchsia-400/60'
+			: isOverridden()
+				? ' border border-amber-400/60'
+				: '')}
 >
 	<div
 		class={'flex items-center justify-between py-1 px-1 cursor-pointer ' +
@@ -119,20 +132,39 @@
 	>
 		<span class="text-sm text-primary">{style.name}</span>
 		{#key selectedClipIds().length + String(inputValue)}
-			<span class="text-xs text-secondary">
-				{#if selectedClipIds().length > 0}
-					{#if getEffectiveForSelection().mixed}
-						(mixte)
+			<div class="flex items-center gap-2 text-xs text-secondary">
+				<span>
+					{#if selectedClipIds().length > 0}
+						{#if getEffectiveForSelection().mixed}
+							(mixte)
+						{:else}
+							{String(inputValue)}
+						{/if}
+						{#if getEffectiveForSelection().overridden}
+							•
+						{/if}
 					{:else}
-						{String(inputValue)}
+						{String(style.value)}
 					{/if}
-					{#if getEffectiveForSelection().overridden}
-						•
-					{/if}
-				{:else}
-					{String(style.value)}
+				</span>
+				{#if selectedClipIds().length > 0 && (getEffectiveForSelection().overridden || getEffectiveForSelection().mixed) && target !== 'global'}
+					<button
+						class="ml-1 text-[10px] px-2 py-0.5 rounded border hover:opacity-90 duration-100"
+						class:!bg-amber-500={getEffectiveForSelection().overridden}
+						class:!border-amber-400={getEffectiveForSelection().overridden}
+						class:!text-amber-900={getEffectiveForSelection().overridden}
+						class:!bg-fuchsia-500={getEffectiveForSelection().mixed}
+						class:!border-fuchsia-400={getEffectiveForSelection().mixed}
+						class:!text-fuchsia-300={getEffectiveForSelection().mixed}
+						onclick={(e) => {
+							e.stopPropagation();
+							clearOverride();
+						}}
+					>
+						Reset
+					</button>
 				{/if}
-			</span>
+			</div>
 		{/key}
 	</div>
 
