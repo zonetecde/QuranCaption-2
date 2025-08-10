@@ -123,12 +123,12 @@
 >
 	<!-- Header -->
 	<div
-		class={'flex items-center justify-between py-2 px-2 cursor-pointer select-none ' +
+		class={'flex items-center justify-between py-1.25 px-2 cursor-pointer select-none ' +
 			(expanded ? 'border-b border-white/10' : '')}
 		onclick={() => (expanded = !expanded)}
 	>
 		<div class="flex items-center gap-2">
-			<span class="material-icons-outlined text-sm text-secondary">{style.icon}</span>
+			<span class="material-icons-outlined text-[20px]! text-secondary">{style.icon}</span>
 			<span class="text-sm text-primary font-medium">{style.name}</span>
 		</div>
 		{#key selectedClipIds().length + String(inputValue)}

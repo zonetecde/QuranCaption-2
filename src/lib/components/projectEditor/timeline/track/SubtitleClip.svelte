@@ -88,7 +88,16 @@
 		}, 0);
 	}
 
-	function editStyle(e: MouseEvent): void {}
+	function editStyle(e: MouseEvent): void {
+		clipClicked();
+	}
+
+	function clipClicked() {
+		// Sélectionne le clip si on est dans la page de style
+		if (globalState.currentProject!.projectEditorState.currentTab === 'Style') {
+			globalState.getStylesState.toggleSelection(clip);
+		}
+	}
 </script>
 
 <div
@@ -103,12 +112,7 @@
 		e.preventDefault();
 		contextMenu!.show(e);
 	}}
-	onclick={() => {
-		// Sélectionne le clip si on est dans la page de style
-		if (globalState.currentProject!.projectEditorState.currentTab === 'Style') {
-			globalState.getStylesState.toggleSelection(clip);
-		}
-	}}
+	onclick={clipClicked}
 >
 	{#if clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle'}
 		<!-- Icône override (haut gauche) -->

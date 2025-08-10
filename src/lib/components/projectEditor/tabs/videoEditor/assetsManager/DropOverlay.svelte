@@ -17,7 +17,7 @@
 </script>
 
 <div
-	class="w-screen h-full absolute inset-0 z-5 backdrop-blur-sm bg-black/40"
+	class="w-screen h-full absolute inset-0 z-30 backdrop-blur-sm bg-black/40"
 	transition:fade={{ duration: 300 }}
 >
 	<!-- Drop zone with animated border -->
