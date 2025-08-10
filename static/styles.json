@@ -357,12 +357,12 @@
 			{
 				"id": "text-outline",
 				"name": "Outline Width",
-				"description": "Set the width of the text outline",
+				"description": "Set the width of the text outline (shadow-based for better Arabic support)",
 				"value": 2,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 10,
-				"css": "-webkit-text-stroke: {value}px;",
+				"css": "text-shadow: {value}px 0 0 var(--text-outline-color), 0 {value}px 0 var(--text-outline-color), -{value}px 0 0 var(--text-outline-color), 0 -{value}px 0 var(--text-outline-color), {value}px {value}px 0 var(--text-outline-color), -{value}px -{value}px 0 var(--text-outline-color), {value}px -{value}px 0 var(--text-outline-color), -{value}px {value}px 0 var(--text-outline-color);",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "line_weight"
@@ -373,7 +373,7 @@
 				"description": "Set the color of the text outline",
 				"value": "#000000",
 				"valueType": "color",
-				"css": "-webkit-text-stroke-color: {value};",
+				"css": "--text-outline-color: {value};",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "palette"
