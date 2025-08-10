@@ -17,7 +17,7 @@
 				"css": "",
 				"tailwind": false,
 				"applyGlobally": true,
-				"icon": "fade"
+				"icon": "blur_on"
 			}
 		]
 	}
