@@ -83,7 +83,7 @@ export class ProjectService {
 
 		// Si le projet ne contient pas de styles vidéo, on initialise avec un style par défaut
 		// || true
-		if (Object.keys(project.content.videoStyle.styles).length === 0 || true) {
+		if (Object.keys(project.content.videoStyle.styles).length === 0) {
 			// Si les styles ne sont pas définis, on initialise avec un style par défaut
 			project.content.videoStyle = await VideoStyle.setDefaultStylesToDefaultOne();
 		}

@@ -134,7 +134,7 @@
 				"valueType": "number",
 				"valueMin": -540,
 				"valueMax": 540,
-				"css": "--translate-y: {value}px; transform: translate(var(--translate-x), var(--translate-y));",
+				"css": "--translate-y: {value}px; transform: translate(var(--translate-x), var(--translate-y)) rotate(var(--rotation)) scale(var(--scale));",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "vertical_align_center"
@@ -147,7 +147,7 @@
 				"valueType": "number",
 				"valueMin": -960,
 				"valueMax": 960,
-				"css": "--translate-x: {value}px; transform: translate(var(--translate-x), var(--translate-y));",
+				"css": "--translate-x: {value}px;",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "horizontal_rule"
@@ -302,7 +302,7 @@
 			},
 			{
 				"id": "text-shadow-color",
-				"name": "Shadow Color",
+				"name": "Text Shadow Color",
 				"description": "Set the color of the text shadow",
 				"value": "#000000",
 				"valueType": "color",
@@ -326,7 +326,7 @@
 			},
 			{
 				"id": "box-shadow-color",
-				"name": "Shadow Color",
+				"name": "Container Shadow Color",
 				"description": "Set the color of the container shadow",
 				"value": "#000000",
 				"valueType": "color",
@@ -463,9 +463,8 @@
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 20,
-				"css": "",
-				"tailwind": true,
-				"tailwindClass": "blur-[{value}px]",
+				"css": "--blur: {value}px; filter: blur(var(--blur, 0px)) brightness(var(--brightness, 100%)) contrast(var(--contrast, 100%));",
+				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "blur_on"
 			},
@@ -477,9 +476,8 @@
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 200,
-				"css": "",
-				"tailwind": true,
-				"tailwindClass": "brightness-[{value}%]",
+				"css": "--brightness: {value}%;",
+				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "brightness_6"
 			},
@@ -491,9 +489,8 @@
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 200,
-				"css": "",
-				"tailwind": true,
-				"tailwindClass": "contrast-[{value}%]",
+				"css": "--contrast: {value}%;",
+				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "contrast"
 			}
@@ -513,9 +510,8 @@
 				"valueType": "number",
 				"valueMin": 25,
 				"valueMax": 300,
-				"css": "",
-				"tailwind": true,
-				"tailwindClass": "scale-[{value}%]",
+				"css": "--scale: {value}%;",
+				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "zoom_in"
 			},
@@ -527,9 +523,8 @@
 				"valueType": "number",
 				"valueMin": -180,
 				"valueMax": 180,
-				"css": "",
-				"tailwind": true,
-				"tailwindClass": "rotate-[{value}deg]",
+				"css": "--rotation: {value}deg;",
+				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "rotate_right"
 			}
