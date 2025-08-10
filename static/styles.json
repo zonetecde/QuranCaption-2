@@ -223,7 +223,7 @@
 				"description": "Add a background color behind the text",
 				"value": "rgba(0,0,0,0.8)",
 				"valueType": "color",
-				"css": "background-color: {value};",
+				"css": "",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "format_color_fill"
@@ -235,8 +235,9 @@
 				"value": 80,
 				"valueType": "number",
 				"valueMin": 0,
-				"valueMax": 100,
-				"css": "background-color: rgba(0, 0, 0, {value}%);",
+				"valueMax": 1,
+				"step": 0.01,
+				"css": "--background-opacity: {value};",
 				"tailwind": false,
 				"applyGlobally": false,
 				"icon": "opacity"

@@ -361,6 +361,19 @@ export class VideoStyle extends SerializableBase {
 					continue;
 				}
 
+				// Cas particulier pour background-color
+				if (style.id === 'background-color') {
+					// Il faut convertir la couleur de l'hex en rgb
+					if (typeof effectiveValue === 'string' && effectiveValue.startsWith('#')) {
+						const r = parseInt(effectiveValue.slice(1, 3), 16);
+						const g = parseInt(effectiveValue.slice(3, 5), 16);
+						const b = parseInt(effectiveValue.slice(5, 7), 16);
+						let valeur = `rgba(${r}, ${g}, ${b}, var(--background-opacity))`;
+
+						css += 'background-color: ' + valeur + ';\n';
+					}
+				}
+
 				// Remplace {value} par la valeur effective
 				let cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
 
