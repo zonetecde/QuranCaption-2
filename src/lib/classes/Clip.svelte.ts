@@ -220,7 +220,7 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 	text: string = $state('');
 	predefinedSubtitleType: PredefinedSubtitleType = $state('Other');
 
-	constructor(startTime: number, endTime: number, text: string, type: PredefinedSubtitleType) {
+	constructor(startTime: number, endTime: number, type: PredefinedSubtitleType, text?: string) {
 		if (startTime === undefined) {
 			// Déserialisation
 			super(0, 0, 'Pre-defined Subtitle');
@@ -237,7 +237,25 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 		}
 
 		super(startTime, endTime, 'Pre-defined Subtitle', translations);
-		this.text = text;
+
+		switch (type) {
+			case 'Basmala':
+				this.text = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+				break;
+			case 'Istiadhah':
+				this.text = 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ';
+				break;
+			case 'Sadaqallahul Azim':
+				this.text = 'صَدَقَ اللَّهُ الْعَظِيمُ';
+				break;
+			case 'Takbir':
+				this.text = 'اللَّهُ أَكْبَرُ';
+				break;
+			case 'Other':
+				this.text = text || '';
+				break;
+		}
+
 		this.predefinedSubtitleType = type;
 	}
 }

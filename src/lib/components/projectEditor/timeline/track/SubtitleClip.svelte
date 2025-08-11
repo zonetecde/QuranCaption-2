@@ -98,11 +98,22 @@
 			globalState.getStylesState.toggleSelection(clip);
 		}
 	}
+
+	function editSubtitle(): void {
+		// Modifie le sous-titre
+		if (globalState.getSubtitlesEditorState.editSubtitle?.id === clip.id) {
+			// Si on est déjà en train de modifier ce sous-titre, on le quitte
+			globalState.getSubtitlesEditorState.editSubtitle = null;
+			return;
+		}
+		globalState.getSubtitlesEditorState.editSubtitle = clip;
+	}
 </script>
 
 <div
 	class={'absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden duration-200 ' +
-		(globalState.getStylesState.isSelected(clip.id)
+		(globalState.getStylesState.isSelected(clip.id) ||
+		globalState.getSubtitlesEditorState.editSubtitle?.id === clip.id
 			? 'border-yellow-500/60 bg-yellow-200/20 '
 			: '') +
 		(globalState.currentProject!.projectEditorState.currentTab === 'Style' ? 'cursor-pointer' : '')}
@@ -153,6 +164,13 @@
 		<Item on:click={editStyle}
 			><div class="btn-icon">
 				<span class="material-icons-outlined text-sm mr-1">auto_fix_high</span>Edit style
+			</div></Item
+		>
+	{/if}
+	{#if globalState.currentProject!.projectEditorState.currentTab === 'Subtitles editor'}
+		<Item on:click={editSubtitle}
+			><div class="btn-icon">
+				<span class="material-icons-outlined text-sm mr-1">edit</span>Edit subtitle
 			</div></Item
 		>
 	{/if}

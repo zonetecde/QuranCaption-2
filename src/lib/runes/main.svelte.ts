@@ -77,6 +77,10 @@ class GlobalState {
 	get getStylesState() {
 		return this.currentProject!.projectEditorState.stylesEditor;
 	}
+
+	get getSubtitlesEditorState() {
+		return this.currentProject!.projectEditorState.subtitlesEditor;
+	}
 }
 
 export const globalState = new GlobalState();

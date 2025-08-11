@@ -172,6 +172,110 @@ export class SubtitleTrack extends Track {
 		super(TrackType.Subtitle);
 	}
 
+	/**
+	 * Modifie un sous-titre existant pour le transformer en un sous-titre pré-défini (Silence, Istiadhah, Basmala).
+	 * @param subtitle Le sous-titre à modifier.
+	 * @param presetChoice Le type de sous-titre pré-défini à appliquer.
+	 */
+	editSubtitleToSpecial(
+		subtitle: SubtitleClip | PredefinedSubtitleClip,
+		presetChoice: 'Silence' | 'Istiadhah' | 'Basmala'
+	) {
+		let newSubtitleClip: SilenceClip | PredefinedSubtitleClip | undefined = undefined;
+
+		if (presetChoice === 'Silence') {
+			newSubtitleClip = new SilenceClip(subtitle.startTime, subtitle.endTime);
+		} else if (presetChoice === 'Istiadhah') {
+			newSubtitleClip = new PredefinedSubtitleClip(
+				subtitle.startTime,
+				subtitle.endTime,
+				'Istiadhah'
+			);
+		} else if (presetChoice === 'Basmala') {
+			newSubtitleClip = new PredefinedSubtitleClip(subtitle.startTime, subtitle.endTime, 'Basmala');
+		}
+
+		// Modiife le clip existant ou le remplace par le nouveau clip pré-défini
+		if (newSubtitleClip) {
+			const clipIndex = this.clips.findIndex((clip) => clip.id === subtitle.id);
+			if (clipIndex !== -1) {
+				this.clips[clipIndex] = newSubtitleClip;
+			}
+		}
+	}
+
+	/**
+	 * Modifie un sous-titre existant ou le transforme en sous-titre normal s'il s'agit d'un sous-titre pré-défini.
+	 * Si le sous-titre est déjà un sous-titre normal, il est simplement modifié.
+	 * @param subtitle Le sous-titre à modifier ou transformer.
+	 * @param verse Le nouveau verset du sous-titre.
+	 * @param firstWordIndex Le nouvel index du premier mot du sous-titre.
+	 * @param lastWordIndex Le nouvel index du dernier mot du sous-titre.
+	 * @param surah Le nouveau numéro de la sourate du sous-titre.
+	 */
+	async editSubtitle(
+		subtitle: SubtitleClip | PredefinedSubtitleClip | null,
+		verse: Verse,
+		firstWordIndex: number,
+		lastWordIndex: number,
+		surah: number
+	) {
+		// Modifie le sous-titre existant
+		// Si c'est un sous-titre pré-défini, on le transforme en sous-titre normal (ex: de silence en Qur'an)
+		if (subtitle?.type !== 'Subtitle') {
+			// Transforme le sous-titre en sous-titre normal
+
+			const subtitlesProperties = await this.getSubtitlesProperties(
+				verse,
+				firstWordIndex,
+				lastWordIndex,
+				surah
+			);
+
+			const newSubtitleClip = new SubtitleClip(
+				subtitle!.startTime,
+				subtitle!.endTime,
+				surah,
+				verse.id,
+				firstWordIndex,
+				lastWordIndex,
+				verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex),
+				verse.getWordByWordTranslationBetweenTwoIndexes(firstWordIndex, lastWordIndex),
+				subtitlesProperties.isFullVerse, // isFullVerse
+				subtitlesProperties.isLastWordsOfVerse, // isLastWordsOfVerse
+				subtitlesProperties.translations // translations
+			);
+
+			// Remplace l'ancien clip par le nouveau dans le tableau clips
+			const clipIndex = this.clips.findIndex((clip) => clip.id === subtitle!.id);
+			if (clipIndex !== -1) {
+				this.clips[clipIndex] = newSubtitleClip;
+			}
+
+			subtitle = newSubtitleClip;
+		} else if (subtitle instanceof SubtitleClip) {
+			// Si c'est déjà un sous-titre normal, on le modifie
+			subtitle.verse = verse.id;
+			subtitle.surah = surah;
+			subtitle.startWordIndex = firstWordIndex;
+			subtitle.endWordIndex = lastWordIndex;
+			subtitle.text = verse.getArabicTextBetweenTwoIndexes(firstWordIndex, lastWordIndex);
+			subtitle.wbwTranslation = verse.getWordByWordTranslationBetweenTwoIndexes(
+				firstWordIndex,
+				lastWordIndex
+			);
+			const subtitlesProperties = await this.getSubtitlesProperties(
+				verse,
+				firstWordIndex,
+				lastWordIndex,
+				surah
+			);
+			subtitle.isFullVerse = subtitlesProperties.isFullVerse;
+			subtitle.isLastWordsOfVerse = subtitlesProperties.isLastWordsOfVerse;
+			subtitle.translations = subtitlesProperties.translations;
+		}
+	}
+
 	async addSubtitle(
 		verse: Verse,
 		firstWordIndex: number,
@@ -192,12 +296,12 @@ export class SubtitleTrack extends Track {
 			return false;
 		}
 
-		const isFullVerse = verse.words.length === lastWordIndex - firstWordIndex + 1;
-		const isLastWordsOfVerse = verse.words.length - lastWordIndex - 1 === 0;
-
-		// Prépare les traductions du sous-titre
-		let translations: { [key: string]: VerseTranslation } =
-			await globalState.getProjectTranslation.getTranslations(surah, verse.id, isFullVerse);
+		const subtitlesProperties = await this.getSubtitlesProperties(
+			verse,
+			firstWordIndex,
+			lastWordIndex,
+			surah
+		);
 
 		this.clips.push(
 			new SubtitleClip(
@@ -209,13 +313,37 @@ export class SubtitleTrack extends Track {
 				lastWordIndex,
 				arabicText,
 				wbwTranslation,
-				isFullVerse, // isFullVerse
-				isLastWordsOfVerse, // isLastWordsOfVerse
-				translations // translations
+				subtitlesProperties.isFullVerse, // isFullVerse
+				subtitlesProperties.isLastWordsOfVerse, // isLastWordsOfVerse
+				subtitlesProperties.translations // translations
 			)
 		);
 
 		return true;
+	}
+
+	async getSubtitlesProperties(
+		verse: Verse,
+		firstWordIndex: number,
+		lastWordIndex: number,
+		surah: number
+	): Promise<{
+		isFullVerse: boolean;
+		isLastWordsOfVerse: boolean;
+		translations: { [key: string]: VerseTranslation };
+	}> {
+		const isFullVerse = verse.words.length === lastWordIndex - firstWordIndex + 1;
+		const isLastWordsOfVerse = verse.words.length - lastWordIndex - 1 === 0;
+
+		// Prépare les traductions du sous-titre
+		let translations: { [key: string]: VerseTranslation } =
+			await globalState.getProjectTranslation.getTranslations(surah, verse.id, isFullVerse);
+
+		return {
+			isFullVerse,
+			isLastWordsOfVerse,
+			translations
+		};
 	}
 
 	/**
@@ -280,7 +408,7 @@ export class SubtitleTrack extends Track {
 		return false;
 	}
 
-	addPredefinedSubtitle(text: string, type: PredefinedSubtitleType): boolean {
+	addPredefinedSubtitle(type: PredefinedSubtitleType): boolean {
 		const startTime = this.getDuration().ms + 1;
 		const endTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition || -1;
 
@@ -289,7 +417,7 @@ export class SubtitleTrack extends Track {
 			return false;
 		}
 
-		this.clips.push(new PredefinedSubtitleClip(startTime, endTime, text, type));
+		this.clips.push(new PredefinedSubtitleClip(startTime, endTime, type));
 
 		return true;
 	}

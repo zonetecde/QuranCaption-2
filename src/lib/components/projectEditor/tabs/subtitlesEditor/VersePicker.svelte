@@ -3,9 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import AutocompleteInput from '$lib/components/misc/AutocompleteInput.svelte';
 
-	let subtitlesEditorState = $derived(
-		() => globalState.currentProject!.projectEditorState.subtitlesEditor
-	);
+	let subtitlesEditorState = $derived(() => globalState.getSubtitlesEditorState);
 
 	// Create suggestions array for autocomplete
 	let surahSuggestions = $derived(() => {
@@ -17,7 +15,7 @@
 
 	// Get current surah name for display
 	let currentSurahName = $derived(() => {
-		const surahId = globalState.currentProject!.projectEditorState.subtitlesEditor.selectedSurah;
+		const surahId = globalState.getSubtitlesEditorState.selectedSurah;
 		const surah = Quran.getSurahsNames().find((s) => s.id === surahId);
 		return surah ? `${surah.id}. ${surah.transliteration}` : '';
 	});
@@ -32,7 +30,7 @@
 		const match = selectedValue.match(/^(\d+)\./);
 		if (match) {
 			const surahId = parseInt(match[1]);
-			globalState.currentProject!.projectEditorState.subtitlesEditor.selectedSurah = surahId;
+			globalState.getSubtitlesEditorState.selectedSurah = surahId;
 			subtitlesEditorState().selectedVerse = 1;
 			subtitlesEditorState().startWordIndex = 0;
 			subtitlesEditorState().endWordIndex = 0;
@@ -83,7 +81,7 @@
 				subtitlesEditorState().startWordIndex = 0;
 				subtitlesEditorState().endWordIndex = 0;
 			}}
-			bind:value={globalState.currentProject!.projectEditorState.subtitlesEditor.selectedVerse}
+			bind:value={globalState.getSubtitlesEditorState.selectedVerse}
 		/>
 	</div>
 </section>

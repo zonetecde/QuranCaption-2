@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { TrackType } from '$lib/classes';
+	import { SubtitleClip, TrackType } from '$lib/classes';
 	import type { PredefinedSubtitleType } from '$lib/classes/Clip.svelte';
 	import { Quran, type Verse, type Word } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import toast from 'svelte-5-french-toast';
 
-	let subtitlesEditorState = $derived(
-		() => globalState.currentProject!.projectEditorState.subtitlesEditor
-	);
+	let subtitlesEditorState = $derived(() => globalState.getSubtitlesEditorState);
 
 	function goNextVerse() {
 		if (
@@ -103,13 +101,12 @@
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_BASMALA,
-			onKeyDown: () => addPredefinedSubtitle('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'Basmala')
+			onKeyDown: () => addPredefinedSubtitle('Basmala')
 		});
 
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_ISTIADHAH,
-			onKeyDown: () =>
-				addPredefinedSubtitle('أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', 'Istiadhah')
+			onKeyDown: () => addPredefinedSubtitle('Istiadhah')
 		});
 	});
 
@@ -167,6 +164,20 @@
 
 		const subtitleTrack = globalState.getSubtitleTrack;
 
+		if (subtitlesEditorState().editSubtitle) {
+			await subtitleTrack.editSubtitle(
+				subtitlesEditorState().editSubtitle,
+				verse,
+				subtitlesEditorState().startWordIndex,
+				subtitlesEditorState().endWordIndex,
+				subtitlesEditorState().selectedSurah
+			);
+
+			globalState.getSubtitlesEditorState.editSubtitle = null; // Reset l'édition après modification
+			toast.success('Subtitle updated successfully!');
+			return;
+		}
+
 		const success = await subtitleTrack.addSubtitle(
 			verse,
 			subtitlesEditorState().startWordIndex,
@@ -192,10 +203,10 @@
 		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
 	}
 
-	function addPredefinedSubtitle(text: string, type: PredefinedSubtitleType) {
+	function addPredefinedSubtitle(type: PredefinedSubtitleType) {
 		const subtitleTrack = globalState.getSubtitleTrack;
 
-		const success = subtitleTrack.addPredefinedSubtitle(text, type);
+		const success = subtitleTrack.addPredefinedSubtitle(type);
 		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
 	}
 
@@ -255,9 +266,25 @@
 			}
 		}
 	}
+
+	$effect(() => {
+		const editSubtitle = globalState.getSubtitlesEditorState.editSubtitle;
+		untrack(() => {
+			if (editSubtitle && editSubtitle instanceof SubtitleClip) {
+				// Met l'éditeur de sous-titres à la position du verset à éditer
+				subtitlesEditorState().selectedSurah = editSubtitle.surah;
+				subtitlesEditorState().selectedVerse = editSubtitle.verse;
+				subtitlesEditorState().startWordIndex = editSubtitle.startWordIndex;
+				subtitlesEditorState().endWordIndex = editSubtitle.endWordIndex;
+			}
+		});
+	});
 </script>
 
-<section class="w-full h-full overflow-y-auto bg-secondary border border-color rounded-lg">
+<section
+	class={'w-full h-full overflow-y-auto bg-secondary border duration-100 rounded-lg ' +
+		(subtitlesEditorState().editSubtitle ? 'border-yellow-500' : ' border-color')}
+>
 	<div
 		class="min-h-full flex flex-row-reverse flex-wrap justify-start content-center xl:leading-[4.5rem] lg:leading-[3rem] leading-[2.5rem]
 	           px-6 text-4xl xl:text-5xl arabic py-4"

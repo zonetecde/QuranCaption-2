@@ -11,6 +11,7 @@
 	]);
 
 	function setActiveTab(tabValue: ProjectEditorTabs) {
+		globalState.getStylesState.clearSelection();
 		globalState.currentProject!.projectEditorState.currentTab = tabValue;
 	}
 </script>

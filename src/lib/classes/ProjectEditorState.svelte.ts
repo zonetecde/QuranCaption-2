@@ -1,5 +1,5 @@
 import type SubtitlesEditor from '$lib/components/projectEditor/tabs/subtitlesEditor/SubtitlesEditor.svelte';
-import { SubtitleClip } from './Clip.svelte';
+import { PredefinedSubtitleClip, SubtitleClip } from './Clip.svelte';
 import { ProjectEditorTabs } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 
@@ -138,6 +138,9 @@ export class SubtitlesEditorState extends SerializableBase {
 
 	// Affiche la translittération des mots
 	showWordTransliteration: boolean = $state(false);
+
+	// Indique le sous-titre à éditer dans l'éditeur de sous-titres (null si aucun)
+	editSubtitle: SubtitleClip | PredefinedSubtitleClip | null = $state(null);
 }
 
 export class TranslationsEditorState extends SerializableBase {

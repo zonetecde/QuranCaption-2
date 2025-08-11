@@ -203,7 +203,7 @@
 	});
 
 	function getSpeed() {
-		let speed = globalState.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed;
+		let speed = globalState.getSubtitlesEditorState.playbackSpeed;
 		if (
 			globalState.currentProject?.projectEditorState.currentTab !==
 			ProjectEditorTabs.SubtitlesEditor
