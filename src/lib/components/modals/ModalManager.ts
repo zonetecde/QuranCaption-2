@@ -27,7 +27,7 @@ export default class ModalManager {
 		});
 	}
 
-	static async errorModal(title: string, message: string, logs: string): Promise<void> {
+	static async errorModal(title: string, message: string, logs?: string): Promise<void> {
 		return new Promise<void>((resolve) => {
 			// Créer un conteneur pour le modal
 			const container = document.createElement('div');

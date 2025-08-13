@@ -30,6 +30,13 @@
 			});
 	});
 
+	let currentImage = $derived(() => {
+		if (getTimelineSettings().movePreviewTo)
+			return untrack(() => {
+				return globalState.currentProject!.content.timeline.getBackgroundImage();
+			});
+	});
+
 	// Récupère l'asset audio actuellement sous le curseur de la timeline
 	let currentAudio = $derived(() => {
 		if (getTimelineSettings().movePreviewTo)
@@ -595,6 +602,12 @@
 					muted
 					onended={goNextVideo}
 				></video>
+			{:else if currentImage()}
+				<img
+					src={convertFileSrc(currentImage()!.filePath)}
+					class="w-full h-full object-cover"
+					alt="Background"
+				/>
 			{/if}
 
 			<!-- Contient l'affichage des sous-titres et de tout les autres style -->

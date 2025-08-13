@@ -30,6 +30,26 @@ export class Timeline extends SerializableBase {
 	}
 
 	/**
+	 * Renvoie, si elle existe, l'image de fond de la timeline.
+	 * @returns L'image de fond ou null si elle n'existe pas.
+	 */
+	getBackgroundImage(): Asset | null {
+		const videoTrack = this.getFirstTrack(TrackType.Video);
+
+		// Si on est dans la track `Video` et qu'il n'y a qu'un seul clip avec une durée de 0,
+		// c'est que c'est une image en tant que fond. Renvoie donc l'image pour la durée de la vidéo entière.
+		if (
+			videoTrack.type === 'Video' &&
+			videoTrack.clips.length === 1 &&
+			videoTrack.clips[0].endTime === 0
+		) {
+			return this.clipToAsset(videoTrack.clips[0]);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Retourne la vidéo qui doit être actuellement jouée sur la timeline
 	 * en fonction du type de piste.
 	 * @param trackType Le type de piste
@@ -39,14 +59,20 @@ export class Timeline extends SerializableBase {
 		const track = this.tracks.find((t) => t.type === trackType);
 		const currentClip = track?.getCurrentClip();
 
-		// Vérifier si le clip est un AssetClip (a la propriété assetId)
-		if (currentClip && 'assetId' in currentClip) {
-			// Accéder directement à l'asset via globalState au lieu d'utiliser getAsset()
-			const assetId = (currentClip as any).assetId;
-			const asset = globalState.currentProject?.content.getAssetById(assetId);
-			return asset || null;
-		}
+		if (!currentClip) return null;
 
+		return this.clipToAsset(currentClip) || null;
+	}
+
+	/**
+	 * Convertit un clip en asset.
+	 * @param clip Le clip à convertir.
+	 * @returns L'asset correspondant au clip, ou null si aucun asset n'est trouvé.
+	 */
+	clipToAsset(clip: Clip): Asset | null {
+		if (clip instanceof AssetClip) {
+			return globalState.currentProject?.content.getAssetById(clip.assetId) || null;
+		}
 		return null;
 	}
 

@@ -13,6 +13,7 @@ import { globalState } from '$lib/runes/main.svelte.js';
 import type { Verse } from './Quran.js';
 import toast from 'svelte-5-french-toast';
 import { VerseTranslation } from './Translation.svelte.js';
+import ModalManager from '$lib/components/modals/ModalManager.js';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -153,11 +154,21 @@ export class AssetTrack extends Track {
 		// Récupère le dernier clip de la piste, s'il existe
 		const lastClip = this.clips.length > 0 ? this.clips[this.clips.length - 1] : null;
 
-		if (lastClip)
+		if (lastClip) {
+			// S'il y a un dernier clip alors qu'on essaie de mettre une image dans la timeline (= mettre une image en
+			// tant que background pour la vidéo), alors on informe l'utilisateur que ce n'est pas possible.
+			if (asset.type === AssetType.Image) {
+				ModalManager.errorModal(
+					'Background Image Error',
+					'You cannot add a background image to the timeline because there is already a video or image clip in the video track.'
+				);
+				return;
+			}
+
 			this.clips.push(
 				new AssetClip(lastClip.endTime + 1, lastClip.endTime + asset.duration.ms + 1, asset.id)
 			);
-		else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
+		} else this.clips.push(new AssetClip(0, asset.duration.ms, asset.id));
 
 		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
 		setTimeout(() => {

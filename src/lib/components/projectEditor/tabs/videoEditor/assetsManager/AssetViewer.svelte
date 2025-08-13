@@ -90,10 +90,11 @@
 	}
 
 	function addInTheTimelineButtonClick(video: boolean, audio: boolean) {
-		if (asset.duration.isNull()) {
+		if (asset.duration.isNull() && asset.type !== AssetType.Image) {
 			toast('Please wait for the asset to be loaded before adding it to the timeline.', {
 				duration: 3000
 			});
+
 			return;
 		}
 
@@ -263,7 +264,7 @@
 						<button
 							class="btn-accent w-full flex items-center justify-center gap-2 text-sm font-medium
 							       py-3 px-4 rounded-lg hover:scale-[1.02] transition-all duration-200"
-							onclick={() => {}}
+							onclick={() => addInTheTimelineButtonClick(true, false)}
 						>
 							<span class="material-icons text-lg">image</span>
 							Set as Background

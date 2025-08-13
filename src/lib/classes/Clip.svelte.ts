@@ -26,7 +26,16 @@ export class Clip extends SerializableBase {
 		this.type = type;
 	}
 
-	getWidth() {
+	getWidth(): number {
+		if (this.duration === 0) {
+			// C'est dans le cas où l'asset est une image. C'est alors l'image de fond de la vidéo.
+			// Elle prend la taille de la timeline.
+			return (
+				globalState.currentProject!.content.timeline.getLongestTrackDuration().toSeconds() *
+				globalState.currentProject?.projectEditorState.timeline.zoom!
+			);
+		}
+
 		return (this.duration / 1000) * globalState.currentProject?.projectEditorState.timeline.zoom!;
 	}
 
