@@ -172,9 +172,16 @@
 						{#if globalState.getStylesState.searchQuery === '' || style.name
 								.toLowerCase()
 								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
-							<!-- Cas spécial : on ne peut pas avoir de séparateur entre le numéro de verset et le verset
-								 pour le texte Coranique. Empêche donc l'affichage de ce style dans ce cas précis. -->
-							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator')}
+							<!-- 
+							Cas spécial : on ne peut pas avoir de séparateur entre le numéro de verset et le verset
+							pour le texte Coranique. Empêche donc l'affichage de ce style dans ce cas précis.
+							
+							Deuxième cas spécial : on ne veut pas pouvoir individuellement modifier les styles suivants:
+								- show-verse-number
+								- verse-number-separator
+							Empêche donc l'affichage de ces deux styles si on a une sélection de sous-titre en cours.
+								  -->
+							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-verse-number' || style.id === 'verse-number-separator'))}
 								<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
 								<StyleComponent
 									bind:style={
