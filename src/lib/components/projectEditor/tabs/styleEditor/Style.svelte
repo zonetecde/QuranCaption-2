@@ -143,7 +143,7 @@
 						</span>
 					{:else if getEffectiveForSelection().overridden}
 						<span
-							class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-200 border border-amber-400/40 flex items-center gap-1"
+							class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-200 border border-amber-400/40 flex items-center gap-1 cursor-auto"
 						>
 							<span class="material-icons-outlined text-[12px]">auto_fix_high</span>
 							override
@@ -157,7 +157,7 @@
 
 				{#if selectedClipIds().length > 0 && (getEffectiveForSelection().overridden || getEffectiveForSelection().mixed) && target !== 'global'}
 					<button
-						class="ml-1 text-[11px] px-2 py-1 rounded border hover:opacity-90 duration-100 flex items-center gap-1"
+						class="ml-1 text-[11px] px-2 py-1 rounded border hover:opacity-90 duration-100 flex items-center gap-1 cursor-pointer"
 						title="Reset override for selection"
 						onclick={(e) => {
 							e.stopPropagation();

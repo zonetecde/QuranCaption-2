@@ -114,7 +114,7 @@
 	class={'absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden duration-200 ' +
 		(globalState.getStylesState.isSelected(clip.id) ||
 		globalState.getSubtitlesEditorState.editSubtitle?.id === clip.id
-			? 'border-yellow-500/60 bg-yellow-200/20 '
+			? ' bg-[#6265af]/50! border-[#6265af]/40! '
 			: '') +
 		(globalState.currentProject!.projectEditorState.currentTab === 'Style' ? 'cursor-pointer' : '')}
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"

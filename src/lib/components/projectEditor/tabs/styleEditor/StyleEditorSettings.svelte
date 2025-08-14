@@ -127,10 +127,10 @@
 				<div class="flex items-center gap-2 text-secondary text-sm">
 					<span class="material-icons-outlined text-base">select_all</span>
 					<span>
-						{globalState.getStylesState.selectedSubtitles.length} clip{globalState.getStylesState
-							.selectedSubtitles.length > 1
+						{globalState.getStylesState.selectedSubtitles.length} subtitle{globalState
+							.getStylesState.selectedSubtitles.length > 1
 							? 's'
-							: ''} selected. Styles will only apply to these clips.
+							: ''} selected. Styles will only apply to these subtitles.
 					</span>
 				</div>
 				<button
