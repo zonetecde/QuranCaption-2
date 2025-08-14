@@ -1,5 +1,43 @@
 [
 	{
+		"id": "general",
+		"name": "General",
+		"description": "General styling options for subtitles",
+		"icon": "settings",
+		"styles": [
+			{
+				"id": "show-subtitles",
+				"name": "Show Subtitles",
+				"description": "Toggle the visibility of subtitles",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "visibility"
+			},
+			{
+				"id": "show-verse-number",
+				"name": "Show Verse Number",
+				"description": "Toggle the visibility of verse numbers",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "123"
+			},
+			{
+				"id": "verse-number-separator",
+				"name": "Verse Number Separator",
+				"description": "Character used to separate verse numbers from text",
+				"value": ". ",
+				"valueType": "text",
+				"css": "",
+				"tailwind": false,
+				"icon": "text_format"
+			}
+		]
+	},
+	{
 		"id": "text",
 		"name": "Text Styling",
 		"description": "Control the appearance and formatting of subtitle text",
@@ -13,7 +51,6 @@
 				"valueType": "color",
 				"css": "color: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "palette"
 			},
 			{
@@ -26,7 +63,6 @@
 				"valueMax": 200,
 				"css": "font-size: {value}px;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "format_size"
 			},
 			{
@@ -38,7 +74,6 @@
 				"options": [],
 				"css": "font-family: '{value}', sans-serif;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "font_download"
 			},
 			{
@@ -50,7 +85,6 @@
 				"options": ["normal", "bold", "lighter", "bolder"],
 				"css": "font-weight: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "format_bold"
 			},
 			{
@@ -62,7 +96,6 @@
 				"options": ["none", "uppercase", "lowercase", "capitalize"],
 				"css": "text-transform: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "text_format"
 			},
 			{
@@ -75,7 +108,6 @@
 				"valueMax": 20,
 				"css": "letter-spacing: {value}px;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "horizontal_distribute"
 			},
 			{
@@ -89,7 +121,6 @@
 				"step": 0.1,
 				"css": "line-height: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "format_line_spacing"
 			},
 			{
@@ -98,10 +129,9 @@
 				"description": "Limit text height and auto-adjust font size to fit",
 				"value": "none",
 				"valueType": "select",
-				"options": ["none", "100", "125", "150", "175", "200", "300", "400"],
+				"options": ["none", "50", "75", "100", "125", "150", "175", "200", "300", "400"],
 				"css": "max-height: {value}px; height: {value}px;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "height"
 			},
 			{
@@ -115,7 +145,6 @@
 				"step": 1,
 				"css": "font-size: {value}px !important;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "height"
 			}
 		]
@@ -136,7 +165,6 @@
 				"valueMax": 540,
 				"css": "--translate-y: {value}px; transform: translate(var(--translate-x), var(--translate-y)) rotate(var(--rotation)) scale(var(--scale));",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "vertical_align_center"
 			},
 			{
@@ -149,7 +177,6 @@
 				"valueMax": 960,
 				"css": "--translate-x: {value}px;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "horizontal_rule"
 			},
 			{
@@ -162,7 +189,6 @@
 				"valueMax": 100,
 				"css": "width: {value}%;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "width_full"
 			},
 			{
@@ -179,7 +205,6 @@
 					"justify": "text-align: justify; justify-content: space-between;"
 				},
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "format_align_center"
 			},
 			{
@@ -195,7 +220,6 @@
 					"bottom": "display: flex; align-items: flex-end;"
 				},
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "vertical_align_center"
 			}
 		]
@@ -214,7 +238,6 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
 			{
@@ -225,7 +248,6 @@
 				"valueType": "color",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "format_color_fill"
 			},
 			{
@@ -239,7 +261,6 @@
 				"step": 0.01,
 				"css": "--background-opacity: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "opacity"
 			},
 			{
@@ -252,7 +273,6 @@
 				"valueMax": 100,
 				"css": "border-radius: {value}px;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "rounded_corner"
 			},
 			{
@@ -265,7 +285,6 @@
 				"valueMax": 100,
 				"css": "padding: {value}px;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "crop_free"
 			}
 		]
@@ -284,7 +303,6 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
 			{
@@ -297,7 +315,6 @@
 				"valueMax": 20,
 				"css": "text-shadow: {value}px {value}px 8px var(--text-shadow-color);",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "text_fields"
 			},
 			{
@@ -308,7 +325,6 @@
 				"valueType": "color",
 				"css": "--text-shadow-color: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "palette"
 			},
 			{
@@ -321,7 +337,6 @@
 				"valueMax": 40,
 				"css": "box-shadow: 0 {value}px {value}px var(--box-shadow-color);",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "square"
 			},
 			{
@@ -332,7 +347,6 @@
 				"valueType": "color",
 				"css": "--box-shadow-color: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "palette"
 			}
 		]
@@ -351,7 +365,6 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
 			{
@@ -364,7 +377,6 @@
 				"valueMax": 10,
 				"css": "text-shadow: {value}px 0 0 var(--text-outline-color), 0 {value}px 0 var(--text-outline-color), -{value}px 0 0 var(--text-outline-color), 0 -{value}px 0 var(--text-outline-color), {value}px {value}px 0 var(--text-outline-color), -{value}px -{value}px 0 var(--text-outline-color), {value}px -{value}px 0 var(--text-outline-color), -{value}px {value}px 0 var(--text-outline-color);",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "line_weight"
 			},
 			{
@@ -375,7 +387,6 @@
 				"valueType": "color",
 				"css": "--text-outline-color: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "palette"
 			}
 		]
@@ -394,7 +405,6 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "toggle_on"
 			},
 			{
@@ -407,7 +417,6 @@
 				"valueMax": 20,
 				"css": "border: {value}px solid;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "line_weight"
 			},
 			{
@@ -418,7 +427,6 @@
 				"valueType": "color",
 				"css": "border-color: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "palette"
 			},
 			{
@@ -430,7 +438,6 @@
 				"options": ["solid", "dashed", "dotted", "double", "groove", "ridge"],
 				"css": "border-style: {value};",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "more_horiz"
 			}
 		]
@@ -452,7 +459,6 @@
 				"step": 0.05,
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "opacity"
 			},
 			{
@@ -465,7 +471,6 @@
 				"valueMax": 20,
 				"css": "--blur: {value}px; filter: blur(var(--blur, 0px)) brightness(var(--brightness, 100%)) contrast(var(--contrast, 100%));",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "blur_on"
 			},
 			{
@@ -478,7 +483,6 @@
 				"valueMax": 200,
 				"css": "--brightness: {value}%;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "brightness_6"
 			},
 			{
@@ -491,7 +495,6 @@
 				"valueMax": 200,
 				"css": "--contrast: {value}%;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "contrast"
 			}
 		]
@@ -512,7 +515,6 @@
 				"valueMax": 300,
 				"css": "--scale: {value}%;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "zoom_in"
 			},
 			{
@@ -525,7 +527,6 @@
 				"valueMax": 180,
 				"css": "--rotation: {value}deg;",
 				"tailwind": false,
-				"applyGlobally": false,
 				"icon": "rotate_right"
 			}
 		]

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PredefinedSubtitleClip, TrackType, Translation } from '$lib/classes';
+	import { PredefinedSubtitleClip, SubtitleClip, TrackType, Translation } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { untrack } from 'svelte';
 
@@ -148,7 +148,7 @@
 				class={'arabic absolute subtitle ' + getTailwind('arabic') + helperStyles()}
 				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)}"
 			>
-				{currentSubtitle()!.text}
+				{currentSubtitle()!.getText()}
 			</p>
 
 			{#each Object.keys(currentSubtitleTranslations()!) as edition}
@@ -161,7 +161,11 @@
 						class={`translation absolute subtitle ${edition} ${getTailwind(edition)} ${helperStyles()}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
-						{translation.text}
+						{#if translation.type === 'verse'}
+							{translation.getText(edition, (currentSubtitle() as SubtitleClip)!)}
+						{:else}
+							{translation.getText()}
+						{/if}
 					</p>
 				{/if}
 			{/each}

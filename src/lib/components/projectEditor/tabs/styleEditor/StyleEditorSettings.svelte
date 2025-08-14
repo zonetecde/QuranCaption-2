@@ -172,16 +172,20 @@
 						{#if globalState.getStylesState.searchQuery === '' || style.name
 								.toLowerCase()
 								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
-							<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
-							<StyleComponent
-								bind:style={
-									globalState.getVideoStyle.styles[
-										globalState.getStylesState.getCurrentSelection()
-									][categoryIndex].styles[styleIndex]
-								}
-								target={globalState.getStylesState.getCurrentSelection()}
-								categoryId={category.id as StyleCategoryName}
-							/>
+							<!-- Cas spécial : on ne peut pas avoir de séparateur entre le numéro de verset et le verset
+								 pour le texte Coranique. Empêche donc l'affichage de ce style dans ce cas précis. -->
+							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator')}
+								<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
+								<StyleComponent
+									bind:style={
+										globalState.getVideoStyle.styles[
+											globalState.getStylesState.getCurrentSelection()
+										][categoryIndex].styles[styleIndex]
+									}
+									target={globalState.getStylesState.getCurrentSelection()}
+									categoryId={category.id as StyleCategoryName}
+								/>
+							{/if}
 						{/if}
 					{/each}
 				</Section>

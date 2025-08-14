@@ -16,7 +16,6 @@
 				"step": 50,
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": true,
 				"icon": "blur_on"
 			}
 		]
@@ -35,7 +34,6 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": true,
 				"icon": "toggle_on"
 			},
 			{
@@ -46,7 +44,6 @@
 				"valueType": "color",
 				"css": "--overlay-color: {value};",
 				"tailwind": false,
-				"applyGlobally": true,
 				"icon": "palette"
 			},
 			{
@@ -60,7 +57,6 @@
 				"step": 0.01,
 				"css": "--overlay-opacity: {value};",
 				"tailwind": false,
-				"applyGlobally": true,
 				"icon": "opacity"
 			}
 		]
@@ -79,7 +75,7 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": true,
+
 				"icon": "visibility"
 			},
 			{
@@ -90,7 +86,7 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": true,
+
 				"icon": "translate"
 			},
 			{
@@ -101,7 +97,7 @@
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": true,
+
 				"icon": "text_fields"
 			},
 			{
@@ -112,7 +108,7 @@
 				"valueType": "text",
 				"css": "--pre-surah-text: '{value}';",
 				"tailwind": false,
-				"applyGlobally": true,
+
 				"icon": "short_text"
 			},
 			{
@@ -125,7 +121,7 @@
 				"valueMax": 300,
 				"css": "--surah-scale: {value}%;",
 				"tailwind": false,
-				"applyGlobally": true,
+
 				"icon": "zoom_in"
 			},
 			{
@@ -136,7 +132,7 @@
 				"valueType": "composite",
 				"css": "",
 				"tailwind": false,
-				"applyGlobally": true,
+
 				"icon": "text_fields"
 			}
 		]

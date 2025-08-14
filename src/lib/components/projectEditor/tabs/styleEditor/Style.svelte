@@ -268,6 +268,15 @@
 						{/if}
 					</select>
 				</div>
+			{:else if style.valueType === 'text'}
+				<div class="relative">
+					<input
+						type="text"
+						value={String(inputValue)}
+						class="w-full mono"
+						oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
+					/>
+				</div>
 			{/if}
 		</div>
 	{/if}

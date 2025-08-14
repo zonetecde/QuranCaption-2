@@ -36,6 +36,10 @@ export class Translation extends SerializableBase {
 			this.status === 'ai trimmed'
 		);
 	}
+
+	getText(edition?: string, subtitle?: SubtitleClip): string {
+		return this.text;
+	}
 }
 
 export class VerseTranslation extends Translation {
@@ -57,6 +61,23 @@ export class VerseTranslation extends Translation {
 		this.endWordIndex = text.split(' ').length - 1;
 		this.isBruteForce = false;
 		this.type = 'verse';
+	}
+
+	override getText(edition: string, subtitle: SubtitleClip): string {
+		// Ajoute le numéro de verset si demandé dans les styles
+		if (
+			subtitle.startWordIndex === 0 &&
+			globalState.getVideoStyle.getStyle(edition, 'general', 'show-verse-number').value
+		) {
+			return (
+				subtitle.verse +
+				((globalState.getVideoStyle.getStyle(edition, 'general', 'verse-number-separator')
+					.value as string) || '. ') +
+				this.text
+			);
+		}
+
+		return this.text;
 	}
 }
 

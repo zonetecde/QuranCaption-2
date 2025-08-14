@@ -131,8 +131,10 @@ export class AssetClip extends Clip {
 
 export class ClipWithTranslation extends Clip {
 	translations: { [key: string]: Translation } = $state({});
+	text: string = $state('');
 
 	constructor(
+		text: string,
 		startTime: number,
 		endTime: number,
 		type: ClipType,
@@ -140,6 +142,7 @@ export class ClipWithTranslation extends Clip {
 	) {
 		super(startTime, endTime, type);
 		this.translations = translations;
+		this.text = text;
 	}
 
 	/**
@@ -151,6 +154,10 @@ export class ClipWithTranslation extends Clip {
 		//@ts-ignore
 		return this.translations[edition.name];
 	}
+
+	getText(): string {
+		return this.text;
+	}
 }
 
 export class SubtitleClip extends ClipWithTranslation {
@@ -158,7 +165,6 @@ export class SubtitleClip extends ClipWithTranslation {
 	verse: number;
 	startWordIndex: number;
 	endWordIndex: number;
-	text: string;
 	wbwTranslation: string; // Traduction mot à mot
 	isFullVerse: boolean; // Indique si ce clip contient l'intégralité du verset
 	isLastWordsOfVerse: boolean; // Indique si ce clip contient les derniers mots du verset
@@ -176,15 +182,13 @@ export class SubtitleClip extends ClipWithTranslation {
 		isLastWordsOfVerse: boolean,
 		translations: { [key: string]: Translation } = {}
 	) {
-		super(startTime, endTime, 'Subtitle', translations);
+		super(text, startTime, endTime, 'Subtitle', translations);
 		this.surah = $state(surah);
 		this.verse = $state(verse);
 		this.startWordIndex = $state(startWordIndex);
 		this.endWordIndex = $state(endWordIndex);
 		this.translations = translations;
-		this.text = $state(text);
 		this.wbwTranslation = $state(wbwTranslation);
-
 		this.isFullVerse = $state(isFullVerse);
 		this.isLastWordsOfVerse = $state(isLastWordsOfVerse);
 	}
@@ -210,6 +214,15 @@ export class SubtitleClip extends ClipWithTranslation {
 			return arabicDigits[parseInt(digit, 10)];
 		});
 	}
+
+	override getText(): string {
+		// Regarde dans les styles si on doit afficher le numéro de verset
+		if (globalState.getVideoStyle.getStyle('arabic', 'general', 'show-verse-number').value) {
+			return this.getTextWithVerseNumber();
+		}
+
+		return this.text;
+	}
 }
 
 export class SilenceClip extends Clip {
@@ -226,13 +239,31 @@ export type PredefinedSubtitleType =
 	| 'Other';
 
 export class PredefinedSubtitleClip extends ClipWithTranslation {
-	text: string = $state('');
 	predefinedSubtitleType: PredefinedSubtitleType = $state('Other');
 
 	constructor(startTime: number, endTime: number, type: PredefinedSubtitleType, text?: string) {
+		let _text = '';
+		switch (type) {
+			case 'Basmala':
+				_text = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+				break;
+			case 'Istiadhah':
+				_text = 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ';
+				break;
+			case 'Sadaqallahul Azim':
+				_text = 'صَدَقَ اللَّهُ الْعَظِيمُ';
+				break;
+			case 'Takbir':
+				_text = 'اللَّهُ أَكْبَرُ';
+				break;
+			case 'Other':
+				_text = text || '';
+				break;
+		}
+
 		if (startTime === undefined) {
 			// Déserialisation
-			super(0, 0, 'Pre-defined Subtitle');
+			super(_text, 0, 0, 'Pre-defined Subtitle');
 			return;
 		}
 
@@ -245,25 +276,7 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 				globalState.getProjectTranslation.getPredefinedSubtitleTranslation(edition, type);
 		}
 
-		super(startTime, endTime, 'Pre-defined Subtitle', translations);
-
-		switch (type) {
-			case 'Basmala':
-				this.text = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-				break;
-			case 'Istiadhah':
-				this.text = 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ';
-				break;
-			case 'Sadaqallahul Azim':
-				this.text = 'صَدَقَ اللَّهُ الْعَظِيمُ';
-				break;
-			case 'Takbir':
-				this.text = 'اللَّهُ أَكْبَرُ';
-				break;
-			case 'Other':
-				this.text = text || '';
-				break;
-		}
+		super(_text, startTime, endTime, 'Pre-defined Subtitle', translations);
 
 		this.predefinedSubtitleType = type;
 	}

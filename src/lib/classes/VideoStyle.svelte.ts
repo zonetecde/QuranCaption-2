@@ -1,7 +1,7 @@
 import { globalState } from '$lib/runes/main.svelte';
 import { SerializableBase } from './misc/SerializableBase';
 
-export type StyleValueType = 'color' | 'number' | 'select' | 'boolean';
+export type StyleValueType = 'color' | 'number' | 'select' | 'boolean' | 'text' | 'composite';
 
 // Types spécifiques pour les catégories de styles
 export type StyleCategoryName =
@@ -12,9 +12,14 @@ export type StyleCategoryName =
 	| 'outline'
 	| 'border'
 	| 'effects'
-	| 'animation';
+	| 'animation'
+	| 'general'
+	| 'overlay'
+	| 'surah-name';
 
 // Types spécifiques pour chaque catégorie de styles
+export type GeneralStyleName = 'show-subtitles' | 'show-verse-number' | 'verse-number-separator';
+
 export type TextStyleName =
 	| 'text-color'
 	| 'font-size'
@@ -29,9 +34,9 @@ export type TextStyleName =
 export type PositioningStyleName =
 	| 'vertical-position'
 	| 'horizontal-position'
-	| 'horizontal-padding'
-	| 'text-align'
-	| 'max-width';
+	| 'width'
+	| 'horizontal-text-alignment'
+	| 'vertical-text-alignment';
 
 export type BackgroundStyleName =
 	| 'background-enable'
@@ -40,7 +45,12 @@ export type BackgroundStyleName =
 	| 'border-radius'
 	| 'padding';
 
-export type ShadowStyleName = 'shadow-enable' | 'text-shadow' | 'box-shadow';
+export type ShadowStyleName =
+	| 'shadow-enable'
+	| 'text-shadow'
+	| 'text-shadow-color'
+	| 'box-shadow'
+	| 'box-shadow-color';
 
 export type OutlineStyleName = 'outline-enable' | 'text-outline' | 'text-outline-color';
 
@@ -50,8 +60,19 @@ export type EffectsStyleName = 'opacity' | 'blur' | 'brightness' | 'contrast';
 
 export type AnimationStyleName = 'fade-duration' | 'scale' | 'rotation';
 
+export type OverlayStyleName = 'overlay-enable' | 'overlay-color' | 'overlay-opacity';
+
+export type SurahNameStyleName =
+	| 'show-surah-name'
+	| 'show-arabic'
+	| 'show-latin'
+	| 'pre-surah-text'
+	| 'surah-size'
+	| 'surah-latin-text-style';
+
 // Union type pour tous les noms de styles
 export type StyleName =
+	| GeneralStyleName
 	| TextStyleName
 	| PositioningStyleName
 	| BackgroundStyleName
@@ -59,7 +80,9 @@ export type StyleName =
 	| OutlineStyleName
 	| BorderStyleName
 	| EffectsStyleName
-	| AnimationStyleName;
+	| AnimationStyleName
+	| OverlayStyleName
+	| SurahNameStyleName;
 
 export interface Style {
 	id: string;
@@ -74,7 +97,6 @@ export interface Style {
 	css: string;
 	tailwind?: boolean;
 	tailwindClass?: string;
-	applyGlobally: boolean;
 	icon: string;
 }
 
@@ -371,6 +393,13 @@ export class VideoStyle extends SerializableBase {
 						let valeur = `rgba(${r}, ${g}, ${b}, var(--background-opacity))`;
 
 						css += 'background-color: ' + valeur + ';\n';
+					}
+				}
+
+				// Cas particulier pour `show-subtitles`
+				if (style.id === 'show-subtitles') {
+					if (!Boolean(effectiveValue)) {
+						return 'display: none;';
 					}
 				}
 

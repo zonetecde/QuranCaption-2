@@ -10,7 +10,7 @@
 		"step": 0.05,
 		"css": "opacity: {value};",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "opacity"
 	},
 	{
@@ -22,7 +22,7 @@
 		"options": [],
 		"css": "font-family: '{value}', sans-serif;",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "font_download"
 	},
 	{
@@ -35,7 +35,7 @@
 		"valueMax": 540,
 		"css": "--translate-y: {value}px; transform: translate(var(--translate-x), var(--translate-y));",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "vertical_align_center"
 	},
 	{
@@ -48,7 +48,7 @@
 		"valueMax": 960,
 		"css": "--translate-x: {value}px;",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "horizontal_rule"
 	},
 	{
@@ -61,7 +61,7 @@
 		"valueMax": 200,
 		"css": "font-size: {value}px;",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "format_size"
 	},
 	{
@@ -72,7 +72,6 @@
 		"valueType": "color",
 		"css": "color: {value};",
 		"tailwind": false,
-		"applyGlobally": false,
 		"icon": "palette"
 	},
 	{
@@ -83,7 +82,7 @@
 		"valueType": "boolean",
 		"css": "",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "toggle_on"
 	},
 	{
@@ -96,7 +95,7 @@
 		"valueMax": 10,
 		"css": "text-shadow: {value}px 0 0 var(--text-outline-color), 0 {value}px 0 var(--text-outline-color), -{value}px 0 0 var(--text-outline-color), 0 -{value}px 0 var(--text-outline-color), {value}px {value}px 0 var(--text-outline-color), -{value}px -{value}px 0 var(--text-outline-color), {value}px -{value}px 0 var(--text-outline-color), -{value}px {value}px 0 var(--text-outline-color);",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "line_weight"
 	},
 	{
@@ -107,7 +106,7 @@
 		"valueType": "color",
 		"css": "--text-outline-color: {value};",
 		"tailwind": false,
-		"applyGlobally": false,
+
 		"icon": "palette"
 	}
 ]
