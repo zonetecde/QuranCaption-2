@@ -60,7 +60,11 @@ export type EffectsStyleName = 'opacity' | 'blur' | 'brightness' | 'contrast';
 
 export type AnimationStyleName = 'fade-duration' | 'scale' | 'rotation';
 
-export type OverlayStyleName = 'overlay-enable' | 'overlay-color' | 'overlay-opacity';
+export type OverlayStyleName =
+	| 'overlay-enable'
+	| 'overlay-color'
+	| 'overlay-opacity'
+	| 'overlay-blur';
 
 export type SurahNameStyleName =
 	| 'show-surah-name'

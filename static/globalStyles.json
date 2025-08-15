@@ -58,6 +58,19 @@
 				"css": "--overlay-opacity: {value};",
 				"tailwind": false,
 				"icon": "opacity"
+			},
+			{
+				"id": "overlay-blur",
+				"name": "Overlay Blur",
+				"description": "Blur level of the overlay",
+				"value": 0,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 30,
+				"step": 0.1,
+				"css": "--overlay-blur: {value}px;",
+				"tailwind": false,
+				"icon": "blur_on"
 			}
 		]
 	},

@@ -139,7 +139,28 @@
 			});
 		});
 	});
+
+	let overlaySettings = $derived(() => {
+		return {
+			enable: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-enable').value,
+			blur: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-blur').value,
+			opacity: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-opacity').value,
+			color: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-color').value
+		};
+	});
 </script>
+
+{#if overlaySettings().enable}
+	<div
+		class="absolute inset-0"
+		style="
+				background-color: {overlaySettings().color};
+				opacity: {overlaySettings().opacity};
+			"
+	></div>
+
+	<div class="absolute inset-0" style="backdrop-filter: blur({overlaySettings().blur}px);"></div>
+{/if}
 
 <div class="w-full h-full">
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
