@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Style } from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { invoke } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type { StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
+	import type { Style, StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
+	import { default as StyleComponent } from '$lib/components/projectEditor/tabs/styleEditor/Style.svelte';
 
 	let {
 		style = $bindable(),
@@ -276,6 +276,18 @@
 						class="w-full mono"
 						oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
 					/>
+				</div>
+			{:else if style.valueType === 'composite'}
+				<div class="flex flex-col gap-2">
+					{#await globalState.getVideoStyle.getCompositeStyles(style.id) then subStyles}
+						{#each subStyles as subStyle}
+							<StyleComponent
+								style={subStyle}
+								target={style.id}
+								categoryId={(style.id + '-category') as StyleCategoryName}
+							/>
+						{/each}
+					{/await}
 				</div>
 			{/if}
 		</div>

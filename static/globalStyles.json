@@ -139,7 +139,7 @@
 			},
 			{
 				"id": "surah-latin-text-style",
-				"name": "Latin Text Style",
+				"name": "Text Style & Position",
 				"description": "Style for the Latin transliteration of the Surah name",
 				"value": 0,
 				"valueType": "composite",

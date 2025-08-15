@@ -343,6 +343,32 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	/**
+	 * Get - et créer si nécessaire - les styles composites pour un style donné
+	 * @param id L'identifiant du style
+	 */
+	async getCompositeStyles(id: string): Promise<Style[]> {
+		if (!this.styles[id]) {
+			const stylesParDefaut = await this.getDefaultCompositeStyles(id);
+			this.styles[id] = [
+				{
+					id: id + '-category',
+					styles: stylesParDefaut,
+					name: 'Composite Style For ' + id,
+					description: 'This is a composite style for ' + id,
+					icon: 'text_fields'
+				}
+			];
+		}
+		return this.styles[id][0].styles;
+	}
+
+	async getDefaultCompositeStyles(id: string): Promise<Style[]> {
+		const styles: Style[] = await (await fetch('./composite-style.json')).json();
+
+		return styles;
+	}
+
+	/**
 	 * Génère le CSS pour tous les styles actifs (fusion globale + overrides clip si fournis)
 	 */
 	generateCSS(target: string, clipId?: number): string {

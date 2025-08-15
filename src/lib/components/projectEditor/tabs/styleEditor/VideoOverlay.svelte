@@ -148,6 +148,14 @@
 			color: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-color').value
 		};
 	});
+
+	let surahNameSettings = $derived(() => {
+		return {
+			show: globalState.getVideoStyle.getStyle('global', 'surah-name', 'show-surah-name').value,
+			preText: globalState.getVideoStyle.getStyle('global', 'surah-name', 'pre-surah-text').value,
+			size: globalState.getVideoStyle.getStyle('global', 'surah-name', 'surah-size').value
+		};
+	});
 </script>
 
 {#if overlaySettings().enable}
