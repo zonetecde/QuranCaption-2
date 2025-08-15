@@ -47,6 +47,30 @@ export class Verse {
 			.map((word) => word.translation)
 			.join(' ');
 	}
+
+	getNextPunctuationMarkIndex(index: number): number {
+		// Retourne l'indice du prochain mot dans le verset contenant une de ces poncutations:
+		const signesPonctuation = [
+			'۩', // Sajda
+			'ۖ', // Sakt
+			'ۗ', // Qila
+			'ۘ', // Mustahabb
+			'ۙ', // Mujawwaz
+			'ۚ', // Hasanu
+			'ۛ', // Ahsanu
+			'ۜ' // waqf
+		];
+
+		for (let i = index + 1; i < this.words.length; i++) {
+			for (const signe of signesPonctuation) {
+				if (this.words[i].arabic.includes(signe)) {
+					return i; // Retourne l'indice du mot contenant la ponctuation
+				}
+			}
+		}
+
+		return this.words.length - 1;
+	}
 }
 
 export class Surah {

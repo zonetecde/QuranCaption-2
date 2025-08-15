@@ -74,7 +74,9 @@
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST,
 			onKeyDown: async () => {
-				subtitlesEditorState().endWordIndex = (await selectedVerse())!.words.length - 1;
+				subtitlesEditorState().endWordIndex = (await selectedVerse())!.getNextPunctuationMarkIndex(
+					subtitlesEditorState().endWordIndex
+				);
 			}
 		});
 

@@ -187,7 +187,7 @@ export const SHORTCUTS = {
 		},
 		SET_END_TO_LAST: {
 			keys: ['c'],
-			description: 'Put the end-of-selection cursor on the last word of the verse.',
+			description: 'Put the end-of-selection cursor on the next punctuation mark.',
 			category: 'Subtitles Editor'
 		},
 		ADD_SUBTITLE: {
