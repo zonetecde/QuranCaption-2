@@ -2,6 +2,7 @@
 	import { PredefinedSubtitleClip, SubtitleClip, TrackType, Translation } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { untrack } from 'svelte';
+	import SurahName from './SurahName.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getVideoStyle.getStyle('global', 'animation', 'fade-duration')
@@ -148,14 +149,6 @@
 			color: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-color').value
 		};
 	});
-
-	let surahNameSettings = $derived(() => {
-		return {
-			show: globalState.getVideoStyle.getStyle('global', 'surah-name', 'show-surah-name').value,
-			preText: globalState.getVideoStyle.getStyle('global', 'surah-name', 'pre-surah-text').value,
-			size: globalState.getVideoStyle.getStyle('global', 'surah-name', 'surah-size').value
-		};
-	});
 </script>
 
 {#if overlaySettings().enable}
@@ -199,5 +192,7 @@
 				{/if}
 			{/each}
 		{/if}
+
+		<SurahName />
 	</div>
 </div>

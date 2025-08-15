@@ -114,6 +114,17 @@
 				"icon": "text_fields"
 			},
 			{
+				"id": "show-translation",
+				"name": "Show Translation",
+				"description": "Show the Surah name translation",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+
+				"icon": "translate"
+			},
+			{
 				"id": "pre-surah-text",
 				"name": "Pre-Surah Text",
 				"description": "Text to display before the Surah name",
@@ -128,10 +139,11 @@
 				"id": "surah-size",
 				"name": "Size",
 				"description": "Scale size of Surah name using transform",
-				"value": 100,
+				"value": 5,
 				"valueType": "number",
-				"valueMin": 25,
-				"valueMax": 300,
+				"valueMin": 1,
+				"valueMax": 10,
+				"step": 0.1,
 				"css": "--surah-scale: {value}%;",
 				"tailwind": false,
 

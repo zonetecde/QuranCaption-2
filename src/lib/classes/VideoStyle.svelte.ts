@@ -70,6 +70,7 @@ export type SurahNameStyleName =
 	| 'show-surah-name'
 	| 'show-arabic'
 	| 'show-latin'
+	| 'show-translation'
 	| 'pre-surah-text'
 	| 'surah-size'
 	| 'surah-latin-text-style';
@@ -140,6 +141,8 @@ export class VideoStyle extends SerializableBase {
 		super();
 		this.styles = styles;
 		this.lastUpdated = lastUpdated;
+
+		this.getDefaultCompositeStyles();
 	}
 
 	static async setDefaultStylesToDefaultOne(): Promise<VideoStyle> {
@@ -346,26 +349,41 @@ export class VideoStyle extends SerializableBase {
 	 * Get - et créer si nécessaire - les styles composites pour un style donné
 	 * @param id L'identifiant du style
 	 */
-	async getCompositeStyles(id: string): Promise<Style[]> {
+	getCompositeStyles(id: string): Style[] {
+		// Try catch au cas où le style composite n'a toujours pas été créé
+
+		try {
+			return this.styles[id][0].styles;
+		} catch (e: any) {
+			return [];
+		}
+	}
+
+	/**
+	 * Créer les styles composites pour un style donné s'il n'existe pas déjà
+	 * @param id L'identifiant du style
+	 */
+	async loadCompositeStyles(id: string) {
 		if (!this.styles[id]) {
-			const stylesParDefaut = await this.getDefaultCompositeStyles(id);
 			this.styles[id] = [
 				{
 					id: id + '-category',
-					styles: stylesParDefaut,
+					styles: await this.getDefaultCompositeStyles(), // Deep clone the array
 					name: 'Composite Style For ' + id,
 					description: 'This is a composite style for ' + id,
 					icon: 'text_fields'
 				}
 			];
 		}
-		return this.styles[id][0].styles;
 	}
 
-	async getDefaultCompositeStyles(id: string): Promise<Style[]> {
-		const styles: Style[] = await (await fetch('./composite-style.json')).json();
+	getStyleFromComposite(compositeStyleId: string, styleId: StyleName): Style {
+		const compositeStyles = this.getCompositeStyles(compositeStyleId);
+		return compositeStyles.find((style) => style.id === styleId) || ({ value: 0 } as Style);
+	}
 
-		return styles;
+	async getDefaultCompositeStyles() {
+		return await (await fetch('./composite-style.json')).json();
 	}
 
 	/**

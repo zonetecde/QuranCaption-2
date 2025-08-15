@@ -16,13 +16,19 @@
 		categoryId: StyleCategoryName;
 	} = $props();
 
-	onMount(() => {
+	onMount(async () => {
 		// Par défaut fermé
 		if (!globalState.getSectionsState[style.id])
 			globalState.getSectionsState[style.id] = {
 				extended: false
 			};
 		else expanded = globalState.getSectionsState[style.id].extended;
+
+		// Si est un style composite
+		if (style.valueType === 'composite') {
+			// On charge les styles composites
+			await globalState.getVideoStyle.loadCompositeStyles(style.id);
+		}
 	});
 
 	let expanded = $state(false);
@@ -279,15 +285,13 @@
 				</div>
 			{:else if style.valueType === 'composite'}
 				<div class="flex flex-col gap-2">
-					{#await globalState.getVideoStyle.getCompositeStyles(style.id) then subStyles}
-						{#each subStyles as subStyle}
-							<StyleComponent
-								style={subStyle}
-								target={style.id}
-								categoryId={(style.id + '-category') as StyleCategoryName}
-							/>
-						{/each}
-					{/await}
+					{#each globalState.getVideoStyle.getCompositeStyles(style.id) as subStyle}
+						<StyleComponent
+							style={subStyle}
+							target={style.id}
+							categoryId={(style.id + '-category') as StyleCategoryName}
+						/>
+					{/each}
 				</div>
 			{/if}
 		</div>
