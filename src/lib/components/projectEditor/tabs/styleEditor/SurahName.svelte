@@ -39,7 +39,19 @@
 				'horizontal-position'
 			).value,
 			color: globalState.getVideoStyle.getStyleFromComposite('surah-latin-text-style', 'text-color')
-				.value
+				.value,
+			outlineWidth: globalState.getVideoStyle.getStyleFromComposite(
+				'surah-latin-text-style',
+				'text-outline'
+			).value,
+			outlineColor: globalState.getVideoStyle.getStyleFromComposite(
+				'surah-latin-text-style',
+				'text-outline-color'
+			).value,
+			enableOutline: globalState.getVideoStyle.getStyleFromComposite(
+				'surah-latin-text-style',
+				'outline-enable'
+			).value
 		};
 	});
 
@@ -57,26 +69,68 @@
 				if (!res.ok) return;
 				const svgText = await res.text();
 				if (!svgContainer) return;
-				svgContainer.innerHTML = svgText;
 
-				// Ajuster le SVG injecté pour permettre le recolor
-				const svgEl = svgContainer.querySelector('svg') as SVGElement | null;
-				if (!svgEl) return;
-				svgEl.setAttribute('width', '100%');
-				svgEl.setAttribute('height', '100%');
+				// Parse SVG and apply color + outline settings
+				try {
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(svgText, 'image/svg+xml');
+					const svgEl = doc.querySelector('svg');
+					if (!svgEl) {
+						svgContainer.innerHTML = svgText; // fallback
+						return;
+					}
 
-				// Forcer fill/stroke en rouge sur les éléments graphiques
-				svgEl
-					.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, g')
-					.forEach((el) => {
+					// Ensure scalable sizing
+					svgEl.setAttribute('width', '100%');
+					svgEl.setAttribute('height', '100%');
+
+					// Read outline settings
+					const settings = surahNameSettings();
+					const enableOutline = !!settings.enableOutline;
+					const outlineWidth = Number(settings.outlineWidth) * 2.5 || 0;
+					const outlineColor = (settings.outlineColor as string) || '#000000';
+					const mainColor = (settings.color as string) || '#000000';
+
+					// Apply fill color to main shapes (override fills unless explicitly 'none')
+					(
+						svgEl.querySelectorAll('path, circle, rect, polygon, polyline, ellipse, g, text') || []
+					).forEach((el) => {
 						try {
-							if ((el as Element).hasAttribute('fill'))
-								(el as Element).setAttribute('fill', surahNameSettings().color as string);
-							else (el as Element).setAttribute('fill', surahNameSettings().color as string);
-							if ((el as Element).hasAttribute('stroke'))
-								(el as Element).setAttribute('stroke', surahNameSettings().color as string);
+							// If element explicitly sets fill="none", keep it. Otherwise set fill to main color.
+							const currentFill = (el as Element).getAttribute('fill');
+							if (currentFill === 'none') {
+								// keep none
+							} else {
+								(el as Element).setAttribute('fill', mainColor);
+							}
+
+							// Apply outline if enabled
+							if (enableOutline && outlineWidth > 0) {
+								(el as Element).setAttribute('stroke', outlineColor);
+								(el as Element).setAttribute('stroke-width', `${outlineWidth}px`);
+								(el as Element).setAttribute('stroke-linejoin', 'round');
+								(el as Element).setAttribute('stroke-linecap', 'round');
+								// Keep stroke consistent when scaling
+								(el as Element).setAttribute('vector-effect', 'non-scaling-stroke');
+								// Ensure stroke is painted beneath fill where supported
+								(el as Element).setAttribute('paint-order', 'stroke fill markers');
+							} else {
+								// remove stroke attributes if present
+								try {
+									(el as Element).removeAttribute('stroke-width');
+								} catch (e) {}
+							}
 						} catch (e) {}
 					});
+
+					// Serialize back and inject
+					const serializer = new XMLSerializer();
+					const out = serializer.serializeToString(svgEl);
+					svgContainer.innerHTML = out;
+				} catch (e) {
+					// fallback: inject raw SVG
+					svgContainer.innerHTML = svgText;
+				}
 			} catch (e) {}
 		});
 	});
