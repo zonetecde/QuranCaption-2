@@ -28,16 +28,18 @@
 				'surah-name',
 				'surah-name-format'
 			).value as string,
-			verticalPosition: globalState.getVideoStyle.getStyleFromComposite(
-				'surah-latin-text-style',
+			verticalPosition: globalState.getVideoStyle.getStyle(
+				'global',
+				'surah-name',
 				'vertical-position'
 			).value,
-			color: globalState.getVideoStyle.getStyleFromComposite('surah-latin-text-style', 'text-color')
-				.value,
-			horizontalPosition: globalState.getVideoStyle.getStyleFromComposite(
-				'surah-latin-text-style',
+			horizontalPosition: globalState.getVideoStyle.getStyle(
+				'global',
+				'surah-name',
 				'horizontal-position'
-			).value
+			).value,
+			color: globalState.getVideoStyle.getStyleFromComposite('surah-latin-text-style', 'text-color')
+				.value
 		};
 	});
 

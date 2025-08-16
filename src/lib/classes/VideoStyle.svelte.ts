@@ -394,12 +394,15 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	async getDefaultCompositeStyles(id?: string) {
-		const styles: Style[] = await (await fetch('./composite-style.json')).json();
+		let styles: Style[] = await (await fetch('./composite-style.json')).json();
 
 		// Application des styles par défaut en fonction de l'ID
 		if (id === 'surah-latin-text-style') {
-			styles.find((style) => style.id === 'vertical-position')!.value = -110;
 			styles.find((style) => style.id === 'font-size')!.value = 8;
+			// Enlève les deux styles vertical-position et horizontal-position
+			styles = styles.filter(
+				(style) => style.id !== 'vertical-position' && style.id !== 'horizontal-position'
+			);
 		}
 
 		return styles;
@@ -411,7 +414,7 @@ export class VideoStyle extends SerializableBase {
 	 * @param toIgnore La liste des styles à ignorer
 	 * @returns Le CSS
 	 */
-	generateCSSForComposite(id: string, toIgnore: string[]) {
+	generateCSSForComposite(id: string) {
 		// Récupère tous les styles composites pour un style donné
 		const compositeStyles = this.getCompositeStyles(id);
 
@@ -422,11 +425,6 @@ export class VideoStyle extends SerializableBase {
 			if (element.id.includes('enable') && !element.value) {
 				// Si on désactive le style, on ne génère pas le CSS (c'est toute la partie outline là qui est concernée)
 				break;
-			}
-
-			if (toIgnore.includes(element.id)) {
-				// Si le style est dans la liste à ignorer, on passe au suivant
-				continue;
 			}
 
 			css += element.css.replaceAll('{value}', String(element.value)) + '\n';

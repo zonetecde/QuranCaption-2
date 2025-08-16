@@ -10,10 +10,7 @@
 	} = $props();
 
 	let getCss = $derived(() => {
-		const toIgnore =
-			id === 'surah-latin-text-style' ? ['vertical-position', 'horizontal-position'] : [];
-
-		return globalState.getVideoStyle.generateCSSForComposite(id, toIgnore);
+		return globalState.getVideoStyle.generateCSSForComposite(id);
 	});
 </script>
 
