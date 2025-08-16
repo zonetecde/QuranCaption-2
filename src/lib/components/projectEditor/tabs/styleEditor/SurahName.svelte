@@ -62,7 +62,7 @@
 		const currentSurahValue = currentSurah();
 
 		untrack(async () => {
-			let url = `https://cdn.amrayn.com/qimages-c/${currentSurahValue}.svg`;
+			let url = `./surah-imgs/${currentSurahValue}.svg`;
 
 			try {
 				const res = await fetch(url);
@@ -70,7 +70,6 @@
 				const svgText = await res.text();
 				if (!svgContainer) return;
 
-				// Parse SVG and apply color + outline settings
 				try {
 					const parser = new DOMParser();
 					const doc = parser.parseFromString(svgText, 'image/svg+xml');

@@ -157,7 +157,7 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	static async setDefaultStylesToDefaultOne(): Promise<VideoStyle> {
-		const globalStyles: StylesData = await (await fetch('./globalStyles.json')).json();
+		const globalStyles: StylesData = await (await fetch('./styles/globalStyles.json')).json();
 		const styles: StylesData = await VideoStyle.getDefaultStyles();
 
 		if (styles) {
@@ -184,7 +184,7 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	static async getDefaultStyles(): Promise<StylesData> {
-		const styles: StylesData = await (await fetch('./styles.json')).json();
+		const styles: StylesData = await (await fetch('./styles/styles.json')).json();
 
 		return styles;
 	}
@@ -394,7 +394,7 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	async getDefaultCompositeStyles(id?: string) {
-		let styles: Style[] = await (await fetch('./composite-style.json')).json();
+		let styles: Style[] = await (await fetch('./styles/compositeStyles.json')).json();
 
 		// Application des styles par défaut en fonction de l'ID
 		if (id === 'surah-latin-text-style') {
