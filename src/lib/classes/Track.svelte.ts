@@ -10,7 +10,7 @@ import {
 import { SerializableBase } from './misc/SerializableBase.js';
 import { Duration, type Asset } from './index.js';
 import { globalState } from '$lib/runes/main.svelte.js';
-import type { Verse } from './Quran.js';
+import { Quran, type Verse } from './Quran.js';
 import toast from 'svelte-5-french-toast';
 import { VerseTranslation } from './Translation.svelte.js';
 import ModalManager from '$lib/components/modals/ModalManager.js';

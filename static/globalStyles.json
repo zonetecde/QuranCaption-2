@@ -92,6 +92,17 @@
 				"icon": "visibility"
 			},
 			{
+				"id": "surah-name-format",
+				"name": "Latin Text Format",
+				"description": "Format of the Surah name display. Use <number>, <transliteration> and <translation> tags to customize.",
+				"value": "<number>. Surah <transliteration>",
+				"valueType": "text",
+				"css": "",
+				"tailwind": false,
+
+				"icon": "format_quote"
+			},
+			{
 				"id": "show-arabic",
 				"name": "Show Arabic",
 				"description": "Show the Surah name in Arabic",
@@ -105,18 +116,7 @@
 			{
 				"id": "show-latin",
 				"name": "Show Latin",
-				"description": "Show the Surah name transliteration (Latin)",
-				"value": true,
-				"valueType": "boolean",
-				"css": "",
-				"tailwind": false,
-
-				"icon": "text_fields"
-			},
-			{
-				"id": "show-translation",
-				"name": "Show Translation",
-				"description": "Show the Surah name translation",
+				"description": "Show additional Latin text (see Latin Text Format)",
 				"value": true,
 				"valueType": "boolean",
 				"css": "",
@@ -125,29 +125,31 @@
 				"icon": "translate"
 			},
 			{
-				"id": "pre-surah-text",
-				"name": "Pre-Surah Text",
-				"description": "Text to display before the Surah name",
-				"value": "Surah",
-				"valueType": "text",
-				"css": "--pre-surah-text: '{value}';",
-				"tailwind": false,
-
-				"icon": "short_text"
-			},
-			{
 				"id": "surah-size",
 				"name": "Size",
 				"description": "Scale size of Surah name using transform",
-				"value": 5,
+				"value": 4,
 				"valueType": "number",
 				"valueMin": 1,
 				"valueMax": 10,
 				"step": 0.1,
-				"css": "--surah-scale: {value}%;",
+				"css": "",
 				"tailwind": false,
 
 				"icon": "zoom_in"
+			},
+			{
+				"id": "surah-latin-spacing",
+				"name": "Spacing",
+				"description": "Adjust spacing between the Arabic Surah name and its Latin equivalent",
+				"value": 1.5,
+				"valueType": "number",
+				"valueMin": 1,
+				"valueMax": 9,
+				"step": 0.1,
+				"css": "",
+				"tailwind": false,
+				"icon": "format_line_spacing"
 			},
 			{
 				"id": "surah-latin-text-style",

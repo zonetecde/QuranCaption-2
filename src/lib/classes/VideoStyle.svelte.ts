@@ -68,11 +68,11 @@ export type OverlayStyleName =
 
 export type SurahNameStyleName =
 	| 'show-surah-name'
+	| 'surah-name-format'
 	| 'show-arabic'
 	| 'show-latin'
-	| 'show-translation'
-	| 'pre-surah-text'
 	| 'surah-size'
+	| 'surah-latin-spacing'
 	| 'surah-latin-text-style';
 
 // Union type pour tous les noms de styles
@@ -142,7 +142,18 @@ export class VideoStyle extends SerializableBase {
 		this.styles = styles;
 		this.lastUpdated = lastUpdated;
 
-		this.getDefaultCompositeStyles();
+		if (this.styles === undefined) return;
+
+		// Load tout les styles composites (notamment pour le style sur le nom de la sourate)
+		for (const [target, styles] of Object.entries(this.styles)) {
+			for (const category of styles) {
+				for (const style of category.styles) {
+					if (style.valueType === 'composite') {
+						this.loadCompositeStyles(style.id);
+					}
+				}
+			}
+		}
 	}
 
 	static async setDefaultStylesToDefaultOne(): Promise<VideoStyle> {
@@ -368,7 +379,7 @@ export class VideoStyle extends SerializableBase {
 			this.styles[id] = [
 				{
 					id: id + '-category',
-					styles: await this.getDefaultCompositeStyles(), // Deep clone the array
+					styles: await this.getDefaultCompositeStyles(id),
 					name: 'Composite Style For ' + id,
 					description: 'This is a composite style for ' + id,
 					icon: 'text_fields'
@@ -382,8 +393,46 @@ export class VideoStyle extends SerializableBase {
 		return compositeStyles.find((style) => style.id === styleId) || ({ value: 0 } as Style);
 	}
 
-	async getDefaultCompositeStyles() {
-		return await (await fetch('./composite-style.json')).json();
+	async getDefaultCompositeStyles(id?: string) {
+		const styles: Style[] = await (await fetch('./composite-style.json')).json();
+
+		// Application des styles par défaut en fonction de l'ID
+		if (id === 'surah-latin-text-style') {
+			styles.find((style) => style.id === 'vertical-position')!.value = -110;
+			styles.find((style) => style.id === 'font-size')!.value = 8;
+		}
+
+		return styles;
+	}
+
+	/**
+	 * Génère le CSS d'un style composite
+	 * @param id L'id du style composite
+	 * @param toIgnore La liste des styles à ignorer
+	 * @returns Le CSS
+	 */
+	generateCSSForComposite(id: string, toIgnore: string[]) {
+		// Récupère tous les styles composites pour un style donné
+		const compositeStyles = this.getCompositeStyles(id);
+
+		let css = '';
+		for (let i = 0; i < compositeStyles.length; i++) {
+			const element = compositeStyles[i];
+
+			if (element.id.includes('enable') && !element.value) {
+				// Si on désactive le style, on ne génère pas le CSS (c'est toute la partie outline là qui est concernée)
+				break;
+			}
+
+			if (toIgnore.includes(element.id)) {
+				// Si le style est dans la liste à ignorer, on passe au suivant
+				continue;
+			}
+
+			css += element.css.replaceAll('{value}', String(element.value)) + '\n';
+		}
+
+		return css;
 	}
 
 	/**
@@ -452,7 +501,16 @@ export class VideoStyle extends SerializableBase {
 				}
 
 				// Remplace {value} par la valeur effective
-				let cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
+				let cssRule = '';
+
+				// Cas spécifique: certains styles sont différents pour l'arabe, comme par ex
+				// le contour du texte (outline) qui nécessite du CSS différent.
+				if (target === 'arabic' && 'cssarabic' in style) {
+					//@ts-ignore
+					cssRule = style.cssarabic.replaceAll(/{value}/g, String(effectiveValue));
+				} else {
+					cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
+				}
 
 				if (cssRule.trim()) {
 					css += cssRule + '\n';

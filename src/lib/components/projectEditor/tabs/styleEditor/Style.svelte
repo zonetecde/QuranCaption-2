@@ -158,7 +158,7 @@
 						<span>{String(inputValue)}</span>
 					{/if}
 				{:else}
-					<span>{String(style.value)}</span>
+					<span class="truncate max-w-[140px]">{String(style.value)}</span>
 				{/if}
 
 				{#if selectedClipIds().length > 0 && (getEffectiveForSelection().overridden || getEffectiveForSelection().mixed) && target !== 'global'}
