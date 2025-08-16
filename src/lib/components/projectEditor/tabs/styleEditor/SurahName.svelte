@@ -151,8 +151,8 @@
 			<CustomText id="surah-latin-text-style">
 				{surahNameSettings()
 					.surahNameFormat.replace('<number>', currentSurah().toString())
-					.replace('<transliteration>', Quran.surahs[currentSurah()].name)
-					.replace('<translation>', Quran.surahs[currentSurah()].translation)}
+					.replace('<transliteration>', Quran.surahs[currentSurah() - 1].name)
+					.replace('<translation>', Quran.surahs[currentSurah() - 1].translation)}
 			</CustomText>
 		</div>
 	</div>
