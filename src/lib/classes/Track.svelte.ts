@@ -333,6 +333,15 @@ export class SubtitleTrack extends Track {
 		return true;
 	}
 
+	/**
+	 * À partir d'un verset et d'une plage de mots, extrait les propriétés des sous-titres.
+	 * @param verse Le verset à analyser.
+	 * @param firstWordIndex L'index du premier mot de la plage.
+	 * @param lastWordIndex L'index du dernier mot de la plage.
+	 * @param surah Le numéro de la sourate.
+	 * @returns Un objet contenant les propriétés des sous-titres.
+	 * @returns {isFullVerse, isLastWordsOfVerse, translations}
+	 */
 	async getSubtitlesProperties(
 		verse: Verse,
 		firstWordIndex: number,
@@ -355,6 +364,25 @@ export class SubtitleTrack extends Track {
 			isLastWordsOfVerse,
 			translations
 		};
+	}
+
+	/**
+	 * Retourne la sourate actuellement lue à la position du curseur (pour l'affiche du nom de la
+	 * sourate sur la vidéo)
+	 */
+	getCurrentSurah(): number {
+		const currentClip = this.getCurrentSubtitleToDisplay();
+		if (currentClip instanceof SubtitleClip) {
+			return currentClip.surah;
+		} else if (currentClip === null) return -1;
+		else {
+			// Prend le clip de sous-titre précédent
+			const previousClip = this.getSubtitleBefore(this.clips.indexOf(currentClip));
+			if (previousClip) {
+				return previousClip.surah;
+			}
+		}
+		return -1;
 	}
 
 	/**

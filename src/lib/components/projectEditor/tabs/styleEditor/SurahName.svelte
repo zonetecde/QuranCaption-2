@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
+	import { draw, fade } from 'svelte/transition';
 
 	let svgContainer: HTMLDivElement | null = null;
-	const svgUrl = `https://cdn.amrayn.com/qimages-c/1.svg`;
+
+	const currentSurah = $derived(() => {
+		return globalState.getSubtitleTrack.getCurrentSurah();
+	});
 
 	let surahNameSettings = $derived(() => {
 		return {
@@ -30,10 +34,13 @@
 
 	$effect(() => {
 		surahNameSettings().color;
+		const currentSurahValue = currentSurah();
 
 		untrack(async () => {
+			let url = `https://cdn.amrayn.com/qimages-c/${currentSurahValue}.svg`;
+
 			try {
-				const res = await fetch(svgUrl);
+				const res = await fetch(url);
 				if (!res.ok) return;
 				const svgText = await res.text();
 				if (!svgContainer) return;
@@ -66,6 +73,5 @@
 	class="w-[100px]"
 	style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px);`}
 >
-	<!-- Image -->
 	<div bind:this={svgContainer}></div>
 </div>
