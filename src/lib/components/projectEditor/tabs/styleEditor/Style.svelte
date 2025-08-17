@@ -9,11 +9,13 @@
 	let {
 		style = $bindable(),
 		target,
-		categoryId
+		categoryId,
+		disabled
 	}: {
 		style: Style;
 		target: string;
 		categoryId: StyleCategoryName;
+		disabled: boolean;
 	} = $props();
 
 	onMount(async () => {
@@ -116,6 +118,31 @@
 			style.id as StyleName
 		);
 	}
+
+	/**
+	 * Effect permettant de fermer le style si celui-ci se fait désactiver
+	 */
+	$effect(() => {
+		if (disabled) {
+			expanded = false; // Si le style est désactivé, on le ferme
+			return;
+		}
+	});
+
+	/**
+	 * Permet de convertir un temps en ms en un temps capable d'être affiché
+	 * dans un input de type 'time'
+	 * @param value La valeur à convertir
+	 */
+	function msToTimeValue(value: number): string {
+		const totalSeconds = Math.floor(value / 1000);
+		const hh = Math.floor(totalSeconds / 3600);
+		const mm = Math.floor((totalSeconds % 3600) / 60);
+		const ss = totalSeconds % 60;
+		const pad = (n: number) => String(n).padStart(2, '0');
+
+		return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+	}
 </script>
 
 <div
@@ -130,7 +157,8 @@
 	<!-- Header -->
 	<div
 		class={'flex items-center justify-between py-1.25 px-2 cursor-pointer select-none ' +
-			(expanded ? 'border-b border-white/10' : '')}
+			(expanded ? 'border-b border-white/10 ' : '') +
+			(disabled ? 'opacity-50 pointer-events-none' : '')}
 		onclick={() => (expanded = !expanded)}
 	>
 		<div class="flex items-center gap-2">
@@ -157,6 +185,8 @@
 					{:else}
 						<span>{String(inputValue)}</span>
 					{/if}
+				{:else if style.valueType === 'time'}
+					<span>{msToTimeValue(Number(inputValue))}</span>
 				{:else}
 					<span class="truncate max-w-[140px]">{String(style.value)}</span>
 				{/if}
@@ -283,6 +313,34 @@
 						oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
 					/>
 				</div>
+			{:else if style.valueType === 'time'}
+				<div class="relative flex flex-row gap-x-2 items-center">
+					<input
+						type="time"
+						class="w-full"
+						oninput={(e) => {
+							// Convertis en ms et applique
+							const timeString = (e.target as HTMLInputElement).value;
+							const [hh, mm, ss] = timeString.split(':').map(Number);
+							const totalSeconds = hh * 3600 + mm * 60 + ss;
+							applyValue(totalSeconds * 1000);
+						}}
+						value={msToTimeValue(style.value as number)}
+					/>
+					<span>or</span>
+					<button
+						class="btn-accent text-sm py-1 min-w-[150px]"
+						title="Use the preview timeline cursor time and put it into the time field"
+						onclick={(e) => {
+							let currentPreviewTime =
+								globalState.currentProject!.projectEditorState.timeline.cursorPosition;
+
+							applyValue(currentPreviewTime);
+						}}
+					>
+						Use preview cursor time
+					</button>
+				</div>
 			{:else if style.valueType === 'composite'}
 				<div class="flex flex-col gap-2">
 					{#each globalState.getVideoStyle.getCompositeStyles(style.id) as subStyle}
@@ -290,6 +348,7 @@
 							style={subStyle}
 							target={style.id}
 							categoryId={(style.id + '-category') as StyleCategoryName}
+							disabled={false}
 						/>
 					{/each}
 				</div>

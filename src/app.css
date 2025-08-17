@@ -162,6 +162,7 @@ body {
 	border-radius: 0.375rem;
 	cursor: pointer;
 	transition: scale 0.2s ease;
+	outline: none;
 }
 
 .btn-accent:hover {
@@ -346,6 +347,12 @@ input[type='number'] {
 
 	background-color: var(--bg-accent);
 	border-color: var(--border-color);
+	color: var(--text-primary);
+}
+
+input[type='time'] {
+	@apply border rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-transparent hover:border-[var(--accent-primary)] transition-all duration-200;
+	background-color: var(--bg-accent);
 	color: var(--text-primary);
 }
 

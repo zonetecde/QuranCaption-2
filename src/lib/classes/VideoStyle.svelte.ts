@@ -1,7 +1,15 @@
 import { globalState } from '$lib/runes/main.svelte';
 import { SerializableBase } from './misc/SerializableBase';
+import { Utilities } from './misc/Utilities';
 
-export type StyleValueType = 'color' | 'number' | 'select' | 'boolean' | 'text' | 'composite';
+export type StyleValueType =
+	| 'color'
+	| 'number'
+	| 'select'
+	| 'boolean'
+	| 'text'
+	| 'time'
+	| 'composite';
 
 // Types spécifiques pour les catégories de styles
 export type StyleCategoryName =
@@ -79,6 +87,13 @@ export type SurahNameStyleName =
 // Nouvelle définition pour les styles du Creator Text
 export type CreatorTextStyleName = 'creator-text' | 'creator-text-composite';
 
+export type CustomTextStyleName =
+	| 'time-appearance'
+	| 'time-disappearance'
+	| 'text'
+	| 'always-show'
+	| 'custom-text-composite';
+
 // Union type pour tous les noms de styles
 export type StyleName =
 	| GeneralStyleName
@@ -92,7 +107,8 @@ export type StyleName =
 	| AnimationStyleName
 	| OverlayStyleName
 	| SurahNameStyleName
-	| CreatorTextStyleName;
+	| CreatorTextStyleName
+	| CustomTextStyleName;
 
 export interface Style {
 	id: string;
@@ -201,11 +217,25 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	/**
-	 * Obtient un style spécifique dans une catégorie
+	 * Obtient un style spécifique dans un target et sa catégorie
+	 * @param target Le target à interroger
+	 * @param categoryId L'ID de la catégorie à interroger
+	 * @param styleId L'ID du style à obtenir
+	 * @returns Le style correspondant
 	 */
 	getStyle(target: string, categoryId: StyleCategoryName, styleId: StyleName): Style {
 		const category = this.getCategory(target, categoryId);
-		return category!.styles.find((style) => style.id === styleId)!;
+		return this.getStyleFromCategory(category, styleId);
+	}
+
+	/**
+	 * Obtient un style spécifique dans une catégorie
+	 * @param category La catégorie à interroger
+	 * @param styleId L'ID du style à obtenir
+	 * @returns Le style correspondant
+	 */
+	getStyleFromCategory(category: Category, styleId: StyleName): Style {
+		return category.styles.find((style) => style.id === styleId)!;
 	}
 
 	setStyle(
@@ -404,10 +434,6 @@ export class VideoStyle extends SerializableBase {
 		// Application des styles par défaut en fonction de l'ID
 		if (id === 'surah-latin-text-style') {
 			styles.find((style) => style.id === 'font-size')!.value = 8;
-			// Enlève les deux styles vertical-position et horizontal-position
-			styles = styles.filter(
-				(style) => style.id !== 'vertical-position' && style.id !== 'horizontal-position'
-			);
 		}
 
 		return styles;
@@ -565,6 +591,44 @@ export class VideoStyle extends SerializableBase {
 		}
 	}
 
+	async getDefaultCustomTextCategory(): Promise<Category> {
+		const category: Category = await (await fetch('./styles/customText.json')).json();
+		const randomId = Utilities.randomId();
+		category.id += '-' + randomId;
+		this.getStyleFromCategory(category, 'custom-text-composite').id += '-' + randomId;
+		return category;
+	}
+
+	/**
+	 * Ajoute un texte personnalisé au projet dans les styles globaux
+	 */
+	async addCustomText() {
+		const customTextCategory = await this.getDefaultCustomTextCategory();
+		this.styles['global'].push(customTextCategory);
+	}
+
+	/**
+	 * Retourne les textes personnalisés à afficher à ce moment précis
+	 */
+	getCurrentCustomTextsToDisplay(): Category[] {
+		const cursorPos = globalState.currentProject!.projectEditorState.timeline.cursorPosition;
+		let currentCustomTexts: Category[] = [];
+
+		for (const category of this.styles['global']) {
+			if (
+				category.id.includes('custom-text') &&
+				(this.getStyle('global', category.id as StyleCategoryName, 'always-show').value ||
+					((this.getStyle('global', category.id as StyleCategoryName, 'time-appearance')
+						.value as number) <= cursorPos &&
+						(this.getStyle('global', category.id as StyleCategoryName, 'time-disappearance')
+							.value as number) >= cursorPos))
+			) {
+				currentCustomTexts.push(category);
+			}
+		}
+		return currentCustomTexts;
+	}
+
 	/**
 	 * Remet tous les styles à leurs valeurs par défaut
 	 */
@@ -573,5 +637,9 @@ export class VideoStyle extends SerializableBase {
 		this.styles = defaultStyle.styles;
 		this.overrides = {};
 		this.lastUpdated = new Date();
+	}
+
+	getCompositeStyleIdFromCategory(customText: Category): string {
+		return customText.styles.find((style) => style.valueType === 'composite')!.id;
 	}
 }

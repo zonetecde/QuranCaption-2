@@ -381,6 +381,10 @@ export class SubtitleTrack extends Track {
 			if (previousClip) {
 				return previousClip.surah;
 			}
+			const nextClip = this.getSubtitleAfter(this.clips.indexOf(currentClip));
+			if (nextClip) {
+				return nextClip.surah;
+			}
 		}
 		return -1;
 	}
@@ -474,6 +478,23 @@ export class SubtitleTrack extends Track {
 		do {
 			i--;
 		} while (i >= 0 && !(this.clips[i] instanceof SubtitleClip));
+
+		return this.clips[i] as SubtitleClip | null;
+	}
+
+	/**
+	 * Renvoie le clip de sous-titre après l'index spécifié.
+	 * @param i L'index du clip pour lequel on veut trouver le clip de sous-titre suivant.
+	 * @returns Le clip de sous-titre suivant ou null s'il n'existe pas.
+	 */
+	getSubtitleAfter(i: number): SubtitleClip | null {
+		if (i < 0 || i >= this.clips.length - 1) {
+			return null;
+		}
+
+		do {
+			i++;
+		} while (i < this.clips.length && !(this.clips[i] instanceof SubtitleClip));
 
 		return this.clips[i] as SubtitleClip | null;
 	}

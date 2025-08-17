@@ -186,6 +186,13 @@
 							On empêche l'affichage du style "reactive-font-size" qui est un style utilitaire censé être non-visible. 
 								  -->
 							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-verse-number' || style.id === 'verse-number-separator' || style.id === 'max-height')) && style.id !== 'reactive-font-size'}
+								<!-- On veut désactiver certains style, comme par exemple
+							 - Si on a le style "Always Show" pour les customs text d'enable, alors on disable les styles permettant
+							 de set les propriétés de temps de début d'affichage et de fin d'affichage -->
+								{@const toDisable =
+									category.id.includes('custom-text') &&
+									globalState.getVideoStyle.getStyleFromCategory(category, 'always-show').value &&
+									(style.id === 'time-appearance' || style.id === 'time-disappearance')}
 								<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
 								<StyleComponent
 									bind:style={
@@ -195,12 +202,27 @@
 									}
 									target={globalState.getStylesState.getCurrentSelection()}
 									categoryId={category.id as StyleCategoryName}
+									disabled={toDisable as boolean}
 								/>
 							{/if}
 						{/if}
 					{/each}
 				</Section>
 			{/each}
+		{/if}
+
+		{#if globalState.getStylesState.getCurrentSelection() === 'global'}
+			<!-- Bouton pour ajouter un texte custom -->
+			<button
+				class="btn-accent w-2/3 mx-auto mt-4 px-2 py-2 rounded-md flex items-center justify-center gap-1"
+				onclick={() => {
+					globalState.getVideoStyle.addCustomText();
+				}}
+				title="Add custom text"
+			>
+				<span class="material-icons-outlined text-sm">add</span>
+				Add Custom Text
+			</button>
 		{/if}
 	</div>
 </div>

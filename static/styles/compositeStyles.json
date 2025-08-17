@@ -26,32 +26,6 @@
 		"icon": "font_download"
 	},
 	{
-		"id": "vertical-position",
-		"name": "Vertical Position",
-		"description": "Change the vertical position of the text (pixels from center)",
-		"value": 0,
-		"valueType": "number",
-		"valueMin": -540,
-		"valueMax": 540,
-		"css": "--translate-y: {value}px; transform: translate(var(--translate-x), var(--translate-y));",
-		"tailwind": false,
-
-		"icon": "vertical_align_center"
-	},
-	{
-		"id": "horizontal-position",
-		"name": "Horizontal Position",
-		"description": "Change the horizontal position of the text (pixels from center)",
-		"value": 0,
-		"valueType": "number",
-		"valueMin": -960,
-		"valueMax": 960,
-		"css": "--translate-x: {value}px;",
-		"tailwind": false,
-
-		"icon": "horizontal_rule"
-	},
-	{
 		"id": "font-size",
 		"name": "Font Size",
 		"description": "Adjust the size of the text",

@@ -3,6 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { untrack } from 'svelte';
 	import SurahName from './SurahName.svelte';
+	import CustomText from './CustomText.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getVideoStyle.getStyle('global', 'animation', 'fade-duration')
@@ -23,6 +24,12 @@
 	let currentSubtitleTranslations = $derived(() => {
 		if (!currentSubtitle()) return [];
 		return currentSubtitle()!.translations;
+	});
+
+	// Contient les textes custom à afficher à ce moment précis
+	let currentCustomTexts = $derived(() => {
+		const _ = getTimelineSettings().cursorPosition;
+		return globalState.getVideoStyle.getCurrentCustomTextsToDisplay();
 	});
 
 	// Calcul de l'opacité des sous-titres (prend en compte les overrides par clip)
@@ -194,5 +201,9 @@
 		{/if}
 
 		<SurahName />
+
+		{#each currentCustomTexts() as customText}
+			<CustomText {customText} />
+		{/each}
 	</div>
 </div>

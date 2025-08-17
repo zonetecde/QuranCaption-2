@@ -3,7 +3,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
 	import { draw, fade } from 'svelte/transition';
-	import CustomText from './CustomText.svelte';
+	import CompositeText from './CompositeText.svelte';
 
 	let svgContainer: HTMLDivElement | null = $state(null);
 
@@ -135,7 +135,7 @@
 	});
 </script>
 
-{#if surahNameSettings().show}
+{#if surahNameSettings().show && currentSurah() >= 1 && currentSurah() <= 114}
 	<div
 		class="w-[100px] flex flex-col items-center"
 		style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px);`}
@@ -148,12 +148,12 @@
 			class="w-[700px] text-center"
 			style={`margin-top: ${-surahNameSettings().surahLatinSpacing}rem; opacity: ${surahNameSettings().showLatin ? 1 : 0};`}
 		>
-			<CustomText id="surah-latin-text-style">
+			<CompositeText id="surah-latin-text-style">
 				{surahNameSettings()
 					.surahNameFormat.replace('<number>', currentSurah().toString())
 					.replace('<transliteration>', Quran.surahs[currentSurah() - 1].name)
 					.replace('<translation>', Quran.surahs[currentSurah() - 1].translation)}
-			</CustomText>
+			</CompositeText>
 		</div>
 	</div>
 {/if}
