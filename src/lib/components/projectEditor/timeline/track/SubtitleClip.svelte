@@ -139,7 +139,7 @@
 		<div class="absolute inset-0 z-5 flex px-2 py-2">
 			<div class="w-full h-full flex flex-col justify-center items-center gap-1">
 				<p
-					class="arabic truncate text-[var(--text-primary)] leading-tight text-center break-words max-w-full max-h-14 overflow-hidden"
+					class="arabic truncate text-[var(--text-primary)] leading-tight text-center min-h-5 max-w-full overflow-hidden"
 					dir="rtl"
 				>
 					{clip.text}
