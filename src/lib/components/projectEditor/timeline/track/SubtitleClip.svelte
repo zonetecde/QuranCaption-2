@@ -137,9 +137,27 @@
 		{/if}
 
 		<div class="absolute inset-0 z-5 flex px-2 py-2">
-			<span class="text-xs text-[var(--text-secondary)] font-medium mx-auto my-auto" dir="rtl"
-				>{clip.text}</span
-			>
+			<div class="w-full h-full flex flex-col justify-center items-center gap-1">
+				<p
+					class="arabic truncate text-[var(--text-primary)] leading-tight text-center break-words max-w-full max-h-14 overflow-hidden"
+					dir="rtl"
+				>
+					{clip.text}
+				</p>
+
+				{#if Object.keys(clip.translations).length > 0}
+					<div class="w-full flex flex-col items-center gap-0.5 mt-1">
+						{#each Object.entries(clip.translations) as [lang, translation]}
+							<p
+								class="text-[11px] sm:text-[12px] truncate w-full text-[var(--text-secondary)] font-medium mx-auto my-auto text-center italic"
+								title={translation.text}
+							>
+								{translation.text}
+							</p>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		</div>
 	{:else if clip.type === 'Silence'}
 		<div
