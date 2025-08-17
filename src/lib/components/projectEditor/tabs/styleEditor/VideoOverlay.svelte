@@ -116,7 +116,7 @@
 						let fontSize = globalState.getVideoStyle.getStyle(target, 'text', 'font-size')
 							.value as number;
 
-						globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
+						globalState.getVideoStyle.setStyle(target, 'text', 'reactive-font-size', fontSize);
 
 						await new Promise((resolve) => {
 							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
@@ -128,7 +128,7 @@
 							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 								fontSize -= 5;
 
-								globalState.getVideoStyle.setStyle(target, 'text', 'font-size-reactive', fontSize);
+								globalState.getVideoStyle.setStyle(target, 'text', 'reactive-font-size', fontSize);
 
 								await new Promise((resolve) => {
 									setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour

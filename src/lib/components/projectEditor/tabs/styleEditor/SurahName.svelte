@@ -5,7 +5,7 @@
 	import { draw, fade } from 'svelte/transition';
 	import CustomText from './CustomText.svelte';
 
-	let svgContainer: HTMLDivElement | null = null;
+	let svgContainer: HTMLDivElement | null = $state(null);
 
 	const currentSurah = $derived(() => {
 		return globalState.getSubtitleTrack.getCurrentSurah();

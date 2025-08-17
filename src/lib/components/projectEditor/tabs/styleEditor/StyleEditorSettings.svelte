@@ -179,9 +179,13 @@
 							Deuxième cas spécial : on ne veut pas pouvoir individuellement modifier les styles suivants:
 								- show-verse-number
 								- verse-number-separator
+								- max-height
 							Empêche donc l'affichage de ces deux styles si on a une sélection de sous-titre en cours.
+
+							Troisième cas :
+							On empêche l'affichage du style "reactive-font-size" qui est un style utilitaire censé être non-visible. 
 								  -->
-							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-verse-number' || style.id === 'verse-number-separator'))}
+							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-verse-number' || style.id === 'verse-number-separator' || style.id === 'max-height')) && style.id !== 'reactive-font-size'}
 								<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
 								<StyleComponent
 									bind:style={

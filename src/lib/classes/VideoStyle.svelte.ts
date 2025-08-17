@@ -15,7 +15,8 @@ export type StyleCategoryName =
 	| 'animation'
 	| 'general'
 	| 'overlay'
-	| 'surah-name';
+	| 'surah-name'
+	| 'creator-text';
 
 // Types spécifiques pour chaque catégorie de styles
 export type GeneralStyleName = 'show-subtitles' | 'show-verse-number' | 'verse-number-separator';
@@ -29,7 +30,7 @@ export type TextStyleName =
 	| 'letter-spacing'
 	| 'line-height'
 	| 'max-height'
-	| 'font-size-reactive';
+	| 'reactive-font-size';
 
 export type PositioningStyleName =
 	| 'vertical-position'
@@ -75,6 +76,9 @@ export type SurahNameStyleName =
 	| 'surah-latin-spacing'
 	| 'surah-latin-text-style';
 
+// Nouvelle définition pour les styles du Creator Text
+export type CreatorTextStyleName = 'creator-text' | 'creator-text-composite';
+
 // Union type pour tous les noms de styles
 export type StyleName =
 	| GeneralStyleName
@@ -87,7 +91,8 @@ export type StyleName =
 	| EffectsStyleName
 	| AnimationStyleName
 	| OverlayStyleName
-	| SurahNameStyleName;
+	| SurahNameStyleName
+	| CreatorTextStyleName;
 
 export interface Style {
 	id: string;

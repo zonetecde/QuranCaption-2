@@ -135,7 +135,7 @@
 				"icon": "height"
 			},
 			{
-				"id": "font-size-reactive",
+				"id": "reactive-font-size",
 				"name": "Reactive Font Size",
 				"description": "Used by the 'Make Text Fit' feature to adjust font size based on container size",
 				"value": "none",
