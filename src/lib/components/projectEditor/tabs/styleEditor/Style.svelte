@@ -5,6 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import type { Style, StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
 	import { default as StyleComponent } from '$lib/components/projectEditor/tabs/styleEditor/Style.svelte';
+	import toast from 'svelte-5-french-toast';
 
 	let {
 		style = $bindable(),
