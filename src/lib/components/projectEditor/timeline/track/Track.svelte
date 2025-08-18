@@ -18,23 +18,6 @@
 	}: {
 		track: Track;
 	} = $props();
-
-	// function getCustomTextAsClips(): CustomTextClip[] {
-	// 	const customTexts = globalState.getVideoStyle.getAllCustomTexts();
-	// 	let clips: CustomTextClip[] = [];
-	// 	for (const category of customTexts) {
-	// 		clips.push(
-	// 			new CustomTextClip(
-	// 				category,
-	// 				globalState.getVideoStyle.getStyleFromCategory(category, 'time-appearance')
-	// 					.value as number,
-	// 				globalState.getVideoStyle.getStyleFromCategory(category, 'time-disappearance')
-	// 					.value as number
-	// 			)
-	// 		);
-	// 	}
-	// 	return clips;
-	// }
 </script>
 
 <div
@@ -76,7 +59,7 @@
 				{#each track.clips as clip, index (clip.id)}
 					<div
 						class="absolute left-0 right-0"
-						style="top: calc((100% / {total}) * {index}); height: calc(100% / {total});"
+						style="top: {((total - 1 - index) * 100) / total}%; height: {100 / total}%;"
 					>
 						<div class="relative h-full">
 							<CustomTextClipComponent bind:clip={track.clips[index] as CustomTextClip} {track} />

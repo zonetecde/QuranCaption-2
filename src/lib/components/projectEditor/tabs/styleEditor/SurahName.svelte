@@ -38,6 +38,7 @@
 				'surah-name',
 				'horizontal-position'
 			).value,
+			opacity: globalState.getVideoStyle.getStyle('global', 'surah-name', 'surah-opacity').value,
 			color: globalState.getVideoStyle.getStyleFromComposite('surah-latin-text-style', 'text-color')
 				.value,
 			outlineWidth: globalState.getVideoStyle.getStyleFromComposite(
@@ -138,7 +139,7 @@
 {#if surahNameSettings().show && currentSurah() >= 1 && currentSurah() <= 114}
 	<div
 		class="w-[100px] flex flex-col items-center"
-		style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px);`}
+		style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity};`}
 	>
 		<div
 			bind:this={svgContainer}

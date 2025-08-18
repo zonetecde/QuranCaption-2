@@ -54,6 +54,8 @@ export class Track extends SerializableBase {
 				}
 			}
 		}
+
+		globalState.updateVideoPreviewUI();
 	}
 
 	removeLastClip() {
@@ -72,7 +74,7 @@ export class Track extends SerializableBase {
 			case TrackType.Subtitle:
 				return 'Subtitles';
 			case TrackType.CustomText:
-				return 'Custom Text';
+				return 'Custom Texts';
 			default:
 				return 'Unknown Track';
 		}
@@ -529,6 +531,8 @@ export class CustomTextTrack extends Track {
 
 	addCustomText(customTextCategory: Category) {
 		this.clips.push(new CustomTextClip(customTextCategory));
+
+		globalState.updateVideoPreviewUI();
 	}
 
 	getCurrentClips(): CustomTextClip[] {

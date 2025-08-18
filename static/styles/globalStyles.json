@@ -176,6 +176,19 @@
 				"icon": "format_line_spacing"
 			},
 			{
+				"id": "surah-opacity",
+				"name": "Opacity",
+				"description": "Adjust the opacity of the Surah name",
+				"value": 1,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 1,
+				"step": 0.01,
+				"css": "",
+				"tailwind": false,
+				"icon": "opacity"
+			},
+			{
 				"id": "surah-latin-text-style",
 				"name": "Text Styles",
 				"description": "Style for the Latin transliteration of the Surah name",

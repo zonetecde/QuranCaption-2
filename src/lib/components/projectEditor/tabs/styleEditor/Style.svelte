@@ -115,8 +115,7 @@
 
 		// Déclenche un refresh éventuel (ex: max-height fit)
 		if (style.id === 'max-height') {
-			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
-				globalState.currentProject!.projectEditorState.timeline.movePreviewTo + 1;
+			globalState.updateVideoPreviewUI();
 		}
 	}
 

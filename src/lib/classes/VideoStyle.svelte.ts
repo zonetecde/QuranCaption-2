@@ -85,6 +85,7 @@ export type SurahNameStyleName =
 	| 'show-arabic'
 	| 'show-latin'
 	| 'surah-size'
+	| 'surah-opacity'
 	| 'surah-latin-spacing'
 	| 'surah-latin-text-style';
 
@@ -239,7 +240,8 @@ export class VideoStyle extends SerializableBase {
 	 * @returns Le style correspondant
 	 */
 	getStyleFromCategory(category: Category, styleId: StyleName): Style {
-		return category.styles.find((style) => style.id === styleId)!;
+		const style = category.styles.find((style) => style.id === styleId)!;
+		return style;
 	}
 
 	/**
@@ -677,16 +679,6 @@ export class VideoStyle extends SerializableBase {
 			}
 		}
 		return currentCustomTexts;
-	}
-
-	getAllCustomTexts(): Category[] {
-		let ct: Category[] = [];
-		for (const category of this.styles['global']) {
-			if (category.id.includes('custom-text')) {
-				ct.push(category);
-			}
-		}
-		return ct;
 	}
 
 	/**

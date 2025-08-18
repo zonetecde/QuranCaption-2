@@ -86,7 +86,7 @@
 			(globalState.getSectionsState['width'].extended ||
 				globalState.getSectionsState['max-height'].extended)
 		) {
-			classes += 'bg-[#11A2AF] ';
+			classes += 'bg-[#11A2AF]/50 ';
 		}
 
 		return classes;

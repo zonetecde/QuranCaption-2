@@ -87,6 +87,11 @@ class GlobalState {
 	get getSubtitlesEditorState() {
 		return this.currentProject!.projectEditorState.subtitlesEditor;
 	}
+
+	updateVideoPreviewUI() {
+		globalState.currentProject!.projectEditorState.timeline.cursorPosition =
+			globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;
+	}
 }
 
 export const globalState = new GlobalState();
