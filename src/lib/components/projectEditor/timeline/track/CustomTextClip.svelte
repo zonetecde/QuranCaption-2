@@ -125,6 +125,11 @@
 		document.removeEventListener('mouseup', stopClipDragging);
 		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
 	}
+
+	function toggleAlwaysShow(e: MouseEvent): void {
+		e.stopPropagation();
+		clip.setStyle('always-show', !clip.getAlwaysShow());
+	}
 </script>
 
 <div
@@ -169,6 +174,13 @@
 	<Item on:click={removeClip}
 		><div class="btn-icon">
 			<span class="material-icons-outlined text-sm mr-1">remove</span>Remove Custom Text
+		</div></Item
+	>
+	<Item on:click={toggleAlwaysShow}
+		><div class="btn-icon">
+			<span class="material-icons-outlined text-sm mr-1">
+				{clip.getAlwaysShow() ? 'visibility' : 'visibility_off'}
+			</span>Toggle "Always Show" style
 		</div></Item
 	>
 </ContextMenu>
