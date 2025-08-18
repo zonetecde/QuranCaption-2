@@ -48,7 +48,7 @@ export class ProjectContent extends SerializableBase {
 			]),
 			[],
 			new ProjectTranslation(),
-			await VideoStyle.setDefaultStylesToDefaultOne()
+			await VideoStyle.getDefaultVideoStyle()
 		);
 	}
 

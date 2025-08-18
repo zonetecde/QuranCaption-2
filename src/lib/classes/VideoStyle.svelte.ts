@@ -5,6 +5,7 @@ import { TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import { CustomTextTrack } from './Track.svelte';
+import type { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 
 export type StyleValueType =
 	| 'color'
@@ -115,385 +116,35 @@ export type StyleName =
 	| CreatorTextStyleName
 	| CustomTextStyleName;
 
-export interface Style {
-	id: string;
-	name: string;
-	description: string;
-	value: string | number | boolean;
-	valueType: StyleValueType;
+export class Style extends SerializableBase {
+	id: string = '';
+	name: string = '';
+	description: string = '';
+	value: string | number | boolean | Style[] = '';
+	valueType: StyleValueType = 'text';
 	valueMin?: number;
 	valueMax?: number;
 	step?: number;
 	options?: string[];
-	css: string;
+	css: string = '';
 	tailwind?: boolean;
 	tailwindClass?: string;
-	icon: string;
-}
+	icon: string = '';
 
-export interface Category {
-	id: string;
-	name: string;
-	description: string;
-	icon: string;
-	styles: Style[];
-}
-
-// Type pour la structure complète des styles avec array
-export type StylesData = Category[];
-
-// Stockage des overrides par clip
-export type ClipStyleOverrides = {
-	[clipId: number]: {
-		[target: string]: {
-			[categoryId in StyleCategoryName]?: {
-				[styleId in StyleName]?: string | number | boolean;
-			};
-		};
-	};
-};
-
-export class VideoStyle extends SerializableBase {
-	styles: {
-		[target: string]: StylesData;
-	} = $state({});
-
-	// Overrides spécifiques aux clips sélectionnés
-	overrides: ClipStyleOverrides = $state({});
-
-	lastUpdated: Date = new Date();
-
-	constructor(styles: { [target: string]: StylesData } = {}, lastUpdated: Date = new Date()) {
+	constructor(init?: Partial<Style>) {
 		super();
-		this.styles = styles;
-		this.lastUpdated = lastUpdated;
-
-		if (this.styles === undefined) return;
-
-		// Load tout les styles composites (notamment pour le style sur le nom de la sourate)
-		for (const [target, styles] of Object.entries(this.styles)) {
-			for (const category of styles) {
-				for (const style of category.styles) {
-					if (style.valueType === 'composite') {
-						this.loadCompositeStyles(style.id);
-					}
-				}
-			}
-		}
-	}
-
-	static async setDefaultStylesToDefaultOne(): Promise<VideoStyle> {
-		const globalStyles: StylesData = await (await fetch('./styles/globalStyles.json')).json();
-		const styles: StylesData = await VideoStyle.getDefaultStyles();
-
-		if (styles) {
-			const dict: any = {};
-			dict['global'] = globalStyles;
-			dict['arabic'] = styles;
-
-			const videoStyle = new VideoStyle(
-				{
-					global: globalStyles,
-					arabic: styles
-				},
-				new Date()
-			);
-
-			videoStyle.setStyle('arabic', 'text', 'font-family', 'Hafs');
-			videoStyle.setStyle('arabic', 'text', 'font-size', 90);
-			videoStyle.setStyle('arabic', 'positioning', 'vertical-position', -100);
-
-			return videoStyle;
-		}
-
-		return new VideoStyle();
-	}
-
-	static async getDefaultStyles(): Promise<StylesData> {
-		const styles: StylesData = await (await fetch('./styles/styles.json')).json();
-
-		return styles;
-	}
-	/**
-	 * Obtient une catégorie de styles par son ID
-	 */
-	getCategory(target: string, categoryId: StyleCategoryName): Category {
-		return this.styles[target].find((category) => category.id === categoryId)!;
+		if (!init) return;
+		Object.assign(this, init);
 	}
 
 	/**
-	 * Obtient un style spécifique dans un target et sa catégorie
-	 * @param target Le target à interroger
-	 * @param categoryId L'ID de la catégorie à interroger
-	 * @param styleId L'ID du style à obtenir
-	 * @returns Le style correspondant
-	 */
-	getStyle(target: string, categoryId: StyleCategoryName, styleId: StyleName): Style {
-		const category = this.getCategory(target, categoryId);
-		return this.getStyleFromCategory(category, styleId);
-	}
-
-	/**
-	 * Obtient un style spécifique dans une catégorie
-	 * @param category La catégorie à interroger
-	 * @param styleId L'ID du style à obtenir
-	 * @returns Le style correspondant
-	 */
-	getStyleFromCategory(category: Category, styleId: StyleName): Style {
-		const style = category.styles.find((style) => style.id === styleId)!;
-		return style;
-	}
-
-	/**
-	 * Update la valeur d'un style
-	 * @param target La target (global/arabic/translation)
-	 * @param categoryId L'ID de la catégorie à interroger
-	 * @param styleId L'ID du style à obtenir
-	 * @param value La nouvelle valeur à appliquer
-	 */
-	setStyle(
-		target: string,
-		categoryId: StyleCategoryName,
-		styleId: StyleName,
-		value: string | number | boolean
-	): void {
-		const category = this.getCategory(target, categoryId);
-		const style = category.styles.find((style) => style.id === styleId);
-		if (style) {
-			style.value = value;
-		}
-	}
-
-	/**
-	 * Update la valeur d'un style d'un custom text (depuis la track Custom Text)
-	 * @param categoryId L'ID de la catégorie à interroger
-	 * @param styleId L'ID du style à obtenir
-	 * @param value La nouvelle valeur à appliquer
-	 */
-	setCustomTextStyle(
-		categoryId: StyleCategoryName,
-		styleId: StyleName,
-		value: string | number | boolean
-	): void {
-		// Trouve donc le clip correspondant pour update sa valeur
-		const clip = globalState.getCustomTextTrack.clips.find(
-			(c) => (c as CustomTextClip).category?.id === categoryId
-		) as CustomTextClip | undefined;
-		if (clip) {
-			// Si on veut modifier les temps d'apprence, vérifie que le temps de debut est plus petit que le temps de fin
-			// et inversement
-			if (styleId === 'time-appearance') {
-				if ((value as number) >= clip.endTime) {
-					toast.error('The start time must be less than the end time');
-					return;
-				}
-			} else if (styleId === 'time-disappearance') {
-				if ((value as number) <= clip.startTime) {
-					toast.error('The end time must be greater than the start time');
-					return;
-				}
-			}
-
-			clip.setStyle(styleId, value);
-		}
-	}
-
-	// Définit un style pour un ou plusieurs clips sélectionnés (override partiel)
-	setStyleForClips(
-		clipIds: number[],
-		target: string,
-		categoryId: StyleCategoryName,
-		styleId: StyleName,
-		value: string | number | boolean
-	) {
-		// Les styles du target 'global' sont uniques et ne peuvent pas être individualisés
-		if (target === 'global') {
-			return;
-		}
-		for (const clipId of clipIds) {
-			if (!this.overrides[clipId]) this.overrides[clipId] = {} as any;
-			if (!this.overrides[clipId][target]) this.overrides[clipId][target] = {} as any;
-			if (!this.overrides[clipId][target][categoryId])
-				this.overrides[clipId][target][categoryId] = {} as any;
-
-			this.overrides[clipId][target][categoryId]![styleId] = value;
-		}
-		this.lastUpdated = new Date();
-	}
-
-	// Supprime l'override pour un style donné sur une liste de clips
-	clearStyleForClips(
-		clipIds: number[],
-		target: string,
-		categoryId: StyleCategoryName,
-		styleId: StyleName
-	) {
-		// Aucun override à supprimer pour 'global' (non supporté)
-		if (target === 'global') {
-			return;
-		}
-		for (const clipId of clipIds) {
-			const byClip = this.overrides[clipId];
-			if (!byClip) continue;
-			const byTarget = byClip[target];
-			if (!byTarget) continue;
-			const byCategory = byTarget[categoryId];
-			if (!byCategory) continue;
-
-			if (byCategory[styleId] !== undefined) {
-				delete byCategory[styleId];
-			}
-
-			// Nettoyage des objets vides
-			if (Object.keys(byCategory).length === 0) {
-				delete byTarget[categoryId];
-			}
-			if (Object.keys(byTarget).length === 0) {
-				delete byClip[target];
-			}
-			if (Object.keys(byClip).length === 0) {
-				delete this.overrides[clipId];
-			}
-		}
-		this.lastUpdated = new Date();
-	}
-
-	// Retourne la valeur effective (override clip si présent, sinon valeur globale)
-	getEffectiveValue(
-		target: string,
-		categoryId: StyleCategoryName,
-		styleId: StyleName,
-		clipId?: number
-	): string | number | boolean {
-		// Le target 'global' ignore toujours les overrides
-		if (target === 'global') {
-			return this.getStyle(target, categoryId, styleId).value;
-		}
-		if (
-			clipId !== undefined &&
-			this.overrides[clipId] &&
-			this.overrides[clipId][target] &&
-			this.overrides[clipId][target][categoryId] &&
-			this.overrides[clipId][target][categoryId]![styleId] !== undefined
-		) {
-			return this.overrides[clipId][target][categoryId]![styleId]!;
-		}
-		return this.getStyle(target, categoryId, styleId).value;
-	}
-
-	hasOverrideForAny(
-		clipIds: number[],
-		target: string,
-		categoryId: StyleCategoryName,
-		styleId: StyleName
-	): boolean {
-		// Jamais d'override pour 'global'
-		if (target === 'global') return false;
-		return clipIds.some((clipId) => {
-			return !!(
-				this.overrides[clipId] &&
-				this.overrides[clipId][target] &&
-				this.overrides[clipId][target][categoryId] &&
-				this.overrides[clipId][target][categoryId]![styleId] !== undefined
-			);
-		});
-	}
-
-	/**
-	 * Indique si un clip possède au moins un override de style.
-	 * Optionnellement, restreint par target et/ou catégorie.
-	 * Le target 'global' est toujours ignoré.
-	 */
-	hasAnyOverrideForClip(clipId: number, target?: string, categoryId?: StyleCategoryName): boolean {
-		const byClip = this.overrides?.[clipId];
-		if (!byClip) return false;
-
-		// Si un target est spécifié
-		if (target) {
-			// Ignorer explicitement 'global'
-			if (target === 'global') return false;
-			const byTarget = byClip[target];
-			if (!byTarget) return false;
-
-			// Si une catégorie est spécifiée
-			if (categoryId) {
-				const byCategory = byTarget[categoryId];
-				return !!(byCategory && Object.keys(byCategory).length > 0);
-			}
-
-			// Sinon, vérifie toute catégorie de ce target
-			return Object.values(byTarget).some((cat) => !!cat && Object.keys(cat as any).length > 0);
-		}
-
-		// Sans filtre, vérifie tous les targets et catégories (en excluant 'global')
-		for (const t in byClip) {
-			if (t === 'global') continue;
-			const byTarget = byClip[t as keyof typeof byClip] as any;
-			for (const c in byTarget) {
-				const byCategory = byTarget[c];
-				if (byCategory && Object.keys(byCategory).length > 0) return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Get - et créer si nécessaire - les styles composites pour un style donné
-	 * @param id L'identifiant du style
-	 */
-	getCompositeStyles(id: string): Style[] {
-		// Try catch au cas où le style composite n'a toujours pas été créé
-
-		try {
-			return this.styles[id][0].styles;
-		} catch (e: any) {
-			return [];
-		}
-	}
-
-	/**
-	 * Créer les styles composites pour un style donné s'il n'existe pas déjà
-	 * @param id L'identifiant du style
-	 */
-	async loadCompositeStyles(id: string) {
-		if (!this.styles[id]) {
-			this.styles[id] = [
-				{
-					id: id + '-category',
-					styles: await this.getDefaultCompositeStyles(id),
-					name: 'Composite Style For ' + id,
-					description: 'This is a composite style for ' + id,
-					icon: 'text_fields'
-				}
-			];
-		}
-	}
-
-	getStyleFromComposite(compositeStyleId: string, styleId: StyleName): Style {
-		const compositeStyles = this.getCompositeStyles(compositeStyleId);
-		return compositeStyles.find((style) => style.id === styleId) || ({ value: 0 } as Style);
-	}
-
-	async getDefaultCompositeStyles(id?: string) {
-		let styles: Style[] = await (await fetch('./styles/compositeStyles.json')).json();
-
-		// Application des styles par défaut en fonction de l'ID
-		if (id === 'surah-latin-text-style') {
-			styles.find((style) => style.id === 'font-size')!.value = 8;
-		}
-
-		return styles;
-	}
-
-	/**
+	 * Méthode utile uniquement si valueType est composite.
 	 * Génère le CSS d'un style composite
-	 * @param id L'id du style composite
-	 * @param toIgnore La liste des styles à ignorer
-	 * @returns Le CSS
+	 * @returns Le CSS de ce style composite
 	 */
-	generateCSSForComposite(id: string) {
+	generateCSSForComposite() {
 		// Récupère tous les styles composites pour un style donné
-		const compositeStyles = this.getCompositeStyles(id);
+		const compositeStyles = this.value as Style[];
 
 		let css = '';
 		for (let i = 0; i < compositeStyles.length; i++) {
@@ -511,23 +162,71 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	/**
+	 * Méthode utile uniquement si valueType est composite.
+	 * @param styleId Le nom du style
+	 * @param value La nouvelle valeur à appliquer
+	 */
+	setCompositeStyleValue(styleId: StyleName, value: string | number | boolean) {
+		if (this.valueType === 'composite') {
+			const style = (this.value as Style[]).find((s) => s.id === styleId);
+			if (style) {
+				style.value = value;
+			}
+		}
+	}
+}
+
+export class Category extends SerializableBase {
+	id: string = '';
+	name: string = '';
+	description: string = '';
+	icon: string = '';
+	styles: Style[] = [];
+
+	constructor(init?: Partial<Category>) {
+		super();
+		if (!init) return;
+		// assign simples
+		const { styles, ...rest } = init as any;
+		Object.assign(this, rest);
+
+		// s'assurer que les styles sont des instances de Style
+		if (Array.isArray(styles)) {
+			this.styles = styles.map((s) => (s instanceof Style ? s : new Style(s)));
+		}
+	}
+
+	getStyle(styleId: StyleName): Style | undefined {
+		return this.styles.find((style) => style.id === styleId);
+	}
+}
+
+class StylesData extends SerializableBase {
+	categories: Category[] = $state([]);
+	target: 'global' | 'arabic' | string = $state('');
+
+	// Overrides spécifiques aux clips sélectionnés
+	overrides: { [clipId: number]: { [styleId in StyleName]?: string | number | boolean } } = $state(
+		{}
+	);
+
+	constructor(target: 'global' | 'arabic' | string, categories: Category[] = []) {
+		super();
+		this.target = target;
+		this.categories = categories;
+	}
+
+	/**
 	 * Génère le CSS pour tous les styles actifs (fusion globale + overrides clip si fournis)
 	 */
 	generateCSS(target: string, clipId?: number): string {
 		let css = '';
 
-		if (!this.styles[target]) return '';
-
-		for (const category of this.styles[target]) {
+		for (const category of this.categories) {
 			let skipCategory = false;
 
 			for (const style of category.styles) {
-				const effectiveValue = this.getEffectiveValue(
-					target,
-					category.id as StyleCategoryName,
-					style.id as StyleName,
-					clipId
-				);
+				const effectiveValue = this.getEffectiveValue(style.id as StyleName, clipId);
 
 				// Pour les catégories de styles qui peuvent être désactivées (border, outline, ...),
 				// si la propriété d'activation est false, on ne génère pas le CSS des autres styles
@@ -596,12 +295,10 @@ export class VideoStyle extends SerializableBase {
 		return css;
 	}
 
-	generateTailwind(target: string): string {
+	generateTailwind(): string {
 		let tailwindClasses = '';
 
-		if (!this.styles[target]) return '';
-
-		for (const category of this.styles[target]) {
+		for (const category of this.categories) {
 			for (const style of category.styles) {
 				if (style.id === 'font-family' && style.value === 'Hafs') {
 					// Utilise la police Hafs pour les styles de texte
@@ -624,24 +321,251 @@ export class VideoStyle extends SerializableBase {
 		return tailwindClasses.trim();
 	}
 
-	async addStylesForEdition(name: string) {
-		if (!this.styles[name]) {
-			const defaultStyles = await VideoStyle.getDefaultStyles();
-
-			this.styles[name] = defaultStyles;
-
-			// Styles par défaut pour les traductions
-			this.setStyle(name, 'text', 'font-size', 60); // Définit la taille de police par défaut
-			this.setStyle(name, 'text', 'font-family', 'Georgia'); // Définit la police par défaut
-			this.setStyle(name, 'positioning', 'vertical-position', 100); // Définit la hauteur de ligne par défaut
+	/**
+	 * Définit la valeur d'un style
+	 * @param styleId L'ID du style à modifier
+	 * @param value La nouvelle valeur à appliquer
+	 */
+	setStyle(styleId: StyleName, value: string | number | boolean): void {
+		// Trouve le style
+		const style = this.findStyle(styleId);
+		if (style) {
+			style.value = value;
 		}
+	}
+
+	/**
+	 * Trouve un style par son ID
+	 * @param styleId L'ID du style à trouver
+	 * @returns Le style correspondant ou undefined s'il n'est pas trouvé
+	 */
+	findStyle(styleId: StyleName): Style | undefined {
+		for (const category of this.categories) {
+			const style = category.styles.find((s) => s.id === styleId);
+			if (style) return style;
+		}
+		return undefined;
+	}
+
+	// Définit un style pour un ou plusieurs clips sélectionnés (override partiel)
+	setStyleForClips(clipIds: number[], styleId: StyleName, value: string | number | boolean) {
+		// Les styles du target 'global' sont uniques et ne peuvent pas être individualisés
+		if (this.target === 'global') {
+			return; // Il n'y a pas de style individuel pour les styles globaux
+		}
+
+		for (const clipId of clipIds) {
+			// Créez un nouvel objet d'override pour le clip s'il n'existe pas
+			if (!this.overrides[clipId]) this.overrides[clipId] = {} as any;
+
+			// Regarde si pour la valeur qu'on veut appliquer à ce style pour ces clip
+			// si c'est la valeur par déjà du style
+			if (this.findStyle(styleId)?.value === value) {
+				// Enlève l'override pour ce style, car c'est la valeur déjà de son parent
+				delete this.overrides[clipId][styleId];
+			} else {
+				// Applique l'override avec la valeur
+				this.overrides[clipId][styleId] = value;
+			}
+		}
+	}
+
+	// Supprime l'override pour un style donné sur une liste de clips
+	clearStyleForClips(clipIds: number[], styleId: StyleName): void {
+		// Aucun override à supprimer pour 'global'
+		if (this.target === 'global') {
+			return;
+		}
+
+		for (const clipId of clipIds) {
+			const byClip = this.overrides[clipId];
+			if (!byClip) continue;
+
+			// Supprime l'override pour ce style sur ce clip
+			if (byClip[styleId] !== undefined) {
+				delete byClip[styleId];
+			}
+
+			// Nettoyage de l'objet clip s'il est vide
+			if (Object.keys(byClip).length === 0) {
+				delete this.overrides[clipId];
+			}
+		}
+	}
+
+	// Retourne la valeur effective (override clip si présent, sinon valeur du StylesData)
+	getEffectiveValue(styleId: StyleName, clipId?: number): string | number | boolean {
+		const style = this.findStyle(styleId);
+
+		// Si target est 'global', on ignore toujours les overrides
+		if (this.target === 'global') {
+			return style ? (style.value as string | number | boolean) : '';
+		}
+
+		// Structure des overrides pour StylesData : overrides[clipId][styleId] = value
+		if (
+			clipId !== undefined &&
+			this.overrides[clipId] &&
+			this.overrides[clipId][styleId] !== undefined
+		) {
+			return this.overrides[clipId][styleId]!;
+		}
+
+		return style ? (style.value as string | number | boolean) : '';
+	}
+
+	hasOverrideForAny(clipIds: number[], styleId: StyleName): boolean {
+		// Jamais d'override pour 'global'
+		if (this.target === 'global') return false;
+
+		return clipIds.some((clipId) => {
+			const byClip = this.overrides[clipId];
+			return !!(byClip && byClip[styleId] !== undefined);
+		});
+	}
+
+	/**
+	 * Indique si un clip possède au moins un override de style.
+	 */
+	hasAnyOverrideForClip(clipId: number): boolean {
+		const byClip = this.overrides?.[clipId];
+		if (!byClip) return false;
+
+		return Object.values(byClip).some((cat) => !!cat && Object.keys(cat as any).length > 0);
+	}
+
+	/**
+	 * Créer les styles composites pour un style donné s'il n'existe pas déjà
+	 * @param compositeStyleId L'identifiant du style composite
+	 */
+	async loadCompositeStyles(compositeStyleId: StyleName) {
+		const style = this.findStyle(compositeStyleId);
+
+		if (style && !(style.value instanceof Array)) {
+			// Ajoute les styles composite par défaut
+			style.value = await (await fetch('./styles/compositeStyles.json')).json();
+
+			if (compositeStyleId === 'surah-latin-text-style') {
+				style.setCompositeStyleValue('font-size', 8);
+			}
+		}
+	}
+
+	/**
+	 * Get - et créer si nécessaire - les styles composites pour un style donné
+	 * @param compositeStyleId L'identifiant du style composite
+	 */
+	getCompositeStyles(compositeStyleId: StyleName): Style[] {
+		// Try catch au cas où le style composite n'a toujours pas été créé
+		const style = this.findStyle(compositeStyleId);
+
+		if (style) {
+			if (style.value instanceof Array) return style.value as Style[];
+			// Style par défaut non encore créé si on arrive là.
+		}
+
+		return [];
+	}
+}
+
+// Stockage des overrides par clip
+export type ClipStyleOverrides = {
+	[clipId: number]: {
+		[target: string]: {
+			[categoryId in StyleCategoryName]?: {
+				[styleId in StyleName]?: string | number | boolean;
+			};
+		};
+	};
+};
+
+export class VideoStyle extends SerializableBase {
+	styles: StylesData[] = $state([]);
+
+	lastUpdated: Date = $state(new Date());
+
+	constructor() {
+		super();
+	}
+
+	/**
+	 * Retourne les styles par défaut d'un projet
+	 * @returns Les styles par défaut d'une vidéo
+	 */
+	static async getDefaultVideoStyle(): Promise<VideoStyle> {
+		// Créer un nouveau objet VideoStyle
+		const videoStyle = new VideoStyle();
+
+		// Ajoute les styles par défaut pour chaque target
+		videoStyle.styles.push(
+			new StylesData('global', await (await fetch('./styles/globalStyles.json')).json())
+		);
+		videoStyle.styles.push(
+			new StylesData('arabic', await (await fetch('./styles/styles.json')).json())
+		);
+
+		// Set les styles par défaut pour l'arabe
+		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Hafs');
+		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
+		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -100);
+
+		return videoStyle;
+	}
+
+	/**
+	 * Obtient les styles d'une cible spécifique
+	 * @param target La cible à interroger (global, arabic, ou une traduction)
+	 * @returns Les styles de la cible
+	 */
+	getStylesOfTarget(target: 'global' | 'arabic' | string): StylesData {
+		const styles = this.styles.find((s) => s.target === target);
+		return styles ? styles : new StylesData(target);
+	}
+
+	/**
+	 * Update la valeur d'un style d'un custom text (depuis la track Custom Text)
+	 * @param customTextId L'ID du texte custom
+	 * @param styleId L'ID du style à obtenir
+	 * @param value La nouvelle valeur à appliquer
+	 */
+	setCustomTextStyle(
+		customTextId: StyleCategoryName,
+		styleId: StyleName,
+		value: string | number | boolean
+	): void {
+		// Trouve donc le clip correspondant pour update sa valeur
+		const clip = globalState.getCustomTextTrack.clips.find(
+			(c) => (c as CustomTextClip).category?.id === customTextId
+		) as CustomTextClip | undefined;
+		if (clip) {
+			clip.setStyle(styleId, value);
+		}
+	}
+
+	doesTargetStyleExist(target: string): boolean {
+		return this.styles.find((style) => style.target === target) !== undefined;
+	}
+
+	async addStylesForEdition(translationEdition: string) {
+		if (this.doesTargetStyleExist(translationEdition)) return;
+
+		const defaultStyles = await (await fetch('./styles/styles.json')).json();
+
+		const stylesData = new StylesData(translationEdition, defaultStyles);
+
+		// Styles par défaut pour les traductions
+		stylesData.setStyle('font-family', 'Georgia'); // Définit la police par défaut
+		stylesData.setStyle('font-size', 60); // Définit la taille de police par défaut
+		stylesData.setStyle('vertical-position', 100); // Définit la hauteur de ligne par défaut
+
+		this.styles.push(stylesData);
 	}
 
 	async getDefaultCustomTextCategory(): Promise<Category> {
 		const category: Category = await (await fetch('./styles/customText.json')).json();
 		const randomId = Utilities.randomId();
 		category.id += '-' + randomId;
-		this.getStyleFromCategory(category, 'custom-text-composite').id += '-' + randomId;
+		category.getStyle('custom-text-composite')!.id += '-' + randomId;
 		return category;
 	}
 
@@ -659,39 +583,4 @@ export class VideoStyle extends SerializableBase {
 		globalState.getCustomTextTrack.addCustomText(customTextCategory);
 	}
 
-	/**
-	 * Retourne les textes personnalisés à afficher à ce moment précis
-	 */
-	getCurrentCustomTextsToDisplay(): Category[] {
-		const cursorPos = globalState.currentProject!.projectEditorState.timeline.cursorPosition;
-		let currentCustomTexts: Category[] = [];
-
-		for (const category of this.styles['global']) {
-			if (
-				category.id.includes('custom-text') &&
-				(this.getStyle('global', category.id as StyleCategoryName, 'always-show').value ||
-					((this.getStyle('global', category.id as StyleCategoryName, 'time-appearance')
-						.value as number) <= cursorPos &&
-						(this.getStyle('global', category.id as StyleCategoryName, 'time-disappearance')
-							.value as number) >= cursorPos))
-			) {
-				currentCustomTexts.push(category);
-			}
-		}
-		return currentCustomTexts;
-	}
-
-	/**
-	 * Remet tous les styles à leurs valeurs par défaut
-	 */
-	async resetToDefaults(): Promise<void> {
-		const defaultStyle = await VideoStyle.setDefaultStylesToDefaultOne();
-		this.styles = defaultStyle.styles;
-		this.overrides = {};
-		this.lastUpdated = new Date();
-	}
-
-	getCompositeStyleIdFromCategory(customText: Category): string {
-		return customText.styles.find((style) => style.valueType === 'composite')!.id;
-	}
 }

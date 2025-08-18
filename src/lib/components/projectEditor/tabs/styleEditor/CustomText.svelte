@@ -82,7 +82,7 @@
 	class="absolute cursor-move select-none"
 	style={`transform: translateY(${customTextSettings().verticalPosition}px) translateX(${customTextSettings().horizontalPosition}px); opacity: ${customTextSettings().opacity()}`}
 >
-	<CompositeText id={globalState.getVideoStyle.getCompositeStyleIdFromCategory(customText)}>
+	<CompositeText id={customText.getStyle('custom-text-composite')!.id}>
 		{customTextSettings().text}
 	</CompositeText>
 </div>
