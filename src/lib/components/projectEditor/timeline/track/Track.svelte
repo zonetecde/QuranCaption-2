@@ -68,16 +68,33 @@
 			</div>
 		{/if}
 	</div>
-	<div class="absolute left-[180px] top-0 bottom-0 flex items-center px-3 gap-2 z-[5]">
-		{#each track.clips as clip, index}
-			{#if track.type === TrackType.Subtitle}
-				<SubtitleClipComponent bind:clip={track.clips[index] as SubtitleClipType} {track} />
-			{:else if track.type === TrackType.CustomText}
-				<CustomTextClipComponent bind:clip={track.clips[index] as CustomTextClip} {track} />
-			{:else}
-				<ClipComponent {clip} {track} />
-			{/if}
-		{/each}
+	<div class="absolute left-[180px] top-0 bottom-0 right-0 z-[5]">
+		{#if track.type === TrackType.CustomText}
+			{@const total = track.clips.length}
+			<!-- Container relatif pour positionner chaque lane -->
+			<div class="absolute inset-0">
+				{#each track.clips as clip, index (clip.id)}
+					<div
+						class="absolute left-0 right-0"
+						style="top: calc((100% / {total}) * {index}); height: calc(100% / {total});"
+					>
+						<div class="relative h-full">
+							<CustomTextClipComponent bind:clip={track.clips[index] as CustomTextClip} {track} />
+						</div>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<div class="flex items-center h-full px-3 gap-2">
+				{#each track.clips as clip, index}
+					{#if track.type === TrackType.Subtitle}
+						<SubtitleClipComponent bind:clip={track.clips[index] as SubtitleClipType} {track} />
+					{:else}
+						<ClipComponent {clip} {track} />
+					{/if}
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
 
