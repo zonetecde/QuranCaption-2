@@ -18,7 +18,8 @@ import {
 	StylesEditorState,
 	SubtitlesEditorState,
 	TimelineState,
-	TranslationsEditorState
+	TranslationsEditorState,
+	VideoPreviewState
 } from './ProjectEditorState.svelte';
 import { Translation, VerseTranslation, PredefinedSubtitleTranslation } from './Translation.svelte';
 import { ProjectTranslation } from './ProjectTranslation.svelte';
@@ -60,6 +61,7 @@ export function initializeClassRegistry() {
 	SerializableBase.registerClass('Project', Project);
 	SerializableBase.registerClass('ProjectDetail', ProjectDetail);
 	// Classes d'état
+	SerializableBase.registerClass('VideoPreviewState', VideoPreviewState);
 	SerializableBase.registerClass('ProjectEditorState', ProjectEditorState);
 	SerializableBase.registerClass('SubtitlesEditorState', SubtitlesEditorState);
 	SerializableBase.registerClass('TimelineState', TimelineState);

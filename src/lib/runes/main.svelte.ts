@@ -88,6 +88,10 @@ class GlobalState {
 		return this.currentProject!.projectEditorState.subtitlesEditor;
 	}
 
+	get getCurrentVideoPreviewState() {
+		return this.currentProject!.projectEditorState.videoPreview;
+	}
+
 	updateVideoPreviewUI() {
 		globalState.currentProject!.projectEditorState.timeline.cursorPosition =
 			globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;

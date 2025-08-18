@@ -105,7 +105,7 @@
 		// si le sous-titre actuel n'a pas changé (pendant la lecture vidéo)
 		if (
 			currentSubtitle()!.id === lastSubtitleId &&
-			globalState.currentProject!.projectEditorState.videoPreview.isPlaying
+			globalState.getCurrentVideoPreviewState.isPlaying
 		)
 			return;
 		lastSubtitleId = currentSubtitle()!.id;

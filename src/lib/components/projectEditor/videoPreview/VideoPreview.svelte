@@ -8,6 +8,8 @@
 	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
 	import VideoPreviewControlsBar from './VideoPreviewControlsBar.svelte';
 	import VideoOverlay from '../tabs/styleEditor/VideoOverlay.svelte';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
+	import ModalManager from '$lib/components/modals/ModalManager';
 
 	let {
 		showControls
@@ -52,9 +54,9 @@
 
 	// Effect qui redimensionne la vidéo quand la hauteur de la prévisualisation change
 	$effect(() => {
-		if (globalState.currentProject?.projectEditorState.upperSectionHeight) {
-			resizeVideoToFitScreen();
-		}
+		const _ = globalState.currentProject?.projectEditorState.upperSectionHeight;
+
+		resizeVideoToFitScreen();
 	});
 
 	// Effect qui recharge l'audio quand l'asset audio change
@@ -190,6 +192,13 @@
 				setPlaybackSpeed(getSpeed());
 			}
 		});
+
+		ShortcutService.registerShortcut({
+			key: SHORTCUTS.VIDEO_PREVIEW.TOGGLE_FULLSCREEN,
+			onKeyDown: (e) => {
+				globalState.getCurrentVideoPreviewState.toggleFullScreen();
+			}
+		});
 	});
 
 	function setPlaybackSpeed(speed: number) {
@@ -228,6 +237,7 @@
 		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD);
 		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_BACKWARD);
 		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED);
+		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.TOGGLE_FULLSCREEN);
 	});
 
 	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo
@@ -306,7 +316,9 @@
 
 			// Configuration du conteneur
 			previewContainer.style.width = 'auto';
-			previewContainer.style.height = 'calc(100%)';
+			previewContainer.style.height = globalState.getCurrentVideoPreviewState.isFullscreen
+				? '100vh'
+				: 'calc(100%)';
 
 			// Reset des transformations précédentes
 			previewContainer.style.position = 'relative';
@@ -315,29 +327,47 @@
 			previewContainer.style.top = '0';
 			previewContainer.style.left = '0';
 
-			// Calcul des ratios pour le redimensionnement proportionnel
-			const containerWidth = previewContainer.clientWidth;
-			const containerHeight = previewContainer.clientHeight;
 			const videoWidth = preview.clientWidth;
 			const videoHeight = preview.clientHeight;
-			const widthRatio = containerWidth / videoWidth;
-			const heightRatio = containerHeight / videoHeight;
 
-			// Utilise le plus petit ratio pour éviter l'étirement (letterboxing/pillarboxing)
-			const scale = Math.min(widthRatio, heightRatio);
+			let targetW: number;
+			let targetH: number;
+			let scale: number;
 
-			// Application de la mise à l'échelle
-			preview.style.transform = `scale(${scale})`;
+			if (globalState.getCurrentVideoPreviewState.isFullscreen) {
+				// Mode plein écran: couvrir tout l'écran (cover)
+				const screenW = window.innerWidth;
+				const screenH = window.innerHeight;
+				const scaleCover = Math.max(screenW / videoWidth, screenH / videoHeight);
+				scale = scaleCover;
+				targetW = videoWidth * scaleCover;
+				targetH = videoHeight * scaleCover;
 
-			// Ajustement de la taille du conteneur à la nouvelle taille mise à l'échelle
-			previewContainer.style.width = `${videoWidth * scale}px`;
-			previewContainer.style.height = `${videoHeight * scale}px`;
-
-			// Centrage horizontal et vertical du conteneur
-			previewContainer.style.left = '50%';
-			previewContainer.style.transform = 'translateX(-50%)';
-			previewContainer.style.top = '50%';
-			previewContainer.style.transform += ' translateY(-50%)';
+				preview.style.transform = `scale(${scaleCover})`;
+				previewContainer.style.width = `${targetW}px`;
+				previewContainer.style.height = `${targetH}px`;
+				previewContainer.style.position = 'fixed';
+				previewContainer.style.top = '50%';
+				previewContainer.style.left = '50%';
+				previewContainer.style.transform = 'translate(-50%, -50%)';
+				previewContainer.style.zIndex = '9999';
+				previewContainer.style.background = 'black';
+			} else {
+				// Mode normal: fit (letterbox) centré
+				const containerWidth = previewContainer.clientWidth;
+				const containerHeight = previewContainer.clientHeight;
+				const widthRatio = containerWidth / videoWidth;
+				const heightRatio = containerHeight / videoHeight;
+				const scaleFit = Math.min(widthRatio, heightRatio);
+				scale = scaleFit;
+				preview.style.transform = `scale(${scaleFit})`;
+				previewContainer.style.width = `${videoWidth * scaleFit}px`;
+				previewContainer.style.height = `${videoHeight * scaleFit}px`;
+				previewContainer.style.left = '50%';
+				previewContainer.style.top = '50%';
+				previewContainer.style.position = 'relative';
+				previewContainer.style.transform = 'translate(-50%, -50%)';
+			}
 		}
 	}
 
@@ -428,7 +458,7 @@
 			volume: 0, // Volume à 0 pour être réellement silencieux
 			onplay: () => {
 				isPlaying = true;
-				globalState.currentProject!.projectEditorState.videoPreview.isPlaying = true;
+				globalState.getCurrentVideoPreviewState.isPlaying = true;
 
 				// Démarre la mise à jour du curseur
 				if (!audioUpdateInterval) {
@@ -463,7 +493,7 @@
 		}
 
 		isPlaying = true;
-		globalState.currentProject!.projectEditorState.videoPreview.isPlaying = true;
+		globalState.getCurrentVideoPreviewState.isPlaying = true;
 
 		// Lance la lecture audio et vidéo simultanément
 		if (audioHowl) {
@@ -479,7 +509,7 @@
 	 */
 	function pause() {
 		isPlaying = false;
-		globalState.currentProject!.projectEditorState.videoPreview.isPlaying = false;
+		globalState.getCurrentVideoPreviewState.isPlaying = false;
 
 		// Pause audio et vidéo
 		if (audioHowl) {
@@ -580,6 +610,13 @@
 		}
 		// Sinon ne fait rien (cas vidéo qui se termine sans prochaine vidéo)
 	}
+
+	onMount(() => {
+		// Si Quran Caption a été quitté en fullscreen, on enlève le fullscreen.
+		if (globalState.getCurrentVideoPreviewState.isFullscreen) {
+			globalState.getCurrentVideoPreviewState.toggleFullScreen();
+		}
+	});
 </script>
 
 <section

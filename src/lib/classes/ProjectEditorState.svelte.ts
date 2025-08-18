@@ -1,7 +1,10 @@
 import type SubtitlesEditor from '$lib/components/projectEditor/tabs/subtitlesEditor/SubtitlesEditor.svelte';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { PredefinedSubtitleClip, SubtitleClip } from './Clip.svelte';
 import { ProjectEditorTabs } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
+import { globalState } from '$lib/runes/main.svelte';
+import ModalManager from '$lib/components/modals/ModalManager';
 
 /**
  * État de l'éditeur de projet, utilisé pour gérer l'interface utilisateur et les interactions
@@ -115,6 +118,27 @@ export class TimelineState extends SerializableBase {
 export class VideoPreviewState extends SerializableBase {
 	// Indique si la prévisualisation vidéo est en pause
 	isPlaying: boolean = $state(false);
+
+	// Indique si la prévisualisation vidéo est en plein écran
+	isFullscreen: boolean = $state(false);
+
+	async toggleFullScreen() {
+		const appWindow = getCurrentWindow();
+
+		try {
+			globalState.currentProject!.projectEditorState.videoPreview.isFullscreen =
+				!globalState.currentProject!.projectEditorState.videoPreview.isFullscreen;
+			await appWindow.setFullscreen(
+				globalState.currentProject!.projectEditorState.videoPreview.isFullscreen
+			);
+		} catch (err: any) {
+			ModalManager.errorModal(
+				'Error',
+				'There was an error toggling fullscreen!',
+				JSON.stringify(err)
+			);
+		}
+	}
 }
 
 export class SubtitlesEditorState extends SerializableBase {

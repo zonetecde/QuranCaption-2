@@ -162,6 +162,11 @@ export const SHORTCUTS = {
 			keys: ['pageup', 'pagedown'],
 			description: 'Set video speed to 2x',
 			category: 'Video Preview'
+		},
+		TOGGLE_FULLSCREEN: {
+			keys: ['F11'],
+			description: 'Toggle Fullscreen',
+			category: 'Video Preview'
 		}
 	},
 	SUBTITLES_EDITOR: {
