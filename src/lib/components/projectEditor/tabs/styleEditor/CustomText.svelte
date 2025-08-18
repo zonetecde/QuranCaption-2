@@ -8,38 +8,23 @@
 
 	let customTextSettings = $derived(() => {
 		return {
-			verticalPosition: globalState.getVideoStyle.getStyleFromCategory(
-				customText,
-				'vertical-position'
-			).value,
-			horizontalPosition: globalState.getVideoStyle.getStyleFromCategory(
-				customText,
-				'horizontal-position'
-			).value,
-			text: globalState.getVideoStyle.getStyleFromCategory(customText, 'text').value,
+			verticalPosition: customText.getStyle('vertical-position')?.value as number,
+			horizontalPosition: customText.getStyle('horizontal-position')?.value as number,
+			text: customText.getStyle('text')?.value as string,
 			opacity: () => {
-				const alwaysShow = globalState.getVideoStyle.getStyleFromCategory(customText, 'always-show')
-					.value as number;
+				const alwaysShow = customText.getStyle('always-show')?.value as number;
 
 				// Si on veut toujours qu'il soit affiché, alors on retourne une opacité de 1
 				if (alwaysShow) return 1;
 
 				// En fonction de son temps d'apparition et de la valeur du fondu
-				const fadeDuration = globalState.getVideoStyle.getStyle(
-					'global',
-					'animation',
-					'fade-duration'
-				).value as number;
+				const fadeDuration = globalState.getVideoStyle
+					.getStylesOfTarget('global')
+					.findStyle('fade-duration')!.value as number;
 				const currentTime = globalState.currentProject!.projectEditorState.timeline.cursorPosition;
 
-				const startTime = globalState.getVideoStyle.getStyleFromCategory(
-					customText,
-					'time-appearance'
-				).value as number;
-				const endTime = globalState.getVideoStyle.getStyleFromCategory(
-					customText,
-					'time-disappearance'
-				).value as number;
+				const startTime = customText.getStyle('time-appearance')?.value as number;
+				const endTime = customText.getStyle('time-disappearance')?.value as number;
 
 				// Avant l'apparition
 				if (currentTime < startTime) return 0;
@@ -66,10 +51,7 @@
 		};
 	});
 
-	const verticalStyle = globalState.getVideoStyle.getStyleFromCategory(
-		customText,
-		'vertical-position'
-	);
+	const verticalStyle = customText.getStyle('vertical-position')!;
 </script>
 
 <div
@@ -82,7 +64,7 @@
 	class="absolute cursor-move select-none"
 	style={`transform: translateY(${customTextSettings().verticalPosition}px) translateX(${customTextSettings().horizontalPosition}px); opacity: ${customTextSettings().opacity()}`}
 >
-	<CompositeText id={customText.getStyle('custom-text-composite')!.id}>
+	<CompositeText compositeStyle={customText.getCompositeStyle()!}>
 		{customTextSettings().text}
 	</CompositeText>
 </div>

@@ -92,7 +92,7 @@
 				"icon": "visibility"
 			},
 			{
-				"id": "vertical-position",
+				"id": "surah-name-vertical-position",
 				"name": "Vertical Position",
 				"description": "Change the vertical position of the surah name (pixels from center)",
 				"value": -110,
@@ -104,7 +104,7 @@
 				"icon": "vertical_align_center"
 			},
 			{
-				"id": "horizontal-position",
+				"id": "surah-name-horizontal-position",
 				"name": "Horizontal Position",
 				"description": "Change the horizontal position of the surah name (pixels from center)",
 				"value": 0,

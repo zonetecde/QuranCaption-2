@@ -84,6 +84,8 @@ export type SurahNameStyleName =
 	| 'show-surah-name'
 	| 'surah-name-format'
 	| 'show-arabic'
+	| 'surah-name-vertical-position'
+	| 'surah-name-horizontal-position'
 	| 'show-latin'
 	| 'surah-size'
 	| 'surah-opacity'
@@ -117,10 +119,10 @@ export type StyleName =
 	| CustomTextStyleName;
 
 export class Style extends SerializableBase {
-	id: string = '';
+	id: string = $state('');
 	name: string = '';
 	description: string = '';
-	value: string | number | boolean | Style[] = '';
+	value: string | number | boolean | Style[] = $state('');
 	valueType: StyleValueType = 'text';
 	valueMin?: number;
 	valueMax?: number;
@@ -168,20 +170,35 @@ export class Style extends SerializableBase {
 	 */
 	setCompositeStyleValue(styleId: StyleName, value: string | number | boolean) {
 		if (this.valueType === 'composite') {
-			const style = (this.value as Style[]).find((s) => s.id === styleId);
+			const style = this.getCompositeStyle(styleId);
 			if (style) {
 				style.value = value;
 			}
 		}
 	}
+
+	/**
+	 * Méthode utile uniquement si valueType est composite.
+	 * Récupère un style composite par son ID
+	 * @param styleId L'ID du style à récupérer
+	 * @returns Le style composite correspondant ou undefined
+	 */
+	getCompositeStyle(styleId: StyleName): Style | undefined {
+		if (this.valueType === 'composite' && this.value instanceof Array) {
+			return (this.value as Style[]).find((s) => s.id === styleId);
+		} else {
+			// Le style composite n'a toujours pas été chargé
+			return new Style({ id: styleId, value: 0 });
+		}
+	}
 }
 
 export class Category extends SerializableBase {
-	id: string = '';
+	id: string = $state('');
 	name: string = '';
 	description: string = '';
 	icon: string = '';
-	styles: Style[] = [];
+	styles: Style[] = $state([]);
 
 	constructor(init?: Partial<Category>) {
 		super();
@@ -199,9 +216,37 @@ export class Category extends SerializableBase {
 	getStyle(styleId: StyleName): Style | undefined {
 		return this.styles.find((style) => style.id === styleId);
 	}
+
+	getCompositeStyle(): Style | undefined {
+		for (const style of this.styles) {
+			if (style.valueType === 'composite') {
+				return style;
+			}
+		}
+		return undefined;
+	}
+
+	/**
+	 * Si la catégorie contient un style composite, le load avec
+	 * ses valeurs par défaut.
+	 */
+	async loadCompositeStyle() {
+		for (const style of this.styles) {
+			if (style.valueType === 'composite' && !(style.value instanceof Array)) {
+				// Charge les styles composites (JSON brut)
+				const raw: any[] = await (await fetch('./styles/compositeStyles.json')).json();
+				// Transforme chaque entrée en véritable instance de Style
+				style.value = raw.map((s) => (s instanceof Style ? s : new Style(s)));
+
+				if (style.id === 'surah-latin-text-style') {
+					style.setCompositeStyleValue('font-size', 8);
+				}
+			}
+		}
+	}
 }
 
-class StylesData extends SerializableBase {
+export class StylesData extends SerializableBase {
 	categories: Category[] = $state([]);
 	target: 'global' | 'arabic' | string = $state('');
 
@@ -213,13 +258,17 @@ class StylesData extends SerializableBase {
 	constructor(target: 'global' | 'arabic' | string, categories: Category[] = []) {
 		super();
 		this.target = target;
-		this.categories = categories;
+		// S'assurer que chaque élément passé est bien une instance de Category
+		// (les JSON importés depuis les fichiers contiennent seulement les attributs)
+		this.categories = (categories || []).map((c: any) =>
+			c instanceof Category ? c : new Category(c)
+		);
 	}
 
 	/**
 	 * Génère le CSS pour tous les styles actifs (fusion globale + overrides clip si fournis)
 	 */
-	generateCSS(target: string, clipId?: number): string {
+	generateCSS(clipId?: number): string {
 		let css = '';
 
 		for (const category of this.categories) {
@@ -279,7 +328,7 @@ class StylesData extends SerializableBase {
 
 				// Cas spécifique: certains styles sont différents pour l'arabe, comme par ex
 				// le contour du texte (outline) qui nécessite du CSS différent.
-				if (target === 'arabic' && 'cssarabic' in style) {
+				if (this.target === 'arabic' && 'cssarabic' in style) {
 					//@ts-ignore
 					cssRule = style.cssarabic.replaceAll(/{value}/g, String(effectiveValue));
 				} else {
@@ -295,6 +344,10 @@ class StylesData extends SerializableBase {
 		return css;
 	}
 
+	/**
+	 * Génère les classes Tailwind pour tous les styles actifs
+	 * @returns Une chaîne de classes Tailwind
+	 */
 	generateTailwind(): string {
 		let tailwindClasses = '';
 
@@ -347,7 +400,9 @@ class StylesData extends SerializableBase {
 		return undefined;
 	}
 
-	// Définit un style pour un ou plusieurs clips sélectionnés (override partiel)
+	/**
+	 * Définit un style pour un ou plusieurs clips sélectionnés (override partiel)
+	 */
 	setStyleForClips(clipIds: number[], styleId: StyleName, value: string | number | boolean) {
 		// Les styles du target 'global' sont uniques et ne peuvent pas être individualisés
 		if (this.target === 'global') {
@@ -370,7 +425,11 @@ class StylesData extends SerializableBase {
 		}
 	}
 
-	// Supprime l'override pour un style donné sur une liste de clips
+	/**
+	 * Supprime l'override pour un style donné sur une liste de clips
+	 * @param clipIds L'ID des clips à modifier
+	 * @param styleId L'ID du style à supprimer
+	 */
 	clearStyleForClips(clipIds: number[], styleId: StyleName): void {
 		// Aucun override à supprimer pour 'global'
 		if (this.target === 'global') {
@@ -393,7 +452,12 @@ class StylesData extends SerializableBase {
 		}
 	}
 
-	// Retourne la valeur effective (override clip si présent, sinon valeur du StylesData)
+	/**
+	 * Retourne la valeur effective (override clip si présent, sinon valeur du StylesData)
+	 * @param styleId L'ID du style à récupérer
+	 * @param clipId L'ID du clip à vérifier
+	 * @returns La valeur effective du style
+	 */
 	getEffectiveValue(styleId: StyleName, clipId?: number): string | number | boolean {
 		const style = this.findStyle(styleId);
 
@@ -414,6 +478,12 @@ class StylesData extends SerializableBase {
 		return style ? (style.value as string | number | boolean) : '';
 	}
 
+	/**
+	 * Vérifie si un clip a un override pour un style donné
+	 * @param clipIds L'ID du clip à vérifier
+	 * @param styleId L'ID du style à vérifier
+	 * @returns true si le clip a un override pour le style, false sinon
+	 */
 	hasOverrideForAny(clipIds: number[], styleId: StyleName): boolean {
 		// Jamais d'override pour 'global'
 		if (this.target === 'global') return false;
@@ -426,6 +496,8 @@ class StylesData extends SerializableBase {
 
 	/**
 	 * Indique si un clip possède au moins un override de style.
+	 * @param clipId L'ID du clip à vérifier
+	 * @returns true si le clip a au moins un override de style, false sinon
 	 */
 	hasAnyOverrideForClip(clipId: number): boolean {
 		const byClip = this.overrides?.[clipId];
@@ -435,19 +507,11 @@ class StylesData extends SerializableBase {
 	}
 
 	/**
-	 * Créer les styles composites pour un style donné s'il n'existe pas déjà
-	 * @param compositeStyleId L'identifiant du style composite
+	 * Créer les styles composites s'ils n'existent pas déjà
 	 */
-	async loadCompositeStyles(compositeStyleId: StyleName) {
-		const style = this.findStyle(compositeStyleId);
-
-		if (style && !(style.value instanceof Array)) {
-			// Ajoute les styles composite par défaut
-			style.value = await (await fetch('./styles/compositeStyles.json')).json();
-
-			if (compositeStyleId === 'surah-latin-text-style') {
-				style.setCompositeStyleValue('font-size', 8);
-			}
+	async loadCompositeStyles() {
+		for (const category of this.categories) {
+			category.loadCompositeStyle();
 		}
 	}
 
@@ -562,10 +626,18 @@ export class VideoStyle extends SerializableBase {
 	}
 
 	async getDefaultCustomTextCategory(): Promise<Category> {
-		const category: Category = await (await fetch('./styles/customText.json')).json();
+		// Récupère le JSON brut
+		const raw = await (await fetch('./styles/customText.json')).json();
+		// Instancie correctement la catégorie (ce constructeur instancie aussi les Style internes)
+		const category = new Category(raw);
+		// Ajoute un suffixe unique pour éviter collisions lorsque plusieurs custom texts sont ajoutés
 		const randomId = Utilities.randomId();
 		category.id += '-' + randomId;
-		category.getStyle('custom-text-composite')!.id += '-' + randomId;
+		const composite = category.getStyle('custom-text-composite')!;
+		composite.id += '-' + randomId;
+
+		category.loadCompositeStyle();
+
 		return category;
 	}
 
@@ -578,9 +650,37 @@ export class VideoStyle extends SerializableBase {
 			globalState.currentProject!.content.timeline.addTrack(new CustomTextTrack());
 		}
 
+		// Si on a la hauteur de section du hauter par défaut (68), alors ajouter la track
+		// `custom text` rendra invisible la track `audio`. Augmente donc la hauteur de la
+		// timeline afin qu'elle soit visible
+		if (globalState.currentProject!.projectEditorState.upperSectionHeight === 68) {
+			globalState.currentProject!.projectEditorState.upperSectionHeight = 60;
+		}
+
 		// Ajoute le custom text au projet
 		const customTextCategory = await this.getDefaultCustomTextCategory();
 		globalState.getCustomTextTrack.addCustomText(customTextCategory);
+
+		setTimeout(() => {
+			globalState.updateVideoPreviewUI();
+		}, 10); // 10ms nécessaire
 	}
 
+	/**
+	 * Recherche parmis tout les targets qu'on a s'il existe un override pour
+	 * un clip donné
+	 * @param id L'ID du clip à vérifier
+	 */
+	hasAnyOverrideForClip(id: number): any {
+		for (const stylesData of this.styles) {
+			if (stylesData.hasAnyOverrideForClip(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
+
+SerializableBase.registerChildClass(VideoStyle, 'styles', StylesData);
+SerializableBase.registerChildClass(StylesData, 'categories', Category);
+SerializableBase.registerChildClass(Category, 'styles', Style);

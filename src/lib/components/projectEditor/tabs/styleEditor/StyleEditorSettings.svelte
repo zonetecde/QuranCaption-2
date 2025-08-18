@@ -14,7 +14,9 @@
 	import { CustomTextClip } from '$lib/classes';
 
 	const getCategoriesToDisplay = $derived(() => {
-		return globalState.getVideoStyle.styles[globalState.getStylesState.getCurrentSelection()];
+		return globalState.getVideoStyle.getStylesOfTarget(
+			globalState.getStylesState.getCurrentSelection()
+		).categories;
 	});
 
 	let stylesContainer: HTMLDivElement | undefined;
@@ -34,9 +36,9 @@
 
 		// S'il manque des styles à une traduction, on les ajoute
 		for (const translation of globalState.getProjectTranslation.addedTranslationEditions) {
-			if (globalState.getVideoStyle.styles[translation.name]) continue;
+			if (globalState.getVideoStyle.doesTargetStyleExist(translation.name)) continue;
 
-			globalState.getVideoStyle.styles[translation.name] = await VideoStyle.getDefaultStyles();
+			await globalState.getVideoStyle.addStylesForEdition(translation.name);
 		}
 	});
 
@@ -179,6 +181,7 @@
 							pour le texte Coranique. Empêche donc l'affichage de ce style dans ce cas précis.
 							
 							Deuxième cas spécial : on ne veut pas pouvoir individuellement modifier les styles suivants:
+								- show-subtitles
 								- show-verse-number
 								- verse-number-separator
 								- max-height
@@ -187,21 +190,17 @@
 							Troisième cas :
 							On empêche l'affichage du style "reactive-font-size" qui est un style utilitaire censé être non-visible. 
 								  -->
-							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-verse-number' || style.id === 'verse-number-separator' || style.id === 'max-height')) && style.id !== 'reactive-font-size'}
+							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-subtitles' || style.id === 'show-verse-number' || style.id === 'verse-number-separator' || style.id === 'max-height')) && style.id !== 'reactive-font-size'}
 								<!-- On veut désactiver certains style, comme par exemple
 							 - Si on a le style "Always Show" pour les customs text d'enable, alors on disable les styles permettant
 							 de set les propriétés de temps de début d'affichage et de fin d'affichage -->
 								{@const toDisable =
 									category.id.includes('custom-text') &&
-									globalState.getVideoStyle.getStyleFromCategory(category, 'always-show').value &&
+									category.getStyle('always-show')?.value &&
 									(style.id === 'time-appearance' || style.id === 'time-disappearance')}
 								<!-- Si la recherche est vide ou si le nom du style correspond à la requête de recherche -->
 								<StyleComponent
-									bind:style={
-										globalState.getVideoStyle.styles[
-											globalState.getStylesState.getCurrentSelection()
-										][categoryIndex].styles[styleIndex]
-									}
+									{style}
 									target={globalState.getStylesState.getCurrentSelection()}
 									categoryId={category.id as StyleCategoryName}
 									disabled={toDisable as boolean}
@@ -222,7 +221,7 @@
 									.toLowerCase()
 									.includes(globalState.getStylesState.searchQuery.toLowerCase())}
 								{@const toDisable =
-									globalState.getVideoStyle.getStyleFromCategory(category, 'always-show').value &&
+									category.getStyle('always-show')!.value &&
 									(style.id === 'time-appearance' || style.id === 'time-disappearance')}
 
 								<!-- prettier-ignore -->
@@ -247,13 +246,6 @@
 			<button
 				class="btn-accent w-2/3 mx-auto mt-4 px-2 py-2 rounded-md flex items-center justify-center gap-1"
 				onclick={() => {
-					// Si on a la hauteur de section du hauter par défaut (68), alors ajouter la track
-					// `custom text` rendra invisible la track `audio`. Augmente donc la hauteur de la
-					// timeline afin qu'elle soit visible
-					if (globalState.currentProject!.projectEditorState.upperSectionHeight === 68) {
-						globalState.currentProject!.projectEditorState.upperSectionHeight = 60;
-					}
-
 					globalState.getVideoStyle.addCustomText();
 				}}
 				title="Add custom text"

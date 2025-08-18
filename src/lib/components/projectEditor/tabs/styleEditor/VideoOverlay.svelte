@@ -13,7 +13,7 @@
 	import CustomText from './CustomText.svelte';
 
 	const fadeDuration = $derived(() => {
-		return globalState.getVideoStyle.getStyle('global', 'animation', 'fade-duration')
+		return globalState.getVideoStyle.getStylesOfTarget('global').findStyle('fade-duration')!
 			.value as number;
 	});
 
@@ -48,7 +48,7 @@
 
 		const clipId = subtitle.id;
 		let maxOpacity = Number(
-			globalState.getVideoStyle.getEffectiveValue(target, 'effects', 'opacity', clipId)
+			globalState.getVideoStyle.getStylesOfTarget(target).getEffectiveValue('opacity', clipId)
 		);
 
 		const currentTime = getTimelineSettings().cursorPosition;
@@ -71,11 +71,11 @@
 	});
 
 	let getCss = $derived((target: string, clipId?: number) => {
-		return globalState.getVideoStyle.generateCSS(target, clipId);
+		return globalState.getVideoStyle.getStylesOfTarget(target).generateCSS(clipId);
 	});
 
 	let getTailwind = $derived((target: string) => {
-		return globalState.getVideoStyle.generateTailwind(target);
+		return globalState.getVideoStyle.getStylesOfTarget(target).generateTailwind();
 	});
 
 	let helperStyles = $derived(() => {
@@ -112,8 +112,8 @@
 		lastSubtitleId = currentSubtitle()!.id;
 
 		globalState.currentProject!.projectEditorState.timeline.movePreviewTo;
-		globalState.getVideoStyle.getStyle('arabic', 'text', 'max-height').value;
-		globalState.getVideoStyle.getStyle('arabic', 'text', 'font-size').value;
+		globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('max-height')!.value;
+		globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-size')!.value;
 
 		untrack(async () => {
 			let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
@@ -121,18 +121,23 @@
 			targets.forEach(async (target) => {
 				try {
 					if (
-						globalState.getVideoStyle.getStyle(target, 'text', 'max-height').value !== 'none' ||
+						globalState.getVideoStyle.getStylesOfTarget(target).findStyle('max-height')!.value !==
+							'none' ||
 						currentSubtitle()!.id
 					) {
 						// Make the font-size responsive
-						const maxHeight = globalState.getVideoStyle.getStyle(target, 'text', 'max-height')
-							.value as string;
+						const maxHeight = globalState.getVideoStyle
+							.getStylesOfTarget(target)
+							.findStyle('max-height')!.value as string;
 						const maxHeightValue = parseFloat(maxHeight);
 
-						let fontSize = globalState.getVideoStyle.getStyle(target, 'text', 'font-size')
-							.value as number;
+						let fontSize = globalState.getVideoStyle
+							.getStylesOfTarget(target)
+							.findStyle('font-size')!.value as number;
 
-						globalState.getVideoStyle.setStyle(target, 'text', 'reactive-font-size', fontSize);
+						globalState.getVideoStyle
+							.getStylesOfTarget(target)
+							.setStyle('reactive-font-size', fontSize);
 
 						await new Promise((resolve) => {
 							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
@@ -144,7 +149,9 @@
 							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 								fontSize -= 5;
 
-								globalState.getVideoStyle.setStyle(target, 'text', 'reactive-font-size', fontSize);
+								globalState.getVideoStyle
+									.getStylesOfTarget(target)
+									.setStyle('reactive-font-size', fontSize);
 
 								await new Promise((resolve) => {
 									setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
@@ -159,10 +166,12 @@
 
 	let overlaySettings = $derived(() => {
 		return {
-			enable: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-enable').value,
-			blur: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-blur').value,
-			opacity: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-opacity').value,
-			color: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-color').value
+			enable: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-enable')!
+				.value,
+			blur: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-blur')!.value,
+			opacity: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-opacity')!
+				.value,
+			color: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-color')!.value
 		};
 	});
 
@@ -188,13 +197,14 @@
 				use:verticalDrag={{
 					getInitial: () =>
 						Number(
-							globalState.getVideoStyle.getStyle('arabic', 'positioning', 'vertical-position').value
+							globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
+								.value
 						),
 					apply: (v: number) =>
-						globalState.getVideoStyle.setStyle('arabic', 'positioning', 'vertical-position', v),
-					min: globalState.getVideoStyle.getStyle('arabic', 'positioning', 'vertical-position')
+						globalState.getVideoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', v),
+					min: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
 						.valueMin,
-					max: globalState.getVideoStyle.getStyle('arabic', 'positioning', 'vertical-position')
+					max: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
 						.valueMax
 				}}
 				class={'arabic absolute subtitle select-none ' + getTailwind('arabic') + helperStyles()}
@@ -208,20 +218,25 @@
 					edition
 				]}
 
-				{#if globalState.getVideoStyle.styles[edition]}
+				{#if globalState.getVideoStyle.doesTargetStyleExist(edition)}
 					<p
 						use:verticalDrag={{
 							getInitial: () =>
 								Number(
-									globalState.getVideoStyle.getStyle(edition, 'positioning', 'vertical-position')
-										.value
+									globalState.getVideoStyle
+										.getStylesOfTarget(edition)
+										.findStyle('vertical-position')!.value
 								),
 							apply: (v: number) =>
-								globalState.getVideoStyle.setStyle(edition, 'positioning', 'vertical-position', v),
-							min: globalState.getVideoStyle.getStyle(edition, 'positioning', 'vertical-position')
-								.valueMin,
-							max: globalState.getVideoStyle.getStyle(edition, 'positioning', 'vertical-position')
-								.valueMax
+								globalState.getVideoStyle
+									.getStylesOfTarget(edition)
+									.setStyle('vertical-position', v),
+							min: globalState.getVideoStyle
+								.getStylesOfTarget(edition)
+								.findStyle('vertical-position')!.valueMin,
+							max: globalState.getVideoStyle
+								.getStylesOfTarget(edition)
+								.findStyle('vertical-position')!.valueMax
 						}}
 						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles()}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}

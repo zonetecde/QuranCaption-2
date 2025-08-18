@@ -67,11 +67,11 @@ export class VerseTranslation extends Translation {
 		// Ajoute le numéro de verset si demandé dans les styles
 		if (
 			subtitle.startWordIndex === 0 &&
-			globalState.getVideoStyle.getStyle(edition, 'general', 'show-verse-number').value
+			globalState.getVideoStyle.getStylesOfTarget(edition).findStyle('show-verse-number')!.value
 		) {
 			return (
 				subtitle.verse +
-				((globalState.getVideoStyle.getStyle(edition, 'general', 'verse-number-separator')
+				((globalState.getVideoStyle.getStylesOfTarget(edition).findStyle('verse-number-separator')!
 					.value as string) || '. ') +
 				this.text
 			);

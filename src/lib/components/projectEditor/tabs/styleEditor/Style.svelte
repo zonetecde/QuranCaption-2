@@ -9,7 +9,7 @@
 	import type { CustomTextClip } from '$lib/classes';
 
 	let {
-		style = $bindable(),
+		style,
 		target,
 		categoryId,
 		disabled
@@ -29,9 +29,9 @@
 		else expanded = globalState.getSectionsState[style.id].extended;
 
 		// Si est un style composite
-		if (style.valueType === 'composite') {
+		if (style.valueType === 'composite' && target) {
 			// On charge les styles composites
-			await globalState.getVideoStyle.loadCompositeStyles(style.id);
+			await globalState.getVideoStyle.getStylesOfTarget(target).loadCompositeStyles();
 		}
 	});
 
@@ -60,16 +60,15 @@
 		}
 
 		const values = selectedClipIds().map((id) =>
-			globalState.getVideoStyle.getEffectiveValue(target, categoryId, style.id as StyleName, id)
+			globalState.getVideoStyle
+				.getStylesOfTarget(target)
+				.getEffectiveValue(style.id as StyleName, id)
 		);
 		const first = values[0];
 		const mixed = values.some((v) => String(v) !== String(first));
-		const overridden = globalState.getVideoStyle.hasOverrideForAny(
-			selectedClipIds(),
-			target,
-			categoryId,
-			style.id as StyleName
-		);
+		const overridden = globalState.getVideoStyle
+			.getStylesOfTarget(target)
+			.hasOverrideForAny(selectedClipIds(), style.id as StyleName);
 		return { value: mixed ? first : first, mixed, overridden };
 	}
 
@@ -96,17 +95,13 @@
 	function applyValue(v: any) {
 		const value = coerce(v);
 		if (selectedClipIds().length > 0) {
-			globalState.getVideoStyle.setStyleForClips(
-				selectedClipIds(),
-				target!,
-				categoryId,
-				style.id as StyleName,
-				value
-			);
+			globalState.getVideoStyle
+				.getStylesOfTarget(target!)
+				.setStyleForClips(selectedClipIds(), style.id as StyleName, value);
 		} else {
 			// S'il y a un target, c'est que on est dans les styles de sous-titre ou global.
 			if (target)
-				globalState.getVideoStyle.setStyle(target, categoryId, style.id as StyleName, value);
+				globalState.getVideoStyle.getStylesOfTarget(target).setStyle(style.id as StyleName, value);
 			else {
 				// S'il n'y a pas de target, c'est qu'on est dans les customs text
 				globalState.getVideoStyle.setCustomTextStyle(categoryId, style.id as StyleName, value);
@@ -121,10 +116,9 @@
 
 	function clearOverride() {
 		if (selectedClipIds().length === 0) return;
-		globalState.getVideoStyle.clearStyleForClips(
+		globalState.getVideoStyle.getStylesOfTarget(target!).clearStyleForClips(
 			selectedClipIds(),
-			target!,
-			categoryId,
+
 			style.id as StyleName
 		);
 	}
@@ -353,7 +347,9 @@
 				</div>
 			{:else if style.valueType === 'composite'}
 				<div class="flex flex-col gap-2">
-					{#each globalState.getVideoStyle.getCompositeStyles(style.id) as subStyle}
+					{#each globalState.getVideoStyle
+						.getStylesOfTarget(target!)
+						.getCompositeStyles(style.id as StyleName) as subStyle}
 						<StyleComponent
 							style={subStyle}
 							target={style.id}

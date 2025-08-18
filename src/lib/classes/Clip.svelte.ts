@@ -218,7 +218,9 @@ export class SubtitleClip extends ClipWithTranslation {
 
 	override getText(): string {
 		// Regarde dans les styles si on doit afficher le numéro de verset
-		if (globalState.getVideoStyle.getStyle('arabic', 'general', 'show-verse-number').value) {
+		if (
+			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
+		) {
 			return this.getTextWithVerseNumber();
 		}
 
@@ -293,10 +295,8 @@ export class CustomTextClip extends Clip {
 			return;
 		}
 
-		let startTime = globalState.getVideoStyle.getStyleFromCategory(category, 'time-appearance')
-			.value as number;
-		let endTime = globalState.getVideoStyle.getStyleFromCategory(category, 'time-disappearance')
-			.value as number;
+		let startTime = category.getStyle('time-appearance')!.value as number;
+		let endTime = category.getStyle('time-disappearance')!.value as number;
 
 		super(startTime, endTime, 'Custom Text');
 		this.category = category;
@@ -313,12 +313,11 @@ export class CustomTextClip extends Clip {
 	}
 
 	getAlwaysShow(): boolean {
-		return globalState.getVideoStyle.getStyleFromCategory(this.category!, 'always-show')
-			.value as boolean;
+		return this.category?.getStyle('always-show')!.value as boolean;
 	}
 
 	getText() {
-		return globalState.getVideoStyle.getStyleFromCategory(this.category!, 'text').value as string;
+		return this.category?.getStyle('text')!.value as string;
 	}
 
 	override getWidth(): number {

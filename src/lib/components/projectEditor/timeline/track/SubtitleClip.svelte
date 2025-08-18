@@ -21,7 +21,7 @@
 
 	// Détecte s'il existe des overrides de style pour ce clip (utilise VideoStyle)
 	const hasOverrides = $derived(() => {
-		return (globalState.getVideoStyle as any)?.hasAnyOverrideForClip?.(clip.id) ?? false;
+		return globalState.getVideoStyle.hasAnyOverrideForClip(clip.id);
 	});
 
 	let dragStartX: number | null = null;

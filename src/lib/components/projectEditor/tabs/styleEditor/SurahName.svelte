@@ -14,46 +14,44 @@
 
 	let surahNameSettings = $derived(() => {
 		return {
-			show: globalState.getVideoStyle.getStyle('global', 'surah-name', 'show-surah-name').value,
-			size: globalState.getVideoStyle.getStyle('global', 'surah-name', 'surah-size').value,
-			showArabic: globalState.getVideoStyle.getStyle('global', 'surah-name', 'show-arabic').value,
-			showLatin: globalState.getVideoStyle.getStyle('global', 'surah-name', 'show-latin').value,
-			surahLatinSpacing: globalState.getVideoStyle.getStyle(
-				'global',
-				'surah-name',
-				'surah-latin-spacing'
-			).value,
-
-			surahNameFormat: globalState.getVideoStyle.getStyle(
-				'global',
-				'surah-name',
-				'surah-name-format'
-			).value as string,
-			verticalPosition: globalState.getVideoStyle.getStyle(
-				'global',
-				'surah-name',
-				'vertical-position'
-			).value,
-			horizontalPosition: globalState.getVideoStyle.getStyle(
-				'global',
-				'surah-name',
-				'horizontal-position'
-			).value,
-			opacity: globalState.getVideoStyle.getStyle('global', 'surah-name', 'surah-opacity').value,
-			color: globalState.getVideoStyle.getStyleFromComposite('surah-latin-text-style', 'text-color')
+			show: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-surah-name')!
 				.value,
-			outlineWidth: globalState.getVideoStyle.getStyleFromComposite(
-				'surah-latin-text-style',
-				'text-outline'
-			).value,
-			outlineColor: globalState.getVideoStyle.getStyleFromComposite(
-				'surah-latin-text-style',
-				'text-outline-color'
-			).value,
-			enableOutline: globalState.getVideoStyle.getStyleFromComposite(
-				'surah-latin-text-style',
-				'outline-enable'
-			).value
+			size: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('surah-size')!.value,
+			showArabic: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-arabic')!
+				.value,
+			showLatin: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-latin')!
+				.value,
+			surahLatinSpacing: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-latin-spacing')!.value,
+
+			surahNameFormat: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-name-format')!.value as string,
+			verticalPosition: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-name-vertical-position')!.value as number,
+			horizontalPosition: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-name-horizontal-position')!.value as number,
+			opacity: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('surah-opacity')!
+				.value,
+			color: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-latin-text-style')
+				?.getCompositeStyle('text-color')!.value,
+			outlineWidth: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-latin-text-style')
+				?.getCompositeStyle('text-outline')!.value,
+			outlineColor: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-latin-text-style')
+				?.getCompositeStyle('text-outline-color')!.value,
+			enableOutline: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-latin-text-style')
+				?.getCompositeStyle('outline-enable')!.value
 		};
 	});
 
@@ -135,22 +133,22 @@
 			} catch (e) {}
 		});
 	});
-
-	const surahVerticalStyle = globalState.getVideoStyle.getStyle(
-		'global',
-		'surah-name',
-		'vertical-position'
-	);
 </script>
 
 {#if surahNameSettings().show && currentSurah() >= 1 && currentSurah() <= 114}
 	<div
 		use:verticalDrag={{
-			getInitial: () => Number(surahVerticalStyle.value),
+			getInitial: () => Number(surahNameSettings().verticalPosition),
 			apply: (v: number) =>
-				globalState.getVideoStyle.setStyle('global', 'surah-name', 'vertical-position', v),
-			min: surahVerticalStyle.valueMin,
-			max: surahVerticalStyle.valueMax
+				globalState.getVideoStyle
+					.getStylesOfTarget('global')
+					.setStyle('surah-name-vertical-position', v),
+			min: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-name-vertical-position')!.valueMin,
+			max: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-name-vertical-position')!.valueMax
 		}}
 		class="w-[100px] flex flex-col items-center cursor-move select-none"
 		style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity};`}
@@ -163,7 +161,11 @@
 			class="w-[700px] text-center"
 			style={`margin-top: ${-surahNameSettings().surahLatinSpacing}rem; opacity: ${surahNameSettings().showLatin ? 1 : 0};`}
 		>
-			<CompositeText id="surah-latin-text-style">
+			<CompositeText
+				compositeStyle={globalState.getVideoStyle
+					.getStylesOfTarget('global')
+					.findStyle('surah-latin-text-style')!}
+			>
 				{surahNameSettings()
 					.surahNameFormat.replace('<number>', currentSurah().toString())
 					.replace('<transliteration>', Quran.surahs[currentSurah() - 1].name)
