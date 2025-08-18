@@ -218,11 +218,15 @@
 					{@const category = (customTextClip as CustomTextClip).category!}
 					<Section name={category.name} icon={category.icon} classes="-mb-1">
 						{#each category.styles as style, styleIndex}
-							{@const toDisable =
-								globalState.getVideoStyle.getStyleFromCategory(category, 'always-show').value &&
-								(style.id === 'time-appearance' || style.id === 'time-disappearance')}
-							<!-- prettier-ignore -->
-							<StyleComponent
+							{#if globalState.getStylesState.searchQuery === '' || style.name
+									.toLowerCase()
+									.includes(globalState.getStylesState.searchQuery.toLowerCase())}
+								{@const toDisable =
+									globalState.getVideoStyle.getStyleFromCategory(category, 'always-show').value &&
+									(style.id === 'time-appearance' || style.id === 'time-disappearance')}
+
+								<!-- prettier-ignore -->
+								<StyleComponent
 								bind:style={
 									category.styles[
 										styleIndex
@@ -231,6 +235,7 @@
 								categoryId={category.id as StyleCategoryName}
 								disabled={toDisable as boolean}
 							/>
+							{/if}
 						{/each}
 					</Section>
 				{/each}
@@ -242,6 +247,13 @@
 			<button
 				class="btn-accent w-2/3 mx-auto mt-4 px-2 py-2 rounded-md flex items-center justify-center gap-1"
 				onclick={() => {
+					// Si on a la hauteur de section du hauter par défaut (68), alors ajouter la track
+					// `custom text` rendra invisible la track `audio`. Augmente donc la hauteur de la
+					// timeline afin qu'elle soit visible
+					if (globalState.currentProject!.projectEditorState.upperSectionHeight === 68) {
+						globalState.currentProject!.projectEditorState.upperSectionHeight = 60;
+					}
+
 					globalState.getVideoStyle.addCustomText();
 				}}
 				title="Add custom text"

@@ -2,7 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
 	import Track from './track/Track.svelte';
-	import { Duration } from '$lib/classes';
+	import { Duration, TrackType } from '$lib/classes';
 	import { slide } from 'svelte/transition';
 	import ShortcutService from '$lib/services/ShortcutService';
 
@@ -217,7 +217,10 @@
 				<!-- Track lanes -->
 				<div class="track-lanes">
 					{#each globalState.currentProject!.content.timeline.tracks as track, i}
-						<Track bind:track={globalState.currentProject!.content.timeline.tracks[i]} />
+						<!-- N'affiche pas la track des customs texts s'il y en a pas dans le projet -->
+						{#if !(track.type === TrackType.CustomText && track.clips.length === 0)}
+							<Track bind:track={globalState.currentProject!.content.timeline.tracks[i]} />
+						{/if}
 					{/each}
 				</div>
 

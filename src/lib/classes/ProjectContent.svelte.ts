@@ -1,6 +1,6 @@
 import { Timeline } from './Timeline.svelte.js';
 import { Asset } from './Asset.svelte.js';
-import { AssetTrack, SubtitleTrack, Track } from './Track.svelte.js';
+import { AssetTrack, CustomTextTrack, SubtitleTrack, Track } from './Track.svelte.js';
 import { AssetType, TrackType } from './enums.js';
 import { SerializableBase } from './misc/SerializableBase.js';
 import toast from 'svelte-5-french-toast';
@@ -41,6 +41,7 @@ export class ProjectContent extends SerializableBase {
 	static async getDefaultProjectContent(): Promise<ProjectContent> {
 		return new ProjectContent(
 			new Timeline([
+				new CustomTextTrack(),
 				new SubtitleTrack(),
 				new AssetTrack(TrackType.Video),
 				new AssetTrack(TrackType.Audio)
