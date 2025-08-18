@@ -7,7 +7,7 @@ import {
 	type PredefinedSubtitleClip,
 	ProjectTranslation
 } from '$lib/classes';
-import type { AssetTrack, SubtitleTrack } from '$lib/classes/Track.svelte';
+import type { AssetTrack, CustomTextTrack, SubtitleTrack } from '$lib/classes/Track.svelte';
 
 class GlobalState {
 	// Liste des détails des projets de l'utilisateur
@@ -46,6 +46,12 @@ class GlobalState {
 
 	get getVideoTrack() {
 		return this.currentProject!.content.timeline.getFirstTrack(TrackType.Video)! as AssetTrack;
+	}
+
+	get getCustomTextTrack() {
+		return this.currentProject!.content.timeline.getFirstTrack(
+			TrackType.CustomText
+		)! as CustomTextTrack;
 	}
 
 	get getSubtitleClips(): SubtitleClip[] {

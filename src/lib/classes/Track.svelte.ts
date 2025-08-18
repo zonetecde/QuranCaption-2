@@ -2,6 +2,7 @@ import { AssetType, TrackType } from './enums.js';
 import {
 	AssetClip,
 	Clip,
+	CustomTextClip,
 	PredefinedSubtitleClip,
 	SilenceClip,
 	SubtitleClip,
@@ -14,6 +15,7 @@ import { Quran, type Verse } from './Quran.js';
 import toast from 'svelte-5-french-toast';
 import { VerseTranslation } from './Translation.svelte.js';
 import ModalManager from '$lib/components/modals/ModalManager.js';
+import type { Category } from './VideoStyle.svelte.js';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -69,6 +71,8 @@ export class Track extends SerializableBase {
 				return 'Audio';
 			case TrackType.Subtitle:
 				return 'Subtitles';
+			case TrackType.CustomText:
+				return 'Custom Text';
 			default:
 				return 'Unknown Track';
 		}
@@ -82,6 +86,8 @@ export class Track extends SerializableBase {
 				return 'music_note';
 			case TrackType.Subtitle:
 				return 'subtitles';
+			case TrackType.CustomText:
+				return 'text_fields';
 			default:
 				return 'help_outline';
 		}
@@ -513,6 +519,34 @@ export class SubtitleTrack extends Track {
 			}
 		}
 		return null;
+	}
+}
+
+export class CustomTextTrack extends Track {
+	constructor() {
+		super(TrackType.CustomText);
+	}
+
+	addCustomText(customTextCategory: Category) {
+		this.clips.push(new CustomTextClip(customTextCategory));
+	}
+
+	getCurrentClips(): CustomTextClip[] {
+		// Retourne tout les clips à afficher
+		const currentTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition ?? 0;
+		let clips: CustomTextClip[] = [];
+
+		for (let index = 0; index < this.clips.length; index++) {
+			const element = this.clips[index] as CustomTextClip;
+			if (
+				element.getAlwaysShow() ||
+				(currentTime >= element.startTime && currentTime <= element.endTime)
+			) {
+				clips.push(element);
+			}
+		}
+
+		return clips;
 	}
 }
 

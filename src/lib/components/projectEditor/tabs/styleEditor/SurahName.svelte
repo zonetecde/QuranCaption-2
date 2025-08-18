@@ -55,13 +55,13 @@
 		};
 	});
 
-	onMount(async () => {});
-
 	$effect(() => {
 		surahNameSettings().color;
 		const currentSurahValue = currentSurah();
 
 		untrack(async () => {
+			if (currentSurahValue < 1 || currentSurahValue > 114) return;
+
 			let url = `./surah-imgs/${currentSurahValue}.svg`;
 
 			try {

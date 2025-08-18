@@ -5,8 +5,9 @@ import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
 import { PredefinedSubtitleTranslation, type VerseTranslation } from './Translation.svelte';
+import type { Category, StyleName, TextStyleName } from './VideoStyle.svelte';
 
-type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Asset';
+type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Custom Text' | 'Asset';
 
 export class Clip extends SerializableBase {
 	id: number;
@@ -282,5 +283,59 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 	}
 }
 
+export class CustomTextClip extends Clip {
+	category: Category | undefined = $state(undefined);
+
+	constructor(category: Category) {
+		// Déserialization
+		if (category === undefined) {
+			super(0, 0, 'Custom Text');
+			return;
+		}
+
+		let startTime = globalState.getVideoStyle.getStyleFromCategory(category, 'time-appearance')
+			.value as number;
+		let endTime = globalState.getVideoStyle.getStyleFromCategory(category, 'time-disappearance')
+			.value as number;
+
+		super(startTime, endTime, 'Custom Text');
+		this.category = category;
+	}
+
+	setStyle(styleId: StyleName, value: any) {
+		if (styleId === 'time-appearance') {
+			this.setStartTime(value);
+		} else if (styleId === 'time-disappearance') {
+			this.setEndTime(value);
+		}
+
+		this.category!.styles.find((style) => style.id === styleId)!.value = value;
+	}
+
+	getAlwaysShow(): boolean {
+		return globalState.getVideoStyle.getStyleFromCategory(this.category!, 'always-show')
+			.value as boolean;
+	}
+
+	getText() {
+		return globalState.getVideoStyle.getStyleFromCategory(this.category!, 'text').value as string;
+	}
+
+	override getWidth(): number {
+		// Si le custom text s'affiche sur toute la durée de la vidéo, alors retourne le temps
+		// total de la vidéo
+		if (this.getAlwaysShow()) {
+			return (
+				globalState.currentProject!.content.timeline.getLongestTrackDuration().toSeconds() *
+				globalState.currentProject?.projectEditorState.timeline.zoom!
+			);
+		} else {
+			// Appel du getWidth du parent
+			return super.getWidth();
+		}
+	}
+}
+
 SerializableBase.registerChildClass(SubtitleClip, 'translations', Translation);
 SerializableBase.registerChildClass(ClipWithTranslation, 'translations', Translation);
+SerializableBase.registerChildClass(CustomTextClip, 'translations', Translation);

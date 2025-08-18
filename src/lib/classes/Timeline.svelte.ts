@@ -86,6 +86,18 @@ export class Timeline extends SerializableBase {
 		if (!track) throw new Error('Track not found.');
 		return track;
 	}
+
+	doesTrackExist(trackType: TrackType): boolean {
+		return this.tracks.some((track) => track.type === trackType);
+	}
+
+	/**
+	 * Ajoute une nouvelle piste à la timeline.
+	 * @param track La piste à ajouter
+	 */
+	addTrack(track: Track) {
+		this.tracks.unshift(track);
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique

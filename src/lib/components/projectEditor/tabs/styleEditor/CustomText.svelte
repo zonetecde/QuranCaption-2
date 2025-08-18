@@ -17,6 +17,12 @@
 			).value,
 			text: globalState.getVideoStyle.getStyleFromCategory(customText, 'text').value,
 			opacity: () => {
+				const alwaysShow = globalState.getVideoStyle.getStyleFromCategory(customText, 'always-show')
+					.value as number;
+
+				// Si on veut toujours qu'il soit affiché, alors on retourne une opacité de 1
+				if (alwaysShow) return 1;
+
 				// En fonction de son temps d'apparition et de la valeur du fondu
 				const fadeDuration = globalState.getVideoStyle.getStyle(
 					'global',

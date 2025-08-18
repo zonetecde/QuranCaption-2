@@ -3,17 +3,38 @@
 		TrackType,
 		type AssetType,
 		type Track,
-		type SubtitleClip as SubtitleClipType
+		type SubtitleClip as SubtitleClipType,
+		Clip,
+		SubtitleClip,
+		CustomTextClip
 	} from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
-	import Clip from './Clip.svelte';
-	import SubtitleClip from './SubtitleClip.svelte';
+	import ClipComponent from './Clip.svelte';
+	import SubtitleClipComponent from './SubtitleClip.svelte';
+	import CustomTextClipComponent from './CustomTextClip.svelte';
 
 	let {
 		track = $bindable()
 	}: {
 		track: Track;
 	} = $props();
+
+	// function getCustomTextAsClips(): CustomTextClip[] {
+	// 	const customTexts = globalState.getVideoStyle.getAllCustomTexts();
+	// 	let clips: CustomTextClip[] = [];
+	// 	for (const category of customTexts) {
+	// 		clips.push(
+	// 			new CustomTextClip(
+	// 				category,
+	// 				globalState.getVideoStyle.getStyleFromCategory(category, 'time-appearance')
+	// 					.value as number,
+	// 				globalState.getVideoStyle.getStyleFromCategory(category, 'time-disappearance')
+	// 					.value as number
+	// 			)
+	// 		);
+	// 	}
+	// 	return clips;
+	// }
 </script>
 
 <div
@@ -50,9 +71,11 @@
 	<div class="absolute left-[180px] top-0 bottom-0 flex items-center px-3 gap-2 z-[5]">
 		{#each track.clips as clip, index}
 			{#if track.type === TrackType.Subtitle}
-				<SubtitleClip bind:clip={track.clips[index] as SubtitleClipType} {track} />
+				<SubtitleClipComponent bind:clip={track.clips[index] as SubtitleClipType} {track} />
+			{:else if track.type === TrackType.CustomText}
+				<CustomTextClipComponent bind:clip={track.clips[index] as CustomTextClip} {track} />
 			{:else}
-				<Clip {clip} {track} />
+				<ClipComponent {clip} {track} />
 			{/if}
 		{/each}
 	</div>

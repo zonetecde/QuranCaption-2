@@ -1,6 +1,10 @@
 import { globalState } from '$lib/runes/main.svelte';
+import toast from 'svelte-5-french-toast';
+import type { CustomTextClip } from '.';
+import { TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
+import { CustomTextTrack } from './Track.svelte';
 
 export type StyleValueType =
 	| 'color'
@@ -238,6 +242,13 @@ export class VideoStyle extends SerializableBase {
 		return category.styles.find((style) => style.id === styleId)!;
 	}
 
+	/**
+	 * Update la valeur d'un style
+	 * @param target La target (global/arabic/translation)
+	 * @param categoryId L'ID de la catégorie à interroger
+	 * @param styleId L'ID du style à obtenir
+	 * @param value La nouvelle valeur à appliquer
+	 */
 	setStyle(
 		target: string,
 		categoryId: StyleCategoryName,
@@ -249,7 +260,40 @@ export class VideoStyle extends SerializableBase {
 		if (style) {
 			style.value = value;
 		}
-		this.lastUpdated = new Date();
+	}
+
+	/**
+	 * Update la valeur d'un style d'un custom text (depuis la track Custom Text)
+	 * @param categoryId L'ID de la catégorie à interroger
+	 * @param styleId L'ID du style à obtenir
+	 * @param value La nouvelle valeur à appliquer
+	 */
+	setCustomTextStyle(
+		categoryId: StyleCategoryName,
+		styleId: StyleName,
+		value: string | number | boolean
+	): void {
+		// Trouve donc le clip correspondant pour update sa valeur
+		const clip = globalState.getCustomTextTrack.clips.find(
+			(c) => (c as CustomTextClip).category?.id === categoryId
+		) as CustomTextClip | undefined;
+		if (clip) {
+			// Si on veut modifier les temps d'apprence, vérifie que le temps de debut est plus petit que le temps de fin
+			// et inversement
+			if (styleId === 'time-appearance') {
+				if ((value as number) >= clip.endTime) {
+					toast.error('The start time must be less than the end time');
+					return;
+				}
+			} else if (styleId === 'time-disappearance') {
+				if ((value as number) <= clip.startTime) {
+					toast.error('The end time must be greater than the start time');
+					return;
+				}
+			}
+
+			clip.setStyle(styleId, value);
+		}
 	}
 
 	// Définit un style pour un ou plusieurs clips sélectionnés (override partiel)
@@ -603,8 +647,14 @@ export class VideoStyle extends SerializableBase {
 	 * Ajoute un texte personnalisé au projet dans les styles globaux
 	 */
 	async addCustomText() {
+		// Ajoute la track Custom Text si non existante
+		if (!globalState.currentProject!.content.timeline.doesTrackExist(TrackType.CustomText)) {
+			globalState.currentProject!.content.timeline.addTrack(new CustomTextTrack());
+		}
+
+		// Ajoute le custom text au projet
 		const customTextCategory = await this.getDefaultCustomTextCategory();
-		this.styles['global'].push(customTextCategory);
+		globalState.getCustomTextTrack.addCustomText(customTextCategory);
 	}
 
 	/**
@@ -627,6 +677,16 @@ export class VideoStyle extends SerializableBase {
 			}
 		}
 		return currentCustomTexts;
+	}
+
+	getAllCustomTexts(): Category[] {
+		let ct: Category[] = [];
+		for (const category of this.styles['global']) {
+			if (category.id.includes('custom-text')) {
+				ct.push(category);
+			}
+		}
+		return ct;
 	}
 
 	/**

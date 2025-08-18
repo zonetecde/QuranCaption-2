@@ -6,6 +6,7 @@
 	import type { Style, StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
 	import { default as StyleComponent } from '$lib/components/projectEditor/tabs/styleEditor/Style.svelte';
 	import toast from 'svelte-5-french-toast';
+	import type { CustomTextClip } from '$lib/classes';
 
 	let {
 		style = $bindable(),
@@ -14,7 +15,7 @@
 		disabled
 	}: {
 		style: Style;
-		target: string;
+		target?: string;
 		categoryId: StyleCategoryName;
 		disabled: boolean;
 	} = $props();
@@ -52,6 +53,8 @@
 		mixed: boolean;
 		overridden: boolean;
 	} {
+		if (!target) return { value: style.value, mixed: false, overridden: false };
+
 		if (selectedClipIds().length === 0) {
 			return { value: style.value, mixed: false, overridden: false };
 		}
@@ -95,14 +98,21 @@
 		if (selectedClipIds().length > 0) {
 			globalState.getVideoStyle.setStyleForClips(
 				selectedClipIds(),
-				target,
+				target!,
 				categoryId,
 				style.id as StyleName,
 				value
 			);
 		} else {
-			globalState.getVideoStyle.setStyle(target, categoryId, style.id as StyleName, value);
+			// S'il y a un target, c'est que on est dans les styles de sous-titre ou global.
+			if (target)
+				globalState.getVideoStyle.setStyle(target, categoryId, style.id as StyleName, value);
+			else {
+				// S'il n'y a pas de target, c'est qu'on est dans les customs text
+				globalState.getVideoStyle.setCustomTextStyle(categoryId, style.id as StyleName, value);
+			}
 		}
+
 		// Déclenche un refresh éventuel (ex: max-height fit)
 		if (style.id === 'max-height') {
 			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
@@ -114,7 +124,7 @@
 		if (selectedClipIds().length === 0) return;
 		globalState.getVideoStyle.clearStyleForClips(
 			selectedClipIds(),
-			target,
+			target!,
 			categoryId,
 			style.id as StyleName
 		);

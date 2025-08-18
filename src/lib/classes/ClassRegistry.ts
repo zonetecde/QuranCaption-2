@@ -5,9 +5,10 @@ import {
 	SilenceClip,
 	PredefinedSubtitleClip,
 	AssetClip,
-	ClipWithTranslation
+	ClipWithTranslation,
+	CustomTextClip
 } from './Clip.svelte';
-import { AssetTrack, SubtitleTrack, Track } from './Track.svelte';
+import { AssetTrack, CustomTextTrack, SubtitleTrack, Track } from './Track.svelte';
 import { Timeline } from './Timeline.svelte';
 import { ProjectContent } from './ProjectContent.svelte';
 import { Project } from './Project';
@@ -47,7 +48,9 @@ export function initializeClassRegistry() {
 	SerializableBase.registerClass('AssetClip', AssetClip);
 	SerializableBase.registerClass('AssetTrack', AssetTrack);
 	SerializableBase.registerClass('SubtitleTrack', SubtitleTrack);
+	SerializableBase.registerClass('CustomTextTrack', CustomTextTrack);
 	SerializableBase.registerClass('SubtitleClip', SubtitleClip);
+	SerializableBase.registerClass('CustomTextClip', CustomTextClip);
 	SerializableBase.registerClass('Asset', Asset);
 
 	// Classes de projet

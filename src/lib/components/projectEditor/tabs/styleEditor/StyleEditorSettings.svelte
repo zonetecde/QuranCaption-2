@@ -10,8 +10,10 @@
 	import Section from '../../Section.svelte';
 	import StyleComponent from './Style.svelte';
 	import { fade, slide } from 'svelte/transition';
+	import { currentMenu } from 'svelte-contextmenu/stores';
+	import { CustomTextClip } from '$lib/classes';
 
-	const styles = $derived(() => {
+	const getCategoriesToDisplay = $derived(() => {
 		return globalState.getVideoStyle.styles[globalState.getStylesState.getCurrentSelection()];
 	});
 
@@ -165,10 +167,10 @@
 				</p>
 			</div>
 		{:else}
-			{#each styles() as category}
+			{#each getCategoriesToDisplay() as category}
 				<Section name={category.name} icon={category.icon} classes="-mb-1">
 					{#each category.styles as style, styleIndex}
-						{@const categoryIndex = styles().findIndex((c) => c.id === category.id)}
+						{@const categoryIndex = getCategoriesToDisplay().findIndex((c) => c.id === category.id)}
 						{#if globalState.getStylesState.searchQuery === '' || style.name
 								.toLowerCase()
 								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
@@ -209,6 +211,30 @@
 					{/each}
 				</Section>
 			{/each}
+
+			<!-- Ajoute maintenant les customs texts -->
+			{#if globalState.getStylesState.currentSelection === 'global'}
+				{#each globalState.getCustomTextTrack.clips as customTextClip, i}
+					{@const category = (customTextClip as CustomTextClip).category!}
+					<Section name={category.name} icon={category.icon} classes="-mb-1">
+						{#each category.styles as style, styleIndex}
+							{@const toDisable =
+								globalState.getVideoStyle.getStyleFromCategory(category, 'always-show').value &&
+								(style.id === 'time-appearance' || style.id === 'time-disappearance')}
+							<!-- prettier-ignore -->
+							<StyleComponent
+								bind:style={
+									category.styles[
+										styleIndex
+									]
+								}
+								categoryId={category.id as StyleCategoryName}
+								disabled={toDisable as boolean}
+							/>
+						{/each}
+					</Section>
+				{/each}
+			{/if}
 		{/if}
 
 		{#if globalState.getStylesState.getCurrentSelection() === 'global'}

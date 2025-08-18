@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { PredefinedSubtitleClip, SubtitleClip, TrackType, Translation } from '$lib/classes';
+	import {
+		CustomTextClip,
+		PredefinedSubtitleClip,
+		SubtitleClip,
+		TrackType,
+		Translation
+	} from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { untrack } from 'svelte';
 	import SurahName from './SurahName.svelte';
@@ -29,7 +35,9 @@
 	// Contient les textes custom à afficher à ce moment précis
 	let currentCustomTexts = $derived(() => {
 		const _ = getTimelineSettings().cursorPosition;
-		return globalState.getVideoStyle.getCurrentCustomTextsToDisplay();
+		return untrack(() => {
+			return globalState.getCustomTextTrack.getCurrentClips();
+		});
 	});
 
 	// Calcul de l'opacité des sous-titres (prend en compte les overrides par clip)
@@ -203,7 +211,7 @@
 		<SurahName />
 
 		{#each currentCustomTexts() as customText}
-			<CustomText {customText} />
+			<CustomText customText={(customText as CustomTextClip).category!} />
 		{/each}
 	</div>
 </div>
