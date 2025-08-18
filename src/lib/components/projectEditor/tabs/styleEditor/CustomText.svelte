@@ -2,6 +2,7 @@
 	import type { Category } from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import CompositeText from './CompositeText.svelte';
+	import { verticalDrag } from '$lib/services/verticalDrag';
 
 	let { customText }: { customText: Category } = $props();
 
@@ -64,10 +65,21 @@
 			}
 		};
 	});
+
+	const verticalStyle = globalState.getVideoStyle.getStyleFromCategory(
+		customText,
+		'vertical-position'
+	);
 </script>
 
 <div
-	class="absolute"
+	use:verticalDrag={{
+		getInitial: () => Number(verticalStyle.value),
+		apply: (v: number) => (verticalStyle.value = v),
+		min: verticalStyle.valueMin,
+		max: verticalStyle.valueMax
+	}}
+	class="absolute cursor-move select-none"
 	style={`transform: translateY(${customTextSettings().verticalPosition}px) translateX(${customTextSettings().horizontalPosition}px); opacity: ${customTextSettings().opacity()}`}
 >
 	<CompositeText id={globalState.getVideoStyle.getCompositeStyleIdFromCategory(customText)}>

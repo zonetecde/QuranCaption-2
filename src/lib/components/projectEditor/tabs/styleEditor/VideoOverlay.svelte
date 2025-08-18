@@ -7,6 +7,7 @@
 		Translation
 	} from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
+	import { verticalDrag } from '$lib/services/verticalDrag';
 	import { untrack } from 'svelte';
 	import SurahName from './SurahName.svelte';
 	import CustomText from './CustomText.svelte';
@@ -164,6 +165,8 @@
 			color: globalState.getVideoStyle.getStyle('global', 'overlay', 'overlay-color').value
 		};
 	});
+
+	// Drag vertical factorisé via l'action verticalDrag
 </script>
 
 {#if overlaySettings().enable}
@@ -182,7 +185,19 @@
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
 		{#if currentSubtitle() && currentSubtitle()!.id}
 			<p
-				class={'arabic absolute subtitle ' + getTailwind('arabic') + helperStyles()}
+				use:verticalDrag={{
+					getInitial: () =>
+						Number(
+							globalState.getVideoStyle.getStyle('arabic', 'positioning', 'vertical-position').value
+						),
+					apply: (v: number) =>
+						globalState.getVideoStyle.setStyle('arabic', 'positioning', 'vertical-position', v),
+					min: globalState.getVideoStyle.getStyle('arabic', 'positioning', 'vertical-position')
+						.valueMin,
+					max: globalState.getVideoStyle.getStyle('arabic', 'positioning', 'vertical-position')
+						.valueMax
+				}}
+				class={'arabic absolute subtitle select-none ' + getTailwind('arabic') + helperStyles()}
 				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)}"
 			>
 				{currentSubtitle()!.getText()}
@@ -195,7 +210,20 @@
 
 				{#if globalState.getVideoStyle.styles[edition]}
 					<p
-						class={`translation absolute subtitle ${edition} ${getTailwind(edition)} ${helperStyles()}`}
+						use:verticalDrag={{
+							getInitial: () =>
+								Number(
+									globalState.getVideoStyle.getStyle(edition, 'positioning', 'vertical-position')
+										.value
+								),
+							apply: (v: number) =>
+								globalState.getVideoStyle.setStyle(edition, 'positioning', 'vertical-position', v),
+							min: globalState.getVideoStyle.getStyle(edition, 'positioning', 'vertical-position')
+								.valueMin,
+							max: globalState.getVideoStyle.getStyle(edition, 'positioning', 'vertical-position')
+								.valueMax
+						}}
+						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles()}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
 						{#if translation.type === 'verse'}

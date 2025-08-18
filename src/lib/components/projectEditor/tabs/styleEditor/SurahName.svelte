@@ -2,6 +2,7 @@
 	import { Quran } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
+	import { verticalDrag } from '$lib/services/verticalDrag';
 	import { draw, fade } from 'svelte/transition';
 	import CompositeText from './CompositeText.svelte';
 
@@ -134,11 +135,24 @@
 			} catch (e) {}
 		});
 	});
+
+	const surahVerticalStyle = globalState.getVideoStyle.getStyle(
+		'global',
+		'surah-name',
+		'vertical-position'
+	);
 </script>
 
 {#if surahNameSettings().show && currentSurah() >= 1 && currentSurah() <= 114}
 	<div
-		class="w-[100px] flex flex-col items-center"
+		use:verticalDrag={{
+			getInitial: () => Number(surahVerticalStyle.value),
+			apply: (v: number) =>
+				globalState.getVideoStyle.setStyle('global', 'surah-name', 'vertical-position', v),
+			min: surahVerticalStyle.valueMin,
+			max: surahVerticalStyle.valueMax
+		}}
+		class="w-[100px] flex flex-col items-center cursor-move select-none"
 		style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity};`}
 	>
 		<div
