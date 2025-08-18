@@ -503,7 +503,9 @@ export class StylesData extends SerializableBase {
 		const byClip = this.overrides?.[clipId];
 		if (!byClip) return false;
 
-		return Object.values(byClip).some((cat) => !!cat && Object.keys(cat as any).length > 0);
+		// Chaque override pour un clip est un objet plat { styleId: value },
+		// donc il suffit de vérifier s'il y a au moins une clé.
+		return Object.keys(byClip).length > 0;
 	}
 
 	/**
@@ -674,9 +676,11 @@ export class VideoStyle extends SerializableBase {
 	hasAnyOverrideForClip(id: number): any {
 		for (const stylesData of this.styles) {
 			if (stylesData.hasAnyOverrideForClip(id)) {
+				console.log(`Override trouvé pour le clip ${id} dans les styles ${stylesData}`);
 				return true;
 			}
 		}
+		console.log(`Aucun override trouvé pour le clip ${id}`);
 		return false;
 	}
 }
