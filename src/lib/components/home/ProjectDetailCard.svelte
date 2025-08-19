@@ -38,11 +38,7 @@
 	class="glassmorphism-card flex flex-col justify-between hover:shadow-2xl hover:border-[var(--accent-primary)] transition-all duration-300"
 >
 	<div class="group">
-		<img
-			alt="Project Thumbnail"
-			class="w-full h-40 object-cover rounded-t-lg mb-4"
-			src="https://placehold.co/1920x1080"
-		/>
+		<section class="w-full h-40 object-cover rounded-t-lg mb-4 bg-white/80"></section>
 		<div class="px-4 pb-4">
 			<div class="flex justify-between items-start mb-2">
 				<EditableText
@@ -97,13 +93,10 @@
 						></div>
 					</div>
 				</div>
-				<div>
+				<div class=" space-y-2">
 					{#each Object.entries(projectDetail.translations) as [language, percentage]}
 						<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
-							<span
-								>Translation ({language})
-								<img alt="{language} flag" class="flag-icon" src="" /></span
-							>
+							<span>Translation ({language}) </span>
 							<span class="font-medium text-[var(--text-primary)]">{percentage}%</span>
 						</div>
 						<div class="progress-bar-bg">
