@@ -218,6 +218,16 @@
 				"icon": "visibility"
 			},
 			{
+				"id": "reciter-name",
+				"name": "Reciter Name",
+				"description": "Change the reciter of the project",
+				"value": "",
+				"valueType": "reciter",
+				"css": "",
+				"tailwind": false,
+				"icon": "format_quote"
+			},
+			{
 				"id": "reciter-name-vertical-position",
 				"name": "Vertical Position",
 				"description": "Change the vertical position of the reciter name (pixels from center)",
@@ -291,7 +301,7 @@
 				"id": "reciter-latin-spacing",
 				"name": "Spacing",
 				"description": "Adjust spacing between the Arabic Reciter name and its Latin equivalent",
-				"value": 10.3,
+				"value": 11,
 				"valueType": "number",
 				"valueMin": 0.2,
 				"valueMax": 15,

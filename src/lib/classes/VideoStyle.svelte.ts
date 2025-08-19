@@ -14,7 +14,8 @@ export type StyleValueType =
 	| 'boolean'
 	| 'text'
 	| 'time'
-	| 'composite';
+	| 'composite'
+	| 'reciter';
 
 // Types spécifiques pour les catégories de styles
 export type StyleCategoryName =

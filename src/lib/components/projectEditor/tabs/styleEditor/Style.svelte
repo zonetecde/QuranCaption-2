@@ -6,7 +6,11 @@
 	import type { Style, StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
 	import { default as StyleComponent } from '$lib/components/projectEditor/tabs/styleEditor/Style.svelte';
 	import toast from 'svelte-5-french-toast';
-	import type { CustomTextClip } from '$lib/classes';
+	import { ProjectDetail, type CustomTextClip } from '$lib/classes';
+	import AutocompleteInput from '$lib/components/misc/AutocompleteInput.svelte';
+	import RecitersManager from '$lib/classes/Reciter';
+	import EditableText from '$lib/components/misc/EditableText.svelte';
+	import { projectService } from '$lib/services/ProjectService';
 
 	let {
 		style,
@@ -34,6 +38,11 @@
 		if (style.valueType === 'composite' && target) {
 			// On charge les styles composites
 			await globalState.getVideoStyle.getStylesOfTarget(target).loadCompositeStyles();
+		}
+
+		// Si le style est sur le récitateur du projet, bind la valeur au récitateur du projet
+		if (style.valueType === 'reciter') {
+			inputValue = globalState.currentProject!.detail.reciter;
 		}
 	});
 
@@ -143,6 +152,14 @@
 
 		return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
 	}
+
+	function getStyleValue() {
+		if (style.valueType === 'composite') {
+			return 'Click to expand';
+		} else if (style.valueType === 'reciter') {
+			return globalState.currentProject!.detail.reciter || 'No reciter selected';
+		} else return String(style.value);
+	}
 </script>
 
 <div
@@ -188,9 +205,7 @@
 				{:else if style.valueType === 'time'}
 					<span>{msToTimeValue(Number(inputValue))}</span>
 				{:else}
-					<span class="truncate max-w-[140px]"
-						>{style.valueType === 'composite' ? 'Click to expand' : String(style.value)}</span
-					>
+					<span class="truncate max-w-[140px]">{getStyleValue()}</span>
 				{/if}
 
 				{#if selectedClipIds().length > 0 && (getEffectiveForSelection().overridden || getEffectiveForSelection().mixed) && target !== 'global'}
@@ -342,6 +357,31 @@
 					>
 						Use preview cursor time
 					</button>
+				</div>
+			{:else if style.valueType === 'reciter'}
+				<div class="flex flex-col gap-x-2">
+					<EditableText
+						text="Enter project reciter"
+						bind:value={globalState.currentProject!.detail.reciter}
+						maxLength={ProjectDetail.RECITER_MAX_LENGTH}
+						placeholder={globalState.currentProject!.detail.reciter}
+						textClasses="font-semibold"
+						action={async () => {
+							await projectService.saveDetail(globalState.currentProject!.detail); // Sauvegarde le projet
+						}}
+						inputType="reciters"
+					/>
+
+					{#if RecitersManager.getReciterObject(globalState.currentProject!.detail.reciter).number !== -1}
+						<p class="reciters-font text-3xl -mr-3 text-center">
+							{RecitersManager.getReciterObject(globalState.currentProject!.detail.reciter).number}
+						</p>
+					{:else}
+						<p class="text-sm mt-2 text-yellow-500">
+							<span class="material-icons align-middle text-[18px]!">block</span>
+							Arabic calligraphy is not available for this reciter.
+						</p>
+					{/if}
 				</div>
 			{:else if style.valueType === 'composite'}
 				<div class="flex flex-col gap-2">

@@ -27,6 +27,12 @@
 			globalState.userProjectsDetails = globalState.userProjectsDetails.sort(
 				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
 			);
+
+			// Re-récupère les détails du projet le plus récent
+			// Nécessaire car quand on les modifies dans le projet ça le modifie pas dans `globalState.userProjectsDetails`
+			globalState.userProjectsDetails[0] = await projectService.loadDetail(
+				globalState.userProjectsDetails[0].id
+			);
 		}
 	});
 </script>

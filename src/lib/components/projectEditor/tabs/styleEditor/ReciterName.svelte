@@ -15,7 +15,8 @@
 		return {
 			show: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-reciter-name')!
 				.value,
-			size: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('reciter-size')!.value,
+			size: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('reciter-size')!
+				.value as number,
 			showArabic: globalState.getVideoStyle
 				.getStylesOfTarget('global')
 				.findStyle('reciter-show-arabic')!.value,
@@ -78,9 +79,16 @@
 		{#if reciter().number !== -1}
 			<p
 				class="reciters-font"
-				style={`opacity: ${reciterNameSettings().showArabic ? 1 : 0}; font-size: ${reciterNameSettings().size}rem;`}
+				style={`opacity: ${reciterNameSettings().showArabic && reciter().number !== -1 ? 1 : 0}; font-size: ${reciterNameSettings().size}rem;`}
 			>
 				{reciter().number}
+			</p>
+		{:else}
+			<p
+				class="arabic w-[300px] text-center h-[155px] pt-7"
+				style={`opacity: ${reciterNameSettings().showArabic ? 1 : 0}; font-size: ${reciterNameSettings().size / 2}rem;`}
+			>
+				{reciter().arabic}
 			</p>
 		{/if}
 
