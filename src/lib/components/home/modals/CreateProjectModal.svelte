@@ -5,20 +5,13 @@
 	import { onMount } from 'svelte';
 	import toast from 'svelte-5-french-toast';
 	import AutocompleteInput from '$lib/components/misc/AutocompleteInput.svelte';
+	import type Reciter from '$lib/classes/Reciter';
+	import RecitersManager from '$lib/classes/Reciter';
 
 	let { close } = $props();
 
 	let name: string = $state('');
 	let reciter: string = $state('');
-	let reciters: string[] = $state([]);
-
-	onMount(async () => {
-		try {
-			reciters = await fetch('/reciter.json').then((res) => res.json());
-		} catch (error) {
-			console.error('Failed to load reciters:', error);
-		}
-	});
 
 	async function createProjectButtonClick() {
 		// Vérifie que le nom du projet n'est pas vide
@@ -107,7 +100,7 @@
 		<div style="position: relative; z-index: 1000;">
 			<AutocompleteInput
 				bind:value={reciter}
-				suggestions={reciters}
+				suggestions={RecitersManager.reciters.map((r) => r.latin)}
 				placeholder="Start typing to search reciters..."
 				maxlength={ProjectDetail.RECITER_MAX_LENGTH}
 				icon="Person"

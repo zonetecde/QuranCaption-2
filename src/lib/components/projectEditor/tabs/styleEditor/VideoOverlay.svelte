@@ -11,6 +11,7 @@
 	import { untrack } from 'svelte';
 	import SurahName from './SurahName.svelte';
 	import CustomText from './CustomText.svelte';
+	import ReciterName from './ReciterName.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getVideoStyle.getStylesOfTarget('global').findStyle('fade-duration')!
@@ -252,6 +253,7 @@
 		{/if}
 
 		<SurahName />
+		<ReciterName />
 
 		{#each currentCustomTexts() as customText}
 			<CustomText customText={(customText as CustomTextClip).category!} />

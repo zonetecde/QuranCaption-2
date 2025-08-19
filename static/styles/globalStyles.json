@@ -95,7 +95,7 @@
 				"id": "surah-name-vertical-position",
 				"name": "Vertical Position",
 				"description": "Change the vertical position of the surah name (pixels from center)",
-				"value": -110,
+				"value": -400,
 				"valueType": "number",
 				"valueMin": -540,
 				"valueMax": 540,
@@ -127,7 +127,7 @@
 				"icon": "format_quote"
 			},
 			{
-				"id": "show-arabic",
+				"id": "surah-show-arabic",
 				"name": "Show Arabic",
 				"description": "Show the Surah name in Arabic",
 				"value": true,
@@ -138,7 +138,7 @@
 				"icon": "translate"
 			},
 			{
-				"id": "show-latin",
+				"id": "surah-show-latin",
 				"name": "Show Latin",
 				"description": "Show additional Latin text (see Latin Text Format)",
 				"value": true,
@@ -166,10 +166,10 @@
 				"id": "surah-latin-spacing",
 				"name": "Spacing",
 				"description": "Adjust spacing between the Arabic Surah name and its Latin equivalent",
-				"value": 1.5,
+				"value": -1.2,
 				"valueType": "number",
-				"valueMin": 0.2,
-				"valueMax": 5,
+				"valueMin": -10,
+				"valueMax": 15,
 				"step": 0.1,
 				"css": "",
 				"tailwind": false,
@@ -179,7 +179,7 @@
 				"id": "surah-opacity",
 				"name": "Opacity",
 				"description": "Adjust the opacity of the Surah name",
-				"value": 1,
+				"value": 0.75,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 1,
@@ -192,6 +192,131 @@
 				"id": "surah-latin-text-style",
 				"name": "Text Styles",
 				"description": "Style for the Latin transliteration of the Surah name",
+				"value": "Click to expand",
+				"valueType": "composite",
+				"css": "",
+				"tailwind": false,
+				"icon": "auto_fix_high"
+			}
+		]
+	},
+	{
+		"id": "reciter-name",
+		"name": "Reciter Name",
+		"description": "Control display of the Reciter name",
+		"icon": "person",
+		"styles": [
+			{
+				"id": "show-reciter-name",
+				"name": "Show Reciter Name",
+				"description": "Show or hide the Reciter name",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+
+				"icon": "visibility"
+			},
+			{
+				"id": "reciter-name-vertical-position",
+				"name": "Vertical Position",
+				"description": "Change the vertical position of the reciter name (pixels from center)",
+				"value": 350,
+				"valueType": "number",
+				"valueMin": -540,
+				"valueMax": 540,
+				"css": "",
+				"tailwind": false,
+				"icon": "vertical_align_center"
+			},
+			{
+				"id": "reciter-name-horizontal-position",
+				"name": "Horizontal Position",
+				"description": "Change the horizontal position of the reciter name (pixels from center)",
+				"value": 0,
+				"valueType": "number",
+				"valueMin": -960,
+				"valueMax": 960,
+				"css": "",
+				"tailwind": false,
+				"icon": "horizontal_rule"
+			},
+			{
+				"id": "reciter-name-format",
+				"name": "Latin Text Format",
+				"description": "Format of the Reciter name display. Use <arabic> and <transliteration> tags to customize.",
+				"value": "<transliteration>",
+				"valueType": "text",
+				"css": "",
+				"tailwind": false,
+
+				"icon": "format_quote"
+			},
+			{
+				"id": "reciter-show-arabic",
+				"name": "Show Arabic",
+				"description": "Show the Reciter name in Arabic",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+
+				"icon": "translate"
+			},
+			{
+				"id": "reciter-show-latin",
+				"name": "Show Latin",
+				"description": "Show additional Latin text (see Latin Text Format)",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "translate"
+			},
+			{
+				"id": "reciter-size",
+				"name": "Size",
+				"description": "Size of Reciter Arabic Calligraphy Name",
+				"value": 6.5,
+				"valueType": "number",
+				"valueMin": 1,
+				"valueMax": 16,
+				"step": 0.05,
+				"css": "",
+				"tailwind": false,
+
+				"icon": "zoom_in"
+			},
+			{
+				"id": "reciter-latin-spacing",
+				"name": "Spacing",
+				"description": "Adjust spacing between the Arabic Reciter name and its Latin equivalent",
+				"value": 10.3,
+				"valueType": "number",
+				"valueMin": 0.2,
+				"valueMax": 15,
+				"step": 0.1,
+				"css": "",
+				"tailwind": false,
+				"icon": "format_line_spacing"
+			},
+			{
+				"id": "reciter-opacity",
+				"name": "Opacity",
+				"description": "Adjust the opacity of the Reciter name",
+				"value": 0.75,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 1,
+				"step": 0.01,
+				"css": "",
+				"tailwind": false,
+				"icon": "opacity"
+			},
+			{
+				"id": "reciter-latin-text-style",
+				"name": "Text Styles",
+				"description": "Style for the Latin transliteration of the Reciter name",
 				"value": "Click to expand",
 				"valueType": "composite",
 				"css": "",

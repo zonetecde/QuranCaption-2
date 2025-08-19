@@ -204,6 +204,9 @@
 									target={globalState.getStylesState.getCurrentSelection()}
 									categoryId={category.id as StyleCategoryName}
 									disabled={toDisable as boolean}
+									applyValueSimple={(v) => {
+										style.value = v;
+									}}
 								/>
 							{/if}
 						{/if}
@@ -231,6 +234,17 @@
 										styleIndex
 									]
 								}
+								applyValueSimple={(v) => {
+									// Pour time-appearance et time-disappearance on modifie le clip lui-même
+									// en plus du style. 
+									if (style.id === 'time-appearance') {
+										globalState.getCustomTextTrack.getCustomTextWithId(category.id)!.setStartTime(v);
+									}
+									if (style.id === 'time-disappearance') {
+										globalState.getCustomTextTrack.getCustomTextWithId(category.id)!.setEndTime(v);
+									}
+									style.value = v;
+								}}
 								categoryId={category.id as StyleCategoryName}
 								disabled={toDisable as boolean}
 							/>
@@ -245,8 +259,8 @@
 			<!-- Bouton pour ajouter un texte custom -->
 			<button
 				class="btn-accent w-2/3 mx-auto mt-4 px-2 py-2 rounded-md flex items-center justify-center gap-1"
-				onclick={() => {
-					globalState.getVideoStyle.addCustomText();
+				onclick={async () => {
+					await globalState.getVideoStyle.addCustomText();
 				}}
 				title="Add custom text"
 			>

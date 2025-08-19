@@ -7,6 +7,8 @@
 	import ModalManager from '../modals/ModalManager';
 	import { Status } from '$lib/classes/Status';
 	import { slide } from 'svelte/transition';
+	import RecitersManager from '$lib/classes/Reciter';
+	import AutocompleteInput from '../misc/AutocompleteInput.svelte';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -117,6 +119,7 @@
 					action={async () => {
 						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
 					}}
+					inputType="reciters"
 				/>
 			</div>
 			<p class="text-xs text-[var(--text-secondary)] mb-1">

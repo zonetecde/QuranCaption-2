@@ -12,12 +12,14 @@
 		style,
 		target,
 		categoryId,
-		disabled
+		disabled,
+		applyValueSimple
 	}: {
 		style: Style;
 		target?: string;
 		categoryId: StyleCategoryName;
 		disabled: boolean;
+		applyValueSimple: (value: any) => void;
 	} = $props();
 
 	onMount(async () => {
@@ -99,13 +101,7 @@
 				.getStylesOfTarget(target!)
 				.setStyleForClips(selectedClipIds(), style.id as StyleName, value);
 		} else {
-			// S'il y a un target, c'est que on est dans les styles de sous-titre ou global.
-			if (target)
-				globalState.getVideoStyle.getStylesOfTarget(target).setStyle(style.id as StyleName, value);
-			else {
-				// S'il n'y a pas de target, c'est qu'on est dans les customs text
-				globalState.getVideoStyle.setCustomTextStyle(categoryId, style.id as StyleName, value);
-			}
+			applyValueSimple(value);
 		}
 
 		// Déclenche un refresh éventuel (ex: max-height fit)
@@ -192,7 +188,9 @@
 				{:else if style.valueType === 'time'}
 					<span>{msToTimeValue(Number(inputValue))}</span>
 				{:else}
-					<span class="truncate max-w-[140px]">{String(style.value)}</span>
+					<span class="truncate max-w-[140px]"
+						>{style.valueType === 'composite' ? 'Click to expand' : String(style.value)}</span
+					>
 				{/if}
 
 				{#if selectedClipIds().length > 0 && (getEffectiveForSelection().overridden || getEffectiveForSelection().mixed) && target !== 'global'}
@@ -353,8 +351,11 @@
 						<StyleComponent
 							style={subStyle}
 							target={style.id}
-							categoryId={(style.id + '-category') as StyleCategoryName}
+							categoryId={categoryId as StyleCategoryName}
 							disabled={false}
+							applyValueSimple={(v) => {
+								subStyle.value = v;
+							}}
 						/>
 					{/each}
 				</div>

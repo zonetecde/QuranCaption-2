@@ -17,10 +17,12 @@
 			show: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-surah-name')!
 				.value,
 			size: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('surah-size')!.value,
-			showArabic: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-arabic')!
-				.value,
-			showLatin: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-latin')!
-				.value,
+			showArabic: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-show-arabic')!.value,
+			showLatin: globalState.getVideoStyle
+				.getStylesOfTarget('global')
+				.findStyle('surah-show-latin')!.value,
 			surahLatinSpacing: globalState.getVideoStyle
 				.getStylesOfTarget('global')
 				.findStyle('surah-latin-spacing')!.value,
@@ -150,12 +152,12 @@
 				.getStylesOfTarget('global')
 				.findStyle('surah-name-vertical-position')!.valueMax
 		}}
-		class="w-[100px] flex flex-col items-center cursor-move select-none"
-		style={`transform: scale(${surahNameSettings().size}) translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity};`}
+		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
+		style={`transform: translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity};`}
 	>
 		<div
 			bind:this={svgContainer}
-			style={`opacity: ${surahNameSettings().showArabic ? 1 : 0};`}
+			style={`opacity: ${surahNameSettings().showArabic ? 1 : 0}; transform: scale(${surahNameSettings().size})`}
 		></div>
 		<div
 			class="w-[700px] text-center"

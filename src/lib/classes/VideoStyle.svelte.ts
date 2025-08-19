@@ -1,6 +1,6 @@
 import { globalState } from '$lib/runes/main.svelte';
 import toast from 'svelte-5-french-toast';
-import type { CustomTextClip } from '.';
+import { CustomTextClip } from '.';
 import { TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
@@ -83,14 +83,26 @@ export type OverlayStyleName =
 export type SurahNameStyleName =
 	| 'show-surah-name'
 	| 'surah-name-format'
-	| 'show-arabic'
+	| 'surah-show-arabic'
 	| 'surah-name-vertical-position'
 	| 'surah-name-horizontal-position'
-	| 'show-latin'
+	| 'surah-show-latin'
 	| 'surah-size'
 	| 'surah-opacity'
 	| 'surah-latin-spacing'
 	| 'surah-latin-text-style';
+
+export type ReciterNameStyleName =
+	| 'show-reciter-name'
+	| 'reciter-name-format'
+	| 'reciter-show-arabic'
+	| 'reciter-name-vertical-position'
+	| 'reciter-name-horizontal-position'
+	| 'reciter-show-latin'
+	| 'reciter-size'
+	| 'reciter-opacity'
+	| 'reciter-latin-spacing'
+	| 'reciter-latin-text-style';
 
 // Nouvelle définition pour les styles du Creator Text
 export type CreatorTextStyleName = 'creator-text' | 'creator-text-composite';
@@ -115,6 +127,7 @@ export type StyleName =
 	| AnimationStyleName
 	| OverlayStyleName
 	| SurahNameStyleName
+	| ReciterNameStyleName
 	| CreatorTextStyleName
 	| CustomTextStyleName;
 
@@ -238,8 +251,8 @@ export class Category extends SerializableBase {
 				// Transforme chaque entrée en véritable instance de Style
 				style.value = raw.map((s) => (s instanceof Style ? s : new Style(s)));
 
-				if (style.id === 'surah-latin-text-style') {
-					style.setCompositeStyleValue('font-size', 8);
+				if (style.id === 'surah-latin-text-style' || style.id === 'reciter-latin-text-style') {
+					style.setCompositeStyleValue('font-size', 30);
 				}
 			}
 		}
@@ -530,7 +543,8 @@ export class StylesData extends SerializableBase {
 			// Style par défaut non encore créé si on arrive là.
 		}
 
-		return [];
+		// Si non trouvé, alors cherche parmis les textes composites des customs text
+		return globalState.getVideoStyle.getCustomTextCompositeStyles(compositeStyleId);
 	}
 }
 
@@ -602,6 +616,8 @@ export class VideoStyle extends SerializableBase {
 		styleId: StyleName,
 		value: string | number | boolean
 	): void {
+		console.log(customTextId);
+
 		// Trouve donc le clip correspondant pour update sa valeur
 		const clip = globalState.getCustomTextTrack.clips.find(
 			(c) => (c as CustomTextClip).category?.id === customTextId
@@ -683,6 +699,19 @@ export class VideoStyle extends SerializableBase {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Retourne les styles du style composite d'un custom text
+	 * @param customTextId L'id du customText
+	 * @returns
+	 */
+	getCustomTextCompositeStyles(customTextId: string): any {
+		for (const clip of globalState.getCustomTextTrack.clips) {
+			if (!(clip instanceof CustomTextClip)) continue;
+			const style = clip.category!.getStyle(customTextId as StyleName);
+			if (style) return style.value as Style[];
+		}
 	}
 }
 

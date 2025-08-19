@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import ModalManager from '../modals/ModalManager';
 
 	let {
@@ -8,11 +9,21 @@
 		placeholder = 'Enter text here',
 		action = () => {},
 		parentClasses = '',
-		textClasses = ''
+		textClasses = '',
+		inputType = 'text'
+	}: {
+		text?: string;
+		value?: string;
+		maxLength?: number;
+		placeholder?: string;
+		action?: () => void;
+		parentClasses?: string;
+		textClasses?: string;
+		inputType?: 'text' | 'reciters';
 	} = $props();
 
 	async function projectNameClick() {
-		const newName = await ModalManager.inputModal(text, value, maxLength, placeholder);
+		const newName = await ModalManager.inputModal(text, value, maxLength, placeholder, inputType);
 		if (newName && newName.trim() !== '') {
 			value = newName.trim();
 			action();

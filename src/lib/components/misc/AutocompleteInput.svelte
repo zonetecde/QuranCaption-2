@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	type Props = {
 		value: string;
 		suggestions: string[];
@@ -9,6 +11,7 @@
 		label?: string;
 		labelIcon?: string;
 		icon: string;
+		focusOnMount?: boolean;
 		onEnterPress?: () => void;
 	};
 
@@ -21,8 +24,17 @@
 		maxlength = NaN,
 		label,
 		labelIcon: icon,
+		focusOnMount,
 		onEnterPress
 	}: Props = $props();
+
+	let input: HTMLInputElement | undefined = $state(undefined);
+	onMount(() => {
+		if (input && focusOnMount) {
+			input.focus();
+			input.select();
+		}
+	});
 
 	let filteredSuggestions: string[] = $state([]);
 	let showSuggestions: boolean = $state(false);
@@ -115,6 +127,7 @@
 
 	<div class="relative">
 		<input
+			bind:this={input}
 			bind:value
 			type="text"
 			{maxlength}

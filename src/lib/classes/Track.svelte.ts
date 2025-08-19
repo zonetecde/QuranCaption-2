@@ -535,10 +535,9 @@ export class CustomTextTrack extends Track {
 		super(TrackType.CustomText);
 	}
 
-	addCustomText(customTextCategory: Category) {
-		this.clips.push(new CustomTextClip(customTextCategory));
-
-		globalState.updateVideoPreviewUI();
+	async addCustomText(customTextCategory: Category) {
+		const clip = new CustomTextClip(customTextCategory);
+		this.clips.push(clip);
 	}
 
 	getCurrentClips(): CustomTextClip[] {
@@ -557,6 +556,12 @@ export class CustomTextTrack extends Track {
 		}
 
 		return clips;
+	}
+
+	getCustomTextWithId(categoryId: string) {
+		return this.clips.find(
+			(clip) => clip instanceof CustomTextClip && clip.category!.id === categoryId
+		) as CustomTextClip | undefined;
 	}
 }
 

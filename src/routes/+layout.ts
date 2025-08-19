@@ -1,4 +1,5 @@
 import { Quran } from '$lib/classes/Quran';
+import RecitersManager from '$lib/classes/Reciter';
 import ModalManager from '$lib/components/modals/ModalManager';
 import { telemetry } from '$lib/services/Telemetry';
 
@@ -7,6 +8,9 @@ export const ssr = false;
 
 // Load le Qur'an au démarrage de l'application
 Quran.load();
+
+// Load les réciteurs au démarrage de l'application
+RecitersManager.loadReciters();
 
 // main.ts ou entrypoint
 window.addEventListener('error', (event) => {

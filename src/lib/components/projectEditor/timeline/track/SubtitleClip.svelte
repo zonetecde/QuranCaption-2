@@ -178,7 +178,7 @@
 </div>
 
 <ContextMenu bind:this={contextMenu}>
-	{#if globalState.currentProject!.projectEditorState.currentTab === 'Style'}
+	{#if globalState.currentProject!.projectEditorState.currentTab === 'Style' && clip.type === 'Subtitle'}
 		<Item on:click={editStyle}
 			><div class="btn-icon">
 				<span class="material-icons-outlined text-sm mr-1">auto_fix_high</span>Edit style

@@ -55,7 +55,8 @@ export default class ModalManager {
 		text: string,
 		defaultText: string = '',
 		maxlength: number = 100,
-		placeholder: string = 'Enter text here'
+		placeholder: string = 'Enter text here',
+		inputType: 'text' | 'reciters' = 'text'
 	): Promise<string> {
 		return new Promise<string>((resolve) => {
 			// Supprime l'ancien modal s'il existe
@@ -77,6 +78,7 @@ export default class ModalManager {
 					defaultText: defaultText,
 					maxlength: maxlength,
 					placeholder: placeholder,
+					inputType: inputType,
 					resolve: (result: string) => {
 						// Nettoyer et résoudre
 						unmount(input);
