@@ -1,5 +1,6 @@
 import { globalState } from '$lib/runes/main.svelte';
-import type { SubtitleClip } from './Clip.svelte';
+import { stat } from '@tauri-apps/plugin-fs';
+import type { ClipWithTranslation, SubtitleClip } from './Clip.svelte';
 import type { Edition } from './Edition';
 import { SerializableBase } from './misc/SerializableBase';
 
@@ -39,6 +40,43 @@ export class Translation extends SerializableBase {
 
 	getText(edition?: string, subtitle?: SubtitleClip): string {
 		return this.text;
+	}
+
+	updateStatus(status: TranslationStatus, edition: Edition) {
+		this.status = status;
+
+		this.updatePercentageCompleted(edition);
+	}
+
+	/**
+	 * Met à jour le pourcentage de complétion des traductions du projet pour
+	 * une édition donnée
+	 * @param edition L'édition à mettre à jour
+	 */
+	updatePercentageCompleted(edition: Edition) {
+		// Calcul le nbre de traduction complété/nbre de traduction total
+		let total: number = 0;
+		let completed: number = 0;
+
+		for (const subtitle of globalState.getSubtitleTrack.clips) {
+			if (subtitle.type === 'Subtitle' || subtitle.type === 'Pre-defined Subtitle') {
+				const translations = (subtitle as ClipWithTranslation).translations;
+				if (translations && translations[edition.name]) {
+					// Si la traduction existe, on l'ajoute au pourcentage
+					if (!(translations[edition.name] instanceof VerseTranslation)) continue;
+
+					if (translations[edition.name].isStatusComplete()) {
+						completed++;
+					}
+
+					total++;
+				}
+			}
+		}
+
+		globalState.currentProject!.detail.translations[edition.author] = Math.floor(
+			total > 0 ? (completed / total) * 100 : 0
+		);
 	}
 }
 

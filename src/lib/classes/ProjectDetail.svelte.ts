@@ -21,10 +21,8 @@ export class ProjectDetail extends SerializableBase {
 	percentageCaptioned: number;
 	status: Status;
 
-	translations: {
-		language: string;
-		percentage: number;
-	}[];
+	// Format : language: percentage
+	translations: { [language: string]: number };
 
 	/**
 	 * Crée une nouvelle instance de ProjectDetail
@@ -45,7 +43,7 @@ export class ProjectDetail extends SerializableBase {
 		this.percentageCaptioned = $state(0);
 		this.status = Status.NOT_SET;
 		this.duration = new Duration(0);
-		this.translations = [];
+		this.translations = {};
 	}
 
 	/**

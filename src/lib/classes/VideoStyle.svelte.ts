@@ -152,7 +152,7 @@ export class Style extends SerializableBase {
 		for (let i = 0; i < compositeStyles.length; i++) {
 			const element = compositeStyles[i];
 
-			if (element.id.includes('enable') && !element.value) {
+			if (!element.id || (element.id.includes('enable') && !element.value)) {
 				// Si on désactive le style, on ne génère pas le CSS (c'est toute la partie outline là qui est concernée)
 				break;
 			}
@@ -575,6 +575,9 @@ export class VideoStyle extends SerializableBase {
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
 		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -100);
 
+		// Load les styles composites
+		videoStyle.getStylesOfTarget('global').loadCompositeStyles();
+
 		return videoStyle;
 	}
 
@@ -676,11 +679,9 @@ export class VideoStyle extends SerializableBase {
 	hasAnyOverrideForClip(id: number): any {
 		for (const stylesData of this.styles) {
 			if (stylesData.hasAnyOverrideForClip(id)) {
-				console.log(`Override trouvé pour le clip ${id} dans les styles ${stylesData}`);
 				return true;
 			}
 		}
-		console.log(`Aucun override trouvé pour le clip ${id}`);
 		return false;
 	}
 }

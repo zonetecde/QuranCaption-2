@@ -71,8 +71,9 @@
 					// Si c'est les derniers mots du verset, normalement le trim est fait automatiquement
 					// donc on met le status à 'automatically trimmed'
 					// sinon on le met à 'to review' car il faut encore trim la fin de la traduction
-					if (subtitle.isLastWordsOfVerse) translation().status = 'automatically trimmed';
-					else translation().status = 'to review';
+					if (subtitle.isLastWordsOfVerse)
+						translation().updateStatus('automatically trimmed', edition);
+					else translation().updateStatus('to review', edition);
 				}
 			}
 		}
@@ -96,7 +97,7 @@
 			}
 
 			updateTranslationText();
-			translation().status = 'reviewed';
+			translation().updateStatus('reviewed', edition);
 		}
 	}
 
@@ -258,7 +259,7 @@
 						bind:checked={(subtitle.translations[edition.name] as VerseTranslation).isBruteForce}
 						onchange={(e) => {
 							if ((e.target as HTMLInputElement).checked) {
-								translation().status = 'reviewed';
+								translation().updateStatus('reviewed', edition);
 								setTimeout(() => {
 									if (translationInput) {
 										translationInput.focus();
@@ -279,7 +280,7 @@
 					class="text-sm font-medium"
 					ondblclick={() => {
 						(subtitle.translations[edition.name] as VerseTranslation).isBruteForce = true;
-						translation().status = 'reviewed';
+						translation().updateStatus('reviewed', edition);
 						// Met le focus sur l'input de traduction
 						setTimeout(() => {
 							if (translationInput) {

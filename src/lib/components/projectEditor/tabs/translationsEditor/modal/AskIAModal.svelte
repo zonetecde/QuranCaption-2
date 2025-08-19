@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Edition, SubtitleClip } from '$lib/classes';
+	import type { VerseTranslation } from '$lib/classes/Translation.svelte';
 	import ClickableLink from '$lib/components/home/ClickableLink.svelte';
 	import ModalManager from '$lib/components/modals/ModalManager';
 	import { globalState } from '$lib/runes/main.svelte';
@@ -109,13 +110,13 @@
 				for (let segmentIndex = 0; segmentIndex < segmentRanges.length; segmentIndex++) {
 					const range = segmentRanges[segmentIndex];
 					const subtitle = subtitlesForVerse[segmentIndex];
-					const verseTranslation = subtitle.translations[edition.name];
+					const verseTranslation: VerseTranslation = subtitle.translations[edition.name];
 
 					if (range === null) {
 						errorMessages.push(
 							`Verse ${verseKey}, segment ${segmentIndex + 1}: AI returned null (unmappable segment)`
 						);
-						verseTranslation.status = 'ai error';
+						verseTranslation.updateStatus('ai error', edition);
 						verseHasError = true;
 						continue;
 					}
@@ -124,7 +125,7 @@
 						errorMessages.push(
 							`Verse ${verseKey}, segment ${segmentIndex + 1}: Invalid range format - expected [start, end]`
 						);
-						verseTranslation.status = 'ai error';
+						verseTranslation.updateStatus('ai error', edition);
 						verseHasError = true;
 						continue;
 					}
@@ -136,7 +137,7 @@
 						errorMessages.push(
 							`Verse ${verseKey}, segment ${segmentIndex + 1}: Negative indices not allowed (${startIndex}, ${endIndex})`
 						);
-						verseTranslation.status = 'ai error';
+						verseTranslation.updateStatus('ai error', edition);
 						verseHasError = true;
 						continue;
 					}
@@ -145,7 +146,7 @@
 						errorMessages.push(
 							`Verse ${verseKey}, segment ${segmentIndex + 1}: Start index (${startIndex}) cannot be greater than end index (${endIndex})`
 						);
-						verseTranslation.status = 'ai error';
+						verseTranslation.updateStatus('ai error', edition);
 						verseHasError = true;
 						continue;
 					}
@@ -155,7 +156,7 @@
 							`Verse ${verseKey}, segment ${segmentIndex + 1}: Indices out of range (${startIndex}-${endIndex}), translation has only ${translationWords.length} words`
 						);
 
-						verseTranslation.status = 'ai error';
+						verseTranslation.updateStatus('ai error', edition);
 						verseHasError = true;
 						continue;
 					}
@@ -170,7 +171,7 @@
 					verseTranslation.text = translationText;
 					verseTranslation.startWordIndex = startIndex;
 					verseTranslation.endWordIndex = endIndex;
-					verseTranslation.status = 'ai trimmed';
+					verseTranslation.updateStatus('ai trimmed', edition);
 				}
 
 				if (!verseHasError) {

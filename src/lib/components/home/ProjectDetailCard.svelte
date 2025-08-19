@@ -98,16 +98,16 @@
 					</div>
 				</div>
 				<div>
-					{#each projectDetail.translations as translation}
+					{#each Object.entries(projectDetail.translations) as [language, percentage]}
 						<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
 							<span
-								>Translation ({translation.language})
-								<img alt="{translation.language} flag" class="flag-icon" src="" /></span
+								>Translation ({language})
+								<img alt="{language} flag" class="flag-icon" src="" /></span
 							>
-							<span class="font-medium text-[var(--text-primary)]">{translation.percentage}%</span>
+							<span class="font-medium text-[var(--text-primary)]">{percentage}%</span>
 						</div>
 						<div class="progress-bar-bg">
-							<div class="progress-bar-fill" style="width: {translation.percentage}%;"></div>
+							<div class="progress-bar-fill" style="width: {percentage}%;"></div>
 						</div>
 					{/each}
 				</div>
