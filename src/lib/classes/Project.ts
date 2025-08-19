@@ -1,3 +1,4 @@
+import { globalState } from '$lib/runes/main.svelte';
 import { projectService } from '$lib/services/ProjectService';
 import { ProjectContent, ProjectDetail, ProjectEditorState } from '.';
 import { SerializableBase } from './misc/SerializableBase';
@@ -24,6 +25,8 @@ export class Project extends SerializableBase {
 	 */
 	async save(): Promise<void> {
 		this.detail.updateTimestamp();
+		globalState.userProjectsDetails.find((p) => p.id === this.detail.id)!.updatedAt =
+			this.detail.updatedAt;
 		await projectService.save(this);
 	}
 }

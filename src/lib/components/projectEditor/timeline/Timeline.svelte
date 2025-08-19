@@ -10,6 +10,8 @@
 		// Récupère la fin du clip le plus loin dans la timeline
 		const longestClipEnd = globalState.currentProject?.content.timeline.getLongestTrackDuration()!;
 
+		globalState.currentProject!.detail.duration = longestClipEnd;
+
 		if (!longestClipEnd.isNull())
 			return new Duration(
 				// Ajoute 2 minutes pour pas que la timeline soit au ras bord

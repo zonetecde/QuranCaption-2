@@ -1,11 +1,11 @@
 import { SerializableBase } from './misc/SerializableBase';
 
 export class Status extends SerializableBase {
-	static readonly EXPORTED = new Status('Exported', '#11ff00');
-	static readonly TO_EXPORT = new Status('To Export', '#e600ff');
-	static readonly TO_CAPTION = new Status('To Caption', '#ffea00');
 	static readonly NOT_SET = new Status('Not Set', '#ffffff');
+	static readonly TO_CAPTION = new Status('To Caption', '#ffea00');
 	static readonly TO_TRANSLATE = new Status('To Translate', '#ffea00');
+	static readonly TO_EXPORT = new Status('To Export', '#e600ff');
+	static readonly EXPORTED = new Status('Exported', '#11ff00');
 
 	status: string;
 	color: string;

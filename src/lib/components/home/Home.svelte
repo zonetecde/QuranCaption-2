@@ -19,8 +19,15 @@
 	}
 
 	onMount(async () => {
-		// Récupère les projets de l'utilisateur au chargement de l'application
-		await projectService.loadUserProjectsDetails();
+		if (globalState.userProjectsDetails.length === 0) {
+			// Récupère les projets de l'utilisateur au chargement de l'application
+			await projectService.loadUserProjectsDetails();
+		} else {
+			// Retrie juste dans l'ordre de updatetime
+			globalState.userProjectsDetails = globalState.userProjectsDetails.sort(
+				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+			);
+		}
 	});
 </script>
 

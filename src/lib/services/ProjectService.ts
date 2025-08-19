@@ -2,6 +2,7 @@ import { Project, ProjectContent, ProjectDetail, VideoStyle } from '$lib/classes
 import { readDir, remove, writeTextFile, readTextFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { globalState } from '$lib/runes/main.svelte';
+import ModalManager from '$lib/components/modals/ModalManager';
 
 /**
  * Service pour gérer les projets.
@@ -107,14 +108,24 @@ export class ProjectService {
 	async delete(projectId: number): Promise<void> {
 		const projectsPath = await join(await appDataDir(), this.projectsFolder);
 
-		// Construis le chemin d'accès vers le projet
-		const filePath = await join(projectsPath, `${projectId}.json`);
+		try {
+			// Construis le chemin d'accès vers le projet
+			const filePath = await join(projectsPath, `${projectId}.json`);
+			await remove(filePath);
 
-		await remove(filePath);
+			// Supprime le dossier des assets associés au projet
+			const assetsPath = await this.getAssetFolderForProject(projectId);
+			await remove(assetsPath, { recursive: true });
+		} catch (e) {
+			// Le projet n'avait pas d'asset
+		}
 
-		// Supprime le dossier des assets associés au projet
-		const assetsPath = await this.getAssetFolderForProject(projectId);
-		await remove(assetsPath, { recursive: true });
+		// Le supprime de la liste des projets
+		setTimeout(() => {
+			globalState.userProjectsDetails = globalState.userProjectsDetails.filter(
+				(p) => p.id !== projectId
+			);
+		}, 0);
 	}
 
 	/**

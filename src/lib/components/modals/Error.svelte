@@ -1,4 +1,5 @@
 <script lang="ts">
+	import toast from 'svelte-5-french-toast';
 	import { slide } from 'svelte/transition';
 
 	let {
@@ -37,17 +38,31 @@
 		<p class="text-secondary leading-relaxed text-sm">{message}</p>
 
 		{#if logs}
-			<details class="bg-accent border border-color rounded-lg overflow-hidden">
-				<summary
-					class="px-4 py-3 text-sm font-medium text-primary cursor-pointer hover:bg-primary/10 transition-colors duration-200"
+			<div class="relative">
+				<details class="bg-accent relative border border-color rounded-lg max-h-[400px]">
+					<summary
+						class="px-4 py-3 text-sm font-medium text-primary cursor-pointer hover:bg-primary/10 transition-colors duration-200 h-full"
+					>
+						Show technical details
+					</summary>
+					<div class="px-4 py-3 border-t border-color bg-primary/5">
+						<pre
+							class="text-xs text-thirdly font-mono whitespace-pre-wrap overflow-x-auto overflow-y-auto max-h-[300px]">{logs}</pre>
+					</div>
+				</details>
+
+				<button
+					class="absolute top-3 right-2 px-2 text-sm bg-primary/10 hover:bg-primary/20 rounded-2xl transition-colors duration-200 flex items-center gap-1 z-20 cursor-pointer"
+					onclick={(e) => {
+						e.stopPropagation();
+						navigator.clipboard.writeText(logs ?? '');
+						toast.success('Logs copied to clipboard');
+					}}
 				>
-					Show technical details
-				</summary>
-				<div class="px-4 py-3 border-t border-color bg-primary/5">
-					<pre
-						class="text-xs text-thirdly font-mono whitespace-pre-wrap overflow-x-auto">{logs}</pre>
-				</div>
-			</details>
+					<span class="material-icons text-[19px]">content_copy</span>
+					Copy
+				</button>
+			</div>
 		{/if}
 	</div>
 
@@ -55,7 +70,7 @@
 	<div class="flex justify-end">
 		<button
 			class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105
-			       shadow-lg hover:shadow-xl"
+				   shadow-lg hover:shadow-xl"
 			onclick={() => {
 				resolve();
 			}}

@@ -5,6 +5,8 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import EditableText from '../misc/EditableText.svelte';
 	import ModalManager from '../modals/ModalManager';
+	import { Status } from '$lib/classes/Status';
+	import { slide } from 'svelte/transition';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -22,7 +24,6 @@
 			)
 		) {
 			await projectService.delete(projectDetail.id); // Supprime le projet
-			await projectService.loadUserProjectsDetails(); // maj des projets de l'utilisateur
 		} else {
 			contextMenu!.close();
 		}
@@ -32,10 +33,30 @@
 		// Ouvre le projet
 		globalState.currentProject = await projectService.load(projectDetail.id);
 	}
+
+	// Gestion du menu de statut
+	let showStatusMenu = $state(false);
+	const statuses: Status[] = Object.values(Status).filter((v) => v instanceof Status) as Status[];
+
+	async function selectStatus(s: Status) {
+		projectDetail.status = s;
+		showStatusMenu = false;
+		await projectService.saveDetail(projectDetail);
+	}
+
+	function toggleStatusMenu(e: MouseEvent) {
+		e.stopPropagation();
+		showStatusMenu = !showStatusMenu;
+	}
+
+	// Fermer en cliquant dehors
+	if (typeof window !== 'undefined') {
+		window.addEventListener('click', () => (showStatusMenu = false));
+	}
 </script>
 
 <div
-	class="glassmorphism-card flex flex-col justify-between hover:shadow-2xl hover:border-[var(--accent-primary)] transition-all duration-300"
+	class="bg-[rgba(22,27,34,0.6)] backdrop-blur-[10px] border border-[var(--border-color)] rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col justify-between hover:shadow-2xl transition-all duration-300"
 >
 	<div class="group">
 		<section class="w-full h-40 object-cover rounded-t-lg mb-4 bg-white/80"></section>
@@ -53,9 +74,37 @@
 					}}
 				/>
 
-				<div class="status-not-set text-xs flex items-center">
-					<span class="status-dot" style={`background-color: ${projectDetail.status.color}`}
-					></span>{projectDetail.status.status}
+				<div class="relative">
+					<button
+						class="bg-transparent cursor-pointer text-xs flex items-center mr-0 duration-300 group-hover:mr-3 relative"
+						onclick={toggleStatusMenu}
+						type="button"
+					>
+						<span
+							class="w-3 h-3 rounded-full inline-block mr-2 group-hover:mr-3 duration-300"
+							style={`background-color: ${projectDetail.status.color}`}
+						></span>
+						{projectDetail.status.status}
+						<span
+							class="material-icons-outlined text-[10px] w-10 duration-300 absolute left-full top-1/2 -translate-y-1/2 scale-75 pointer-events-none opacity-0 group-hover:opacity-60 group-hover:scale-100 group-hover:-translate-x-2"
+							aria-hidden="true">arrow_drop_down</span
+						>
+					</button>
+					{#if showStatusMenu}
+						<ul
+							class="absolute group top-full right-0 mt-1 w-40 rounded-md border border-[var(--border-color)] bg-[#161B22] shadow-xl py-1 z-20 backdrop-blur-sm"
+						>
+							{#each statuses as s}
+								<li
+									class={`flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer select-none transition-colors hover:bg-white/5 rounded-sm ${s === projectDetail.status ? 'bg-white/10' : ''}`}
+									onclick={() => selectStatus(s)}
+								>
+									<span class="w-3 h-3 rounded-full" style={`background-color: ${s.color}`}
+									></span>{s.status}
+								</li>
+							{/each}
+						</ul>
+					{/if}
 				</div>
 			</div>
 			<div class="flex items-center gap-x-1 text-xs text-[var(--text-secondary)] -mb-0.5">
@@ -78,7 +127,9 @@
 					>{projectDetail.verseRange.toString()}</span
 				>
 			</p>
-			<div class="project-card-details space-y-2">
+			<div
+				class="project-details opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-64 space-y-2"
+			>
 				<div>
 					<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
 						<span>Captioning</span>
@@ -86,21 +137,24 @@
 							>{projectDetail.percentageCaptioned}%</span
 						>
 					</div>
-					<div class="progress-bar-bg">
+					<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
 						<div
-							class="progress-bar-fill"
+							class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
 							style="width: {projectDetail.percentageCaptioned}%;"
 						></div>
 					</div>
 				</div>
-				<div class=" space-y-2">
+				<div class="space-y-2">
 					{#each Object.entries(projectDetail.translations) as [language, percentage]}
 						<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
 							<span>Translation ({language}) </span>
 							<span class="font-medium text-[var(--text-primary)]">{percentage}%</span>
 						</div>
-						<div class="progress-bar-bg">
-							<div class="progress-bar-fill" style="width: {percentage}%;"></div>
+						<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
+							<div
+								class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
+								style="width: {percentage}%;"
+							></div>
 						</div>
 					{/each}
 				</div>
@@ -136,53 +190,13 @@
 </ContextMenu>
 
 <style>
-	.glassmorphism-card {
-		background: rgba(22, 27, 34, 0.6);
-		backdrop-filter: blur(10px);
-		border: 1px solid var(--border-color);
-		border-radius: 0.75rem;
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-	}
-
-	.status-dot {
-		width: 0.75rem;
-		height: 0.75rem;
-		border-radius: 50%;
-		display: inline-block;
-		margin-right: 0.5rem;
-	}
-
-	.progress-bar-bg {
-		background-color: var(--border-color);
-		border-radius: 0.25rem;
-		height: 0.5rem;
-		overflow: hidden;
-	}
-
-	.progress-bar-fill {
-		background-color: var(--accent-primary);
-		height: 100%;
-		border-radius: 0.25rem;
-		transition: width 0.3s ease-in-out;
-	}
-	.flag-icon {
-		width: 1.25rem;
-		height: 0.75rem;
-		border-radius: 2px;
-		object-fit: cover;
-		display: inline-block;
-		margin-left: 0.25rem;
-	}
-	.project-card-details {
-		opacity: 0;
-		max-height: 0;
-		overflow: hidden;
+	.project-details {
 		transition:
-			opacity 0.3s ease-out,
-			max-height 0.3s ease-out;
+			opacity 300ms ease-out,
+			max-height 500ms ease-out;
 	}
-	.group:hover .project-card-details {
-		opacity: 1;
-		max-height: 500px;
+
+	.group:hover .project-details {
+		transition-delay: 50ms;
 	}
 </style>

@@ -379,11 +379,11 @@ export class SubtitleTrack extends Track {
 	 * sourate sur la vidéo)
 	 */
 	getCurrentSurah(): number {
-		const currentClip = this.getCurrentSubtitleToDisplay();
+		const currentClip = this.getCurrentClip();
+
 		if (currentClip instanceof SubtitleClip) {
 			return currentClip.surah;
-		} else if (currentClip === null) return -1;
-		else {
+		} else if (currentClip !== null) {
 			// Prend le clip de sous-titre précédent
 			const previousClip = this.getSubtitleBefore(this.clips.indexOf(currentClip));
 			if (previousClip) {
@@ -392,6 +392,12 @@ export class SubtitleTrack extends Track {
 			const nextClip = this.getSubtitleAfter(this.clips.indexOf(currentClip));
 			if (nextClip) {
 				return nextClip.surah;
+			}
+		} else {
+			// Prend le dernier clip qui est un sous-titre dans le projet
+			const lastSubtitleClip = this.clips.findLast((clip) => clip instanceof SubtitleClip);
+			if (lastSubtitleClip) {
+				return lastSubtitleClip.surah;
 			}
 		}
 		return -1;

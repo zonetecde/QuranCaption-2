@@ -41,7 +41,7 @@ export class ProjectDetail extends SerializableBase {
 
 		this.verseRange = new VerseRange();
 		this.percentageCaptioned = $state(0);
-		this.status = Status.NOT_SET;
+		this.status = $state(Status.NOT_SET);
 		this.duration = new Duration(0);
 		this.translations = {};
 	}
