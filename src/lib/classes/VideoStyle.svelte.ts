@@ -310,7 +310,7 @@ export class StylesData extends SerializableBase {
 
 				// Propriétés spécifiques à ignorer
 				if (style.id === 'font-family' && String(effectiveValue) === 'Hafs') continue; // Gérer par une classe Tailwind
-				if (style.id === 'max-height' && String(effectiveValue) === 'none') break; // Ignore les propriétés après qui dépendent de max-height
+				if (style.id === 'max-height' && effectiveValue === 0) break; // Ignore les propriétés après qui dépendent de max-height
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
@@ -609,6 +609,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Set les styles par défaut pour l'arabe
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Mushaf');
+		videoStyle.getStylesOfTarget('arabic').setStyle('line-height', 1.6);
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
 		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -100);
 

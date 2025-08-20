@@ -93,7 +93,10 @@
 			{#each ['global', 'arabic', 'translation'] as selection}
 				<button
 					onclick={() => {
-						globalState.getStylesState.currentSelection = selection;
+						globalState.getStylesState.currentSelection = selection as
+							| 'global'
+							| 'arabic'
+							| 'translation';
 					}}
 					class={'py-1.5 px-2 rounded-lg flex items-center justify-center gap-1  ' +
 						(globalState.getStylesState.currentSelection === selection

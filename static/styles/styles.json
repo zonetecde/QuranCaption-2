@@ -138,10 +138,11 @@
 			{
 				"id": "max-height",
 				"name": "Max Height (Make Text Fit)",
-				"description": "Limit text height and auto-adjust font size to fit",
-				"value": "none",
-				"valueType": "select",
-				"options": ["none", "50", "75", "100", "125", "150", "175", "200", "300", "400"],
+				"description": "Limit text height and auto-adjust font size to fit. 0 = no limit.",
+				"value": 0,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 800,
 				"css": "max-height: {value}px; height: {value}px;",
 				"tailwind": false,
 				"icon": "height"

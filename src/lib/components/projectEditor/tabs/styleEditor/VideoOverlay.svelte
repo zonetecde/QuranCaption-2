@@ -79,19 +79,27 @@
 		return globalState.getVideoStyle.getStylesOfTarget(target).generateTailwind();
 	});
 
-	let helperStyles = $derived(() => {
-		let classes = ' ';
-
-		// Si on a certains styles qu'on modifie, on ajoute des styles pour afficher ce qu'ils font
+	let helperStyles = $derived((target: string) => {
+		// Vérifie que la sélection actuelle correspond à la cible
 		if (
-			globalState.getSectionsState['width'] &&
-			(globalState.getSectionsState['width'].extended ||
-				globalState.getSectionsState['max-height'].extended)
+			globalState.getStylesState.currentSelection === target ||
+			(globalState.getStylesState.currentSelection === 'translation' &&
+				globalState.getStylesState.currentSelectionTranslation === target)
 		) {
-			classes += 'bg-[#11A2AF]/50 ';
-		}
+			let classes = ' ';
 
-		return classes;
+			// Si on a certains styles qu'on modifie, on ajoute des styles pour afficher ce qu'ils font
+			if (
+				globalState.getSectionsState['width'] &&
+				(globalState.getSectionsState['width'].extended ||
+					globalState.getSectionsState['max-height'].extended)
+			) {
+				classes += 'bg-[#11A2AF]/50 ';
+			}
+
+			return classes;
+		}
+		return '';
 	});
 
 	let lastSubtitleId = 0;
@@ -213,9 +221,9 @@
 					max: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
 						.valueMax
 				}}
-				class={'arabic absolute subtitle select-none flex flex-row-reverse flex-wrap ' +
+				class={'arabic absolute subtitle select-none flex flex-row-reverse flex-wrap content-center ' +
 					getTailwind('arabic') +
-					helperStyles()}
+					helperStyles('arabic')}
 				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)};"
 			>
 				{#each currentSubtitle()!.getText().split(' ') as word}
@@ -248,7 +256,7 @@
 								.getStylesOfTarget(edition)
 								.findStyle('vertical-position')!.valueMax
 						}}
-						class={`translation absolute subtitle flex flex-wrap select-none ${edition} ${getTailwind(edition)} ${helperStyles()}`}
+						class={`translation absolute subtitle flex flex-wrap select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
 						{#if translation.type === 'verse'}

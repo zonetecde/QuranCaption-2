@@ -48,7 +48,7 @@ export class StylesEditorState extends SerializableBase {
 	scrollPosition: number = $state(0);
 
 	// Indique quel est la sélection actuelle dans l'éditeur de styles (global/arabic/translation)
-	currentSelection: 'global' | 'arabic' | string = $state('global');
+	currentSelection: 'global' | 'arabic' | 'translation' = $state('global');
 
 	// Indique quelle traduction est actuellement sélectionnée dans l'éditeur de styles
 	currentSelectionTranslation: string = $state('');
