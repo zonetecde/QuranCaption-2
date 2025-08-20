@@ -1,0 +1,40 @@
+[
+  {
+    "id": 105,
+    "city": "makkah",
+    "name": {
+      "translated": "The Elephant",
+      "transliterated": "Al-Fil",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1610,
+        1604
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-fil",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "Non hai visto come agì il tuo Signore con quelli dell’elefante?"
+  ],
+  [
+    2,
+    "Non fece fallire le loro astuzie?"
+  ],
+  [
+    3,
+    "Mandò contro di loro stormi di uccelli"
+  ],
+  [
+    4,
+    "lancianti su di loro pietre di argilla indurita."
+  ],
+  [
+    5,
+    "Li ridusse come pula svuotata."
+  ]
+]

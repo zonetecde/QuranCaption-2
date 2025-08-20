@@ -1,0 +1,40 @@
+[
+  {
+    "id": 97,
+    "city": "makkah",
+    "name": {
+      "translated": "The Power",
+      "transliterated": "Al-Qadr",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1583,
+        1585
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-qadr",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Nous l’avons certes, fait descendre (le Coran) pendant la nuit d’Al-Qadr (du Destin)."
+  ],
+  [
+    2,
+    "Et qui te dira ce qu’est la nuit d’Al-Qadr ?"
+  ],
+  [
+    3,
+    "La nuit d’Al-Qadr est meilleure que mille mois."
+  ],
+  [
+    4,
+    "Durant celle-ci descendent les Anges ainsi que l’Esprit , par permission de leur Seigneur pour tout ordre."
+  ],
+  [
+    5,
+    "Elle est paix et salut jusqu’à l’apparition de l’aube."
+  ]
+]

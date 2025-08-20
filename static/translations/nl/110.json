@@ -1,0 +1,32 @@
+[
+  {
+    "id": 110,
+    "city": "madinah",
+    "name": {
+      "translated": "The Divine Support",
+      "transliterated": "An-Nasr",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "an-nasr",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Als de hulp van Allah en de overwinning zijn gekomen."
+  ],
+  [
+    2,
+    "En jij (O Mohammed) de mensen in grote groepen tot de godsdienst van Allah ziet toetreden."
+  ],
+  [
+    3,
+    "Prijs dan de Glorie van jouw Heer en vraag Hem om vergeving. Voorwaar, Hij is Berouwaanvaardend."
+  ]
+]

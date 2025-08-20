@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "city": "makkah",
+    "name": {
+      "translated": "The Opener",
+      "transliterated": "Al-Fatihah",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1575,
+        1578,
+        1581,
+        1577
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-fatihah",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "In nome di Allah, il Compassionevole, il Misericordioso"
+  ],
+  [
+    2,
+    "La lode [appartiene] ad Allah, Signore dei mondi"
+  ],
+  [
+    3,
+    "il Compassionevole, il Misericordioso,"
+  ],
+  [
+    4,
+    "Re del Giorno del Giudizio."
+  ],
+  [
+    5,
+    "Te noi adoriamo e a Te chiediamo aiuto."
+  ],
+  [
+    6,
+    "Guidaci sulla retta via,"
+  ],
+  [
+    7,
+    "la via di coloro che hai colmato di grazia, non di coloro che [sono incorsi] nella [Tua] ira, né degli sviati."
+  ]
+]

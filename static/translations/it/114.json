@@ -1,0 +1,44 @@
+[
+  {
+    "id": 114,
+    "city": "makkah",
+    "name": {
+      "translated": "Mankind",
+      "transliterated": "An-Nas",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1575,
+        1587
+      ]
+    },
+    "ayahs": 6,
+    "slug": "an-nas",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "Di’: “Mi rifugio nel Signore degli uomini,"
+  ],
+  [
+    2,
+    "Re degli uomini,"
+  ],
+  [
+    3,
+    "Dio degli uomini,"
+  ],
+  [
+    4,
+    "contro il male del sussurratore furtivo,"
+  ],
+  [
+    5,
+    "che soffia il male nei cuori degli uomini,"
+  ],
+  [
+    6,
+    "che [venga] dai dèmoni o dagli uomini”."
+  ]
+]

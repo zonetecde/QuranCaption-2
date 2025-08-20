@@ -1,0 +1,47 @@
+[
+  {
+    "id": 109,
+    "city": "makkah",
+    "name": {
+      "translated": "The Disbelievers",
+      "transliterated": "Al-Kafirun",
+      "codepoints": [
+        1575,
+        1604,
+        1603,
+        1575,
+        1601,
+        1585,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 6,
+    "slug": "al-kafirun",
+    "translator": null
+  },
+  [
+    1,
+    "Dize: Ó incrédulos,"
+  ],
+  [
+    2,
+    "Não adoro o que adorais,"
+  ],
+  [
+    3,
+    "Nem vós adorais o que adoro."
+  ],
+  [
+    4,
+    "E jamais adorarei o que adorais,"
+  ],
+  [
+    5,
+    "Nem vós adorareis o que adoro."
+  ],
+  [
+    6,
+    "Vós tendes a vossa religião e eu tenho a minha."
+  ]
+]

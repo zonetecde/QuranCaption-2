@@ -1,0 +1,40 @@
+[
+  {
+    "id": 97,
+    "city": "makkah",
+    "name": {
+      "translated": "The Power",
+      "transliterated": "Al-Qadr",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1583,
+        1585
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-qadr",
+    "translator": null
+  },
+  [
+    1,
+    "Sabei que o revelamos (o Alcorão), na Noite do Decreto."
+  ],
+  [
+    2,
+    "E o que te fará entender o que é a Noite do Decreto?"
+  ],
+  [
+    3,
+    "A Noite do Decreto é melhor do que mil meses."
+  ],
+  [
+    4,
+    "Nela descem os anjos e o Espírito (Anjo Gabriel), com a anuência do seu Senhor, para executar todas as Suas ordens."
+  ],
+  [
+    5,
+    "(Ela) é paz, até ao romper da aurora!"
+  ]
+]

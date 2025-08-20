@@ -1,0 +1,32 @@
+[
+  {
+    "id": 110,
+    "city": "madinah",
+    "name": {
+      "translated": "The Divine Support",
+      "transliterated": "An-Nasr",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "an-nasr",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "Lorsque vient le secours d’Allah ainsi que la victoire,"
+  ],
+  [
+    2,
+    "et que tu vois les gens entrer en foule dans la religion d’Allah,"
+  ],
+  [
+    3,
+    "alors, par la louange, célèbre la gloire de ton Seigneur et implore Son pardon. Car c’est Lui le grand Accueillant au repentir."
+  ]
+]

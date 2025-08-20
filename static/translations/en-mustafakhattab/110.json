@@ -1,0 +1,32 @@
+[
+  {
+    "id": 110,
+    "city": "madinah",
+    "name": {
+      "translated": "The Divine Support",
+      "transliterated": "An-Nasr",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "an-nasr",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "When Allah’s ˹ultimate˺ help comes and the victory ˹over Mecca is achieved˺,"
+  ],
+  [
+    2,
+    "and you ˹O Prophet˺ see the people embracing Allah’s Way in crowds,"
+  ],
+  [
+    3,
+    "then glorify the praises of your Lord and seek His forgiveness, for certainly He is ever Accepting of Repentance."
+  ]
+]

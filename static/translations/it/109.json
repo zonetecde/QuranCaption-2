@@ -1,0 +1,47 @@
+[
+  {
+    "id": 109,
+    "city": "makkah",
+    "name": {
+      "translated": "The Disbelievers",
+      "transliterated": "Al-Kafirun",
+      "codepoints": [
+        1575,
+        1604,
+        1603,
+        1575,
+        1601,
+        1585,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 6,
+    "slug": "al-kafirun",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "Di’: “O miscredenti!"
+  ],
+  [
+    2,
+    "Io non adoro quel che voi adorate"
+  ],
+  [
+    3,
+    "e voi non siete adoratori di quel che io adoro."
+  ],
+  [
+    4,
+    "Io non sono adoratore di quel che voi avete adorato"
+  ],
+  [
+    5,
+    "e voi non siete adoratori di quel che io adoro:"
+  ],
+  [
+    6,
+    "a voi la vostra religione, a me la mia”."
+  ]
+]

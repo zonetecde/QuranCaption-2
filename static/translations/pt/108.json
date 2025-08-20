@@ -1,0 +1,33 @@
+[
+  {
+    "id": 108,
+    "city": "makkah",
+    "name": {
+      "translated": "The Abundance",
+      "transliterated": "Al-Kawthar",
+      "codepoints": [
+        1575,
+        1604,
+        1603,
+        1608,
+        1579,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "al-kawthar",
+    "translator": null
+  },
+  [
+    1,
+    "Em verdade, agraciamos-te com a abundância."
+  ],
+  [
+    2,
+    "Reza, pois, ao teu Senhor, e faze sacrifício."
+  ],
+  [
+    3,
+    "Em verdade, quem te insultar não terá posteridade."
+  ]
+]

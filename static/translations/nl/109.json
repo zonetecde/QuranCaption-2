@@ -1,0 +1,47 @@
+[
+  {
+    "id": 109,
+    "city": "makkah",
+    "name": {
+      "translated": "The Disbelievers",
+      "transliterated": "Al-Kafirun",
+      "codepoints": [
+        1575,
+        1604,
+        1603,
+        1575,
+        1601,
+        1585,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 6,
+    "slug": "al-kafirun",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Zeg (O Mohammed): \"O ongelovigen."
+  ],
+  [
+    2,
+    "Ik aanbid niet wat jullie aanbidden."
+  ],
+  [
+    3,
+    "En jullie zijn geen aanbidders van wat ik aanbid."
+  ],
+  [
+    4,
+    "En ik zal nooit een aanbidder worden van wat jullie aanbidden."
+  ],
+  [
+    5,
+    "En jullie zullen nooit aanbidders worden van wat ik aanbid."
+  ],
+  [
+    6,
+    "Daarom, voor jullie jullie godsdienst en voor mij mijn godsdienst."
+  ]
+]

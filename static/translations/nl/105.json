@@ -1,0 +1,40 @@
+[
+  {
+    "id": 105,
+    "city": "makkah",
+    "name": {
+      "translated": "The Elephant",
+      "transliterated": "Al-Fil",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1610,
+        1604
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-fil",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Heb jij niet vernomen hoe jouw Heer met de mensen van de olifant heeft gehandeld?"
+  ],
+  [
+    2,
+    "Heeft Hij hun plan niet verijdeld?"
+  ],
+  [
+    3,
+    "En Hij heeft over hen zwermen vogels gezonden."
+  ],
+  [
+    4,
+    "Die stenen van klei op hen wierpen."
+  ],
+  [
+    5,
+    "Zo maakte Hij hen als (door wormen) aangevreten bladeren."
+  ]
+]

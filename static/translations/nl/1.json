@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "city": "makkah",
+    "name": {
+      "translated": "The Opener",
+      "transliterated": "Al-Fatihah",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1575,
+        1578,
+        1581,
+        1577
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-fatihah",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "In de naam van Allah, de Erbarmer, de Meest Barmhartige."
+  ],
+  [
+    2,
+    "Alle lof zij Allah, de Heer der Werelden."
+  ],
+  [
+    3,
+    "De Erbarmer, de Meest Barmhartige."
+  ],
+  [
+    4,
+    "De Heerser op de Dag des Oordeels."
+  ],
+  [
+    5,
+    "U alleen aanbidden wij en U alleen vragen wij om hulp."
+  ],
+  [
+    6,
+    "Leid ons op het rechte Pad."
+  ],
+  [
+    7,
+    "Het Pad van degenen aan wie U gunsten hebt geschonken, niet van degenen op wie de toorn rust en niet dat van de dwalenden."
+  ]
+]

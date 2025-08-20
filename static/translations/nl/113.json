@@ -1,0 +1,40 @@
+[
+  {
+    "id": 113,
+    "city": "makkah",
+    "name": {
+      "translated": "The Daybreak",
+      "transliterated": "Al-Falaq",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1604,
+        1602
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-falaq",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Zeg: \"Ik zoek bescherming bij de Heer der dageraad."
+  ],
+  [
+    2,
+    "Tegen het kwaad dat Hij geschapen heeft."
+  ],
+  [
+    3,
+    "En tegen het kwaad van de donkere nacht wanneer hij aanbreekt."
+  ],
+  [
+    4,
+    "En tegen het kwaad van hen die op knopen blazen."
+  ],
+  [
+    5,
+    "En tegen het kwaad van een jaloerse wanneer deze jaloers is.\""
+  ]
+]

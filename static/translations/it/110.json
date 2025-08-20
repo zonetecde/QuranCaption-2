@@ -1,0 +1,32 @@
+[
+  {
+    "id": 110,
+    "city": "madinah",
+    "name": {
+      "translated": "The Divine Support",
+      "transliterated": "An-Nasr",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "an-nasr",
+    "translator": "Hamza Roberto Piccardo"
+  },
+  [
+    1,
+    "Quando verrà l’ausilio di Allah e la vittoria,"
+  ],
+  [
+    2,
+    "e vedrai le genti entrare in massa nella religione di Allah,"
+  ],
+  [
+    3,
+    "glorifica il tuo Signore lodandoLo e chiediGli perdono: in verità Egli è Colui che accetta il pentimento."
+  ]
+]

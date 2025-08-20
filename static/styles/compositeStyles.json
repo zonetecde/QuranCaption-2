@@ -1,0 +1,87 @@
+[
+	{
+		"id": "opacity",
+		"name": "Text Opacity",
+		"description": "Control the transparency of the text",
+		"value": 1,
+		"valueType": "number",
+		"valueMin": 0,
+		"valueMax": 1,
+		"step": 0.01,
+		"css": "opacity: {value};",
+		"tailwind": false,
+
+		"icon": "opacity"
+	},
+	{
+		"id": "font-family",
+		"name": "Font",
+		"description": "Select the font family for the text",
+		"value": "Arial",
+		"valueType": "select",
+		"options": [],
+		"css": "font-family: '{value}', sans-serif;",
+		"tailwind": false,
+
+		"icon": "font_download"
+	},
+	{
+		"id": "font-size",
+		"name": "Font Size",
+		"description": "Adjust the size of the text",
+		"value": 60,
+		"valueType": "number",
+		"valueMin": 4,
+		"valueMax": 200,
+		"css": "font-size: {value}px;",
+		"tailwind": false,
+
+		"icon": "format_size"
+	},
+	{
+		"id": "text-color",
+		"name": "Color",
+		"description": "Change the color of the text",
+		"value": "#ffffff",
+		"valueType": "color",
+		"css": "color: {value};",
+		"tailwind": false,
+		"icon": "palette"
+	},
+	{
+		"id": "outline-enable",
+		"name": "Outline",
+		"description": "Enable or disable text outline",
+		"value": false,
+		"valueType": "boolean",
+		"css": "",
+		"tailwind": false,
+
+		"icon": "toggle_on"
+	},
+	{
+		"id": "text-outline",
+		"name": "Outline Thickness",
+		"description": "Set the width of the text outline",
+		"value": 0.2,
+		"valueType": "number",
+		"valueMin": 0,
+		"valueMax": 2,
+		"step": 0.01,
+		"css": "--text-outline-width: {value}px; -webkit-text-stroke: {value}px var(--text-outline-color); -webkit-text-fill-color: currentColor; text-shadow: {value}px 0 0 var(--text-outline-color), 0 {value}px 0 var(--text-outline-color), -{value}px 0 0 var(--text-outline-color), 0 -{value}px 0 var(--text-outline-color), {value}px {value}px 0 var(--text-outline-color), -{value}px -{value}px 0 var(--text-outline-color), {value}px -{value}px 0 var(--text-outline-color), -{value}px {value}px 0 var(--text-outline-color);",
+		"tailwind": false,
+
+		"icon": "line_weight"
+	},
+	{
+		"id": "text-outline-color",
+		"name": "Outline Colour",
+		"description": "Set the color of the text outline",
+		"value": "#000000",
+		"valueType": "color",
+		"css": "--text-outline-color: {value};",
+		"tailwind": false,
+
+		"icon": "palette"
+	}
+]

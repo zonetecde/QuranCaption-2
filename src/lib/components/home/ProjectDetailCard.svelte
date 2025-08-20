@@ -1,0 +1,205 @@
+<script lang="ts">
+	import { ProjectDetail } from '$lib/classes';
+	import { projectService } from '$lib/services/ProjectService';
+	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
+	import { globalState } from '$lib/runes/main.svelte';
+	import EditableText from '../misc/EditableText.svelte';
+	import ModalManager from '../modals/ModalManager';
+	import { Status } from '$lib/classes/Status';
+	import { slide } from 'svelte/transition';
+	import RecitersManager from '$lib/classes/Reciter';
+	import AutocompleteInput from '../misc/AutocompleteInput.svelte';
+
+	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
+
+	let {
+		projectDetail = $bindable()
+	}: {
+		projectDetail: ProjectDetail;
+	} = $props();
+
+	async function deleteProjectButtonClick(e: MouseEvent) {
+		if (e.button !== 0) return; // Only handle left click
+		if (
+			await ModalManager.confirmModal(
+				`Are you sure you want to delete the project "${projectDetail.name}"?`
+			)
+		) {
+			await projectService.delete(projectDetail.id); // Supprime le projet
+		} else {
+			contextMenu!.close();
+		}
+	}
+
+	async function openProjectButtonClick() {
+		// Ouvre le projet
+		globalState.currentProject = await projectService.load(projectDetail.id);
+	}
+
+	// Gestion du menu de statut
+	let showStatusMenu = $state(false);
+	const statuses: Status[] = Object.values(Status).filter((v) => v instanceof Status) as Status[];
+
+	async function selectStatus(s: Status) {
+		projectDetail.status = s;
+		showStatusMenu = false;
+		await projectService.saveDetail(projectDetail);
+	}
+
+	function toggleStatusMenu(e: MouseEvent) {
+		e.stopPropagation();
+		showStatusMenu = !showStatusMenu;
+	}
+
+	// Fermer en cliquant dehors
+	if (typeof window !== 'undefined') {
+		window.addEventListener('click', () => (showStatusMenu = false));
+	}
+</script>
+
+<div
+	class="bg-[rgba(22,27,34,0.6)] backdrop-blur-[10px] border border-[var(--border-color)] rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col justify-between hover:shadow-2xl transition-all duration-300"
+>
+	<div class="group">
+		<section class="w-full h-40 object-cover rounded-t-lg mb-4 bg-white/80"></section>
+		<div class="px-4 pb-4">
+			<div class="flex justify-between items-start mb-2">
+				<EditableText
+					text="Enter project name"
+					bind:value={projectDetail.name}
+					maxLength={ProjectDetail.NAME_MAX_LENGTH}
+					placeholder={projectDetail.name}
+					parentClasses="text-accent"
+					textClasses="text-lg font-semibold"
+					action={async () => {
+						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+					}}
+				/>
+
+				<div class="relative">
+					<button
+						class="bg-transparent cursor-pointer text-xs flex items-center mr-0 duration-300 group-hover:mr-3 relative"
+						onclick={toggleStatusMenu}
+						type="button"
+					>
+						<span
+							class="w-3 h-3 rounded-full inline-block mr-2 group-hover:mr-3 duration-300"
+							style={`background-color: ${projectDetail.status.color}`}
+						></span>
+						{projectDetail.status.status}
+						<span
+							class="material-icons-outlined text-[10px] w-10 duration-300 absolute left-full top-1/2 -translate-y-1/2 scale-75 pointer-events-none opacity-0 group-hover:opacity-60 group-hover:scale-100 group-hover:-translate-x-2"
+							aria-hidden="true">arrow_drop_down</span
+						>
+					</button>
+					{#if showStatusMenu}
+						<ul
+							class="absolute group top-full right-0 mt-1 w-40 rounded-md border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-xl py-1 z-20 backdrop-blur-sm"
+						>
+							{#each statuses as s}
+								<li
+									class={`flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer select-none transition-colors hover:bg-white/5 rounded-sm ${s === projectDetail.status ? 'bg-white/10' : ''}`}
+									onclick={() => selectStatus(s)}
+								>
+									<span class="w-3 h-3 rounded-full" style={`background-color: ${s.color}`}
+									></span>{s.status}
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+			</div>
+			<div class="flex items-center gap-x-1 text-xs text-[var(--text-secondary)] -mb-0.5">
+				Reciter: <EditableText
+					text="Enter project reciter"
+					bind:value={projectDetail.reciter}
+					maxLength={ProjectDetail.RECITER_MAX_LENGTH}
+					placeholder={projectDetail.reciter}
+					textClasses="font-semibold"
+					action={async () => {
+						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+					}}
+					inputType="reciters"
+				/>
+			</div>
+			<p class="text-xs text-[var(--text-secondary)] mb-1">
+				Duration: {projectDetail.duration.getFormattedTime(false)}
+			</p>
+			<p class="text-xs text-[var(--text-secondary)] mb-3">
+				Verses: <span class="font-medium text-[var(--text-primary)]"
+					>{projectDetail.verseRange.toString()}</span
+				>
+			</p>
+			<div
+				class="project-details opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-64 space-y-2"
+			>
+				<div>
+					<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
+						<span>Captioning</span>
+						<span class="font-medium text-[var(--text-primary)]"
+							>{projectDetail.percentageCaptioned}%</span
+						>
+					</div>
+					<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
+						<div
+							class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
+							style="width: {projectDetail.percentageCaptioned}%;"
+						></div>
+					</div>
+				</div>
+				<div class="space-y-2">
+					{#each Object.entries(projectDetail.translations) as [language, percentage]}
+						<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
+							<span>Translation ({language}) </span>
+							<span class="font-medium text-[var(--text-primary)]">{percentage}%</span>
+						</div>
+						<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
+							<div
+								class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
+								style="width: {percentage}%;"
+							></div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-auto pt-3 border-t border-[var(--border-color)] px-4 pb-4">
+		<div class="flex justify-between items-center text-xs text-[var(--text-secondary)] mb-2">
+			<span>Created: {projectDetail.createdAt.toLocaleDateString()}</span>
+			<span>Updated: {projectDetail.updatedAt.toLocaleDateString()}</span>
+		</div>
+
+		<div class="flex space-x-2">
+			<button class="btn btn-primary btn-sm flex-grow text-xs" onclick={openProjectButtonClick}
+				>Open</button
+			>
+			<button
+				class="btn btn-secondary btn-sm p-1.5 flex items-center"
+				onclick={contextMenu!.createHandler()}
+			>
+				<span class="material-icons-outlined text-sm">more_horiz</span>
+			</button>
+		</div>
+	</div>
+</div>
+
+<ContextMenu bind:this={contextMenu}>
+	<Item on:click={deleteProjectButtonClick}
+		><div class="btn-icon danger-color">
+			<span class="material-icons-outlined text-sm mr-1">delete</span>Delete project
+		</div></Item
+	>
+</ContextMenu>
+
+<style>
+	.project-details {
+		transition:
+			opacity 300ms ease-out,
+			max-height 500ms ease-out;
+	}
+
+	.group:hover .project-details {
+		transition-delay: 50ms;
+	}
+</style>

@@ -1,0 +1,54 @@
+[
+  {
+    "id": 99,
+    "city": "madinah",
+    "name": {
+      "translated": "The Earthquake",
+      "transliterated": "Az-Zalzalah",
+      "codepoints": [
+        1575,
+        1604,
+        1586,
+        1604,
+        1586,
+        1604,
+        1577
+      ]
+    },
+    "ayahs": 8,
+    "slug": "az-zalzalah",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "When the earth is shaken ˹in˺ its ultimate quaking,"
+  ],
+  [
+    2,
+    "and when the earth throws out ˹all˺ its contents,"
+  ],
+  [
+    3,
+    "and humanity cries, “What is wrong with it?”—"
+  ],
+  [
+    4,
+    "on that Day the earth will recount everything,"
+  ],
+  [
+    5,
+    "having been inspired by your Lord ˹to do so˺."
+  ],
+  [
+    6,
+    "On that Day people will proceed in separate groups to be shown ˹the consequences of˺ their deeds."
+  ],
+  [
+    7,
+    "So whoever does an atom’s weight of good will see it."
+  ],
+  [
+    8,
+    "And whoever does an atom’s weight of evil will see it."
+  ]
+]

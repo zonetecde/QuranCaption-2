@@ -1,0 +1,52 @@
+[
+  {
+    "id": 94,
+    "city": "makkah",
+    "name": {
+      "translated": "The Relief",
+      "transliterated": "Ash-Sharh",
+      "codepoints": [
+        1575,
+        1604,
+        1588,
+        1585,
+        1581
+      ]
+    },
+    "ayahs": 8,
+    "slug": "ash-sharh",
+    "translator": "Muhammad Hamidullah"
+  },
+  [
+    1,
+    "N’avons-Nous pas ouvert  pour toi ta poitrine ?"
+  ],
+  [
+    2,
+    "Et ne t’avons-Nous pas déchargé du fardeau."
+  ],
+  [
+    3,
+    "qui accablait ton dos ?"
+  ],
+  [
+    4,
+    "Et exalté pour toi ta renommée ?"
+  ],
+  [
+    5,
+    "A côté de la difficulté est, certes, une facilité !"
+  ],
+  [
+    6,
+    "A côté de la difficulté, est certes, une facilité !"
+  ],
+  [
+    7,
+    "Quand tu te libères, donc, lève-toi ,"
+  ],
+  [
+    8,
+    "et à ton Seigneur aspire."
+  ]
+]

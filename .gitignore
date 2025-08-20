@@ -1,29 +1,27 @@
-.DS_Store
 node_modules
-/build
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
 /.svelte-kit
-/package
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
 .env
 .env.*
 !.env.example
+!.env.test
+
+# Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+src-tauri/2
 
-ffmpeg.exe
-ffplay.exe
-ffprobe.exe
-video_creator.exe
-yt-dlp.exe
-src/lib/ext/PrivateVariable.ts
-localStorage/
-_localStorage/
-
-# for the export
-src-tauri/video-creator/build/*
-src-tauri/video-creator/dist/*
-src-tauri/video-creator/video_creator.spec
-
-src-tauri/video-creator/output.mp4
-src-tauri/video_creator_debug.txt
-src-tauri/binaries/output.mp4
-src-tauri/video-creator/__pycache__/*
+# Special
+src-tauri/binaries/*.exe

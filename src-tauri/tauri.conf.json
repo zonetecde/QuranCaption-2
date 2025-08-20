@@ -1,101 +1,47 @@
 {
-	"$schema": "../node_modules/@tauri-apps/cli/schema.json",
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"productName": "Quran Caption",
+	"version": "3.0.0",
+	"identifier": "com.qurancaption",
 	"build": {
-		"beforeBuildCommand": "npm run build",
+		"frontendDist": "../build",
+		"devUrl": "http://localhost:5173",
 		"beforeDevCommand": "npm run dev",
-		"devPath": "http://localhost:5173",
-		"distDir": "../build"
+		"beforeBuildCommand": "npm run build"
 	},
-	"package": {
-		"productName": "Quran Caption",
-		"version": "4.7.0"
-	},
-	"tauri": {
-		"allowlist": {
-			"all": false,
-			"shell": {
-				"open": true
-			},
-			"dialog": {
-				"all": false,
-				"ask": true,
-				"confirm": true,
-				"message": true,
-				"open": true,
-				"save": true
-			},
-			"protocol": {
-				"all": true,
-				"asset": true,
-				"assetScope": ["**"]
-			},
-			"fs": {
-				"all": false,
-				"copyFile": false,
-				"createDir": true,
-				"exists": true,
-				"readDir": true,
-				"readFile": true,
-				"removeDir": true,
-				"removeFile": true,
-				"renameFile": false,
-				"scope": ["**"],
-				"writeFile": true
-			},
-			"window": {
-				"all": true
-			}
-		},
-		"bundle": {
-			"active": true,
-			"category": "DeveloperTool",
-			"copyright": "",
-			"deb": {
-				"depends": []
-			},
-			"externalBin": [],
-			"icon": [
-				"icons/32x32.png",
-				"icons/128x128.png",
-				"icons/128x128@2x.png",
-				"icons/icon.icns",
-				"icons/icon.ico"
-			],
-			"identifier": "com.qurancaption",
-			"longDescription": "Quran Caption is a software that allows you to create videos of Quran recitation with subtitles in multiple languages and, most importantly, with ease.",
-			"macOS": {
-				"entitlements": null,
-				"exceptionDomain": "",
-				"frameworks": [],
-				"providerShortName": "Quran Caption",
-				"signingIdentity": "-"
-			},
-			"resources": ["binaries/**/*", "black-vid.mp4"],
-			"shortDescription": "",
-			"targets": "all",
-			"windows": {
-				"certificateThumbprint": null,
-				"digestAlgorithm": "sha256",
-				"timestampUrl": ""
-			}
-		},
-		"security": {
-			"csp": "default-src *; media-src *; style-src * 'unsafe-inline'; connect-src *; img-src * data:"
-		},
-		"updater": {
-			"active": false
-		},
+	"app": {
 		"windows": [
 			{
-				"label": "main",
-				"fullscreen": false,
-				"height": 768,
-				"resizable": true,
 				"title": "Quran Caption",
+				"height": 768,
 				"width": 1024,
 				"minWidth": 1024,
-				"minHeight": 768
+				"minHeight": 768,
+				"resizable": true,
+				"fullscreen": false,
+				"decorations": false
 			}
+		],
+		"security": {
+			"csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost",
+			"assetProtocol": {
+				"enable": true,
+				"scope": {
+					"allow": ["**/*"]
+				}
+			}
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"resources": ["binaries/**/*"],
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
 		]
 	}
 }

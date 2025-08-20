@@ -1,0 +1,40 @@
+[
+  {
+    "id": 105,
+    "city": "makkah",
+    "name": {
+      "translated": "The Elephant",
+      "transliterated": "Al-Fil",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1610,
+        1604
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-fil",
+    "translator": "Dr. Mustafa Khattab"
+  },
+  [
+    1,
+    "Have you not seen ˹O Prophet˺ how your Lord dealt with the Army of the Elephant?"
+  ],
+  [
+    2,
+    "Did He not frustrate their scheme?"
+  ],
+  [
+    3,
+    "For He sent against them flocks of birds,"
+  ],
+  [
+    4,
+    "that pelted them with stones of baked clay,"
+  ],
+  [
+    5,
+    "leaving them like chewed up straw. "
+  ]
+]

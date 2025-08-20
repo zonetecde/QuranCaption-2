@@ -1,0 +1,38 @@
+[
+  {
+    "id": 112,
+    "city": "makkah",
+    "name": {
+      "translated": "The Sincerity",
+      "transliterated": "Al-Ikhlas",
+      "codepoints": [
+        1575,
+        1604,
+        1573,
+        1582,
+        1604,
+        1575,
+        1589
+      ]
+    },
+    "ayahs": 4,
+    "slug": "al-ikhlas",
+    "translator": "Sofian S. Siregar"
+  },
+  [
+    1,
+    "Zeg: \"Hij is Allah, de Enige."
+  ],
+  [
+    2,
+    "Allah is de Enige van Wie al het geschapene afhankelijk is."
+  ],
+  [
+    3,
+    "Hij heeft niet verwekt en is niet verwekt."
+  ],
+  [
+    4,
+    "En niet één is aan Hem gelijkwaardig.\""
+  ]
+]
