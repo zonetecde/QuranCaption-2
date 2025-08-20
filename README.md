@@ -16,14 +16,11 @@ Quran Caption 3 represents a complete rewrite and modernization of the applicati
 
 ## Preview Images
 
-![Quran Caption 3 Preview 1](placeholder-image-1.png)
-*Main interface preview - Image coming soon*
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/90cbfe2d-00d3-4e9e-9f26-82a950fbd2f5" />
 
-![Quran Caption 3 Preview 2](placeholder-image-2.png)
-*Video editing workspace - Image coming soon*
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/7d9f469a-5b2b-4434-a7f1-ddd01f78fa9b" />
 
-![Quran Caption 3 Preview 3](placeholder-image-3.png)
-*Advanced styling options - Image coming soon*
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/a311e681-4374-428c-aca2-bf85b3debff8" />
 
 ---
 
