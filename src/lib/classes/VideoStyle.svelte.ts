@@ -9,6 +9,7 @@ import type { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 import QPCV2FontProvider from '$lib/services/FontProvider';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile, readTextFile } from '@tauri-apps/plugin-fs';
+import ModalManager from '$lib/components/modals/ModalManager';
 
 export type StyleValueType =
 	| 'color'
@@ -779,6 +780,25 @@ export class VideoStyle extends SerializableBase {
 	async importStyles(json: videoStyleFileData) {
 		// Crée une nouvelle instance VideoStyle à partir des données JSON
 		const importedVideoStyle = VideoStyle.fromJSON(json.videoStyle);
+
+		// Si une traduction existe dans le projet mais que ce n'est pas celle du fichier style exporté,
+		// alors on demande à l'utilisateur s'il veut l'appliquer à sa traduction
+		const projectTranslations = globalState.getProjectTranslation.addedTranslationEditions;
+		for (const style of importedVideoStyle.styles) {
+			if (style.target === 'arabic' || style.target === 'global') continue;
+
+			for (const projectTranslation of projectTranslations) {
+				if (!projectTranslations.find((e) => e.name === style.target)) {
+					const confirm = await ModalManager.confirmModal(
+						`Your project does not have the "${style.target}" translation. Would you like to apply the styles from that translation to your project translation "${projectTranslation.name}"?`
+					);
+
+					if (confirm) {
+						style.target = projectTranslation.name;
+					}
+				}
+			}
+		}
 
 		// Remplace les styles du projet actuel par les nouveaux
 		globalState.currentProject!.content.videoStyle = importedVideoStyle;
