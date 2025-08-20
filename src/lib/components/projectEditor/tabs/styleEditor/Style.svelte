@@ -307,6 +307,7 @@
 							{#await invoke('get_system_fonts')}
 								<option value="" disabled selected>Loading fonts...</option>
 							{:then fonts: any}
+								<option value="Mushaf">Mushaf (Qur'an Font)</option>
 								<option value="Hafs">Hafs (Qur'an Font)</option>
 								{#each fonts as font}
 									<option value={font}>{font}</option>

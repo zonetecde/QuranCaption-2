@@ -1,11 +1,12 @@
 import { globalState } from '$lib/runes/main.svelte';
 import toast from 'svelte-5-french-toast';
-import { CustomTextClip } from '.';
+import { CustomTextClip, SubtitleClip } from '.';
 import { TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import { CustomTextTrack } from './Track.svelte';
 import type { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
+import QPCV2FontProvider from '$lib/services/FontProvider';
 
 export type StyleValueType =
 	| 'color'
@@ -310,6 +311,24 @@ export class StylesData extends SerializableBase {
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
+				// Cas particulier: pour la police d'écriture Mushaf, alors on met la bonne
+				// police d'écriture en fonction du verset
+				if (style.id === 'font-family' && String(effectiveValue) === 'Mushaf' && clipId) {
+					const subtitleClip = globalState.getSubtitleTrack.getClipById(clipId);
+					let fontname = 'QCF2BSML'; // Par défaut on met le font contenant tout les glyphes spéciaux du Coran
+					// (notamment si subtitleClip instanceof PredefinedSubtitle alors pour la basmala ce sera le bon font)
+
+					if (subtitleClip instanceof SubtitleClip) {
+						fontname = QPCV2FontProvider.getFontNameForVerse(
+							subtitleClip.surah,
+							subtitleClip.verse
+						);
+					}
+
+					css += `font-family: ${fontname};\n`;
+					continue;
+				}
+
 				// Cas particulier pour l'alignement vertical/horizontal du texte
 				if (style.id === 'vertical-text-alignment' || style.id === 'horizontal-text-alignment') {
 					// @ts-ignore: style.css peut être un objet map
@@ -586,7 +605,7 @@ export class VideoStyle extends SerializableBase {
 		);
 
 		// Set les styles par défaut pour l'arabe
-		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Hafs');
+		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Mushaf');
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
 		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -100);
 

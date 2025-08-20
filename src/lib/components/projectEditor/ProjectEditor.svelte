@@ -11,6 +11,7 @@
 	import toast from 'svelte-5-french-toast';
 	import TranslationsEditor from './tabs/translationsEditor/TranslationsEditor.svelte';
 	import StyleEditor from './tabs/styleEditor/StyleEditor.svelte';
+	import QPCV2FontProvider from '$lib/services/FontProvider';
 
 	let saveInterval: any;
 

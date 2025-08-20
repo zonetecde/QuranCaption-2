@@ -65,6 +65,10 @@ export class Track extends SerializableBase {
 		this.clips.pop();
 	}
 
+	getClipById(clipId: number) {
+		return this.clips.find((clip) => clip.id === clipId)!;
+	}
+
 	getName(): string {
 		switch (this.type) {
 			case TrackType.Video:

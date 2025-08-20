@@ -7,6 +7,7 @@ import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
 import { PredefinedSubtitleTranslation, type VerseTranslation } from './Translation.svelte';
 import type { Category, StyleName, TextStyleName } from './VideoStyle.svelte';
+import QPCV2FontProvider from '$lib/services/FontProvider';
 
 type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Custom Text' | 'Asset';
 
@@ -230,14 +231,29 @@ export class SubtitleClip extends ClipWithTranslation {
 	}
 
 	override getText(): string {
-		// Regarde dans les styles si on doit afficher le numéro de verset
+		// En fonction de la police d'écriture, renvoie le bon texte
+		// Si on a pas la police QCF2,
 		if (
-			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
+			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-family')!.value !==
+			'Mushaf'
 		) {
-			return this.getTextWithVerseNumber();
-		}
+			// Regarde dans les styles si on doit afficher le numéro de verset
+			if (
+				globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
+			) {
+				return this.getTextWithVerseNumber();
+			}
 
-		return this.text;
+			return this.text;
+		} else {
+			return QPCV2FontProvider.getQuranVerseGlyph(
+				this.surah,
+				this.verse,
+				this.startWordIndex,
+				this.endWordIndex,
+				this.isLastWordsOfVerse
+			);
+		}
 	}
 }
 
@@ -295,6 +311,23 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 		super(_text, startTime, endTime, 'Pre-defined Subtitle', translations);
 
 		this.predefinedSubtitleType = type;
+	}
+
+	override getText(): string {
+		// En fonction de la police d'écriture, renvoie le bon texte
+		// Si on a pas la police QCF2,
+		if (
+			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-family')!.value !==
+			'Mushaf'
+		) {
+			// Regarde dans les styles si on doit afficher le numéro de verset
+			return super.getText();
+		} else {
+			if (this.predefinedSubtitleType === 'Basmala') return QPCV2FontProvider.getBasmalaGlyph();
+			else if (this.predefinedSubtitleType === 'Istiadhah')
+				return QPCV2FontProvider.getIstiadhahGlyph();
+			return super.getText();
+		}
 	}
 }
 

@@ -119,7 +119,7 @@
 				"id": "surah-name-format",
 				"name": "Latin Text Format",
 				"description": "Format of the Surah name display. Use <number>, <transliteration> and <translation> tags to customize.",
-				"value": "<number>. Surah <transliteration>",
+				"value": "Surah <transliteration>",
 				"valueType": "text",
 				"css": "",
 				"tailwind": false,

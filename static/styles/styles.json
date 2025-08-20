@@ -111,6 +111,18 @@
 				"icon": "horizontal_distribute"
 			},
 			{
+				"id": "word-spacing",
+				"name": "Word Spacing",
+				"description": "Adjust spacing between words",
+				"value": 0,
+				"valueType": "number",
+				"valueMin": -40,
+				"valueMax": 60,
+				"css": "word-spacing: {value}px;",
+				"tailwind": false,
+				"icon": "horizontal_distribute"
+			},
+			{
 				"id": "line-height",
 				"name": "Line Height",
 				"description": "Adjust spacing between lines",

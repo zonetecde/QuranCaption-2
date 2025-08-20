@@ -208,8 +208,8 @@
 					max: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
 						.valueMax
 				}}
-				class={'arabic absolute subtitle select-none ' + getTailwind('arabic') + helperStyles()}
-				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)}"
+				class={'absolute subtitle select-none ' + getTailwind('arabic') + helperStyles()}
+				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)};"
 			>
 				{currentSubtitle()!.getText()}
 			</p>
