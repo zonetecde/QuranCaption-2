@@ -5,17 +5,94 @@
 	import Header from './Header.svelte';
 	import CreateProjectModal from './modals/CreateProjectModal.svelte';
 	import ProjectDetailCard from './ProjectDetailCard.svelte';
+	import FilterMenu from './FilterMenu.svelte';
+	import SortMenu from './SortMenu.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
 	import { projectService } from '$lib/services/ProjectService';
+	import { Status } from '$lib/classes/Status';
+	import type { ProjectDetail } from '$lib/classes/ProjectDetail.svelte';
 
 	let createNewProjectModalVisible: boolean = $state(false);
+
+	// États pour les menus de filtrage et tri
+	let filterMenuVisible = $state(false);
+	let sortMenuVisible = $state(false);
+	let selectedStatuses: Status[] = $state(Status.getAllStatuses());
+	let filteredProjects: typeof globalState.userProjectsDetails = $state([]);
+
+	let searchQuery: string = $state('');
 
 	/**
 	 * Affiche le popup pour créer un nouveau projet.
 	 */
 	function newProjectButtonClick() {
 		createNewProjectModalVisible = true;
+	}
+
+	/**
+	 * Bascule l'affichage du menu de filtrage
+	 */
+	function toggleFilterMenu() {
+		filterMenuVisible = !filterMenuVisible;
+		sortMenuVisible = false; // Ferme l'autre menu
+	}
+
+	/**
+	 * Bascule l'affichage du menu de tri
+	 */
+	function toggleSortMenu() {
+		sortMenuVisible = !sortMenuVisible;
+		filterMenuVisible = false; // Ferme l'autre menu
+	}
+
+	/**
+	 * Applique le filtre sur les projets
+	 */
+	function handleFilter(statuses: Status[]) {
+		selectedStatuses = statuses;
+		applyFilterAndSort();
+	}
+
+	/**
+	 * Applique le tri sur les projets
+	 */
+	function handleSort(property: keyof ProjectDetail, ascending: boolean) {
+		filteredProjects.sort((a, b) => {
+			let valueA = a[property];
+			let valueB = b[property];
+
+			// Gestion spéciale pour les dates et durées
+			if (valueA instanceof Date && valueB instanceof Date) {
+				valueA = valueA.getTime();
+				valueB = valueB.getTime();
+			} else if (typeof valueA === 'object' && valueA && 'ms' in valueA) {
+				// Pour Duration
+				valueA = (valueA as any).ms;
+				valueB = (valueB as any).ms;
+			} else if (typeof valueA === 'string' && typeof valueB === 'string') {
+				valueA = valueA.toLowerCase();
+				valueB = valueB.toLowerCase();
+			}
+
+			if (valueA < valueB) return ascending ? -1 : 1;
+			if (valueA > valueB) return ascending ? 1 : -1;
+			return 0;
+		});
+		filteredProjects = [...filteredProjects]; // Trigger reactivity
+	}
+
+	/**
+	 * Applique le filtre et maintient le tri actuel
+	 */
+	function applyFilterAndSort() {
+		if (selectedStatuses.length === 0) {
+			filteredProjects = [];
+		} else {
+			filteredProjects = globalState.userProjectsDetails.filter((project) =>
+				selectedStatuses.some((status) => status.status === project.status.status)
+			);
+		}
 	}
 
 	onMount(async () => {
@@ -33,6 +110,16 @@
 			globalState.userProjectsDetails[0] = await projectService.loadDetail(
 				globalState.userProjectsDetails[0].id
 			);
+		}
+
+		// Initialise les projets filtrés
+		applyFilterAndSort();
+	});
+
+	$effect(() => {
+		// Reapplique le filtre quand la liste des projets change
+		if (globalState.userProjectsDetails.length >= 0) {
+			applyFilterAndSort();
 		}
 	});
 </script>
@@ -58,26 +145,52 @@
 			<h3 class="text-2xl font-semibold text-white">Recent Projects</h3>
 
 			<div class="flex items-center space-x-4">
-				<InputWithIcon icon="search" placeholder="Search projects..." classes="w-64" />
+				<InputWithIcon
+					icon="search"
+					placeholder="Search projects..."
+					classes="w-64"
+					bind:value={searchQuery}
+				/>
 
-				<button class="btn text-sm p-2 btn-icon">
-					<span class="material-icons-outlined">filter_list</span>
-				</button>
-				<button class="btn text-sm p-2 btn-icon">
-					<span class="material-icons-outlined">view_module</span>
-				</button>
+				<div class="relative">
+					<button class="filter-button btn text-sm p-2 btn-icon" onclick={toggleFilterMenu}>
+						<span class="material-icons-outlined">filter_list</span>
+					</button>
+					<FilterMenu
+						bind:isVisible={filterMenuVisible}
+						bind:selectedStatuses
+						onFilter={handleFilter}
+					/>
+				</div>
+
+				<div class="relative">
+					<button class="sort-button btn text-sm p-2 btn-icon" onclick={toggleSortMenu}>
+						<span class="material-icons-outlined">sort</span>
+					</button>
+					<SortMenu bind:isVisible={sortMenuVisible} onSort={handleSort} />
+				</div>
 			</div>
 		</div>
 
-		{#if globalState.userProjectsDetails.length === 0}
-			<p class="mt-4">You don't have any projects yet. Click "New Project" to create one.</p>
+		{#if filteredProjects.length === 0}
+			{#if selectedStatuses.length === 0}
+				<p class="mt-4">
+					No projects match the current filter. Adjust your status filter to see projects.
+				</p>
+			{:else if globalState.userProjectsDetails.length === 0}
+				<p class="mt-4">You don't have any projects yet. Click "New Project" to create one.</p>
+			{:else}
+				<p class="mt-4">No projects match the current filter. Try adjusting your status filter.</p>
+			{/if}
 		{:else}
 			<div
 				placeholder="Project cards"
 				class="mt-4 grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
 			>
-				{#each globalState.userProjectsDetails as _, index}
-					<ProjectDetailCard bind:projectDetail={globalState.userProjectsDetails[index]} />
+				{#each filteredProjects as project, index}
+					{#if searchQuery === '' || project.matchSearchQuery(searchQuery)}
+						<ProjectDetailCard bind:projectDetail={filteredProjects[index]} />
+					{/if}
 				{/each}
 			</div>
 		{/if}

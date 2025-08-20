@@ -15,4 +15,14 @@ export class Status extends SerializableBase {
 		this.status = status;
 		this.color = color;
 	}
+
+	static getAllStatuses(): Status[] {
+		return [
+			Status.NOT_SET,
+			Status.TO_CAPTION,
+			Status.TO_TRANSLATE,
+			Status.TO_EXPORT,
+			Status.EXPORTED
+		];
+	}
 }

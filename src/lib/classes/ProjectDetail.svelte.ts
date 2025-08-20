@@ -1,9 +1,11 @@
 import { globalState } from '$lib/runes/main.svelte';
-import { TrackType, Utilities } from '.';
+import { Edition, TrackType, Utilities } from '.';
 import { Duration } from './index.js';
 import { Status } from './Status';
 import { VerseRange } from './VerseRange';
 import { SerializableBase } from './misc/SerializableBase';
+import type { ClipWithTranslation } from './Clip.svelte';
+import { VerseTranslation } from './Translation.svelte';
 
 export class ProjectDetail extends SerializableBase {
 	static NAME_MAX_LENGTH: number = 50;
@@ -53,6 +55,10 @@ export class ProjectDetail extends SerializableBase {
 		this.updatedAt = new Date();
 	}
 
+	/**
+	 * Met à jour le pourcentage de sous-titres captionnés par rapport
+	 * à la durée total de la vidéo du projet
+	 */
 	public updatePercentageCaptioned() {
 		const captionedDuration = globalState.getSubtitleTrack.getDuration().ms || 0;
 
@@ -64,6 +70,46 @@ export class ProjectDetail extends SerializableBase {
 		}
 
 		globalState.currentProject!.detail.percentageCaptioned = Math.floor(percentage);
+	}
+
+	/**
+	 * Met à jour le pourcentage de complétion des traductions du projet pour
+	 * une édition donnée
+	 * @param edition L'édition à mettre à jour
+	 */
+	updatePercentageTranslated(edition: Edition) {
+		// Calcul le nbre de traduction complété/nbre de traduction total
+		let total: number = 0;
+		let completed: number = 0;
+
+		for (const subtitle of globalState.getSubtitleTrack.clips) {
+			if (subtitle.type === 'Subtitle' || subtitle.type === 'Pre-defined Subtitle') {
+				const translations = (subtitle as ClipWithTranslation).translations;
+				if (translations && translations[edition.name]) {
+					// Si la traduction existe, on l'ajoute au pourcentage
+					if (!(translations[edition.name] instanceof VerseTranslation)) continue;
+
+					if (translations[edition.name].isStatusComplete()) {
+						completed++;
+					}
+
+					total++;
+				}
+			}
+		}
+
+		globalState.currentProject!.detail.translations[edition.author] = Math.floor(
+			total > 0 ? (completed / total) * 100 : 0
+		);
+	}
+
+	matchSearchQuery(searchQuery: string): boolean {
+		const normalizedProjectInfo = `${this.name} ${this.reciter}`;
+		return this.normalize(normalizedProjectInfo).includes(this.normalize(searchQuery));
+	}
+
+	normalize(str: string) {
+		return str.trim().toLowerCase().replaceAll(/\s+/g, ' ').replaceAll('-', '').replaceAll("'", '');
 	}
 }
 
