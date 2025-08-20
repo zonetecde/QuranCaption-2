@@ -1,3 +1,6 @@
+// Cache pour stocker les données des sourates déjà téléchargées
+const surahCache = new Map<number, any>();
+
 /**
  * Obtient la traduction ou translittération mot-à-mot d'un verset coranique
  * @param surahNumber - Numéro de la sourate (1-114)
@@ -6,8 +9,8 @@
  * @returns Promise<string[]> - Tableau des mots traduits/translitérés
  *
  * @remarks
- * - Gère les cas spéciaux (silence, basmalah) avec des vérifications initiales
- * - Utilise un découpage intelligent des résultats de l'API
+ * - Utilise un cache pour éviter les téléchargements répétés
+ * - Source: https://raw.githubusercontent.com/qazasaz/quranwbw/refs/heads/master/surahs/data/
  * - Contient une gestion d'erreurs détaillée
  */
 export async function getWordByWordTranslation(
@@ -16,30 +19,26 @@ export async function getWordByWordTranslation(
 	type: 'translation' | 'transliteration' = 'translation'
 ): Promise<string[]> {
 	// Vérification des entrées invalides
-	if ([surahNumber].some((n) => n < 1 || n > 114) || [verseNumber].some((n) => n < 1 || n > 286)) {
-		console.error('Numéro de sourate invalide');
+	if (surahNumber < 1 || surahNumber > 114 || verseNumber < 1 || verseNumber > 286) {
+		console.error('Numéro de sourate ou verset invalide');
 		return [];
 	}
 
 	try {
-		// Construction de l'URL de l'API
-		const apiUrl = `https://api.quranwbw.com/v1/verses?verses=${surahNumber}:${verseNumber}`;
+		// Récupération des données de la sourate (avec cache)
+		const surahData = await getSurahData(surahNumber);
 
-		// Requête HTTP avec timeout
-		const response = await fetch(apiUrl, { signal: AbortSignal.timeout(5000) });
-
-		if (!response.ok) {
-			throw new Error(`Erreur HTTP: ${response.status}`);
+		// Vérification de l'existence du verset
+		if (!surahData[verseNumber]) {
+			console.error(`Verset ${verseNumber} non trouvé dans la sourate ${surahNumber}`);
+			return [];
 		}
 
-		// Traitement des données JSON
-		const data = await response.json();
+		// Extraction des mots selon le type demandé
+		const words = surahData[verseNumber].w;
+		const fieldKey = type === 'translation' ? 'e' : 'd';
 
-		// Extraction du texte selon le type demandé
-		const rawText = extractTextFromData(data, type);
-
-		// Découpage et nettoyage des résultats
-		return processRawText(rawText);
+		return words.map((word: any) => word[fieldKey] || '').filter((word: string) => word.length > 0);
 	} catch (error) {
 		handleTranslationError(error);
 		return [];
@@ -47,38 +46,33 @@ export async function getWordByWordTranslation(
 }
 
 /**
- * Extrait le texte brut des données JSON selon le type spécifié
- * @param data - Données JSON de l'API
- * @param type - Type de texte à extraire
- * @returns Chaîne brute non traitée
+ * Récupère les données d'une sourate avec mise en cache
+ * @param surahNumber - Numéro de la sourate (1-114)
+ * @returns Promise<any> - Données JSON de la sourate
  */
-function extractTextFromData(data: any, type: string): string {
-	const jsonString = JSON.stringify(data);
-	const typePattern = new RegExp(`"${type}":\\s*"([^"]+)"`);
-	const match = jsonString.match(typePattern);
-
-	if (!match || match.length < 2) {
-		throw new Error('Type de traduction non trouvé dans la réponse');
+async function getSurahData(surahNumber: number): Promise<any> {
+	// Vérification du cache
+	if (surahCache.has(surahNumber)) {
+		return surahCache.get(surahNumber);
 	}
 
-	return match[1].trim();
-}
+	// Construction de l'URL
+	const url = `https://raw.githubusercontent.com/qazasaz/quranwbw/refs/heads/master/surahs/data/${surahNumber}.json`;
 
-/**
- * Transforme le texte brut en tableau de mots
- * @param rawText - Texte brut de l'API
- * @returns Tableau de mots nettoyés
- */
-function processRawText(rawText: string): string[] {
-	// Gestion des cas vides
-	if (!rawText) return [];
+	// Requête HTTP avec timeout
+	const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
 
-	// Découpage intelligent avec gestion multiple des séparateurs (des fois les mots sont séparés par ||, des fois par | seulement)
-	return rawText
-		.replace(/\s*\|\|\s*/g, '|') // Normalisation des séparateurs
-		.split('|')
-		.map((word) => word.trim())
-		.filter((word) => word.length > 0);
+	if (!response.ok) {
+		throw new Error(`Erreur HTTP: ${response.status} pour la sourate ${surahNumber}`);
+	}
+
+	// Traitement des données JSON
+	const data = await response.json();
+
+	// Mise en cache
+	surahCache.set(surahNumber, data);
+
+	return data;
 }
 
 /**
