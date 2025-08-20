@@ -12,6 +12,7 @@
 	import TranslationsEditor from './tabs/translationsEditor/TranslationsEditor.svelte';
 	import StyleEditor from './tabs/styleEditor/StyleEditor.svelte';
 	import QPCV2FontProvider from '$lib/services/FontProvider';
+	import Export from './tabs/export/Export.svelte';
 
 	let saveInterval: any;
 
@@ -38,5 +39,7 @@
 		<TranslationsEditor />
 	{:else if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.Style}
 		<StyleEditor />
+	{:else if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.Export}
+		<Export />
 	{/if}
 </div>
