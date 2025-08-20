@@ -147,6 +147,11 @@
 						const subtitles = document.querySelectorAll('.' + target);
 						subtitles.forEach(async (subtitle) => {
 							// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
+
+							console.log(target, (subtitle as HTMLElement).clientHeight, maxHeightValue, fontSize);
+
+							console.log(target, (subtitle as HTMLElement).getClientRects().length);
+
 							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 								fontSize -= 5;
 
@@ -208,10 +213,14 @@
 					max: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
 						.valueMax
 				}}
-				class={'absolute subtitle select-none ' + getTailwind('arabic') + helperStyles()}
+				class={'absolute subtitle select-none flex flex-row-reverse flex-wrap ' +
+					getTailwind('arabic') +
+					helperStyles()}
 				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)};"
 			>
-				{currentSubtitle()!.getText()}
+				{#each currentSubtitle()!.getText().split(' ') as word}
+					<span>{word}</span>{' '}
+				{/each}
 			</p>
 
 			{#each Object.keys(currentSubtitleTranslations()!) as edition}
@@ -239,13 +248,19 @@
 								.getStylesOfTarget(edition)
 								.findStyle('vertical-position')!.valueMax
 						}}
-						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles()}`}
+						class={`translation absolute subtitle flex flex-wrap select-none ${edition} ${getTailwind(edition)} ${helperStyles()}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
 						{#if translation.type === 'verse'}
-							{translation.getText(edition, (currentSubtitle() as SubtitleClip)!)}
+							{#each translation
+								.getText(edition, (currentSubtitle() as SubtitleClip)!)
+								.split(' ') as word}
+								<span>{word}</span>{' '}
+							{/each}
 						{:else}
-							{translation.getText()}
+							{#each translation.getText().split(' ') as word}
+								<span>{word}</span>{' '}
+							{/each}
 						{/if}
 					</p>
 				{/if}

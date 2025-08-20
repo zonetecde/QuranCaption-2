@@ -360,6 +360,9 @@
 					</button>
 				</div>
 			{:else if style.valueType === 'reciter'}
+				{@const reciter = RecitersManager.getReciterObject(
+					globalState.currentProject!.detail.reciter
+				)}
 				<div class="flex flex-col gap-x-2">
 					<EditableText
 						text="Enter project reciter"
@@ -373,9 +376,9 @@
 						inputType="reciters"
 					/>
 
-					{#if RecitersManager.getReciterObject(globalState.currentProject!.detail.reciter).number !== -1}
+					{#if reciter.number !== -1}
 						<p class="reciters-font text-3xl -mr-3 text-center">
-							{RecitersManager.getReciterObject(globalState.currentProject!.detail.reciter).number}
+							{reciter.number}
 						</p>
 					{:else}
 						<p class="text-sm mt-2 text-yellow-500">

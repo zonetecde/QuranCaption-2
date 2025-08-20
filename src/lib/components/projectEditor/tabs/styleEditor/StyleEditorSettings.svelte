@@ -9,6 +9,7 @@
 	import { onMount } from 'svelte';
 	import Section from '../../Section.svelte';
 	import StyleComponent from './Style.svelte';
+	import ImportExportStyle from './ImportExportStyle.svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { currentMenu } from 'svelte-contextmenu/stores';
 	import { CustomTextClip } from '$lib/classes';
@@ -20,6 +21,7 @@
 	});
 
 	let stylesContainer: HTMLDivElement | undefined;
+	let importExportMenuVisible = $state(false);
 
 	onMount(async () => {
 		stylesContainer!.scrollTop =
@@ -45,15 +47,42 @@
 	function clearSearch() {
 		globalState.getStylesState.searchQuery = '';
 	}
+
+	/**
+	 * Bascule l'affichage du menu Import/Export
+	 */
+	function toggleImportExportMenu() {
+		importExportMenuVisible = !importExportMenuVisible;
+	}
+
+	// Fermer le menu en cliquant à l'extérieur
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as Element;
+		if (!target.closest('.import-export-menu') && !target.closest('.import-export-button')) {
+			importExportMenuVisible = false;
+		}
+	}
 </script>
 
+<svelte:window on:click={handleClickOutside} />
+
 <div
-	class="bg-secondary h-full border border-color mx-0.5 rounded-xl pt-6 relative flex flex-col shadow"
+	class="bg-secondary h-full border border-color mx-0.5 rounded-xl relative flex flex-col shadow"
 >
 	<!-- En-tête avec icône -->
-	<div class="flex gap-x-2 items-center justify-center mb-3">
+	<div class="flex gap-x-2 items-center px-3 mb-2 mt-4">
 		<span class="material-icons-outlined text-accent text-2xl">auto_fix_high</span>
 		<h2 class="text-xl font-semibold text-primary tracking-wide">Style Editor</h2>
+
+		<div class="relative ml-auto">
+			<button
+				class="import-export-button btn-accent flex flex-row items-center px-2 py-1 gap-x-2 text-sm"
+				onclick={toggleImportExportMenu}
+			>
+				<span class="material-icons-outlined text-[20px]!">content_paste</span>Import/Export
+			</button>
+			<ImportExportStyle bind:isVisible={importExportMenuVisible} />
+		</div>
 	</div>
 
 	<div

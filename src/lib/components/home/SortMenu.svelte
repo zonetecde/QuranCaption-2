@@ -49,7 +49,7 @@
 
 {#if isVisible}
 	<div
-		class="sort-menu absolute top-full right-0 mt-2 w-[370px] bg-[#161B22] border border-[var(--border-color)] rounded-lg shadow-xl z-50 p-4"
+		class="sort-menu absolute top-full right-0 mt-2 w-[370px] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-xl z-50 p-4"
 		transition:slide={{ duration: 200 }}
 	>
 		<!-- En-tête -->

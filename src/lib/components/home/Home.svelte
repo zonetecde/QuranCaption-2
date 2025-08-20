@@ -165,7 +165,7 @@
 
 				<div class="relative">
 					<button class="sort-button btn text-sm p-2 btn-icon" onclick={toggleSortMenu}>
-						<span class="material-icons-outlined">sort</span>
+						<span class="material-icons-outlined">import_export</span>
 					</button>
 					<SortMenu bind:isVisible={sortMenuVisible} onSort={handleSort} />
 				</div>

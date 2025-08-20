@@ -7,6 +7,8 @@ import { Utilities } from './misc/Utilities';
 import { CustomTextTrack } from './Track.svelte';
 import type { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 import QPCV2FontProvider from '$lib/services/FontProvider';
+import { open } from '@tauri-apps/plugin-dialog';
+import { readFile, readTextFile } from '@tauri-apps/plugin-fs';
 
 export type StyleValueType =
 	| 'color'
@@ -43,6 +45,7 @@ export type TextStyleName =
 	| 'font-weight'
 	| 'text-transform'
 	| 'letter-spacing'
+	| 'word-spacing'
 	| 'line-height'
 	| 'max-height'
 	| 'reactive-font-size';
@@ -733,6 +736,66 @@ export class VideoStyle extends SerializableBase {
 			if (style) return style.value as Style[];
 		}
 	}
+
+	/**
+	 * Exporte les styles vers un fichier
+	 * @param includedExportClips Optionnellement, une liste des customs-text à inclure
+	 * @return Les données exportées en format JSON
+	 */
+	exportStyles(includedExportClips: Set<number>): string {
+		let exportData: videoStyleFileData = {
+			videoStyle: JSON.parse(JSON.stringify(this)),
+			customTextClips: []
+		};
+		// Enlève tout les overrides
+		for (const style of exportData.videoStyle.styles) {
+			style.overrides = {};
+		}
+		// Ajoute les customs texts clips
+		for (const clip of globalState.getCustomTextTrack.clips) {
+			if (includedExportClips.has(clip.id)) {
+				const _clip = JSON.parse(JSON.stringify(clip));
+				exportData.customTextClips.push(_clip);
+			}
+		}
+		// Retourne le JSON
+		return JSON.stringify(exportData, null, 2);
+	}
+
+	async importStylesFromFile() {
+		// Open a dialog
+		const file = await open({
+			multiple: false,
+			directory: false
+		});
+
+		if (!file) return;
+
+		const json = JSON.parse((await readTextFile(file)).toString());
+		globalState.getVideoStyle.importStyles(json);
+	}
+
+	async importStyles(json: videoStyleFileData) {
+		// Crée une nouvelle instance VideoStyle à partir des données JSON
+		const importedVideoStyle = VideoStyle.fromJSON(json.videoStyle);
+
+		// Remplace les styles du projet actuel par les nouveaux
+		globalState.currentProject!.content.videoStyle = importedVideoStyle;
+
+		// Ajoute les customs text clips en créant des instances correctes
+		for (const clipData of json.customTextClips) {
+			clipData.id = Utilities.randomId(); // Assure qu'il a un ID unique
+
+			// Crée une nouvelle instance CustomTextClip à partir des données JSON
+			const clip = CustomTextClip.fromJSON(clipData);
+			globalState.getCustomTextTrack.clips.push(clip);
+		}
+	}
+}
+
+interface videoStyleFileData {
+	videoStyle: VideoStyle;
+	customTextClips: CustomTextClip[];
 }
 
 SerializableBase.registerChildClass(VideoStyle, 'styles', StylesData);

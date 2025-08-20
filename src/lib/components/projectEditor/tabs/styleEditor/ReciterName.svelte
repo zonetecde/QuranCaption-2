@@ -58,7 +58,7 @@
 	});
 </script>
 
-{#if reciterNameSettings().show}
+{#if reciterNameSettings().show && reciter().latin !== 'not set'}
 	<div
 		use:verticalDrag={{
 			getInitial: () => Number(reciterNameSettings().verticalPosition),

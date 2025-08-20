@@ -63,7 +63,7 @@
 
 {#if isVisible}
 	<div
-		class="filter-menu absolute top-full right-0 mt-2 w-[330px] bg-[#161B22] border border-[var(--border-color)] rounded-lg shadow-xl z-50 py-2"
+		class="filter-menu absolute top-full right-0 mt-2 w-[330px] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-xl z-50 py-2"
 		transition:slide={{ duration: 200 }}
 	>
 		<!-- En-tête avec boutons Check All / Uncheck All -->

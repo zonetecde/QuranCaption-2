@@ -94,7 +94,7 @@
 					</button>
 					{#if showStatusMenu}
 						<ul
-							class="absolute group top-full right-0 mt-1 w-40 rounded-md border border-[var(--border-color)] bg-[#161B22] shadow-xl py-1 z-20 backdrop-blur-sm"
+							class="absolute group top-full right-0 mt-1 w-40 rounded-md border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-xl py-1 z-20 backdrop-blur-sm"
 						>
 							{#each statuses as s}
 								<li
