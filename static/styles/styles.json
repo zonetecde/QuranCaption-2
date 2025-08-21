@@ -69,7 +69,7 @@
 				"id": "font-family",
 				"name": "Font Family",
 				"description": "Select the font family for the text",
-				"value": "Arial",
+				"value": "Candara",
 				"valueType": "select",
 				"options": [],
 				"css": "font-family: '{value}', sans-serif;",

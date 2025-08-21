@@ -614,7 +614,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Set les styles par défaut pour l'arabe
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Mushaf');
-		videoStyle.getStylesOfTarget('arabic').setStyle('max-height', '260'); // Une ligne max
+		videoStyle.getStylesOfTarget('arabic').setStyle('max-height', 220); // Une ligne max
 		videoStyle.getStylesOfTarget('arabic').setStyle('line-height', 1.6);
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
 		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -110);

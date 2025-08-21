@@ -114,7 +114,7 @@
 		}
 
 		// Déclenche un refresh éventuel (ex: max-height fit)
-		if (style.id === 'max-height') {
+		if (style.id === 'max-height' || style.id === 'font-size') {
 			globalState.updateVideoPreviewUI();
 		} else if (style.id === 'video-dimension') {
 			// On met à jour toutes les valeurs minimum et maximum des styles vertical-position/horizontal-position
@@ -419,8 +419,8 @@
 				</div>
 			{:else if style.valueType === 'dimension'}
 				<!-- Deux boutons quick select : landscape (met en 1920x1080) et portrait (met en 1080x1920) -->
-				<div class="flex flex-row items-center gap-x-2">
-					<p>Fast select:</p>
+				<div class="flex flex-row items-center gap-x-1">
+					<p>Quick select:</p>
 					<button
 						class={'px-3 py-1 ' + (style.value === '1920x1080' ? 'btn-accent' : 'btn')}
 						onclick={() => applyValue({ width: 1920, height: 1080 })}
