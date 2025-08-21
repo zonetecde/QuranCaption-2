@@ -1,17 +1,8 @@
 import { globalState } from '$lib/runes/main.svelte';
 
-interface QpcGlyph {
-	id: number;
-	surah: string;
-	ayah: string;
-	word: string;
-	location: string;
-	text: string;
-}
-
 export class QPC2FontProvider {
-	static qpc2Glyphs: Record<string, QpcGlyph> | undefined = undefined;
-	static qpc1Glyphs: Record<string, QpcGlyph> | undefined = undefined;
+	static qpc2Glyphs: Record<string, string> | undefined = undefined;
+	static qpc1Glyphs: Record<string, string> | undefined = undefined;
 	static verseMapping: Record<string, string> | undefined = undefined;
 	static loadedFonts: Set<string> = new Set();
 
@@ -82,7 +73,7 @@ export class QPC2FontProvider {
 			const glyph =
 				qpcVersion === 1 ? QPC2FontProvider.qpc1Glyphs![key] : QPC2FontProvider.qpc2Glyphs![key];
 			if (glyph) {
-				str += glyph.text + ' ';
+				str += glyph + ' ';
 			}
 		}
 
@@ -94,7 +85,7 @@ export class QPC2FontProvider {
 			const key = `${surah}:${verse}:${endWord + 2}`;
 			const glyph = QPC2FontProvider.qpc2Glyphs![key];
 			if (glyph) {
-				str += glyph.text; // Ajoute le symbole du numéro de verset
+				str += glyph; // Ajoute le symbole du numéro de verset
 			}
 		}
 
