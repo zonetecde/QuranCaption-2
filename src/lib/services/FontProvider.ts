@@ -41,7 +41,7 @@ export class QPCV2FontProvider {
 		style.textContent = `
 			@font-face {
 				font-family: '${fontName}';
-				src: url('/QPC2/fonts/${fontName}.ttf') format('truetype');
+				src: url('/QPC2/fonts/${fontName}.woff2') format('woff2');
 				font-weight: normal;
 				font-style: normal;
 			}
