@@ -7,7 +7,7 @@ import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
 import { PredefinedSubtitleTranslation, type VerseTranslation } from './Translation.svelte';
 import type { Category, StyleName, TextStyleName } from './VideoStyle.svelte';
-import QPCV2FontProvider from '$lib/services/FontProvider';
+import QPC2FontProvider from '$lib/services/FontProvider';
 
 type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Custom Text' | 'Asset';
 
@@ -246,7 +246,7 @@ export class SubtitleClip extends ClipWithTranslation {
 
 			return this.text;
 		} else {
-			return QPCV2FontProvider.getQuranVerseGlyph(
+			return QPC2FontProvider.getQuranVerseGlyph(
 				this.surah,
 				this.verse,
 				this.startWordIndex,
@@ -323,9 +323,9 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 			// Regarde dans les styles si on doit afficher le numéro de verset
 			return super.getText();
 		} else {
-			if (this.predefinedSubtitleType === 'Basmala') return QPCV2FontProvider.getBasmalaGlyph();
+			if (this.predefinedSubtitleType === 'Basmala') return QPC2FontProvider.getBasmalaGlyph();
 			else if (this.predefinedSubtitleType === 'Istiadhah')
-				return QPCV2FontProvider.getIstiadhahGlyph();
+				return QPC2FontProvider.getIstiadhahGlyph();
 			return super.getText();
 		}
 	}

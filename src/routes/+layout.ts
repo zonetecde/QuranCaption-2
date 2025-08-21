@@ -1,7 +1,7 @@
 import { Quran } from '$lib/classes/Quran';
 import RecitersManager from '$lib/classes/Reciter';
 import ModalManager from '$lib/components/modals/ModalManager';
-import QPCV2FontProvider from '$lib/services/FontProvider';
+import QPC2FontProvider from '$lib/services/FontProvider';
 import { telemetry } from '$lib/services/Telemetry';
 
 export const prerender = true;
@@ -14,7 +14,7 @@ Quran.load();
 RecitersManager.loadReciters();
 
 // Load la police d'écriture du Mushaf
-QPCV2FontProvider.loadQCF2Data();
+QPC2FontProvider.loadQPC2Data();
 
 // main.ts ou entrypoint
 window.addEventListener('error', (event) => {
