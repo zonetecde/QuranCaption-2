@@ -35,7 +35,7 @@ export default class Exporter {
 
 			for (const target of settings.includedTargets) {
 				if (target === 'arabic') {
-					text += subtitle.getText(globalState.getExportState.arabicTextFormat);
+					text += subtitle.getText();
 				} else {
 					if (subtitle instanceof SubtitleClip)
 						text += subtitle.getTranslation(target).getText(target, subtitle);

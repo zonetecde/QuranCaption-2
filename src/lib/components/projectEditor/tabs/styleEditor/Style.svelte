@@ -114,7 +114,12 @@
 		}
 
 		// Déclenche un refresh éventuel (ex: max-height fit)
-		if (style.id === 'max-height' || style.id === 'font-size') {
+		if (
+			style.id === 'max-height' ||
+			style.id === 'font-size' ||
+			style.id === 'word-spacing' ||
+			style.id === 'font-family'
+		) {
 			globalState.updateVideoPreviewUI();
 		} else if (style.id === 'video-dimension') {
 			// On met à jour toutes les valeurs minimum et maximum des styles vertical-position/horizontal-position
@@ -337,8 +342,9 @@
 							{#await invoke('get_system_fonts')}
 								<option value="" disabled selected>Loading fonts...</option>
 							{:then fonts: any}
-								<option value="Mushaf">Mushaf (Qur'an Font)</option>
-								<option value="Hafs">Hafs (Qur'an Font)</option>
+								<option value="QPC2">Uthamic Mushaf QPC2</option>
+								<option value="QPC1">Uthamic Mushaf QPC1</option>
+								<option value="Hafs">Hafs</option>
 								{#each fonts as font}
 									<option value={font}>{font}</option>
 								{/each}

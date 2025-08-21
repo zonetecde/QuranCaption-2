@@ -156,6 +156,28 @@
 												bind:group={globalState.getExportState.arabicTextFormat}
 												class="sr-only"
 												disabled={!included}
+												onchange={(e: any) => {
+													// Modifie la police d'écriture dans la vidéo (car c'est elle
+													// qui détermine le texte sous-titre pour les polices QPC)
+													const fontFamily = globalState.getVideoStyle
+														.getStylesOfTarget('arabic')
+														.findStyle('font-family')!.value;
+
+													if (
+														e.target.value === 'Plain' &&
+														(fontFamily === 'QPC1' || fontFamily === 'QPC2')
+													) {
+														globalState.getVideoStyle
+															.getStylesOfTarget('arabic')
+															.setStyle('font-family', 'Hafs');
+													} else if (e.target.value === 'V1' || e.target.value === 'V2') {
+														globalState.getVideoStyle
+															.getStylesOfTarget('arabic')
+															.setStyle('font-family', 'QPC' + e.target.value[1]);
+													}
+
+													globalState.updateVideoPreviewUI();
+												}}
 											/>
 											<div
 												class="cursor-pointer rounded-lg border px-3 py-2 text-center flex flex-col items-center justify-center text-sm font-medium transition-all duration-200 h-full {globalState

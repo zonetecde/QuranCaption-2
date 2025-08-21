@@ -319,15 +319,23 @@ export class StylesData extends SerializableBase {
 
 				if (style.tailwind) continue; // Ignore les styles Tailwind, qui sont appliqués différemment
 
-				// Cas particulier: pour la police d'écriture Mushaf, alors on met la bonne
+				// Cas particulier: pour la police d'écriture QPC1 ou QPC2, alors on met la bonne
 				// police d'écriture en fonction du verset
-				if (style.id === 'font-family' && String(effectiveValue) === 'Mushaf' && clipId) {
+				if (
+					style.id === 'font-family' &&
+					(String(effectiveValue) === 'QPC1' || String(effectiveValue) === 'QPC2') &&
+					clipId
+				) {
 					const subtitleClip = globalState.getSubtitleTrack.getClipById(clipId);
-					let fontname = 'QCF2BSML'; // Par défaut on met le font contenant tout les glyphes spéciaux du Coran
+					let fontname = 'QCP2BSML'; // Par défaut on met le font contenant tout les glyphes spéciaux du Coran
 					// (notamment si subtitleClip instanceof PredefinedSubtitle alors pour la basmala ce sera le bon font)
 
 					if (subtitleClip instanceof SubtitleClip) {
-						fontname = QPCFontProvider.getFontNameForVerse(subtitleClip.surah, subtitleClip.verse);
+						fontname = QPCFontProvider.getFontNameForVerse(
+							subtitleClip.surah,
+							subtitleClip.verse,
+							String(effectiveValue) === 'QPC1' ? '1' : '2'
+						);
 					}
 
 					css += `font-family: ${fontname};\n`;

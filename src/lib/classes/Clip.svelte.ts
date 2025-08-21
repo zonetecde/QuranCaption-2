@@ -230,22 +230,21 @@ export class SubtitleClip extends ClipWithTranslation {
 		});
 	}
 
-	override getText(forceFormat?: 'V1' | 'V2' | 'Plain'): string {
+	override getText(): string {
 		// En fonction de la police d'écriture, renvoie le bon texte
-		// Si on a pas la police QCF2,
-		if (
-			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-family')!.value !==
-				'Mushaf' ||
-			forceFormat === 'Plain'
-		) {
+		// Si on a pas la police QCP2
+		const fontFamily = globalState.getVideoStyle
+			.getStylesOfTarget('arabic')
+			.findStyle('font-family')!;
+
+		// Si ce n'est pas une police avec des caractères spéciaux (QPC1 et QPC2)
+		if (fontFamily.value !== 'QPC1' && fontFamily.value !== 'QPC2') {
 			// Regarde dans les styles si on doit afficher le numéro de verset
 			if (
 				globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
-			) {
+			)
 				return this.getTextWithVerseNumber();
-			}
-
-			return this.text;
+			else return this.text;
 		} else {
 			return QPCFontProvider.getQuranVerseGlyph(
 				this.surah,
@@ -253,7 +252,7 @@ export class SubtitleClip extends ClipWithTranslation {
 				this.startWordIndex,
 				this.endWordIndex,
 				this.isLastWordsOfVerse,
-				forceFormat || 'V2'
+				fontFamily.value === 'QPC1' ? '1' : '2'
 			);
 		}
 	}
@@ -316,24 +315,23 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 	}
 
 	/**
-	 * Retourne le texte du clip, en fonction de la police d'écriture et du format forcé.
-	 * @param forceFormat Si précisé, le format à utiliser pour le texte au lieu de la police d'écriture
+	 * Retourne le texte du clip en fonction de la police d'écriture
 	 * @returns Le texte du clip
 	 */
-	override getText(forceFormat?: 'V1' | 'V2' | 'Plain'): string {
+	override getText(): string {
 		// En fonction de la police d'écriture, renvoie le bon texte
-		// Si on a pas la police QCF2,
-		if (
-			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-family')!.value !==
-				'Mushaf' ||
-			forceFormat === 'Plain'
-		) {
+		const fontFamily = globalState.getVideoStyle
+			.getStylesOfTarget('arabic')
+			.findStyle('font-family')!;
+
+		// Si on a pas une police avec les caractères spéciaux
+		if (fontFamily.value !== 'QPC1' && fontFamily.value !== 'QPC2') {
 			return super.getText();
 		} else {
 			if (this.predefinedSubtitleType === 'Basmala')
-				return QPCFontProvider.getBasmalaGlyph(forceFormat || 'V2');
+				return QPCFontProvider.getBasmalaGlyph(fontFamily.value === 'QPC1' ? '1' : '2');
 			else if (this.predefinedSubtitleType === 'Istiadhah')
-				return QPCFontProvider.getIstiadhahGlyph(forceFormat || 'V2');
+				return QPCFontProvider.getIstiadhahGlyph(fontFamily.value === 'QPC1' ? '1' : '2');
 
 			// Dans ce cas, on retourne le texte par défaut
 			return super.getText();

@@ -3,7 +3,8 @@ import { globalState } from '$lib/runes/main.svelte';
 export class QPCFontProvider {
 	static qpc2Glyphs: Record<string, string> | undefined = undefined;
 	static qpc1Glyphs: Record<string, string> | undefined = undefined;
-	static verseMapping: Record<string, string> | undefined = undefined;
+	static verseMappingV2: Record<string, string> | undefined = undefined;
+	static verseMappingV1: Record<string, string> | undefined = undefined;
 	static loadedFonts: Set<string> = new Set();
 
 	static async loadQPC2Data() {
@@ -13,19 +14,25 @@ export class QPCFontProvider {
 		if (!QPCFontProvider.qpc1Glyphs) {
 			QPCFontProvider.qpc1Glyphs = await (await fetch('/QPC1/qpc-v1.json')).json();
 		}
-		if (!QPCFontProvider.verseMapping) {
+
+		if (!QPCFontProvider.verseMappingV2) {
 			// verse-mapping by Primo - May Allah reward him for his work
-			QPCFontProvider.verseMapping = await (await fetch('/QPC2/verse-mapping.json')).json();
+			QPCFontProvider.verseMappingV2 = await (await fetch('/QPC2/verse-mapping.json')).json();
+		}
+		if (!QPCFontProvider.verseMappingV1) {
+			// verse-mapping by Primo - May Allah reward him for his work
+			QPCFontProvider.verseMappingV1 = await (await fetch('/QPC1/verse-mapping.json')).json();
 		}
 
 		// Charge déjà le fichier font avec la basmala
-		QPCFontProvider.loadFontIfNotLoaded('QCF2BSML');
+		QPCFontProvider.loadFontIfNotLoaded('QCP1BSML', '1');
+		QPCFontProvider.loadFontIfNotLoaded('QCP2BSML', '2');
 	}
 
 	/**
-	 * Charge dynamiquement une police QCF si elle n'est pas déjà chargée
+	 * Charge dynamiquement une police QCP si elle n'est pas déjà chargée
 	 */
-	static loadFontIfNotLoaded(fontName: string) {
+	static loadFontIfNotLoaded(fontName: string, version: '1' | '2') {
 		// Vérifie si la police est déjà chargée
 		if (this.loadedFonts.has(fontName)) {
 			return;
@@ -36,7 +43,7 @@ export class QPCFontProvider {
 		style.textContent = `
 			@font-face {
 				font-family: '${fontName}';
-				src: url('/QPC2/fonts/${fontName}.woff2') format('woff2');
+				src: url('/QPC${version}/fonts/${fontName}.woff2') format('woff2');
 				font-weight: normal;
 				font-style: normal;
 			}
@@ -47,14 +54,17 @@ export class QPCFontProvider {
 		this.loadedFonts.add(fontName);
 	}
 
-	static getFontNameForVerse(surah: number, verse: number): string {
+	static getFontNameForVerse(surah: number, verse: number, qpcVersion: '1' | '2'): string {
 		// Get the font name for the verse
 		const verseKey = `${surah}:${verse}`;
 
-		const fontName = this.verseMapping![verseKey] || 'QCF0001';
+		const fontName =
+			qpcVersion === '1'
+				? this.verseMappingV1![verseKey] || 'QPC1_p0001'
+				: this.verseMappingV2![verseKey] || 'QPC2_p0001';
 
 		// Charge dynamiquement la police si elle n'est pas déjà chargée
-		QPCFontProvider.loadFontIfNotLoaded(fontName);
+		QPCFontProvider.loadFontIfNotLoaded(fontName, qpcVersion);
 
 		return fontName;
 	}
@@ -65,13 +75,13 @@ export class QPCFontProvider {
 		startWord: number,
 		endWord: number,
 		isLastWords: boolean,
-		qpcVersion: 'V1' | 'V2' = 'V2'
+		qpcVersion: '1' | '2' = '2'
 	): string {
 		let str = '';
 		for (let i = startWord + 1; i <= endWord + 1; i++) {
 			const key = `${surah}:${verse}:${i}`;
 			const glyph =
-				qpcVersion === 'V1' ? QPCFontProvider.qpc1Glyphs![key] : QPCFontProvider.qpc2Glyphs![key];
+				qpcVersion === '1' ? QPCFontProvider.qpc1Glyphs![key] : QPCFontProvider.qpc2Glyphs![key];
 			if (glyph) {
 				str += glyph + ' ';
 			}
@@ -83,7 +93,8 @@ export class QPCFontProvider {
 			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
 		) {
 			const key = `${surah}:${verse}:${endWord + 2}`;
-			const glyph = QPCFontProvider.qpc2Glyphs![key];
+			const glyph =
+				qpcVersion === '1' ? QPCFontProvider.qpc1Glyphs![key] : QPCFontProvider.qpc2Glyphs![key];
 			if (glyph) {
 				str += glyph; // Ajoute le symbole du numéro de verset
 			}
@@ -92,22 +103,22 @@ export class QPCFontProvider {
 		return str.trim();
 	}
 
-	static getBasmalaGlyph(version: 'V1' | 'V2' = 'V2'): string {
+	static getBasmalaGlyph(version: '1' | '2'): string {
 		switch (version) {
-			case 'V1':
+			case '1':
 				return '#"!'; // ou alors peut-être -,+*
-			case 'V2':
+			case '2':
 				return 'ﭑﭒﭓ';
 			default:
 				return '';
 		}
 	}
 
-	static getIstiadhahGlyph(version: 'V1' | 'V2' = 'V2'): string {
+	static getIstiadhahGlyph(version: '1' | '2'): string {
 		switch (version) {
-			case 'V1':
+			case '1':
 				return 'FEDCB'.split('').join(' ');
-			case 'V2':
+			case '2':
 				return 'ﭲﭳﭴﭵﭶ'.split('').join(' ');
 			default:
 				return '';

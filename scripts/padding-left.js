@@ -12,7 +12,7 @@ fs.readdirSync(dir).forEach((file) => {
 	if (match) {
 		const num = match[1].padStart(3, '0');
 		const ext = match[2];
-		const newName = `p${num}${ext}`;
+		const newName = `QPC2_p${num}${ext}`;
 		if (newName !== file) {
 			fs.renameSync(path.join(dir, file), path.join(dir, newName));
 			console.log(`${file} -> ${newName}`);
