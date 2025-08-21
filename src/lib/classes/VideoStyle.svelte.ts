@@ -6,7 +6,7 @@ import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import { CustomTextTrack } from './Track.svelte';
 import type { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
-import QPC2FontProvider from '$lib/services/FontProvider';
+import QPCFontProvider from '$lib/services/FontProvider';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile, readTextFile } from '@tauri-apps/plugin-fs';
 import ModalManager from '$lib/components/modals/ModalManager';
@@ -327,7 +327,7 @@ export class StylesData extends SerializableBase {
 					// (notamment si subtitleClip instanceof PredefinedSubtitle alors pour la basmala ce sera le bon font)
 
 					if (subtitleClip instanceof SubtitleClip) {
-						fontname = QPC2FontProvider.getFontNameForVerse(subtitleClip.surah, subtitleClip.verse);
+						fontname = QPCFontProvider.getFontNameForVerse(subtitleClip.surah, subtitleClip.verse);
 					}
 
 					css += `font-family: ${fontname};\n`;

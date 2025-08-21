@@ -7,7 +7,7 @@ import { Utilities } from './misc/Utilities';
 import type { Track } from './Track.svelte';
 import { PredefinedSubtitleTranslation, type VerseTranslation } from './Translation.svelte';
 import type { Category, StyleName, TextStyleName } from './VideoStyle.svelte';
-import QPC2FontProvider from '$lib/services/FontProvider';
+import QPCFontProvider from '$lib/services/FontProvider';
 
 type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Custom Text' | 'Asset';
 
@@ -165,9 +165,9 @@ export class ClipWithTranslation extends Clip {
 	 * @param edition L'édition pour laquelle obtenir la traduction.
 	 * @return La traduction associée à l'édition.
 	 */
-	getTranslation(edition: Edition): Translation {
+	getTranslation(edition: Edition | string): Translation {
 		//@ts-ignore
-		return this.translations[edition.name];
+		return this.translations[typeof edition === 'string' ? edition : edition.name];
 	}
 
 	getText(): string {
@@ -230,12 +230,13 @@ export class SubtitleClip extends ClipWithTranslation {
 		});
 	}
 
-	override getText(): string {
+	override getText(forceFormat?: 'V1' | 'V2' | 'Plain'): string {
 		// En fonction de la police d'écriture, renvoie le bon texte
 		// Si on a pas la police QCF2,
 		if (
 			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-family')!.value !==
-			'Mushaf'
+				'Mushaf' ||
+			forceFormat === 'Plain'
 		) {
 			// Regarde dans les styles si on doit afficher le numéro de verset
 			if (
@@ -246,12 +247,13 @@ export class SubtitleClip extends ClipWithTranslation {
 
 			return this.text;
 		} else {
-			return QPC2FontProvider.getQuranVerseGlyph(
+			return QPCFontProvider.getQuranVerseGlyph(
 				this.surah,
 				this.verse,
 				this.startWordIndex,
 				this.endWordIndex,
-				this.isLastWordsOfVerse
+				this.isLastWordsOfVerse,
+				forceFormat || 'V2'
 			);
 		}
 	}
@@ -313,19 +315,27 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 		this.predefinedSubtitleType = type;
 	}
 
-	override getText(): string {
+	/**
+	 * Retourne le texte du clip, en fonction de la police d'écriture et du format forcé.
+	 * @param forceFormat Si précisé, le format à utiliser pour le texte au lieu de la police d'écriture
+	 * @returns Le texte du clip
+	 */
+	override getText(forceFormat?: 'V1' | 'V2' | 'Plain'): string {
 		// En fonction de la police d'écriture, renvoie le bon texte
 		// Si on a pas la police QCF2,
 		if (
 			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-family')!.value !==
-			'Mushaf'
+				'Mushaf' ||
+			forceFormat === 'Plain'
 		) {
-			// Regarde dans les styles si on doit afficher le numéro de verset
 			return super.getText();
 		} else {
-			if (this.predefinedSubtitleType === 'Basmala') return QPC2FontProvider.getBasmalaGlyph();
+			if (this.predefinedSubtitleType === 'Basmala')
+				return QPCFontProvider.getBasmalaGlyph(forceFormat || 'V2');
 			else if (this.predefinedSubtitleType === 'Istiadhah')
-				return QPC2FontProvider.getIstiadhahGlyph();
+				return QPCFontProvider.getIstiadhahGlyph(forceFormat || 'V2');
+
+			// Dans ce cas, on retourne le texte par défaut
 			return super.getText();
 		}
 	}

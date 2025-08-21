@@ -39,6 +39,9 @@ export class ProjectEditorState extends SerializableBase {
 	// Styles editor
 	stylesEditor: StylesEditorState = $state(new StylesEditorState());
 
+	// Export
+	export: ExportState = $state(new ExportState());
+
 	// Hauteur de la section supérieure dans chaque onglet
 	upperSectionHeight: number = $state(68);
 }
@@ -195,6 +198,29 @@ export class TranslationsEditorState extends SerializableBase {
 	}
 }
 
+export class ExportState extends SerializableBase {
+	// Indique le type d'export choisie
+	selectedChoice: 'video' | 'subtitles' | 'chapters' | 'project' = $state('video');
+
+	/*
+	 * ============================================
+	 * SUBTITLES EXPORT STATES
+	 * ============================================
+	 */
+
+	// Le format de sous-titre choisi
+	subtitleFormat: 'SRT' | 'VTT' = $state('SRT');
+
+	// Indique les cibles incluses dans l'export
+	includedTarget: { [target: string]: boolean } = $state({});
+
+	// Indique si on exporte les numéros de verset ou pas
+	exportVerseNumbers: { [target: string]: boolean } = $state({});
+
+	// Indique le format du texte arabe
+	arabicTextFormat: 'Plain' | 'V1' | 'V2' = $state('Plain');
+}
+
 SerializableBase.registerChildClass(ProjectEditorState, 'timeline', TimelineState);
 SerializableBase.registerChildClass(
 	ProjectEditorState,
@@ -204,3 +230,4 @@ SerializableBase.registerChildClass(
 SerializableBase.registerChildClass(ProjectEditorState, 'videoPreview', VideoPreviewState);
 SerializableBase.registerChildClass(ProjectEditorState, 'subtitlesEditor', SubtitlesEditorState);
 SerializableBase.registerChildClass(ProjectEditorState, 'stylesEditor', StylesEditorState);
+SerializableBase.registerChildClass(ProjectEditorState, 'export', ExportState);

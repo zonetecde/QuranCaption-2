@@ -152,11 +152,13 @@
 							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
 						});
 
-						const subtitles = document.querySelectorAll('.' + target);
+						const subtitles = document.querySelectorAll('.' + CSS.escape(target) + '.subtitle');
 						subtitles.forEach(async (subtitle) => {
 							// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
 							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 								fontSize -= 5;
+
+								console.log(subtitle.clientHeight);
 
 								globalState.getVideoStyle
 									.getStylesOfTarget(target)
@@ -216,14 +218,12 @@
 					max: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
 						.valueMax
 				}}
-				class={'arabic absolute subtitle select-none flex flex-row-reverse flex-wrap content-center ' +
+				class={'arabic absolute subtitle select-none ' +
 					getTailwind('arabic') +
 					helperStyles('arabic')}
 				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)};"
 			>
-				{#each currentSubtitle()!.getText().split(' ') as word}
-					<span>{word}</span>{' '}
-				{/each}
+				{currentSubtitle()!.getText()}
 			</p>
 
 			{#each Object.keys(currentSubtitleTranslations()!) as edition}
@@ -251,19 +251,13 @@
 								.getStylesOfTarget(edition)
 								.findStyle('vertical-position')!.valueMax
 						}}
-						class={`translation absolute subtitle flex flex-wrap select-none  content-center ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
+						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
 						{#if translation.type === 'verse'}
-							{#each translation
-								.getText(edition, (currentSubtitle() as SubtitleClip)!)
-								.split(' ') as word}
-								<span>{word}</span>{' '}
-							{/each}
+							{translation.getText(edition, (currentSubtitle() as SubtitleClip)!)}
 						{:else}
-							{#each translation.getText().split(' ') as word}
-								<span>{word}</span>{' '}
-							{/each}
+							{translation.getText()}
 						{/if}
 					</p>
 				{/if}

@@ -350,4 +350,14 @@ export class ProjectTranslation extends SerializableBase {
 		}
 		return translations;
 	}
+
+	getEditionFromName(name: string): Edition {
+		const edition = globalState.getProjectTranslation.addedTranslationEditions.find(
+			(e) => e.name === name
+		);
+		if (!edition) {
+			throw new Error(`Edition not found with name: ${name}`);
+		}
+		return edition;
+	}
 }

@@ -72,6 +72,10 @@ class GlobalState {
 		return this.currentProject!.projectEditorState.translationsEditor;
 	}
 
+	get getExportState() {
+		return this.currentProject!.projectEditorState.export;
+	}
+
 	get getVideoStyle() {
 		return this.currentProject!.content.videoStyle;
 	}

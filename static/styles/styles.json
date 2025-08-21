@@ -114,11 +114,11 @@
 				"id": "word-spacing",
 				"name": "Word Spacing",
 				"description": "Adjust spacing between words",
-				"value": 16,
+				"value": 0,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 60,
-				"css": "column-gap: {value}px;",
+				"css": "word-spacing: {value}px;",
 				"tailwind": false,
 				"icon": "horizontal_distribute"
 			},

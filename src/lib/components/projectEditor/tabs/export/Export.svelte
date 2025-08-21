@@ -7,7 +7,11 @@
 </script>
 
 <div class="flex-grow w-full max-w-full flex overflow-hidden h-full min-h-0">
-	<!-- Assets -->
+	<section
+		class="2xl:w-[450px] w-[350px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
+	>
+		<ExportSettings />
+	</section>
 
 	<section class="flex-1 min-w-0 flex flex-row max-h-full min-h-0">
 		<section class="w-full min-w-0 flex flex-col min-h-0">
@@ -19,11 +23,6 @@
 			<!-- Timeline -->
 			<Timeline />
 		</section>
-	</section>
-	<section
-		class="2xl:w-[350px] w-[300px] flex-shrink-0 divide-y-2 divide-color max-h-full overflow-hidden flex flex-col"
-	>
-		<ExportSettings />
 	</section>
 </div>
 
