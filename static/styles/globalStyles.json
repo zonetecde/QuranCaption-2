@@ -347,5 +347,67 @@
 				"icon": "auto_fix_high"
 			}
 		]
+	},
+	{
+		"id": "verse-number",
+		"name": "Verse Number (Separated From Text)",
+		"description": "Control display of the Verse number",
+		"icon": "format_list_numbered",
+		"styles": [
+			{
+				"id": "show-verse-number",
+				"name": "Show Verse Number",
+				"description": "Show or hide the Verse number",
+				"value": false,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "visibility"
+			},
+			{
+				"id": "verse-number-vertical-position",
+				"name": "Vertical Position",
+				"description": "Change the vertical position of the Verse number (pixels from center)",
+				"value": -250,
+				"valueType": "number",
+				"valueMin": -540,
+				"valueMax": 540,
+				"css": "",
+				"tailwind": false,
+				"icon": "vertical_align_center"
+			},
+			{
+				"id": "verse-number-horizontal-position",
+				"name": "Horizontal Position",
+				"description": "Change the horizontal position of the Verse number (pixels from center)",
+				"value": 0,
+				"valueType": "number",
+				"valueMin": -960,
+				"valueMax": 960,
+				"css": "",
+				"tailwind": false,
+				"icon": "horizontal_rule"
+			},
+			{
+				"id": "verse-number-format",
+				"name": "Format",
+				"description": "Change the format of the Verse number display. Use <surah> and <verse> tags to customize.",
+				"value": "<surah>:<verse>",
+				"valueType": "text",
+				"css": "",
+				"tailwind": false,
+				"icon": "format_quote"
+			},
+			{
+				"id": "verse-number-text-style",
+				"name": "Text Styles",
+				"description": "Change the style of the Verse number display",
+				"value": "Click to expand",
+				"valueType": "composite",
+				"css": "",
+				"tailwind": false,
+				"icon": "auto_fix_high"
+			}
+		]
 	}
 ]

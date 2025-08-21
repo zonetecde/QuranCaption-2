@@ -123,6 +123,14 @@ export type CustomTextStyleName =
 	| 'always-show'
 	| 'custom-text-composite';
 
+export type VerseNumberStyleName =
+	| 'verse-number'
+	| 'show-verse-number'
+	| 'verse-number-vertical-position'
+	| 'verse-number-horizontal-position'
+	| 'verse-number-format'
+	| 'verse-number-text-style';
+
 // Union type pour tous les noms de styles
 export type StyleName =
 	| GeneralStyleName
@@ -139,7 +147,8 @@ export type StyleName =
 	| ReciterNameStyleName
 	| CreatorTextStyleName
 	| CustomTextStyleName
-	| GlobalAnimationStyleName;
+	| GlobalAnimationStyleName
+	| VerseNumberStyleName;
 
 export class Style extends SerializableBase {
 	id: string = $state('');
@@ -618,7 +627,7 @@ export class VideoStyle extends SerializableBase {
 		);
 
 		// Set les styles par défaut pour l'arabe
-		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Mushaf');
+		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'QPC2');
 		videoStyle.getStylesOfTarget('arabic').setStyle('max-height', 220); // Une ligne max
 		videoStyle.getStylesOfTarget('arabic').setStyle('line-height', 1.6);
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
