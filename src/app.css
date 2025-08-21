@@ -11,7 +11,7 @@
 
 @font-face {
 	font-family: 'Reciters';
-	src: url('Reciters.ttf') format('truetype');
+	src: url('/reciters/reciters.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }

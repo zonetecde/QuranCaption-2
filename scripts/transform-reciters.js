@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Lire le fichier reciter.json
-const reciterFilePath = path.join(__dirname, '..', 'static', 'reciter.json');
+// Lire le fichier /reciters/reciters.json
+const reciterFilePath = path.join(__dirname, '..', 'static', '/reciters/reciters.json');
 const reciters = JSON.parse(fs.readFileSync(reciterFilePath, 'utf8'));
 
 // Transformer le tableau de strings en tableau d'objets

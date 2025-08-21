@@ -363,8 +363,8 @@ const translations = {
 	'Zayed Alatteah': 'زايد العطية'
 };
 
-// Lire le fichier reciter.json
-const reciterPath = path.join(__dirname, '..', 'static', 'reciter.json');
+// Lire le fichier /reciters/reciters.json
+const reciterPath = path.join(__dirname, '..', 'static', '/reciters/reciters.json');
 const reciters = JSON.parse(fs.readFileSync(reciterPath, 'utf8'));
 
 // Mettre à jour les traductions
@@ -379,4 +379,4 @@ reciters.forEach((reciter) => {
 
 // Écrire le fichier mis à jour
 fs.writeFileSync(reciterPath, JSON.stringify(reciters, null, '\t'), 'utf8');
-console.log('Fichier reciter.json mis à jour avec les traductions arabes!');
+console.log('Fichier /reciters/reciters.json mis à jour avec les traductions arabes!');

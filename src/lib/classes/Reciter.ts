@@ -17,7 +17,7 @@ export default class RecitersManager {
 
 	static async loadReciters() {
 		try {
-			const response = await fetch('/reciter.json');
+			const response = await fetch('/reciters/reciters.json');
 			const data = await response.json();
 			this.reciters = data.map((item: any) => new Reciter(item));
 		} catch (error) {

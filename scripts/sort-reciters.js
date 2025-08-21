@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Lire le fichier reciter.json
-const reciterPath = path.join(__dirname, '..', 'static', 'reciter.json');
+// Lire le fichier /reciters/reciters.json
+const reciterPath = path.join(__dirname, '..', 'static', '/reciters/reciters.json');
 const reciters = JSON.parse(fs.readFileSync(reciterPath, 'utf8'));
 
 console.log(`Nombre total de récitateurs avant tri: ${reciters.length}`);
@@ -36,7 +36,9 @@ reciters.slice(-10).forEach((reciter, index) => {
 
 // Écrire le fichier trié
 fs.writeFileSync(reciterPath, JSON.stringify(reciters, null, '\t'), 'utf8');
-console.log(`\nFichier reciter.json trié avec succès! Total: ${reciters.length} récitateurs`);
+console.log(
+	`\nFichier /reciters/reciters.json trié avec succès! Total: ${reciters.length} récitateurs`
+);
 
 // Afficher les récitateurs avec un numéro assigné
 const numberedReciters = reciters
