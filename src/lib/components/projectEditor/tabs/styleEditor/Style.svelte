@@ -116,6 +116,34 @@
 		// Déclenche un refresh éventuel (ex: max-height fit)
 		if (style.id === 'max-height') {
 			globalState.updateVideoPreviewUI();
+		} else if (style.id === 'video-dimension') {
+			// On met à jour toutes les valeurs minimum et maximum des styles vertical-position/horizontal-position
+			// afin qu'on puisse mettre nos textes où on veut sur la vidéo
+			for (let target of globalState.getVideoStyle.styles) {
+				for (let category of target.categories) {
+					for (let style of category.styles) {
+						if (style.id.includes('vertical-position')) {
+							style.valueMin = -(v.height / 2);
+							style.valueMax = v.height / 2;
+
+							if ((style.value as number) > style.valueMax) {
+								style.value = style.valueMax;
+							} else if ((style.value as number) < style.valueMin) {
+								style.value = style.valueMin;
+							}
+						} else if (style.id.includes('horizontal-position')) {
+							style.valueMin = -(v.width / 2);
+							style.valueMax = v.width / 2;
+
+							if ((style.value as number) > style.valueMax) {
+								style.value = style.valueMax;
+							} else if ((style.value as number) < style.valueMin) {
+								style.value = style.valueMin;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -158,6 +186,8 @@
 			return 'Click to expand';
 		} else if (style.valueType === 'reciter') {
 			return globalState.currentProject!.detail.reciter || 'No reciter selected';
+		} else if (style.valueType === 'dimension') {
+			return (style.value as any).width + 'x' + (style.value as any).height;
 		} else return String(style.value);
 	}
 </script>
@@ -386,6 +416,49 @@
 							Arabic calligraphy is not available for this reciter.
 						</p>
 					{/if}
+				</div>
+			{:else if style.valueType === 'dimension'}
+				<!-- Deux boutons quick select : landscape (met en 1920x1080) et portrait (met en 1080x1920) -->
+				<div class="flex flex-row items-center gap-x-2">
+					<p>Fast select:</p>
+					<button
+						class={'px-3 py-1 ' + (style.value === '1920x1080' ? 'btn-accent' : 'btn')}
+						onclick={() => applyValue({ width: 1920, height: 1080 })}
+					>
+						Landscape
+					</button>
+					<button
+						class={'px-3 py-1 ' + (style.value === '1080x1920' ? 'btn-accent' : 'btn')}
+						onclick={() => applyValue({ width: 1080, height: 1920 })}
+					>
+						Portrait
+					</button>
+				</div>
+
+				<p class="mt-2">Custom dimensions:</p>
+
+				<div class="flex flex-row items-center gap-x-2">
+					<input
+						type="number"
+						class="w-full"
+						oninput={(e) => {
+							const width = parseInt((e.target as HTMLInputElement).value);
+							const height = (style.value as any).height;
+							applyValue({ width, height });
+						}}
+						value={(style.value as any).width}
+					/>
+					<span>x</span>
+					<input
+						type="number"
+						class="w-full"
+						oninput={(e) => {
+							const width = (style.value as any).width;
+							const height = parseInt((e.target as HTMLInputElement).value);
+							applyValue({ width, height });
+						}}
+						value={(style.value as any).height}
+					/>
 				</div>
 			{:else if style.valueType === 'composite'}
 				<div class="flex flex-col gap-2">

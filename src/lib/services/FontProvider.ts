@@ -92,7 +92,6 @@ export class QPCV2FontProvider {
 			}
 		}
 
-		console.log(`Quran Verse Glyph: ${str}`);
 		return str.trim();
 	}
 

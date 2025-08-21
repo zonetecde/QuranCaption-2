@@ -6,6 +6,19 @@
 		"icon": "animation",
 		"styles": [
 			{
+				"id": "video-dimension",
+				"name": "Video Dimension / Orientation",
+				"description": "Dimension of the video",
+				"value": {
+					"width": 1920,
+					"height": 1080
+				},
+				"valueType": "dimension",
+				"css": "",
+				"tailwind": false,
+				"icon": "screen_rotation"
+			},
+			{
 				"id": "fade-duration",
 				"name": "Fade Duration",
 				"description": "Duration of fade in/out effect in milliseconds",

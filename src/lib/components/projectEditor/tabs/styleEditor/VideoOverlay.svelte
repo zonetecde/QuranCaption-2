@@ -155,11 +155,6 @@
 						const subtitles = document.querySelectorAll('.' + target);
 						subtitles.forEach(async (subtitle) => {
 							// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
-
-							console.log(target, (subtitle as HTMLElement).clientHeight, maxHeightValue, fontSize);
-
-							console.log(target, (subtitle as HTMLElement).getClientRects().length);
-
 							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 								fontSize -= 5;
 
@@ -256,7 +251,7 @@
 								.getStylesOfTarget(edition)
 								.findStyle('vertical-position')!.valueMax
 						}}
-						class={`translation absolute subtitle flex flex-wrap select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
+						class={`translation absolute subtitle flex flex-wrap select-none  content-center ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
 					>
 						{#if translation.type === 'verse'}

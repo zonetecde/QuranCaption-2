@@ -307,12 +307,20 @@
 		const previewContainer = document.getElementById('preview-container');
 		const preview = document.getElementById('preview');
 
+		const previewDimension = globalState.getVideoStyle
+			.getStylesOfTarget('global')
+			.findStyle('video-dimension')!.value as any;
+
 		if (previewContainer && preview) {
-			// Configuration initiale : taille fixe 1920x1080 pour éviter les effets bizarres au chargement
-			preview.style.width = '1920px';
-			preview.style.height = '1080px';
-			preview.style.minWidth = '1920px';
-			preview.style.minHeight = '1080px';
+			// Définition des dimensions selon l'orientation
+			let videoWidth: number = previewDimension.width;
+			let videoHeight: number = previewDimension.height;
+
+			// Configuration initiale : taille fixe selon l'orientation
+			preview.style.width = `${videoWidth}px`;
+			preview.style.height = `${videoHeight}px`;
+			preview.style.minWidth = `${videoWidth}px`;
+			preview.style.minHeight = `${videoHeight}px`;
 
 			// Configuration du conteneur
 			previewContainer.style.width = 'auto';
@@ -326,9 +334,6 @@
 			previewContainer.style.transform = 'none';
 			previewContainer.style.top = '0';
 			previewContainer.style.left = '0';
-
-			const videoWidth = preview.clientWidth;
-			const videoHeight = preview.clientHeight;
 
 			let targetW: number;
 			let targetH: number;
@@ -369,6 +374,10 @@
 				previewContainer.style.transform = 'translate(-50%, -50%)';
 			}
 		}
+
+		untrack(() => {
+			globalState.updateVideoPreviewUI();
+		});
 	}
 
 	// === GESTION AUDIO AVEC HOWLER ===

@@ -18,6 +18,7 @@ export type StyleValueType =
 	| 'boolean'
 	| 'text'
 	| 'time'
+	| 'dimension'
 	| 'composite'
 	| 'reciter';
 
@@ -38,6 +39,8 @@ export type StyleCategoryName =
 
 // Types spécifiques pour chaque catégorie de styles
 export type GeneralStyleName = 'show-subtitles' | 'show-verse-number' | 'verse-number-separator';
+
+export type GlobalAnimationStyleName = 'video-dimension' | 'fade-duration';
 
 export type TextStyleName =
 	| 'text-color'
@@ -78,7 +81,7 @@ export type BorderStyleName = 'border-enable' | 'border-width' | 'border-color' 
 
 export type EffectsStyleName = 'opacity' | 'blur' | 'brightness' | 'contrast';
 
-export type AnimationStyleName = 'fade-duration' | 'scale' | 'rotation';
+export type AnimationStyleName = 'scale' | 'rotation';
 
 export type OverlayStyleName =
 	| 'overlay-enable'
@@ -135,16 +138,17 @@ export type StyleName =
 	| SurahNameStyleName
 	| ReciterNameStyleName
 	| CreatorTextStyleName
-	| CustomTextStyleName;
+	| CustomTextStyleName
+	| GlobalAnimationStyleName;
 
 export class Style extends SerializableBase {
 	id: string = $state('');
 	name: string = '';
 	description: string = '';
-	value: string | number | boolean | Style[] = $state('');
+	value: string | number | boolean | { width: number; height: number } | Style[] = $state('');
 	valueType: StyleValueType = 'text';
-	valueMin?: number;
-	valueMax?: number;
+	valueMin?: number = $state(-540);
+	valueMax?: number = $state(540);
 	step?: number;
 	options?: string[];
 	css: string = '';
@@ -610,9 +614,10 @@ export class VideoStyle extends SerializableBase {
 
 		// Set les styles par défaut pour l'arabe
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'Mushaf');
+		videoStyle.getStylesOfTarget('arabic').setStyle('max-height', '260'); // Une ligne max
 		videoStyle.getStylesOfTarget('arabic').setStyle('line-height', 1.6);
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
-		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -100);
+		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -110);
 
 		// Load les styles composites
 		videoStyle.getStylesOfTarget('global').loadCompositeStyles();
@@ -641,8 +646,6 @@ export class VideoStyle extends SerializableBase {
 		styleId: StyleName,
 		value: string | number | boolean
 	): void {
-		console.log(customTextId);
-
 		// Trouve donc le clip correspondant pour update sa valeur
 		const clip = globalState.getCustomTextTrack.clips.find(
 			(c) => (c as CustomTextClip).category?.id === customTextId
@@ -665,8 +668,9 @@ export class VideoStyle extends SerializableBase {
 
 		// Styles par défaut pour les traductions
 		stylesData.setStyle('font-family', 'Georgia'); // Définit la police par défaut
+		stylesData.setStyle('max-height', 280); // 3 lignes max
 		stylesData.setStyle('font-size', 60); // Définit la taille de police par défaut
-		stylesData.setStyle('vertical-position', 100); // Définit la hauteur de ligne par défaut
+		stylesData.setStyle('vertical-position', 70); // Définit la hauteur de ligne par défaut
 
 		this.styles.push(stylesData);
 	}
