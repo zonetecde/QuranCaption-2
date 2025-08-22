@@ -107,13 +107,14 @@
 		const tauriWindow = getCurrentWebviewWindow();
 		const tauriWindowSize = await tauriWindow.size();
 
-		// 1) capture écran (peut ne pas fournir 60fps)
+		// 1) capture écran avec les meilleurs paramètres (video seulement)
 		const displayStream = await navigator.mediaDevices.getDisplayMedia({
 			video: {
 				frameRate: { ideal: fps, max: fps },
 				width: tauriWindowSize.width,
 				height: tauriWindowSize.height
 			}
+			// Pas d'audio - on l'ajoute après avec ffmpeg
 		});
 
 		// Cache immédiatement l'overlay dès que l'utilisateur commence la sélection d'écran
@@ -127,52 +128,98 @@
 		video.muted = true;
 		await video.play();
 
-		// 3) canvas pour forcer la cadence voulue
+		// 3) canvas pour forcer la cadence voulue avec qualité maximale
 		const canvas = document.createElement('canvas');
 		canvas.width = video.videoWidth || 1280;
 		canvas.height = video.videoHeight || 720;
-		const ctx = canvas.getContext('2d')!;
+		const ctx = canvas.getContext('2d', {
+			alpha: false, // Pas de transparence pour de meilleures performances
+			desynchronized: true, // Améliore les performances de rendu
+			willReadFrequently: false // Optimise pour l'écriture plutôt que la lecture
+		})!;
 
-		// dessine à la cadence souhaitée
+		// Optimise le rendu pour la qualité
+		ctx.imageSmoothingEnabled = true;
+		ctx.imageSmoothingQuality = 'high';
+
+		// dessine à la cadence souhaitée avec timing précis
 		const interval = 1000 / fps;
 		let drawing = true;
-		const drawLoop = () => {
+		let lastTime = performance.now();
+
+		const drawLoop = (currentTime: number) => {
 			if (!drawing) return;
-			ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-			setTimeout(drawLoop, interval);
+
+			// Contrôle précis du timing
+			if (currentTime - lastTime >= interval) {
+				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+				lastTime = currentTime;
+			}
+			requestAnimationFrame(drawLoop);
 		};
-		drawLoop();
+		requestAnimationFrame(drawLoop);
 
-		// 4) enregistre le stream du canvas (contrôle réel du fps)
+		// 4) enregistre le stream du canvas (video seulement)
 		const stream = (canvas as HTMLCanvasElement).captureStream(fps);
-		// ajouter piste audio si besoin (la première piste audio du displayStream)
-		const audioTrack = displayStream.getAudioTracks()[0];
-		if (audioTrack) stream.addTrack(audioTrack);
+		// Pas d'audio - on l'ajoute après avec ffmpeg
 
-		// 5) config MediaRecorder — vérifier support mime
-		const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-			? 'video/webm;codecs=vp9'
-			: MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
-				? 'video/webm;codecs=vp8'
-				: 'video/webm';
-		const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 12_000_000 });
+		// 5) config MediaRecorder pour la meilleure qualité vidéo
+		let mimeType: string;
+		let options: MediaRecorderOptions;
+
+		// Équilibre qualité/taille pour des fichiers raisonnables (video seulement)
+		if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42E01E')) {
+			mimeType = 'video/mp4;codecs=avc1.42E01E';
+			options = {
+				mimeType,
+				videoBitsPerSecond: 8_000_000 // 8 Mbps - bon équilibre qualité/taille
+			};
+		} else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+			mimeType = 'video/webm;codecs=vp9';
+			options = {
+				mimeType,
+				videoBitsPerSecond: 6_000_000 // 6 Mbps avec VP9 (plus efficace)
+			};
+		} else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+			mimeType = 'video/webm;codecs=vp8';
+			options = {
+				mimeType,
+				videoBitsPerSecond: 8_000_000 // 8 Mbps avec VP8
+			};
+		} else {
+			// Fallback de base
+			mimeType = 'video/webm';
+			options = {
+				mimeType,
+				videoBitsPerSecond: 6_000_000 // 6 Mbps fallback
+			};
+		}
+
+		const rec = new MediaRecorder(stream, options);
 		const chunks: Blob[] = [];
+
+		// Demander des chunks plus fréquents pour de meilleures métadonnées
 		rec.ondataavailable = (e) => {
 			if (e.data && e.data.size) chunks.push(e.data);
 		};
+
+		// Démarrer avec des chunks de 1 seconde pour améliorer les métadonnées
+		rec.start(1000);
 
 		rec.onstop = async () => {
 			drawing = false;
 			video.pause();
 
-			const fileName = `QC-${globalState.currentProject!.detail.id}.webm`;
+			// Utiliser l'extension correcte selon le codec
+			const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+			const fileName = `QC-${globalState.currentProject!.detail.id}.${extension}`;
 
-			// combine
-			const blob = new Blob(chunks, { type: 'video/webm' });
+			// combine avec le bon type MIME
+			const blob = new Blob(chunks, { type: mimeType });
 			const arrayBuf = await blob.arrayBuffer();
 
-			// Option A: sauvegarde locale "download"
-			const file = new File([arrayBuf], fileName, { type: 'video/webm' });
+			// Utiliser le bon type MIME pour le fichier aussi
+			const file = new File([arrayBuf], fileName, { type: mimeType });
 			const url = URL.createObjectURL(file);
 			const a = document.createElement('a');
 			a.href = url;
@@ -185,8 +232,6 @@
 				addAudioToVideo(fileName);
 			}, 0);
 		};
-
-		rec.start();
 		// retourne un objet pour pouvoir arrêter plus tard
 		return {
 			recorder: rec,
@@ -213,6 +258,11 @@
 		while (!(await exists(videoFileName, { baseDir: BaseDirectory.Download }))) {
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		}
+
+		// destroy le media recorder pour qu'on ai plus la petite fenetre "X partage une fenêtre"
+		rec?.cleanup();
+		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
+		videoPreview?.togglePlayPause(); // Met en pause la vidéo pour pas consommer de ressource
 
 		await invoke('add_audio_to_video', {
 			fileName: videoFileName,
@@ -257,10 +307,10 @@
 				</div>
 
 				<!-- Main instruction text -->
-				<h1 class="text-4xl font-bold text-white mb-6">Select Screen to Record</h1>
+				<h1 class="text-4xl font-bold text-white mb-6">Select Window to Record</h1>
 
 				<div class="text-xl text-gray-200 leading-relaxed space-y-4">
-					<p>A popup window will appear asking you to choose which screen to share.</p>
+					<p>A popup window will appear asking you to choose which window to share.</p>
 					<p class="font-semibold text-yellow-300">Please select the window with title:</p>
 					<div
 						class="bg-gray-800 border border-gray-600 rounded-lg p-4 font-mono text-lg text-green-400"
