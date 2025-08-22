@@ -2,6 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import ExportProjectData from './ExportProjectData.svelte';
 	import ExportSubtitles from './ExportSubtitles.svelte';
+	import ExportYtbChapters from './ExportYtbChapters.svelte';
 
 	// Export choices (English labels & hints)
 	const choices = [
@@ -86,7 +87,7 @@
 		{:else if globalState.getExportState.selectedChoice === 'subtitles'}
 			<ExportSubtitles />
 		{:else if globalState.getExportState.selectedChoice === 'chapters'}
-			<p class="text-secondary">YouTube chapters configuration…</p>
+			<ExportYtbChapters />
 		{:else if globalState.getExportState.selectedChoice === 'project'}
 			<ExportProjectData />
 		{/if}

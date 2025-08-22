@@ -219,6 +219,9 @@ export class ExportState extends SerializableBase {
 
 	// Indique le format du texte arabe
 	arabicTextFormat: 'Plain' | 'V1' | 'V2' = $state('Plain');
+
+	// Indique la sélection d'exportation des chapitres YouTube
+	ytbChaptersChoice: 'Each Surah' | 'Each Verse' = $state('Each Surah');
 }
 
 SerializableBase.registerChildClass(ProjectEditorState, 'timeline', TimelineState);
