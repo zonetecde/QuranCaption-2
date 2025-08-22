@@ -1,0 +1,333 @@
+[
+  {
+    "id": 55,
+    "city": "madina",
+    "name": {
+      "translated": "The Beneficent",
+      "transliterated": "Ar-Rahman",
+      "codepoints": [
+        1575,
+        1604,
+        1585,
+        1581,
+        1605,
+        1606
+      ]
+    },
+    "ayahs": 78,
+    "slug": "ar-rahman",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Der Allerbarmer"
+  ],
+  [
+    2,
+    "hat den Qur’an gelehrt."
+  ],
+  [
+    3,
+    "Er hat den Menschen erschaffen."
+  ],
+  [
+    4,
+    "Er hat ihn die klare Darlegung gelehrt."
+  ],
+  [
+    5,
+    "Die Sonne und der Mond (laufen) nach Berechnung."
+  ],
+  [
+    6,
+    "Die stiellosen Pflanzen und die Bäume werfen sich nieder."
+  ],
+  [
+    7,
+    "Den Himmel hat Er emporgehoben und die Waage aufgestellt,"
+  ],
+  [
+    8,
+    "damit ihr beim Wägen nicht das Maß überschreitet."
+  ],
+  [
+    9,
+    "Und meßt das Gewicht in Gerechtigkeit und gebt beim Wägen nicht weniger."
+  ],
+  [
+    10,
+    "Und die Erde hat Er für die Geschöpfe (an)gelegt;"
+  ],
+  [
+    11,
+    "auf ihr gibt es Früchte, Palmen mit Fruchthüllen"
+  ],
+  [
+    12,
+    "und Korn mit Halmen und duftende Pflanzen."
+  ],
+  [
+    13,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    14,
+    "Er hat den Menschen aus trockenem Ton wie Töpferware erschaffen."
+  ],
+  [
+    15,
+    "Und Er hat die Ginn aus einer unruhigen Feuerflamme erschaffen."
+  ],
+  [
+    16,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    17,
+    "(Er ist) der Herr der beiden Osten und der Herr der beiden Westen."
+  ],
+  [
+    18,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    19,
+    "Er hat den beiden Meeren freien Lauf gelassen; sie treffen aufeinander,"
+  ],
+  [
+    20,
+    "zwischen ihnen ist (aber) ein trennendes Hindernis, (das)s sie (ihre Grenzen) nicht überschreiten."
+  ],
+  [
+    21,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    22,
+    "Aus ihnen beiden kommen Perlen und Korallen hervor."
+  ],
+  [
+    23,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?\r\n"
+  ],
+  [
+    24,
+    "Und Sein sind (auch) die (hoch)gebauten auf dem Meer fahrenden (Schiffe), wie Berge."
+  ],
+  [
+    25,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    26,
+    "Alle, die auf ihr sind, werden vergehen;"
+  ],
+  [
+    27,
+    "bleiben wird (nur) das Angesicht deines Herrn, Besitzer der Erhabenheit und Ehre."
+  ],
+  [
+    28,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    29,
+    "Ihn bittet wer in den Himmeln und auf der Erde ist. Jeden Tag befaßt Er sich mit einer Angelegenheit."
+  ],
+  [
+    30,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    31,
+    "Wir werden Uns euch widmen, ihr beiden Schwerlastenden."
+  ],
+  [
+    32,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?\r\n"
+  ],
+  [
+    33,
+    "O ihr Gesellschaft der Ginn und der Menschen, wenn ihr aus den Bezirken der Himmel und der Erde hinausdringen könnt, so dringt doch heraus. Ihr werdet nicht herausdringen, außer mit einer Ermächtigung."
+  ],
+  [
+    34,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    35,
+    "Gegen euch beide wird eine rauchlose Feuerflamme und Kupfer gesandt werden, so werdet ihr euch selbst nicht helfen (können)."
+  ],
+  [
+    36,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    37,
+    "Wenn der Himmel sich spalten und dann rosig werden wird wie Farböl"
+  ],
+  [
+    38,
+    "-welche der Wohltaten eures Herrn wollt ihr beide denn leugnen? -,"
+  ],
+  [
+    39,
+    "an jenem Tag nun werden nach ihrer Sünde weder Mensch noch Gänn gefragt."
+  ],
+  [
+    40,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    41,
+    "Die Übeltäter werden an ihrem Merkmal erkannt werden und dann an den Stirnlocken und an den Füßen ergriffen."
+  ],
+  [
+    42,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    43,
+    "Das ist die Hölle, die die Übeltäter für Lüge erklären."
+  ],
+  [
+    44,
+    "Sie werden zwischen ihr und siedend heißem Wasser umhergehen."
+  ],
+  [
+    45,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    46,
+    "Für jemanden aber, der den Stand seines Herrn fürchtet, wird es zwei Gärten geben"
+  ],
+  [
+    47,
+    "-welche der Wohltaten eures Herrn wollt ihr beide denn leugnen? -,"
+  ],
+  [
+    48,
+    "die beide Zweige haben."
+  ],
+  [
+    49,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    50,
+    "Darin sind zwei Quellen, die fließen."
+  ],
+  [
+    51,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    52,
+    "Darin gibt es von jeder Frucht zwei Arten."
+  ],
+  [
+    53,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    54,
+    "Sie werden sich auf Ruhebetten lehnen, deren Futter aus schwerem Brokat sind. Und die Ernte der beiden Gärten hängt herab."
+  ],
+  [
+    55,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    56,
+    "Darin sind (weibliche Wesen), die ihre Blicke zurückhalten, die vor ihnen weder Mensch noch Ginn berührt haben"
+  ],
+  [
+    57,
+    "-welche der Wohltaten eures Herrn wollt ihr beide denn leugnen? -,"
+  ],
+  [
+    58,
+    "als wären sie Rubine und Korallen."
+  ],
+  [
+    59,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    60,
+    "Ist der Lohn des Guten nicht ebenfalls das Gute?"
+  ],
+  [
+    61,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    62,
+    "Unterhalb der beiden gibt es (noch) zwei andere Gärten"
+  ],
+  [
+    63,
+    "-welche der Wohltaten eures Herrn wollt ihr beide denn leugnen? -,"
+  ],
+  [
+    64,
+    "dich bewachsene."
+  ],
+  [
+    65,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    66,
+    "Darin sind zwei sprudelnde Quellen."
+  ],
+  [
+    67,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    68,
+    "Darin sind Früchte und Palmen und Granatäpfel."
+  ],
+  [
+    69,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    70,
+    "Darin sind gute schöne (weibliche Wesen)"
+  ],
+  [
+    71,
+    "- welche der Wohltaten eures Herrn wollt ihr beide denn leugnen? -,"
+  ],
+  [
+    72,
+    "Huris, (die) in den Zelten zurückgezogen (leben) -,"
+  ],
+  [
+    73,
+    "welche der Wohltaten eures Herrn wollt ihr beide denn leugnen? -,"
+  ],
+  [
+    74,
+    "die vor ihnen weder Mensch noch Ginn berührt haben."
+  ],
+  [
+    75,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    76,
+    "Sie lehnen sich auf grünen Decken und schönen Teppichen."
+  ],
+  [
+    77,
+    "Welche der Wohltaten eures Herrn wollt ihr beide denn leugnen?"
+  ],
+  [
+    78,
+    "Segensreich ist der Name deines Herrn, Besitzer der Erhabenheit und Ehre!"
+  ]
+]

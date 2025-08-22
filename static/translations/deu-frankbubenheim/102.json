@@ -1,0 +1,54 @@
+[
+  {
+    "id": 102,
+    "city": "makkah",
+    "name": {
+      "translated": "Competition",
+      "transliterated": "At-Takathur",
+      "codepoints": [
+        1575,
+        1604,
+        1578,
+        1603,
+        1575,
+        1579,
+        1585
+      ]
+    },
+    "ayahs": 8,
+    "slug": "at-takathur",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Die Vermehrung lenkt euch ab,"
+  ],
+  [
+    2,
+    "bis ihr die Friedhöfe besucht."
+  ],
+  [
+    3,
+    "Keineswegs! Ihr werdet (es noch) erfahren."
+  ],
+  [
+    4,
+    "Abermals: Keineswegs! Ihr werdet (es noch) erfahren."
+  ],
+  [
+    5,
+    "Keineswegs! Wenn ihr es nur mit dem Wissen der Gewißheit wüßtet!"
+  ],
+  [
+    6,
+    "Ihr werdet ganz gewiß den Höllenbrand sehen."
+  ],
+  [
+    7,
+    "Abermals: Ihr werdet ihn mit dem Auge der Gewißheit sehen."
+  ],
+  [
+    8,
+    "Hierauf werdet ihr an jenem Tag ganz gewiß nach der Wonne gefragt werden."
+  ]
+]

@@ -1,0 +1,40 @@
+[
+  {
+    "id": 105,
+    "city": "makkah",
+    "name": {
+      "translated": "The Elephant",
+      "transliterated": "Al-Fil",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1610,
+        1604
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-fil",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Siehst du nicht, wie dein Herr mit den Leuten des Elefanten verfuhr?"
+  ],
+  [
+    2,
+    "Ließ Er nicht ihre List verlorengehen"
+  ],
+  [
+    3,
+    "und sandte gegen sie Vögel in aufeinanderfolgenden Schwärmen,"
+  ],
+  [
+    4,
+    "die sie mit Steinen aus gebranntem Lehm bewarfen,"
+  ],
+  [
+    5,
+    "und sie so wie abgefressene Halme machte?"
+  ]
+]

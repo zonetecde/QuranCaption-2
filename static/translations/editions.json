@@ -1725,6 +1725,17 @@
 		"istiadhah": "Ich suche Zuflucht bei Allah vor Satan, dem Verfluchten",
 		"translations": [
 			{
+				"key": "deu_frankbubenheima",
+				"name": "deu-frankbubenheima",
+				"author": "Frank Bubenheim And Nadeem Elyas",
+				"language": "German",
+				"direction": "ltr",
+				"source": "https://quranenc.com/check/german_bubenheim/v1.1.0-csv.1 , https://quranenc.com/en/browse/german_bubenheim , https://quranenc.com ,",
+				"comments": "Ponctuation",
+				"link": "/translations/deu-frankbubenheim/{chapter}.json",
+				"linkmin": "/translations/deu-frankbubenheim/{chapter}.json"
+			},
+			{
 				"key": "deu_aburidamuhammad",
 				"name": "deu-aburidamuhammad",
 				"author": "Abu Rida Muhammad Ibn Ahmad Ibn Rassoul",
@@ -1756,28 +1767,6 @@
 				"comments": "",
 				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/deu-amirzaidan.json",
 				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/deu-amirzaidan.min.json"
-			},
-			{
-				"key": "deu_asfbubenheimand",
-				"name": "deu-asfbubenheimand",
-				"author": "A. S. F. Bubenheim And N. Elyas",
-				"language": "German",
-				"direction": "ltr",
-				"source": "http://tanzil.net",
-				"comments": "",
-				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/deu-asfbubenheimand.json",
-				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/deu-asfbubenheimand.min.json"
-			},
-			{
-				"key": "deu_frankbubenheima",
-				"name": "deu-frankbubenheima",
-				"author": "Frank Bubenheim And Nadeem Elyas",
-				"language": "German",
-				"direction": "ltr",
-				"source": "https://quranenc.com/check/german_bubenheim/v1.1.0-csv.1 , https://quranenc.com/en/browse/german_bubenheim , https://quranenc.com ,",
-				"comments": "",
-				"link": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/deu-frankbubenheima.json",
-				"linkmin": "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/deu-frankbubenheima.min.json"
 			}
 		]
 	},

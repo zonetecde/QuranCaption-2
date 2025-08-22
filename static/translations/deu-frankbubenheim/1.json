@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "city": "makkah",
+    "name": {
+      "translated": "The Opening",
+      "transliterated": "Al-Fatihah",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1575,
+        1578,
+        1581,
+        1577
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-fatihah",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Im Namen Allahs, des Allerbarmers, des Barmherzigen."
+  ],
+  [
+    2,
+    "(Alles) Lob gehört Allah, dem Herrn der Welten,"
+  ],
+  [
+    3,
+    "dem Allerbarmer, dem Barmherzigen,"
+  ],
+  [
+    4,
+    "dem Herrscher am Tag des Gerichts."
+  ],
+  [
+    5,
+    "Dir allein dienen wir, und zu Dir allein flehen wir um Hilfe."
+  ],
+  [
+    6,
+    "Leite uns den geraden Weg,"
+  ],
+  [
+    7,
+    "den Weg derjenigen, denen Du Gunst erwiesen hast, nicht derjenigen, die (Deinen) Zorn erregt haben, und nicht der Irregehenden!"
+  ]
+]

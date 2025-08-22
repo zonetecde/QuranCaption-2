@@ -1,0 +1,40 @@
+[
+  {
+    "id": 97,
+    "city": "makkah",
+    "name": {
+      "translated": "The Power, Fate",
+      "transliterated": "Al-Qadr",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1583,
+        1585
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-qadr",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Wir haben ihn ja in der Nacht der Bestimmung hinabgesandt."
+  ],
+  [
+    2,
+    "Und was läßt dich wissen, was die Nacht der Bestimmung ist?"
+  ],
+  [
+    3,
+    "Die Nacht der Bestimmung ist besser als tausend Monate."
+  ],
+  [
+    4,
+    "Es kommen die Engel und der Geist in ihr mit der Erlaubnis ihres Herrn mit jeder Angelegenheit herab."
+  ],
+  [
+    5,
+    "Frieden ist sie bis zum Anbruch der Morgendämmerung."
+  ]
+]

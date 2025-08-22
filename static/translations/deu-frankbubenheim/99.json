@@ -1,0 +1,54 @@
+[
+  {
+    "id": 99,
+    "city": "madina",
+    "name": {
+      "translated": "The Earthquake",
+      "transliterated": "Az-Zalzalah",
+      "codepoints": [
+        1575,
+        1604,
+        1586,
+        1604,
+        1586,
+        1604,
+        1577
+      ]
+    },
+    "ayahs": 8,
+    "slug": "az-zalzalah",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Wenn die Erde erschüttert wird durch ihr heftiges Beben"
+  ],
+  [
+    2,
+    "und die Erde hervorbringt ihre Lasten"
+  ],
+  [
+    3,
+    "und der Mensch sagt: Was ist mit ihr?,"
+  ],
+  [
+    4,
+    "an jenem Tag wird sie die Nachrichten über sich erzählen,"
+  ],
+  [
+    5,
+    "weil dein Herr (es) ihr eingegeben hat."
+  ],
+  [
+    6,
+    "An jenem Tag werden die Menschen (in Gruppen) getrennt herauskommen, damit ihnen ihre Werke gezeigt werden."
+  ],
+  [
+    7,
+    "Wer nun im Gewicht eines Stäubchens Gutes tut, wird es sehen."
+  ],
+  [
+    8,
+    "Und wer im Gewicht eines Stäubchens Böses tut, wird es sehen."
+  ]
+]

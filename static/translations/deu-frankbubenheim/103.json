@@ -1,0 +1,32 @@
+[
+  {
+    "id": 103,
+    "city": "makkah",
+    "name": {
+      "translated": "The Declining Day, Epoch",
+      "transliterated": "Al-'Asr",
+      "codepoints": [
+        1575,
+        1604,
+        1593,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "al-asr",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Beim Zeitalter!"
+  ],
+  [
+    2,
+    "Der Mensch befindet sich wahrlich in Verlust,"
+  ],
+  [
+    3,
+    "außer denjenigen, die glauben und rechtschaffene Werke tun und einander die Wahrheit eindringlich empfehlen und einander die Standhaftigkeit eindringlich empfehlen."
+  ]
+]

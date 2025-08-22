@@ -1,0 +1,930 @@
+[
+  {
+    "id": 26,
+    "city": "makkah",
+    "name": {
+      "translated": "The Poets",
+      "transliterated": "Ash-Shu'ara",
+      "codepoints": [
+        1575,
+        1604,
+        1588,
+        1593,
+        1585,
+        1575,
+        1569
+      ]
+    },
+    "ayahs": 227,
+    "slug": "ash-shu-ara",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Im Namen Allahs, des Allerbarmers, des Barmherzigen:Ta-Sin-Mim."
+  ],
+  [
+    2,
+    "Dies sind die Zeichen des deutlichen Buches."
+  ],
+  [
+    3,
+    "Vielleicht magst du dich noch selbst umbringen aus Gram (darüber), daß sie nicht gläubig sind."
+  ],
+  [
+    4,
+    "Wenn Wir woll(t)en, könn(t)en Wir vom Himmel ein Zeichen auf sie hinabsenden, so daß sich ihre Nacken dauernd davor unterwerfen (würden)."
+  ],
+  [
+    5,
+    "Keine neuerlich offenbarte Ermahnung kommt zu ihnen vom Allerbarmer, ohne daß sie sich davon abwenden."
+  ],
+  [
+    6,
+    "Sie haben (sie) ja für Lüge erklärt. So werden zu ihnen die Nachrichten kommen von dem, worüber sie sich lustig zu machen pflegten."
+  ],
+  [
+    7,
+    "Haben sie nicht auf die Erde gesehen, wie viele edle Arten Wir auf ihr haben wachsen lassen?"
+  ],
+  [
+    8,
+    "Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    9,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    10,
+    "Als dein Herr Musa zurief: „Begib dich zum ungerechten Volk,"
+  ],
+  [
+    11,
+    "zum Volk Fir’auns, ob sie nicht gottesfürchtig sein wollen."
+  ],
+  [
+    12,
+    "Er sagte: „Mein Herr, ich fürchte, daß sie mich der Lüge bezichtigen."
+  ],
+  [
+    13,
+    "Auch ist meine Brust beklommen, und meine Zunge ist nicht gelöst. Darum entsende (auch) Harun."
+  ],
+  [
+    14,
+    "Und sie haben gegen mich eine Sünde geltend zu machen; so fürchte ich, daß sie mich töten."
+  ],
+  [
+    15,
+    "Er sagte: „Keineswegs! So geht denn beide hin mit Unseren Zeichen. Wir sind mit euch und hören zu."
+  ],
+  [
+    16,
+    "Begebt euch zu Fir’aun und sagt: ,Wir sind der Gesandte des Herrn der Weltenbewohner:"
+  ],
+  [
+    17,
+    "Lasse die Kinder Isra’ils mit uns gehen’."
+  ],
+  [
+    18,
+    "Er (Fir’aun) sagte: „Haben wir dich nicht als kleines Kind unter uns aufgezogen, und hast du dich nicht (viele) Jahre deines Lebens unter uns aufgehalten?"
+  ],
+  [
+    19,
+    "Und du hast deine Tat, die du (damals) getan hast, verübt und gehörst zu den Undankbaren."
+  ],
+  [
+    20,
+    "Er sagte: „Ich habe sie da(mals) verübt, als ich (noch) zu den Irregehenden gehörte."
+  ],
+  [
+    21,
+    "Und so floh ich vor euch, als ich Angst vor euch bekommen hatte. (Doch) dann schenkte mir mein Herr Urteil(skraft) und machte mich zu einem der Gesandten."
+  ],
+  [
+    22,
+    "Ist das (etwa) eine Gunst, die du mir vorhältst, daß du die Kinder lsra’ils geknechtet hast?"
+  ],
+  [
+    23,
+    "Fir’aun sagte: „Was ist denn der Herr der Weltenbewohner?"
+  ],
+  [
+    24,
+    "Er (Musa) sagte: „Der Herr der Himmel und der Erde und dessen, was dazwischen ist, wenn ihr überzeugt seid."
+  ],
+  [
+    25,
+    "Er (Fir’aun) sagte zu denjenigen in seiner Umgebung: „Hört ihr nicht zu?"
+  ],
+  [
+    26,
+    "Er (Musa) sagte: „(Er ist) euer Herr und der Herr eurer Vorväter."
+  ],
+  [
+    27,
+    "Er (Fir’aun) sagte: „Euer Gesandter, der zu euch gesandt wurde, ist fürwahr besessen."
+  ],
+  [
+    28,
+    "Er (Musa) sagte: „(Er ist) der Herr des Ostens und des Westens und dessen, was dazwischen ist, wenn ihr (nur) begreifen würdet."
+  ],
+  [
+    29,
+    "Er (Fir’aun) sagte: „Wenn du dir einen anderen Gott als mich nimmst, werde ich dich ganz gewiß zu einem der Gefangenen machen."
+  ],
+  [
+    30,
+    "Er (Musa) sagte: „Etwa auch, wenn ich dir etwas Deutliches bringe?"
+  ],
+  [
+    31,
+    "Er (Fir’aun) sagte: „Dann bringe es her, wenn du zu den Wahrhaftigen gehörst."
+  ],
+  [
+    32,
+    "Da warf er seinen Stock hin, und sogleich war er eine deutliche Schlange."
+  ],
+  [
+    33,
+    "Und er zog seine Hand heraus, da war sie weiß für die Betrachter."
+  ],
+  [
+    34,
+    "Er (Fir’aun) sagte zu der führenden Schar in seiner Umgebung: „Dieser ist fürwahr ein kenntnisreicher Zauberer,"
+  ],
+  [
+    35,
+    "der euch mit seiner Zauberei aus eurem Land vertreiben will. Was befehlt ihr nun?"
+  ],
+  [
+    36,
+    "Sie sagten: „Stelle ihn und seinen Bruder zurück und schicke in die Städte (Boten), die (die Leute) versammeln,"
+  ],
+  [
+    37,
+    "damit sie dir jeden kenntnisreichen Zauberer herbringen."
+  ],
+  [
+    38,
+    "So wurden die Zauberer auf die festgesetzte Zeit eines (wohl)bekannten Tages versammelt."
+  ],
+  [
+    39,
+    "Und es wurde zu den Menschen gesagt: „Werdet (auch) ihr euch nun wohl versammeln?"
+  ],
+  [
+    40,
+    "Vielleicht werden wir den Zauberern folgen, wenn sie es sind, die siegen."
+  ],
+  [
+    41,
+    "Als die Zauberer kamen, sagten sie zu Fir’aun: „Wir bekommen doch sicher einen Lohn, wenn wir es sind, die siegen?"
+  ],
+  [
+    42,
+    "Er sagte: „Ja. Und ihr werdet dann also fürwahr zu den Nahegestellten gehören."
+  ],
+  [
+    43,
+    "Musa sagte zu ihnen: „Werft hin, was ihr zu werfen habt!"
+  ],
+  [
+    44,
+    "Da warfen sie ihre Stricke und Stöcke hin und sagten: „Bei der Macht Fir’auns, wir werden ganz gewiß Sieger sein."
+  ],
+  [
+    45,
+    "So warf Musa seinen Stock hin, und da verschlang er sogleich, was sie vortäuschten."
+  ],
+  [
+    46,
+    "Da warfen sich die Zauberer ehrerbietig nieder."
+  ],
+  [
+    47,
+    "Sie sagten: „Wir glauben an den Herrn der Weltenbewohner,"
+  ],
+  [
+    48,
+    "den Herrn von Musa und Harun."
+  ],
+  [
+    49,
+    "Er (Fir’aun) sagte: „Ihr glaubt ihm, bevor ich es euch erlaube? Er ist wahrlich euer Ältester, der euch die Zauberei gelehrt hat. Ihr werdet (es) wahrlich erfahren. Ganz gewiß werde ich eure Hände und eure Füße wechselseitig abhacken und euch allesamt ganz gewiß kreuzigen (lassen)."
+  ],
+  [
+    50,
+    "Sie sagten: „Kein Schaden! Wir werden ganz gewiß zu unserem Herrn zurückkehren."
+  ],
+  [
+    51,
+    "Wir erhoffen ja, daß unser Herr uns unsere Verfehlungen vergebe dafür, daß wir die ersten (der) Gläubigen sind."
+  ],
+  [
+    52,
+    "Und Wir gaben Musa (als Offenbarung) ein: „Zieh bei Nacht mit Meinen Dienern fort; ihr werdet ja verfolgt werden."
+  ],
+  [
+    53,
+    "Da sandte Fir’aun in die Städte (Boten), die (die Leute) versammelten:"
+  ],
+  [
+    54,
+    "„Diese sind fürwahr (nur) eine kleine Schar;"
+  ],
+  [
+    55,
+    "dennoch lassen sie uns fürwahr ergrimmen."
+  ],
+  [
+    56,
+    "Aber wir sind alle wahrlich auf der Hut."
+  ],
+  [
+    57,
+    "So ließen Wir sie fortziehen von Gärten und Quellen,"
+  ],
+  [
+    58,
+    "von Schätzen und von trefflicher Stätte."
+  ],
+  [
+    59,
+    "So war es. Und Wir gaben sie den Kindern lsra’ils zum Erbe."
+  ],
+  [
+    60,
+    "Dann folgten sie ihnen bei Sonnenaufgang."
+  ],
+  [
+    61,
+    "Als die beiden Heere einander sahen, sagten die Gefährten Musas: „Wir werden fürwahr eingeholt."
+  ],
+  [
+    62,
+    "Er sagte: „Keineswegs! Denn mit mir ist mein Herr; Er wird mich leiten."
+  ],
+  [
+    63,
+    "Da gaben Wir Mūsā ein: „Schlag mit deinem Stock auf das Meer.“ So spaltete es sich, und jeder Teil war wie ein gewaltiger Berg."
+  ],
+  [
+    64,
+    "Und Wir ließen die anderen dort nahe herankommen."
+  ],
+  [
+    65,
+    "Und Wir retteten Musa und diejenigen, die mit ihm waren, allesamt."
+  ],
+  [
+    66,
+    "Hierauf ließen Wir die anderen ertrinken."
+  ],
+  [
+    67,
+    "Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    68,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    69,
+    "Und verlies ihnen die Kunde von Ibrahim."
+  ],
+  [
+    70,
+    "Als er zu seinem Vater und seinem Volk sagte: „Wem dient ihr?"
+  ],
+  [
+    71,
+    "Sie sagten: „Wir dienen Götzen, und so geben wir uns dauernd ihrer Andacht hin."
+  ],
+  [
+    72,
+    "Er sagte: „Hören sie euch, wenn ihr sie anruft?"
+  ],
+  [
+    73,
+    "Oder nützen sie euch, oder schaden?"
+  ],
+  [
+    74,
+    "Sie sagten: „Nein! Vielmehr fanden wir (bereits) unsere Väter desgleichen tun."
+  ],
+  [
+    75,
+    "Er sagte: „Was meint ihr wohl zu dem, was ihr zu verehren pflegt,"
+  ],
+  [
+    76,
+    "ihr und eure Vorväter?"
+  ],
+  [
+    77,
+    "Gewiß, sie sind mir (alle) Feinde, außer dem Herrn der Weltenbewohner,"
+  ],
+  [
+    78,
+    "Der mich erschaffen hat und mich (nun) rechtleitet,"
+  ],
+  [
+    79,
+    "und Der mir zu essen und zu trinken gibt"
+  ],
+  [
+    80,
+    "und Der, wenn ich krank bin, mich heilt,"
+  ],
+  [
+    81,
+    "und Der mich sterben läßt und hierauf wieder lebendig macht,"
+  ],
+  [
+    82,
+    "und von Dem ich erhoffe, daß Er mir am Tag des Gerichts meine Verfehlung vergeben wird."
+  ],
+  [
+    83,
+    "Mein Herr, schenke mir Urteil(skraft), und nimm mich unter die Rechtschaffenen auf"
+  ],
+  [
+    84,
+    "Und verleihe mir einen Ruf an Wahrhaftigkeit unter den späteren (Geschlechtern)."
+  ],
+  [
+    85,
+    "Und mach mich zu einem (der) Erben des Gartens der Wonne."
+  ],
+  [
+    86,
+    "Und vergib meinem Vater, denn er gehört zu den Irregehenden."
+  ],
+  [
+    87,
+    "Und stürze mich nicht in Schande am Tag, da sie auferweckt werden,"
+  ],
+  [
+    88,
+    "an dem Tag, da weder Besitz noch Söhne (jemandem) nützen,"
+  ],
+  [
+    89,
+    "außer, wer zu Allah mit heilem Herzen kommt."
+  ],
+  [
+    90,
+    "Und der (Paradies)garten wird an die Gottesfürchtigen nahe herangebracht."
+  ],
+  [
+    91,
+    "Und zum Erscheinen gebracht wird der Höllenbrand den Verirrten."
+  ],
+  [
+    92,
+    "Und es wird zu ihnen gesagt: „Wo ist denn das, dem ihr zu dienen pflegtet"
+  ],
+  [
+    93,
+    "anstatt Allahs? Können sie euch helfen oder sich selbst helfen?"
+  ],
+  [
+    94,
+    "Dann werden sie kopfüber hineingestürzt, sie und die Verirrten,"
+  ],
+  [
+    95,
+    "und die Heerscharen Iblis allesamt."
+  ],
+  [
+    96,
+    "Sie sagen, während sie darin miteinander streiten:"
+  ],
+  [
+    97,
+    "„Bei Allah, wir befanden uns wahrlich in deutlichem Irrtum,"
+  ],
+  [
+    98,
+    "als wir euch dem Herrn der Weltenbewohner gleichsetzten."
+  ],
+  [
+    99,
+    "Es waren nur die Übeltäter, die uns in die Irre geführt haben."
+  ],
+  [
+    100,
+    "So haben wir nun niemanden, der Fürsprache einlegt,"
+  ],
+  [
+    101,
+    "und auch keinen warmherzigen Freund."
+  ],
+  [
+    102,
+    "Hätten wir doch eine (Möglichkeit zur) Wiederholung, damit wir zu den Gläubigen gehörten!"
+  ],
+  [
+    103,
+    "Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    104,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    105,
+    "Das Volk Nuhs bezichtigte die Gesandten der Lüge."
+  ],
+  [
+    106,
+    "Als ihr Bruder Nuh zu ihnen sagte: „Wollt ihr nicht gottesfürchtig sein?"
+  ],
+  [
+    107,
+    "Gewiß, ich bin für euch ein vertrauenswürdiger Gesandter."
+  ],
+  [
+    108,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    109,
+    "Ich verlange von euch keinen Lohn dafür. Mein Lohn obliegt nur dem Herrn der Weltenbewohner."
+  ],
+  [
+    110,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    111,
+    "Sie sagten: „Sollen wir dir glauben, wo dir (nur) die Niedrigsten folgen?"
+  ],
+  [
+    112,
+    "Er sagte: „Welches Wissen sollte ich darüber haben, was sie zu tun pflegten?"
+  ],
+  [
+    113,
+    "Ihre Abrechnung obliegt nur meinem Herrn, wenn ihr nur merken würdet!"
+  ],
+  [
+    114,
+    "Und ich werde die Gläubigen nicht abweisen."
+  ],
+  [
+    115,
+    "Ich bin nur ein deutlicher Warner."
+  ],
+  [
+    116,
+    "Sie sagten: „Wenn du nicht aufhörst, o Nuh, wirst du ganz gewiß zu den Gesteinigten gehören."
+  ],
+  [
+    117,
+    "Er sagte: „Mein Herr, gewiß mein Volk hat mich der Lüge bezichtigt."
+  ],
+  [
+    118,
+    "So triff zwischen mir und ihnen eine klare Entscheidung und errette mich und wer von den Gläubigen mit mir ist."
+  ],
+  [
+    119,
+    "Da retteten Wir ihn und wer mit ihm war im vollbeladenen Schiff."
+  ],
+  [
+    120,
+    "Hierauf ließen Wir alsdann die übrigen ertrinken."
+  ],
+  [
+    121,
+    "Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    122,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    123,
+    "Die ’Ad bezichtigten die Gesandten der Lüge."
+  ],
+  [
+    124,
+    "Als ihr Bruder Hud zu ihnen sagte: „Wollt ihr nicht gottesfürchtig sein?"
+  ],
+  [
+    125,
+    "Gewiß, ich bin für euch ein vertrauenswürdiger Gesandter."
+  ],
+  [
+    126,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    127,
+    "Ich verlange von euch keinen Lohn dafür. Mein Lohn obliegt nur dem Herrn der Weltenbewohner."
+  ],
+  [
+    128,
+    "Baut ihr denn auf jeder Anhöhe ein Wahrzeichen und treibt ein sinnloses Spiel"
+  ],
+  [
+    129,
+    "und nehmt euch Bauwerke (in der Hoffnung), auf daß ihr ewig leben würdet?"
+  ],
+  [
+    130,
+    "Und, wenn ihr zupackt, packt ihr gewalttätig zu."
+  ],
+  [
+    131,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    132,
+    "Und fürchtet Denjenigen, Der euch unterstützt hat mit dem, was ihr wißt,"
+  ],
+  [
+    133,
+    "(Der) euch unterstützt hat mit Vieh und Söhnen"
+  ],
+  [
+    134,
+    "und Gärten und Quellen."
+  ],
+  [
+    135,
+    "Gewiß, ich fürchte für euch die Strafe eines gewaltigen Tages."
+  ],
+  [
+    136,
+    "Sie sagten: „Gleich ist es in Bezug auf uns, ob du ermahnst oder ob du nicht zu denjenigen gehörst, die ermahnen."
+  ],
+  [
+    137,
+    "Das hier ist nur die Sitte der Früheren."
+  ],
+  [
+    138,
+    "Und wir werden nicht gestraft werden."
+  ],
+  [
+    139,
+    "So bezichtigten sie ihn der Lüge, und da vernichteten Wir sie. Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    140,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    141,
+    "Die Tamud bezichtigten die Gesandten der Lüge."
+  ],
+  [
+    142,
+    "Als ihr Bruder Salih zu ihnen sagte: „Wollt ihr nicht gottesfürchtig sein?"
+  ],
+  [
+    143,
+    "Gewiß, ich bin für euch ein vertrauenswürdiger Gesandter."
+  ],
+  [
+    144,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    145,
+    "Ich verlange von euch keinen Lohn dafür. Mein Lohn obliegt nur dem Herrn der Weltenbewohner."
+  ],
+  [
+    146,
+    "Werdet ihr etwa in Sicherheit belassen in dem, was hier ist,"
+  ],
+  [
+    147,
+    "in Gärten und an Quellen."
+  ],
+  [
+    148,
+    "In Getreidefeldern und unter Palmen, deren Blütenscheiden zart sind?"
+  ],
+  [
+    149,
+    "Und werdet ihr (weiter) voller Stolz aus den Bergen Häuser aushauen?"
+  ],
+  [
+    150,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    151,
+    "Und gehorcht nicht dem Befehl der Maßlosen,"
+  ],
+  [
+    152,
+    "die auf der Erde Unheil stiften und keine Besserung bringen."
+  ],
+  [
+    153,
+    "Sie sagten: „Du gehörst ja nur zu denjenigen, die einem Zauber verfallen sind."
+  ],
+  [
+    154,
+    "Du bist nur ein menschliches Wesen wie wir. So bringe doch ein Zeichen her, wenn du zu den Wahrhaftigen gehörst."
+  ],
+  [
+    155,
+    "Er sagte: „Dies ist eine Kamelstute; sie hat eine Trinkzeit, und ihr habt eine Trinkzeit an einem bestimmten Tag."
+  ],
+  [
+    156,
+    "Fügt ihr nichts Böses zu, sonst überkommt euch die Strafe eines gewaltigen Tages."
+  ],
+  [
+    157,
+    "Aber sie schnitten ihr die Sehnen durch . So wurden sie zu Leuten, die Reue empfinden."
+  ],
+  [
+    158,
+    "Da ergriff sie die Strafe. Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    159,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    160,
+    "Das Volk Luts bezichtigte die Gesandten der Lüge."
+  ],
+  [
+    161,
+    "Als ihr Bruder Lut zu ihnen sagte: „Wollt ihr nicht gottesfürchtig sein?"
+  ],
+  [
+    162,
+    "Gewiß, ich bin für euch ein vertrauenswürdiger Gesandter."
+  ],
+  [
+    163,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    164,
+    "Ich verlange von euch keinen Lohn dafür. Mein Lohn obliegt nur dem Herrn der Weltenbewohner."
+  ],
+  [
+    165,
+    "Laßt ihr euch etwa mit Männern unter den Weltenbewohnern ein"
+  ],
+  [
+    166,
+    "und laßt, was euer Herr für euch an Gattinnen erschaffen hat, stehen? Aber nein! Ihr seid Leute, die Übertretungen begehen."
+  ],
+  [
+    167,
+    "Sie sagten: „Wenn du nicht aufhörst, o Lut, wirst du ganz gewiß zu den Vertriebenen gehören."
+  ],
+  [
+    168,
+    "Er sagte: „Ich gehöre gewiß zu denjenigen, die euer Tun verabscheuen."
+  ],
+  [
+    169,
+    "Mein Herr, errette mich und meine Angehörigen von dem, was sie tun."
+  ],
+  [
+    170,
+    "Da erretteten Wir ihn und seine Angehörigen allesamt,"
+  ],
+  [
+    171,
+    "außer einer alten Frau unter denjenigen, die zurückblieben."
+  ],
+  [
+    172,
+    "Hierauf vernichteten Wir die anderen."
+  ],
+  [
+    173,
+    "Und Wir ließen einen Regen auf sie niedergehen; wie böse war der Regen für diejenigen, die gewarnt worden waren!"
+  ],
+  [
+    174,
+    "Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    175,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    176,
+    "Die Bewohner des Dickichts bezichtigte die Gesandten der Lüge."
+  ],
+  [
+    177,
+    "Als Su’aib zu ihnen sagte: „Wollt ihr nicht gottesfürchtig sein?"
+  ],
+  [
+    178,
+    "Gewiß, ich bin für euch ein vertrauenswürdiger Gesandter."
+  ],
+  [
+    179,
+    "So fürchtet Allah und gehorcht mir."
+  ],
+  [
+    180,
+    "Ich verlange von euch keinen Lohn dafür. Mein Lohn obliegt nur dem Herrn der Weltenbewohner."
+  ],
+  [
+    181,
+    "Gebt volles Maß und gehört nicht zu denjenigen, die (anderen) Verlust verursachen."
+  ],
+  [
+    182,
+    "Und wägt mit der richtigen Waage."
+  ],
+  [
+    183,
+    "Und schmälert den Menschen nicht ihre Sachen und richtet auf der Erde nicht unheilstiftend Verderben an."
+  ],
+  [
+    184,
+    "Und fürchtet Denjenigen, Der euch und die früheren Geschöpfe erschaffen hat."
+  ],
+  [
+    185,
+    "Sie sagten: „Du gehörst ja nur zu denjenigen, die einem starken Zauber verfallen sind."
+  ],
+  [
+    186,
+    "Du bist nur ein menschliches Wesen wie wir. Wir meinen wahrlich, daß du zu den Lügnern gehörst."
+  ],
+  [
+    187,
+    "Lasse doch Stücke vom Himmel auf uns herabfallen, wenn du zu den Wahrhaftigen gehörst."
+  ],
+  [
+    188,
+    "Er sagte: „Mein Herr weiß am besten, was ihr tut."
+  ],
+  [
+    189,
+    "Aber sie bezichtigten ihn der Lüge. Da ergriff sie die Strafe des Tages der schattenspendenden Wolke; gewiß es war die Strafe eines gewaltigen Tages."
+  ],
+  [
+    190,
+    "Darin ist wahrlich ein Zeichen, doch sind die meisten von ihnen nicht gläubig."
+  ],
+  [
+    191,
+    "Und dein Herr ist fürwahr der Allmächtige und Barmherzige."
+  ],
+  [
+    192,
+    "Und er ist ganz sicher eine Offenbarung des Herrn der Weltenbewohner;"
+  ],
+  [
+    193,
+    "mit dem der vertrauenswürdige Geist herabgekommen ist"
+  ],
+  [
+    194,
+    "auf dein Herz, damit du zu den Überbringern von Warnung gehörst,"
+  ],
+  [
+    195,
+    "in deutlicher arabischer Sprache."
+  ],
+  [
+    196,
+    "Und er ist wahrlich in den Schriften der Früheren (erwähnt)."
+  ],
+  [
+    197,
+    "War es denn kein Zeichen für sie, daß die Gelehrten der Kinder Isra’ils darüber Bescheid wissen?"
+  ],
+  [
+    198,
+    "Wenn Wir ihn einem der Nichtaraber offenbart hätten"
+  ],
+  [
+    199,
+    "und er ihn ihnen vorgelesen hätte, hätten sie nicht daran geglaubt."
+  ],
+  [
+    200,
+    "So haben Wir ihn in die Herzen der Übeltäter einziehen lassen."
+  ],
+  [
+    201,
+    "Sie glauben nicht eher daran, bis sie die schmerzhafte Strafe sehen"
+  ],
+  [
+    202,
+    "und diese plötzlich über sie kommt, ohne daß sie merken,"
+  ],
+  [
+    203,
+    "bis sie dann sagen: „Wird uns Aufschub gewährt?"
+  ],
+  [
+    204,
+    "Wünschen sie denn Unsere Strafe zu beschleunigen?"
+  ],
+  [
+    205,
+    "Was meinst du wohl? Wenn Wir sie über Jahre hinweg genießen lassen,"
+  ],
+  [
+    206,
+    "und hierauf über sie kommt, was ihnen stets angedroht wurde,"
+  ],
+  [
+    207,
+    "nicht nützen wird ihnen (dann), was ihnen an Nießbrauch gewährt wurde."
+  ],
+  [
+    208,
+    "Und Wir vernichteten keine Stadt, ohne daß sie Überbringer von Warnungen gehabt hätte,"
+  ],
+  [
+    209,
+    "(dies) als Ermahnung. Und nie sind Wir ungerecht."
+  ],
+  [
+    210,
+    "Nicht die Satane sind mit ihm herabgekommen;"
+  ],
+  [
+    211,
+    "es ziemt ihnen nicht, und sie können es (auch) nicht."
+  ],
+  [
+    212,
+    "Sie sind vom Hören fürwahr ausgeschlossen."
+  ],
+  [
+    213,
+    "So rufe neben Allah keinen anderen Gott an, sonst wirst du zu den Gestraften gehören."
+  ],
+  [
+    214,
+    "Und warne die Nächsten deiner Sippe."
+  ],
+  [
+    215,
+    "Und senke deinen Flügel für diejenigen von den Gläubigen, die dir folgen."
+  ],
+  [
+    216,
+    "Wenn sie sich dir widersetzen, dann sag: „Ich sage mich los von dem, was ihr tut."
+  ],
+  [
+    217,
+    "Und verlasse dich auf den Allmächtigen und Barmherzigen,"
+  ],
+  [
+    218,
+    "Der dich sieht, wenn du aufrecht stehst,"
+  ],
+  [
+    219,
+    "und deine Stellungswechsel unter denjenigen, die sich niederwerfen."
+  ],
+  [
+    220,
+    "Er ist ja der Allhörende und Allwissende."
+  ],
+  [
+    221,
+    "Soll ich euch kundtun, auf wen die Satane herabkommen?"
+  ],
+  [
+    222,
+    "Sie kommen auf jeden ungeheuerlichen Lügner und Sünder herab."
+  ],
+  [
+    223,
+    "Sie hören hin, und die meisten von ihnen sind Lügner."
+  ],
+  [
+    224,
+    "Und die Dichter - es folgen ihnen die Verirrten."
+  ],
+  [
+    225,
+    "Siehst du nicht, daß sie in jedem Tal ziellos umherwandern"
+  ],
+  [
+    226,
+    "und daß sie sagen, was sie nicht tun?"
+  ],
+  [
+    227,
+    "Außer denjenigen, die glauben, rechtschaffene Werke tun und Allahs häufig gedenken und sich (erst) selbst helfen, nachdem ihnen ja Unrecht zugefügt wurde. Und diejenigen, die Unrecht tun, werden erfahren, was für eine Rückkehr sie haben werden."
+  ]
+]

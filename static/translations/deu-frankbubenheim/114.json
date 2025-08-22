@@ -1,0 +1,44 @@
+[
+  {
+    "id": 114,
+    "city": "makkah",
+    "name": {
+      "translated": "Mankind",
+      "transliterated": "An-Nas",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1575,
+        1587
+      ]
+    },
+    "ayahs": 6,
+    "slug": "an-nas",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Sag: Ich nehme Zuflucht beim Herrn der Menschen,"
+  ],
+  [
+    2,
+    "dem König der Menschen,"
+  ],
+  [
+    3,
+    "dem Gott der Menschen,"
+  ],
+  [
+    4,
+    "vor dem Übel des Einflüsterers, des Davonschleichers,"
+  ],
+  [
+    5,
+    "der in die Brüste der Menschen einflüstert,"
+  ],
+  [
+    6,
+    "von den Ginn und den Menschen."
+  ]
+]

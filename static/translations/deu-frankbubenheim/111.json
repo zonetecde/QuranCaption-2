@@ -1,0 +1,40 @@
+[
+  {
+    "id": 111,
+    "city": "makkah",
+    "name": {
+      "translated": "The Palm Fibre",
+      "transliterated": "Al-Masad",
+      "codepoints": [
+        1575,
+        1604,
+        1605,
+        1587,
+        1583
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-masad",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Zugrunde gehen sollen die Hände Abu Lahabs, und zugrunde gehen soll er (selbst)!"
+  ],
+  [
+    2,
+    "Was nützt ihm sein Besitz und das, was er erworben hat?"
+  ],
+  [
+    3,
+    "Er wird einem Feuer voller Flammen ausgesetzt sein"
+  ],
+  [
+    4,
+    "und (auch) seine Frau, die Brennholzträgerin."
+  ],
+  [
+    5,
+    "Um ihrem Hals ist ein Strick aus Palmfasern."
+  ]
+]

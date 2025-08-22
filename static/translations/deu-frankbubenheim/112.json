@@ -1,0 +1,38 @@
+[
+  {
+    "id": 112,
+    "city": "makkah",
+    "name": {
+      "translated": "Sincerity",
+      "transliterated": "Al-Ikhlas",
+      "codepoints": [
+        1575,
+        1604,
+        1573,
+        1582,
+        1604,
+        1575,
+        1589
+      ]
+    },
+    "ayahs": 4,
+    "slug": "al-ikhlas",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Sag: Er ist Allah, Einer,"
+  ],
+  [
+    2,
+    "Allah, der Überlegene."
+  ],
+  [
+    3,
+    "Er hat nicht gezeugt und ist nicht gezeugt worden,"
+  ],
+  [
+    4,
+    "und niemand ist Ihm jemals gleich."
+  ]
+]

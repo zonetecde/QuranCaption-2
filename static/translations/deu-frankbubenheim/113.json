@@ -1,0 +1,40 @@
+[
+  {
+    "id": 113,
+    "city": "makkah",
+    "name": {
+      "translated": "The Dawn",
+      "transliterated": "Al-Falaq",
+      "codepoints": [
+        1575,
+        1604,
+        1601,
+        1604,
+        1602
+      ]
+    },
+    "ayahs": 5,
+    "slug": "al-falaq",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Sag: Ich nehme Zuflucht beim Herrn des Tagesanbruchs"
+  ],
+  [
+    2,
+    "vor dem Übel dessen, was Er erschaffen hat,"
+  ],
+  [
+    3,
+    "und vor dem Übel der Dunkelheit, wenn sie zunimmt,"
+  ],
+  [
+    4,
+    "und vor dem Übel der Knotenanbläserinnen"
+  ],
+  [
+    5,
+    "und vor dem Übel eines (jeden) Neidenden, wenn er neidet."
+  ]
+]

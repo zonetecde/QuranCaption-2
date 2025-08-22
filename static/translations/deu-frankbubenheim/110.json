@@ -1,0 +1,32 @@
+[
+  {
+    "id": 110,
+    "city": "madina",
+    "name": {
+      "translated": "Divine Support",
+      "transliterated": "An-Nasr",
+      "codepoints": [
+        1575,
+        1604,
+        1606,
+        1589,
+        1585
+      ]
+    },
+    "ayahs": 3,
+    "slug": "an-nasr",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Wenn Allahs Hilfe kommt und der Sieg"
+  ],
+  [
+    2,
+    "und du die Menschen in Allahs Religion in Scharen eintreten siehst,"
+  ],
+  [
+    3,
+    "dann lobpreise deinen Herrn und bitte Ihn um Vergebung; gewiß, Er ist Reue-Annehmend."
+  ]
+]

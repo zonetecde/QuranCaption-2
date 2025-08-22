@@ -1,0 +1,50 @@
+[
+  {
+    "id": 107,
+    "city": "makkah",
+    "name": {
+      "translated": "Almsgiving",
+      "transliterated": "Al-Ma'un",
+      "codepoints": [
+        1575,
+        1604,
+        1605,
+        1575,
+        1593,
+        1608,
+        1606
+      ]
+    },
+    "ayahs": 7,
+    "slug": "al-ma-un",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Siehst du (nicht) denjenigen, der das Gericht für Lüge erklärt?"
+  ],
+  [
+    2,
+    "Das ist derjenige, der die Waise zurückstößt"
+  ],
+  [
+    3,
+    "und nicht zur Speisung des Armen anhält."
+  ],
+  [
+    4,
+    "Wehe nun den Betenden,"
+  ],
+  [
+    5,
+    "denjenigen, die auf ihre Gebete nicht achten,"
+  ],
+  [
+    6,
+    "denjenigen, die dabei (nur) gesehen werden wollen;"
+  ],
+  [
+    7,
+    "und die Hilfeleistung verweigern!"
+  ]
+]

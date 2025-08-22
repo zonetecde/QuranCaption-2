@@ -1,0 +1,66 @@
+[
+  {
+    "id": 101,
+    "city": "makkah",
+    "name": {
+      "translated": "The Calamity",
+      "transliterated": "Al-Qari'ah",
+      "codepoints": [
+        1575,
+        1604,
+        1602,
+        1575,
+        1585,
+        1593,
+        1577
+      ]
+    },
+    "ayahs": 11,
+    "slug": "al-qari-ah",
+    "translator": "Frank Bubenheim"
+  },
+  [
+    1,
+    "Das Verhängnis!"
+  ],
+  [
+    2,
+    "Was ist das Verhängnis?"
+  ],
+  [
+    3,
+    "Und was läßt dich wissen, was das Verhängnis ist?"
+  ],
+  [
+    4,
+    "Am Tag, da die Menschen wie flatternde Motten sein werden"
+  ],
+  [
+    5,
+    "und die Berge wie zerflockte gefärbte Wolle sein werden."
+  ],
+  [
+    6,
+    "Was nun jemanden angeht, dessen Waagschalen schwer sind,"
+  ],
+  [
+    7,
+    "so wird er in einem zufriedenen Leben sein."
+  ],
+  [
+    8,
+    "Was aber jemanden angeht, dessen Waagschalen leicht sind,"
+  ],
+  [
+    9,
+    "dessen Mutter wird ein Abgrund sein."
+  ],
+  [
+    10,
+    "Und was läßt dich wissen, was das ist?"
+  ],
+  [
+    11,
+    "Ein sehr heißes Feuer."
+  ]
+]
