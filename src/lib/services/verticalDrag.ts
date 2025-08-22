@@ -1,3 +1,6 @@
+import { globalState } from '$lib/runes/main.svelte';
+import type { StyleName } from '$lib/classes/VideoStyle.svelte';
+
 export interface VerticalDragOptions {
 	getInitial: () => number;
 	apply: (value: number) => void;
@@ -5,6 +8,11 @@ export interface VerticalDragOptions {
 	max?: number;
 	round?: boolean;
 	classWhileDragging?: string; // classe à ajouter pendant le drag
+	// Support pour les clips sélectionnés
+	target?: string;
+	styleId?: StyleName;
+	selectedClipIds?: () => number[];
+	getEffectiveValue?: (clipId?: number) => number;
 }
 
 export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
@@ -17,7 +25,20 @@ export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
 		if (e.button !== 0) return;
 		e.preventDefault();
 		startY = e.clientY;
-		origin = opts.getInitial();
+
+		// Récupère la valeur initiale avec support pour les clips sélectionnés
+		if (opts.target && opts.styleId && opts.selectedClipIds && opts.getEffectiveValue) {
+			const selectedIds = opts.selectedClipIds();
+			if (selectedIds.length > 0) {
+				// Si on a des clips sélectionnés, utilise la valeur effective du premier clip
+				origin = opts.getEffectiveValue(selectedIds[0]);
+			} else {
+				origin = opts.getInitial();
+			}
+		} else {
+			origin = opts.getInitial();
+		}
+
 		dragging = true;
 		document.addEventListener('mousemove', mousemove);
 		document.addEventListener('mouseup', mouseup);
@@ -32,7 +53,27 @@ export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
 		if (typeof opts.min === 'number') val = Math.max(opts.min, val);
 		if (typeof opts.max === 'number') val = Math.min(opts.max, val);
 		if (opts.round !== false) val = Math.round(val);
-		opts.apply(val);
+
+		// Applique la valeur avec support pour les clips sélectionnés
+		if (opts.target && opts.styleId && opts.selectedClipIds) {
+			const selectedIds = opts.selectedClipIds();
+			if (selectedIds.length > 0) {
+				// Si on a des clips sélectionnés, utilise setStyleForClips
+				globalState.getVideoStyle
+					.getStylesOfTarget(opts.target)
+					.setStyleForClips(selectedIds, opts.styleId, val);
+			} else {
+				// Sinon, utilise la fonction apply classique
+				opts.apply(val);
+			}
+
+			// Déclenche un refresh si nécessaire pour certains styles
+			if (opts.styleId === 'vertical-position' || opts.styleId === 'horizontal-position') {
+				globalState.updateVideoPreviewUI();
+			}
+		} else {
+			opts.apply(val);
+		}
 	}
 
 	function mouseup() {

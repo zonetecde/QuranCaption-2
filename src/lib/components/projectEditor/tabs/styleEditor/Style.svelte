@@ -232,7 +232,7 @@
 							class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-200 border border-amber-400/40 flex items-center gap-1 cursor-auto"
 						>
 							<span class="material-icons-outlined text-[12px]">auto_fix_high</span>
-							override
+							override: {getEffectiveForSelection().value}
 						</span>
 					{:else}
 						<span>{String(inputValue)}</span>
