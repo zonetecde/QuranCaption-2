@@ -4,6 +4,7 @@ use std::process::Command;
 use tokio::process::Command as TokioCommand;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use regex::Regex;
+use tauri::Emitter;
 
 use font_kit::source::SystemSource;
 
@@ -219,7 +220,7 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn add_audio_to_video(file_name: String, audios: Vec<String>) -> Result<String, String> {
+async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: tauri::AppHandle) -> Result<String, String> {
     // Chemin vers ffmpeg dans le dossier binaries
     let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
     
@@ -262,6 +263,9 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>) -> Result<St
     
     // Construire la commande ffmpeg
     let mut cmd = TokioCommand::new(&ffmpeg_path);
+    
+    // Supprimer les 0.5 premières secondes de la vidéo car peut contenir l'écran de sélection de share
+    cmd.arg("-ss").arg("0.5");
     
     // Ajouter le fichier vidéo d'entrée
     cmd.arg("-i").arg(&input_video_path);
@@ -331,8 +335,22 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>) -> Result<St
                         if video_duration > 0.0 {
                             let progress = (current_time / video_duration * 100.0).min(100.0);
                             println!("Progress: {:.1}% ({:.1}s / {:.1}s)", progress, current_time, video_duration);
+                            
+                            // Émettre l'événement vers le frontend
+                            let _ = app_handle.emit("export-progress", serde_json::json!({
+                                "progress": progress,
+                                "current_time": current_time,
+                                "total_time": video_duration
+                            }));
                         } else {
                             println!("Processing: {:.1}s elapsed", current_time);
+                            
+                            // Émettre l'événement vers le frontend sans pourcentage
+                            let _ = app_handle.emit("export-progress", serde_json::json!({
+                                "progress": null,
+                                "current_time": current_time,
+                                "total_time": null
+                            }));
                         }
                     }
                 }
@@ -344,10 +362,17 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>) -> Result<St
     let status = child.wait().await.map_err(|e| format!("Failed to wait for ffmpeg: {}", e))?;
     
     if !status.success() {
+        let _ = app_handle.emit("export-error", "FFmpeg failed during processing");
         return Err("FFmpeg failed during processing".to_string());
     }
     
     println!("✓ Video with audio saved as: {}", output_file_name);
+    
+    // Émettre l'événement de fin d'export
+    let _ = app_handle.emit("export-complete", serde_json::json!({
+        "filename": output_file_name
+    }));
+    
     Ok(format!("Video with audio saved as: {}", output_file_name))
 }
 

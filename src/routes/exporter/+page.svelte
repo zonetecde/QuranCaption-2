@@ -6,6 +6,7 @@
 	import { projectService } from '$lib/services/ProjectService';
 	import { invoke } from '@tauri-apps/api/core';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { listen } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';
 	import { exists, BaseDirectory } from '@tauri-apps/plugin-fs';
 	import { LogicalPosition } from '@tauri-apps/api/dpi';
@@ -14,6 +15,36 @@
 	let hasRecordStarted = $state(false);
 
 	onMount(async () => {
+		// Écouter les événements de progression d'export
+		listen('export-progress', (event) => {
+			const data = event.payload as {
+				progress?: number;
+				current_time: number;
+				total_time?: number;
+			};
+
+			if (data.progress !== null && data.progress !== undefined) {
+				console.log(
+					`Export Progress: ${data.progress.toFixed(1)}% (${data.current_time.toFixed(1)}s / ${data.total_time?.toFixed(1)}s)`
+				);
+			} else {
+				console.log(`Export Processing: ${data.current_time.toFixed(1)}s elapsed`);
+			}
+		});
+
+		listen('export-complete', (event) => {
+			const data = event.payload as { filename: string };
+			console.log(`✅ Export complete! File saved as: ${data.filename}`);
+
+			// Détruit cette fenêtre
+			getCurrentWebviewWindow().close();
+		});
+
+		listen('export-error', (event) => {
+			const error = event.payload as string;
+			console.error(`❌ Export failed: ${error}`);
+		});
+
 		// Récupère le fichier du projet à exporter.
 		// L'id se trouve dans l'url, paramètre "id"
 		const id = new URLSearchParams(window.location.search).get('id');
