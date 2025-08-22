@@ -32,7 +32,7 @@
 		{label}
 	</label>
 
-	<div class="relative flex flex-row gap-x-2 items-center">
+	<div class="relative flex flex-col 2xl:flex-row gap-2 items-center">
 		<input
 			id="time-input-{label}"
 			type="time"
@@ -48,17 +48,19 @@
 			value={msToTimeValue(value)}
 			{placeholder}
 		/>
-		<span class="text-thirdly text-sm">or</span>
-		<button
-			class="btn-accent text-sm py-1 px-3 min-w-[150px] whitespace-nowrap"
-			title="Use the preview timeline cursor time and put it into the time field"
-			onclick={() => {
-				const currentPreviewTime = globalState.getTimelineState.cursorPosition;
-				applyValue(currentPreviewTime);
-			}}
-		>
-			Use cursor time
-		</button>
+		<div class=" flex flex-row items-center gap-x-2">
+			<span class="text-thirdly text-sm">or</span>
+			<button
+				class="btn-accent text-sm py-1 px-3 min-w-[150px] whitespace-nowrap"
+				title="Use the preview timeline cursor time and put it into the time field"
+				onclick={() => {
+					const currentPreviewTime = globalState.getTimelineState.cursorPosition;
+					applyValue(currentPreviewTime);
+				}}
+			>
+				Use cursor time
+			</button>
+		</div>
 	</div>
 
 	<p class="text-thirdly text-xs mt-1">

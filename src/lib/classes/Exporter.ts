@@ -6,6 +6,7 @@ import SubtitleFileContentGenerator from './misc/SubtitleFileContentGenerator';
 import { Quran } from './Quran';
 import { Utilities } from './misc/Utilities';
 import { projectService } from '$lib/services/ProjectService';
+import type { Project } from '.';
 
 export default class Exporter {
 	/**
@@ -188,19 +189,50 @@ export default class Exporter {
 		const project = globalState.currentProject!.clone();
 		project.detail.id = Number(exportId);
 
+		const { width: windowWidth, height: windowHeight } =
+			await Exporter.getRealExportDimensions(project);
+
+		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
+		projectService.saveToExportFolder(project);
+
+		// Créer une fenêtre Tauri avec la taille ajustée
+		const w = new WebviewWindow(exportId, {
+			width: windowWidth,
+			height: windowHeight,
+			decorations: false,
+			alwaysOnTop: true,
+			title: 'QC - ' + exportId,
+			url: '/exporter?' + new URLSearchParams({ id: exportId })
+		});
+
+		w.once('tauri://created', () => {});
+
+		w.once('tauri://destroyed', () => {
+			// Nettoyer les ressources si nécessaire
+		});
+	}
+
+	static async getRealExportDimensions(
+		project: Project
+	): Promise<{ width: number; height: number }> {
 		const videoSize = project.content.videoStyle
 			.getStylesOfTarget('global')
 			.findStyle('video-dimension')!.value as { width: number; height: number };
+
+		let screenWidth = 0;
+		let screenHeight = 0;
 
 		// Obtenir la taille de l'écran de l'utilisateur
 		const monitor = await currentMonitor();
 		if (!monitor) {
 			console.error('Could not get monitor information');
-			return;
+			// Considère qu'il a un écran 1920x1080
+			screenWidth = 1920;
+			screenHeight = 1080;
+		} else {
+			screenWidth = monitor.size.width;
+			screenHeight = monitor.size.height;
 		}
-
-		const screenWidth = monitor.size.width;
-		const screenHeight = monitor.size.height;
 
 		// Calculer la taille de fenêtre optimale
 		let windowWidth = videoSize.width;
@@ -228,23 +260,6 @@ export default class Exporter {
 		console.log(`Screen size: ${screenWidth}x${screenHeight}`);
 		console.log(`Window size: ${windowWidth}x${windowHeight}`);
 
-		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
-		projectService.saveToExportFolder(project);
-
-		// Créer une fenêtre Tauri avec la taille ajustée
-		const w = new WebviewWindow(exportId, {
-			width: windowWidth,
-			height: windowHeight,
-			decorations: false,
-			alwaysOnTop: true,
-			title: 'QC - ' + exportId,
-			url: '/exporter?' + new URLSearchParams({ id: exportId })
-		});
-
-		w.once('tauri://created', () => {});
-
-		w.once('tauri://destroyed', () => {
-			// Nettoyer les ressources si nécessaire
-		});
+		return { width: windowWidth, height: windowHeight };
 	}
 }

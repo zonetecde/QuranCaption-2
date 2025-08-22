@@ -28,9 +28,9 @@
 		}
 	}
 
-	let videoDimensions = globalState.getVideoStyle
-		.getStylesOfTarget('global')
-		.findStyle('video-dimension')!.value as { width: number; height: number };
+	let videoDimensions = $derived(async () => {
+		return await Exporter.getRealExportDimensions(globalState.currentProject!);
+	});
 </script>
 
 <!-- Export Video Configuration -->
@@ -49,7 +49,7 @@
 		<p class="text-thirdly text-sm mb-4">Select the time range of your video to export:</p>
 
 		<div class="bg-accent rounded-lg p-4 border border-color">
-			<div class="grid grid-cols-1 md:grid-rows-2 gap-4">
+			<div class="grid grid-cols-1 grid-rows-2 gap-4">
 				<!-- Start Time -->
 				<TimeInput label="Start Time" bind:value={globalState.getExportState.videoStartTime} />
 
@@ -93,10 +93,13 @@
 					<div class="w-2 h-2 bg-accent-primary rounded-full mt-2 flex-shrink-0"></div>
 					<div>
 						<span class="text-secondary text-sm font-medium">Quality Settings</span>
-						<p class="text-thirdly text-xs mt-1">
-							Export will be in {videoDimensions.width}x{videoDimensions.height} resolution at 60fps
-							with high bitrate
-						</p>
+						{#await videoDimensions() then dimensions}
+							<p class="text-thirdly text-xs mt-1">
+								The video will be exported at {dimensions.width}x{dimensions.height} resolution and 60
+								fps. If this does not match your project's Style settings, it is due to your screen resolution
+								limitations.
+							</p>
+						{/await}
 					</div>
 				</div>
 				<div class="flex items-start gap-3">
