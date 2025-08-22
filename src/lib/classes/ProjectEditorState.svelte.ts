@@ -125,6 +125,9 @@ export class VideoPreviewState extends SerializableBase {
 	// Indique si la prévisualisation vidéo est en plein écran
 	isFullscreen: boolean = $state(false);
 
+	// Indique si on doit mute la vidéo
+	isMuted: boolean = $state(false);
+
 	async toggleFullScreen() {
 		const appWindow = getCurrentWindow();
 

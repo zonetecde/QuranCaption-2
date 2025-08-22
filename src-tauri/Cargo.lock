@@ -97,6 +97,7 @@ dependencies = [
  "dirs",
  "font-kit",
  "log",
+ "regex",
  "serde",
  "serde_json",
  "tauri",
@@ -106,6 +107,7 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "tauri-plugin-store",
+ "tokio",
 ]
 
 [[package]]

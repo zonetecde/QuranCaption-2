@@ -56,6 +56,9 @@
 		"dialog:default",
 		"core:webview:allow-create-webview",
 		"core:webview:allow-create-webview-window",
-		"core:window:allow-set-fullscreen"
+		"core:window:allow-set-fullscreen",
+		"core:window:allow-set-skip-taskbar",
+		"core:window:allow-set-always-on-top",
+		"core:window:allow-set-position"
 	]
 }

@@ -1,10 +1,15 @@
 <script lang="ts">
+	import type { AssetClip } from '$lib/classes';
 	import Timeline from '$lib/components/projectEditor/timeline/Timeline.svelte';
 	import VideoPreview from '$lib/components/projectEditor/videoPreview/VideoPreview.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { projectService } from '$lib/services/ProjectService';
 	import { invoke } from '@tauri-apps/api/core';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { onMount } from 'svelte';
+	import { exists, BaseDirectory } from '@tauri-apps/plugin-fs';
+	import { LogicalPosition } from '@tauri-apps/api/dpi';
+	import { getCurrentWebview } from '@tauri-apps/api/webview';
 
 	let hasRecordStarted = $state(false);
 
@@ -19,6 +24,7 @@
 			// Prépare les paramètres pour exporter la vidéo
 			globalState.getVideoPreviewState.isFullscreen = true; // Mettre la vidéo en plein écran
 			globalState.getVideoPreviewState.isPlaying = false; // Mettre la vidéo en pause
+			globalState.getVideoPreviewState.isMuted = true; // Mettre la vidéo en sourdine
 			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime; // Revenir au début de la timeline
 			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime; // Revenir au début de la timeline
 
@@ -35,21 +41,25 @@
 				try {
 					rec = await startRecord(60);
 				} catch (e) {
+					// Si l'utilisateur annule la sélection, on remet l'overlay
+					hasRecordStarted = false;
 					cancelExport();
 					return;
 				}
 
-				// Quand on arrive ici, la personne a démarré le record.
-				hasRecordStarted = true;
-
 				// Joue la vidéo
 				videoPreview!.togglePlayPause();
-
-				setTimeout(() => {
-					console.log('ending record now');
-					endRecord();
-				}, globalState.getExportState.videoEndTime - globalState.getExportState.videoStartTime);
 			}, 0);
+		}
+	});
+
+	// Dès que on atteint la fin de la vidéo que l'utilisateur veut exporter, end le record
+	$effect(() => {
+		if (
+			hasRecordStarted &&
+			globalState.getTimelineState.cursorPosition >= globalState.getExportState.videoEndTime
+		) {
+			endRecord();
 		}
 	});
 
@@ -58,11 +68,22 @@
 	}
 
 	async function startRecord(fps = 60) {
+		const tauriWindow = getCurrentWebviewWindow();
+		const tauriWindowSize = await tauriWindow.size();
+
 		// 1) capture écran (peut ne pas fournir 60fps)
 		const displayStream = await navigator.mediaDevices.getDisplayMedia({
-			video: { frameRate: { ideal: fps, max: fps }, width: 1920, height: 1080 },
-			audio: true
+			video: {
+				frameRate: { ideal: fps, max: fps },
+				width: tauriWindowSize.width,
+				height: tauriWindowSize.height
+			}
 		});
+
+		// Cache immédiatement l'overlay dès que l'utilisateur commence la sélection d'écran
+		hasRecordStarted = true;
+		// Cache la fenêtre de l'application
+		await tauriWindow.setPosition(new LogicalPosition(-10000, -100000));
 
 		// 2) crée video cachée pour lire le stream source
 		const video = document.createElement('video');
@@ -107,29 +128,26 @@
 		rec.onstop = async () => {
 			drawing = false;
 			video.pause();
+
+			const fileName = `QC-${globalState.currentProject!.detail.id}.webm`;
+
 			// combine
 			const blob = new Blob(chunks, { type: 'video/webm' });
 			const arrayBuf = await blob.arrayBuffer();
 
 			// Option A: sauvegarde locale "download"
-			const file = new File([arrayBuf], 'recording.webm', { type: 'video/webm' });
+			const file = new File([arrayBuf], fileName, { type: 'video/webm' });
 			const url = URL.createObjectURL(file);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = 'recording.webm';
+			a.download = fileName;
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
 
-			// Option B: envoyer au backend Tauri (commande `save_recording` que tu as ajoutée)
-			// convertit en tableau de bytes et invoque la commande
-			try {
-				const bytes = Array.from(new Uint8Array(arrayBuf));
-				const savedPath = await invoke<string>('save_recording', { data: bytes });
-				console.log('Saved to:', savedPath);
-			} catch (err) {
-				console.error('save_recording failed', err);
-			}
+			setTimeout(() => {
+				addAudioToVideo(fileName);
+			}, 0);
 		};
 
 		rec.start();
@@ -149,6 +167,19 @@
 	let videoPreview: VideoPreview | undefined = $state(undefined);
 
 	function cancelExport() {}
+
+	async function addAudioToVideo(videoFileName: string) {
+		const audios: string[] = globalState.getAudioTrack.clips.map(
+			(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
+		);
+
+		// Attend que le fichier de la vidéo soit téléchargé sur le PC
+		while (!(await exists(videoFileName, { baseDir: BaseDirectory.Download }))) {
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+
+		await invoke('add_audio_to_video', { fileName: videoFileName, audios });
+	}
 </script>
 
 {#if globalState.currentProject}

@@ -415,6 +415,7 @@
 			currentlyPlayingAudio = audioAsset.filePath; // Met à jour l'asset actuellement joué
 
 			audioHowl = new Howl({
+				mute: globalState.getVideoPreviewState.isMuted,
 				src: [convertFileSrc(audioAsset.filePath)],
 				html5: true, // Important pour les gros fichiers et le VBR (Variable Bit Rate)
 				rate: audioSpeed, // Vitesse de lecture initiale

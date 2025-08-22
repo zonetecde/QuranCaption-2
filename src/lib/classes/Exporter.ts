@@ -199,6 +199,7 @@ export default class Exporter {
 			width: videoSize.width,
 			height: videoSize.height,
 			decorations: false,
+			alwaysOnTop: true,
 			title: 'QC - ' + exportId,
 			url: '/exporter?' + new URLSearchParams({ id: exportId })
 		});
