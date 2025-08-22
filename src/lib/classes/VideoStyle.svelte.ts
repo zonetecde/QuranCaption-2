@@ -791,8 +791,16 @@ export class VideoStyle extends SerializableBase {
 
 		if (!file) return;
 
-		const json = JSON.parse((await readTextFile(file)).toString());
-		globalState.getVideoStyle.importStyles(json);
+		try {
+			const json = JSON.parse((await readTextFile(file)).toString());
+			await globalState.getVideoStyle.importStyles(json);
+		} catch (error) {
+			ModalManager.errorModal(
+				'Error importing styles',
+				'Your styles file is either invalid or corrupted.',
+				JSON.stringify(error, Object.getOwnPropertyNames(error))
+			);
+		}
 	}
 
 	async importStyles(json: videoStyleFileData) {

@@ -63,7 +63,26 @@ export default class Exporter {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `subtitles.${globalState.currentProject!.detail.name}.${settings.format.toLowerCase()}`;
+		a.download = `qurancaption.subtitles.${globalState.currentProject!.detail.name}.${settings.format.toLowerCase()}`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+
+	static exportProjectData() {
+		const projectData = globalState.currentProject;
+
+		if (!projectData) {
+			console.error('No project data available for export.');
+			return;
+		}
+
+		const json = JSON.stringify(projectData, null, 2);
+		const blob = new Blob([json], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `qurancaption.project.${projectData.detail.name}.json`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);

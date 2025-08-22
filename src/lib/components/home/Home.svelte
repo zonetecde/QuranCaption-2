@@ -12,6 +12,9 @@
 	import { projectService } from '$lib/services/ProjectService';
 	import { Status } from '$lib/classes/Status';
 	import type { ProjectDetail } from '$lib/classes/ProjectDetail.svelte';
+	import { open } from '@tauri-apps/plugin-dialog';
+	import { readTextFile } from '@tauri-apps/plugin-fs';
+	import ModalManager from '../modals/ModalManager';
 
 	let createNewProjectModalVisible: boolean = $state(false);
 
@@ -122,6 +125,31 @@
 			applyFilterAndSort();
 		}
 	});
+
+	async function importProject() {
+		// Open a dialog
+		const files = await open({
+			multiple: true,
+			directory: false
+		});
+
+		if (!files) return;
+
+		for (let i = 0; i < files.length; i++) {
+			try {
+				const element = files[i];
+				const json = JSON.parse((await readTextFile(element)).toString());
+
+				projectService.importProject(json);
+			} catch (error) {
+				ModalManager.errorModal(
+					'Error importing project',
+					'Your project file is either invalid or corrupted.',
+					JSON.stringify(error, Object.getOwnPropertyNames(error))
+				);
+			}
+		}
+	}
 </script>
 
 <div class="flex flex-col min-h-full overflow-x-hidden overflow-auto">
@@ -135,7 +163,7 @@
 				<button class="btn-accent btn-icon h-12 px-4 xl:px-7" onclick={newProjectButtonClick}>
 					<span class="material-icons-outlined mr-2">add_circle_outline</span> New Project
 				</button>
-				<button class="btn btn-icon h-12 px-4 xl:px-7">
+				<button class="btn btn-icon h-12 px-4 xl:px-7" onclick={importProject}>
 					<span class="material-icons-outlined mr-2">file_upload</span> Import Project
 				</button>
 			</section>

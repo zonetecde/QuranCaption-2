@@ -211,7 +211,7 @@
 		<button class="btn-accent px-6 py-3 font-medium" onclick={Exporter.exportSubtitles}>
 			Export Subtitles
 		</button>
-		<p class="text-thirdly text-xs mt-2">
+		<p class="text-thirdly text-xs mt-2 text-center">
 			Generate subtitle files with your selected configuration
 		</p>
 	</div>

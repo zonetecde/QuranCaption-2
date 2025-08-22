@@ -1,4 +1,4 @@
-import { Project, ProjectContent, ProjectDetail, VideoStyle } from '$lib/classes';
+import { Project, ProjectContent, ProjectDetail, Utilities, VideoStyle } from '$lib/classes';
 import { readDir, remove, writeTextFile, readTextFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { globalState } from '$lib/runes/main.svelte';
@@ -84,7 +84,7 @@ export class ProjectService {
 
 		// Si le projet ne contient pas de styles vidéo, on initialise avec un style par défaut
 		// || true
-		if (Object.keys(project.content.videoStyle.styles).length === 0 || true) {
+		if (Object.keys(project.content.videoStyle.styles).length === 0) {
 			// Si les styles ne sont pas définis, on initialise avec un style par défaut
 			project.content.videoStyle = await VideoStyle.getDefaultVideoStyle();
 		}
@@ -181,6 +181,17 @@ export class ProjectService {
 	 */
 	async getAssetFolderForProject(projectId: number): Promise<string> {
 		return await join(await appDataDir(), this.assetsFolder, projectId.toString());
+	}
+
+	/**
+	 * Importe un projet à partir d'un fichier JSON.
+	 * @param json Le contenu JSON du projet
+	 */
+	importProject(json: any) {
+		json.detail.id = Utilities.randomId(); // Applique un nouvel ID unique au projet
+
+		const projectObject = Project.fromJSON(json);
+		projectObject.save(); // Enregistre le projet importé sur le disque
 	}
 }
 

@@ -230,6 +230,7 @@
 		subtitleTrack.removeLastClip();
 
 		globalState.currentProject!.detail.updatePercentageCaptioned();
+		globalState.updateVideoPreviewUI();
 	}
 
 	/**

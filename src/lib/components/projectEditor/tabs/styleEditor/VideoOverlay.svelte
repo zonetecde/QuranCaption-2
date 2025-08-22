@@ -204,28 +204,36 @@
 
 <div class="w-full h-full">
 	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
-		{#if currentSubtitle() && currentSubtitle()!.id}
-			<p
-				use:verticalDrag={{
-					getInitial: () =>
-						Number(
-							globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
-								.value
-						),
-					apply: (v: number) =>
-						globalState.getVideoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', v),
-					min: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
-						.valueMin,
-					max: globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('vertical-position')!
-						.valueMax
-				}}
-				class={'arabic absolute subtitle select-none ' +
-					getTailwind('arabic') +
-					helperStyles('arabic')}
-				style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', currentSubtitle()!.id)};"
-			>
-				{currentSubtitle()!.getText()}
-			</p>
+		{#if currentSubtitle()}
+			{@const subtitle = currentSubtitle()}
+			{#if subtitle && subtitle.id}
+				<p
+					use:verticalDrag={{
+						getInitial: () =>
+							Number(
+								globalState.getVideoStyle
+									.getStylesOfTarget('arabic')
+									.findStyle('vertical-position')!.value
+							),
+						apply: (v: number) =>
+							globalState.getVideoStyle
+								.getStylesOfTarget('arabic')
+								.setStyle('vertical-position', v),
+						min: globalState.getVideoStyle
+							.getStylesOfTarget('arabic')
+							.findStyle('vertical-position')!.valueMin,
+						max: globalState.getVideoStyle
+							.getStylesOfTarget('arabic')
+							.findStyle('vertical-position')!.valueMax
+					}}
+					class={'arabic absolute subtitle select-none ' +
+						getTailwind('arabic') +
+						helperStyles('arabic')}
+					style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', subtitle.id)};"
+				>
+					{subtitle.getText()}
+				</p>
+			{/if}
 
 			{#each Object.keys(currentSubtitleTranslations()!) as edition}
 				{@const translation = (currentSubtitleTranslations()! as Record<string, Translation>)[
