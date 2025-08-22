@@ -21,7 +21,7 @@
 				const fadeDuration = globalState.getVideoStyle
 					.getStylesOfTarget('global')
 					.findStyle('fade-duration')!.value as number;
-				const currentTime = globalState.currentProject!.projectEditorState.timeline.cursorPosition;
+				const currentTime = globalState.getTimelineState.cursorPosition;
 
 				const startTime = customText.getStyle('time-appearance')?.value as number;
 				const endTime = customText.getStyle('time-disappearance')?.value as number;

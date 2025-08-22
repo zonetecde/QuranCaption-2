@@ -2,6 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import ExportProjectData from './ExportProjectData.svelte';
 	import ExportSubtitles from './ExportSubtitles.svelte';
+	import ExportVideo from './ExportVideo.svelte';
 	import ExportYtbChapters from './ExportYtbChapters.svelte';
 
 	// Export choices (English labels & hints)
@@ -83,7 +84,7 @@
 
 		<!-- Dynamic panel depending on selection -->
 		{#if globalState.getExportState.selectedChoice === 'video'}
-			<p class="text-secondary">Video options coming soon…</p>
+			<ExportVideo />
 		{:else if globalState.getExportState.selectedChoice === 'subtitles'}
 			<ExportSubtitles />
 		{:else if globalState.getExportState.selectedChoice === 'chapters'}

@@ -11,16 +11,17 @@ import ModalManager from '$lib/components/modals/ModalManager';
 export class ProjectService {
 	private projectsFolder: string = 'projects/';
 	private assetsFolder: string = 'assets/';
+	private exportFolder: string = 'exports/';
 
 	/**
 	 * S'assure que le dossier des projets existe
 	 */
-	private async ensureProjectsFolder(): Promise<string> {
-		const projectsPath = await join(await appDataDir(), this.projectsFolder);
-		if (!(await exists(projectsPath))) {
-			await mkdir(projectsPath, { recursive: true });
+	private async ensureFolder(folder: string): Promise<string> {
+		const folderPath = await join(await appDataDir(), folder);
+		if (!(await exists(folderPath))) {
+			await mkdir(folderPath, { recursive: true });
 		}
-		return projectsPath;
+		return folderPath;
 	}
 
 	/**
@@ -29,7 +30,7 @@ export class ProjectService {
 	 */
 	async save(project: Project) {
 		// S'assure que le dossier existe
-		const projectsPath = await this.ensureProjectsFolder();
+		const projectsPath = await this.ensureFolder(this.projectsFolder);
 
 		// Construis le chemin d'accès vers le projet
 		const filePath = await join(projectsPath, `${project.detail.id}.json`);
@@ -58,9 +59,15 @@ export class ProjectService {
 	 * @param onlyDetail Si true, ne charge que les détails du projet
 	 * @returns Le projet
 	 */
-	async load(projectId: number, onlyDetail: boolean = false): Promise<Project> {
+	async load(
+		projectId: number,
+		onlyDetail: boolean = false,
+		inExportFolder: boolean = false
+	): Promise<Project> {
+		const folder = inExportFolder ? this.exportFolder : this.projectsFolder;
+
 		// S'assure que le dossier existe
-		const projectsPath = await this.ensureProjectsFolder();
+		const projectsPath = await this.ensureFolder(folder);
 
 		// Construis le chemin d'accès vers le projet
 		const filePath = await join(projectsPath, `${projectId}.json`);
@@ -192,6 +199,21 @@ export class ProjectService {
 
 		const projectObject = Project.fromJSON(json);
 		projectObject.save(); // Enregistre le projet importé sur le disque
+	}
+
+	/**
+	 * Enregistre un projet dans le dossier export. Le nom du fichier
+	 * et l'id du projet (soit l'idée de l'export)
+	 * @param project Le projet à exporter
+	 */
+	async saveToExportFolder(project: Project) {
+		const folder: string = await this.ensureFolder(this.exportFolder);
+
+		// Enregistre le projet dans le dossier d'export
+		await writeTextFile(
+			await join(folder, project.detail.id.toString() + '.json'),
+			JSON.stringify(project.toJSON(), null, 2)
+		);
 	}
 }
 

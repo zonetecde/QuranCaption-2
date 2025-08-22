@@ -336,15 +336,17 @@ export class StylesData extends SerializableBase {
 					clipId
 				) {
 					const subtitleClip = globalState.getSubtitleTrack.getClipById(clipId);
-					let fontname = 'QCP2BSML'; // Par défaut on met le font contenant tout les glyphes spéciaux du Coran
-					// (notamment si subtitleClip instanceof PredefinedSubtitle alors pour la basmala ce sera le bon font)
-
+					let fontname = '';
 					if (subtitleClip instanceof SubtitleClip) {
 						fontname = QPCFontProvider.getFontNameForVerse(
 							subtitleClip.surah,
 							subtitleClip.verse,
 							String(effectiveValue) === 'QPC1' ? '1' : '2'
 						);
+					} else {
+						// Met le font contenant tout les glyphes spéciaux du Coran
+						// (notamment si subtitleClip instanceof PredefinedSubtitle alors pour la basmala ce sera le bon font)
+						fontname = String(effectiveValue) === 'QPC1' ? 'QPC1BSML' : 'QPC2BSML';
 					}
 
 					css += `font-family: ${fontname};\n`;

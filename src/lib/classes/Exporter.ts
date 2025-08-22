@@ -1,7 +1,10 @@
 import { globalState } from '$lib/runes/main.svelte';
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { PredefinedSubtitleClip, SubtitleClip } from './Clip.svelte';
 import SubtitleFileContentGenerator from './misc/SubtitleFileContentGenerator';
 import { Quran } from './Quran';
+import { Utilities } from './misc/Utilities';
+import { projectService } from '$lib/services/ProjectService';
 
 export default class Exporter {
 	/**
@@ -172,5 +175,38 @@ export default class Exporter {
 		} else {
 			return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 		}
+	}
+
+	/**
+	 * Exporte le projet sous forme de vidéo.
+	 */
+	static async exportVideo() {
+		const exportId = Utilities.randomId().toString();
+
+		// Commence par faire une copie du projet à l'état actuelle
+		const project = globalState.currentProject!.clone();
+		project.detail.id = Number(exportId);
+
+		const videoSize = project.content.videoStyle
+			.getStylesOfTarget('global')
+			.findStyle('video-dimension')!.value as { width: number; height: number };
+
+		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
+		projectService.saveToExportFolder(project);
+
+		// Créer une fenêtre Tauri
+		const w = new WebviewWindow(exportId, {
+			width: videoSize.width,
+			height: videoSize.height,
+			decorations: false,
+			title: 'QC - ' + exportId,
+			url: '/exporter?' + new URLSearchParams({ id: exportId })
+		});
+
+		w.once('tauri://created', () => {});
+
+		w.once('tauri://destroyed', () => {
+			// Nettoyer les ressources si nécessaire
+		});
 	}
 }

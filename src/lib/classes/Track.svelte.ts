@@ -184,8 +184,7 @@ export class AssetTrack extends Track {
 
 		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
 		setTimeout(() => {
-			globalState.currentProject!.projectEditorState.timeline.movePreviewTo =
-				globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;
+			globalState.getTimelineState.movePreviewTo = globalState.getTimelineState.cursorPosition + 1;
 		}, 0);
 	}
 }
@@ -518,7 +517,7 @@ export class SubtitleTrack extends Track {
 	}
 
 	getCurrentSubtitleToDisplay(): SubtitleClip | PredefinedSubtitleClip | null {
-		const cursorPos = globalState.currentProject!.projectEditorState.timeline.cursorPosition;
+		const cursorPos = globalState.getTimelineState.cursorPosition;
 		for (let i = 0; i < this.clips.length; i++) {
 			const clip = this.clips[i];
 

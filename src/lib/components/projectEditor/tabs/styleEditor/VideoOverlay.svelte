@@ -114,14 +114,11 @@
 		currentSubtitle()!.id;
 
 		// si le sous-titre actuel n'a pas changé (pendant la lecture vidéo)
-		if (
-			currentSubtitle()!.id === lastSubtitleId &&
-			globalState.getCurrentVideoPreviewState.isPlaying
-		)
+		if (currentSubtitle()!.id === lastSubtitleId && globalState.getVideoPreviewState.isPlaying)
 			return;
 		lastSubtitleId = currentSubtitle()!.id;
 
-		globalState.currentProject!.projectEditorState.timeline.movePreviewTo;
+		globalState.getTimelineState.movePreviewTo;
 		globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('max-height')!.value;
 		globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-size')!.value;
 

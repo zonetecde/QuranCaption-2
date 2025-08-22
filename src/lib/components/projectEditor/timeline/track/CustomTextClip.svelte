@@ -36,7 +36,7 @@
 	function startLeftDragging(e: MouseEvent) {
 		if (e.button !== 0 || clip.getAlwaysShow()) return; // pas de drag si always-show
 		dragStartX = e.clientX;
-		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+		globalState.getTimelineState.showCursor = false;
 		document.addEventListener('mousemove', onLeftDragging);
 		document.addEventListener('mouseup', stopLeftDragging);
 	}
@@ -58,14 +58,14 @@
 		dragStartX = null;
 		document.removeEventListener('mousemove', onLeftDragging);
 		document.removeEventListener('mouseup', stopLeftDragging);
-		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+		globalState.getTimelineState.showCursor = true;
 	}
 
 	// --- Redimensionnement droite ---
 	function startRightDragging(e: MouseEvent) {
 		if (e.button !== 0 || clip.getAlwaysShow()) return;
 		dragStartX = e.clientX;
-		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+		globalState.getTimelineState.showCursor = false;
 		document.addEventListener('mousemove', onRightDragging);
 		document.addEventListener('mouseup', stopRightDragging);
 	}
@@ -85,7 +85,7 @@
 		dragStartX = null;
 		document.removeEventListener('mousemove', onRightDragging);
 		document.removeEventListener('mouseup', stopRightDragging);
-		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+		globalState.getTimelineState.showCursor = true;
 	}
 
 	// --- Déplacement complet du clip ---
@@ -96,7 +96,7 @@
 		clipDragStartX = e.clientX;
 		originalStartTime = clip.startTime;
 		originalDuration = clip.duration; // conserver la durée
-		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+		globalState.getTimelineState.showCursor = false;
 		document.addEventListener('mousemove', onClipDragging);
 		document.addEventListener('mouseup', stopClipDragging);
 	}
@@ -123,7 +123,7 @@
 		clipDragStartX = null;
 		document.removeEventListener('mousemove', onClipDragging);
 		document.removeEventListener('mouseup', stopClipDragging);
-		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+		globalState.getTimelineState.showCursor = true;
 	}
 
 	function toggleAlwaysShow(e: MouseEvent): void {

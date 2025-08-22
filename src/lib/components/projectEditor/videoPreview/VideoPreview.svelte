@@ -196,7 +196,7 @@
 		ShortcutService.registerShortcut({
 			key: SHORTCUTS.VIDEO_PREVIEW.TOGGLE_FULLSCREEN,
 			onKeyDown: (e) => {
-				globalState.getCurrentVideoPreviewState.toggleFullScreen();
+				globalState.getVideoPreviewState.toggleFullScreen();
 			}
 		});
 	});
@@ -324,7 +324,7 @@
 
 			// Configuration du conteneur
 			previewContainer.style.width = 'auto';
-			previewContainer.style.height = globalState.getCurrentVideoPreviewState.isFullscreen
+			previewContainer.style.height = globalState.getVideoPreviewState.isFullscreen
 				? '100vh'
 				: 'calc(100%)';
 
@@ -339,7 +339,7 @@
 			let targetH: number;
 			let scale: number;
 
-			if (globalState.getCurrentVideoPreviewState.isFullscreen) {
+			if (globalState.getVideoPreviewState.isFullscreen) {
 				// Mode plein écran: couvrir tout l'écran (cover)
 				const screenW = window.innerWidth;
 				const screenH = window.innerHeight;
@@ -387,7 +387,7 @@
 	let audioSpeed = $state(1); // Vitesse de lecture audio
 	let currentlyPlayingAudio: string = ''; // L'asset audio actuellement joué
 
-	function togglePlayPause() {
+	export function togglePlayPause() {
 		if (isPlaying) {
 			pause();
 		} else {
@@ -467,7 +467,7 @@
 			volume: 0, // Volume à 0 pour être réellement silencieux
 			onplay: () => {
 				isPlaying = true;
-				globalState.getCurrentVideoPreviewState.isPlaying = true;
+				globalState.getVideoPreviewState.isPlaying = true;
 
 				// Démarre la mise à jour du curseur
 				if (!audioUpdateInterval) {
@@ -502,7 +502,7 @@
 		}
 
 		isPlaying = true;
-		globalState.getCurrentVideoPreviewState.isPlaying = true;
+		globalState.getVideoPreviewState.isPlaying = true;
 
 		// Lance la lecture audio et vidéo simultanément
 		if (audioHowl) {
@@ -518,7 +518,7 @@
 	 */
 	function pause() {
 		isPlaying = false;
-		globalState.getCurrentVideoPreviewState.isPlaying = false;
+		globalState.getVideoPreviewState.isPlaying = false;
 
 		// Pause audio et vidéo
 		if (audioHowl) {
@@ -622,8 +622,8 @@
 
 	onMount(() => {
 		// Si Quran Caption a été quitté en fullscreen, on enlève le fullscreen.
-		if (globalState.getCurrentVideoPreviewState.isFullscreen) {
-			globalState.getCurrentVideoPreviewState.toggleFullScreen();
+		if (globalState.getVideoPreviewState.isFullscreen) {
+			globalState.getVideoPreviewState.toggleFullScreen();
 		}
 	});
 </script>

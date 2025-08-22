@@ -30,7 +30,7 @@
 		if (e.button === 0) {
 			// vient de cliquer sur le bord gauche du clip
 			dragStartX = e.clientX;
-			globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+			globalState.getTimelineState.showCursor = false;
 			document.addEventListener('mousemove', onLeftDragging);
 			document.addEventListener('mouseup', stopLeftDragging);
 		}
@@ -46,7 +46,7 @@
 		dragStartX = null;
 		document.removeEventListener('mousemove', onLeftDragging);
 		document.removeEventListener('mouseup', stopLeftDragging);
-		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+		globalState.getTimelineState.showCursor = true;
 	}
 
 	function startRightDragging(e: MouseEvent) {
@@ -54,7 +54,7 @@
 		dragStartX = e.clientX;
 		document.addEventListener('mousemove', onRightDragging);
 		document.addEventListener('mouseup', stopRightDragging);
-		globalState.currentProject!.projectEditorState.timeline.showCursor = false;
+		globalState.getTimelineState.showCursor = false;
 	}
 
 	function onRightDragging(e: MouseEvent) {
@@ -67,7 +67,7 @@
 		dragStartX = null;
 		document.removeEventListener('mousemove', onRightDragging);
 		document.removeEventListener('mouseup', stopRightDragging);
-		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+		globalState.getTimelineState.showCursor = true;
 	}
 
 	function addSilence(): void {

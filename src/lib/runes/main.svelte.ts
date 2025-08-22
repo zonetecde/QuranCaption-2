@@ -92,13 +92,16 @@ class GlobalState {
 		return this.currentProject!.projectEditorState.subtitlesEditor;
 	}
 
-	get getCurrentVideoPreviewState() {
+	get getVideoPreviewState() {
 		return this.currentProject!.projectEditorState.videoPreview;
 	}
 
+	get getTimelineState() {
+		return this.currentProject!.projectEditorState.timeline;
+	}
+
 	updateVideoPreviewUI() {
-		globalState.currentProject!.projectEditorState.timeline.cursorPosition =
-			globalState.currentProject!.projectEditorState.timeline.cursorPosition + 1;
+		globalState.getTimelineState.cursorPosition = globalState.getTimelineState.cursorPosition + 1;
 	}
 }
 

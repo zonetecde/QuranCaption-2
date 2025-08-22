@@ -241,9 +241,7 @@
 
 		const lastSubtitle = subtitleTrack.getLastClip();
 		if (lastSubtitle) {
-			lastSubtitle.setEndTime(
-				globalState.currentProject!.projectEditorState.timeline.cursorPosition
-			);
+			lastSubtitle.setEndTime(globalState.getTimelineState.cursorPosition);
 		}
 	}
 

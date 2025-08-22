@@ -386,8 +386,7 @@
 						class="btn-accent text-sm py-1 min-w-[150px]"
 						title="Use the preview timeline cursor time and put it into the time field"
 						onclick={(e) => {
-							let currentPreviewTime =
-								globalState.currentProject!.projectEditorState.timeline.cursorPosition;
+							let currentPreviewTime = globalState.getTimelineState.cursorPosition;
 
 							applyValue(currentPreviewTime);
 						}}

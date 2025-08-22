@@ -25,8 +25,8 @@ export class QPCFontProvider {
 		}
 
 		// Charge déjà le fichier font avec la basmala
-		QPCFontProvider.loadFontIfNotLoaded('QCP1BSML', '1');
-		QPCFontProvider.loadFontIfNotLoaded('QCP2BSML', '2');
+		QPCFontProvider.loadFontIfNotLoaded('QPC1BSML', '1');
+		QPCFontProvider.loadFontIfNotLoaded('QPC2BSML', '2');
 	}
 
 	/**
@@ -40,10 +40,15 @@ export class QPCFontProvider {
 
 		// Crée une nouvelle règle @font-face
 		const style = document.createElement('style');
+
+		// Les polices contenant les basmala/isti3adha sont au format ttf
+		let extension = fontName.includes('BSML') ? 'ttf' : 'woff2';
+		let format = fontName.includes('BSML') ? 'truetype' : 'woff2';
+
 		style.textContent = `
 			@font-face {
 				font-family: '${fontName}';
-				src: url('/QPC${version}/fonts/${fontName}.woff2') format('woff2');
+				src: url('/QPC${version}/fonts/${fontName}.${extension}') format('${format}');
 				font-weight: normal;
 				font-style: normal;
 			}

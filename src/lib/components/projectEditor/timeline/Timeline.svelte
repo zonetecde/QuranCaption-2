@@ -2,7 +2,7 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
 	import Track from './track/Track.svelte';
-	import { Duration, TrackType } from '$lib/classes';
+	import { Duration, TrackType, ProjectEditorTabs } from '$lib/classes';
 	import { slide } from 'svelte/transition';
 	import ShortcutService from '$lib/services/ShortcutService';
 
@@ -29,7 +29,7 @@
 		timelineDiv!.scrollLeft = timelineState().scrollX;
 
 		// Au cas où il serait en false après un changement de taille de sous-titre
-		globalState.currentProject!.projectEditorState.timeline.showCursor = true;
+		globalState.getTimelineState.showCursor = true;
 	});
 
 	// Fonction pour déterminer l'intervalle d'affichage des timestamps selon le zoom
@@ -233,6 +233,30 @@
 					style="left: {(timelineState().cursorPosition / 1000) * timelineState().zoom +
 						180}px; opacity: {timelineState().showCursor ? 1 : 0};"
 				></div>
+
+				<!-- Export range overlay when in Export tab -->
+				{#if globalState.currentProject!.projectEditorState.currentTab === ProjectEditorTabs.Export}
+					<div
+						class="export-range-overlay"
+						style="left: {(globalState.getExportState.videoStartTime / 1000) *
+							timelineState().zoom +
+							180}px; 
+							   width: {((globalState.getExportState.videoEndTime - globalState.getExportState.videoStartTime) /
+							1000) *
+							timelineState().zoom}px;"
+					></div>
+					<div
+						class="export-range-border export-start"
+						style="left: {(globalState.getExportState.videoStartTime / 1000) *
+							timelineState().zoom +
+							180}px;"
+					></div>
+					<div
+						class="export-range-border export-end"
+						style="left: {(globalState.getExportState.videoEndTime / 1000) * timelineState().zoom +
+							180}px;"
+					></div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -419,5 +443,49 @@
 	/* Synchronize scroll between ruler and tracks */
 	.timeline-ruler::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* Export Range Visualization */
+	.export-range-overlay {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		background: rgba(34, 197, 94, 0.15);
+		border: 1px solid rgba(34, 197, 94, 0.4);
+		border-radius: 4px;
+		z-index: 0;
+		pointer-events: none;
+	}
+
+	.export-range-border {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: #22c55e;
+		z-index: 0;
+		pointer-events: none;
+		box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+	}
+
+	.export-range-border.export-start {
+		border-radius: 3px 0 0 3px;
+	}
+
+	.export-range-border.export-end {
+		border-radius: 0 3px 3px 0;
+		margin-left: -3px;
+	}
+
+	.export-range-border::after {
+		content: '';
+		position: absolute;
+		top: -6px;
+		left: -3px;
+		width: 9px;
+		height: 12px;
+		background: #22c55e;
+		clip-path: polygon(0 0, 100% 0, 50% 100%);
+		box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
 	}
 </style>
