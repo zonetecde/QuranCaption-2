@@ -1,5 +1,6 @@
 import { globalState } from '$lib/runes/main.svelte';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { currentMonitor } from '@tauri-apps/api/window';
 import { PredefinedSubtitleClip, SubtitleClip } from './Clip.svelte';
 import SubtitleFileContentGenerator from './misc/SubtitleFileContentGenerator';
 import { Quran } from './Quran';
@@ -191,13 +192,49 @@ export default class Exporter {
 			.getStylesOfTarget('global')
 			.findStyle('video-dimension')!.value as { width: number; height: number };
 
+		// Obtenir la taille de l'écran de l'utilisateur
+		const monitor = await currentMonitor();
+		if (!monitor) {
+			console.error('Could not get monitor information');
+			return;
+		}
+
+		const screenWidth = monitor.size.width;
+		const screenHeight = monitor.size.height;
+
+		// Calculer la taille de fenêtre optimale
+		let windowWidth = videoSize.width;
+		let windowHeight = videoSize.height;
+
+		// Si la vidéo dépasse les dimensions de l'écran, on redimensionne en gardant le ratio
+		if (windowHeight > screenHeight || windowWidth > screenWidth) {
+			const videoRatio = videoSize.width / videoSize.height;
+			const screenRatio = screenWidth / screenHeight;
+
+			if (windowHeight > screenHeight) {
+				// La hauteur dépasse, on ajuste selon la hauteur max
+				windowHeight = screenHeight;
+				windowWidth = Math.round(windowHeight * videoRatio);
+			}
+
+			if (windowWidth > screenWidth) {
+				// Après ajustement, si la largeur dépasse encore, on ajuste selon la largeur max
+				windowWidth = screenWidth;
+				windowHeight = Math.round(windowWidth / videoRatio);
+			}
+		}
+
+		console.log(`Original video size: ${videoSize.width}x${videoSize.height}`);
+		console.log(`Screen size: ${screenWidth}x${screenHeight}`);
+		console.log(`Window size: ${windowWidth}x${windowHeight}`);
+
 		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
 		projectService.saveToExportFolder(project);
 
-		// Créer une fenêtre Tauri
+		// Créer une fenêtre Tauri avec la taille ajustée
 		const w = new WebviewWindow(exportId, {
-			width: videoSize.width,
-			height: videoSize.height,
+			width: windowWidth,
+			height: windowHeight,
 			decorations: false,
 			alwaysOnTop: true,
 			title: 'QC - ' + exportId,

@@ -2,6 +2,7 @@
 	import {
 		CustomTextClip,
 		PredefinedSubtitleClip,
+		ProjectEditorTabs,
 		SubtitleClip,
 		TrackType,
 		Translation
@@ -85,7 +86,8 @@
 		if (
 			globalState.getStylesState.currentSelection === target ||
 			(globalState.getStylesState.currentSelection === 'translation' &&
-				globalState.getStylesState.currentSelectionTranslation === target)
+				globalState.getStylesState.currentSelectionTranslation === target &&
+				globalState.currentProject?.projectEditorState.currentTab === ProjectEditorTabs.Style)
 		) {
 			let classes = ' ';
 

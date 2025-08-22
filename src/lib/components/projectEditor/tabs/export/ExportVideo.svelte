@@ -27,6 +27,10 @@
 			return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 		}
 	}
+
+	let videoDimensions = globalState.getVideoStyle
+		.getStylesOfTarget('global')
+		.findStyle('video-dimension')!.value as { width: number; height: number };
 </script>
 
 <!-- Export Video Configuration -->
@@ -90,7 +94,8 @@
 					<div>
 						<span class="text-secondary text-sm font-medium">Quality Settings</span>
 						<p class="text-thirdly text-xs mt-1">
-							Export will be in 1920x1080 resolution at 60fps with high bitrate
+							Export will be in {videoDimensions.width}x{videoDimensions.height} resolution at 60fps
+							with high bitrate
 						</p>
 					</div>
 				</div>

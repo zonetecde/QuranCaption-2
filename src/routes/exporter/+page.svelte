@@ -13,6 +13,7 @@
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
 
 	let hasRecordStarted = $state(false);
+	let exportId = '';
 
 	onMount(async () => {
 		// Écouter les événements de progression d'export
@@ -33,11 +34,13 @@
 		});
 
 		listen('export-complete', (event) => {
-			const data = event.payload as { filename: string };
+			const data = event.payload as { filename: string; exportId: string };
 			console.log(`✅ Export complete! File saved as: ${data.filename}`);
 
-			// Détruit cette fenêtre
-			getCurrentWebviewWindow().close();
+			// Ne fermer que si c'est NOTRE export qui est terminé
+			if (data.exportId === id) {
+				getCurrentWebviewWindow().close();
+			}
 		});
 
 		listen('export-error', (event) => {
@@ -49,6 +52,8 @@
 		// L'id se trouve dans l'url, paramètre "id"
 		const id = new URLSearchParams(window.location.search).get('id');
 		if (id) {
+			exportId = id;
+
 			// Récupère le projet correspondant à l'id
 			globalState.currentProject = await projectService.load(Number(id), false, true);
 
@@ -209,12 +214,19 @@
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		}
 
-		await invoke('add_audio_to_video', { fileName: videoFileName, audios });
+		await invoke('add_audio_to_video', {
+			fileName: videoFileName,
+			audios: audios,
+			startTime: globalState.getExportState.videoStartTime,
+			exportId: exportId,
+			videoDuration:
+				globalState.getExportState.videoEndTime - globalState.getExportState.videoStartTime
+		});
 	}
 </script>
 
 {#if globalState.currentProject}
-	<div class="absolute inset-0 w-screen h-screen">
+	<div class="absolute inset-0 w-full h-full">
 		<VideoPreview bind:this={videoPreview} showControls={false} />
 		<div class="hidden">
 			<Timeline />
@@ -224,7 +236,7 @@
 	<!-- Avant de record, on dit à l'utilisateur de sélectionné la fenêtre -->
 	{#if !hasRecordStarted}
 		<div
-			class="absolute inset-0 w-screen pt-[350px] h-screen bg-black/80 backdrop-blur-sm flex items-center justify-center"
+			class="absolute inset-0 w-full h-full pt-[350px] bg-black/80 backdrop-blur-sm flex items-center justify-center"
 		>
 			<div class="text-center max-w-2xl px-8">
 				<!-- Arrow pointing up-center towards popup -->

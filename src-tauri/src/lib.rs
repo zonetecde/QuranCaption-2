@@ -220,7 +220,7 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: f64, export_id: String, video_duration: f64, app_handle: tauri::AppHandle) -> Result<String, String> {
     // Chemin vers ffmpeg dans le dossier binaries
     let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
     
@@ -247,25 +247,64 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: 
     if audios.is_empty() {
         return Err("No audio files provided".to_string());
     }
+
+    // Convertir start_time de millisecondes en secondes
+    let start_time_seconds = start_time / 1000.0;
     
-    // D'abord, obtenir la durée totale de la vidéo pour calculer le pourcentage
-    let video_duration = match get_video_duration(&input_video_path).await {
-        Ok(duration) => {
-            println!("Video duration: {:.2} seconds", duration);
-            duration
-        },
-        Err(e) => {
-            println!("Warning: {}", e);
-            println!("Will show progress without percentage");
-            0.0 // Pas de durée connue, on affichera juste le temps écoulé
+    // Obtenir les durées de tous les fichiers audio
+    let mut audio_durations = Vec::new();
+    for audio_file in &audios {
+        match get_duration(audio_file) {
+            Ok(duration_ms) => {
+                let duration_seconds = duration_ms as f64 / 1000.0; // Convertir ms en secondes
+                audio_durations.push(duration_seconds);
+            },
+            Err(e) => {
+                println!("Warning: Could not get duration for {}: {}", audio_file, e);
+                audio_durations.push(0.0); // Valeur par défaut si on ne peut pas obtenir la durée
+            }
         }
-    };
+    }
+    
+    // Calculer quels fichiers audio utiliser et à partir de quel moment
+    let mut current_audio_time = 0.0;
+    let mut audio_filters = Vec::new();
+    let mut input_index = 1; // L'index 0 est la vidéo
+    
+    for &audio_duration in audio_durations.iter() {
+        let audio_end_time = current_audio_time + audio_duration;
+        
+        // Si le start_time est après la fin de ce fichier audio, on l'ignore complètement
+        if start_time_seconds >= audio_end_time {
+            current_audio_time = audio_end_time;
+            input_index += 1;
+            continue;
+        }
+        
+        // Si le start_time est dans ce fichier audio
+        if start_time_seconds >= current_audio_time && start_time_seconds < audio_end_time {
+            let skip_seconds = start_time_seconds - current_audio_time;
+            // Utiliser atrim avec asetpts pour repositionner l'audio au début
+            audio_filters.push(format!("[{}:a]atrim=start={},asetpts=PTS-STARTPTS[a{}]", input_index, skip_seconds, audio_filters.len()));
+            current_audio_time = audio_end_time;
+            input_index += 1;
+        } else {
+            // Ce fichier audio commence après le start_time, on le prend en entier mais repositionné au début
+            audio_filters.push(format!("[{}:a]asetpts=PTS-STARTPTS[a{}]", input_index, audio_filters.len()));
+            current_audio_time = audio_end_time;
+            input_index += 1;
+        }
+    }
+    
+    // Convertir video_duration de millisecondes en secondes
+    let video_duration_seconds = video_duration / 1000.0;
+    println!("Video duration: {:.2} seconds", video_duration_seconds);
     
     // Construire la commande ffmpeg
     let mut cmd = TokioCommand::new(&ffmpeg_path);
     
-    // Supprimer les 0.5 premières secondes de la vidéo car peut contenir l'écran de sélection de share
-    cmd.arg("-ss").arg("0.5");
+    // Supprimer les 0.2 premières secondes de la vidéo car peut contenir l'écran de sélection de share
+    cmd.arg("-ss").arg("0.2");
     
     // Ajouter le fichier vidéo d'entrée
     cmd.arg("-i").arg(&input_video_path);
@@ -275,11 +314,16 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: 
         cmd.arg("-i").arg(audio_file);
     }
     
-    // Construire le filtre pour concaténer les audios et les appliquer à la vidéo
-    if audios.len() == 1 {
-        // Un seul fichier audio : simple mapping
-        cmd.arg("-map").arg("0:v") // Vidéo du premier input
-           .arg("-map").arg("1:a") // Audio du deuxième input
+    // Construire le filtre pour traiter les audios selon le start_time et les appliquer à la vidéo
+    if audio_filters.is_empty() {
+        return Err("No audio files match the specified start time".to_string());
+    } else if audio_filters.len() == 1 {
+        // Un seul fichier audio (ou segment) : utiliser le filtre créé
+        let filter_complex = audio_filters[0].clone();
+        
+        cmd.arg("-filter_complex").arg(&filter_complex)
+           .arg("-map").arg("0:v") // Vidéo du premier input
+           .arg("-map").arg("[a0]") // Audio filtré
            .arg("-c:v").arg("libx264") // Re-encoder la vidéo en H.264 pour MP4
            .arg("-c:a").arg("aac") // Encoder l'audio en AAC
            .arg("-b:a").arg("128k") // Bitrate audio
@@ -287,18 +331,19 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: 
            .arg("-crf").arg("18") // Qualité vidéo (plus bas = meilleure qualité)
            .arg("-shortest"); // Arrêter quand le flux le plus court se termine
     } else {
-        // Plusieurs fichiers audio : les concaténer puis les appliquer
-        let mut filter_complex = String::new();
+        // Plusieurs fichiers audio : les concaténer après les avoir filtrés
+        let mut filter_complex = audio_filters.join(";");
         
-        // Concaténer tous les fichiers audio
-        for i in 1..=audios.len() {
-            filter_complex.push_str(&format!("[{}:a]", i));
+        // Ajouter la concaténation des audios filtrés
+        filter_complex.push(';');
+        for i in 0..audio_filters.len() {
+            filter_complex.push_str(&format!("[a{}]", i));
         }
-        filter_complex.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audios.len()));
+        filter_complex.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len()));
         
         cmd.arg("-filter_complex").arg(&filter_complex)
            .arg("-map").arg("0:v") // Vidéo du premier input
-           .arg("-map").arg("[audio_out]") // Audio concaténé
+           .arg("-map").arg("[audio_out]") // Audio concaténé et filtré
            .arg("-c:v").arg("libx264") // Re-encoder la vidéo en H.264 pour MP4
            .arg("-c:a").arg("aac") // Encoder l'audio en AAC
            .arg("-b:a").arg("128k") // Bitrate audio
@@ -332,15 +377,15 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: 
                     if let Ok(time_us) = time_match.as_str().parse::<u64>() {
                         let current_time = time_us as f64 / 1_000_000.0; // Convertir de microsecondes en secondes
                         
-                        if video_duration > 0.0 {
-                            let progress = (current_time / video_duration * 100.0).min(100.0);
-                            println!("Progress: {:.1}% ({:.1}s / {:.1}s)", progress, current_time, video_duration);
+                        if video_duration_seconds > 0.0 {
+                            let progress = (current_time / video_duration_seconds * 100.0).min(100.0);
+                            println!("Progress: {:.1}% ({:.1}s / {:.1}s)", progress, current_time, video_duration_seconds);
                             
                             // Émettre l'événement vers le frontend
                             let _ = app_handle.emit("export-progress", serde_json::json!({
                                 "progress": progress,
                                 "current_time": current_time,
-                                "total_time": video_duration
+                                "total_time": video_duration_seconds
                             }));
                         } else {
                             println!("Processing: {:.1}s elapsed", current_time);
@@ -368,73 +413,21 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, app_handle: 
     
     println!("✓ Video with audio saved as: {}", output_file_name);
     
+    // Supprimer la vidéo originale (sans audio)
+    if input_video_path.exists() {
+        match std::fs::remove_file(&input_video_path) {
+            Ok(_) => println!("✓ Original video file deleted: {}", file_name),
+            Err(e) => println!("⚠ Failed to delete original video file: {}", e),
+        }
+    }
+    
     // Émettre l'événement de fin d'export
     let _ = app_handle.emit("export-complete", serde_json::json!({
-        "filename": output_file_name
+        "filename": output_file_name,
+        "exportId": export_id
     }));
     
     Ok(format!("Video with audio saved as: {}", output_file_name))
-}
-
-// Fonction helper pour obtenir la durée d'une vidéo
-async fn get_video_duration(video_path: &Path) -> Result<f64, String> {
-    let ffprobe_path = Path::new("binaries").join("ffprobe.exe");
-    
-    let output = TokioCommand::new(&ffprobe_path)
-        .arg("-v").arg("quiet")
-        .arg("-show_entries").arg("format=duration")
-        .arg("-of").arg("csv=p=0")
-        .arg(video_path)
-        .output()
-        .await
-        .map_err(|e| format!("Failed to execute ffprobe: {}", e))?;
-    
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("FFprobe failed: {}", stderr));
-    }
-    
-    let duration_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    println!("Raw duration output: '{}'", duration_str);
-    
-    // Vérifier si la durée est disponible
-    if duration_str.is_empty() || duration_str == "N/A" || duration_str == "0.000000" {
-        // Essayer une méthode alternative avec les streams
-        return get_video_duration_from_stream(video_path).await;
-    }
-    
-    duration_str.parse::<f64>().map_err(|e| format!("Failed to parse duration '{}': {}", duration_str, e))
-}
-
-// Méthode alternative pour obtenir la durée depuis les informations de stream
-async fn get_video_duration_from_stream(video_path: &Path) -> Result<f64, String> {
-    let ffprobe_path = Path::new("binaries").join("ffprobe.exe");
-    
-    let output = TokioCommand::new(&ffprobe_path)
-        .arg("-v").arg("quiet")
-        .arg("-select_streams").arg("v:0")
-        .arg("-show_entries").arg("stream=duration")
-        .arg("-of").arg("csv=p=0")
-        .arg(video_path)
-        .output()
-        .await
-        .map_err(|e| format!("Failed to execute ffprobe for stream duration: {}", e))?;
-    
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("FFprobe stream failed: {}", stderr));
-    }
-    
-    let duration_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    println!("Raw stream duration output: '{}'", duration_str);
-    
-    if duration_str.is_empty() || duration_str == "N/A" {
-        // Si on ne peut toujours pas obtenir la durée, on utilise une valeur par défaut
-        println!("Warning: Could not determine video duration, using estimated duration");
-        return Ok(300.0); // 5 minutes par défaut, on ajustera pendant le processus
-    }
-    
-    duration_str.parse::<f64>().map_err(|e| format!("Failed to parse stream duration '{}': {}", duration_str, e))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
