@@ -262,12 +262,12 @@ export default class MigrationService {
 			projectDetail.updatePercentageTranslated(edition);
 		}
 
-		globalState.currentProject.save();
+		globalState.currentProject.save(false);
 		globalState.userProjectsDetails.push(newProject.detail);
 
 		globalState.currentProject = null;
 
-		await newProject.save();
+		await newProject.save(false);
 	}
 }
 function formatTranslationName(key: string) {
