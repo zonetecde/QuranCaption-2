@@ -122,6 +122,24 @@ export class ProjectDetail extends SerializableBase {
 	normalize(str: string) {
 		return str.trim().toLowerCase().replaceAll(/\s+/g, ' ').replaceAll('-', '').replaceAll("'", '');
 	}
+
+	/**
+	 * Génère, en fonction des paramètres d'export actuels, le nom du fichier d'export.
+	 */
+	generateExportFileName(): string {
+		// Nom du projet (Nom du récitateur) - Al Insan 12-21, XXX
+		const finalFileName =
+			globalState.currentProject!.detail.name +
+			' ' +
+			(globalState.currentProject!.detail.reciter
+				? '(' + globalState.currentProject!.detail.reciter + ') - '
+				: '- ') +
+			VerseRange.getVerseRange(
+				globalState.getExportState.videoStartTime,
+				globalState.getExportState.videoEndTime
+			).toStringForExportFile();
+		return finalFileName;
+	}
 }
 
 // Enregistre les classes enfants pour la désérialisation automatique

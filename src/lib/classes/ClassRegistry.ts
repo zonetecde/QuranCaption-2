@@ -26,6 +26,7 @@ import { Translation, VerseTranslation, PredefinedSubtitleTranslation } from './
 import { ProjectTranslation } from './ProjectTranslation.svelte';
 import { Duration } from './Duration';
 import { Status } from './Status';
+import Exportation from './Exportation.svelte';
 
 /**
  * Enregistre automatiquement toutes les classes sérialisables pour permettre
@@ -74,4 +75,7 @@ export function initializeClassRegistry() {
 	SerializableBase.registerClass('VerseTranslation', VerseTranslation);
 	SerializableBase.registerClass('PredefinedSubtitleTranslation', PredefinedSubtitleTranslation);
 	SerializableBase.registerClass('TranslationsEditorState', TranslationsEditorState);
+
+	// Classe d'exportation
+	SerializableBase.registerClass('Exportation', Exportation);
 }

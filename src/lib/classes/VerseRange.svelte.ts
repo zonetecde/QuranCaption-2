@@ -29,7 +29,8 @@ export class VerseRange extends SerializableBase {
 
 		for (const subtitleClip of globalState.getSubtitleClips) {
 			// Vérifie que le sous-titre est dans les limites du segment
-			if (!(subtitleClip.startTime >= startTime && subtitleClip.endTime <= endTime)) {
+			// Laisse une marge de 1 seconde pour considérer le sous-titre comme sélectionné
+			if (!(subtitleClip.startTime >= startTime - 1000 && subtitleClip.endTime <= endTime + 1000)) {
 				continue;
 			}
 
@@ -68,5 +69,9 @@ export class VerseRange extends SerializableBase {
 					`Surah ${Quran.getSurahsNames()[part.surah - 1].transliteration}: ${part.verseStart}-${part.verseEnd}`
 			)
 			.join(', ');
+	}
+
+	public toStringForExportFile(): string {
+		return this.toString().replaceAll(':', '').replaceAll('Surah ', '');
 	}
 }

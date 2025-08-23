@@ -3,7 +3,7 @@
 	import Section from '$lib/components/projectEditor/Section.svelte';
 	import SubtitleClip from '$lib/components/projectEditor/timeline/track/SubtitleClip.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { projectService } from '$lib/services/ProjectService';
+	import { ProjectService } from '$lib/services/ProjectService';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-5-french-toast';
 

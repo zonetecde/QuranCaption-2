@@ -10,7 +10,7 @@
 	import AutocompleteInput from '$lib/components/misc/AutocompleteInput.svelte';
 	import RecitersManager from '$lib/classes/Reciter';
 	import EditableText from '$lib/components/misc/EditableText.svelte';
-	import { projectService } from '$lib/services/ProjectService';
+	import { ProjectService } from '$lib/services/ProjectService';
 
 	let {
 		style,
@@ -471,7 +471,7 @@
 						placeholder={globalState.currentProject!.detail.reciter}
 						textClasses="font-semibold"
 						action={async () => {
-							await projectService.saveDetail(globalState.currentProject!.detail); // Sauvegarde le projet
+							await ProjectService.saveDetail(globalState.currentProject!.detail); // Sauvegarde le projet
 						}}
 						inputType="reciters"
 					/>

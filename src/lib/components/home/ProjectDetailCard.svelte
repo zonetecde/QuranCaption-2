@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ProjectDetail } from '$lib/classes';
-	import { projectService } from '$lib/services/ProjectService';
+	import { ProjectService } from '$lib/services/ProjectService';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
 	import { globalState } from '$lib/runes/main.svelte';
 	import EditableText from '../misc/EditableText.svelte';
@@ -25,7 +25,7 @@
 				`Are you sure you want to delete the project "${projectDetail.name}"?`
 			)
 		) {
-			await projectService.delete(projectDetail.id); // Supprime le projet
+			await ProjectService.delete(projectDetail.id); // Supprime le projet
 		} else {
 			contextMenu!.close();
 		}
@@ -33,7 +33,7 @@
 
 	async function openProjectButtonClick() {
 		// Ouvre le projet
-		globalState.currentProject = await projectService.load(projectDetail.id);
+		globalState.currentProject = await ProjectService.load(projectDetail.id);
 	}
 
 	// Gestion du menu de statut
@@ -43,7 +43,7 @@
 	async function selectStatus(s: Status) {
 		projectDetail.status = s;
 		showStatusMenu = false;
-		await projectService.saveDetail(projectDetail);
+		await ProjectService.saveDetail(projectDetail);
 	}
 
 	function toggleStatusMenu(e: MouseEvent) {
@@ -80,7 +80,7 @@
 					parentClasses="text-accent"
 					textClasses="text-lg font-semibold"
 					action={async () => {
-						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+						await ProjectService.saveDetail(projectDetail); // Sauvegarde le projet
 					}}
 				/>
 
@@ -125,7 +125,7 @@
 					placeholder={projectDetail.reciter}
 					textClasses="font-semibold"
 					action={async () => {
-						await projectService.saveDetail(projectDetail); // Sauvegarde le projet
+						await ProjectService.saveDetail(projectDetail); // Sauvegarde le projet
 					}}
 					inputType="reciters"
 				/>

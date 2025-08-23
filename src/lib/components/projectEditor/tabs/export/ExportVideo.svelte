@@ -4,6 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import TimeInput from './TimeInput.svelte';
 	import Style from '../styleEditor/Style.svelte';
+	import { VerseRange } from '$lib/classes';
 
 	// Initialize export state values if not set
 	$effect(() => {
@@ -70,6 +71,19 @@
 									(globalState.getExportState.videoStartTime || 0)
 							)
 						)}
+					</span>
+				</div>
+			</div>
+
+			<!-- Verse Range Preview -->
+			<div class="mt-4 p-3 bg-secondary rounded-lg border border-color">
+				<div class="flex items-center justify-between text-sm">
+					<span class="text-secondary min-w-[150px]">Export Verse Range:</span>
+					<span class="text-accent-primary font-medium">
+						{VerseRange.getVerseRange(
+							globalState.getExportState.videoStartTime,
+							globalState.getExportState.videoEndTime
+						).toString()}
 					</span>
 				</div>
 			</div>

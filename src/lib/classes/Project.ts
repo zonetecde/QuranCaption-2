@@ -1,5 +1,5 @@
 import { globalState } from '$lib/runes/main.svelte';
-import { projectService } from '$lib/services/ProjectService';
+import { ProjectService } from '$lib/services/ProjectService';
 import { ProjectContent, ProjectDetail, ProjectEditorState } from '.';
 import { SerializableBase } from './misc/SerializableBase';
 
@@ -32,7 +32,7 @@ export class Project extends SerializableBase {
 			globalState.userProjectsDetails.unshift(this.detail);
 		}
 
-		await projectService.save(this);
+		await ProjectService.save(this);
 	}
 }
 

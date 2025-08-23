@@ -220,7 +220,7 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: f64, export_id: String, video_duration: f64, target_width: i32, target_height: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn add_audio_to_video(file_name: String, final_file_path: String, audios: Vec<String>, start_time: f64, export_id: String, video_duration: f64, target_width: i32, target_height: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
     // Chemin vers ffmpeg dans le dossier binaries
     let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
     
@@ -235,14 +235,20 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: 
         return Err(format!("Video file not found: {}", input_video_path.display()));
     }
     
-    // Créer le nom du fichier de sortie (changer l'extension en .mp4 pour éviter les problèmes de codec)
-    let output_file_name = if let Some(stem) = Path::new(&file_name).file_stem() {
-        format!("{}_with_audio.mp4", stem.to_string_lossy())
-    } else {
-        format!("{}_with_audio.mp4", file_name)
-    };
+    // Utiliser le chemin de fichier final fourni par le frontend avec l'extension .mp4
+    let output_video_path = Path::new(&final_file_path).with_extension("mp4");
     
-    let output_video_path = downloads_dir.join(&output_file_name);
+    // Créer le dossier parent du fichier de sortie s'il n'existe pas
+    if let Some(parent_dir) = output_video_path.parent() {
+        if let Err(e) = fs::create_dir_all(parent_dir) {
+            return Err(format!("Unable to create output directory: {}", e));
+        }
+    }
+    
+    let output_file_name = output_video_path.file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("output.mp4")
+        .to_string();
     
     if audios.is_empty() {
         return Err("No audio files provided".to_string());
@@ -431,6 +437,115 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: 
     Ok(format!("Video with audio saved as: {}", output_file_name))
 }
 
+#[tauri::command]
+fn open_explorer_with_file_selected(file_path: String) -> Result<(), String> {
+    let path = Path::new(&file_path);
+    
+    // Vérifier que le fichier existe
+    if !path.exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        // Sur Windows, utiliser explorer.exe avec /select pour sélectionner le fichier
+        // Note: explorer.exe peut retourner un code de sortie non-zéro même en cas de succès
+        let output = Command::new("explorer")
+            .args(&["/select,", &file_path])
+            .output();
+
+        match output {
+            Ok(_) => {
+                // Si la commande a pu être exécutée, on considère que c'est un succès
+                // car explorer.exe peut retourner des codes de sortie non-zéro même quand ça marche
+                Ok(())
+            }
+            Err(e) => Err(format!("Failed to execute explorer command: {}", e))
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        // Sur macOS, utiliser 'open' avec -R pour révéler le fichier dans Finder
+        let output = Command::new("open")
+            .args(&["-R", &file_path])
+            .output();
+
+        match output {
+            Ok(result) => {
+                if result.status.success() {
+                    Ok(())
+                } else {
+                    // Fallback: ouvrir juste le dossier parent
+                    if let Some(parent) = path.parent() {
+                        let fallback_output = Command::new("open")
+                            .arg(parent)
+                            .output();
+                        
+                        match fallback_output {
+                            Ok(fallback_result) => {
+                                if fallback_result.status.success() {
+                                    Ok(())
+                                } else {
+                                    Err("Failed to open Finder".to_string())
+                                }
+                            }
+                            Err(e) => Err(format!("Failed to execute open command: {}", e))
+                        }
+                    } else {
+                        Err("Failed to open Finder and no parent directory found".to_string())
+                    }
+                }
+            }
+            Err(e) => Err(format!("Failed to execute open command: {}", e))
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        // Sur Linux, essayer plusieurs gestionnaires de fichiers
+        let file_managers = ["nautilus", "dolphin", "thunar", "pcmanfm", "caja"];
+        let parent_dir = path.parent().ok_or("No parent directory found")?;
+        
+        for manager in &file_managers {
+            let output = Command::new(manager)
+                .arg(parent_dir)
+                .output();
+                
+            match output {
+                Ok(result) => {
+                    if result.status.success() {
+                        return Ok(());
+                    }
+                }
+                Err(_) => continue, // Essayer le gestionnaire suivant
+            }
+        }
+        
+        // Fallback: utiliser xdg-open pour ouvrir le dossier parent
+        let output = Command::new("xdg-open")
+            .arg(parent_dir)
+            .output();
+
+        match output {
+            Ok(result) => {
+                if result.status.success() {
+                    Ok(())
+                } else {
+                    Err("Failed to open file manager".to_string())
+                }
+            }
+            Err(e) => Err(format!("Failed to execute xdg-open command: {}", e))
+        }
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    {
+        // Pour les autres OS, juste retourner une erreur
+        Err("Unsupported operating system".to_string())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -443,7 +558,8 @@ pub fn run() {
             get_new_file_path,
             move_file,
             get_system_fonts,
-            add_audio_to_video
+            add_audio_to_video,
+            open_explorer_with_file_selected
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

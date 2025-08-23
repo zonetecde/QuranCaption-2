@@ -1,11 +1,15 @@
-<script>
+<script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import EditableText from './misc/EditableText.svelte';
+	import ExportService from '$lib/services/ExportService';
+	import ExportMonitor from './ExportMonitor.svelte';
+
+	globalState.showExportMonitor = false;
 
 	async function minimizeButtonClick() {
-		(await getCurrentWindow()).minimize();
+		getCurrentWindow().minimize();
 	}
 
 	async function maximalizeButtonClick() {
@@ -24,7 +28,26 @@
 		}
 		await currentWindow.close();
 	}
+
+	// Fermer le monitor quand on clique ailleurs
+	function handleClickOutside(event: Event) {
+		if (globalState.showExportMonitor) {
+			const exportButton = document.getElementById('export-button');
+			const exportMonitor = document.querySelector('[role="dialog"]');
+
+			if (
+				exportButton &&
+				exportMonitor &&
+				!exportButton.contains(event.target as Node) &&
+				!exportMonitor.contains(event.target as Node)
+			) {
+				globalState.showExportMonitor = false;
+			}
+		}
+	}
 </script>
+
+<svelte:window on:click={handleClickOutside} />
 
 <header
 	data-tauri-drag-region
@@ -72,6 +95,24 @@
 			<span class="material-icons pt-2">help_outline</span>
 		</button>
 		<button
+			id="export-button"
+			class="w-10 cursor-pointer rounded-full hover:bg-gray-700 relative"
+			type="button"
+			onclick={() => {
+				globalState.showExportMonitor = !globalState.showExportMonitor;
+			}}
+		>
+			<span class="material-icons pt-2">file_download</span>
+
+			{#if ExportService.currentlyExportingProjects().length > 0}
+				<p
+					class="absolute top-0.5 -right-1 w-4 flex items-center pt-0.5 justify-center text-xs h-4 rounded-full bg-blue-400 outline outline-blue-600 animate-pulse"
+				>
+					{ExportService.currentlyExportingProjects().length}
+				</p>
+			{/if}
+		</button>
+		<button
 			class="w-10 cursor-pointer rounded-full hover:bg-gray-700"
 			type="button"
 			onclick={minimizeButtonClick}
@@ -94,3 +135,6 @@
 		</button>
 	</div>
 </header>
+
+<!-- Export Monitor -->
+<ExportMonitor />

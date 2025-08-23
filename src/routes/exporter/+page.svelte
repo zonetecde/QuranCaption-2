@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { AssetClip } from '$lib/classes';
+	import { VerseRange, type AssetClip } from '$lib/classes';
 	import Timeline from '$lib/components/projectEditor/timeline/Timeline.svelte';
 	import VideoPreview from '$lib/components/projectEditor/videoPreview/VideoPreview.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { projectService } from '$lib/services/ProjectService';
+	import { ProjectService } from '$lib/services/ProjectService';
 	import { invoke } from '@tauri-apps/api/core';
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { listen } from '@tauri-apps/api/event';
@@ -11,58 +11,113 @@
 	import { exists, BaseDirectory } from '@tauri-apps/plugin-fs';
 	import { LogicalPosition } from '@tauri-apps/api/dpi';
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
+	import { join } from '@tauri-apps/api/path';
+	import ExportService, { type ExportProgress } from '$lib/services/ExportService';
+	import { getAllWindows } from '@tauri-apps/api/window';
+	import Exportation, { ExportState } from '$lib/classes/Exportation.svelte';
 
+	// Indique si l'enregistrement a commencé
 	let hasRecordStarted = $state(false);
+
+	// Indique si l'enregistrement est terminé
+	let hasRecordEnded = $state(false);
+
+	// Contient l'ID de l'export
 	let exportId = '';
 
+	// Contient le recorder
+	let rec: { recorder: MediaRecorder; stop: () => void; cleanup: () => void } | null = null;
+
+	// VideoPreview
+	let videoPreview: VideoPreview | undefined = $state(undefined);
+
+	// Récupère les données d'export de la vidéo
+	let exportData: Exportation | undefined;
+
+	async function exportProgress(event: any) {
+		const data = event.payload as {
+			progress?: number;
+			current_time: number;
+			total_time?: number;
+		};
+
+		if (data.progress !== null && data.progress !== undefined) {
+			console.log(
+				`Export Progress: ${data.progress.toFixed(1)}% (${data.current_time.toFixed(1)}s / ${data.total_time?.toFixed(1)}s)`
+			);
+
+			emitProgress({
+				exportId: Number(exportId),
+				progress: data.progress,
+				currentState: ExportState.AddingAudio,
+				currentTime: data.current_time * 1000 // Convertir de secondes en millisecondes
+			} as ExportProgress);
+		} else {
+			console.log(`Export Processing: ${data.current_time.toFixed(1)}s elapsed`);
+		}
+	}
+
+	async function exportComplete(event: any) {
+		const data = event.payload as { filename: string; exportId: string };
+		console.log(`✅ Export complete! File saved as: ${data.filename}`);
+
+		await emitProgress({
+			exportId: Number(exportId),
+			progress: 100,
+			currentState: ExportState.Exported
+		} as ExportProgress);
+
+		// Ne fermer que si c'est NOTRE export qui est terminé
+		if (data.exportId === exportId) {
+			getCurrentWebviewWindow().close();
+		}
+	}
+
+	async function exportError(event: any) {
+		const error = event.payload as string;
+		console.error(`❌ Export failed: ${error}`);
+
+		emitProgress({
+			exportId: Number(exportId),
+			progress: 100,
+			currentState: ExportState.Error,
+			errorLog: error
+		} as ExportProgress);
+	}
+
+	async function emitProgress(progress: ExportProgress) {
+		(await getAllWindows()).find((w) => w.label === 'main')!.emit('export-progress-main', progress);
+	}
+
+	function cancelExport() {}
+
 	onMount(async () => {
-		// Écouter les événements de progression d'export
-		listen('export-progress', (event) => {
-			const data = event.payload as {
-				progress?: number;
-				current_time: number;
-				total_time?: number;
-			};
+		// Écoute les événements de progression d'export donné par Rust
+		listen('export-progress', exportProgress);
+		listen('export-complete', exportComplete);
+		listen('export-error', exportError);
 
-			if (data.progress !== null && data.progress !== undefined) {
-				console.log(
-					`Export Progress: ${data.progress.toFixed(1)}% (${data.current_time.toFixed(1)}s / ${data.total_time?.toFixed(1)}s)`
-				);
-			} else {
-				console.log(`Export Processing: ${data.current_time.toFixed(1)}s elapsed`);
-			}
-		});
-
-		listen('export-complete', (event) => {
-			const data = event.payload as { filename: string; exportId: string };
-			console.log(`✅ Export complete! File saved as: ${data.filename}`);
-
-			// Ne fermer que si c'est NOTRE export qui est terminé
-			if (data.exportId === id) {
-				getCurrentWebviewWindow().close();
-			}
-		});
-
-		listen('export-error', (event) => {
-			const error = event.payload as string;
-			console.error(`❌ Export failed: ${error}`);
-		});
-
-		// Récupère le fichier du projet à exporter.
-		// L'id se trouve dans l'url, paramètre "id"
+		// Récupère l'id de l'export, qui est en paramètre d'URL
 		const id = new URLSearchParams(window.location.search).get('id');
 		if (id) {
 			exportId = id;
 
-			// Récupère le projet correspondant à l'id
-			globalState.currentProject = await projectService.load(Number(id), false, true);
+			// Récupère le projet correspondant à cette ID (dans le dossier export, paramètre inExportFolder: true)
+			globalState.currentProject = await ExportService.loadProject(Number(id));
+
+			// Supprime le fichier projet JSON
+			ExportService.deleteProjectFile(Number(id));
+
+			// Récupère les données d'export
+			exportData = ExportService.findExportById(Number(id))!;
 
 			// Prépare les paramètres pour exporter la vidéo
-			globalState.getVideoPreviewState.isFullscreen = true; // Mettre la vidéo en plein écran
-			globalState.getVideoPreviewState.isPlaying = false; // Mettre la vidéo en pause
-			globalState.getVideoPreviewState.isMuted = true; // Mettre la vidéo en sourdine
-			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime; // Revenir au début de la timeline
-			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime; // Revenir au début de la timeline
+			globalState.getVideoPreviewState.isFullscreen = true; // Met la vidéo en plein écran
+			globalState.getVideoPreviewState.isPlaying = false; // Met la vidéo en pause
+			globalState.getVideoPreviewState.isMuted = true; // Met la vidéo en sourdine
+			// Met le curseur au début du startTime voulu pour l'export
+			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime;
+			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;
 
 			setTimeout(async () => {
 				// Enlève tout les styles `tranform` de la div d'id `preview-container` et met
@@ -77,28 +132,45 @@
 				try {
 					rec = await startRecord(60);
 				} catch (e) {
-					// Si l'utilisateur annule la sélection, on remet l'overlay
+					// Si l'utilisateur annule la sélection, on cancel l'export
 					hasRecordStarted = false;
 					cancelExport();
 					return;
 				}
 
-				// Joue la vidéo
+				// Joue la vidéo pendant que le MediaRecorder record
 				videoPreview!.togglePlayPause();
 			}, 0);
 		}
 	});
 
-	// Dès que on atteint la fin de la vidéo que l'utilisateur veut exporter, end le record
+	/*
+	 * Dès que on atteint la fin de la vidéo que l'utilisateur veut exporter, end le record
+	 */
 	$effect(() => {
-		if (
-			hasRecordStarted &&
-			globalState.getTimelineState.cursorPosition >= globalState.getExportState.videoEndTime
-		) {
+		if (!hasRecordStarted) return; // Si on a pas encore commencé, on fait rien
+
+		const cursorPos = globalState.getTimelineState.cursorPosition;
+
+		if (cursorPos >= exportData!.videoEndTime) {
 			endRecord();
+		} else if (cursorPos % 1000 < 16) {
+			// Ou alors report le progrès toutes les secondes
+			emitProgress({
+				exportId: Number(exportId),
+				progress: Math.max(
+					0,
+					Math.min(100, ((cursorPos - exportData!.videoStartTime) / exportData!.videoLength) * 100)
+				),
+				currentState: ExportState.Recording,
+				currentTime: cursorPos - exportData!.videoStartTime
+			} as ExportProgress);
 		}
 	});
 
+	/**
+	 * Arrête l'enregistrement de la vidéo.
+	 */
 	function endRecord() {
 		rec?.stop();
 	}
@@ -206,33 +278,9 @@
 		// Démarrer avec des chunks de 1 seconde pour améliorer les métadonnées
 		rec.start(1000);
 
-		rec.onstop = async () => {
-			drawing = false;
-			video.pause();
+		rec.onstop = () => recordStoped(drawing, video, mimeType, chunks);
 
-			// Utiliser l'extension correcte selon le codec
-			const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-			const fileName = `QC-${globalState.currentProject!.detail.id}.${extension}`;
-
-			// combine avec le bon type MIME
-			const blob = new Blob(chunks, { type: mimeType });
-			const arrayBuf = await blob.arrayBuffer();
-
-			// Utiliser le bon type MIME pour le fichier aussi
-			const file = new File([arrayBuf], fileName, { type: mimeType });
-			const url = URL.createObjectURL(file);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = fileName;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-
-			setTimeout(() => {
-				addAudioToVideo(fileName);
-			}, 0);
-		};
-		// retourne un objet pour pouvoir arrêter plus tard
+		// Retourne l'objet recorder avec méthode stop et cleanup
 		return {
 			recorder: rec,
 			stop: () => rec.stop(),
@@ -244,12 +292,48 @@
 		};
 	}
 
-	let rec: { recorder: MediaRecorder; stop: () => void; cleanup: () => void } | null = null;
-	let videoPreview: VideoPreview | undefined = $state(undefined);
+	/**
+	 * Appelé lorsque l'enregistrement est arrêté. Sauvegarde la vidéo sur le PC.
+	 */
+	async function recordStoped(
+		drawing: boolean,
+		video: HTMLVideoElement,
+		mimeType: string,
+		chunks: Blob[]
+	) {
+		drawing = false;
+		video.pause();
 
-	function cancelExport() {}
+		// Utiliser l'extension correcte selon le codec
+		const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
 
+		// Enregistre le fichier vidéo. Nom simple pour l'instant
+		const fileName = `QC-${globalState.currentProject!.detail.id}.${extension}`;
+
+		// Combine avec le bon type MIME
+		const blob = new Blob(chunks, { type: mimeType });
+		const arrayBuf = await blob.arrayBuffer();
+
+		// Utiliser le bon type MIME pour le fichier aussi
+		const file = new File([arrayBuf], fileName, { type: mimeType });
+		const url = URL.createObjectURL(file);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = fileName;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+
+		// Appelle la fonction pour ajouter l'audio à la vidéo
+		addAudioToVideo(fileName);
+	}
+
+	/**
+	 * Ajoute l'audio à la vidéo et effectue diverse opération avec FFMPEG
+	 * @param videoFileName
+	 */
 	async function addAudioToVideo(videoFileName: string) {
+		// Récupère le chemin de fichier de tout les audios du projet
 		const audios: string[] = globalState.getAudioTrack.clips.map(
 			(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
 		);
@@ -259,36 +343,34 @@
 			await new Promise((resolve) => setTimeout(resolve, 100));
 		}
 
-		// destroy le media recorder pour qu'on ai plus la petite fenetre "X partage une fenêtre"
+		// Destroy le media recorder pour qu'on ai plus la petite fenetre "X partage une fenêtre"
 		rec?.cleanup();
 		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
-		videoPreview?.togglePlayPause(); // Met en pause la vidéo pour pas consommer de ressource
+		hasRecordEnded = true; // Supprime la timeline et la videoPreview pour pas consommer de ressources
 
-		const videoDimensions: { width: number; height: number } = globalState.getStyle(
-			'global',
-			'video-dimension'
-		)!.value as any;
-
+		// Appel FFMPEG depuis Rust
 		await invoke('add_audio_to_video', {
 			fileName: videoFileName,
+			finalFilePath: exportData!.finalFilePath,
 			audios: audios,
 			startTime: globalState.getExportState.videoStartTime,
-			exportId: exportId,
-			videoDuration:
-				globalState.getExportState.videoEndTime - globalState.getExportState.videoStartTime,
-			targetWidth: videoDimensions.width,
-			targetHeight: videoDimensions.height
+			exportId: exportData!.exportId.toString(),
+			videoDuration: exportData!.videoLength,
+			targetWidth: exportData!.videoDimensions.width,
+			targetHeight: exportData!.videoDimensions.height
 		});
 	}
 </script>
 
 {#if globalState.currentProject}
-	<div class="absolute inset-0 w-full h-full">
-		<VideoPreview bind:this={videoPreview} showControls={false} />
-		<div class="hidden">
-			<Timeline />
+	{#if !hasRecordEnded}
+		<div class="absolute inset-0 w-full h-full">
+			<VideoPreview bind:this={videoPreview} showControls={false} />
+			<div class="hidden">
+				<Timeline />
+			</div>
 		</div>
-	</div>
+	{/if}
 
 	<!-- Avant de record, on dit à l'utilisateur de sélectionné la fenêtre -->
 	{#if !hasRecordStarted}

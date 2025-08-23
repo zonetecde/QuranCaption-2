@@ -1,7 +1,7 @@
 <script lang="ts">
 	import toast from 'svelte-5-french-toast';
 	import { invoke } from '@tauri-apps/api/core';
-	import { projectService } from '$lib/services/ProjectService';
+	import { ProjectService } from '$lib/services/ProjectService';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { Asset, AssetType } from '$lib/classes';
 	import Section from '$lib/components/projectEditor/Section.svelte';
@@ -16,7 +16,7 @@
 				return;
 			}
 
-			const downloadPath = await projectService.getAssetFolderForProject(
+			const downloadPath = await ProjectService.getAssetFolderForProject(
 				globalState.currentProject!.detail.id
 			);
 

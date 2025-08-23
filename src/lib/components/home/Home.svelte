@@ -9,13 +9,16 @@
 	import SortMenu from './SortMenu.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
-	import { projectService } from '$lib/services/ProjectService';
 	import { Status } from '$lib/classes/Status';
 	import type { ProjectDetail } from '$lib/classes/ProjectDetail.svelte';
 	import { open } from '@tauri-apps/plugin-dialog';
-	import { readTextFile } from '@tauri-apps/plugin-fs';
+	import { readTextFile, exists } from '@tauri-apps/plugin-fs';
 	import ModalManager from '../modals/ModalManager';
+	import { ProjectService } from '$lib/services/ProjectService';
+	import { join, localDataDir } from '@tauri-apps/api/path';
+	import MigrationFromV2Modal from './modals/MigrationFromV2Modal.svelte';
 
+	let migrationFromV2ModalVisibility = $state(false);
 	let createNewProjectModalVisible: boolean = $state(false);
 
 	// États pour les menus de filtrage et tri
@@ -23,7 +26,6 @@
 	let sortMenuVisible = $state(false);
 	let selectedStatuses: Status[] = $state(Status.getAllStatuses());
 	let filteredProjects: typeof globalState.userProjectsDetails = $state([]);
-
 	let searchQuery: string = $state('');
 
 	/**
@@ -101,7 +103,7 @@
 	onMount(async () => {
 		if (globalState.userProjectsDetails.length === 0) {
 			// Récupère les projets de l'utilisateur au chargement de l'application
-			await projectService.loadUserProjectsDetails();
+			await ProjectService.loadUserProjectsDetails();
 		} else {
 			// Retrie juste dans l'ordre de updatetime
 			globalState.userProjectsDetails = globalState.userProjectsDetails.sort(
@@ -110,13 +112,32 @@
 
 			// Re-récupère les détails du projet le plus récent
 			// Nécessaire car quand on les modifies dans le projet ça le modifie pas dans `globalState.userProjectsDetails`
-			globalState.userProjectsDetails[0] = await projectService.loadDetail(
+			globalState.userProjectsDetails[0] = await ProjectService.loadDetail(
 				globalState.userProjectsDetails[0].id
 			);
 		}
 
 		// Initialise les projets filtrés
 		applyFilterAndSort();
+
+		// Si c'est le tout premier lancement du logiciel, et que la personne avait déjà installé Quran Caption 2
+		// Vérifier l'existence du dossier Quran Caption 2 dans AppData\Local
+		try {
+			// Obtenir le chemin vers le dossier AppData\Local de l'utilisateur
+			const userLocalDataDir = await localDataDir();
+			const qc2LocalStoragePath = await join(userLocalDataDir, 'Quran Caption', 'localStorage');
+			const qc2FolderExists = await exists(qc2LocalStoragePath);
+
+			if (qc2FolderExists) {
+				console.log('Quran Caption 2 data found at:', qc2LocalStoragePath);
+
+				migrationFromV2ModalVisibility = true;
+			} else {
+				console.log('No Quran Caption 2 data found');
+			}
+		} catch (error) {
+			console.error('Error checking for Quran Caption 2 data:', error);
+		}
 	});
 
 	$effect(() => {
@@ -140,7 +161,7 @@
 				const element = files[i];
 				const json = JSON.parse((await readTextFile(element)).toString());
 
-				projectService.importProject(json);
+				ProjectService.importProject(json);
 			} catch (error) {
 				ModalManager.errorModal(
 					'Error importing project',
@@ -230,5 +251,11 @@
 {#if createNewProjectModalVisible}
 	<div class="modal-wrapper" transition:fade>
 		<CreateProjectModal close={() => (createNewProjectModalVisible = false)} />
+	</div>
+{/if}
+
+{#if migrationFromV2ModalVisibility}
+	<div class="modal-wrapper" transition:fade>
+		<MigrationFromV2Modal close={() => (migrationFromV2ModalVisibility = false)} />
 	</div>
 {/if}

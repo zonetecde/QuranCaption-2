@@ -5,8 +5,8 @@ import { PredefinedSubtitleClip, SubtitleClip } from './Clip.svelte';
 import SubtitleFileContentGenerator from './misc/SubtitleFileContentGenerator';
 import { Quran } from './Quran';
 import { Utilities } from './misc/Utilities';
-import { projectService } from '$lib/services/ProjectService';
 import type { Project } from '.';
+import ExportService from '$lib/services/ExportService';
 
 export default class Exporter {
 	/**
@@ -183,32 +183,38 @@ export default class Exporter {
 	 * Exporte le projet sous forme de vidéo.
 	 */
 	static async exportVideo() {
+		// Génère un ID d'export unique.
 		const exportId = Utilities.randomId().toString();
 
-		// Commence par faire une copie du projet à l'état actuelle
+		// Fait une copie du projet à l'état actuelle
 		const project = globalState.currentProject!.clone();
-		project.detail.id = Number(exportId);
+		project.detail.id = Number(exportId); // L'ID du projet est l'ID d'export
 
+		// Récupère les dimensions de la fenêtre d'export (qui prend compte des limitations de taille de fenêtre)
 		const { width: windowWidth, height: windowHeight } =
 			await Exporter.getRealExportDimensions(project);
 
 		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
-		projectService.saveToExportFolder(project);
+		await ExportService.saveProject(project);
 
-		// Créer une fenêtre Tauri avec la taille ajustée
+		// Ajoute à la liste des exports en cours
+		await ExportService.addExport(project);
+
+		// Ouvre le popup de monitor d'export
+		globalState.showExportMonitor = true;
+
+		// Set-up l'écouteur d'évènement pour suivre
+		// le progrès des projets en cours d'exportation
+		ExportService.setupListener();
+
+		// Créer une fenêtre Tauri avec la bonne taille
 		const w = new WebviewWindow(exportId, {
 			width: windowWidth,
 			height: windowHeight,
 			decorations: false,
 			alwaysOnTop: true,
 			title: 'QC - ' + exportId,
-			url: '/exporter?' + new URLSearchParams({ id: exportId })
-		});
-
-		w.once('tauri://created', () => {});
-
-		w.once('tauri://destroyed', () => {
-			// Nettoyer les ressources si nécessaire
+			url: '/exporter?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
 		});
 	}
 

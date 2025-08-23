@@ -2,21 +2,19 @@ import { Project, ProjectContent, ProjectDetail, Utilities, VideoStyle } from '$
 import { readDir, remove, writeTextFile, readTextFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { globalState } from '$lib/runes/main.svelte';
-import ModalManager from '$lib/components/modals/ModalManager';
 
 /**
  * Service pour gérer les projets.
  * Utilise JSONProjectStorage pour la persistance des données.
  */
 export class ProjectService {
-	private projectsFolder: string = 'projects/';
-	private assetsFolder: string = 'assets/';
-	private exportFolder: string = 'exports/';
+	private static projectsFolder: string = 'projects/';
+	private static assetsFolder: string = 'assets/';
 
 	/**
 	 * S'assure que le dossier des projets existe
 	 */
-	private async ensureFolder(folder: string): Promise<string> {
+	static async ensureFolder(folder: string): Promise<string> {
 		const folderPath = await join(await appDataDir(), folder);
 		if (!(await exists(folderPath))) {
 			await mkdir(folderPath, { recursive: true });
@@ -28,7 +26,7 @@ export class ProjectService {
 	 * Sauvegarde un projet sur l'ordinateur
 	 * @param project Le projet à sauver
 	 */
-	async save(project: Project) {
+	static async save(project: Project) {
 		// S'assure que le dossier existe
 		const projectsPath = await this.ensureFolder(this.projectsFolder);
 
@@ -42,7 +40,7 @@ export class ProjectService {
 	 * Sauvegarde les détails d'un projet.
 	 * @param detail Les détails du projet à sauvegarder
 	 */
-	async saveDetail(detail: ProjectDetail): Promise<void> {
+	static async saveDetail(detail: ProjectDetail): Promise<void> {
 		// Récupère le projet complet
 		const project = await this.load(detail.id);
 
@@ -59,12 +57,12 @@ export class ProjectService {
 	 * @param onlyDetail Si true, ne charge que les détails du projet
 	 * @returns Le projet
 	 */
-	async load(
+	static async load(
 		projectId: number,
 		onlyDetail: boolean = false,
-		inExportFolder: boolean = false
+		customFolder?: string
 	): Promise<Project> {
-		const folder = inExportFolder ? this.exportFolder : this.projectsFolder;
+		const folder = customFolder || this.projectsFolder;
 
 		// S'assure que le dossier existe
 		const projectsPath = await this.ensureFolder(folder);
@@ -91,7 +89,7 @@ export class ProjectService {
 
 		// Si le projet ne contient pas de styles vidéo, on initialise avec un style par défaut
 		// || true
-		if (Object.keys(project.content.videoStyle.styles).length === 0 || true) {
+		if (Object.keys(project.content.videoStyle.styles).length === 0) {
 			// Si les styles ne sont pas définis, on initialise avec un style par défaut
 			project.content.videoStyle = await VideoStyle.getDefaultVideoStyle();
 		}
@@ -104,7 +102,7 @@ export class ProjectService {
 	 * @param projectId L'id du projet
 	 * @returns Les détails du projet
 	 */
-	async loadDetail(projectId: number): Promise<ProjectDetail> {
+	static async loadDetail(projectId: number): Promise<ProjectDetail> {
 		return (await this.load(projectId, true)).detail;
 	}
 
@@ -112,7 +110,7 @@ export class ProjectService {
 	 * Supprime un projet de l'ordinateur.
 	 * @param projectId L'id du projet à supprimer
 	 */
-	async delete(projectId: number): Promise<void> {
+	static async delete(projectId: number): Promise<void> {
 		const projectsPath = await join(await appDataDir(), this.projectsFolder);
 
 		try {
@@ -139,7 +137,7 @@ export class ProjectService {
 	 * Récupère tous les détails des projets existants.
 	 * Met à jour la liste des projets de l'utilisateur dans le globalState.
 	 */
-	async loadUserProjectsDetails() {
+	static async loadUserProjectsDetails() {
 		try {
 			// Récupère le chemin absolu vers le dossier contenant les projets
 			const projectsPath = await join(await appDataDir(), this.projectsFolder);
@@ -186,7 +184,7 @@ export class ProjectService {
 	 * Récupère le chemin du dossier des assets téléchargés.
 	 * @returns Le chemin du dossier des assets
 	 */
-	async getAssetFolderForProject(projectId: number): Promise<string> {
+	static async getAssetFolderForProject(projectId: number): Promise<string> {
 		return await join(await appDataDir(), this.assetsFolder, projectId.toString());
 	}
 
@@ -194,28 +192,10 @@ export class ProjectService {
 	 * Importe un projet à partir d'un fichier JSON.
 	 * @param json Le contenu JSON du projet
 	 */
-	importProject(json: any) {
+	static importProject(json: any) {
 		json.detail.id = Utilities.randomId(); // Applique un nouvel ID unique au projet
 
 		const projectObject = Project.fromJSON(json);
 		projectObject.save(); // Enregistre le projet importé sur le disque
 	}
-
-	/**
-	 * Enregistre un projet dans le dossier export. Le nom du fichier
-	 * et l'id du projet (soit l'idée de l'export)
-	 * @param project Le projet à exporter
-	 */
-	async saveToExportFolder(project: Project) {
-		const folder: string = await this.ensureFolder(this.exportFolder);
-
-		// Enregistre le projet dans le dossier d'export
-		await writeTextFile(
-			await join(folder, project.detail.id.toString() + '.json'),
-			JSON.stringify(project.toJSON(), null, 2)
-		);
-	}
 }
-
-// Instance singleton pour faciliter l'utilisation
-export const projectService = new ProjectService();

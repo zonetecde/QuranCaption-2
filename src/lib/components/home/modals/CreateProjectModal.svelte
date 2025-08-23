@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Project, ProjectContent, ProjectDetail } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { projectService } from '$lib/services/ProjectService';
+	import { ProjectService } from '$lib/services/ProjectService';
 	import { onMount } from 'svelte';
 	import toast from 'svelte-5-french-toast';
 	import AutocompleteInput from '$lib/components/misc/AutocompleteInput.svelte';
@@ -29,7 +29,7 @@
 		await project.save();
 
 		// maj des projets de l'utilisateur
-		await projectService.loadUserProjectsDetails();
+		await ProjectService.loadUserProjectsDetails();
 
 		// Ouvre le projet
 		globalState.currentProject = project;
@@ -41,7 +41,9 @@
 	class="bg-secondary border-color border rounded-2xl w-[700px] shadow-2xl shadow-black flex flex-col relative"
 >
 	<!-- Header with gradient background -->
-	<div class="bg-gradient-to-r from-accent to-bg-accent px-6 py-6 border-b border-color">
+	<div
+		class="bg-gradient-to-r from-accent to-bg-accent rounded-t-2xl px-6 py-6 border-b border-color"
+	>
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-4">
 				<div
@@ -112,7 +114,7 @@
 	</div>
 
 	<!-- Footer -->
-	<div class="border-t border-color bg-primary px-8 py-6">
+	<div class="border-t border-color bg-primary px-8 py-6 rounded-b-2xl">
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-2 text-sm text-thirdly">
 				<span class="material-icons text-accent-secondary">info</span>

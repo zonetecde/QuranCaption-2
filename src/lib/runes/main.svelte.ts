@@ -7,6 +7,7 @@ import {
 	type PredefinedSubtitleClip,
 	ProjectTranslation
 } from '$lib/classes';
+import type Exportation from '$lib/classes/Exportation.svelte';
 import type { AssetTrack, CustomTextTrack, SubtitleTrack } from '$lib/classes/Track.svelte';
 import type { StyleName } from '$lib/classes/VideoStyle.svelte';
 
@@ -16,6 +17,9 @@ class GlobalState {
 
 	// Projet actuellement sélectionné
 	currentProject: Project | null = $state(null);
+
+	// Contient tout les exports (en cours ou accomplis)
+	exportations: Exportation[] = $state([]);
 
 	// Contient tout les traductions disponibles
 	availableTranslations: Record<
@@ -30,6 +34,9 @@ class GlobalState {
 
 	// Cache pour le téléchargement des traductions
 	caches = $state(new Map<string, string>());
+
+	// Indique si on affiche le moniteur d'exportation
+	showExportMonitor: boolean = $state(false);
 
 	// ==========================================
 	// Shortcut pour le projet actuel
