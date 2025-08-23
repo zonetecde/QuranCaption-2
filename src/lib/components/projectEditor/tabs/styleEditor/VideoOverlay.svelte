@@ -185,8 +185,6 @@
 			color: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-color')!.value
 		};
 	});
-
-	// Drag vertical factorisé via l'action verticalDrag
 </script>
 
 {#if overlaySettings().enable}

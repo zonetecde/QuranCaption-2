@@ -161,34 +161,6 @@
 			style.id === 'font-family'
 		) {
 			globalState.updateVideoPreviewUI();
-		} else if (style.id === 'video-dimension') {
-			// On met à jour toutes les valeurs minimum et maximum des styles vertical-position/horizontal-position
-			// afin qu'on puisse mettre nos textes où on veut sur la vidéo
-			for (let target of globalState.getVideoStyle.styles) {
-				for (let category of target.categories) {
-					for (let style of category.styles) {
-						if (style.id.includes('vertical-position')) {
-							style.valueMin = -(v.height / 2);
-							style.valueMax = v.height / 2;
-
-							if ((style.value as number) > style.valueMax) {
-								style.value = style.valueMax;
-							} else if ((style.value as number) < style.valueMin) {
-								style.value = style.valueMin;
-							}
-						} else if (style.id.includes('horizontal-position')) {
-							style.valueMin = -(v.width / 2);
-							style.valueMax = v.width / 2;
-
-							if ((style.value as number) > style.valueMax) {
-								style.value = style.valueMax;
-							} else if ((style.value as number) < style.valueMin) {
-								style.value = style.valueMin;
-							}
-						}
-					}
-				}
-			}
 		}
 	}
 

@@ -302,25 +302,53 @@
 	/**
 	 * Redimensionne la vidéo pour qu'elle s'adapte au conteneur sans déformation
 	 * Utilise un système de mise à l'échelle avec ratio préservé
+	 * La preview reste basée sur 1920x1080 mais avec le bon ratio de sortie
 	 */
 	function resizeVideoToFitScreen() {
 		const previewContainer = document.getElementById('preview-container');
 		const preview = document.getElementById('preview');
 
-		const previewDimension = globalState.getVideoStyle
+		const outputDimension = globalState.getVideoStyle
 			.getStylesOfTarget('global')
 			.findStyle('video-dimension')!.value as any;
 
 		if (previewContainer && preview) {
-			// Définition des dimensions selon l'orientation
-			let videoWidth: number = previewDimension.width;
-			let videoHeight: number = previewDimension.height;
+			// Calcul du ratio de sortie
+			const outputRatio = outputDimension.width / outputDimension.height;
+			const baseRatio = 16 / 9; // Ratio de référence (1920x1080)
 
-			// Configuration initiale : taille fixe selon l'orientation
-			preview.style.width = `${videoWidth}px`;
-			preview.style.height = `${videoHeight}px`;
-			preview.style.minWidth = `${videoWidth}px`;
-			preview.style.minHeight = `${videoHeight}px`;
+			let previewWidth: number;
+			let previewHeight: number;
+
+			if (Math.abs(outputRatio - baseRatio) < 0.01) {
+				// Si le ratio de sortie est 16:9 (ou très proche), utiliser 1920x1080
+				previewWidth = 1920;
+				previewHeight = 1080;
+			} else {
+				// Sinon, adapter 1920x1080 au ratio de sortie
+				if (outputRatio > baseRatio) {
+					// Format plus large que 16:9 (ex: 21:9)
+					previewWidth = 1920;
+					previewHeight = Math.round(1920 / outputRatio);
+				} else {
+					// Format plus haut que 16:9 (ex: 9:16 portrait)
+					previewHeight = 1080;
+					previewWidth = Math.round(1080 * outputRatio);
+				}
+			}
+
+			console.log(
+				`Output: ${outputDimension.width}×${outputDimension.height} (ratio: ${outputRatio.toFixed(3)})`
+			);
+			console.log(
+				`Preview: ${previewWidth}×${previewHeight} (ratio: ${(previewWidth / previewHeight).toFixed(3)})`
+			);
+
+			// Configuration initiale avec les dimensions de preview calculées
+			preview.style.width = `${previewWidth}px`;
+			preview.style.height = `${previewHeight}px`;
+			preview.style.minWidth = `${previewWidth}px`;
+			preview.style.minHeight = `${previewHeight}px`;
 
 			// Configuration du conteneur
 			previewContainer.style.width = 'auto';
@@ -343,10 +371,10 @@
 				// Mode plein écran: couvrir tout l'écran (cover)
 				const screenW = window.innerWidth;
 				const screenH = window.innerHeight;
-				const scaleCover = Math.max(screenW / videoWidth, screenH / videoHeight);
+				const scaleCover = Math.max(screenW / previewWidth, screenH / previewHeight);
 				scale = scaleCover;
-				targetW = videoWidth * scaleCover;
-				targetH = videoHeight * scaleCover;
+				targetW = previewWidth * scaleCover;
+				targetH = previewHeight * scaleCover;
 
 				preview.style.transform = `scale(${scaleCover})`;
 				previewContainer.style.width = `${targetW}px`;
@@ -361,13 +389,13 @@
 				// Mode normal: fit (letterbox) centré
 				const containerWidth = previewContainer.clientWidth;
 				const containerHeight = previewContainer.clientHeight;
-				const widthRatio = containerWidth / videoWidth;
-				const heightRatio = containerHeight / videoHeight;
+				const widthRatio = containerWidth / previewWidth;
+				const heightRatio = containerHeight / previewHeight;
 				const scaleFit = Math.min(widthRatio, heightRatio);
 				scale = scaleFit;
 				preview.style.transform = `scale(${scaleFit})`;
-				previewContainer.style.width = `${videoWidth * scaleFit}px`;
-				previewContainer.style.height = `${videoHeight * scaleFit}px`;
+				previewContainer.style.width = `${previewWidth * scaleFit}px`;
+				previewContainer.style.height = `${previewHeight * scaleFit}px`;
 				previewContainer.style.left = '50%';
 				previewContainer.style.top = '50%';
 				previewContainer.style.position = 'relative';
