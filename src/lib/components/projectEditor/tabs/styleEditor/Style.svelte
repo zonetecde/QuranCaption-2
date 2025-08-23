@@ -452,6 +452,8 @@
 							applyValue({ width, height });
 						}}
 						value={(style.value as any).width}
+						min="256"
+						max="3840"
 					/>
 					<span>x</span>
 					<input
@@ -463,6 +465,8 @@
 							applyValue({ width, height });
 						}}
 						value={(style.value as any).height}
+						min="144"
+						max="2160"
 					/>
 				</div>
 			{:else if style.valueType === 'composite'}

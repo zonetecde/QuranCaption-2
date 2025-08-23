@@ -220,7 +220,7 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: f64, export_id: String, video_duration: f64, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: f64, export_id: String, video_duration: f64, target_width: i32, target_height: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
     // Chemin vers ffmpeg dans le dossier binaries
     let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
     
@@ -318,11 +318,11 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: 
     if audio_filters.is_empty() {
         return Err("No audio files match the specified start time".to_string());
     } else if audio_filters.len() == 1 {
-        // Un seul fichier audio (ou segment) : utiliser le filtre créé
-        let filter_complex = audio_filters[0].clone();
+        // Un seul fichier audio (ou segment) : utiliser le filtre créé + redimensionner la vidéo
+        let filter_complex = format!("[0:v]scale={}:{}[v_resized];{}", target_width, target_height, audio_filters[0]);
         
         cmd.arg("-filter_complex").arg(&filter_complex)
-           .arg("-map").arg("0:v") // Vidéo du premier input
+           .arg("-map").arg("[v_resized]") // Vidéo redimensionnée
            .arg("-map").arg("[a0]") // Audio filtré
            .arg("-c:v").arg("libx264") // Re-encoder la vidéo en H.264 pour MP4
            .arg("-c:a").arg("aac") // Encoder l'audio en AAC
@@ -331,8 +331,9 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: 
            .arg("-crf").arg("18") // Qualité vidéo (plus bas = meilleure qualité)
            .arg("-shortest"); // Arrêter quand le flux le plus court se termine
     } else {
-        // Plusieurs fichiers audio : les concaténer après les avoir filtrés
-        let mut filter_complex = audio_filters.join(";");
+        // Plusieurs fichiers audio : les concaténer après les avoir filtrés + redimensionner la vidéo
+        let mut filter_complex = format!("[0:v]scale={}:{}[v_resized];", target_width, target_height);
+        filter_complex.push_str(&audio_filters.join(";"));
         
         // Ajouter la concaténation des audios filtrés
         filter_complex.push(';');
@@ -342,7 +343,7 @@ async fn add_audio_to_video(file_name: String, audios: Vec<String>, start_time: 
         filter_complex.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len()));
         
         cmd.arg("-filter_complex").arg(&filter_complex)
-           .arg("-map").arg("0:v") // Vidéo du premier input
+           .arg("-map").arg("[v_resized]") // Vidéo redimensionnée
            .arg("-map").arg("[audio_out]") // Audio concaténé et filtré
            .arg("-c:v").arg("libx264") // Re-encoder la vidéo en H.264 pour MP4
            .arg("-c:a").arg("aac") // Encoder l'audio en AAC

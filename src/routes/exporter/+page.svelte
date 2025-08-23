@@ -264,13 +264,19 @@
 		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
 		videoPreview?.togglePlayPause(); // Met en pause la vidéo pour pas consommer de ressource
 
+		const videoDimensions: { width: number; height: number } = globalState.getVideoStyle
+			.getStylesOfTarget('global')
+			.findStyle('video-dimension')!.value as any;
+
 		await invoke('add_audio_to_video', {
 			fileName: videoFileName,
 			audios: audios,
 			startTime: globalState.getExportState.videoStartTime,
 			exportId: exportId,
 			videoDuration:
-				globalState.getExportState.videoEndTime - globalState.getExportState.videoStartTime
+				globalState.getExportState.videoEndTime - globalState.getExportState.videoStartTime,
+			targetWidth: videoDimensions.width,
+			targetHeight: videoDimensions.height
 		});
 	}
 </script>

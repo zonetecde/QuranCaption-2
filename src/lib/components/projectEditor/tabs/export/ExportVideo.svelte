@@ -95,9 +95,9 @@
 						<span class="text-secondary text-sm font-medium">Quality Settings</span>
 						{#await videoDimensions() then dimensions}
 							<p class="text-thirdly text-xs mt-1">
-								The video will be exported at {dimensions.width}x{dimensions.height} resolution and 60
-								fps. If this does not match your project's Style settings, it is due to your screen resolution
-								limitations.
+								The video will be recorded at {dimensions.width}x{dimensions.height} resolution due to
+								your screen resolution limitations. It will then be processed to match your project's
+								Style settings.
 							</p>
 						{/await}
 					</div>
