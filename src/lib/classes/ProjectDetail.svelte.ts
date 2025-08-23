@@ -1,9 +1,10 @@
+import { SerializableBase } from './misc/SerializableBase';
+
 import { globalState } from '$lib/runes/main.svelte';
 import { Edition, TrackType, Utilities } from '.';
 import { Duration } from './index.js';
+import { VerseRange } from './VerseRange.svelte';
 import { Status } from './Status';
-import { VerseRange } from './VerseRange';
-import { SerializableBase } from './misc/SerializableBase';
 import type { ClipWithTranslation } from './Clip.svelte';
 import { VerseTranslation } from './Translation.svelte';
 
@@ -41,10 +42,10 @@ export class ProjectDetail extends SerializableBase {
 		this.createdAt = $state(new Date());
 		this.updatedAt = $state(new Date());
 
-		this.verseRange = new VerseRange();
 		this.percentageCaptioned = $state(0);
 		this.status = $state(Status.NOT_SET);
 		this.duration = new Duration(0);
+		this.verseRange = new VerseRange();
 		this.translations = {};
 	}
 
@@ -59,7 +60,12 @@ export class ProjectDetail extends SerializableBase {
 	 * Met à jour le pourcentage de sous-titres captionnés par rapport
 	 * à la durée total de la vidéo du projet
 	 */
-	public updatePercentageCaptioned() {
+	public updateVideoDetailAttributes() {
+		this.updateVideoPercentageCaptioned();
+		this.updateVerseRange();
+	}
+
+	private updateVideoPercentageCaptioned() {
 		const captionedDuration = globalState.getSubtitleTrack.getDuration().ms || 0;
 
 		const totalDuration = globalState.getAudioTrack.getDuration().ms || 0;
@@ -70,6 +76,11 @@ export class ProjectDetail extends SerializableBase {
 		}
 
 		globalState.currentProject!.detail.percentageCaptioned = Math.floor(percentage);
+	}
+
+	private updateVerseRange() {
+		// Update la verse range pour toute la vidéo
+		this.verseRange = VerseRange.getVerseRange(0, globalState.getSubtitleTrack.getDuration().ms);
 	}
 
 	/**
@@ -104,7 +115,7 @@ export class ProjectDetail extends SerializableBase {
 	}
 
 	matchSearchQuery(searchQuery: string): boolean {
-		const normalizedProjectInfo = `${this.name} ${this.reciter}`;
+		const normalizedProjectInfo = `${this.name} ${this.reciter} ${this.verseRange.toString()}`;
 		return this.normalize(normalizedProjectInfo).includes(this.normalize(searchQuery));
 	}
 
@@ -115,5 +126,5 @@ export class ProjectDetail extends SerializableBase {
 
 // Enregistre les classes enfants pour la désérialisation automatique
 SerializableBase.registerChildClass(ProjectDetail, 'duration', Duration);
-SerializableBase.registerChildClass(ProjectDetail, 'verseRange', VerseRange);
 SerializableBase.registerChildClass(ProjectDetail, 'status', Status);
+SerializableBase.registerChildClass(ProjectDetail, 'verseRange', VerseRange);

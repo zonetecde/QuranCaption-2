@@ -190,7 +190,7 @@
 		if (success) {
 			await selectNextWord();
 			subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
-			globalState.currentProject!.detail.updatePercentageCaptioned();
+			globalState.currentProject!.detail.updateVideoDetailAttributes();
 		}
 	}
 
@@ -202,14 +202,14 @@
 		const subtitleTrack = globalState.getSubtitleTrack;
 
 		const success = subtitleTrack.addSilence();
-		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
+		if (success) globalState.currentProject!.detail.updateVideoDetailAttributes();
 	}
 
 	function addPredefinedSubtitle(type: PredefinedSubtitleType) {
 		const subtitleTrack = globalState.getSubtitleTrack;
 
 		const success = subtitleTrack.addPredefinedSubtitle(type);
-		if (success) globalState.currentProject!.detail.updatePercentageCaptioned();
+		if (success) globalState.currentProject!.detail.updateVideoDetailAttributes();
 	}
 
 	/**
@@ -229,7 +229,7 @@
 
 		subtitleTrack.removeLastClip();
 
-		globalState.currentProject!.detail.updatePercentageCaptioned();
+		globalState.currentProject!.detail.updateVideoDetailAttributes();
 		globalState.updateVideoPreviewUI();
 	}
 

@@ -55,14 +55,22 @@
 	if (typeof window !== 'undefined') {
 		window.addEventListener('click', () => (showStatusMenu = false));
 	}
+
+	// Gestion de l'affichage des détails du projet
+	let showProjectDetails = $state(false);
+
+	function toggleProjectDetails(e: MouseEvent) {
+		e.stopPropagation();
+		showProjectDetails = !showProjectDetails;
+	}
 </script>
 
 <div
 	class="bg-[rgba(22,27,34,0.6)] backdrop-blur-[10px] border border-[var(--border-color)] rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col justify-between hover:shadow-2xl transition-all duration-300"
 >
-	<div class="group">
+	<div>
 		<section class="w-full h-40 object-cover rounded-t-lg mb-4 bg-white/80"></section>
-		<div class="px-4 pb-4">
+		<div class="px-4 pb-4 relative">
 			<div class="flex justify-between items-start mb-2">
 				<EditableText
 					text="Enter project name"
@@ -78,23 +86,23 @@
 
 				<div class="relative">
 					<button
-						class="bg-transparent cursor-pointer text-xs flex items-center mr-0 duration-300 group-hover:mr-3 relative"
+						class="bg-transparent cursor-pointer text-xs flex items-center mr-0 duration-300 relative"
 						onclick={toggleStatusMenu}
 						type="button"
 					>
 						<span
-							class="w-3 h-3 rounded-full inline-block mr-2 group-hover:mr-3 duration-300"
+							class="w-3 h-3 rounded-full inline-block mr-2 duration-300"
 							style={`background-color: ${projectDetail.status.color}`}
 						></span>
 						{projectDetail.status.status}
 						<span
-							class="material-icons-outlined text-[10px] w-10 duration-300 absolute left-full top-1/2 -translate-y-1/2 scale-75 pointer-events-none opacity-0 group-hover:opacity-60 group-hover:scale-100 group-hover:-translate-x-2"
+							class="material-icons-outlined text-[10px] w-10 duration-300 absolute left-full top-1/2 -translate-y-1/2 scale-75 pointer-events-none opacity-0 hover:opacity-60 hover:scale-100 hover:-translate-x-2"
 							aria-hidden="true">arrow_drop_down</span
 						>
 					</button>
 					{#if showStatusMenu}
 						<ul
-							class="absolute group top-full right-0 mt-1 w-40 rounded-md border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-xl py-1 z-20 backdrop-blur-sm"
+							class="absolute top-full right-0 mt-1 w-40 rounded-md border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-xl py-1 z-20 backdrop-blur-sm"
 						>
 							{#each statuses as s}
 								<li
@@ -130,38 +138,58 @@
 					>{projectDetail.verseRange.toString()}</span
 				>
 			</p>
-			<div
-				class="project-details opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-64 space-y-2"
+
+			<!-- Bouton discret pour basculer les détails -->
+			<button
+				class={'absolute bottom-0 right-0 p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] opacity-60 hover:opacity-100 transition-all duration-200  cursor-pointer ' +
+					(showProjectDetails ? ' translate-y-2' : '')}
+				onclick={toggleProjectDetails}
+				type="button"
+				title={showProjectDetails ? 'Hide details' : 'Show details'}
 			>
-				<div>
-					<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
-						<span>Captioning</span>
-						<span class="font-medium text-[var(--text-primary)]"
-							>{projectDetail.percentageCaptioned}%</span
-						>
-					</div>
-					<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
-						<div
-							class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
-							style="width: {projectDetail.percentageCaptioned}%;"
-						></div>
-					</div>
-				</div>
-				<div class="space-y-2">
-					{#each Object.entries(projectDetail.translations) as [language, percentage]}
+				<span
+					class={'material-icons-outlined text-sm transition-transform duration-200 ' +
+						(showProjectDetails ? '-rotate-180' : '')}
+				>
+					expand_more
+				</span>
+			</button>
+
+			{#if showProjectDetails}
+				<div
+					class="project-details space-y-2 mt-3 pb-3 pt-3 border-t border-[var(--border-color)]"
+					transition:slide={{ duration: 300 }}
+				>
+					<div>
 						<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
-							<span>Translation ({language}) </span>
-							<span class="font-medium text-[var(--text-primary)]">{percentage}%</span>
+							<span>Captioning</span>
+							<span class="font-medium text-[var(--text-primary)]"
+								>{projectDetail.percentageCaptioned}%</span
+							>
 						</div>
 						<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
 							<div
 								class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
-								style="width: {percentage}%;"
+								style="width: {projectDetail.percentageCaptioned}%;"
 							></div>
 						</div>
-					{/each}
+					</div>
+					<div class="space-y-2">
+						{#each Object.entries(projectDetail.translations) as [language, percentage]}
+							<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
+								<span>Translation ({language}) </span>
+								<span class="font-medium text-[var(--text-primary)]">{percentage}%</span>
+							</div>
+							<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
+								<div
+									class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
+									style="width: {percentage}%;"
+								></div>
+							</div>
+						{/each}
+					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
 	</div>
 	<div class="mt-auto pt-3 border-t border-[var(--border-color)] px-4 pb-4">
@@ -193,13 +221,7 @@
 </ContextMenu>
 
 <style>
-	.project-details {
-		transition:
-			opacity 300ms ease-out,
-			max-height 500ms ease-out;
-	}
-
-	.group:hover .project-details {
-		transition-delay: 50ms;
+	.rotate-180 {
+		transform: rotate(180deg);
 	}
 </style>

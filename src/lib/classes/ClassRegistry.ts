@@ -1,4 +1,5 @@
 import { SerializableBase } from './misc/SerializableBase';
+import { Asset, Category, Style, StylesData, VerseRange, VideoStyle } from '.';
 import {
 	Clip,
 	SubtitleClip,
@@ -23,10 +24,8 @@ import {
 } from './ProjectEditorState.svelte';
 import { Translation, VerseTranslation, PredefinedSubtitleTranslation } from './Translation.svelte';
 import { ProjectTranslation } from './ProjectTranslation.svelte';
-import { VerseRange } from './VerseRange';
 import { Duration } from './Duration';
 import { Status } from './Status';
-import { Asset, Category, Style, StylesData, VideoStyle } from '.';
 
 /**
  * Enregistre automatiquement toutes les classes sérialisables pour permettre
