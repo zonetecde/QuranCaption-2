@@ -90,7 +90,7 @@
 </script>
 
 <div
-	class="bg-secondary border-color border rounded-2xl w-[800px] max-h-[700px] overflow-auto shadow-2xl shadow-black flex flex-col relative"
+	class="bg-secondary border-color border rounded-2xl w-[800px] 2xl:max-h-screen max-h-[700px] overflow-auto shadow-2xl shadow-black flex flex-col relative"
 >
 	<!-- Header with gradient background -->
 	<div

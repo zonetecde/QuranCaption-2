@@ -99,7 +99,7 @@ export class ProjectTranslation extends SerializableBase {
 			// Mark this surah as loaded
 			globalState.caches.set(surahCacheKey, 'loaded');
 		} catch (error) {
-			toast.error('Error fetching surah translation');
+			console.error('Error loading surah translation:', error);
 		}
 	}
 

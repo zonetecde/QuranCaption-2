@@ -120,14 +120,12 @@
 		// Initialise les projets filtrés
 		applyFilterAndSort();
 
-		// Regarde si des données de Quran Caption 2 sont présentes et que c'est un nouvel utilisateur
-		try {
+		promise.then(async () => {
+			// Vérifie si des données de Quran Caption 2 sont présentes
 			if ((await MigrationService.hasQCV2Data()) && globalState.userProjectsDetails.length === 0) {
 				migrationFromV2ModalVisibility = true;
 			}
-		} catch (error) {
-			console.error('Error checking for Quran Caption 2 data:', error);
-		}
+		});
 	});
 
 	$effect(() => {
