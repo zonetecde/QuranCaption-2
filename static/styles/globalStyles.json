@@ -1,14 +1,14 @@
 [
 	{
-		"id": "animation",
-		"name": "Animation & Transitions",
-		"description": "Add motion and transition effects to subtitles",
+		"id": "general",
+		"name": "General Settings",
+		"description": "Configure general settings for the video",
 		"icon": "animation",
 		"styles": [
 			{
 				"id": "video-dimension",
-				"name": "Video Dimension / Orientation",
-				"description": "Dimension of the video",
+				"name": "Video Quality & Orientation",
+				"description": "Quality and orientation of the video",
 				"value": {
 					"width": 1920,
 					"height": 1080
@@ -43,7 +43,7 @@
 				"id": "overlay-enable",
 				"name": "Enable Overlay",
 				"description": "Enable or disable the overlay",
-				"value": false,
+				"value": true,
 				"valueType": "boolean",
 				"css": "",
 				"tailwind": false,
@@ -63,7 +63,7 @@
 				"id": "overlay-opacity",
 				"name": "Overlay Opacity",
 				"description": "Opacity of the overlay",
-				"value": 0.5,
+				"value": 0.65,
 				"valueType": "number",
 				"valueMin": 0,
 				"valueMax": 1,

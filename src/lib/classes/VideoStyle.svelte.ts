@@ -1,7 +1,7 @@
 import { globalState } from '$lib/runes/main.svelte';
 import toast from 'svelte-5-french-toast';
 import { CustomTextClip, SubtitleClip } from '.';
-import { TrackType } from './enums';
+import { ProjectEditorTabs, TrackType } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import { Utilities } from './misc/Utilities';
 import { CustomTextTrack } from './Track.svelte';
@@ -31,7 +31,7 @@ export type StyleCategoryName =
 	| 'outline'
 	| 'border'
 	| 'effects'
-	| 'animation'
+	| 'general'
 	| 'general'
 	| 'overlay'
 	| 'surah-name'
@@ -849,17 +849,23 @@ export class VideoStyle extends SerializableBase {
 	 * @param categoryName La catégorie à highlight
 	 */
 	highlightCategory(target: string, categoryName: StyleCategoryName) {
-		if (target === 'arabic' || target === 'global') {
-			globalState.getStylesState.currentSelection = target;
-		} else {
-			globalState.getStylesState.currentSelection = 'translation';
-			setTimeout(() => {
-				globalState.getStylesState.currentSelectionTranslation = categoryName;
-			}, 0);
+		if (globalState.currentProject!.projectEditorState.currentTab !== ProjectEditorTabs.Style) {
+			globalState.currentProject!.projectEditorState.currentTab = ProjectEditorTabs.Style;
 		}
 
 		setTimeout(() => {
-			globalState.getStylesState.scrollAndHighlight = categoryName;
+			if (target === 'arabic' || target === 'global') {
+				globalState.getStylesState.currentSelection = target;
+			} else {
+				globalState.getStylesState.currentSelection = 'translation';
+				setTimeout(() => {
+					globalState.getStylesState.currentSelectionTranslation = categoryName;
+				}, 0);
+			}
+
+			setTimeout(() => {
+				globalState.getStylesState.scrollAndHighlight = categoryName;
+			}, 0);
 		}, 0);
 	}
 }

@@ -15,13 +15,11 @@
 	let {
 		style,
 		target,
-		categoryId,
 		disabled,
 		applyValueSimple
 	}: {
 		style: Style;
 		target?: string;
-		categoryId: StyleCategoryName;
 		disabled: boolean;
 		applyValueSimple: (value: any) => void;
 	} = $props();
@@ -578,7 +576,6 @@
 						<StyleComponent
 							style={subStyle}
 							target={style.id}
-							categoryId={categoryId as StyleCategoryName}
 							disabled={false}
 							applyValueSimple={(v) => {
 								subStyle.value = v;

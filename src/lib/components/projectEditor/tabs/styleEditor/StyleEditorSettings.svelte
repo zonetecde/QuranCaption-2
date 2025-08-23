@@ -262,7 +262,6 @@
 								<StyleComponent
 									{style}
 									target={globalState.getStylesState.getCurrentSelection()}
-									categoryId={category.id as StyleCategoryName}
 									disabled={toDisable as boolean}
 									applyValueSimple={(v) => {
 										style.value = v;
@@ -305,7 +304,6 @@
 									}
 									style.value = v;
 								}}
-								categoryId={category.id as StyleCategoryName}
 								disabled={toDisable as boolean}
 							/>
 							{/if}
