@@ -84,10 +84,10 @@
 	let helperStyles = $derived((target: string) => {
 		// Vérifie que la sélection actuelle correspond à la cible
 		if (
-			globalState.getStylesState.currentSelection === target ||
-			(globalState.getStylesState.currentSelection === 'translation' &&
-				globalState.getStylesState.currentSelectionTranslation === target &&
-				globalState.currentProject?.projectEditorState.currentTab === ProjectEditorTabs.Style)
+			globalState.currentProject?.projectEditorState.currentTab === ProjectEditorTabs.Style &&
+			(globalState.getStylesState.currentSelection === target ||
+				(globalState.getStylesState.currentSelection === 'translation' &&
+					globalState.getStylesState.currentSelectionTranslation === target))
 		) {
 			let classes = ' ';
 
