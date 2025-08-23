@@ -337,6 +337,10 @@ export class ProjectTranslation extends SerializableBase {
 					verse
 				);
 
+				if (!globalState.getProjectTranslation.versesTranslations[translationEdition.name]) {
+					globalState.getProjectTranslation.versesTranslations[translationEdition.name] = {};
+				}
+
 				// Ajoute la traduction à l'objet translations
 				globalState.getProjectTranslation.versesTranslations[translationEdition.name][
 					surah + ':' + verse
