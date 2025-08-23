@@ -14,46 +14,29 @@
 
 	let surahNameSettings = $derived(() => {
 		return {
-			show: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-surah-name')!
-				.value,
-			size: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('surah-size')!.value,
-			showArabic: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-show-arabic')!.value,
-			showLatin: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-show-latin')!.value,
-			surahLatinSpacing: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-latin-spacing')!.value,
-
-			surahNameFormat: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-name-format')!.value as string,
-			verticalPosition: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-name-vertical-position')!.value as number,
-			horizontalPosition: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-name-horizontal-position')!.value as number,
-			opacity: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('surah-opacity')!
-				.value,
-			color: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-latin-text-style')
-				?.getCompositeStyle('text-color')!.value,
-			outlineWidth: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-latin-text-style')
-				?.getCompositeStyle('text-outline')!.value,
-			outlineColor: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-latin-text-style')
-				?.getCompositeStyle('text-outline-color')!.value,
-			enableOutline: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-latin-text-style')
-				?.getCompositeStyle('outline-enable')!.value
+			show: globalState.getStyle('global', 'show-surah-name')!.value,
+			size: globalState.getStyle('global', 'surah-size')!.value,
+			showArabic: globalState.getStyle('global', 'surah-show-arabic')!.value,
+			showLatin: globalState.getStyle('global', 'surah-show-latin')!.value,
+			surahLatinSpacing: globalState.getStyle('global', 'surah-latin-spacing')!.value as number,
+			surahNameFormat: globalState.getStyle('global', 'surah-name-format')!.value as string,
+			verticalPosition: globalState.getStyle('global', 'surah-name-vertical-position')!
+				.value as number,
+			horizontalPosition: globalState.getStyle('global', 'surah-name-horizontal-position')!
+				.value as number,
+			opacity: globalState.getStyle('global', 'surah-opacity')!.value,
+			color: globalState
+				.getStyle('global', 'surah-latin-text-style')!
+				.getCompositeStyle('text-color')!.value,
+			outlineWidth: globalState
+				.getStyle('global', 'surah-latin-text-style')!
+				.getCompositeStyle('text-outline')!.value,
+			outlineColor: globalState
+				.getStyle('global', 'surah-latin-text-style')!
+				.getCompositeStyle('text-outline-color')!.value,
+			enableOutline: globalState
+				.getStyle('global', 'surah-latin-text-style')!
+				.getCompositeStyle('outline-enable')!.value
 		};
 	});
 
@@ -157,11 +140,7 @@
 			class="w-[700px] text-center"
 			style={`margin-top: ${-surahNameSettings().surahLatinSpacing}rem; opacity: ${surahNameSettings().showLatin ? 1 : 0};`}
 		>
-			<CompositeText
-				compositeStyle={globalState.getVideoStyle
-					.getStylesOfTarget('global')
-					.findStyle('surah-latin-text-style')!}
-			>
+			<CompositeText compositeStyle={globalState.getStyle('global', 'surah-latin-text-style')!}>
 				{surahNameSettings()
 					.surahNameFormat.replace('<number>', currentSurah().toString())
 					.replace('<transliteration>', Quran.surahs[currentSurah() - 1].name)

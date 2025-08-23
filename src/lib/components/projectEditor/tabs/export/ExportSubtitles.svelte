@@ -159,9 +159,7 @@
 												onchange={(e: any) => {
 													// Modifie la police d'écriture dans la vidéo (car c'est elle
 													// qui détermine le texte sous-titre pour les polices QPC)
-													const fontFamily = globalState.getVideoStyle
-														.getStylesOfTarget('arabic')
-														.findStyle('font-family')!.value;
+													const fontFamily = globalState.getStyle('arabic', 'font-family')!.value;
 
 													if (
 														e.target.value === 'Plain' &&

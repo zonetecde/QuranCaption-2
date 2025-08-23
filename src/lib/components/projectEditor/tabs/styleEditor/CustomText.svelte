@@ -18,9 +18,7 @@
 				if (alwaysShow) return 1;
 
 				// En fonction de son temps d'apparition et de la valeur du fondu
-				const fadeDuration = globalState.getVideoStyle
-					.getStylesOfTarget('global')
-					.findStyle('fade-duration')!.value as number;
+				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number;
 				const currentTime = globalState.getTimelineState.cursorPosition;
 
 				const startTime = customText.getStyle('time-appearance')?.value as number;

@@ -238,19 +238,20 @@
 								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
 							<!-- 
 							Cas spécial : on ne peut pas avoir de séparateur entre le numéro de verset et le verset
-							pour le texte Coranique. Empêche donc l'affichage de ce style dans ce cas précis.
+							pour le texte Coranique, ni changer sa position. Empêche donc l'affichage de ces styles dans ce cas précis.
 							
 							Deuxième cas spécial : on ne veut pas pouvoir individuellement modifier les styles suivants:
 								- show-subtitles
 								- show-verse-number
-								- verse-number-separator
+								- verse-number-format
+								- verse-number-position
 								- max-height
 							Empêche donc l'affichage de ces deux styles si on a une sélection de sous-titre en cours.
 
 							Troisième cas :
 							On empêche l'affichage du style "reactive-font-size" qui est un style utilitaire censé être non-visible. 
 								  -->
-							{#if !(globalState.getStylesState.currentSelection === 'arabic' && style.id === 'verse-number-separator') && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-subtitles' || style.id === 'show-verse-number' || style.id === 'verse-number-separator' || style.id === 'max-height')) && style.id !== 'reactive-font-size'}
+							{#if !(globalState.getStylesState.currentSelection === 'arabic' && (style.id === 'verse-number-format' || style.id === 'verse-number-position')) && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-subtitles' || style.id === 'show-verse-number' || style.id === 'verse-number-format' || style.id === 'max-height' || style.id === 'verse-number-position')) && style.id !== 'reactive-font-size'}
 								<!-- On veut désactiver certains style, comme par exemple
 							 - Si on a le style "Always Show" pour les customs text d'enable, alors on disable les styles permettant
 							 de set les propriétés de temps de début d'affichage et de fin d'affichage -->

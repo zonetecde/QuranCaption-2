@@ -233,16 +233,12 @@ export class SubtitleClip extends ClipWithTranslation {
 	override getText(): string {
 		// En fonction de la police d'écriture, renvoie le bon texte
 		// Si on a pas la police QCP2
-		const fontFamily = globalState.getVideoStyle
-			.getStylesOfTarget('arabic')
-			.findStyle('font-family')!;
+		const fontFamily = globalState.getStyle('arabic', 'font-family')!;
 
 		// Si ce n'est pas une police avec des caractères spéciaux (QPC1 et QPC2)
 		if (fontFamily.value !== 'QPC1' && fontFamily.value !== 'QPC2') {
 			// Regarde dans les styles si on doit afficher le numéro de verset
-			if (
-				globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
-			)
+			if (globalState.getStyle('arabic', 'show-verse-number').value)
 				return this.getTextWithVerseNumber();
 			else return this.text;
 		} else {
@@ -320,9 +316,7 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 	 */
 	override getText(): string {
 		// En fonction de la police d'écriture, renvoie le bon texte
-		const fontFamily = globalState.getVideoStyle
-			.getStylesOfTarget('arabic')
-			.findStyle('font-family')!;
+		const fontFamily = globalState.getStyle('arabic', 'font-family')!;
 
 		// Si on a pas une police avec les caractères spéciaux
 		if (fontFamily.value !== 'QPC1' && fontFamily.value !== 'QPC2') {

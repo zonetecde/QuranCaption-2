@@ -17,19 +17,14 @@
 
 	let verseNumberSettings = $derived(() => {
 		return {
-			show: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('show-verse-number')!
-				.value,
+			show: globalState.getStyle('global', 'show-verse-number')!.value,
 
-			verticalPosition: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('verse-number-vertical-position')!.value as number,
-			horizontalPosition: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('verse-number-horizontal-position')!.value as number,
+			verticalPosition: globalState.getStyle('global', 'verse-number-vertical-position')!
+				.value as number,
+			horizontalPosition: globalState.getStyle('global', 'verse-number-horizontal-position')!
+				.value as number,
 
-			verseNumberFormat: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('verse-number-format')!.value as string
+			verseNumberFormat: globalState.getStyle('global', 'verse-number-format')!.value as string
 		};
 	});
 </script>
@@ -47,11 +42,7 @@
 		style={`transform: translateY(${verseNumberSettings().verticalPosition}px) translateX(${verseNumberSettings().horizontalPosition}px);`}
 	>
 		<div class="w-[700px] text-center">
-			<CompositeText
-				compositeStyle={globalState.getVideoStyle
-					.getStylesOfTarget('global')
-					.findStyle('verse-number-text-style')!}
-			>
+			<CompositeText compositeStyle={globalState.getStyle('global', 'verse-number-text-style')!}>
 				{verseNumberSettings()
 					.verseNumberFormat.replace('<surah>', currentSurah.toString())
 					.replace('<verse>', currentVerse.toString())}

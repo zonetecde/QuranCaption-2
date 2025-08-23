@@ -93,10 +93,7 @@ export class QPCFontProvider {
 		}
 
 		// Si on veut inclure le numéro de verset
-		if (
-			isLastWords &&
-			globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('show-verse-number')!.value
-		) {
+		if (isLastWords && globalState.getStyle('arabic', 'show-verse-number')!.value) {
 			const key = `${surah}:${verse}:${endWord + 2}`;
 			const glyph =
 				qpcVersion === '1' ? QPCFontProvider.qpc1Glyphs![key] : QPCFontProvider.qpc2Glyphs![key];

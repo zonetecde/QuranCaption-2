@@ -17,8 +17,7 @@
 	import { type StyleCategoryName } from '$lib/classes/VideoStyle.svelte';
 
 	const fadeDuration = $derived(() => {
-		return globalState.getVideoStyle.getStylesOfTarget('global').findStyle('fade-duration')!
-			.value as number;
+		return globalState.getStyle('global', 'fade-duration').value as number;
 	});
 
 	let getTimelineSettings = $derived(() => {
@@ -122,8 +121,8 @@
 		lastSubtitleId = currentSubtitle()!.id;
 
 		globalState.getTimelineState.movePreviewTo;
-		globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('max-height')!.value;
-		globalState.getVideoStyle.getStylesOfTarget('arabic').findStyle('font-size')!.value;
+		globalState.getStyle('arabic', 'max-height').value;
+		globalState.getStyle('arabic', 'font-size').value;
 
 		untrack(async () => {
 			let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
@@ -131,19 +130,14 @@
 			targets.forEach(async (target) => {
 				try {
 					if (
-						globalState.getVideoStyle.getStylesOfTarget(target).findStyle('max-height')!.value !==
-							'none' ||
+						globalState.getStyle(target, 'max-height').value !== 'none' ||
 						currentSubtitle()!.id
 					) {
 						// Make the font-size responsive
-						const maxHeight = globalState.getVideoStyle
-							.getStylesOfTarget(target)
-							.findStyle('max-height')!.value as string;
+						const maxHeight = globalState.getStyle(target, 'max-height')!.value as string;
 						const maxHeightValue = parseFloat(maxHeight);
 
-						let fontSize = globalState.getVideoStyle
-							.getStylesOfTarget(target)
-							.findStyle('font-size')!.value as number;
+						let fontSize = globalState.getStyle(target, 'font-size').value as number;
 
 						globalState.getVideoStyle
 							.getStylesOfTarget(target)
@@ -178,12 +172,10 @@
 
 	let overlaySettings = $derived(() => {
 		return {
-			enable: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-enable')!
-				.value,
-			blur: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-blur')!.value,
-			opacity: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-opacity')!
-				.value,
-			color: globalState.getVideoStyle.getStylesOfTarget('global').findStyle('overlay-color')!.value
+			enable: globalState.getStyle('global', 'overlay-enable')!.value,
+			blur: globalState.getStyle('global', 'overlay-blur')!.value,
+			opacity: globalState.getStyle('global', 'overlay-opacity')!.value,
+			color: globalState.getStyle('global', 'overlay-color')!.value
 		};
 	});
 </script>

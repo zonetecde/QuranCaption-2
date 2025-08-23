@@ -8,6 +8,7 @@ import {
 	ProjectTranslation
 } from '$lib/classes';
 import type { AssetTrack, CustomTextTrack, SubtitleTrack } from '$lib/classes/Track.svelte';
+import type { StyleName } from '$lib/classes/VideoStyle.svelte';
 
 class GlobalState {
 	// Liste des détails des projets de l'utilisateur
@@ -98,6 +99,10 @@ class GlobalState {
 
 	get getTimelineState() {
 		return this.currentProject!.projectEditorState.timeline;
+	}
+
+	getStyle(t: 'arabic' | 'translation' | string, s: StyleName): any {
+		return this.getVideoStyle.getStylesOfTarget(t).findStyle(s)!;
 	}
 
 	updateVideoPreviewUI() {

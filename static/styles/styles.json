@@ -26,14 +26,25 @@
 				"icon": "123"
 			},
 			{
-				"id": "verse-number-separator",
-				"name": "Verse Number Separator",
-				"description": "Character used to separate verse numbers from text",
-				"value": ". ",
+				"id": "verse-number-format",
+				"name": "Verse Number Format",
+				"description": "Change the format of verse numbers. Use <number> tag to customize.",
+				"value": "<number>. ",
 				"valueType": "text",
 				"css": "",
 				"tailwind": false,
 				"icon": "text_format"
+			},
+			{
+				"id": "verse-number-position",
+				"name": "Verse Number Position",
+				"description": "Set the position of verse numbers",
+				"value": "before",
+				"valueType": "select",
+				"options": ["before", "after"],
+				"css": "",
+				"tailwind": false,
+				"icon": "123"
 			}
 		]
 	},

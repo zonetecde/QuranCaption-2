@@ -264,9 +264,10 @@
 		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
 		videoPreview?.togglePlayPause(); // Met en pause la vidéo pour pas consommer de ressource
 
-		const videoDimensions: { width: number; height: number } = globalState.getVideoStyle
-			.getStylesOfTarget('global')
-			.findStyle('video-dimension')!.value as any;
+		const videoDimensions: { width: number; height: number } = globalState.getStyle(
+			'global',
+			'video-dimension'
+		)!.value as any;
 
 		await invoke('add_audio_to_video', {
 			fileName: videoFileName,

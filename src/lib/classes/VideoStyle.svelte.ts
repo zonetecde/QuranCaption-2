@@ -40,7 +40,11 @@ export type StyleCategoryName =
 	| 'creator-text';
 
 // Types spécifiques pour chaque catégorie de styles
-export type GeneralStyleName = 'show-subtitles' | 'show-verse-number' | 'verse-number-separator';
+export type GeneralStyleName =
+	| 'show-subtitles'
+	| 'show-verse-number'
+	| 'verse-number-format'
+	| 'verse-number-position';
 
 export type GlobalAnimationStyleName = 'video-dimension' | 'fade-duration';
 

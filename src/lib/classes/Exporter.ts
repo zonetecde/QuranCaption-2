@@ -215,9 +215,10 @@ export default class Exporter {
 	static async getRealExportDimensions(
 		project: Project
 	): Promise<{ width: number; height: number }> {
-		const videoSize = project.content.videoStyle
-			.getStylesOfTarget('global')
-			.findStyle('video-dimension')!.value as { width: number; height: number };
+		const videoSize = globalState.getStyle('global', 'video-dimension')!.value as {
+			width: number;
+			height: number;
+		};
 
 		let screenWidth = 0;
 		let screenHeight = 0;

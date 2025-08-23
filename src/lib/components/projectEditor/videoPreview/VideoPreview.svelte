@@ -314,9 +314,7 @@
 		const previewContainer = document.getElementById('preview-container');
 		const preview = document.getElementById('preview');
 
-		const outputDimension = globalState.getVideoStyle
-			.getStylesOfTarget('global')
-			.findStyle('video-dimension')!.value as any;
+		const outputDimension = globalState.getStyle('global', 'video-dimension')!.value as any;
 
 		if (previewContainer && preview) {
 			// Calcul du ratio de sortie

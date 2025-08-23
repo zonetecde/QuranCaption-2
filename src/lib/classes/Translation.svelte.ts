@@ -72,16 +72,23 @@ export class VerseTranslation extends Translation {
 
 	override getText(edition: string, subtitle: SubtitleClip): string {
 		// Ajoute le numéro de verset si demandé dans les styles
-		if (
-			subtitle.startWordIndex === 0 &&
-			globalState.getVideoStyle.getStylesOfTarget(edition).findStyle('show-verse-number')!.value
-		) {
-			return (
-				subtitle.verse +
-				((globalState.getVideoStyle.getStylesOfTarget(edition).findStyle('verse-number-separator')!
-					.value as string) || '. ') +
-				this.text
-			);
+		if (subtitle.startWordIndex === 0 && globalState.getStyle(edition, 'show-verse-number').value) {
+			// Le format contient par ex. `<number>. `
+			let format: string = (
+				globalState.getStyle(edition, 'verse-number-format').value as string
+			).replace('<number>', subtitle.verse.toString());
+
+			// Ajoute le texte de la traduction au bon endroit
+			switch (globalState.getStyle(edition, 'verse-number-position')!.value) {
+				case 'before':
+					format = format + super.getText();
+					break;
+				case 'after':
+					format = super.getText() + format;
+					break;
+			}
+
+			return format;
 		}
 
 		return this.text;

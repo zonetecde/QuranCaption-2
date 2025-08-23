@@ -80,12 +80,10 @@
 		<h4 class="text-base font-medium text-secondary mb-3">Video Quality & Orientation</h4>
 		<div class="bg-accent rounded-lg p-4 border border-color">
 			<Style
-				style={globalState.getVideoStyle.getStylesOfTarget('global').findStyle('video-dimension')!}
+				style={globalState.getStyle('global', 'video-dimension')!}
 				target={'global'}
 				applyValueSimple={(v) => {
-					globalState.getVideoStyle
-						.getStylesOfTarget('global')
-						.findStyle('video-dimension')!.value = v;
+					globalState.getStyle('global', 'video-dimension')!.value = v;
 				}}
 				disabled={false}
 			/>
