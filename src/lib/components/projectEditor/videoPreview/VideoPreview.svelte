@@ -232,6 +232,12 @@
 	onDestroy(() => {
 		pause(); // Met en pause la lecture pour éviter les fuites de mémoire
 
+		// Supprime la div de fond fullscreen si elle existe
+		const backgroundDiv = document.getElementById('fullscreen-background');
+		if (backgroundDiv) {
+			backgroundDiv.remove();
+		}
+
 		// Enlève tout les shortcuts enregistrés
 		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.PLAY_PAUSE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD);
@@ -337,13 +343,6 @@
 				}
 			}
 
-			console.log(
-				`Output: ${outputDimension.width}×${outputDimension.height} (ratio: ${outputRatio.toFixed(3)})`
-			);
-			console.log(
-				`Preview: ${previewWidth}×${previewHeight} (ratio: ${(previewWidth / previewHeight).toFixed(3)})`
-			);
-
 			// Configuration initiale avec les dimensions de preview calculées
 			preview.style.width = `${previewWidth}px`;
 			preview.style.height = `${previewHeight}px`;
@@ -368,15 +367,32 @@
 			let scale: number;
 
 			if (globalState.getVideoPreviewState.isFullscreen) {
-				// Mode plein écran: couvrir tout l'écran (cover)
+				// Créer ou récupérer la div de fond
+				let backgroundDiv = document.getElementById('fullscreen-background');
+				if (!backgroundDiv) {
+					backgroundDiv = document.createElement('div');
+					backgroundDiv.id = 'fullscreen-background';
+					backgroundDiv.style.position = 'absolute';
+					backgroundDiv.style.top = '0';
+					backgroundDiv.style.left = '0';
+					backgroundDiv.style.width = '100vw';
+					backgroundDiv.style.height = '100vh';
+					backgroundDiv.style.zIndex = '9998';
+					backgroundDiv.style.backgroundColor = '#11151c';
+					backgroundDiv.style.background =
+						'repeating-linear-gradient(45deg, #161b22, #161b22 5px, #11151c 5px, #11151c 25px)';
+					document.body.appendChild(backgroundDiv);
+				}
+
+				// Mode plein écran: fit (letterbox) pour voir toute la vidéo avec des bandes noires
 				const screenW = window.innerWidth;
 				const screenH = window.innerHeight;
-				const scaleCover = Math.max(screenW / previewWidth, screenH / previewHeight);
-				scale = scaleCover;
-				targetW = previewWidth * scaleCover;
-				targetH = previewHeight * scaleCover;
+				const scaleFit = Math.min(screenW / previewWidth, screenH / previewHeight);
+				scale = scaleFit;
+				targetW = previewWidth * scaleFit;
+				targetH = previewHeight * scaleFit;
 
-				preview.style.transform = `scale(${scaleCover})`;
+				preview.style.transform = `scale(${scaleFit})`;
 				previewContainer.style.width = `${targetW}px`;
 				previewContainer.style.height = `${targetH}px`;
 				previewContainer.style.position = 'fixed';
@@ -386,6 +402,11 @@
 				previewContainer.style.zIndex = '9999';
 				previewContainer.style.background = 'black';
 			} else {
+				// Supprimer la div de fond si elle existe
+				const backgroundDiv = document.getElementById('fullscreen-background');
+				if (backgroundDiv) {
+					backgroundDiv.remove();
+				}
 				// Mode normal: fit (letterbox) centré
 				const containerWidth = previewContainer.clientWidth;
 				const containerHeight = previewContainer.clientHeight;
