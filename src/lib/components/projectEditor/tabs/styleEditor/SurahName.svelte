@@ -139,6 +139,9 @@
 
 {#if surahNameSettings().show && currentSurah() >= 1 && currentSurah() <= 114}
 	<div
+		ondblclick={() => {
+			globalState.getVideoStyle.highlightCategory('global', 'surah-name');
+		}}
 		use:verticalDrag={{
 			getInitial: () => Number(surahNameSettings().verticalPosition),
 			apply: (v: number) =>

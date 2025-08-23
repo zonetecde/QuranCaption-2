@@ -14,6 +14,7 @@
 	import CustomText from './CustomText.svelte';
 	import ReciterName from './ReciterName.svelte';
 	import VerseNumber from './VerseNumber.svelte';
+	import { type StyleCategoryName } from '$lib/classes/VideoStyle.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getVideoStyle.getStylesOfTarget('global').findStyle('fade-duration')!
@@ -205,6 +206,9 @@
 			{@const subtitle = currentSubtitle()}
 			{#if subtitle && subtitle.id}
 				<p
+					ondblclick={() => {
+						globalState.getVideoStyle.highlightCategory('arabic', 'general');
+					}}
 					use:verticalDrag={{
 						getInitial: () =>
 							Number(
@@ -252,6 +256,12 @@
 
 				{#if globalState.getVideoStyle.doesTargetStyleExist(edition)}
 					<p
+						ondblclick={() => {
+							globalState.getVideoStyle.highlightCategory(
+								'translation',
+								edition as StyleCategoryName
+							);
+						}}
 						use:verticalDrag={{
 							getInitial: () =>
 								Number(

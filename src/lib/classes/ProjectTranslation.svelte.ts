@@ -351,6 +351,11 @@ export class ProjectTranslation extends SerializableBase {
 		return translations;
 	}
 
+	/**
+	 * Récupère une édition par son nom.
+	 * @param name Le nom de l'édition
+	 * @returns L'édition correspondante ou une erreur
+	 */
 	getEditionFromName(name: string): Edition {
 		const edition = globalState.getProjectTranslation.addedTranslationEditions.find(
 			(e) => e.name === name

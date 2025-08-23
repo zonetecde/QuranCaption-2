@@ -60,6 +60,9 @@
 
 {#if reciterNameSettings().show && reciter().latin !== 'not set'}
 	<div
+		ondblclick={() => {
+			globalState.getVideoStyle.highlightCategory('global', 'reciter-name');
+		}}
 		use:verticalDrag={{
 			getInitial: () => Number(reciterNameSettings().verticalPosition),
 			apply: (v: number) =>

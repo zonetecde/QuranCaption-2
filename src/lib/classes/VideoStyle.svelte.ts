@@ -35,6 +35,8 @@ export type StyleCategoryName =
 	| 'general'
 	| 'overlay'
 	| 'surah-name'
+	| 'reciter-name'
+	| 'verse-number'
 	| 'creator-text';
 
 // Types spécifiques pour chaque catégorie de styles
@@ -839,6 +841,26 @@ export class VideoStyle extends SerializableBase {
 			const clip = CustomTextClip.fromJSON(clipData);
 			globalState.getCustomTextTrack.clips.push(clip);
 		}
+	}
+
+	/**
+	 * Highlight dans le gestionnaire de style la catégorie en paramètre
+	 * @param target La cible à highlight
+	 * @param categoryName La catégorie à highlight
+	 */
+	highlightCategory(target: string, categoryName: StyleCategoryName) {
+		if (target === 'arabic' || target === 'global') {
+			globalState.getStylesState.currentSelection = target;
+		} else {
+			globalState.getStylesState.currentSelection = 'translation';
+			setTimeout(() => {
+				globalState.getStylesState.currentSelectionTranslation = categoryName;
+			}, 0);
+		}
+
+		setTimeout(() => {
+			globalState.getStylesState.scrollAndHighlight = categoryName;
+		}, 0);
 	}
 }
 

@@ -62,6 +62,9 @@ export class StylesEditorState extends SerializableBase {
 	// Indique les sous-titres actuellement sélectionnés dans l'éditeur de styles
 	selectedSubtitles: SubtitleClip[] = $state([]);
 
+	// Indique la catégorie sur laquelle on doit scroll et highlight quelque seconde
+	scrollAndHighlight: string | null = $state(null);
+
 	getCurrentSelection(): 'global' | 'arabic' | string {
 		if (this.currentSelection === 'global' || this.currentSelection === 'arabic') {
 			return this.currentSelection;

@@ -36,6 +36,9 @@
 
 {#if verseNumberSettings().show && currentSurah > 0 && currentVerse > 0}
 	<div
+		ondblclick={() => {
+			globalState.getVideoStyle.highlightCategory('global', 'verse-number');
+		}}
 		use:verticalDrag={{
 			getInitial: () => Number(verseNumberSettings().verticalPosition),
 			apply: (v: number) =>

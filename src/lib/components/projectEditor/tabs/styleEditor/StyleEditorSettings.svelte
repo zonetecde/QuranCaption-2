@@ -62,6 +62,28 @@
 			importExportMenuVisible = false;
 		}
 	}
+
+	$effect(() => {
+		const _ = globalState.getStylesState.scrollAndHighlight;
+
+		if (_) {
+			// Scroll to the highlighted category
+			const category = globalState.getStylesState.scrollAndHighlight;
+			console.log('Scrolling to category:', category);
+			const element = stylesContainer!.querySelector(`[data-category="${category}"]`);
+			if (element) {
+				console.log('Scrolling to element:', element);
+				element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				// Le met en jaune pendant 2 secondes
+				element.classList.add('highlight');
+				setTimeout(() => {
+					element.classList.remove('highlight');
+				}, 2000);
+			}
+
+			globalState.getStylesState.scrollAndHighlight = null;
+		}
+	});
 </script>
 
 <svelte:window on:click={handleClickOutside} />
@@ -202,9 +224,15 @@
 			</div>
 		{:else}
 			{#each getCategoriesToDisplay() as category}
-				<Section name={category.name} icon={category.icon} classes="-mb-1">
+				<Section
+					name={category.name}
+					icon={category.icon}
+					classes="-mb-1"
+					dataCategory={globalState.getStylesState.currentSelection === 'translation'
+						? globalState.getStylesState.currentSelectionTranslation
+						: category.id}
+				>
 					{#each category.styles as style, styleIndex}
-						{@const categoryIndex = getCategoriesToDisplay().findIndex((c) => c.id === category.id)}
 						{#if globalState.getStylesState.searchQuery === '' || style.name
 								.toLowerCase()
 								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
