@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PredefinedSubtitleClip } from '$lib/classes';
+	import { PredefinedSubtitleClip, ProjectTranslation } from '$lib/classes';
 	import ModalManager from '$lib/components/modals/ModalManager';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { fade, slide } from 'svelte/transition';
@@ -47,7 +47,7 @@
 		} else {
 			// Sinon on applique le changement de sous-titre
 			const subtitleTrack = globalState.getSubtitleTrack;
-			await globalState.getProjectTranslation.loadAvailableTranslations();
+			await ProjectTranslation.loadAvailableTranslations();
 			subtitleTrack.editSubtitleToSpecial(
 				globalState.getSubtitlesEditorState.editSubtitle!,
 				//@ts-ignore

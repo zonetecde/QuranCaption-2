@@ -27,7 +27,7 @@ export class ProjectTranslation extends SerializableBase {
 	/**
 	 * Charge dans la mémoire les traductions disponibles
 	 */
-	async loadAvailableTranslations() {
+	static async loadAvailableTranslations() {
 		// Regarde si les traductions sont déjà chargées
 		if (Object.keys(globalState.availableTranslations).length > 0) {
 			return;

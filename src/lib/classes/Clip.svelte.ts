@@ -300,10 +300,11 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 		let translations: { [key: string]: Translation } = {};
 
 		// Récupère les traductions ajoutées au projet
-		for (const edition of globalState.getProjectTranslation.addedTranslationEditions) {
-			translations[edition.name] =
-				globalState.getProjectTranslation.getPredefinedSubtitleTranslation(edition, type);
-		}
+		if (globalState.currentProject)
+			for (const edition of globalState.getProjectTranslation.addedTranslationEditions) {
+				translations[edition.name] =
+					globalState.getProjectTranslation.getPredefinedSubtitleTranslation(edition, type);
+			}
 
 		super(_text, startTime, endTime, 'Pre-defined Subtitle', translations);
 

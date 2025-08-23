@@ -109,7 +109,12 @@ async fn download_from_youtube(
 
 // Fonction pour obtenir la durée précise du fichier téléchargé avec ffprobe
 #[tauri::command]
-fn get_duration(file_path: &str) -> Result<u64, String> {
+fn get_duration(file_path: &str) -> Result<i64, String> {
+    // If the file does not exist, return -1
+    if !std::path::Path::new(file_path).exists() {
+        return Ok(-1);
+    }
+
     let ffprobe_path = Path::new("binaries").join("ffprobe");
 
     let output = Command::new(&ffprobe_path)
@@ -132,7 +137,7 @@ fn get_duration(file_path: &str) -> Result<u64, String> {
 
                 if let Ok(duration_seconds) = duration_line.parse::<f64>() {
                     // Convertir en millisecondes avec précision
-                    Ok((duration_seconds * 1000.0).round() as u64)
+                    Ok((duration_seconds * 1000.0).round() as i64)
                 } else {
                     Err("Unable to parse duration from ffprobe output".to_string())
                 }

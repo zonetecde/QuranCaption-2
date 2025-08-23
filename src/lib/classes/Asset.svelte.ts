@@ -75,6 +75,11 @@ export class Asset extends SerializableBase {
 		this.duration = new Duration(
 			(await invoke('get_duration', { filePath: this.filePath })) as number
 		);
+
+		if (this.duration.ms === -1) {
+			this.duration = new Duration(0);
+			this.exists = false;
+		}
 	}
 
 	async checkExistence() {

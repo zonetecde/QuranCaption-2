@@ -184,6 +184,8 @@ export class AssetTrack extends Track {
 
 		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
 		setTimeout(() => {
+			if (!globalState.currentProject) return;
+
 			globalState.getTimelineState.movePreviewTo = globalState.getTimelineState.cursorPosition + 1;
 		}, 0);
 	}
@@ -367,8 +369,13 @@ export class SubtitleTrack extends Track {
 		const isLastWordsOfVerse = verse.words.length - lastWordIndex - 1 === 0;
 
 		// Prépare les traductions du sous-titre
-		let translations: { [key: string]: VerseTranslation } =
-			await globalState.getProjectTranslation.getTranslations(surah, verse.id, isFullVerse);
+		let translations: { [key: string]: VerseTranslation } = {};
+		if (globalState.currentProject)
+			translations = await globalState.getProjectTranslation.getTranslations(
+				surah,
+				verse.id,
+				isFullVerse
+			);
 
 		return {
 			isFullVerse,

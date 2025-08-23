@@ -32,15 +32,15 @@ export class ProjectDetail extends SerializableBase {
 	 * @param name Nom du projet
 	 * @param reciter Nom du réciteur
 	 */
-	constructor(name: string, reciter: string) {
+	constructor(name: string, reciter: string, createdAt?: Date, updatedAt?: Date) {
 		super();
 
 		this.id = Utilities.randomId();
 
 		this.name = $state(name);
 		this.reciter = $state(reciter || 'not set');
-		this.createdAt = $state(new Date());
-		this.updatedAt = $state(new Date());
+		this.createdAt = $state(createdAt || new Date());
+		this.updatedAt = $state(updatedAt || new Date());
 
 		this.percentageCaptioned = $state(0);
 		this.status = $state(Status.NOT_SET);

@@ -6,12 +6,13 @@
 	import TranslationsWorkspace from './TranslationsWorkspace.svelte';
 	import { fade } from 'svelte/transition';
 	import AddTranslationModal from './modal/AddTranslationModal.svelte';
+	import { ProjectTranslation } from '$lib/classes';
 
 	let addTranslationModalVisibility = $state(false);
 
 	onMount(() => {
 		// Récupère toutes les traductions disponibles
-		globalState.currentProject!.content.projectTranslation.loadAvailableTranslations();
+		ProjectTranslation.loadAvailableTranslations();
 	});
 </script>
 

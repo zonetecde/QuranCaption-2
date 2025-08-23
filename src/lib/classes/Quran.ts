@@ -30,7 +30,11 @@ export class Verse {
 
 	getArabicTextBetweenTwoIndexes(startIndex: number, endIndex: number): string {
 		if (startIndex < 0 || endIndex >= this.words.length || startIndex > endIndex) {
-			throw new Error('Invalid index range');
+			if (endIndex >= this.words.length) {
+				return this.getArabicTextBetweenTwoIndexes(startIndex, this.words.length - 1);
+			} else {
+				throw new Error('Invalid index range');
+			}
 		}
 		return this.words
 			.slice(startIndex, endIndex + 1)
@@ -40,7 +44,11 @@ export class Verse {
 
 	getWordByWordTranslationBetweenTwoIndexes(startIndex: number, endIndex: number): string {
 		if (startIndex < 0 || endIndex >= this.words.length || startIndex > endIndex) {
-			throw new Error('Invalid index range');
+			if (endIndex >= this.words.length) {
+				return this.getWordByWordTranslationBetweenTwoIndexes(startIndex, this.words.length - 1);
+			} else {
+				throw new Error('Invalid index range');
+			}
 		}
 		return this.words
 			.slice(startIndex, endIndex + 1)

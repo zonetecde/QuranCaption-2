@@ -17,6 +17,7 @@
 	import { ProjectService } from '$lib/services/ProjectService';
 	import { join, localDataDir } from '@tauri-apps/api/path';
 	import MigrationFromV2Modal from './modals/MigrationFromV2Modal.svelte';
+	import MigrationService from '$lib/services/MigrationService';
 
 	let migrationFromV2ModalVisibility = $state(false);
 	let createNewProjectModalVisible: boolean = $state(false);
@@ -100,11 +101,10 @@
 		}
 	}
 
+	let promise: Promise<any> = $state(ProjectService.loadUserProjectsDetails());
+
 	onMount(async () => {
-		if (globalState.userProjectsDetails.length === 0) {
-			// Récupère les projets de l'utilisateur au chargement de l'application
-			await ProjectService.loadUserProjectsDetails();
-		} else {
+		if (globalState.userProjectsDetails.length > 0) {
 			// Retrie juste dans l'ordre de updatetime
 			globalState.userProjectsDetails = globalState.userProjectsDetails.sort(
 				(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
@@ -120,20 +120,10 @@
 		// Initialise les projets filtrés
 		applyFilterAndSort();
 
-		// Si c'est le tout premier lancement du logiciel, et que la personne avait déjà installé Quran Caption 2
-		// Vérifier l'existence du dossier Quran Caption 2 dans AppData\Local
+		// Regarde si des données de Quran Caption 2 sont présentes et que c'est un nouvel utilisateur
 		try {
-			// Obtenir le chemin vers le dossier AppData\Local de l'utilisateur
-			const userLocalDataDir = await localDataDir();
-			const qc2LocalStoragePath = await join(userLocalDataDir, 'Quran Caption', 'localStorage');
-			const qc2FolderExists = await exists(qc2LocalStoragePath);
-
-			if (qc2FolderExists) {
-				console.log('Quran Caption 2 data found at:', qc2LocalStoragePath);
-
+			if ((await MigrationService.hasQCV2Data()) && globalState.userProjectsDetails.length === 0) {
 				migrationFromV2ModalVisibility = true;
-			} else {
-				console.log('No Quran Caption 2 data found');
 			}
 		} catch (error) {
 			console.error('Error checking for Quran Caption 2 data:', error);
@@ -221,28 +211,44 @@
 			</div>
 		</div>
 
-		{#if filteredProjects.length === 0}
-			{#if selectedStatuses.length === 0}
-				<p class="mt-4">
-					No projects match the current filter. Adjust your status filter to see projects.
-				</p>
-			{:else if globalState.userProjectsDetails.length === 0}
-				<p class="mt-4">You don't have any projects yet. Click "New Project" to create one.</p>
-			{:else}
-				<p class="mt-4">No projects match the current filter. Try adjusting your status filter.</p>
-			{/if}
-		{:else}
-			<div
-				placeholder="Project cards"
-				class="mt-4 grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
-			>
-				{#each filteredProjects as project, index}
-					{#if searchQuery === '' || project.matchSearchQuery(searchQuery)}
-						<ProjectDetailCard bind:projectDetail={filteredProjects[index]} />
-					{/if}
-				{/each}
+		{#await promise}
+			<div class="items-center justify-center absolute inset-0 flex flex-col gap-y-3">
+				<div
+					class="flex items-center flex-col px-30 rounded-4xl border-black/50 border-2 bg-black/30 py-10"
+				>
+					<span class="material-icons animate-spin text-4xl text-gray-400 text-[40px]!"
+						>autorenew</span
+					>
+
+					<p class="text-xl">Please wait, we are currently loading your projects...</p>
+				</div>
 			</div>
-		{/if}
+		{:then}
+			{#if filteredProjects.length === 0}
+				{#if selectedStatuses.length === 0}
+					<p class="mt-4">
+						No projects match the current filter. Adjust your status filter to see projects.
+					</p>
+				{:else if globalState.userProjectsDetails.length === 0}
+					<p class="mt-4">You don't have any projects yet. Click "New Project" to create one.</p>
+				{:else}
+					<p class="mt-4">
+						No projects match the current filter. Try adjusting your status filter.
+					</p>
+				{/if}
+			{:else}
+				<div
+					placeholder="Project cards"
+					class="mt-4 grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
+				>
+					{#each filteredProjects as project, index}
+						{#if searchQuery === '' || project.matchSearchQuery(searchQuery)}
+							<ProjectDetailCard bind:projectDetail={filteredProjects[index]} />
+						{/if}
+					{/each}
+				</div>
+			{/if}
+		{/await}
 	</div>
 
 	<Footer />
