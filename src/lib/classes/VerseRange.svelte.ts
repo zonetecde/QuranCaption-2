@@ -66,7 +66,7 @@ export class VerseRange extends SerializableBase {
 		return this.parts
 			.map(
 				(part) =>
-					`Surah ${Quran.getSurahsNames()[part.surah - 1].transliteration}: ${part.verseStart}-${part.verseEnd}`
+					`Surah ${Quran.getSurahsNames()[part.surah - 1].transliteration}: ${part.verseStart}${part.verseEnd !== part.verseStart ? '-' + part.verseEnd : ''}`
 			)
 			.join(', ');
 	}
