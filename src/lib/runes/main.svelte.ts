@@ -101,7 +101,8 @@ class GlobalState {
 	}
 
 	updateVideoPreviewUI() {
-		globalState.getTimelineState.cursorPosition = globalState.getTimelineState.cursorPosition + 1;
+		globalState.getTimelineState.cursorPosition =
+			globalState.getTimelineState.cursorPosition + 0.01;
 	}
 }
 
