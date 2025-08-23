@@ -469,6 +469,46 @@
 		]
 	},
 	{
+		"id": "text-glow",
+		"name": "Text Glow",
+		"description": "Add a glow effect to the text",
+		"icon": "wb_incandescent",
+		"styles": [
+			{
+				"id": "text-glow-enable",
+				"name": "Enable Glow",
+				"description": "Enable or disable text glow",
+				"value": false,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "toggle_on"
+			},
+			{
+				"id": "text-glow-color",
+				"name": "Glow Color",
+				"description": "Set the color of the text glow",
+				"value": "#ffffff",
+				"valueType": "color",
+				"css": "--text-glow-color: {value};  text-shadow: 0 0 calc(var(--text-glow-blur) * 0.5) var(--text-glow-color), 0 0 var(--text-glow-blur) var(--text-glow-color), 0 0 calc(var(--text-glow-blur) * 1.5) var(--text-glow-color), 0 0 calc(var(--text-glow-blur) * 2) var(--text-glow-color); filter: drop-shadow(0 0 var(--text-glow-blur) var(--text-glow-color)) brightness(calc(100% + 5 * 50%));",
+				"tailwind": false,
+				"icon": "palette"
+			},
+			{
+				"id": "text-glow-blur",
+				"name": "Glow Blur",
+				"description": "Set the blur radius of the text glow",
+				"value": 10,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 50,
+				"css": "--text-glow-blur: {value}px;",
+				"tailwind": false,
+				"icon": "blur_on"
+			}
+		]
+	},
+	{
 		"id": "effects",
 		"name": "Visual Effects",
 		"description": "Add visual effects and filters to enhance subtitle appearance",

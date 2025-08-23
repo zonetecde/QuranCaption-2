@@ -28,9 +28,6 @@
 		// Sauvegarde le projet sur le disque
 		await project.save();
 
-		// maj des projets de l'utilisateur
-		await ProjectService.loadUserProjectsDetails();
-
 		// Ouvre le projet
 		globalState.currentProject = project;
 		close();

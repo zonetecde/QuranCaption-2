@@ -644,6 +644,12 @@ export class VideoStyle extends SerializableBase {
 		// Load les styles composites
 		videoStyle.getStylesOfTarget('global').loadCompositeStyles();
 
+		// S'il manque des styles à une traduction, on les ajoute
+		if (globalState.currentProject)
+			for (const translation of globalState.getProjectTranslation.addedTranslationEditions) {
+				await videoStyle.addStylesForEdition(translation.name);
+			}
+
 		return videoStyle;
 	}
 
@@ -871,6 +877,16 @@ export class VideoStyle extends SerializableBase {
 				globalState.getStylesState.scrollAndHighlight = categoryName;
 			}, 0);
 		}, 0);
+	}
+
+	async resetStyles() {
+		const confirmation = await ModalManager.confirmModal(
+			'Are you sure you want to reset all styles to their default values?'
+		);
+		if (!confirmation) return;
+
+		// Réinitialise les styles
+		globalState.currentProject!.content.videoStyle = await VideoStyle.getDefaultVideoStyle();
 	}
 }
 

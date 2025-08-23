@@ -135,6 +135,15 @@
 					Export to File
 				</button>
 			</div>
+
+			<div class="flex items-center justify-center">
+				<button
+					class="btn px-3 py-2"
+					onclick={async () => await globalState.getVideoStyle.resetStyles()}
+				>
+					Reset to Default Styles
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
