@@ -47,11 +47,51 @@
 	});
 
 	let expanded = $state(false);
+	let selectedOrientation = $state('landscape');
+	let selectedQuality = $state('1080p');
 
 	$effect(() => {
 		globalState.getSectionsState[style.id] = {
 			extended: expanded
 		};
+	});
+
+	// Initialize orientation and quality based on current dimensions
+	$effect(() => {
+		if (style.valueType === 'dimension') {
+			const current = style.value as any;
+			// Detect current orientation and quality
+			if (current.width > current.height) {
+				selectedOrientation = 'landscape';
+			} else {
+				selectedOrientation = 'portrait';
+			}
+
+			// Detect quality based on exact dimensions (not just >= comparison)
+			const maxDimension = Math.max(current.width, current.height);
+			const minDimension = Math.min(current.width, current.height);
+
+			if (maxDimension === 3840 && minDimension === 2160) {
+				selectedQuality = '2160p';
+			} else if (maxDimension === 2560 && minDimension === 1440) {
+				selectedQuality = '1440p';
+			} else if (maxDimension === 1920 && minDimension === 1080) {
+				selectedQuality = '1080p';
+			} else if (maxDimension === 1280 && minDimension === 720) {
+				selectedQuality = '720p';
+			} else {
+				// Pour les dimensions custom, choisir la qualité la plus proche
+				if (maxDimension >= 3000) {
+					selectedQuality = '2160p';
+				} else if (maxDimension >= 2000) {
+					selectedQuality = '1440p';
+				} else if (maxDimension >= 1500) {
+					selectedQuality = '1080p';
+				} else {
+					selectedQuality = '720p';
+				}
+			}
+		}
 	});
 
 	// Gestion sélection de clips
@@ -152,6 +192,61 @@
 		}
 	}
 
+	/**
+	 * Applique les dimensions sélectionnées à la vidéo
+	 */
+	function applySelectedDimensions() {
+		const dimensions = getDimensionsFromSelection(selectedOrientation, selectedQuality);
+		applyValue(dimensions);
+	}
+
+	/**
+	 * Récupère les dimensions en fonction de l'orientation et de la qualité sélectionnées
+	 * @param orientation L'orientation de la vidéo (landscape ou portrait)
+	 * @param quality La qualité de la vidéo (720p, 1080p, etc.)
+	 */
+	function getDimensionsFromSelection(orientation: string, quality: string) {
+		const isLandscape = orientation === 'landscape';
+
+		let width: number, height: number;
+
+		switch (quality) {
+			case '720p':
+				width = isLandscape ? 1280 : 720;
+				height = isLandscape ? 720 : 1280;
+				break;
+			case '1080p':
+				width = isLandscape ? 1920 : 1080;
+				height = isLandscape ? 1080 : 1920;
+				break;
+			case '1440p':
+				width = isLandscape ? 2560 : 1440;
+				height = isLandscape ? 1440 : 2560;
+				break;
+			case '2160p':
+				width = isLandscape ? 3840 : 2160;
+				height = isLandscape ? 2160 : 3840;
+				break;
+			default:
+				width = isLandscape ? 1920 : 1080;
+				height = isLandscape ? 1080 : 1920;
+		}
+
+		return { width, height };
+	}
+
+	/**
+	 * Prévisualise la résolution de la vidéo après application des dimensions
+	 */
+	function getPreviewResolution(): string {
+		if (!selectedOrientation || !selectedQuality) return '';
+		const dimensions = getDimensionsFromSelection(selectedOrientation, selectedQuality);
+		return `${dimensions.width}×${dimensions.height}`;
+	}
+
+	/**
+	 * Efface les styles différents de son parent appliqués aux clips sélectionnés
+	 */
 	function clearOverride() {
 		if (selectedClipIds().length === 0) return;
 		globalState.getVideoStyle.getStylesOfTarget(target!).clearStyleForClips(
@@ -423,51 +518,85 @@
 					{/if}
 				</div>
 			{:else if style.valueType === 'dimension'}
-				<!-- Deux boutons quick select : landscape (met en 1920x1080) et portrait (met en 1080x1920) -->
-				<div class="flex flex-row items-center gap-x-1">
-					<p>Quick select:</p>
-					<button
-						class={'px-3 py-1 ' + (style.value === '1920x1080' ? 'btn-accent' : 'btn')}
-						onclick={() => applyValue({ width: 1920, height: 1080 })}
-					>
-						Landscape
-					</button>
-					<button
-						class={'px-3 py-1 ' + (style.value === '1080x1920' ? 'btn-accent' : 'btn')}
-						onclick={() => applyValue({ width: 1080, height: 1920 })}
-					>
-						Portrait
-					</button>
-				</div>
+				<div class="flex flex-col gap-4">
+					<!-- Orientation Selection -->
+					<div class="flex flex-col gap-2">
+						<p class="text-sm font-medium">Orientation:</p>
+						<div class="flex gap-4">
+							{#each [{ value: 'landscape', label: 'Landscape' }, { value: 'portrait', label: 'Portrait' }] as orientation}
+								<label class="flex items-center gap-2 cursor-pointer">
+									<input
+										type="radio"
+										name="orientation"
+										value={orientation.value}
+										bind:group={selectedOrientation}
+										class="accent-accent"
+									/>
+									<span class="text-sm">{orientation.label}</span>
+								</label>
+							{/each}
+						</div>
+					</div>
 
-				<p class="mt-2">Custom dimensions:</p>
+					<!-- Quality Selection -->
+					<div class="flex flex-col gap-2">
+						<p class="text-sm font-medium">Quality:</p>
+						<div class="flex gap-4 flex-wrap">
+							{#each [{ value: '720p', label: '720p', width: 1280, height: 720 }, { value: '1080p', label: '1080p', width: 1920, height: 1080 }, { value: '1440p', label: '1440p (2K)', width: 2560, height: 1440 }, { value: '2160p', label: '2160p (4K)', width: 3840, height: 2160 }] as quality}
+								<label class="flex items-center gap-2 cursor-pointer">
+									<input
+										type="radio"
+										name="quality"
+										value={quality.value}
+										bind:group={selectedQuality}
+										class="accent-accent"
+									/>
+									<span class="text-sm">{quality.label}</span>
+								</label>
+							{/each}
+						</div>
+					</div>
 
-				<div class="flex flex-row items-center gap-x-2">
-					<input
-						type="number"
-						class="w-full"
-						oninput={(e) => {
-							const width = parseInt((e.target as HTMLInputElement).value);
-							const height = (style.value as any).height;
-							applyValue({ width, height });
-						}}
-						value={(style.value as any).width}
-						min="256"
-						max="3840"
-					/>
-					<span>x</span>
-					<input
-						type="number"
-						class="w-full"
-						oninput={(e) => {
-							const width = (style.value as any).width;
-							const height = parseInt((e.target as HTMLInputElement).value);
-							applyValue({ width, height });
-						}}
-						value={(style.value as any).height}
-						min="144"
-						max="2160"
-					/>
+					<!-- Apply Button -->
+					<button
+						class="btn-accent w-full py-2 mt-2"
+						onclick={() => applySelectedDimensions()}
+						disabled={!selectedOrientation || !selectedQuality}
+					>
+						Apply {getPreviewResolution()}
+					</button>
+
+					<!-- Custom Dimensions -->
+					<div class="flex flex-col gap-2">
+						<p class="text-sm font-medium">Custom dimensions:</p>
+						<div class="flex flex-row items-center gap-x-2">
+							<input
+								type="number"
+								class="w-full"
+								oninput={(e) => {
+									const width = parseInt((e.target as HTMLInputElement).value);
+									const height = (style.value as any).height;
+									applyValue({ width, height });
+								}}
+								value={(style.value as any).width}
+								min="256"
+								max="7680"
+							/>
+							<span>×</span>
+							<input
+								type="number"
+								class="w-full"
+								oninput={(e) => {
+									const width = (style.value as any).width;
+									const height = parseInt((e.target as HTMLInputElement).value);
+									applyValue({ width, height });
+								}}
+								value={(style.value as any).height}
+								min="144"
+								max="4320"
+							/>
+						</div>
+					</div>
 				</div>
 			{:else if style.valueType === 'composite'}
 				<div class="flex flex-col gap-2">
