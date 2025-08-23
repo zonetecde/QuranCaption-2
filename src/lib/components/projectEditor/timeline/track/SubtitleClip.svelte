@@ -85,6 +85,8 @@
 			}
 
 			track.removeClip(clip.id, true);
+
+			globalState.currentProject!.detail.updateVideoDetailAttributes();
 		}, 0);
 	}
 

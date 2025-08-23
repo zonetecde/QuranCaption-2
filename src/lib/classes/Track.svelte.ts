@@ -62,6 +62,7 @@ export class Track extends SerializableBase {
 		if (this.clips.length === 0) {
 			return;
 		}
+
 		this.clips.pop();
 	}
 
