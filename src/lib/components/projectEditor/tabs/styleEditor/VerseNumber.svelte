@@ -40,17 +40,8 @@
 			globalState.getVideoStyle.highlightCategory('global', 'verse-number');
 		}}
 		use:verticalDrag={{
-			getInitial: () => Number(verseNumberSettings().verticalPosition),
-			apply: (v: number) =>
-				globalState.getVideoStyle
-					.getStylesOfTarget('global')
-					.setStyle('verse-number-vertical-position', v),
-			min: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('verse-number-vertical-position')!.valueMin,
-			max: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('verse-number-vertical-position')!.valueMax
+			target: 'global',
+			styleId: 'verse-number-vertical-position'
 		}}
 		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
 		style={`transform: translateY(${verseNumberSettings().verticalPosition}px) translateX(${verseNumberSettings().horizontalPosition}px);`}

@@ -210,35 +210,8 @@
 						globalState.getVideoStyle.highlightCategory('arabic', 'general');
 					}}
 					use:verticalDrag={{
-						getInitial: () =>
-							Number(
-								globalState.getVideoStyle
-									.getStylesOfTarget('arabic')
-									.findStyle('vertical-position')!.value
-							),
-						apply: (v: number) =>
-							globalState.getVideoStyle
-								.getStylesOfTarget('arabic')
-								.setStyle('vertical-position', v),
-						min: globalState.getVideoStyle
-							.getStylesOfTarget('arabic')
-							.findStyle('vertical-position')!.valueMin,
-						max: globalState.getVideoStyle
-							.getStylesOfTarget('arabic')
-							.findStyle('vertical-position')!.valueMax,
-						// Support pour les clips sélectionnés
 						target: 'arabic',
-						styleId: 'vertical-position',
-						selectedClipIds: () =>
-							globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
-								(s) => s.id
-							),
-						getEffectiveValue: (clipId?: number) =>
-							Number(
-								globalState.getVideoStyle
-									.getStylesOfTarget('arabic')
-									.getEffectiveValue('vertical-position', clipId)
-							)
+						styleId: 'vertical-position'
 					}}
 					class={'arabic absolute subtitle select-none ' +
 						getTailwind('arabic') +
@@ -263,35 +236,8 @@
 							);
 						}}
 						use:verticalDrag={{
-							getInitial: () =>
-								Number(
-									globalState.getVideoStyle
-										.getStylesOfTarget(edition)
-										.findStyle('vertical-position')!.value
-								),
-							apply: (v: number) =>
-								globalState.getVideoStyle
-									.getStylesOfTarget(edition)
-									.setStyle('vertical-position', v),
-							min: globalState.getVideoStyle
-								.getStylesOfTarget(edition)
-								.findStyle('vertical-position')!.valueMin,
-							max: globalState.getVideoStyle
-								.getStylesOfTarget(edition)
-								.findStyle('vertical-position')!.valueMax,
-							// Support pour les clips sélectionnés
 							target: edition,
-							styleId: 'vertical-position',
-							selectedClipIds: () =>
-								globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
-									(s) => s.id
-								),
-							getEffectiveValue: (clipId?: number) =>
-								Number(
-									globalState.getVideoStyle
-										.getStylesOfTarget(edition)
-										.getEffectiveValue('vertical-position', clipId)
-								)
+							styleId: 'vertical-position'
 						}}
 						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
 						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}

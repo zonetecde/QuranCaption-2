@@ -2,17 +2,17 @@ import { globalState } from '$lib/runes/main.svelte';
 import type { StyleName } from '$lib/classes/VideoStyle.svelte';
 
 export interface VerticalDragOptions {
-	getInitial: () => number;
-	apply: (value: number) => void;
+	// Mode simple : fonction manuelle
+	getInitial?: () => number;
+	apply?: (value: number) => void;
 	min?: number;
 	max?: number;
 	round?: boolean;
-	classWhileDragging?: string; // classe à ajouter pendant le drag
-	// Support pour les clips sélectionnés
+	classWhileDragging?: string;
+
+	// Mode automatique avec globalState
 	target?: string;
 	styleId?: StyleName;
-	selectedClipIds?: () => number[];
-	getEffectiveValue?: (clipId?: number) => number;
 }
 
 export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
@@ -26,17 +26,28 @@ export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
 		e.preventDefault();
 		startY = e.clientY;
 
-		// Récupère la valeur initiale avec support pour les clips sélectionnés
-		if (opts.target && opts.styleId && opts.selectedClipIds && opts.getEffectiveValue) {
-			const selectedIds = opts.selectedClipIds();
+		// Mode automatique avec globalState
+		if (opts.target && opts.styleId) {
+			const selectedIds =
+				globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
+					(s) => s.id
+				);
 			if (selectedIds.length > 0) {
 				// Si on a des clips sélectionnés, utilise la valeur effective du premier clip
-				origin = opts.getEffectiveValue(selectedIds[0]);
+				origin = Number(
+					globalState.getVideoStyle
+						.getStylesOfTarget(opts.target)
+						.getEffectiveValue(opts.styleId, selectedIds[0])
+				);
 			} else {
-				origin = opts.getInitial();
+				// Sinon, utilise la valeur du style global
+				origin = Number(
+					globalState.getVideoStyle.getStylesOfTarget(opts.target).findStyle(opts.styleId)!.value
+				);
 			}
 		} else {
-			origin = opts.getInitial();
+			// Mode manuel
+			origin = opts.getInitial!();
 		}
 
 		dragging = true;
@@ -50,21 +61,36 @@ export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
 		if (!dragging) return;
 		const delta = e.clientY - startY;
 		let val = origin + delta;
-		if (typeof opts.min === 'number') val = Math.max(opts.min, val);
-		if (typeof opts.max === 'number') val = Math.min(opts.max, val);
+
+		// Mode automatique avec globalState
+		if (opts.target && opts.styleId) {
+			const style = globalState.getVideoStyle
+				.getStylesOfTarget(opts.target)
+				.findStyle(opts.styleId)!;
+			if (typeof style.valueMin === 'number') val = Math.max(style.valueMin, val);
+			if (typeof style.valueMax === 'number') val = Math.min(style.valueMax, val);
+		} else {
+			// Mode manuel
+			if (typeof opts.min === 'number') val = Math.max(opts.min, val);
+			if (typeof opts.max === 'number') val = Math.min(opts.max, val);
+		}
+
 		if (opts.round !== false) val = Math.round(val);
 
-		// Applique la valeur avec support pour les clips sélectionnés
-		if (opts.target && opts.styleId && opts.selectedClipIds) {
-			const selectedIds = opts.selectedClipIds();
+		// Mode automatique avec globalState
+		if (opts.target && opts.styleId) {
+			const selectedIds =
+				globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
+					(s) => s.id
+				);
 			if (selectedIds.length > 0) {
 				// Si on a des clips sélectionnés, utilise setStyleForClips
 				globalState.getVideoStyle
 					.getStylesOfTarget(opts.target)
 					.setStyleForClips(selectedIds, opts.styleId, val);
 			} else {
-				// Sinon, utilise la fonction apply classique
-				opts.apply(val);
+				// Sinon, utilise setStyle pour le style global
+				globalState.getVideoStyle.getStylesOfTarget(opts.target).setStyle(opts.styleId, val);
 			}
 
 			// Déclenche un refresh si nécessaire pour certains styles
@@ -72,7 +98,8 @@ export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
 				globalState.updateVideoPreviewUI();
 			}
 		} else {
-			opts.apply(val);
+			// Mode manuel
+			opts.apply!(val);
 		}
 	}
 

@@ -143,17 +143,8 @@
 			globalState.getVideoStyle.highlightCategory('global', 'surah-name');
 		}}
 		use:verticalDrag={{
-			getInitial: () => Number(surahNameSettings().verticalPosition),
-			apply: (v: number) =>
-				globalState.getVideoStyle
-					.getStylesOfTarget('global')
-					.setStyle('surah-name-vertical-position', v),
-			min: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-name-vertical-position')!.valueMin,
-			max: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('surah-name-vertical-position')!.valueMax
+			target: 'global',
+			styleId: 'surah-name-vertical-position'
 		}}
 		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
 		style={`transform: translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity};`}

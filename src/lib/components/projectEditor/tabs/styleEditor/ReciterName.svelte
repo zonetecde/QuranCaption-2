@@ -64,17 +64,8 @@
 			globalState.getVideoStyle.highlightCategory('global', 'reciter-name');
 		}}
 		use:verticalDrag={{
-			getInitial: () => Number(reciterNameSettings().verticalPosition),
-			apply: (v: number) =>
-				globalState.getVideoStyle
-					.getStylesOfTarget('global')
-					.setStyle('reciter-name-vertical-position', v),
-			min: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('reciter-name-vertical-position')!.valueMin,
-			max: globalState.getVideoStyle
-				.getStylesOfTarget('global')
-				.findStyle('reciter-name-vertical-position')!.valueMax
+			target: 'global',
+			styleId: 'reciter-name-vertical-position'
 		}}
 		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
 		style={`transform: translateY(${reciterNameSettings().verticalPosition}px) translateX(${reciterNameSettings().horizontalPosition}px); opacity: ${reciterNameSettings().opacity};`}
