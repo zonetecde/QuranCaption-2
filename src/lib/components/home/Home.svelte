@@ -101,7 +101,7 @@
 		}
 	}
 
-	let promise: Promise<any> = $state(ProjectService.loadUserProjectsDetails());
+	let promise: Promise<any> | undefined = $state(undefined);
 
 	onMount(async () => {
 		if (globalState.userProjectsDetails.length > 0) {
@@ -115,17 +115,23 @@
 			globalState.userProjectsDetails[0] = await ProjectService.loadDetail(
 				globalState.userProjectsDetails[0].id
 			);
+		} else {
+			promise = ProjectService.loadUserProjectsDetails();
 		}
 
 		// Initialise les projets filtrés
 		applyFilterAndSort();
 
-		promise.then(async () => {
-			// Vérifie si des données de Quran Caption 2 sont présentes
-			if ((await MigrationService.hasQCV2Data()) && globalState.userProjectsDetails.length === 0) {
-				migrationFromV2ModalVisibility = true;
-			}
-		});
+		if (promise)
+			promise!.then(async () => {
+				// Vérifie si des données de Quran Caption 2 sont présentes
+				if (
+					(await MigrationService.hasQCV2Data()) &&
+					globalState.userProjectsDetails.length === 0
+				) {
+					migrationFromV2ModalVisibility = true;
+				}
+			});
 	});
 
 	$effect(() => {
