@@ -78,7 +78,7 @@
 					maxLength={ProjectDetail.NAME_MAX_LENGTH}
 					placeholder={projectDetail.name}
 					parentClasses="text-accent"
-					textClasses="text-lg font-semibold"
+					textClasses="text-lg font-semibold max-w-[310px] truncate"
 					action={async () => {
 						await ProjectService.saveDetail(projectDetail); // Sauvegarde le projet
 					}}
