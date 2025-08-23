@@ -213,12 +213,7 @@ export default class MigrationService {
 
 					for (const [key, value] of Object.entries(clip.translations)) {
 						const tr = new VerseTranslation(value as string, 'reviewed');
-						translations[
-							key
-								.replace('-la', '')
-								.replace('fra-muhammadhamidul', 'fra-muhammadhameedu')
-								.replace('deu-asfbubenheimand', 'deu-frankbubenheima')
-						] = tr;
+						translations[formatTranslationName(key)] = tr;
 
 						// Télécharge la traduction en ligne
 						const edition = projectContent.projectTranslation.addedTranslationEditions.find(
@@ -259,202 +254,20 @@ export default class MigrationService {
 		}
 
 		const newProject = new Project(projectDetail, projectContent);
-		await newProject.save();
-	}
 
-	/**
-	 * Fonctions très obsures mais fonctionnelles.
-	 * Elle est mal codée, JE SAIS, mais elle fonctionne et n'est pas là pour
-	 * être belle.
-	 */
-	static async importAllProjectsFromV2(): Promise<void> {
-		const qc2Dir = await MigrationService.getQCV2Dir();
-		if (!qc2Dir) return;
+		globalState.currentProject = newProject;
 
-		await ProjectTranslation.loadAvailableTranslations();
-
-		const files = await readDir(qc2Dir);
-
-		for (const file of files) {
-			if (!file.name.endsWith('.json')) continue;
-			if (file.name === 'projects.json') continue;
-
-			const fileContent = await readTextFile(await join(qc2Dir, file.name));
-			const project: any = JSON.parse(JSON.parse(fileContent)); // (Me demander pas pourquoi mais dans QC2 les projets sont stringify deux fois)
-
-			// Project Detail
-			const projectName = project.name;
-			const projectCreatedAt: Date = new Date(project.createdAt);
-			const projectUpdatedAt: Date = new Date(project.updatedAt);
-			const projectReciter = project.reciter;
-
-			const projectDetail = new ProjectDetail(
-				projectName,
-				projectReciter,
-				projectCreatedAt,
-				projectUpdatedAt
-			);
-
-			let newIds: { [oldId: string]: number } = {};
-
-			const projectContent = await ProjectContent.getDefaultProjectContent();
-
-			// Assets
-			const projectAssets: Asset[] = [];
-
-			for (const asset of project.assets) {
-				const newAsset = new Asset(asset.filePath);
-				newIds[asset.id] = newAsset.id;
-				projectAssets.push(newAsset);
-			}
-
-			projectContent.assets = projectAssets;
-
-			// Timeline
-
-			// Audio Track
-			if (project.timeline.audiosTracks[0].clips.length > 0) {
-				for (const clip of project.timeline.audiosTracks[0].clips) {
-					if (clip.isMuted) continue; // Inutile de l'ajouter
-
-					const assetClip = new AssetClip(clip.start, clip.end, newIds[clip.assetId]);
-
-					(projectContent.timeline.getFirstTrack(TrackType.Audio) as AssetTrack)!.clips.push(
-						assetClip
-					);
-				}
-			}
-
-			// Video Track
-			if (project.timeline.videosTracks[0].clips.length > 0) {
-				for (const clip of project.timeline.videosTracks[0].clips) {
-					const asset = projectAssets.find((asset) => asset.id === newIds[clip.assetId]);
-
-					if (!asset) continue;
-
-					if (asset && asset.duration === undefined) {
-						asset!.duration = new Duration(clip.end - clip.start);
-					}
-
-					const assetClip = new AssetClip(clip.start, clip.end, newIds[clip.assetId]);
-
-					if (!clip.isMuted) {
-						// On est dans la track video mais le clip n'est pas muted, alors on doit l'ajouter dans la track audio à la place
-
-						(projectContent.timeline.getFirstTrack(TrackType.Audio) as AssetTrack)!.clips.push(
-							assetClip
-						);
-					} else {
-						(projectContent.timeline.getFirstTrack(TrackType.Video) as AssetTrack)!.clips.push(
-							assetClip
-						);
-					}
-				}
-			}
-
-			// Traductions
-			projectContent.projectTranslation.addedTranslationEditions = await Promise.all(
-				project.projectSettings.addedTranslations.map(async (s: string) => {
-					for (const [key, value] of Object.entries(globalState.availableTranslations)) {
-						for (const tr of value.translations) {
-							if (tr.name === formatTranslationName(s)) {
-								// Ajoute les styles pour les traductions
-								await projectContent.videoStyle.addStylesForEdition(tr.name);
-								tr.showInTranslationsEditor = true;
-								return tr;
-							}
-						}
-					}
-
-					return null;
-				})
-			);
-
-			// Subtitles
-			if (project.timeline.subtitlesTracks[0].clips.length > 0) {
-				for (const clip of project.timeline.subtitlesTracks[0].clips) {
-					if ((clip.surah === -1 || clip.verse === -1) && !clip.isSilence && !clip.isCustomText) {
-						let translations: { [key: string]: Translation } = {};
-
-						// predefined subtitle clip
-						const sub = new PredefinedSubtitleClip(
-							clip.start,
-							clip.end,
-							clip.text.includes('بِسْمِ') ? 'Basmala' : 'Istiadhah'
-						);
-
-						for (const [key, value] of Object.entries(clip.translations)) {
-							translations[formatTranslationName(key)] = new Translation(
-								value as string,
-								'reviewed'
-							);
-						}
-
-						sub.translations = translations;
-
-						projectContent.timeline.getFirstTrack(TrackType.Subtitle)!.clips.push(sub);
-					} else if (!clip.isSilence && !clip.isCustomText) {
-						const verse = (await Quran.getSurah(clip.surah)).verses[clip.verse - 1];
-
-						const subtitlesProperties = await (
-							projectContent.timeline.getFirstTrack(TrackType.Subtitle) as SubtitleTrack
-						).getSubtitlesProperties(
-							verse,
-							clip.firstWordIndexInVerse,
-							clip.lastWordIndexInVerse,
-							clip.surah
-						);
-
-						// subtitle clip
-						const sub = new SubtitleClip(
-							clip.start,
-							clip.end,
-							clip.surah,
-							clip.verse,
-							clip.firstWordIndexInVerse,
-							clip.lastWordIndexInVerse,
-							verse.getArabicTextBetweenTwoIndexes(
-								clip.firstWordIndexInVerse,
-								clip.lastWordIndexInVerse
-							),
-							verse.getWordByWordTranslationBetweenTwoIndexes(
-								clip.firstWordIndexInVerse,
-								clip.lastWordIndexInVerse
-							),
-							subtitlesProperties.isFullVerse,
-							subtitlesProperties.isLastWordsOfVerse,
-							subtitlesProperties.translations
-						);
-
-						let translations: { [key: string]: Translation } = {};
-
-						for (const [key, value] of Object.entries(clip.translations)) {
-							translations[formatTranslationName(key)] = new Translation(
-								value as string,
-								'reviewed'
-							);
-						}
-
-						sub.translations = translations;
-
-						projectContent.timeline.getFirstTrack(TrackType.Subtitle)!.clips.push(sub);
-					} else if (clip.isSilence || clip.isCustomText) {
-						// SilenceClip
-						const silence = new SilenceClip(clip.start, clip.end);
-						projectContent.timeline.getFirstTrack(TrackType.Subtitle)!.clips.push(silence);
-					}
-				}
-			}
-
-			projectDetail.updateVideoDetailAttributes();
-			for (const edition of projectContent.projectTranslation.addedTranslationEditions) {
-				projectDetail.updatePercentageTranslated(edition);
-			}
-
-			const newProject = new Project(projectDetail, projectContent);
-			newProject.save();
-			globalState.userProjectsDetails.push(newProject.detail);
+		projectDetail.updateVideoDetailAttributes();
+		for (const edition of projectContent.projectTranslation.addedTranslationEditions) {
+			projectDetail.updatePercentageTranslated(edition);
 		}
+
+		globalState.currentProject.save();
+		globalState.userProjectsDetails.push(newProject.detail);
+
+		globalState.currentProject = null;
+
+		await newProject.save();
 	}
 }
 function formatTranslationName(key: string) {

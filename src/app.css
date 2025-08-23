@@ -4,7 +4,7 @@
 
 @font-face {
 	font-family: 'Hafs';
-	src: url('Hafs.ttf') format('truetype');
+	src: url('/Hafs.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }

@@ -61,6 +61,7 @@ export class ProjectDetail extends SerializableBase {
 	 * à la durée total de la vidéo du projet
 	 */
 	public updateVideoDetailAttributes() {
+		this.duration = new Duration(globalState.getAudioTrack.getDuration().ms || 0);
 		this.updateVideoPercentageCaptioned();
 		this.updateVerseRange();
 	}
