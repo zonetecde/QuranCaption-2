@@ -244,10 +244,12 @@
 
 		<SurahName />
 		<ReciterName />
-		<VerseNumber
-			currentSurah={(currentSubtitle() as any).surah ?? -1}
-			currentVerse={(currentSubtitle() as any).verse ?? -1}
-		/>
+		{#if currentSubtitle() && currentSubtitle() instanceof SubtitleClip}
+			<VerseNumber
+				currentSurah={(currentSubtitle() as SubtitleClip).surah}
+				currentVerse={(currentSubtitle() as SubtitleClip).verse}
+			/>
+		{/if}
 
 		{#each currentCustomTexts() as customText}
 			<CustomText customText={(customText as CustomTextClip).category!} />

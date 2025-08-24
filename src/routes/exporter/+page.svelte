@@ -124,8 +124,54 @@
 				// l'inset à 0 (sinon la videoPreview prend que 50% de l'écran, je sais pas pourquoi)
 				const previewContainer = document.getElementById('preview-container');
 				if (previewContainer) {
-					previewContainer.style.transform = '';
-					previewContainer.style.inset = '';
+					// Sauvegarde parent & position pour restaurer après l'export
+					const originalParent = previewContainer.parentElement;
+					const originalNextSibling = previewContainer.nextSibling;
+					const originalStyle: Record<string, string> = {
+						position: previewContainer.style.position || '',
+						zIndex: previewContainer.style.zIndex || '',
+						inset: previewContainer.style.inset || '',
+						transform: previewContainer.style.transform || '',
+						width: previewContainer.style.width || '',
+						height: previewContainer.style.height || '',
+						top: previewContainer.style.top || '',
+						left: previewContainer.style.left || '',
+						right: previewContainer.style.right || '',
+						bottom: previewContainer.style.bottom || '',
+						margin: previewContainer.style.margin || ''
+					};
+
+					// Promeut l'élément au body pour garantir un fullscreen "réel"
+					document.body.appendChild(previewContainer);
+					Object.assign(previewContainer.style, {
+						position: 'fixed',
+						inset: '0',
+						top: '0',
+						left: '0',
+						width: '100%',
+						height: '100%',
+						transform: 'none',
+						zIndex: '999',
+						margin: '0'
+					});
+
+					// Fournit une fonction globale de restauration (appelable depuis cleanup)
+					// On stocke sur window pour éviter d'ajouter des variables en haut du fichier
+					(window as any).__qcRestorePreview = () => {
+						if (!previewContainer) return;
+						// Remet dans son parent d'origine, à la même position
+						if (originalParent) {
+							if (originalNextSibling && originalNextSibling.parentNode === originalParent) {
+								originalParent.insertBefore(previewContainer, originalNextSibling);
+							} else {
+								originalParent.appendChild(previewContainer);
+							}
+						}
+						// Restaure les styles originaux
+						Object.assign(previewContainer.style, originalStyle);
+						delete (window as any).__qcRestorePreview;
+						console.log('Restored preview container to original parent and styles.');
+					};
 				}
 
 				// Lance la demande de record
@@ -375,7 +421,7 @@
 	<!-- Avant de record, on dit à l'utilisateur de sélectionné la fenêtre -->
 	{#if !hasRecordStarted}
 		<div
-			class="absolute inset-0 w-full h-full pt-[350px] bg-black/80 backdrop-blur-sm flex items-center justify-center"
+			class="absolute inset-0 w-full h-full pt-[350px] bg-black/80 backdrop-blur-sm flex items-center justify-center z-[99999]"
 		>
 			<div class="text-center max-w-2xl px-8">
 				<!-- Arrow pointing up-center towards popup -->

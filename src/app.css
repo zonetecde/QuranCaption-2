@@ -43,8 +43,12 @@
 	--selected-word-bg: #22272d;
 	--accent-secondary: #3fb950;
 	--danger-color: #f85149;
-	--timeline-clip-color: rgba(88, 166, 255, 0.4);
-	--timeline-clip-border: rgba(88, 166, 255, 0.7);
+	--timeline-audio-clip-color: rgba(88, 166, 255, 0.4);
+	--timeline-audio-clip-border: rgba(88, 166, 255, 0.7);
+	--timeline-video-clip-color: rgba(88, 166, 255, 0.4);
+	--timeline-video-clip-border: rgba(88, 166, 255, 0.7);
+	--timeline-subtitle-clip-color: rgba(88, 166, 255, 0.4);
+	--timeline-subtitle-clip-border: rgba(88, 166, 255, 0.7);
 	--highlight-color: #fbbf24;
 	--highlight-bg: rgba(251, 191, 36, 0.2);
 

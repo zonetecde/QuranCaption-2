@@ -113,7 +113,7 @@
 </script>
 
 <div
-	class={'absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden duration-200 ' +
+	class={'absolute inset-0 z-10 border border-[var(--timeline-subtitle-clip-border)] bg-[var(--timeline-subtitle-clip-color)] rounded-md group overflow-hidden duration-200 ' +
 		(globalState.getStylesState.isSelected(clip.id) ||
 		globalState.getSubtitlesEditorState.editSubtitle?.id === clip.id
 			? ' bg-[#6265af]/50! border-[#6265af]/40! '

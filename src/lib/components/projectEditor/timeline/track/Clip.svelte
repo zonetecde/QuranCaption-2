@@ -47,7 +47,10 @@
 </script>
 
 <div
-	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group"
+	class={'absolute inset-0 z-10 border rounded-md group ' +
+		(track.type === TrackType.Audio
+			? 'border-[var(--timeline-audio-clip-border)] bg-[var(--timeline-audio-clip-color)]'
+			: 'border-[var(--timeline-video-clip-border)] bg-[var(--timeline-video-clip-color)]')}
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
 	transition:slide={{ duration: 500, axis: 'x' }}
 	oncontextmenu={(e) => {
