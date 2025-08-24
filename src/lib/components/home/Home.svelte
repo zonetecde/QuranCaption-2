@@ -23,11 +23,6 @@
 	let createNewProjectModalVisible: boolean = $state(false);
 
 	// États pour les menus de filtrage et tri
-	let filterMenuVisible = $state(false);
-	let sortMenuVisible = $state(false);
-	let selectedStatuses: Status[] = $state(Status.getAllStatuses());
-	let filteredProjects: typeof globalState.userProjectsDetails = $state([]);
-	let searchQuery: string = $state('');
 
 	/**
 	 * Affiche le popup pour créer un nouveau projet.
@@ -40,23 +35,23 @@
 	 * Bascule l'affichage du menu de filtrage
 	 */
 	function toggleFilterMenu() {
-		filterMenuVisible = !filterMenuVisible;
-		sortMenuVisible = false; // Ferme l'autre menu
+		globalState.uiState.filterMenuVisible = !globalState.uiState.filterMenuVisible;
+		globalState.uiState.sortMenuVisible = false; // Ferme l'autre menu
 	}
 
 	/**
 	 * Bascule l'affichage du menu de tri
 	 */
 	function toggleSortMenu() {
-		sortMenuVisible = !sortMenuVisible;
-		filterMenuVisible = false; // Ferme l'autre menu
+		globalState.uiState.sortMenuVisible = !globalState.uiState.sortMenuVisible;
+		globalState.uiState.filterMenuVisible = false; // Ferme l'autre menu
 	}
 
 	/**
 	 * Applique le filtre sur les projets
 	 */
 	function handleFilter(statuses: Status[]) {
-		selectedStatuses = statuses;
+		globalState.uiState.selectedStatuses = statuses;
 		applyFilterAndSort();
 	}
 
@@ -64,7 +59,7 @@
 	 * Applique le tri sur les projets
 	 */
 	function handleSort(property: keyof ProjectDetail, ascending: boolean) {
-		filteredProjects.sort((a, b) => {
+		globalState.uiState.filteredProjects.sort((a, b) => {
 			let valueA = a[property];
 			let valueB = b[property];
 
@@ -85,18 +80,20 @@
 			if (valueA > valueB) return ascending ? 1 : -1;
 			return 0;
 		});
-		filteredProjects = [...filteredProjects]; // Trigger reactivity
+		globalState.uiState.filteredProjects = [...globalState.uiState.filteredProjects]; // Trigger reactivity
 	}
 
 	/**
 	 * Applique le filtre et maintient le tri actuel
 	 */
 	function applyFilterAndSort() {
-		if (selectedStatuses.length === 0) {
-			filteredProjects = [];
+		if (globalState.uiState.selectedStatuses.length === 0) {
+			globalState.uiState.filteredProjects = [];
 		} else {
-			filteredProjects = globalState.userProjectsDetails.filter((project) =>
-				selectedStatuses.some((status) => status.status === project.status.status)
+			globalState.uiState.filteredProjects = globalState.userProjectsDetails.filter((project) =>
+				globalState.uiState.selectedStatuses.some(
+					(status) => status.status === project.status.status
+				)
 			);
 		}
 	}
@@ -165,8 +162,6 @@
 			}
 		}
 	}
-
-	let projectCardView: 'grid' | 'list' = $state('grid'); // 'grid' ou 'list'
 </script>
 
 <div class="flex flex-col min-h-full overflow-x-hidden overflow-auto">
@@ -194,7 +189,7 @@
 					icon="search"
 					placeholder="Search projects..."
 					classes="w-64"
-					bind:value={searchQuery}
+					bind:value={globalState.uiState.searchQuery}
 				/>
 
 				<div class="relative">
@@ -202,8 +197,8 @@
 						<span class="material-icons-outlined">filter_list</span>
 					</button>
 					<FilterMenu
-						bind:isVisible={filterMenuVisible}
-						bind:selectedStatuses
+						bind:isVisible={globalState.uiState.filterMenuVisible}
+						bind:selectedStatuses={globalState.uiState.selectedStatuses}
 						onFilter={handleFilter}
 					/>
 				</div>
@@ -212,14 +207,16 @@
 					<button class="sort-button btn text-sm p-2 btn-icon" onclick={toggleSortMenu}>
 						<span class="material-icons-outlined">import_export</span>
 					</button>
-					<SortMenu bind:isVisible={sortMenuVisible} onSort={handleSort} />
+					<SortMenu bind:isVisible={globalState.uiState.sortMenuVisible} onSort={handleSort} />
 				</div>
 
 				<!-- bouton pour changer affichage grid/list -->
 				<div class="relative">
 					<button
 						class="view-button btn text-sm p-2 btn-icon"
-						onclick={() => (projectCardView = projectCardView === 'grid' ? 'list' : 'grid')}
+						onclick={() =>
+							(globalState.uiState.projectCardView =
+								globalState.uiState.projectCardView === 'grid' ? 'list' : 'grid')}
 					>
 						<span class="material-icons-outlined">view_module</span>
 					</button>
@@ -240,8 +237,8 @@
 				</div>
 			</div>
 		{:then}
-			{#if filteredProjects.length === 0}
-				{#if selectedStatuses.length === 0}
+			{#if globalState.uiState.filteredProjects.length === 0}
+				{#if globalState.uiState.selectedStatuses.length === 0}
 					<p class="mt-4">
 						No projects match the current filter. Adjust your status filter to see projects.
 					</p>
@@ -256,13 +253,16 @@
 				<div
 					placeholder="Project cards"
 					class={'mt-4  ' +
-						(projectCardView === 'list'
+						(globalState.uiState.projectCardView === 'list'
 							? 'grid grid-cols-1 gap-3'
 							: 'grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6')}
 				>
-					{#each filteredProjects as project, index}
-						{#if searchQuery === '' || project.matchSearchQuery(searchQuery)}
-							<ProjectDetailCard bind:projectDetail={filteredProjects[index]} {projectCardView} />
+					{#each globalState.uiState.filteredProjects as project, index}
+						{#if globalState.uiState.searchQuery === '' || project.matchSearchQuery(globalState.uiState.searchQuery)}
+							<ProjectDetailCard
+								bind:projectDetail={globalState.uiState.filteredProjects[index]}
+								projectCardView={globalState.uiState.projectCardView}
+							/>
 						{/if}
 					{/each}
 				</div>

@@ -6,7 +6,7 @@
 	import ExportService from '$lib/services/ExportService';
 	import ExportMonitor from './ExportMonitor.svelte';
 
-	globalState.showExportMonitor = false;
+	globalState.uiState.showExportMonitor = false;
 
 	async function minimizeButtonClick() {
 		getCurrentWindow().minimize();
@@ -31,7 +31,7 @@
 
 	// Fermer le monitor quand on clique ailleurs
 	function handleClickOutside(event: Event) {
-		if (globalState.showExportMonitor) {
+		if (globalState.uiState.showExportMonitor) {
 			const exportButton = document.getElementById('export-button');
 			const exportMonitor = document.querySelector('[role="dialog"]');
 
@@ -41,7 +41,7 @@
 				!exportButton.contains(event.target as Node) &&
 				!exportMonitor.contains(event.target as Node)
 			) {
-				globalState.showExportMonitor = false;
+				globalState.uiState.showExportMonitor = false;
 			}
 		}
 	}
@@ -99,7 +99,7 @@
 			class="w-10 cursor-pointer rounded-full hover:bg-gray-700 relative"
 			type="button"
 			onclick={() => {
-				globalState.showExportMonitor = !globalState.showExportMonitor;
+				globalState.uiState.showExportMonitor = !globalState.uiState.showExportMonitor;
 			}}
 		>
 			<span class="material-icons pt-2">file_download</span>

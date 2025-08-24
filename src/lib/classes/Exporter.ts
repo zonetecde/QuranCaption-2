@@ -201,7 +201,7 @@ export default class Exporter {
 		await ExportService.addExport(project);
 
 		// Ouvre le popup de monitor d'export
-		globalState.showExportMonitor = true;
+		globalState.uiState.showExportMonitor = true;
 
 		// Set-up l'écouteur d'évènement pour suivre
 		// le progrès des projets en cours d'exportation
