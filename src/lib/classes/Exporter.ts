@@ -69,7 +69,7 @@ export default class Exporter {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `qurancaption.subtitles.${globalState.currentProject!.detail.name}.${settings.format.toLowerCase()}`;
+		a.download = `qurancaption_subtitles_${globalState.currentProject!.detail.name}.${settings.format.toLowerCase()}`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -88,7 +88,7 @@ export default class Exporter {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `qurancaption.project.${projectData.detail.name}.json`;
+		a.download = `qurancaption_project_${projectData.detail.name}.json`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -157,7 +157,7 @@ export default class Exporter {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `qurancaption.chapters.${globalState.currentProject!.detail.name}.txt`;
+		a.download = `qurancaption_chapters_${globalState.currentProject!.detail.name}.txt`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
