@@ -59,8 +59,6 @@ export class Timeline extends SerializableBase {
 		const track = this.tracks.find((t) => t.type === trackType);
 		const currentClip = track?.getCurrentClip();
 
-		console.log(track);
-
 		if (!currentClip) return null;
 
 		return this.clipToAsset(currentClip) || null;

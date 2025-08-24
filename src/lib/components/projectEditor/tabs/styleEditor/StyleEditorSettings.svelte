@@ -69,10 +69,8 @@
 		if (_) {
 			// Scroll to the highlighted category
 			const category = globalState.getStylesState.scrollAndHighlight;
-			console.log('Scrolling to category:', category);
 			const element = stylesContainer!.querySelector(`[data-category="${category}"]`);
 			if (element) {
-				console.log('Scrolling to element:', element);
 				element.scrollIntoView({ behavior: 'smooth', block: 'start' });
 				// Le met en jaune pendant 2 secondes
 				element.classList.add('highlight');

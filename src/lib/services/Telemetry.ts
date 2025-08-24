@@ -3,7 +3,6 @@
  * @param msg Le message à envoyer
  */
 export async function telemetry(msg: string) {
-	console.log(msg);
 	try {
 		const url = 'https://rayanestaszewski.fr/telemetry-quran-caption';
 		const res = await fetch(url, {

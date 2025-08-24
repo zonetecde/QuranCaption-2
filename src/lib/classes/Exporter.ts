@@ -263,10 +263,6 @@ export default class Exporter {
 			}
 		}
 
-		console.log(`Original video size: ${videoSize.width}x${videoSize.height}`);
-		console.log(`Screen size: ${screenWidth}x${screenHeight}`);
-		console.log(`Window size: ${windowWidth}x${windowHeight}`);
-
 		return { width: windowWidth, height: windowHeight };
 	}
 }

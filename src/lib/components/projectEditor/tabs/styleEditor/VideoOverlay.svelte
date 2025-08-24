@@ -153,8 +153,6 @@
 							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
 								fontSize -= 5;
 
-								console.log(subtitle.clientHeight);
-
 								globalState.getVideoStyle
 									.getStylesOfTarget(target)
 									.setStyle('reactive-font-size', fontSize);
