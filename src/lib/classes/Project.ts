@@ -26,8 +26,12 @@ export class Project extends SerializableBase {
 	async save(updateUpdateAt: boolean = true): Promise<void> {
 		const projectsDetail = globalState.userProjectsDetails.find((p) => p.id === this.detail.id);
 
-		if (projectsDetail && updateUpdateAt) projectsDetail.updatedAt = this.detail.updatedAt;
-		else {
+		if (projectsDetail) {
+			if (updateUpdateAt) {
+				this.detail.updateTimestamp();
+				projectsDetail.updatedAt = this.detail.updatedAt;
+			}
+		} else {
 			globalState.userProjectsDetails.unshift(this.detail);
 		}
 

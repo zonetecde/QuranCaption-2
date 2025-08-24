@@ -109,7 +109,7 @@ class GlobalState {
 	}
 
 	getStyle(t: 'arabic' | 'translation' | string, s: StyleName): any {
-		return this.getVideoStyle.getStylesOfTarget(t).findStyle(s)!;
+		if (this.currentProject) return this.getVideoStyle.getStylesOfTarget(t).findStyle(s)!;
 	}
 
 	updateVideoPreviewUI() {
