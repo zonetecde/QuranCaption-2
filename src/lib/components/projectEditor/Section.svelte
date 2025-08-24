@@ -8,12 +8,14 @@
 		name,
 		icon,
 		classes,
+		contentClasses,
 		children,
 		dataCategory
 	}: {
 		name: string;
 		icon: string;
 		classes?: string;
+		contentClasses?: string;
 		children: Snippet;
 		dataCategory?: string;
 	} = $props();
@@ -43,9 +45,11 @@
 	<div class={'flex ' + classes} onclick={() => (extended = !extended)}>
 		<h3 class="text-sm font-semibold text-gray-100 flex items-center truncate">
 			{#if icon.includes('png') || icon.includes('svg')}
-				<img src={icon} alt={name} class="w-6 h-6 mr-2" />{name}
+				<img src={icon} alt={name} class="w-6 h-6 mr-2" /><span class="truncate">{name}</span>
 			{:else}
-				<span class="material-icons mr-2 text-lg text-indigo-400">{icon}</span>{name}
+				<span class="material-icons mr-2 text-lg text-indigo-400">{icon}</span><span
+					class="truncate">{name}</span
+				>
 			{/if}
 		</h3>
 		<!-- dropdownicon -->
@@ -58,7 +62,7 @@
 	</div>
 
 	{#if extended}
-		<div transition:slide>
+		<div transition:slide class={contentClasses}>
 			{@render children()}
 		</div>
 	{/if}

@@ -203,7 +203,7 @@
 		{/if}
 	</div>
 	<div
-		class="flex flex-col gap-y-2 px-2 bg-[var(--bg-primary)]/60 rounded-xl border border-[var(--border-color)]/50 overflow-y-auto pb-10 rounded-t-none border-t-2 flex-1"
+		class="flex flex-col gap-y-2 px-1 bg-[var(--bg-primary)]/60 rounded-xl border border-[var(--border-color)]/50 overflow-y-auto pb-10 rounded-t-none border-t-2 flex-1 py-1"
 		bind:this={stylesContainer}
 		onscroll={(e) => {
 			globalState.currentProject!.projectEditorState.stylesEditor.scrollPosition =
@@ -225,7 +225,8 @@
 				<Section
 					name={category.name}
 					icon={category.icon}
-					classes="-mb-1"
+					contentClasses="border-x border-b border-[var(--border-color)] rounded-b-lg -mt-1 pt-1"
+					classes="-mb-1 bg-white/10 pl-0.5 rounded-t-lg"
 					dataCategory={globalState.getStylesState.currentSelection === 'translation'
 						? globalState.getStylesState.currentSelectionTranslation
 						: category.id}
