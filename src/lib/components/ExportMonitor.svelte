@@ -48,6 +48,8 @@
 				return 'text-purple-400';
 			case ExportState.CapturingFrames:
 				return 'text-blue-400';
+			case ExportState.Initializing:
+				return 'text-yellow-400';
 			default:
 				return 'text-gray-400';
 		}
@@ -72,6 +74,8 @@
 				return 'movie_creation';
 			case ExportState.CapturingFrames:
 				return 'photo_camera';
+			case ExportState.Initializing:
+				return 'hourglass_top';
 			default:
 				return 'help';
 		}

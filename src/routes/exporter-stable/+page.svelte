@@ -242,6 +242,14 @@
 					} as ExportProgress);
 				}
 
+				emitProgress({
+					exportId: Number(exportId),
+					progress: 0,
+					currentState: ExportState.Initializing,
+					currentTime: 0,
+					totalTime: exportEnd - exportStart
+				} as ExportProgress);
+
 				// Récupère le chemin de fichier de tout les audios du projet
 				const audios: string[] = globalState.getAudioTrack.clips.map(
 					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath

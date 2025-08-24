@@ -8,7 +8,8 @@ export enum ExportState {
 	Error = 'Error',
 	Canceled = 'Canceled',
 	CreatingVideo = 'Creating Video',
-	CapturingFrames = 'Capturing Frames'
+	CapturingFrames = 'Capturing Frames',
+	Initializing = 'Initializing...'
 }
 
 export default class Exportation extends SerializableBase {
@@ -59,7 +60,8 @@ export default class Exportation extends SerializableBase {
 			this.currentState === ExportState.Recording ||
 			this.currentState === ExportState.AddingAudio ||
 			this.currentState === ExportState.CreatingVideo ||
-			this.currentState === ExportState.CapturingFrames
+			this.currentState === ExportState.CapturingFrames ||
+			this.currentState === ExportState.Initializing
 		);
 	}
 }

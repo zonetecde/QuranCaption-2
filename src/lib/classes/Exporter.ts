@@ -208,14 +208,21 @@ export default class Exporter {
 
 		// Créer une fenêtre Tauri avec la bonne taille
 		const w = new WebviewWindow(exportId, {
-			width: windowWidth,
-			height: windowHeight,
 			decorations: false,
 			visible: false,
 			alwaysOnTop: false,
 			title: 'QC - ' + exportId,
 			url: '/exporter-stable?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
 		});
+
+		// 	const w = new WebviewWindow(exportId, {
+		// 	width: windowWidth,
+		// 	height: windowHeight,
+		// 	decorations: false,
+		// 	alwaysOnTop: true,
+		// 	title: 'QC - ' + exportId,
+		// 	url: '/exporter?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
+		// });
 	}
 
 	static async getRealExportDimensions(): Promise<{ width: number; height: number }> {
