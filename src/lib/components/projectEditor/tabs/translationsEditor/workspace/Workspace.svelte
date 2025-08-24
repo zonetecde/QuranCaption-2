@@ -31,6 +31,40 @@
 	// Le format est : { [sous-titreId]: [edition1, edition2, ...] }
 	let allowedTranslations: { [key: string]: string[] } = $state({});
 
+	// Pagination progressive
+	const PAGE_SIZE = 10;
+	let visibleCount = $state(PAGE_SIZE); // nombre actuel de sous-titres autorisés affichés
+
+	// Liste des index (dans clips) correspondant aux sous-titres autorisés dans l'ordre original
+	let allowedSubtitleIndices = $derived(() =>
+		globalState.getSubtitleTrack.clips.reduce((acc, clip, index) => {
+			if (allowedTranslations[clip.id]) acc.push(index);
+			return acc;
+		}, [] as number[])
+	);
+
+	// Réinitialise le compteur si les filtres changent et qu'on a moins d'éléments
+	$effect(() => {
+		const total = allowedSubtitleIndices().length;
+		if (visibleCount > total) {
+			visibleCount = total;
+		}
+		// Si on change complètement de filtre, on repart de 10 (optionnel)
+		if (total && visibleCount === 0) {
+			visibleCount = Math.min(PAGE_SIZE, total);
+		}
+	});
+
+	function loadMoreIfNeeded(container: HTMLElement) {
+		const threshold = 50; // px avant le bas
+		if (container.scrollTop + container.clientHeight >= container.scrollHeight - threshold) {
+			const total = allowedSubtitleIndices().length;
+			if (visibleCount < total) {
+				visibleCount = Math.min(visibleCount + PAGE_SIZE, total);
+			}
+		}
+	}
+
 	$effect(() => {
 		// Permet de trigger la réactivité en forçant la lecture des status
 		for (const key in globalState.getTranslationsState.filters) {
@@ -80,6 +114,10 @@
 					}
 				}
 			}
+
+			// Ajuste visibleCount si nécessaire
+			const total = Object.keys(allowedTranslations).length;
+			if (visibleCount > total) visibleCount = total;
 		});
 	});
 
@@ -109,18 +147,6 @@
 
 		return false;
 	}
-
-	onMount(() => {
-		// Le timeout sert à attendre que le DOM soit complètement chargé (donc que les traductions soient affichées)
-		setTimeout(() => {
-			// Remet la position du scroll à la dernière position sauvegardée
-			const savedScrollPosition = globalState.getTranslationsState.scrollPosition;
-			const workspace = document.getElementById('translations-workspace');
-			if (workspace) {
-				workspace.scrollTop = savedScrollPosition;
-			}
-		}, 0);
-	});
 </script>
 
 <section
@@ -128,8 +154,8 @@
 	id="translations-workspace"
 	onscroll={(e) => {
 		// Sauvegarde la position du scroll
-		const pos = (e.target as HTMLElement).scrollTop;
-		globalState.getTranslationsState.scrollPosition = pos;
+		const el = e.target as HTMLElement;
+		loadMoreIfNeeded(el);
 	}}
 >
 	{#if globalState.currentProject!.content.projectTranslation.addedTranslationEditions.length === 0}
@@ -158,27 +184,24 @@
 			{#if Object.keys(allowedTranslations).length === 0}
 				<NoTranslationsToShow />
 			{:else}
-				{#each globalState.getSubtitleTrack.clips as subtitle, i}
-					{#if allowedTranslations[subtitle.id]}
-						<!-- Divider pour les nouveaux versets (sauf pour le premier élément) -->
-						{#if isNewVerse(i) && i > 0 && globalState.getSubtitleTrack.clips
-								.slice(0, i)
-								.some((clip, index) => allowedTranslations[clip.id])}
+				{#each allowedSubtitleIndices().slice(0, visibleCount) as clipIndex, i}
+					<!-- clipIndex est l'index réel dans clips -->
+					{#if allowedTranslations[globalState.getSubtitleTrack.clips[clipIndex].id]}
+						{#if isNewVerse(clipIndex) && clipIndex > 0 && globalState.getSubtitleTrack.clips
+								.slice(0, clipIndex)
+								.some((clip) => allowedTranslations[clip.id])}
 							<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
 						{/if}
 
 						<section class="border border-color rounded px-4 py-4 text-primary relative">
-							<!-- Affiche le texte arabe -->
-							<ArabicText {subtitle} />
-
-							<!-- Affiche les éditions de traduction -->
+							<ArabicText subtitle={globalState.getSubtitleTrack.clips[clipIndex]} />
 							{#each editionsToShowInEditor() as edition, j}
-								{#if allowedTranslations[subtitle.id].includes(edition.name)}
+								{#if allowedTranslations[globalState.getSubtitleTrack.clips[clipIndex].id].includes(edition.name)}
 									<Translation
 										{edition}
-										bind:subtitle={globalState.getSubtitleTrack.clips[i] as SubtitleClip}
-										previousSubtitle={i > 0
-											? (globalState.getSubtitleTrack.getSubtitleBefore(i) as SubtitleClip)
+										bind:subtitle={globalState.getSubtitleTrack.clips[clipIndex] as SubtitleClip}
+										previousSubtitle={clipIndex > 0
+											? (globalState.getSubtitleTrack.getSubtitleBefore(clipIndex) as SubtitleClip)
 											: undefined}
 									/>
 								{/if}
@@ -186,6 +209,9 @@
 						</section>
 					{/if}
 				{/each}
+				{#if visibleCount < allowedSubtitleIndices().length}
+					<div class="text-center py-4 text-thirdly text-sm">Scrolling to load more...</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}

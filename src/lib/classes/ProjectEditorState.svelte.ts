@@ -190,9 +190,6 @@ export class TranslationsEditorState extends SerializableBase {
 		'completed by default': false
 	});
 
-	// Garde la position du scroll
-	scrollPosition: number = $state(0);
-
 	checkOnlyFilters(list: string[]) {
 		for (const key in this.filters) {
 			if (list.includes(key)) {
