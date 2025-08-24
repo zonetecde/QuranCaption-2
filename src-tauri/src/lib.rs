@@ -460,15 +460,28 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     entries.sort_by_key(|(ts, _)| *ts);
     println!("[start_export] {} images", entries.len());
 
-    // Durées des images
+    // Calcul des durées d'affichage pour chaque image
     let mut durations: Vec<f64> = Vec::new();
-    for i in 0..entries.len() - 1 { let (t0, _) = entries[i]; let (t1, _) = entries[i + 1]; let diff = t1.saturating_sub(t0); durations.push(diff as f64 / 1000.0); }
-    durations.push(1.0);
-    for d in &mut durations { if *d < 0.01 { *d = 0.01; } }
-    let min_d = durations.iter().cloned().fold(f64::INFINITY, f64::min);
-    let mut crossfade = 0.3; if min_d < crossfade * 1.2 { crossfade = (min_d * 0.5).max(0.05); }
-    for d in &mut durations { if *d < crossfade { *d = crossfade; } }
-    println!("[start_export] Durées images: {:?} crossfade={:.3}", durations, crossfade);
+    let crossfade = 0.3; // Durée de transition fixe
+    
+    // Pour chaque image, calculer sa durée d'affichage réelle
+    for i in 0..entries.len() {
+        let (current_ts, _) = entries[i];
+        
+        if i == entries.len() - 1 {
+            // Dernière image : durée par défaut
+            durations.push(2.0);
+        } else {
+            let (next_ts, _) = entries[i + 1];
+            let time_gap = (next_ts.saturating_sub(current_ts)) as f64 / 1000.0;
+            
+            // La durée d'affichage doit être au moins égale au temps jusqu'à la prochaine image + crossfade
+            let min_duration = time_gap + crossfade;
+            durations.push(min_duration.max(crossfade * 2.0)); // Au minimum 2x la durée de crossfade
+        }
+    }
+    
+    println!("[start_export] Durées images calculées: {:?} crossfade={:.3}", durations, crossfade);
 
     // Audio handling
     let start_time_seconds = start_time / 1000.0;
@@ -498,15 +511,33 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     if entries.len() == 1 {
         filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
     } else {
-        for i in 0..entries.len() { filter.push_str(&format!("[{i}:v]fps=30,format=yuv420p,setsar=1:1[v{i}];")); }
-        let mut output_len_prev = durations[0];
+        // Préparation des inputs vidéo
+        for i in 0..entries.len() { 
+            filter.push_str(&format!("[{i}:v]fps=30,format=yuv420p,setsar=1:1[v{i}];"));
+        }
+        
+        // Construction des transitions xfade basées sur les vrais timestamps
         let mut current_label = String::from("v0");
+        let base_timestamp = entries[0].0; // Timestamp de la première image comme référence
+        
         for i in 1..entries.len() {
             let next_input = format!("v{}", i);
             let out_label = if i == entries.len() - 1 { "vout".to_string() } else { format!("vx{}", i) };
-            let offset = (output_len_prev - crossfade).max(0.0);
-            filter.push_str(&format!("[{curr}][{next}]xfade=transition=fade:duration={dur}:offset={off}[{out}];", curr=current_label, next=next_input, dur=format!("{:.3}", crossfade), off=format!("{:.3}", offset), out=out_label));
-            output_len_prev = output_len_prev + durations[i] - crossfade;
+            
+            // Calculer l'offset basé sur la différence réelle de timestamps
+            let current_image_ts = entries[i].0;
+            let offset = ((current_image_ts - base_timestamp) as f64 / 1000.0) - crossfade;
+            let offset = offset.max(0.0); // Ne pas avoir d'offset négatif
+            
+            filter.push_str(&format!(
+                "[{curr}][{next}]xfade=transition=fade:duration={dur}:offset={off}[{out}];", 
+                curr=current_label, 
+                next=next_input, 
+                dur=format!("{:.3}", crossfade), 
+                off=format!("{:.3}", offset), 
+                out=out_label
+            ));
+            
             current_label = out_label;
         }
         if filter.ends_with(';') { filter.pop(); }
@@ -552,8 +583,12 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
 
     let mut cmd = TokioCommand::new(&ffmpeg_path); cmd.args(&cmd_args); cmd.stderr(std::process::Stdio::piped()); cmd.stdout(std::process::Stdio::piped());
 
-    let total_video_duration: f64 = durations.iter().sum::<f64>() - crossfade * (entries.len() as f64 - 1.0);
-    println!("[start_export] Durée vidéo estimée: {:.3}s", total_video_duration);
+    // Calculer la durée totale basée sur les vrais timestamps
+    let base_timestamp = entries[0].0;
+    let last_timestamp = entries.last().unwrap().0;
+    let last_image_duration = 2.0; // Durée par défaut de la dernière image
+    let total_video_duration = ((last_timestamp - base_timestamp) as f64 / 1000.0) + last_image_duration;
+    println!("[start_export] Durée vidéo estimée: {:.3}s (basée sur timestamps)", total_video_duration);
 
     let mut child = cmd.spawn().map_err(|e| format!("Echec lancement ffmpeg: {e}"))?;
     let mut collected_stderr: Vec<String> = Vec::new();
