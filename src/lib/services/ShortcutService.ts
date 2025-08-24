@@ -205,6 +205,11 @@ export const SHORTCUTS = {
 			description: 'Remove the last subtitle.',
 			category: 'Subtitles Editor'
 		},
+		EDIT_LAST_SUBTITLE: {
+			keys: ['e'],
+			description: 'Edit the last subtitle.',
+			category: 'Subtitles Editor'
+		},
 		ADD_SILENCE: {
 			keys: ['s'],
 			description: 'Add silence to the timeline.',

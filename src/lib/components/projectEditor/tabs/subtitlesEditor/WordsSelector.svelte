@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SubtitleClip, TrackType } from '$lib/classes';
-	import type { PredefinedSubtitleType } from '$lib/classes/Clip.svelte';
+	import type { PredefinedSubtitleClip, PredefinedSubtitleType } from '$lib/classes/Clip.svelte';
 	import { Quran, type Verse, type Word } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
@@ -92,6 +92,11 @@
 		});
 
 		ShortcutService.registerShortcut({
+			key: SHORTCUTS.SUBTITLES_EDITOR.EDIT_LAST_SUBTITLE,
+			onKeyDown: editLastSubtitle
+		});
+
+		ShortcutService.registerShortcut({
 			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE,
 			onKeyDown: addSilence
 		});
@@ -121,11 +126,27 @@
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE);
+		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.EDIT_LAST_SUBTITLE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_BASMALA);
 		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_ISTIADHAH);
 	});
+
+	function editLastSubtitle(): void {
+		if (globalState.getSubtitleTrack.clips.length <= 0) return;
+		const clip = globalState.getSubtitleTrack.getLastClip() as
+			| SubtitleClip
+			| PredefinedSubtitleClip;
+
+		// Modifie le sous-titre
+		if (globalState.getSubtitlesEditorState.editSubtitle?.id === clip.id) {
+			// Si on est déjà en train de modifier ce sous-titre, on le quitte
+			globalState.getSubtitlesEditorState.editSubtitle = null;
+			return;
+		}
+		globalState.getSubtitlesEditorState.editSubtitle = clip;
+	}
 
 	/**
 	 * Sélectionne le mot suivant dans le verset.
