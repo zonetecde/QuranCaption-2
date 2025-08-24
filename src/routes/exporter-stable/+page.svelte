@@ -47,7 +47,7 @@
 			emitProgress({
 				exportId: Number(exportId),
 				progress: data.progress,
-				currentState: ExportState.AddingAudio,
+				currentState: ExportState.CreatingVideo,
 				currentTime: data.current_time * 1000 // Convertir de secondes en millisecondes
 			} as ExportProgress);
 		} else {
@@ -225,11 +225,21 @@
 
 				console.log('Timings détectés (calcul direct):', uniqueSorted);
 
+				let i = 0;
 				for (const timing of uniqueSorted) {
 					globalState.getTimelineState.movePreviewTo = timing;
 					globalState.getTimelineState.cursorPosition = timing;
 					await new Promise((resolve) => setTimeout(resolve, 50));
 					await takeScreenshot(`${Math.round(timing - exportStart)}`);
+
+					i++;
+					emitProgress({
+						exportId: Number(exportId),
+						progress: (i / uniqueSorted.length) * 100,
+						currentState: ExportState.CapturingFrames,
+						currentTime: timing - exportStart,
+						totalTime: exportEnd - exportStart
+					} as ExportProgress);
 				}
 
 				// Récupère le chemin de fichier de tout les audios du projet
@@ -248,37 +258,6 @@
 			}
 		}
 	});
-
-	/**
-	 * Ajoute l'audio à la vidéo et effectue diverse opération avec FFMPEG
-	 * @param videoFileName
-	 */
-	async function addAudioToVideo(videoFileName: string) {
-		// Récupère le chemin de fichier de tout les audios du projet
-		const audios: string[] = globalState.getAudioTrack.clips.map(
-			(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
-		);
-
-		// Attend que le fichier de la vidéo soit téléchargé sur le PC
-		while (!(await exists(videoFileName, { baseDir: BaseDirectory.Download }))) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-
-		// Destroy le media recorder pour qu'on ai plus la petite fenetre "X partage une fenêtre"
-		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
-
-		// Appel FFMPEG depuis Rust
-		await invoke('add_audio_to_video', {
-			fileName: videoFileName,
-			finalFilePath: exportData!.finalFilePath,
-			audios: audios,
-			startTime: globalState.getExportState.videoStartTime,
-			exportId: exportData!.exportId.toString(),
-			videoDuration: exportData!.videoLength,
-			targetWidth: exportData!.videoDimensions.width,
-			targetHeight: exportData!.videoDimensions.height
-		});
-	}
 
 	async function takeScreenshot(fileName: string) {
 		// L'élément à transformer en image

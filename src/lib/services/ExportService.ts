@@ -47,7 +47,7 @@ export default class ExportService {
 	 * Ajoute un projet à la liste des exports en cours.
 	 * @param project Le projet à ajouter
 	 */
-	static async addExport(project: Project) {
+	static async addExport(project: Project, mode: 'recording' | 'stable' = 'stable') {
 		// Ajoute le projet à la liste des exports en cours
 
 		const fileName = project.detail.generateExportFileName() + '.mp4';
@@ -64,7 +64,8 @@ export default class ExportService {
 				VerseRange.getVerseRange(
 					project.projectEditorState.export.videoStartTime,
 					project.projectEditorState.export.videoEndTime
-				).toString()
+				).toString(),
+				mode === 'recording' ? ExportState.WaitingForRecord : ExportState.CapturingFrames
 			)
 		);
 

@@ -592,7 +592,51 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
 
     let mut child = cmd.spawn().map_err(|e| format!("Echec lancement ffmpeg: {e}"))?;
     let mut collected_stderr: Vec<String> = Vec::new();
-    if let Some(stderr) = child.stderr.take() { let reader = BufReader::new(stderr); let mut lines = reader.lines(); let time_regex = Regex::new(r"out_time_ms=(\\d+)").unwrap(); while let Some(line) = lines.next_line().await.unwrap_or(None) { let lt = line.trim().to_string(); if !lt.is_empty() { collected_stderr.push(lt.clone()); } if let Some(caps) = time_regex.captures(&lt) { if let Some(m) = caps.get(1) { if let Ok(us) = m.as_str().parse::<u64>() { let current = us as f64 / 1_000_000.0; if total_video_duration>0.0 { let progress = (current/total_video_duration*100.0).min(100.0); let _ = app_handle.emit("export-progress", serde_json::json!({"progress": progress, "current_time": current, "total_time": total_video_duration})); } else { let _ = app_handle.emit("export-progress", serde_json::json!({"progress": null, "current_time": current, "total_time": null})); } } } } } }
+    
+    if let Some(stderr) = child.stderr.take() {
+        let reader = BufReader::new(stderr);
+        let mut lines = reader.lines();
+        
+        // Regex pour extraire le temps actuel de la progression (correction: un seul backslash)
+        let time_regex = Regex::new(r"out_time_ms=(\d+)").unwrap();
+        
+        while let Some(line) = lines.next_line().await.unwrap_or(None) {
+            let line_trimmed = line.trim().to_string();
+            if !line_trimmed.is_empty() {
+                collected_stderr.push(line_trimmed.clone());
+            }
+            
+            // Chercher les informations de progression
+            if let Some(captures) = time_regex.captures(&line_trimmed) {
+                if let Some(time_match) = captures.get(1) {
+                    if let Ok(time_us) = time_match.as_str().parse::<u64>() {
+                        let current_time = time_us as f64 / 1_000_000.0; // Convertir de microsecondes en secondes
+                        
+                        if total_video_duration > 0.0 {
+                            let progress = (current_time / total_video_duration * 100.0).min(100.0);
+                            println!("Export Progress: {:.1}% ({:.1}s / {:.1}s)", progress, current_time, total_video_duration);
+                            
+                            // Émettre l'événement de progression vers le frontend
+                            let _ = app_handle.emit("export-progress", serde_json::json!({
+                                "progress": progress,
+                                "current_time": current_time,
+                                "total_time": total_video_duration
+                            }));
+                        } else {
+                            println!("Export Processing: {:.1}s elapsed", current_time);
+                            
+                            // Émettre l'événement sans pourcentage
+                            let _ = app_handle.emit("export-progress", serde_json::json!({
+                                "progress": null,
+                                "current_time": current_time,
+                                "total_time": null
+                            }));
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     let status = child.wait().await.map_err(|e| format!("Echec attente ffmpeg: {e}"))?;
     if !status.success() { for l in collected_stderr.iter().rev().take(30).rev() { println!("  | {}", l); } let joined = collected_stderr.join("\n"); let _ = app_handle.emit("export-error", format!("ffmpeg a échoué lors de la génération vidéo\n{}", joined)); return Err("ffmpeg a échoué".to_string()); }

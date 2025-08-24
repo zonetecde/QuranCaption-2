@@ -191,8 +191,7 @@ export default class Exporter {
 		project.detail.id = Number(exportId); // L'ID du projet est l'ID d'export
 
 		// Récupère les dimensions de la fenêtre d'export (qui prend compte des limitations de taille de fenêtre)
-		const { width: windowWidth, height: windowHeight } =
-			await Exporter.getRealExportDimensions(project);
+		const { width: windowWidth, height: windowHeight } = await Exporter.getRealExportDimensions();
 
 		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
 		await ExportService.saveProject(project);
@@ -212,15 +211,14 @@ export default class Exporter {
 			width: windowWidth,
 			height: windowHeight,
 			decorations: false,
-			alwaysOnTop: true,
+			visible: false,
+			alwaysOnTop: false,
 			title: 'QC - ' + exportId,
 			url: '/exporter-stable?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
 		});
 	}
 
-	static async getRealExportDimensions(
-		project: Project
-	): Promise<{ width: number; height: number }> {
+	static async getRealExportDimensions(): Promise<{ width: number; height: number }> {
 		const videoSize = globalState.getStyle('global', 'video-dimension')!.value as {
 			width: number;
 			height: number;

@@ -6,7 +6,9 @@ export enum ExportState {
 	AddingAudio = 'Adding Audio',
 	Exported = 'Exported',
 	Error = 'Error',
-	Canceled = 'Canceled'
+	Canceled = 'Canceled',
+	CreatingVideo = 'Creating Video',
+	CapturingFrames = 'Capturing Frames'
 }
 
 export default class Exportation extends SerializableBase {
@@ -31,7 +33,7 @@ export default class Exportation extends SerializableBase {
 		videoStartTime: number,
 		videoEndTime: number,
 		verseRange: string,
-		currentState: ExportState = ExportState.WaitingForRecord,
+		currentState: ExportState,
 		percentageProgress: number = 0,
 		currentTreatedTime: number = 0,
 		errorLog: string = ''
@@ -55,7 +57,9 @@ export default class Exportation extends SerializableBase {
 		return (
 			this.currentState === ExportState.WaitingForRecord ||
 			this.currentState === ExportState.Recording ||
-			this.currentState === ExportState.AddingAudio
+			this.currentState === ExportState.AddingAudio ||
+			this.currentState === ExportState.CreatingVideo ||
+			this.currentState === ExportState.CapturingFrames
 		);
 	}
 }

@@ -42,6 +42,12 @@
 				return 'text-green-400';
 			case ExportState.Error:
 				return 'text-red-400';
+			case ExportState.Canceled:
+				return 'text-gray-400';
+			case ExportState.CreatingVideo:
+				return 'text-purple-400';
+			case ExportState.CapturingFrames:
+				return 'text-blue-400';
 			default:
 				return 'text-gray-400';
 		}
@@ -60,6 +66,12 @@
 				return 'check_circle';
 			case ExportState.Error:
 				return 'error';
+			case ExportState.Canceled:
+				return 'cancel';
+			case ExportState.CreatingVideo:
+				return 'movie_creation';
+			case ExportState.CapturingFrames:
+				return 'photo_camera';
 			default:
 				return 'help';
 		}
