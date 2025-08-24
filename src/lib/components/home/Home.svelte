@@ -165,6 +165,8 @@
 			}
 		}
 	}
+
+	let projectCardView: 'grid' | 'list' = $state('grid'); // 'grid' ou 'list'
 </script>
 
 <div class="flex flex-col min-h-full overflow-x-hidden overflow-auto">
@@ -212,6 +214,16 @@
 					</button>
 					<SortMenu bind:isVisible={sortMenuVisible} onSort={handleSort} />
 				</div>
+
+				<!-- bouton pour changer affichage grid/list -->
+				<div class="relative">
+					<button
+						class="view-button btn text-sm p-2 btn-icon"
+						onclick={() => (projectCardView = projectCardView === 'grid' ? 'list' : 'grid')}
+					>
+						<span class="material-icons-outlined">view_module</span>
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -243,11 +255,14 @@
 			{:else}
 				<div
 					placeholder="Project cards"
-					class="mt-4 grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
+					class={'mt-4  ' +
+						(projectCardView === 'list'
+							? 'grid grid-cols-1 gap-3'
+							: 'grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6')}
 				>
 					{#each filteredProjects as project, index}
 						{#if searchQuery === '' || project.matchSearchQuery(searchQuery)}
-							<ProjectDetailCard bind:projectDetail={filteredProjects[index]} />
+							<ProjectDetailCard bind:projectDetail={filteredProjects[index]} {projectCardView} />
 						{/if}
 					{/each}
 				</div>
