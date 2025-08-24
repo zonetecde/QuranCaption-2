@@ -164,11 +164,22 @@
 							<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
 						{/if}
 
-						<section class="border border-color rounded px-4 py-4 text-primary">
+						<section class="border border-color rounded px-4 py-4 text-primary relative">
 							<!-- Affiche le texte arabe -->
 							{#if subtitle instanceof SubtitleClip}
 								{@const words = subtitle.getTextWithVerseNumber().split(' ')}
-								<div class="text-3xl flex flex-row arabic text-right gap-x-2" dir="rtl">
+
+								<!-- Affiche le numéro de verset en haut à gauche -->
+								<div
+									class="absolute top-0 left-0 bg-white/10 px-1 py-1 rounded-br-lg border-color border-l-0 border-t-0 border-1 text-sm"
+								>
+									{subtitle.surah}:{subtitle.verse}
+								</div>
+
+								<div
+									class="text-3xl flex flex-row arabic text-right gap-x-2 flex-wrap gap-y-2"
+									dir="rtl"
+								>
 									{#each words as word, i}
 										{@const wordIndex = subtitle.startWordIndex + i}
 										<div
@@ -204,7 +215,7 @@
 											<!-- Si ce n'est pas le numéro de verset -->
 											{#if i !== words.length - 1 || !subtitle.isLastWordsOfVerse}
 												<span
-													class="word-translation-tooltip group-hover:block hidden text-sm absolute top-10 w-max px-1.5 bg-slate-700 border-slate-800 border-2 rounded-lg text-center"
+													class="word-translation-tooltip group-hover:block hidden text-sm absolute top-10 w-max px-1.5 bg-slate-700 border-slate-800 border-2 rounded-lg text-center z-20"
 													dir="ltr"
 												>
 													<!-- Le contenu est chargé dynamiquement lors du survol -->
