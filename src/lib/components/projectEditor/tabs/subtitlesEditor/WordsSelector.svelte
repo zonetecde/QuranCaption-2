@@ -3,7 +3,7 @@
 	import type { PredefinedSubtitleClip, PredefinedSubtitleType } from '$lib/classes/Clip.svelte';
 	import { Quran, type Verse, type Word } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
-	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
+	import ShortcutService from '$lib/services/ShortcutService';
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import toast from 'svelte-5-french-toast';
 
@@ -46,25 +46,25 @@
 	onMount(() => {
 		// Set up les shortcuts pour sélectionner les mots
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_NEXT_WORD,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.SELECT_NEXT_WORD,
 			onKeyDown: selectNextWord
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD,
 			onKeyDown: selectPreviousWord
 		});
 
 		// Set up les shortcuts divers
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.RESET_START_CURSOR,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.RESET_START_CURSOR,
 			onKeyDown: () => {
 				subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
 			}
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.SELECT_ALL_WORDS,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.SELECT_ALL_WORDS,
 			onKeyDown: async () => {
 				subtitlesEditorState().startWordIndex = 0;
 				subtitlesEditorState().endWordIndex = (await selectedVerse())!.words.length - 1;
@@ -72,7 +72,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_END_TO_LAST,
 			onKeyDown: async () => {
 				subtitlesEditorState().endWordIndex = (await selectedVerse())!.getNextPunctuationMarkIndex(
 					subtitlesEditorState().endWordIndex
@@ -82,55 +82,79 @@
 
 		// Set up les shortcuts d'action
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_SUBTITLE,
 			onKeyDown: addSubtitle
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE,
 			onKeyDown: removeLastSubtitle
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.EDIT_LAST_SUBTITLE,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.EDIT_LAST_SUBTITLE,
 			onKeyDown: editLastSubtitle
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_SILENCE,
 			onKeyDown: addSilence
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END,
 			onKeyDown: setLastSubtitleEnd
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_BASMALA,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_BASMALA,
 			onKeyDown: () => addPredefinedSubtitle('Basmala')
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.SUBTITLES_EDITOR.ADD_ISTIADHAH,
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_ISTIADHAH,
 			onKeyDown: () => addPredefinedSubtitle('Istiadhah')
 		});
 	});
 
 	onDestroy(() => {
 		// Clean up les shortcuts
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SELECT_NEXT_WORD);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.RESET_START_CURSOR);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SELECT_ALL_WORDS);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_END_TO_LAST);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SUBTITLE);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.EDIT_LAST_SUBTITLE);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_SILENCE);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_BASMALA);
-		ShortcutService.unregisterShortcut(SHORTCUTS.SUBTITLES_EDITOR.ADD_ISTIADHAH);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SELECT_NEXT_WORD
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SELECT_PREVIOUS_WORD
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.RESET_START_CURSOR
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SELECT_ALL_WORDS
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_END_TO_LAST
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_SUBTITLE
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.REMOVE_LAST_SUBTITLE
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.EDIT_LAST_SUBTITLE
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_SILENCE
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_LAST_SUBTITLE_END
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_BASMALA
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_ISTIADHAH
+		);
 	});
 
 	function editLastSubtitle(): void {

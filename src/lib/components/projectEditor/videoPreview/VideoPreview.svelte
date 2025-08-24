@@ -5,7 +5,7 @@
 	import { mount, onDestroy, onMount, unmount, untrack } from 'svelte';
 	import { Howl } from 'howler';
 	import toast from 'svelte-5-french-toast';
-	import ShortcutService, { SHORTCUTS } from '$lib/services/ShortcutService';
+	import ShortcutService from '$lib/services/ShortcutService';
 	import VideoPreviewControlsBar from './VideoPreviewControlsBar.svelte';
 	import VideoOverlay from '../tabs/styleEditor/VideoOverlay.svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -159,14 +159,14 @@
 		triggerVideoAndAudioToFitCursor();
 		// Set les shortcuts pour le preview
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.VIDEO_PREVIEW.PLAY_PAUSE,
+			key: globalState.settings!.shortcuts.VIDEO_PREVIEW.PLAY_PAUSE,
 			onKeyDown: (e) => {
 				togglePlayPause();
 			}
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD,
+			key: globalState.settings!.shortcuts.VIDEO_PREVIEW.MOVE_FORWARD,
 			onKeyDown: (e) => {
 				const currentTime = getTimelineSettings().cursorPosition;
 				getTimelineSettings().cursorPosition = currentTime + 2000; // Avance de 2 secondes
@@ -175,7 +175,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.VIDEO_PREVIEW.MOVE_BACKWARD,
+			key: globalState.settings!.shortcuts.VIDEO_PREVIEW.MOVE_BACKWARD,
 			onKeyDown: (e) => {
 				const currentTime = getTimelineSettings().cursorPosition;
 				getTimelineSettings().cursorPosition = Math.max(1, currentTime - 2000); // Recule de 2 secondes
@@ -184,7 +184,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED,
+			key: globalState.settings!.shortcuts.VIDEO_PREVIEW.INCREASE_SPEED,
 			onKeyDown: (e) => {
 				setPlaybackSpeed(getSpeed() * 2);
 			},
@@ -194,7 +194,7 @@
 		});
 
 		ShortcutService.registerShortcut({
-			key: SHORTCUTS.VIDEO_PREVIEW.TOGGLE_FULLSCREEN,
+			key: globalState.settings!.shortcuts.VIDEO_PREVIEW.TOGGLE_FULLSCREEN,
 			onKeyDown: (e) => {
 				globalState.getVideoPreviewState.toggleFullScreen();
 			}
@@ -239,11 +239,15 @@
 		}
 
 		// Enlève tout les shortcuts enregistrés
-		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.PLAY_PAUSE);
-		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_FORWARD);
-		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.MOVE_BACKWARD);
-		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.INCREASE_SPEED);
-		ShortcutService.unregisterShortcut(SHORTCUTS.VIDEO_PREVIEW.TOGGLE_FULLSCREEN);
+		ShortcutService.unregisterShortcut(globalState.settings!.shortcuts.VIDEO_PREVIEW.PLAY_PAUSE);
+		ShortcutService.unregisterShortcut(globalState.settings!.shortcuts.VIDEO_PREVIEW.MOVE_FORWARD);
+		ShortcutService.unregisterShortcut(globalState.settings!.shortcuts.VIDEO_PREVIEW.MOVE_BACKWARD);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.VIDEO_PREVIEW.INCREASE_SPEED
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.VIDEO_PREVIEW.TOGGLE_FULLSCREEN
+		);
 	});
 
 	// Effect pour s'assurer que l'événement ontimeupdate est toujours assigné à l'élément vidéo

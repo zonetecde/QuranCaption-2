@@ -10,7 +10,8 @@
 		classes,
 		contentClasses,
 		children,
-		dataCategory
+		dataCategory,
+		saveState = true
 	}: {
 		name: string;
 		icon: string;
@@ -18,11 +19,14 @@
 		contentClasses?: string;
 		children: Snippet;
 		dataCategory?: string;
+		saveState?: boolean;
 	} = $props();
 
 	let extended = $state(true);
 
 	onMount(() => {
+		if (!saveState) return;
+
 		// Init la section dans l'éditeur
 		if (!globalState.getSectionsState[name]) {
 			globalState.getSectionsState[name] = {
@@ -35,6 +39,8 @@
 	});
 
 	$effect(() => {
+		if (!saveState) return;
+
 		globalState.getSectionsState[name] = {
 			extended: extended
 		};

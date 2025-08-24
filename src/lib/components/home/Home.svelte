@@ -23,6 +23,8 @@
 	let createNewProjectModalVisible: boolean = $state(false);
 
 	// États pour les menus de filtrage et tri
+	let filterMenuVisible = $state(false);
+	let sortMenuVisible = $state(false);
 
 	/**
 	 * Affiche le popup pour créer un nouveau projet.
@@ -35,16 +37,16 @@
 	 * Bascule l'affichage du menu de filtrage
 	 */
 	function toggleFilterMenu() {
-		globalState.uiState.filterMenuVisible = !globalState.uiState.filterMenuVisible;
-		globalState.uiState.sortMenuVisible = false; // Ferme l'autre menu
+		filterMenuVisible = !filterMenuVisible;
+		sortMenuVisible = false; // Ferme l'autre menu
 	}
 
 	/**
 	 * Bascule l'affichage du menu de tri
 	 */
 	function toggleSortMenu() {
-		globalState.uiState.sortMenuVisible = !globalState.uiState.sortMenuVisible;
-		globalState.uiState.filterMenuVisible = false; // Ferme l'autre menu
+		sortMenuVisible = !sortMenuVisible;
+		filterMenuVisible = false; // Ferme l'autre menu
 	}
 
 	/**
@@ -197,7 +199,7 @@
 						<span class="material-icons-outlined">filter_list</span>
 					</button>
 					<FilterMenu
-						bind:isVisible={globalState.uiState.filterMenuVisible}
+						bind:isVisible={filterMenuVisible}
 						bind:selectedStatuses={globalState.uiState.selectedStatuses}
 						onFilter={handleFilter}
 					/>
@@ -207,7 +209,7 @@
 					<button class="sort-button btn text-sm p-2 btn-icon" onclick={toggleSortMenu}>
 						<span class="material-icons-outlined">import_export</span>
 					</button>
-					<SortMenu bind:isVisible={globalState.uiState.sortMenuVisible} onSort={handleSort} />
+					<SortMenu bind:isVisible={sortMenuVisible} onSort={handleSort} />
 				</div>
 
 				<!-- bouton pour changer affichage grid/list -->
@@ -215,8 +217,10 @@
 					<button
 						class="view-button btn text-sm p-2 btn-icon"
 						onclick={() =>
-							(globalState.uiState.projectCardView =
-								globalState.uiState.projectCardView === 'grid' ? 'list' : 'grid')}
+							(globalState.settings!.persistentUiState.projectCardView =
+								globalState.settings!.persistentUiState.projectCardView === 'grid'
+									? 'list'
+									: 'grid')}
 					>
 						<span class="material-icons-outlined">view_module</span>
 					</button>
@@ -253,7 +257,7 @@
 				<div
 					placeholder="Project cards"
 					class={'mt-4  ' +
-						(globalState.uiState.projectCardView === 'list'
+						(globalState.settings!.persistentUiState.projectCardView === 'list'
 							? 'grid grid-cols-1 gap-3'
 							: 'grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6')}
 				>
@@ -261,7 +265,7 @@
 						{#if globalState.uiState.searchQuery === '' || project.matchSearchQuery(globalState.uiState.searchQuery)}
 							<ProjectDetailCard
 								bind:projectDetail={globalState.uiState.filteredProjects[index]}
-								projectCardView={globalState.uiState.projectCardView}
+								projectCardView={globalState.settings!.persistentUiState.projectCardView}
 							/>
 						{/if}
 					{/each}

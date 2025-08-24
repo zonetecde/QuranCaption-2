@@ -1,5 +1,6 @@
 import { Quran } from '$lib/classes/Quran';
 import RecitersManager from '$lib/classes/Reciter';
+import Settings from '$lib/classes/Settings.svelte';
 import ModalManager from '$lib/components/modals/ModalManager';
 import ExportService from '$lib/services/ExportService';
 import QPCFontProvider from '$lib/services/FontProvider';
@@ -19,6 +20,9 @@ QPCFontProvider.loadQPC2Data();
 
 // Charge les exports
 ExportService.loadExports();
+
+// Charge les paramètres utilisateur
+Settings.load();
 
 // main.ts ou entrypoint
 window.addEventListener('error', (event) => {

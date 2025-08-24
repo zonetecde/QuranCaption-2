@@ -8,6 +8,7 @@ import {
 	ProjectTranslation
 } from '$lib/classes';
 import type Exportation from '$lib/classes/Exportation.svelte';
+import type Settings from '$lib/classes/Settings.svelte';
 import { Status } from '$lib/classes/Status';
 import type { AssetTrack, CustomTextTrack, SubtitleTrack } from '$lib/classes/Track.svelte';
 import type { StyleName } from '$lib/classes/VideoStyle.svelte';
@@ -36,15 +37,15 @@ class GlobalState {
 	// Cache pour le téléchargement des traductions
 	caches = $state(new Map<string, string>());
 
+	settings: Settings | undefined = $state(undefined);
+
 	uiState = $state({
 		// Indique si on affiche le moniteur d'exportation
 		showExportMonitor: true,
-		filterMenuVisible: false,
-		sortMenuVisible: false,
 		selectedStatuses: Status.getAllStatuses(),
 		filteredProjects: [] as ProjectDetail[],
 		searchQuery: '',
-		projectCardView: 'grid' as 'grid' | 'list'
+		settingsTab: 'shortcuts' as 'shortcuts' | 'theme' | 'about'
 	});
 
 	// ==========================================
@@ -98,7 +99,8 @@ class GlobalState {
 	}
 
 	get getSectionsState() {
-		return this.currentProject!.projectEditorState.sections;
+		if (this.currentProject) return this.currentProject!.projectEditorState.sections;
+		return {}; // Sections des paramètres par exemple alors qu'aucun projet n'est ouvert
 	}
 
 	get getStylesState() {

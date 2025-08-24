@@ -2,6 +2,7 @@ import { mount, unmount } from 'svelte';
 import Confirm from './Confirm.svelte';
 import Input from './Input.svelte';
 import Error from './Error.svelte';
+import Settings from '../settings/Settings.svelte';
 
 export default class ModalManager {
 	static async confirmModal(text: string): Promise<boolean> {
@@ -21,6 +22,28 @@ export default class ModalManager {
 						unmount(confirm);
 						document.body.removeChild(container);
 						resolve(result);
+					}
+				}
+			});
+		});
+	}
+
+	static async settingsModal(): Promise<void> {
+		return new Promise<void>((resolve) => {
+			// Créer un conteneur pour le modal
+			const container = document.createElement('div');
+			container.classList.add('modal-wrapper');
+			document.body.appendChild(container);
+
+			// Monter le composant Svelte 5
+			const confirm = mount(Settings, {
+				target: container,
+				props: {
+					resolve: () => {
+						// Nettoyer et résoudre
+						unmount(confirm);
+						document.body.removeChild(container);
+						resolve();
 					}
 				}
 			});

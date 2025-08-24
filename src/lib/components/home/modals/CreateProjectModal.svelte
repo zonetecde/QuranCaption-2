@@ -37,7 +37,6 @@
 <div
 	class="bg-secondary border-color border rounded-2xl w-[700px] shadow-2xl shadow-black flex flex-col relative"
 >
-	<!-- Header with gradient background -->
 	<div
 		class="bg-gradient-to-r from-accent to-bg-accent rounded-t-2xl px-6 py-6 border-b border-color"
 	>

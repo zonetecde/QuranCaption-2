@@ -5,6 +5,7 @@
 	import EditableText from './misc/EditableText.svelte';
 	import ExportService from '$lib/services/ExportService';
 	import ExportMonitor from './ExportMonitor.svelte';
+	import ModalManager from './modals/ModalManager';
 
 	globalState.uiState.showExportMonitor = false;
 
@@ -82,7 +83,11 @@
 		{/if}
 	</div>
 	<div class="flex items-center space-x-2">
-		<button class="w-10 cursor-pointer rounded-full hover:bg-gray-700" type="button">
+		<button
+			class="w-10 cursor-pointer rounded-full hover:bg-gray-700"
+			type="button"
+			onclick={ModalManager.settingsModal}
+		>
 			<span class="material-icons pt-2">settings</span>
 		</button>
 		<button
