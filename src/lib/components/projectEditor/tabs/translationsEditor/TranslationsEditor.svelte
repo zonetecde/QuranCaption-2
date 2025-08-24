@@ -2,11 +2,11 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount } from 'svelte';
 
-	import TranslationsEditorSettings from './TranslationsEditorSettings.svelte';
-	import TranslationsWorkspace from './TranslationsWorkspace.svelte';
 	import { fade } from 'svelte/transition';
 	import AddTranslationModal from './modal/AddTranslationModal.svelte';
 	import { ProjectTranslation } from '$lib/classes';
+	import TranslationsEditorSettings from './leftPanel/TranslationsEditorSettings.svelte';
+	import Workspace from './workspace/Workspace.svelte';
 
 	let addTranslationModalVisibility = $state(false);
 
@@ -28,8 +28,7 @@
 	</section>
 	<section class="flex-1 min-w-0 flex flex-row max-h-full min-h-0">
 		<section class="w-full min-w-0 flex flex-col min-h-0">
-			<!-- Video preview -->
-			<TranslationsWorkspace
+			<Workspace
 				setAddTranslationModalVisibility={(visible: boolean) =>
 					(addTranslationModalVisibility = visible)}
 			/>
