@@ -11,6 +11,22 @@
 	onMount(() => {
 		// Init le gestionnaire de shortcuts
 		ShortcutService.init();
+
+		// got to /exporter-stable?id=1756049194288261
+		// redirect to /exporter-stable with id in query params
+		const urlParams = new URLSearchParams(window.location.search);
+		urlParams.set('id', '1756050163091091');
+		window.location.href = `/exporter-stable?${urlParams.toString()}`;
+
+		/*
+
+		Idée pour l'exportation:::
+		Je prend la première image jusqu'à la fin du premier fade apparaissant. 
+		Puis deuxieme image contient tout jusqu'au debut du deuxieme fade (opacité encore 1). Trosieme image contient tout jusqu'à la fin du  fade sortant (img sans le texte normalement). Quatrieme image contient jusquà la fin du fade apparaissant.
+
+		puis je combine tout ça en une vidéo avec des transitions crossfade entre chaque image.
+		
+		*/
 	});
 </script>
 

@@ -7,7 +7,7 @@ import { ProjectService } from './ProjectService';
 import { listen } from '@tauri-apps/api/event';
 
 export default class ExportService {
-	private static exportFolder: string = 'exports/';
+	static exportFolder: string = 'exports/';
 
 	constructor() {}
 

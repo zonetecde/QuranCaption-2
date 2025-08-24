@@ -214,7 +214,7 @@ export default class Exporter {
 			decorations: false,
 			alwaysOnTop: true,
 			title: 'QC - ' + exportId,
-			url: '/exporter?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
+			url: '/exporter-stable?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
 		});
 	}
 

@@ -1,0 +1,231 @@
+<script lang="ts">
+	import { VerseRange, type AssetClip } from '$lib/classes';
+	import Timeline from '$lib/components/projectEditor/timeline/Timeline.svelte';
+	import VideoPreview from '$lib/components/projectEditor/videoPreview/VideoPreview.svelte';
+	import { globalState } from '$lib/runes/main.svelte';
+	import { ProjectService } from '$lib/services/ProjectService';
+	import { invoke } from '@tauri-apps/api/core';
+	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+	import { listen } from '@tauri-apps/api/event';
+	import { onMount } from 'svelte';
+	import { exists, BaseDirectory, mkdir } from '@tauri-apps/plugin-fs';
+	import { LogicalPosition } from '@tauri-apps/api/dpi';
+	import { getCurrentWebview } from '@tauri-apps/api/webview';
+	import { join } from '@tauri-apps/api/path';
+	import ExportService, { type ExportProgress } from '$lib/services/ExportService';
+	import { getAllWindows } from '@tauri-apps/api/window';
+	import Exportation, { ExportState } from '$lib/classes/Exportation.svelte';
+	import { writeFile } from '@tauri-apps/plugin-fs';
+	import toast from 'svelte-5-french-toast';
+	import DomToImage from 'dom-to-image';
+
+	// Indique si l'enregistrement a commencé
+	let readyToExport = $state(false);
+
+	// Contient l'ID de l'export
+	let exportId = '';
+
+	// VideoPreview
+	let videoPreview: VideoPreview | undefined = $state(undefined);
+
+	// Récupère les données d'export de la vidéo
+	let exportData: Exportation | undefined;
+
+	async function exportProgress(event: any) {
+		const data = event.payload as {
+			progress?: number;
+			current_time: number;
+			total_time?: number;
+		};
+
+		if (data.progress !== null && data.progress !== undefined) {
+			console.log(
+				`Export Progress: ${data.progress.toFixed(1)}% (${data.current_time.toFixed(1)}s / ${data.total_time?.toFixed(1)}s)`
+			);
+
+			emitProgress({
+				exportId: Number(exportId),
+				progress: data.progress,
+				currentState: ExportState.AddingAudio,
+				currentTime: data.current_time * 1000 // Convertir de secondes en millisecondes
+			} as ExportProgress);
+		} else {
+			console.log(`Export Processing: ${data.current_time.toFixed(1)}s elapsed`);
+		}
+	}
+
+	async function exportComplete(event: any) {
+		const data = event.payload as { filename: string; exportId: string };
+		console.log(`✅ Export complete! File saved as: ${data.filename}`);
+
+		await emitProgress({
+			exportId: Number(exportId),
+			progress: 100,
+			currentState: ExportState.Exported
+		} as ExportProgress);
+
+		// Ne fermer que si c'est NOTRE export qui est terminé
+		if (data.exportId === exportId) {
+			getCurrentWebviewWindow().close();
+		}
+	}
+
+	async function exportError(event: any) {
+		const error = event.payload as string;
+		console.error(`❌ Export failed: ${error}`);
+
+		emitProgress({
+			exportId: Number(exportId),
+			progress: 100,
+			currentState: ExportState.Error,
+			errorLog: error
+		} as ExportProgress);
+	}
+
+	async function emitProgress(progress: ExportProgress) {
+		(await getAllWindows()).find((w) => w.label === 'main')!.emit('export-progress-main', progress);
+	}
+
+	function cancelExport() {}
+
+	onMount(async () => {
+		// Écoute les événements de progression d'export donné par Rust
+		listen('export-progress', exportProgress);
+		listen('export-complete', exportComplete);
+		listen('export-error', exportError);
+
+		// Récupère l'id de l'export, qui est en paramètre d'URL
+		const id = new URLSearchParams(window.location.search).get('id');
+		if (id) {
+			exportId = id;
+
+			// Récupère le projet correspondant à cette ID (dans le dossier export, paramètre inExportFolder: true)
+			globalState.currentProject = await ExportService.loadProject(Number(id));
+
+			// Créer le dossier d'export s'il n'existe pas
+			await mkdir(await join(ExportService.exportFolder, exportId), {
+				baseDir: BaseDirectory.AppData,
+				recursive: true
+			});
+
+			// Supprime le fichier projet JSON
+			// ExportService.deleteProjectFile(Number(id));
+
+			// Récupère les données d'export
+			exportData = ExportService.findExportById(Number(id))!;
+
+			// Prépare les paramètres pour exporter la vidéo
+			globalState.getVideoPreviewState.isFullscreen = true; // Met la vidéo en plein écran
+			globalState.getVideoPreviewState.isPlaying = false; // Met la vidéo en pause
+			globalState.getVideoPreviewState.isMuted = true; // Met la vidéo en sourdine
+			// Met le curseur au début du startTime voulu pour l'export
+			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime;
+			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;
+
+			// Enlève tout les styles de position de la vidéo
+			let videoElement: HTMLElement;
+			// Attend que l'élément soit prêt
+			do {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				videoElement = document.getElementById('video-preview-section') as HTMLElement;
+				videoElement.style.objectFit = 'contain';
+				videoElement.style.top = '0';
+				videoElement.style.left = '0';
+				videoElement.style.width = '100%';
+				videoElement.style.height = '100%';
+			} while (!videoElement);
+
+			// Attend 2 secondes que tout soit prêt
+			await new Promise((resolve) => setTimeout(resolve, 4000));
+
+			readyToExport = true;
+
+			// Joue la vidéo pendant que le MediaRecorder record
+			videoPreview!.togglePlayPause();
+
+			setTimeout(() => {
+				takeScreenshot('test_screenshot');
+			}, 2000);
+		}
+	});
+
+	/**
+	 * Ajoute l'audio à la vidéo et effectue diverse opération avec FFMPEG
+	 * @param videoFileName
+	 */
+	async function addAudioToVideo(videoFileName: string) {
+		// Récupère le chemin de fichier de tout les audios du projet
+		const audios: string[] = globalState.getAudioTrack.clips.map(
+			(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
+		);
+
+		// Attend que le fichier de la vidéo soit téléchargé sur le PC
+		while (!(await exists(videoFileName, { baseDir: BaseDirectory.Download }))) {
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+
+		// Destroy le media recorder pour qu'on ai plus la petite fenetre "X partage une fenêtre"
+		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
+
+		// Appel FFMPEG depuis Rust
+		await invoke('add_audio_to_video', {
+			fileName: videoFileName,
+			finalFilePath: exportData!.finalFilePath,
+			audios: audios,
+			startTime: globalState.getExportState.videoStartTime,
+			exportId: exportData!.exportId.toString(),
+			videoDuration: exportData!.videoLength,
+			targetWidth: exportData!.videoDimensions.width,
+			targetHeight: exportData!.videoDimensions.height
+		});
+	}
+
+	async function takeScreenshot(fileName: string) {
+		// L'élément à transformer en image
+		let node = document.getElementById('preview')!;
+
+		// Qualité de l'image
+		let scale = 1.0;
+
+		// Utilisation de DomToImage pour transformer la div en image
+		try {
+			const dataUrl = await DomToImage.toPng(node, {
+				width: node.clientWidth * scale,
+				height: node.clientHeight * scale,
+				style: {
+					// Set de la qualité
+					transform: 'scale(' + scale + ')',
+					transformOrigin: 'top left'
+				}
+			});
+
+			// Si on est en mode portrait, on crop pour avoir un ratio 9:16
+			let finalDataUrl = dataUrl;
+
+			// with tauri, save the image to the desktop
+			const filePathWithName = await join(ExportService.exportFolder, exportId, fileName + '.png');
+
+			// Convertir dataUrl base64 en ArrayBuffer sans utiliser fetch
+			const base64Data = finalDataUrl.replace(/^data:image\/png;base64,/, '');
+			const binaryString = window.atob(base64Data);
+			const bytes = new Uint8Array(binaryString.length);
+			for (let i = 0; i < binaryString.length; i++) {
+				bytes[i] = binaryString.charCodeAt(i);
+			}
+
+			await writeFile(filePathWithName, bytes, { baseDir: BaseDirectory.AppData });
+		} catch (error: any) {
+			console.error('Error while taking screenshot: ', error);
+			toast.error('Error while taking screenshot: ' + error.message);
+		}
+	}
+</script>
+
+{#if globalState.currentProject}
+	<div class="absolute inset-0 w-screen h-screen">
+		<VideoPreview bind:this={videoPreview} showControls={false} />
+		<div class="hidden">
+			<Timeline />
+		</div>
+	</div>
+{/if}
