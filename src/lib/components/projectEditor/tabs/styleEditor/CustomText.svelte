@@ -11,13 +11,14 @@
 			verticalPosition: customText.getStyle('vertical-position')?.value as number,
 			horizontalPosition: customText.getStyle('horizontal-position')?.value as number,
 			text: customText.getStyle('text')?.value as string,
+
 			opacity: () => {
 				const alwaysShow = customText.getStyle('always-show')?.value as number;
+				const maxOpacity = Number(customText.getStyle('opacity')?.value ?? 1);
 
-				// Si on veut toujours qu'il soit affiché, alors on retourne une opacité de 1
-				if (alwaysShow) return 1;
+				// Si on veut toujours qu'il soit affiché, alors on retourne l'opacité max
+				if (alwaysShow) return maxOpacity;
 
-				// En fonction de son temps d'apparition et de la valeur du fondu
 				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number;
 				const currentTime = globalState.getTimelineState.cursorPosition;
 
@@ -27,20 +28,26 @@
 				// Avant l'apparition
 				if (currentTime < startTime) return 0;
 
+				// Si la durée de fondu est nulle ou négative, on bascule directement entre 0 et maxOpacity
+				if (fadeDuration <= 0) {
+					if (currentTime >= startTime && currentTime <= endTime) return maxOpacity;
+					return 0;
+				}
+
 				// Fondu entrant : startTime -> startTime + fadeDuration
 				if (currentTime >= startTime && currentTime < startTime + fadeDuration) {
-					if (fadeDuration <= 0) return 1;
-					return Math.max(0, Math.min(1, (currentTime - startTime) / fadeDuration));
+					const t = (currentTime - startTime) / fadeDuration;
+					return Math.max(0, Math.min(1, t)) * maxOpacity;
 				}
 
 				// Pleine opacité entre la fin du fondu entrant et le début du fondu sortant
 				if (currentTime >= startTime + fadeDuration && currentTime < endTime - fadeDuration)
-					return 1;
+					return maxOpacity;
 
 				// Fondu sortant : endTime - fadeDuration -> endTime
 				if (currentTime >= endTime - fadeDuration && currentTime <= endTime) {
-					if (fadeDuration <= 0) return 0;
-					return Math.max(0, Math.min(1, (endTime - currentTime) / fadeDuration));
+					const t = (endTime - currentTime) / fadeDuration;
+					return Math.max(0, Math.min(1, t)) * maxOpacity;
 				}
 
 				// Après la disparition
@@ -59,8 +66,9 @@
 		min: verticalStyle.valueMin,
 		max: verticalStyle.valueMax
 	}}
-	class="absolute cursor-move select-none"
+	class="absolute customtext cursor-move select-none"
 	style={`transform: translateY(${customTextSettings().verticalPosition}px) translateX(${customTextSettings().horizontalPosition}px); opacity: ${customTextSettings().opacity()}`}
+	data-maxopacity={customText.getStyle('opacity')?.value}
 >
 	<CompositeText compositeStyle={customText.getCompositeStyle()!}>
 		{customTextSettings().text}

@@ -268,6 +268,7 @@ export class ProjectTranslation extends SerializableBase {
 
 	getPredefinedSubtitleTranslation(edition: Edition, type: string): PredefinedSubtitleTranslation {
 		const lang = globalState.availableTranslations[edition.language];
+		console.log(lang, globalState.availableTranslations, edition.language);
 		switch (type) {
 			case 'Basmala':
 				return new PredefinedSubtitleTranslation(lang.basmala);

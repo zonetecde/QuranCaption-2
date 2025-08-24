@@ -47,7 +47,6 @@
 		} else {
 			// Sinon on applique le changement de sous-titre
 			const subtitleTrack = globalState.getSubtitleTrack;
-			await ProjectTranslation.loadAvailableTranslations();
 			subtitleTrack.editSubtitleToSpecial(
 				globalState.getSubtitlesEditorState.editSubtitle!,
 				//@ts-ignore

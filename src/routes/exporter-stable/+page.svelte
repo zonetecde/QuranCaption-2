@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { VerseRange, type AssetClip } from '$lib/classes';
+	import { PredefinedSubtitleClip, VerseRange, type AssetClip } from '$lib/classes';
 	import Timeline from '$lib/components/projectEditor/timeline/Timeline.svelte';
 	import VideoPreview from '$lib/components/projectEditor/videoPreview/VideoPreview.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
@@ -8,16 +8,17 @@
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { listen } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';
-	import { exists, BaseDirectory, mkdir } from '@tauri-apps/plugin-fs';
+	import { exists, BaseDirectory, mkdir, writeFile } from '@tauri-apps/plugin-fs';
 	import { LogicalPosition } from '@tauri-apps/api/dpi';
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
-	import { join } from '@tauri-apps/api/path';
+	import { appDataDir, join } from '@tauri-apps/api/path';
 	import ExportService, { type ExportProgress } from '$lib/services/ExportService';
 	import { getAllWindows } from '@tauri-apps/api/window';
 	import Exportation, { ExportState } from '$lib/classes/Exportation.svelte';
-	import { writeFile } from '@tauri-apps/plugin-fs';
 	import toast from 'svelte-5-french-toast';
 	import DomToImage from 'dom-to-image';
+	import SubtitleClip from '$lib/components/projectEditor/timeline/track/SubtitleClip.svelte';
+	import { ClipWithTranslation } from '$lib/classes/Clip.svelte';
 
 	// Indique si l'enregistrement a commencé
 	let readyToExport = $state(false);
@@ -109,6 +110,7 @@
 			});
 
 			// Supprime le fichier projet JSON
+			// TODO: uncomment this when the export is fully working
 			// ExportService.deleteProjectFile(Number(id));
 
 			// Récupère les données d'export
@@ -136,16 +138,114 @@
 			} while (!videoElement);
 
 			// Attend 2 secondes que tout soit prêt
-			await new Promise((resolve) => setTimeout(resolve, 4000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			readyToExport = true;
 
-			// Joue la vidéo pendant que le MediaRecorder record
-			videoPreview!.togglePlayPause();
+			// Calcul direct des timings de screenshots sans scruter le DOM / videoPreview
+			// Règles (commentaires d'origine):
+			// - Fin du fade-in
+			// - 10 frames avant le début du fade-out
+			// - Fin du fade-out
+			if (exportData) {
+				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number; // ms
+				const FRAME_RATE = 30; // TODO: rendre dynamique si disponible
+				const FRAME_DURATION = 1000 / FRAME_RATE; // ms
+				const FRAMES_BEFORE_FADE_OUT = 10;
+				const BEFORE_FADE_OUT_OFFSET = FRAME_DURATION * FRAMES_BEFORE_FADE_OUT;
 
-			setTimeout(() => {
-				takeScreenshot('test_screenshot');
-			}, 2000);
+				const exportStart = Math.round(exportData.videoStartTime);
+				const exportEnd = Math.round(exportData.videoEndTime);
+
+				let timingsToTakeScreenshots: number[] = [exportStart, exportEnd];
+
+				function add(t: number | undefined) {
+					if (t === undefined) return;
+					if (t < exportStart || t > exportEnd) return;
+					timingsToTakeScreenshots.push(Math.round(t));
+				}
+
+				// --- Sous-titres ---
+				// Logique d'opacité dans VideoOverlay.svelte : fade-in et fade-out occupent chacun fadeDuration/2
+				const halfFade = fadeDuration / 2;
+				for (const clip of globalState.getSubtitleTrack.clips) {
+					if (!(clip instanceof ClipWithTranslation)) continue;
+
+					// Doit avoir startTime / endTime
+					// @ts-ignore (structure attendue: startTime, endTime)
+					const { startTime, endTime } = clip as any;
+					if (startTime == null || endTime == null) continue;
+					if (endTime < exportStart || startTime > exportEnd) continue;
+
+					const duration = endTime - startTime;
+					if (duration <= 0) continue;
+
+					// Fin fade-in (si durée suffisante)
+					const fadeInEnd = startTime + Math.min(halfFade, Math.max(0, duration));
+					add(fadeInEnd);
+
+					// Début fade-out = endTime - halfFade (si durée > halfFade)
+					const fadeOutStart = endTime - Math.min(halfFade, Math.max(0, duration));
+					// 10 frames avant fade-out
+					add(fadeOutStart - BEFORE_FADE_OUT_OFFSET);
+
+					// Fin fade-out = endTime
+					add(endTime);
+				}
+
+				// --- Custom Texts ---
+				// Opacité définie dans CustomText.svelte :
+				// fade-in: start -> start + fadeDuration
+				// plein: start + fadeDuration -> end - fadeDuration
+				// fade-out: end - fadeDuration -> end
+				for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+					// Chaque clip a une category avec styles 'time-appearance', 'time-disappearance', 'always-show', 'opacity'
+					// @ts-ignore
+					const category = ctClip.category;
+					if (!category) continue;
+					const alwaysShow = (category.getStyle('always-show')?.value as number) || 0;
+					const startTime = category.getStyle('time-appearance')?.value as number;
+					const endTime = category.getStyle('time-disappearance')?.value as number;
+					if (startTime == null || endTime == null) continue;
+					if (endTime < exportStart || startTime > exportEnd) continue;
+					const duration = endTime - startTime;
+					if (duration <= 0) continue;
+
+					if (alwaysShow) {
+						// Pas de fade => juste deux points potentiels (apparition/disparition) ?
+						add(startTime);
+						add(endTime);
+						continue;
+					}
+
+					const fadeInEnd = startTime + Math.min(fadeDuration, Math.max(0, duration));
+					add(fadeInEnd);
+					const fadeOutStart = endTime - Math.min(fadeDuration, Math.max(0, duration));
+					add(fadeOutStart - BEFORE_FADE_OUT_OFFSET);
+					add(endTime);
+				}
+
+				// Nettoyage
+				const uniqueSorted = Array.from(new Set(timingsToTakeScreenshots))
+					.filter((t) => t >= exportStart && t <= Math.round(exportEnd))
+					.sort((a, b) => a - b);
+
+				console.log('Timings détectés (calcul direct):', uniqueSorted);
+
+				for (const timing of uniqueSorted) {
+					globalState.getTimelineState.movePreviewTo = timing;
+					globalState.getTimelineState.cursorPosition = timing;
+					console.log('Moved to timing:', timing);
+					await new Promise((resolve) => setTimeout(resolve, 100));
+					await takeScreenshot(`${Math.round(timing - exportStart)}`);
+				}
+
+				// Démarre l'export dans Rust
+				await invoke('start_export', {
+					exportId: exportId,
+					imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId)
+				});
+			}
 		}
 	});
 

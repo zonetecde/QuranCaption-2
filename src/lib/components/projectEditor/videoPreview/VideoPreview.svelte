@@ -7,9 +7,9 @@
 	import toast from 'svelte-5-french-toast';
 	import ShortcutService from '$lib/services/ShortcutService';
 	import VideoPreviewControlsBar from './VideoPreviewControlsBar.svelte';
-	import VideoOverlay from '../tabs/styleEditor/VideoOverlay.svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import ModalManager from '$lib/components/modals/ModalManager';
+	import VideoOverlay from './VideoOverlay.svelte';
 
 	let {
 		showControls

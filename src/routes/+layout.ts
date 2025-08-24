@@ -1,3 +1,4 @@
+import { ProjectTranslation } from '$lib/classes';
 import { Quran } from '$lib/classes/Quran';
 import RecitersManager from '$lib/classes/Reciter';
 import Settings from '$lib/classes/Settings.svelte';
@@ -23,6 +24,9 @@ ExportService.loadExports();
 
 // Charge les paramètres utilisateur
 Settings.load();
+
+// Charge les traductions si pas déjà fait
+ProjectTranslation.loadAvailableTranslations();
 
 // main.ts ou entrypoint
 window.addEventListener('error', (event) => {

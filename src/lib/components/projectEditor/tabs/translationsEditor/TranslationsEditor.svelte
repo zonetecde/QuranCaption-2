@@ -9,11 +9,6 @@
 	import Workspace from './workspace/Workspace.svelte';
 
 	let addTranslationModalVisibility = $state(false);
-
-	onMount(() => {
-		// Récupère toutes les traductions disponibles
-		ProjectTranslation.loadAvailableTranslations();
-	});
 </script>
 
 <div class="flex-grow w-full max-w-full flex overflow-hidden h-full min-h-0">

@@ -1,20 +1,13 @@
 <script lang="ts">
-	import {
-		CustomTextClip,
-		PredefinedSubtitleClip,
-		ProjectEditorTabs,
-		SubtitleClip,
-		TrackType,
-		Translation
-	} from '$lib/classes';
+	import { CustomTextClip, ProjectEditorTabs, SubtitleClip, Translation } from '$lib/classes';
+	import type { StyleCategoryName } from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { verticalDrag } from '$lib/services/verticalDrag';
 	import { untrack } from 'svelte';
-	import SurahName from './SurahName.svelte';
-	import CustomText from './CustomText.svelte';
-	import ReciterName from './ReciterName.svelte';
-	import VerseNumber from './VerseNumber.svelte';
-	import { type StyleCategoryName } from '$lib/classes/VideoStyle.svelte';
+	import ReciterName from '../tabs/styleEditor/ReciterName.svelte';
+	import SurahName from '../tabs/styleEditor/SurahName.svelte';
+	import VerseNumber from '../tabs/styleEditor/VerseNumber.svelte';
+	import CustomText from '../tabs/styleEditor/CustomText.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getStyle('global', 'fade-duration').value as number;
@@ -207,6 +200,9 @@
 						getTailwind('arabic') +
 						helperStyles('arabic')}
 					style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', subtitle.id)};"
+					data-maxopacity={globalState.getVideoStyle
+						.getStylesOfTarget('arabic')
+						.getEffectiveValue('opacity', subtitle.id)}
 				>
 					{subtitle.getText()}
 				</p>
@@ -230,10 +226,13 @@
 							styleId: 'vertical-position'
 						}}
 						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
-						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, currentSubtitle()!.id)}`}
+						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id)}`}
+						data-maxopacity={globalState.getVideoStyle
+							.getStylesOfTarget(edition)
+							.getEffectiveValue('opacity', subtitle!.id)}
 					>
 						{#if translation.type === 'verse'}
-							{translation.getText(edition, (currentSubtitle() as SubtitleClip)!)}
+							{translation.getText(edition, (subtitle as SubtitleClip)!)}
 						{:else}
 							{translation.getText()}
 						{/if}
@@ -244,6 +243,7 @@
 
 		<SurahName />
 		<ReciterName />
+
 		{#if currentSubtitle() && currentSubtitle() instanceof SubtitleClip}
 			<VerseNumber
 				currentSurah={(currentSubtitle() as SubtitleClip).surah}

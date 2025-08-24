@@ -75,9 +75,6 @@
 	}
 
 	async function importSingleProject(qc2Dir: string, fileName: string) {
-		// Load translations if not already loaded
-		await ProjectTranslation.loadAvailableTranslations();
-
 		// Use the service method to import the project
 		await MigrationService.importSingleProjectFromV2(qc2Dir, fileName);
 	}
