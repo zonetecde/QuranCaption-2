@@ -443,123 +443,104 @@ async fn add_audio_to_video(file_name: String, final_file_path: String, audios: 
 }
 
 #[tauri::command]
-async fn start_export(export_id: String, imgs_folder: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, app_handle: tauri::AppHandle) -> Result<String, String> {
     println!("[start_export] ===== DÉBUT EXPORT {} =====", export_id);
-    println!("[start_export] imgs_folder fourni: {}", imgs_folder);
+    println!("[start_export] imgs_folder: {}", imgs_folder);
+    println!("[start_export] start_time(ms): {} end_time(ms): {}", start_time, end_time);
+    println!("[start_export] audios fournis: {}", audios.len());
     let export_dir = Path::new(&imgs_folder);
+    if !export_dir.exists() { return Err(format!("Le dossier d'export n'existe pas: {}", export_dir.display())); }
 
-    if !export_dir.exists() {
-        println!("[start_export][ERREUR] Dossier d'export introuvable: {}", export_dir.display());
-        return Err(format!("Le dossier d'export n'existe pas: {}", export_dir.display()));
-    }
-
-    // Récupération des images PNG avec leur timestamp (nom de fichier sans extension)
+    // Collecte images
     let mut entries: Vec<(u64, std::path::PathBuf)> = Vec::new();
     for entry in fs::read_dir(&export_dir).map_err(|e| format!("Impossible de lire le dossier export: {e}"))? {
-        match entry {
-            Ok(entry_ok) => {
-                let path = entry_ok.path();
-                let is_png = path.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("png")).unwrap_or(false);
-                if is_png {
-                    if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
-                        match stem.parse::<u64>() {
-                            Ok(ts) => {
-                                entries.push((ts, path.clone()));
-                            }
-                            Err(e) => {
-                                println!("[start_export][WARN] Nom de fichier NON parsé en timestamp: {} ({e})", path.display());
-                            }
-                        }
-                    }
-                } else {
-                    println!("[start_export][INFO] Fichier ignoré (pas png): {}", path.display());
-                }
-            }
-            Err(e) => println!("[start_export][WARN] Impossible de lire une entrée: {e}"),
-        }
+        if let Ok(e) = entry { let p = e.path(); if p.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("png")).unwrap_or(false) { if let Some(stem) = p.file_stem().and_then(|s| s.to_str()) { if let Ok(ts) = stem.parse::<u64>() { entries.push((ts, p.clone())); } else { println!("[start_export][WARN] Nom non parsé: {}", p.display()); } } } }
     }
-
-    if entries.is_empty() {
-        println!("[start_export][ERREUR] Aucune image trouvée dans {}", export_dir.display());
-        return Err("Aucune image trouvée pour l'export".to_string());
-    }
-
+    if entries.is_empty() { return Err("Aucune image trouvée pour l'export".to_string()); }
     entries.sort_by_key(|(ts, _)| *ts);
-    println!("[start_export] {} images trouvées triées:", entries.len());
-    for (i, (ts, p)) in entries.iter().enumerate() {
-        println!("  [{}] {} ms -> {}", i, ts, p.display());
-    }
+    println!("[start_export] {} images", entries.len());
 
-    // Calcul des durées
+    // Durées des images
     let mut durations: Vec<f64> = Vec::new();
-    for i in 0..entries.len() - 1 {
-        let (t_curr, _) = entries[i];
-        let (t_next, _) = entries[i + 1];
-        let diff_ms = if t_next > t_curr { t_next - t_curr } else { 0 };
-        durations.push(diff_ms as f64 / 1000.0);
-    }
-    durations.push(1.0); // dernière image
-
-    println!("[start_export] Durées initiales (s): {:?}", durations);
-
+    for i in 0..entries.len() - 1 { let (t0, _) = entries[i]; let (t1, _) = entries[i + 1]; let diff = t1.saturating_sub(t0); durations.push(diff as f64 / 1000.0); }
+    durations.push(1.0);
     for d in &mut durations { if *d < 0.01 { *d = 0.01; } }
     let min_d = durations.iter().cloned().fold(f64::INFINITY, f64::min);
-    let mut crossfade = 0.3_f64;
-    if min_d < crossfade * 1.2 { crossfade = (min_d * 0.5).max(0.05); }
+    let mut crossfade = 0.3; if min_d < crossfade * 1.2 { crossfade = (min_d * 0.5).max(0.05); }
     for d in &mut durations { if *d < crossfade { *d = crossfade; } }
+    println!("[start_export] Durées images: {:?} crossfade={:.3}", durations, crossfade);
 
-    println!("[start_export] Durées ajustées (s): {:?}", durations);
-    println!("[start_export] Crossfade utilisé: {:.3} s", crossfade);
+    // Audio handling
+    let start_time_seconds = start_time / 1000.0;
+    println!("[start_export] start_time_seconds audio: {:.3}", start_time_seconds);
 
-    // ffmpeg path
+    // ffmpeg
     let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
-    if !ffmpeg_path.exists() { println!("[start_export][ERREUR] ffmpeg introuvable: {}", ffmpeg_path.display()); return Err("ffmpeg introuvable dans ./binaries".to_string()); }
-
+    if !ffmpeg_path.exists() { return Err("ffmpeg introuvable dans ./binaries".to_string()); }
     let output_path = export_dir.join("video_no_audio.mp4");
-    println!("[start_export] Fichier de sortie: {}", output_path.display());
 
     let mut cmd_args: Vec<String> = Vec::new();
     cmd_args.push("-y".into());
 
-    // Inputs
+    // Inputs images
     for (i, (_ts, path)) in entries.iter().enumerate() {
         cmd_args.push("-loop".into()); cmd_args.push("1".into());
         cmd_args.push("-t".into()); cmd_args.push(format!("{:.3}", durations[i]));
         cmd_args.push("-i".into()); cmd_args.push(path.to_string_lossy().to_string());
     }
 
-    // Filter
+    // Inputs audio
+    for a in &audios { cmd_args.push("-i".into()); cmd_args.push(a.clone()); }
+
+    // Construction filter_complex
     let mut filter = String::new();
+    // --- Vidéo ---
     if entries.len() == 1 {
         filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
     } else {
-        // Normaliser chaque entrée (fps / format / sar) AVANT les xfade pour éviter les timebase différents
-        for i in 0..entries.len() {
-            filter.push_str(&format!("[{idx}:v]fps=30,format=yuv420p,setsar=1:1[v{idx}];", idx = i));
-        }
+        for i in 0..entries.len() { filter.push_str(&format!("[{i}:v]fps=30,format=yuv420p,setsar=1:1[v{i}];")); }
         let mut output_len_prev = durations[0];
         let mut current_label = String::from("v0");
         for i in 1..entries.len() {
-            let next_input = format!("v{}", i); // déjà normalisé
+            let next_input = format!("v{}", i);
             let out_label = if i == entries.len() - 1 { "vout".to_string() } else { format!("vx{}", i) };
             let offset = (output_len_prev - crossfade).max(0.0);
-            filter.push_str(&format!(
-                "[{curr}][{next}]xfade=transition=fade:duration={dur}:offset={off}[{out}];",
-                curr = current_label,
-                next = next_input,
-                dur = format!("{:.3}", crossfade),
-                off = format!("{:.3}", offset),
-                out = out_label
-            ));
+            filter.push_str(&format!("[{curr}][{next}]xfade=transition=fade:duration={dur}:offset={off}[{out}];", curr=current_label, next=next_input, dur=format!("{:.3}", crossfade), off=format!("{:.3}", offset), out=out_label));
             output_len_prev = output_len_prev + durations[i] - crossfade;
             current_label = out_label;
         }
         if filter.ends_with(';') { filter.pop(); }
     }
-    println!("[start_export] filter_complex (normalisé): {}", filter);
+
+    // --- Audio --- (similaire à add_audio_to_video)
+    if !audios.is_empty() {
+        let audio_input_start = entries.len();
+        let mut audio_durations = Vec::new();
+        for (idx, audio_file) in audios.iter().enumerate() {
+            match get_duration(audio_file) { Ok(ms) => { let s = (ms.max(0) as f64)/1000.0; audio_durations.push(s); println!("[start_export] Durée audio {} = {:.3}s", idx, s); }, Err(e) => { println!("[start_export][WARN] Durée audio inconnue {}: {}", audio_file, e); audio_durations.push(0.0);} }
+        }
+        let mut current_audio_time = 0.0;
+        let mut audio_filters: Vec<String> = Vec::new();
+        let mut input_index = audio_input_start; // index ffmpeg des audios
+        for &audio_duration in audio_durations.iter() {
+            let audio_end_time = current_audio_time + audio_duration;
+            if start_time_seconds >= audio_end_time { current_audio_time = audio_end_time; input_index += 1; continue; }
+            if start_time_seconds >= current_audio_time && start_time_seconds < audio_end_time { let skip = start_time_seconds - current_audio_time; audio_filters.push(format!("[{idx}:a]atrim=start={skip},asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index)); } else { audio_filters.push(format!("[{idx}:a]asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index)); }
+            current_audio_time = audio_end_time; input_index += 1;
+        }
+        if audio_filters.is_empty() { println!("[start_export][WARN] Aucun segment audio retenu"); }
+
+        if !audio_filters.is_empty() {
+            if !filter.is_empty() && !filter.ends_with(';') { filter.push(';'); }
+            if audio_filters.len() == 1 { filter.push_str(&audio_filters[0]); } else { filter.push_str(&audio_filters.join(";")); filter.push(';'); for i in 0..audio_filters.len() { filter.push_str(&format!("[a{}]", i)); } filter.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len())); }
+        }
+    }
+
+    println!("[start_export] filter_complex final: {}", filter);
 
     cmd_args.push("-filter_complex".into()); cmd_args.push(filter.clone());
     cmd_args.push("-map".into()); cmd_args.push("[vout]".into());
+    if !audios.is_empty() { cmd_args.push("-map".into()); cmd_args.push(if audios.len()==1 { "[a0]".into() } else { "[audio_out]".into() }); cmd_args.push("-c:a".into()); cmd_args.push("aac".into()); cmd_args.push("-b:a".into()); cmd_args.push("128k".into()); }
     cmd_args.push("-c:v".into()); cmd_args.push("libx264".into());
     cmd_args.push("-pix_fmt".into()); cmd_args.push("yuv420p".into());
     cmd_args.push("-movflags".into()); cmd_args.push("+faststart".into());
@@ -567,54 +548,23 @@ async fn start_export(export_id: String, imgs_folder: String, app_handle: tauri:
     cmd_args.push("-progress".into()); cmd_args.push("pipe:2".into());
     cmd_args.push(output_path.to_string_lossy().to_string());
 
-    println!("[start_export] Commande ffmpeg complète:");
-    print!("  {}", ffmpeg_path.display());
-    for a in &cmd_args { print!(" {}", a); }
-    println!("");
+    println!("[start_export] Commande:"); print!("  {}", ffmpeg_path.display()); for a in &cmd_args { print!(" {}", a); } println!("");
 
-    let mut cmd = TokioCommand::new(&ffmpeg_path);
-    cmd.args(&cmd_args);
-    cmd.stderr(std::process::Stdio::piped());
-    cmd.stdout(std::process::Stdio::piped());
+    let mut cmd = TokioCommand::new(&ffmpeg_path); cmd.args(&cmd_args); cmd.stderr(std::process::Stdio::piped()); cmd.stdout(std::process::Stdio::piped());
 
-    let total_video_duration: f64 = durations.iter().cloned().sum::<f64>() - crossfade * (entries.len() as f64 - 1.0);
-    println!("[start_export] Durée vidéo estimée: {:.3} s", total_video_duration);
+    let total_video_duration: f64 = durations.iter().sum::<f64>() - crossfade * (entries.len() as f64 - 1.0);
+    println!("[start_export] Durée vidéo estimée: {:.3}s", total_video_duration);
 
-    let mut child = cmd.spawn().map_err(|e| { println!("[start_export][ERREUR] spawn ffmpeg: {e}"); format!("Echec lancement ffmpeg: {e}") })?;
-
+    let mut child = cmd.spawn().map_err(|e| format!("Echec lancement ffmpeg: {e}"))?;
     let mut collected_stderr: Vec<String> = Vec::new();
+    if let Some(stderr) = child.stderr.take() { let reader = BufReader::new(stderr); let mut lines = reader.lines(); let time_regex = Regex::new(r"out_time_ms=(\\d+)").unwrap(); while let Some(line) = lines.next_line().await.unwrap_or(None) { let lt = line.trim().to_string(); if !lt.is_empty() { collected_stderr.push(lt.clone()); } if let Some(caps) = time_regex.captures(&lt) { if let Some(m) = caps.get(1) { if let Ok(us) = m.as_str().parse::<u64>() { let current = us as f64 / 1_000_000.0; if total_video_duration>0.0 { let progress = (current/total_video_duration*100.0).min(100.0); let _ = app_handle.emit("export-progress", serde_json::json!({"progress": progress, "current_time": current, "total_time": total_video_duration})); } else { let _ = app_handle.emit("export-progress", serde_json::json!({"progress": null, "current_time": current, "total_time": null})); } } } } } }
 
-    if let Some(stderr) = child.stderr.take() {
-        let reader = BufReader::new(stderr);
-        let mut lines = reader.lines();
-        let time_regex = Regex::new(r"out_time_ms=(\\d+)").unwrap();
-        while let Some(line) = lines.next_line().await.unwrap_or(None) {
-            let line_trim = line.trim().to_string();
-            if !line_trim.is_empty() { collected_stderr.push(line_trim.clone()); }
-            if let Some(caps) = time_regex.captures(&line_trim) {
-                if let Some(m) = caps.get(1) { if let Ok(us) = m.as_str().parse::<u64>() { let current_time = us as f64 / 1_000_000.0; if total_video_duration > 0.0 { let progress = (current_time / total_video_duration * 100.0).min(100.0); let _ = app_handle.emit("export-progress", serde_json::json!({"progress": progress, "current_time": current_time, "total_time": total_video_duration})); } else { let _ = app_handle.emit("export-progress", serde_json::json!({"progress": null, "current_time": current_time, "total_time": null})); } } }
-            }
-        }
-    }
-
-    let status = child.wait().await.map_err(|e| { println!("[start_export][ERREUR] attente ffmpeg: {e}"); format!("Echec attente ffmpeg: {e}") })?;
-    println!("[start_export] Code retour ffmpeg: {:?}", status.code());
-
-    if !status.success() {
-        println!("[start_export][ERREUR] ffmpeg a échoué. Dernières lignes stderr:");
-        for l in collected_stderr.iter().rev().take(30).rev() { println!("  | {}", l); }
-        let joined = collected_stderr.join("\n");
-        let _ = app_handle.emit("export-error", format!("ffmpeg a échoué lors de la génération vidéo\n{}", joined));
-        return Err("ffmpeg a échoué".to_string());
-    }
+    let status = child.wait().await.map_err(|e| format!("Echec attente ffmpeg: {e}"))?;
+    if !status.success() { for l in collected_stderr.iter().rev().take(30).rev() { println!("  | {}", l); } let joined = collected_stderr.join("\n"); let _ = app_handle.emit("export-error", format!("ffmpeg a échoué lors de la génération vidéo\n{}", joined)); return Err("ffmpeg a échoué".to_string()); }
 
     let output_str = output_path.to_string_lossy().to_string();
     println!("[start_export] ✓ Vidéo créée: {}", output_str);
-    let _ = app_handle.emit("export-complete", serde_json::json!({
-        "filename": output_path.file_name().and_then(|n| n.to_str()).unwrap_or("video_no_audio.mp4"),
-        "exportId": export_id
-    }));
-
+    let _ = app_handle.emit("export-complete", serde_json::json!({ "filename": output_path.file_name().and_then(|n| n.to_str()).unwrap_or("video_no_audio.mp4"), "exportId": export_id }));
     println!("[start_export] ===== FIN EXPORT {} =====", export_id);
     Ok(output_str)
 }

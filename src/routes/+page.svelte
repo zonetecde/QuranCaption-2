@@ -14,9 +14,9 @@
 
 		// got to /exporter-stable?id=1756049194288261
 		// redirect to /exporter-stable with id in query params
-		const urlParams = new URLSearchParams(window.location.search);
-		urlParams.set('id', '1756066859595278');
-		window.location.href = `/exporter-stable?${urlParams.toString()}`;
+		// const urlParams = new URLSearchParams(window.location.search);
+		// urlParams.set('id', '1756066859595278');
+		// window.location.href = `/exporter-stable?${urlParams.toString()}`;
 
 		/*
 

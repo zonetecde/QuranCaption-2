@@ -149,10 +149,8 @@
 			// - Fin du fade-out
 			if (exportData) {
 				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number; // ms
-				const FRAME_RATE = 30; // TODO: rendre dynamique si disponible
-				const FRAME_DURATION = 1000 / FRAME_RATE; // ms
-				const FRAMES_BEFORE_FADE_OUT = 10;
-				const BEFORE_FADE_OUT_OFFSET = FRAME_DURATION * FRAMES_BEFORE_FADE_OUT;
+				// Sous-titres: fade-in/out = fadeDuration/2 ; CustomText: fadeDuration complète
+				const halfFade = fadeDuration / 2;
 
 				const exportStart = Math.round(exportData.videoStartTime);
 				const exportEnd = Math.round(exportData.videoEndTime);
@@ -166,40 +164,30 @@
 				}
 
 				// --- Sous-titres ---
-				// Logique d'opacité dans VideoOverlay.svelte : fade-in et fade-out occupent chacun fadeDuration/2
-				const halfFade = fadeDuration / 2;
 				for (const clip of globalState.getSubtitleTrack.clips) {
-					if (!(clip instanceof ClipWithTranslation)) continue;
-
-					// Doit avoir startTime / endTime
-					// @ts-ignore (structure attendue: startTime, endTime)
+					// On limite aux types valides
+					// if (!(clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle')) continue;
+					// @ts-ignore
 					const { startTime, endTime } = clip as any;
 					if (startTime == null || endTime == null) continue;
 					if (endTime < exportStart || startTime > exportEnd) continue;
-
 					const duration = endTime - startTime;
 					if (duration <= 0) continue;
 
-					// Fin fade-in (si durée suffisante)
-					const fadeInEnd = startTime + Math.min(halfFade, Math.max(0, duration));
+					// Fin du fade-in (début + halfFade) – clamp si clip trop court
+					const fadeInEnd = Math.min(startTime + halfFade, endTime);
 					add(fadeInEnd);
 
-					// Début fade-out = endTime - halfFade (si durée > halfFade)
-					const fadeOutStart = endTime - Math.min(halfFade, Math.max(0, duration));
-					// 10 frames avant fade-out
-					add(fadeOutStart - BEFORE_FADE_OUT_OFFSET);
+					// Début du fade-out (fin - halfFade) si valable
+					const fadeOutStart = endTime - halfFade;
+					if (fadeOutStart > startTime) add(fadeOutStart);
 
-					// Fin fade-out = endTime
+					// Fin du fade-out (fin du clip)
 					add(endTime);
 				}
 
-				// --- Custom Texts ---
-				// Opacité définie dans CustomText.svelte :
-				// fade-in: start -> start + fadeDuration
-				// plein: start + fadeDuration -> end - fadeDuration
-				// fade-out: end - fadeDuration -> end
+				// --- Custom Texts --- (fade-in/out utilisent fadeDuration complète)
 				for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
-					// Chaque clip a une category avec styles 'time-appearance', 'time-disappearance', 'always-show', 'opacity'
 					// @ts-ignore
 					const category = ctClip.category;
 					if (!category) continue;
@@ -212,22 +200,27 @@
 					if (duration <= 0) continue;
 
 					if (alwaysShow) {
-						// Pas de fade => juste deux points potentiels (apparition/disparition) ?
+						// Pas de fade: on ne met pas de points intermédiaires (option: garder start/end si utile)
 						add(startTime);
 						add(endTime);
 						continue;
 					}
 
-					const fadeInEnd = startTime + Math.min(fadeDuration, Math.max(0, duration));
-					add(fadeInEnd);
-					const fadeOutStart = endTime - Math.min(fadeDuration, Math.max(0, duration));
-					add(fadeOutStart - BEFORE_FADE_OUT_OFFSET);
+					// Fin fade-in (début + fadeDuration)
+					const ctFadeInEnd = Math.min(startTime + fadeDuration, endTime);
+					add(ctFadeInEnd);
+
+					// Début fade-out (fin - fadeDuration)
+					const ctFadeOutStart = endTime - fadeDuration;
+					if (ctFadeOutStart > startTime) add(ctFadeOutStart);
+
+					// Fin fade-out
 					add(endTime);
 				}
 
 				// Nettoyage
 				const uniqueSorted = Array.from(new Set(timingsToTakeScreenshots))
-					.filter((t) => t >= exportStart && t <= Math.round(exportEnd))
+					.filter((t) => t >= exportStart && t <= exportEnd)
 					.sort((a, b) => a - b);
 
 				console.log('Timings détectés (calcul direct):', uniqueSorted);
@@ -235,15 +228,22 @@
 				for (const timing of uniqueSorted) {
 					globalState.getTimelineState.movePreviewTo = timing;
 					globalState.getTimelineState.cursorPosition = timing;
-					console.log('Moved to timing:', timing);
-					await new Promise((resolve) => setTimeout(resolve, 100));
+					await new Promise((resolve) => setTimeout(resolve, 50));
 					await takeScreenshot(`${Math.round(timing - exportStart)}`);
 				}
+
+				// Récupère le chemin de fichier de tout les audios du projet
+				const audios: string[] = globalState.getAudioTrack.clips.map(
+					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
+				);
 
 				// Démarre l'export dans Rust
 				await invoke('start_export', {
 					exportId: exportId,
-					imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId)
+					imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId),
+					startTime: globalState.getExportState.videoStartTime,
+					endTime: globalState.getExportState.videoEndTime,
+					audios: audios
 				});
 			}
 		}
