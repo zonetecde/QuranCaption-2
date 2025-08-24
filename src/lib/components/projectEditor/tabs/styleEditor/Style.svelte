@@ -30,7 +30,7 @@
 			globalState.getSectionsState[style.id] = {
 				extended: false
 			};
-		else expanded = globalState.getSectionsState[style.id].extended;
+		else extended = globalState.getSectionsState[style.id].extended;
 
 		// Si est un style composite
 		if (style.valueType === 'composite' && target) {
@@ -44,13 +44,13 @@
 		}
 	});
 
-	let expanded = $state(false);
+	let extended = $state(false);
 	let selectedOrientation = $state('landscape');
 	let selectedQuality = $state('1080p');
 
 	$effect(() => {
 		globalState.getSectionsState[style.id] = {
-			extended: expanded
+			extended: extended
 		};
 	});
 
@@ -231,7 +231,7 @@
 	 */
 	$effect(() => {
 		if (disabled) {
-			expanded = false; // Si le style est désactivé, on le ferme
+			extended = false; // Si le style est désactivé, on le ferme
 			return;
 		}
 	});
@@ -264,7 +264,7 @@
 
 <div
 	class={'flex flex-col duration-150 rounded-xl overflow-hidden ' +
-		(expanded ? 'bg-white/5 ring-1 ring-white/10 my-2' : 'hover:bg-white/5') +
+		(extended ? 'bg-white/5 ring-1 ring-white/10 my-2' : 'hover:bg-white/5') +
 		(isMixed()
 			? ' border border-fuchsia-400/60'
 			: isOverridden()
@@ -274,9 +274,13 @@
 	<!-- Header -->
 	<div
 		class={'flex items-center justify-between py-1.25 px-2 cursor-pointer select-none ' +
-			(expanded ? 'border-b border-white/10 ' : '') +
+			(extended ? 'border-b border-white/10 ' : '') +
 			(disabled ? 'opacity-50 pointer-events-none' : '')}
-		onclick={() => (expanded = !expanded)}
+		onclick={() => {
+			// Impossible d'étendre un style booléen, comme on a le switch directement pour le mettre en true/false
+			if (style.valueType !== 'boolean') extended = !extended;
+			else applyValue(!inputValue);
+		}}
 	>
 		<div class="flex items-center gap-2">
 			<span class="material-icons-outlined text-[20px]! text-secondary">{style.icon}</span>
@@ -304,6 +308,26 @@
 					{/if}
 				{:else if style.valueType === 'time'}
 					<span>{msToTimeValue(Number(inputValue))}</span>
+				{:else if style.valueType === 'boolean'}
+					<label class="inline-flex items-center cursor-pointer select-none scale-75 origin-right">
+						<input
+							type="checkbox"
+							class="sr-only peer"
+							checked={Boolean(inputValue)}
+							onchange={(e) => applyValue((e.target as HTMLInputElement).checked)}
+						/>
+						<div
+							class="relative w-11 h-6 rounded-full border border-white/10 bg-white/5
+           transition-colors duration-150 peer-checked:bg-blue-500
+           peer-checked:[&>span]:translate-x-5"
+						>
+							<span
+								class="absolute left-1 top-0.75 w-4 h-4 bg-white rounded-full shadow
+             transition-transform duration-150"
+							>
+							</span>
+						</div>
+					</label>
 				{:else}
 					<span class="truncate max-w-[140px]">{getStyleValue()}</span>
 				{/if}
@@ -325,7 +349,7 @@
 		{/key}
 	</div>
 
-	{#if expanded}
+	{#if extended}
 		<div class="my-2 px-2" transition:slide>
 			<p class="text-xs text-secondary mb-2 flex items-center gap-1">
 				<span class="material-icons-outlined text-[12px]">info</span>
@@ -380,19 +404,6 @@
 							oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
 						/>
 					</div>
-				</div>
-			{:else if style.valueType === 'boolean'}
-				<div class="flex gap-x-2 items-center mt-2">
-					<label class="inline-flex items-center cursor-pointer gap-2">
-						<input
-							type="checkbox"
-							checked={Boolean(inputValue)}
-							class=""
-							oninput={(e) => applyValue((e.target as HTMLInputElement).checked)}
-						/>
-
-						<span class="text-xs text-secondary">Enabled</span>
-					</label>
 				</div>
 			{:else if style.valueType === 'select'}
 				<div class="relative">
