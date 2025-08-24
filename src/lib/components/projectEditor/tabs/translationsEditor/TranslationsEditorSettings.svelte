@@ -127,6 +127,23 @@
 								<span class="material-icons text-base mr-2">auto_awesome</span>
 								Ask AI
 							</button>
+
+							{#if globalState.currentProject!.detail.translations[edition.author]}
+								<div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1 mt-3">
+									<span>Percentage done</span>
+									<span class="font-medium text-[var(--text-primary)]"
+										>{globalState.currentProject!.detail.translations[edition.author]}%</span
+									>
+								</div>
+								<div class="bg-[var(--border-color)] rounded h-2 overflow-hidden">
+									<div
+										class="bg-[var(--accent-primary)] h-full rounded transition-all duration-300 ease-in-out"
+										style="width: {globalState.currentProject!.detail.translations[
+											edition.author
+										]}%;"
+									></div>
+								</div>
+							{/if}
 						</Section>
 					</div>
 				{/if}
