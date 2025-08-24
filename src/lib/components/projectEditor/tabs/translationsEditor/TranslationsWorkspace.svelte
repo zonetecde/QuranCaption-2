@@ -6,6 +6,7 @@
 	import { onMount, untrack } from 'svelte';
 	import type { ClipWithTranslation } from '$lib/classes/Clip.svelte';
 	import NoTranslationsToShow from './NoTranslationsToShow.svelte';
+	import { Quran } from '$lib/classes/Quran';
 
 	function addTranslationButtonClick() {
 		// Affiche le pop-up pour ajouter une nouvelle traduction
@@ -163,12 +164,55 @@
 							<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
 						{/if}
 
-						<!-- Affiche le texte arabe -->
 						<section class="border border-color rounded px-4 py-4 text-primary">
+							<!-- Affiche le texte arabe -->
 							{#if subtitle instanceof SubtitleClip}
-								<p class="text-3xl arabic text-right" dir="rtl">
-									{subtitle.getTextWithVerseNumber()}
-								</p>
+								{@const words = subtitle.getTextWithVerseNumber().split(' ')}
+								<div class="text-3xl flex flex-row arabic text-right gap-x-2" dir="rtl">
+									{#each words as word, i}
+										{@const wordIndex = subtitle.startWordIndex + i}
+										<div
+											class="word group flex flex-col items-center gap-y-2 relative"
+											role="button"
+											tabindex="0"
+											onmouseenter={(e) => {
+												// Ne charge la traduction que si ce n'est pas le numéro de verset
+												if (i !== words.length - 1 || !subtitle.isLastWordsOfVerse) {
+													const target = e.currentTarget;
+													const tooltip = target.querySelector(
+														'.word-translation-tooltip'
+													) as HTMLElement;
+													if (tooltip && !tooltip.dataset.loaded) {
+														// Marque comme chargé pour éviter les rechargements
+														tooltip.dataset.loaded = 'true';
+														// Charge et affiche la traduction
+														Quran.getVerse(subtitle.surah, subtitle.verse).then((verse) => {
+															if (verse) {
+																const translation = verse.getWordByWordTranslationBetweenTwoIndexes(
+																	wordIndex,
+																	wordIndex
+																);
+																tooltip.textContent = translation;
+															}
+														});
+													}
+												}
+											}}
+										>
+											<span>{word + ' '}</span>
+
+											<!-- Si ce n'est pas le numéro de verset -->
+											{#if i !== words.length - 1 || !subtitle.isLastWordsOfVerse}
+												<span
+													class="word-translation-tooltip group-hover:block hidden text-sm absolute top-10 w-max px-1.5 bg-slate-700 border-slate-800 border-2 rounded-lg text-center"
+													dir="ltr"
+												>
+													<!-- Le contenu est chargé dynamiquement lors du survol -->
+												</span>
+											{/if}
+										</div>
+									{/each}
+								</div>
 
 								<p class="text-sm text-thirdly text-left mt-1" dir="rtl">
 									{subtitle.wbwTranslation}
@@ -177,6 +221,7 @@
 								<p class="text-3xl arabic text-right" dir="rtl">{subtitle.text}</p>
 							{/if}
 
+							<!-- Affiche les éditions de traduction -->
 							{#each editionsToShowInEditor() as edition, j}
 								{#if allowedTranslations[subtitle.id].includes(edition.name)}
 									<TranslationEdition
