@@ -177,6 +177,20 @@ export class Style extends SerializableBase {
 		Object.assign(this, init);
 	}
 
+	getCategory(): string {
+		for (const category of globalState.getVideoStyle.getStylesOfTarget('arabic').categories) {
+			if (category.styles.some((style) => style.id === this.id)) {
+				return category.id;
+			}
+		}
+		for (const category of globalState.getVideoStyle.getStylesOfTarget('global').categories) {
+			if (category.styles.some((style) => style.id === this.id)) {
+				return category.id;
+			}
+		}
+		return '';
+	}
+
 	/**
 	 * Méthode utile uniquement si valueType est composite.
 	 * Génère le CSS d'un style composite
@@ -306,7 +320,7 @@ export class StylesData extends SerializableBase {
 	/**
 	 * Génère le CSS pour tous les styles actifs (fusion globale + overrides clip si fournis)
 	 */
-	generateCSS(clipId?: number): string {
+	generateCSS(clipId?: number, excludedCategories: string[] = []): string {
 		let css = '';
 
 		for (const category of this.categories) {
@@ -324,6 +338,11 @@ export class StylesData extends SerializableBase {
 					} else {
 						continue; // ne pas générer la règle pour le flag lui-même
 					}
+				}
+
+				// Si la catégorie est dans la liste des catégories à exclure, on skip tout le CSS
+				if (excludedCategories.includes(style.getCategory())) {
+					continue;
 				}
 
 				if (skipCategory) break;

@@ -68,7 +68,6 @@
 	}}
 	class="absolute customtext cursor-move select-none"
 	style={`transform: translateY(${customTextSettings().verticalPosition}px) translateX(${customTextSettings().horizontalPosition}px); opacity: ${customTextSettings().opacity()}`}
-	data-maxopacity={customText.getStyle('opacity')?.value}
 >
 	<CompositeText compositeStyle={customText.getCompositeStyle()!}>
 		{customTextSettings().text}

@@ -66,8 +66,10 @@
 		return maxOpacity;
 	});
 
-	let getCss = $derived((target: string, clipId?: number) => {
-		return globalState.getVideoStyle.getStylesOfTarget(target).generateCSS(clipId);
+	let getCss = $derived((target: string, clipId?: number, excludedCategories: string[] = []) => {
+		return globalState.getVideoStyle
+			.getStylesOfTarget(target)
+			.generateCSS(clipId, excludedCategories);
 	});
 
 	let getTailwind = $derived((target: string) => {
@@ -192,6 +194,14 @@
 			{#if currentSubtitle()}
 				{@const subtitle = currentSubtitle()}
 				{#if subtitle && subtitle.id}
+					<!-- Background du sous-titre -->
+					<div
+						class={'arabic absolute subtitle select-none' +
+							getTailwind('arabic') +
+							helperStyles('arabic')}
+						style="{getCss('arabic', subtitle.id)};"
+					></div>
+
 					<p
 						ondblclick={() => {
 							globalState.getVideoStyle.highlightCategory('arabic', 'general');
@@ -203,10 +213,10 @@
 						class={'arabic absolute subtitle select-none ' +
 							getTailwind('arabic') +
 							helperStyles('arabic')}
-						style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', subtitle.id)};"
-						data-maxopacity={globalState.getVideoStyle
-							.getStylesOfTarget('arabic')
-							.getEffectiveValue('opacity', subtitle.id)}
+						style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', subtitle.id, [
+							'background',
+							'border'
+						])};"
 					>
 						{subtitle.getText()}
 					</p>
@@ -218,6 +228,14 @@
 					]}
 
 					{#if globalState.getVideoStyle.doesTargetStyleExist(edition)}
+						<!-- Background du sous-titre -->
+						<div
+							class={'translation absolute subtitle select-none' +
+								getTailwind(edition) +
+								helperStyles(edition)}
+							style="{getCss(edition)};"
+						></div>
+
 						<p
 							ondblclick={() => {
 								globalState.getVideoStyle.highlightCategory(
@@ -230,10 +248,10 @@
 								styleId: 'vertical-position'
 							}}
 							class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
-							style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id)}`}
-							data-maxopacity={globalState.getVideoStyle
-								.getStylesOfTarget(edition)
-								.getEffectiveValue('opacity', subtitle!.id)}
+							style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id, [
+								'background',
+								'border'
+							])};`}
 						>
 							{#if translation.type === 'verse'}
 								{translation.getText(edition, (subtitle as SubtitleClip)!)}
