@@ -29,10 +29,6 @@
 			return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 		}
 	}
-
-	let videoDimensions = $derived(async () => {
-		return await Exporter.getRealExportDimensions(globalState.currentProject!);
-	});
 </script>
 
 <!-- Export Video Configuration -->
@@ -93,6 +89,11 @@
 	<div class="mb-6">
 		<h4 class="text-base font-medium text-secondary mb-3">Video Quality & Orientation</h4>
 		<div class="bg-accent rounded-lg p-4 border border-color">
+			<p class="text-thirdly text-sm mb-4">
+				Set the resolution and orientation for the exported video. Higher resolutions offer better
+				quality but may increase export time.
+			</p>
+
 			<Style
 				style={globalState.getStyle('global', 'video-dimension')!}
 				target={'global'}
@@ -103,44 +104,21 @@
 			/>
 		</div>
 	</div>
-
-	<!-- Export Settings -->
 	<div class="mb-6">
-		<h4 class="text-base font-medium text-secondary mb-3">Export Information</h4>
+		<h4 class="text-base font-medium text-secondary mb-3">FPS</h4>
 		<div class="bg-accent rounded-lg p-4 border border-color">
-			<div class="space-y-3">
-				<div class="flex items-start gap-3">
-					<div class="w-2 h-2 bg-accent-primary rounded-full mt-2 flex-shrink-0"></div>
-					<div>
-						<span class="text-secondary text-sm font-medium">Screen Recording</span>
-						<p class="text-thirdly text-xs mt-1">
-							The video will be exported by recording the screen during playback
-						</p>
-					</div>
-				</div>
-				<div class="flex items-start gap-3">
-					<div class="w-2 h-2 bg-accent-primary rounded-full mt-2 flex-shrink-0"></div>
-					<div>
-						<span class="text-secondary text-sm font-medium">Quality Settings</span>
-						{#await videoDimensions() then dimensions}
-							<p class="text-thirdly text-xs mt-1">
-								The video will be recorded at {dimensions.width}x{dimensions.height} resolution due to
-								your screen resolution limitations. It will then be processed to match your project's
-								Style settings.
-							</p>
-						{/await}
-					</div>
-				</div>
-				<div class="flex items-start gap-3">
-					<div class="w-2 h-2 bg-accent-primary rounded-full mt-2 flex-shrink-0"></div>
-					<div>
-						<span class="text-secondary text-sm font-medium">Audio Included</span>
-						<p class="text-thirdly text-xs mt-1">
-							Both recitation audio and system audio will be captured
-						</p>
-					</div>
-				</div>
-			</div>
+			<p class="text-thirdly text-sm mb-4">
+				Set the frames per second for the exported video (lower values export faster but are less
+				fluid).
+			</p>
+			<input
+				type="number"
+				min="1"
+				max="60"
+				step="1"
+				class="input w-full"
+				bind:value={globalState.getExportState.fps}
+			/>
 		</div>
 	</div>
 

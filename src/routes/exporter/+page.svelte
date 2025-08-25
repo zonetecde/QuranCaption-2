@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { VerseRange, type AssetClip } from '$lib/classes';
+	import { PredefinedSubtitleClip, VerseRange, type AssetClip } from '$lib/classes';
 	import Timeline from '$lib/components/projectEditor/timeline/Timeline.svelte';
 	import VideoPreview from '$lib/components/projectEditor/videoPreview/VideoPreview.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
@@ -8,25 +8,23 @@
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { listen } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';
-	import { exists, BaseDirectory } from '@tauri-apps/plugin-fs';
+	import { exists, BaseDirectory, mkdir, writeFile, remove } from '@tauri-apps/plugin-fs';
 	import { LogicalPosition } from '@tauri-apps/api/dpi';
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
-	import { join } from '@tauri-apps/api/path';
+	import { appDataDir, join } from '@tauri-apps/api/path';
 	import ExportService, { type ExportProgress } from '$lib/services/ExportService';
 	import { getAllWindows } from '@tauri-apps/api/window';
 	import Exportation, { ExportState } from '$lib/classes/Exportation.svelte';
+	import toast from 'svelte-5-french-toast';
+	import DomToImage from 'dom-to-image';
+	import SubtitleClip from '$lib/components/projectEditor/timeline/track/SubtitleClip.svelte';
+	import { ClipWithTranslation } from '$lib/classes/Clip.svelte';
 
 	// Indique si l'enregistrement a commencé
-	let hasRecordStarted = $state(false);
-
-	// Indique si l'enregistrement est terminé
-	let hasRecordEnded = $state(false);
+	let readyToExport = $state(false);
 
 	// Contient l'ID de l'export
 	let exportId = '';
-
-	// Contient le recorder
-	let rec: { recorder: MediaRecorder; stop: () => void; cleanup: () => void } | null = null;
 
 	// VideoPreview
 	let videoPreview: VideoPreview | undefined = $state(undefined);
@@ -49,7 +47,7 @@
 			emitProgress({
 				exportId: Number(exportId),
 				progress: data.progress,
-				currentState: ExportState.AddingAudio,
+				currentState: ExportState.CreatingVideo,
 				currentTime: data.current_time * 1000 // Convertir de secondes en millisecondes
 			} as ExportProgress);
 		} else {
@@ -66,11 +64,6 @@
 			progress: 100,
 			currentState: ExportState.Exported
 		} as ExportProgress);
-
-		// Ne fermer que si c'est NOTRE export qui est terminé
-		if (data.exportId === exportId) {
-			getCurrentWebviewWindow().close();
-		}
 	}
 
 	async function exportError(event: any) {
@@ -105,6 +98,12 @@
 			// Récupère le projet correspondant à cette ID (dans le dossier export, paramètre inExportFolder: true)
 			globalState.currentProject = await ExportService.loadProject(Number(id));
 
+			// Créer le dossier d'export s'il n'existe pas
+			await mkdir(await join(ExportService.exportFolder, exportId), {
+				baseDir: BaseDirectory.AppData,
+				recursive: true
+			});
+
 			// Supprime le fichier projet JSON
 			ExportService.deleteProjectFile(Number(id));
 
@@ -119,345 +118,238 @@
 			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime;
 			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;
 
-			setTimeout(async () => {
-				// Enlève tout les styles `tranform` de la div d'id `preview-container` et met
-				// l'inset à 0 (sinon la videoPreview prend que 50% de l'écran, je sais pas pourquoi)
-				const previewContainer = document.getElementById('preview-container');
-				if (previewContainer) {
-					// Sauvegarde parent & position pour restaurer après l'export
-					const originalParent = previewContainer.parentElement;
-					const originalNextSibling = previewContainer.nextSibling;
-					const originalStyle: Record<string, string> = {
-						position: previewContainer.style.position || '',
-						zIndex: previewContainer.style.zIndex || '',
-						inset: previewContainer.style.inset || '',
-						transform: previewContainer.style.transform || '',
-						width: previewContainer.style.width || '',
-						height: previewContainer.style.height || '',
-						top: previewContainer.style.top || '',
-						left: previewContainer.style.left || '',
-						right: previewContainer.style.right || '',
-						bottom: previewContainer.style.bottom || '',
-						margin: previewContainer.style.margin || ''
-					};
+			// Enlève tout les styles de position de la vidéo
+			let videoElement: HTMLElement;
+			// Attend que l'élément soit prêt
+			do {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				videoElement = document.getElementById('video-preview-section') as HTMLElement;
+				videoElement.style.objectFit = 'contain';
+				videoElement.style.top = '0';
+				videoElement.style.left = '0';
+				videoElement.style.width = '100%';
+				videoElement.style.height = '100%';
+			} while (!videoElement);
 
-					// Promeut l'élément au body pour garantir un fullscreen "réel"
-					document.body.appendChild(previewContainer);
-					Object.assign(previewContainer.style, {
-						position: 'fixed',
-						inset: '0',
-						top: '0',
-						left: '0',
-						width: '100%',
-						height: '100%',
-						transform: 'none',
-						zIndex: '999',
-						margin: '0'
+			// Attend 2 secondes que tout soit prêt
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+
+			readyToExport = true;
+
+			// Calcul direct des timings de screenshots sans scruter le DOM / videoPreview
+			// Règles (commentaires d'origine):
+			// - Fin du fade-in
+			// - 10 frames avant le début du fade-out
+			// - Fin du fade-out
+			if (exportData) {
+				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number; // ms
+				// Sous-titres: fade-in/out = fadeDuration/2 ; CustomText: fadeDuration complète
+				const halfFade = fadeDuration / 2;
+
+				const exportStart = Math.round(exportData.videoStartTime);
+				const exportEnd = Math.round(exportData.videoEndTime);
+
+				let timingsToTakeScreenshots: number[] = [exportStart, exportEnd];
+
+				function add(t: number | undefined) {
+					if (t === undefined) return;
+					if (t < exportStart || t > exportEnd) return;
+					timingsToTakeScreenshots.push(Math.round(t));
+				}
+
+				// --- Sous-titres ---
+				for (const clip of globalState.getSubtitleTrack.clips) {
+					// On limite aux types valides
+					// if (!(clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle')) continue;
+					// @ts-ignore
+					const { startTime, endTime } = clip as any;
+					if (startTime == null || endTime == null) continue;
+					if (endTime < exportStart || startTime > exportEnd) continue;
+					const duration = endTime - startTime;
+					if (duration <= 0) continue;
+
+					// Fin du fade-in (début + halfFade) – clamp si clip trop court
+					const fadeInEnd = Math.min(startTime + halfFade, endTime);
+					add(fadeInEnd);
+
+					// Début du fade-out (fin - halfFade) si valable
+					const fadeOutStart = endTime - halfFade;
+					if (fadeOutStart > startTime) add(fadeOutStart);
+
+					// Fin du fade-out (fin du clip)
+					add(endTime);
+				}
+
+				// --- Custom Texts --- (fade-in/out utilisent fadeDuration complète)
+				for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+					// @ts-ignore
+					const category = ctClip.category;
+					if (!category) continue;
+					const alwaysShow = (category.getStyle('always-show')?.value as number) || 0;
+					const startTime = category.getStyle('time-appearance')?.value as number;
+					const endTime = category.getStyle('time-disappearance')?.value as number;
+					if (startTime == null || endTime == null) continue;
+					if (endTime < exportStart || startTime > exportEnd) continue;
+					const duration = endTime - startTime;
+					if (duration <= 0) continue;
+
+					if (alwaysShow) {
+						// Pas de fade: on ne met pas de points intermédiaires (option: garder start/end si utile)
+						add(startTime);
+						add(endTime);
+						continue;
+					}
+
+					// Fin fade-in (début + fadeDuration)
+					const ctFadeInEnd = Math.min(startTime + fadeDuration, endTime);
+					add(ctFadeInEnd);
+
+					// Début fade-out (fin - fadeDuration)
+					const ctFadeOutStart = endTime - fadeDuration;
+					if (ctFadeOutStart > startTime) add(ctFadeOutStart);
+
+					// Fin fade-out
+					add(endTime);
+				}
+
+				// Nettoyage
+				const uniqueSorted = Array.from(new Set(timingsToTakeScreenshots))
+					.filter((t) => t >= exportStart && t <= exportEnd)
+					.sort((a, b) => a - b);
+
+				console.log('Timings détectés (calcul direct):', uniqueSorted);
+
+				let i = 0;
+				for (const timing of uniqueSorted) {
+					globalState.getTimelineState.movePreviewTo = timing;
+					globalState.getTimelineState.cursorPosition = timing;
+					await new Promise((resolve) => setTimeout(resolve, 50));
+					await takeScreenshot(`${Math.round(timing - exportStart)}`);
+
+					i++;
+					emitProgress({
+						exportId: Number(exportId),
+						progress: (i / uniqueSorted.length) * 100,
+						currentState: ExportState.CapturingFrames,
+						currentTime: timing - exportStart,
+						totalTime: exportEnd - exportStart
+					} as ExportProgress);
+				}
+
+				emitProgress({
+					exportId: Number(exportId),
+					progress: 0,
+					currentState: ExportState.Initializing,
+					currentTime: 0,
+					totalTime: exportEnd - exportStart
+				} as ExportProgress);
+
+				// Récupère le chemin de fichier de tout les audios du projet
+				const audios: string[] = globalState.getAudioTrack.clips.map(
+					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
+				);
+
+				// Récupère le chemin de fichier de tout les vidéos du projet
+				const videos = globalState.getVideoTrack.clips.map(
+					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
+				);
+
+				console.log(exportData.finalFilePath);
+
+				try {
+					// Démarre l'export dans Rust
+					await invoke('start_export', {
+						exportId: exportId,
+						imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId),
+						startTime: globalState.getExportState.videoStartTime,
+						endTime: globalState.getExportState.videoEndTime,
+						audios: audios,
+						videos: videos,
+						targetWidth: exportData!.videoDimensions.width,
+						targetHeight: exportData!.videoDimensions.height,
+						finalFilePath: exportData!.finalFilePath,
+						fps: exportData!.fps
+					});
+				} catch (e: any) {
+					emitProgress({
+						exportId: Number(exportId),
+						progress: 100,
+						currentState: ExportState.Error,
+						errorLog: JSON.stringify(e, Object.getOwnPropertyNames(e))
+					} as ExportProgress);
+				} finally {
+					// supprime le dossier temporaire des images
+					await remove(await join(ExportService.exportFolder, exportId), {
+						baseDir: BaseDirectory.AppData,
+						recursive: true
 					});
 
-					// Fournit une fonction globale de restauration (appelable depuis cleanup)
-					// On stocke sur window pour éviter d'ajouter des variables en haut du fichier
-					(window as any).__qcRestorePreview = () => {
-						if (!previewContainer) return;
-						// Remet dans son parent d'origine, à la même position
-						if (originalParent) {
-							if (originalNextSibling && originalNextSibling.parentNode === originalParent) {
-								originalParent.insertBefore(previewContainer, originalNextSibling);
-							} else {
-								originalParent.appendChild(previewContainer);
-							}
-						}
-						// Restaure les styles originaux
-						Object.assign(previewContainer.style, originalStyle);
-						delete (window as any).__qcRestorePreview;
-						console.log('Restored preview container to original parent and styles.');
-					};
-				}
+					console.log('Temporary images folder removed.');
 
-				// Lance la demande de record
-				try {
-					rec = await startRecord(60);
-				} catch (e) {
-					// Si l'utilisateur annule la sélection, on cancel l'export
-					hasRecordStarted = false;
-					cancelExport();
-					return;
+					// Ferme la fenêtre d'export
+					getCurrentWebviewWindow().close();
 				}
-
-				// Joue la vidéo pendant que le MediaRecorder record
-				videoPreview!.togglePlayPause();
-			}, 0);
+			}
 		}
 	});
 
-	/*
-	 * Dès que on atteint la fin de la vidéo que l'utilisateur veut exporter, end le record
-	 */
-	$effect(() => {
-		if (!hasRecordStarted) return; // Si on a pas encore commencé, on fait rien
+	async function takeScreenshot(fileName: string) {
+		// L'élément à transformer en image
+		let node = document.getElementById('overlay')!;
 
-		const cursorPos = globalState.getTimelineState.cursorPosition;
+		// Qualité de l'image
+		let scale = 1.0;
 
-		if (cursorPos >= exportData!.videoEndTime) {
-			endRecord();
-		} else if (cursorPos % 1000 < 16) {
-			// Ou alors report le progrès toutes les secondes
-			emitProgress({
-				exportId: Number(exportId),
-				progress: Math.max(
-					0,
-					Math.min(100, ((cursorPos - exportData!.videoStartTime) / exportData!.videoLength) * 100)
-				),
-				currentState: ExportState.Recording,
-				currentTime: cursorPos - exportData!.videoStartTime
-			} as ExportProgress);
-		}
-	});
+		// En sachant que node.clientWidth = 1920 et node.clientHeight = 1080,
+		// je veux pouvoir avoir la dimension trouver dans les paramètres d'export
+		const targetWidth = exportData!.videoDimensions.width;
+		const targetHeight = exportData!.videoDimensions.height;
 
-	/**
-	 * Arrête l'enregistrement de la vidéo.
-	 */
-	function endRecord() {
-		rec?.stop();
-	}
+		// Calcul du scale
+		const scaleX = targetWidth / node.clientWidth;
+		const scaleY = targetHeight / node.clientHeight;
+		scale = Math.min(scaleX, scaleY);
 
-	async function startRecord(fps = 60) {
-		const tauriWindow = getCurrentWebviewWindow();
-		const tauriWindowSize = await tauriWindow.size();
+		// Utilisation de DomToImage pour transformer la div en image
+		try {
+			const dataUrl = await DomToImage.toPng(node, {
+				width: node.clientWidth * scale,
+				height: node.clientHeight * scale,
+				style: {
+					// Set de la qualité
+					transform: 'scale(' + scale + ')',
+					transformOrigin: 'top left'
+				},
+				quality: 1
+			});
 
-		// 1) capture écran avec les meilleurs paramètres (video seulement)
-		const displayStream = await navigator.mediaDevices.getDisplayMedia({
-			video: {
-				frameRate: { ideal: fps, max: fps },
-				width: tauriWindowSize.width,
-				height: tauriWindowSize.height
+			// Si on est en mode portrait, on crop pour avoir un ratio 9:16
+			let finalDataUrl = dataUrl;
+
+			// with tauri, save the image to the desktop
+			const filePathWithName = await join(ExportService.exportFolder, exportId, fileName + '.png');
+
+			// Convertir dataUrl base64 en ArrayBuffer sans utiliser fetch
+			const base64Data = finalDataUrl.replace(/^data:image\/png;base64,/, '');
+			const binaryString = window.atob(base64Data);
+			const bytes = new Uint8Array(binaryString.length);
+			for (let i = 0; i < binaryString.length; i++) {
+				bytes[i] = binaryString.charCodeAt(i);
 			}
-			// Pas d'audio - on l'ajoute après avec ffmpeg
-		});
 
-		// Cache immédiatement l'overlay dès que l'utilisateur commence la sélection d'écran
-		hasRecordStarted = true;
-		// Cache la fenêtre de l'application
-		await tauriWindow.setPosition(new LogicalPosition(-10000, -100000));
-
-		// 2) crée video cachée pour lire le stream source
-		const video = document.createElement('video');
-		video.srcObject = displayStream;
-		video.muted = true;
-		await video.play();
-
-		// 3) canvas pour forcer la cadence voulue avec qualité maximale
-		const canvas = document.createElement('canvas');
-		canvas.width = video.videoWidth || 1280;
-		canvas.height = video.videoHeight || 720;
-		const ctx = canvas.getContext('2d', {
-			alpha: false, // Pas de transparence pour de meilleures performances
-			desynchronized: true, // Améliore les performances de rendu
-			willReadFrequently: false // Optimise pour l'écriture plutôt que la lecture
-		})!;
-
-		// Optimise le rendu pour la qualité
-		ctx.imageSmoothingEnabled = true;
-		ctx.imageSmoothingQuality = 'high';
-
-		// dessine à la cadence souhaitée avec timing précis
-		const interval = 1000 / fps;
-		let drawing = true;
-		let lastTime = performance.now();
-
-		const drawLoop = (currentTime: number) => {
-			if (!drawing) return;
-
-			// Contrôle précis du timing
-			if (currentTime - lastTime >= interval) {
-				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-				lastTime = currentTime;
-			}
-			requestAnimationFrame(drawLoop);
-		};
-		requestAnimationFrame(drawLoop);
-
-		// 4) enregistre le stream du canvas (video seulement)
-		const stream = (canvas as HTMLCanvasElement).captureStream(fps);
-		// Pas d'audio - on l'ajoute après avec ffmpeg
-
-		// 5) config MediaRecorder pour la meilleure qualité vidéo
-		let mimeType: string;
-		let options: MediaRecorderOptions;
-
-		// Équilibre qualité/taille pour des fichiers raisonnables (video seulement)
-		if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42E01E')) {
-			mimeType = 'video/mp4;codecs=avc1.42E01E';
-			options = {
-				mimeType,
-				videoBitsPerSecond: 8_000_000 // 8 Mbps - bon équilibre qualité/taille
-			};
-		} else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
-			mimeType = 'video/webm;codecs=vp9';
-			options = {
-				mimeType,
-				videoBitsPerSecond: 6_000_000 // 6 Mbps avec VP9 (plus efficace)
-			};
-		} else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
-			mimeType = 'video/webm;codecs=vp8';
-			options = {
-				mimeType,
-				videoBitsPerSecond: 8_000_000 // 8 Mbps avec VP8
-			};
-		} else {
-			// Fallback de base
-			mimeType = 'video/webm';
-			options = {
-				mimeType,
-				videoBitsPerSecond: 6_000_000 // 6 Mbps fallback
-			};
+			await writeFile(filePathWithName, bytes, { baseDir: BaseDirectory.AppData });
+		} catch (error: any) {
+			console.error('Error while taking screenshot: ', error);
+			toast.error('Error while taking screenshot: ' + error.message);
 		}
-
-		const rec = new MediaRecorder(stream, options);
-		const chunks: Blob[] = [];
-
-		// Demander des chunks plus fréquents pour de meilleures métadonnées
-		rec.ondataavailable = (e) => {
-			if (e.data && e.data.size) chunks.push(e.data);
-		};
-
-		// Démarrer avec des chunks de 1 seconde pour améliorer les métadonnées
-		rec.start(1000);
-
-		rec.onstop = () => recordStoped(drawing, video, mimeType, chunks);
-
-		// Retourne l'objet recorder avec méthode stop et cleanup
-		return {
-			recorder: rec,
-			stop: () => rec.stop(),
-			cleanup: () => {
-				drawing = false;
-				video.pause();
-				displayStream.getTracks().forEach((t) => t.stop());
-			}
-		};
-	}
-
-	/**
-	 * Appelé lorsque l'enregistrement est arrêté. Sauvegarde la vidéo sur le PC.
-	 */
-	async function recordStoped(
-		drawing: boolean,
-		video: HTMLVideoElement,
-		mimeType: string,
-		chunks: Blob[]
-	) {
-		drawing = false;
-		video.pause();
-
-		// Utiliser l'extension correcte selon le codec
-		const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-
-		// Enregistre le fichier vidéo. Nom simple pour l'instant
-		const fileName = `QC-${globalState.currentProject!.detail.id}.${extension}`;
-
-		// Combine avec le bon type MIME
-		const blob = new Blob(chunks, { type: mimeType });
-		const arrayBuf = await blob.arrayBuffer();
-
-		// Utiliser le bon type MIME pour le fichier aussi
-		const file = new File([arrayBuf], fileName, { type: mimeType });
-		const url = URL.createObjectURL(file);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = fileName;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-
-		// Appelle la fonction pour ajouter l'audio à la vidéo
-		addAudioToVideo(fileName);
-	}
-
-	/**
-	 * Ajoute l'audio à la vidéo et effectue diverse opération avec FFMPEG
-	 * @param videoFileName
-	 */
-	async function addAudioToVideo(videoFileName: string) {
-		// Récupère le chemin de fichier de tout les audios du projet
-		const audios: string[] = globalState.getAudioTrack.clips.map(
-			(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
-		);
-
-		// Attend que le fichier de la vidéo soit téléchargé sur le PC
-		while (!(await exists(videoFileName, { baseDir: BaseDirectory.Download }))) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-
-		// Destroy le media recorder pour qu'on ai plus la petite fenetre "X partage une fenêtre"
-		rec?.cleanup();
-		getCurrentWebviewWindow().setSkipTaskbar(true); // On peut mtn cacher la fenêtre
-		hasRecordEnded = true; // Supprime la timeline et la videoPreview pour pas consommer de ressources
-
-		// Appel FFMPEG depuis Rust
-		await invoke('add_audio_to_video', {
-			fileName: videoFileName,
-			finalFilePath: exportData!.finalFilePath,
-			audios: audios,
-			startTime: globalState.getExportState.videoStartTime,
-			exportId: exportData!.exportId.toString(),
-			videoDuration: exportData!.videoLength,
-			targetWidth: exportData!.videoDimensions.width,
-			targetHeight: exportData!.videoDimensions.height
-		});
 	}
 </script>
 
 {#if globalState.currentProject}
-	{#if !hasRecordEnded}
-		<div class="absolute inset-0 w-full h-full">
-			<VideoPreview bind:this={videoPreview} showControls={false} />
-			<div class="hidden">
-				<Timeline />
-			</div>
+	<div class="absolute inset-0 w-screen h-screen">
+		<VideoPreview bind:this={videoPreview} showControls={false} />
+		<div class="hidden">
+			<Timeline />
 		</div>
-	{/if}
-
-	<!-- Avant de record, on dit à l'utilisateur de sélectionné la fenêtre -->
-	{#if !hasRecordStarted}
-		<div
-			class="absolute inset-0 w-full h-full pt-[350px] bg-black/80 backdrop-blur-sm flex items-center justify-center z-[99999]"
-		>
-			<div class="text-center max-w-2xl px-8">
-				<!-- Arrow pointing up-center towards popup -->
-				<div class="flex justify-center mb-8">
-					<svg
-						class="w-20 h-20 text-white animate-bounce"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="3"
-							d="M12 19V5M5 12l7-7 7 7"
-						/>
-					</svg>
-				</div>
-
-				<!-- Main instruction text -->
-				<h1 class="text-4xl font-bold text-white mb-6">Select Window to Record</h1>
-
-				<div class="text-xl text-gray-200 leading-relaxed space-y-4">
-					<p>A popup window will appear asking you to choose which window to share.</p>
-					<p class="font-semibold text-yellow-300">Please select the window with title:</p>
-					<div
-						class="bg-gray-800 border border-gray-600 rounded-lg p-4 font-mono text-lg text-green-400"
-					>
-						"QC - {globalState.currentProject!.detail.id}"
-					</div>
-					<p class="text-xl font-semibold text-white mt-6">
-						Then click the <span class="bg-blue-600 px-3 py-1 rounded font-bold">Share</span> button
-						to start recording
-					</p>
-				</div>
-			</div>
-		</div>
-	{/if}
+	</div>
 {/if}
