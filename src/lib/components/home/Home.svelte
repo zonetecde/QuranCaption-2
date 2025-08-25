@@ -19,6 +19,8 @@
 	import MigrationFromV2Modal from './modals/MigrationFromV2Modal.svelte';
 	import MigrationService from '$lib/services/MigrationService';
 	import Settings from '$lib/classes/Settings.svelte';
+	import VersionService, { type UpdateInfo } from '$lib/services/VersionService';
+	import NewUpdateModal from './modals/NewUpdateModal.svelte';
 
 	let migrationFromV2ModalVisibility = $state(false);
 	let createNewProjectModalVisible: boolean = $state(false);
@@ -102,8 +104,11 @@
 	}
 
 	let promise: Promise<any> | undefined = $state(undefined);
+	let update: UpdateInfo | null = $state(null);
 
 	onMount(async () => {
+		update = await VersionService.checkForUpdates();
+
 		if (globalState.userProjectsDetails.length > 0) {
 			// Retrie juste dans l'ordre de updatetime
 			globalState.userProjectsDetails = globalState.userProjectsDetails.sort(
@@ -287,4 +292,8 @@
 	<div class="modal-wrapper" transition:fade>
 		<MigrationFromV2Modal close={() => (migrationFromV2ModalVisibility = false)} />
 	</div>
+{/if}
+
+{#if update && update.hasUpdate}
+	<NewUpdateModal {update} />
 {/if}

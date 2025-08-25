@@ -164,7 +164,7 @@
 {#if !globalState.settings}
 	<div class="p-4 text-secondary">Chargement des raccourcis…</div>
 {:else}
-	<div class="p-4 space-y-8">
+	<div class="space-y-8">
 		{#each allCategories() as cat}
 			<div class="space-y-4">
 				<div class="flex items-center gap-2">

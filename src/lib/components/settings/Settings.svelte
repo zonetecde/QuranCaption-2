@@ -4,6 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import ShortcutsManager from './ShortcutsManager.svelte';
 	import { onMount } from 'svelte';
+	import About from './About.svelte';
 
 	let {
 		resolve
@@ -46,7 +47,7 @@
 		<!-- Sidebar -->
 		<div class="bg-primary border-r border-color p-3 overflow-auto">
 			<div class="flex flex-col gap-2">
-				{#each [{ name: 'Shortcuts', tab: SettingsTab.SHORTCUTS, icon: 'keyboard' }, { name: 'Theme', tab: SettingsTab.THEME, icon: 'light_mode' }] as setting}
+				{#each [{ name: 'Shortcuts', tab: SettingsTab.SHORTCUTS, icon: 'keyboard' }, { name: 'Theme', tab: SettingsTab.THEME, icon: 'light_mode' }, { name: 'About', tab: SettingsTab.ABOUT, icon: 'info' }] as setting}
 					<button
 						class="flex items-center gap-3 text-sm px-3 py-2 rounded-lg w-full transition-colors duration-150 justify-start"
 						class:selected={globalState.uiState.settingsTab === setting.tab}
@@ -69,15 +70,10 @@
 					<h3 class="text-lg font-medium text-primary">Theme</h3>
 					<p class="text-sm text-thirdly">Select application theme and accent colors.</p>
 					<!-- Exemple simple de réglage : -->
-					<div class="flex items-center gap-3">
-						<button class="px-4 py-2 rounded-md bg-accent-primary text-black shadow-sm"
-							>Light</button
-						>
-						<button class="px-4 py-2 rounded-md bg-bg-accent text-primary border border-color"
-							>Dark</button
-						>
-					</div>
+					<p>Coming soon...</p>
 				</div>
+			{:else if globalState.uiState.settingsTab === SettingsTab.ABOUT}
+				<About />
 			{/if}
 		</div>
 	</div>
@@ -107,11 +103,6 @@
 	/* Override for the small icon color in sidebar */
 	.material-icons.text-accent-secondary {
 		color: var(--accent-primary);
-	}
-
-	/* Ensure modal has smooth entrance */
-	div[class*='bg-secondary'] {
-		animation: modalSlideIn 0.22s ease-out;
 	}
 
 	@keyframes modalSlideIn {
