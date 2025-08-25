@@ -113,9 +113,6 @@ export class TimelineState extends SerializableBase {
 
 	// Position du scroll
 	scrollX: number = $state(0);
-
-	// On montre ou non les wavesforms
-	showWaveforms: boolean = $state(false);
 }
 
 /**

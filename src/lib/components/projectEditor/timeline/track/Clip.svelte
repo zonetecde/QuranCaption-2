@@ -25,10 +25,7 @@
 	let file = $state(convertFileSrc(asset.filePath));
 
 	$effect(() => {
-		if (
-			globalState.currentProject?.projectEditorState.timeline.showWaveforms &&
-			track.type === TrackType.Audio
-		) {
+		if (globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio) {
 			const wavesurfer = WaveSurfer.create({
 				container: '#clip-' + clip.id,
 				waveColor: '#9d99cc',
@@ -58,7 +55,7 @@
 		contextMenu!.show(e);
 	}}
 >
-	{#if globalState.currentProject?.projectEditorState.timeline.showWaveforms && track.type === TrackType.Audio}
+	{#if globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio}
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
 	{:else}
 		<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">

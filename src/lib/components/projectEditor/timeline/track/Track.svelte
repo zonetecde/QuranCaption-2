@@ -36,7 +36,7 @@
 				<section class="flex items-center gap-1">
 					<input
 						type="checkbox"
-						bind:checked={globalState.getTimelineState.showWaveforms}
+						bind:checked={globalState.settings!.persistentUiState.showWaveforms}
 						class="cursor-pointer"
 						title="Show waveforms"
 						id="show-waveforms-checkbox"

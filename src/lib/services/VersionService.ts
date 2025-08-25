@@ -64,14 +64,24 @@ export default class VersionService {
 				return { hasUpdate: false, changelog: '', latestVersion: '0.0.0' };
 			}
 
+			// filtrer seulement les releases qui commencent par "QC-"
+			const qcReleases = releases.filter((r: any) => {
+				const tag = r.tag_name || '';
+				return tag.startsWith('QC-');
+			});
+
+			if (qcReleases.length === 0) {
+				return { hasUpdate: false, changelog: '', latestVersion: '0.0.0' };
+			}
+
 			// déterminer la version la plus élevée trouvée (au cas où l'ordre GitHub ne suit pas SemVer)
-			const highest = releases.reduce((max: string, r: any) => {
+			const highest = qcReleases.reduce((max: string, r: any) => {
 				const tag = r.tag_name || '0.0.0';
 				return this.compareSemver(tag, max) === 1 ? tag : max;
-			}, releases[0].tag_name || '0.0.0');
+			}, qcReleases[0].tag_name || '0.0.0');
 
 			// filtrer les releases strictement supérieures à la version courante
-			const newer = releases
+			const newer = qcReleases
 				.filter((r: any) => {
 					const tag = r.tag_name || '';
 					return this.compareSemver(tag, currentVersion) === 1;
@@ -88,10 +98,13 @@ export default class VersionService {
 				})
 				.join('\n\n');
 
+			// extraire la partie numérique du tag le plus élevé (enlever "QC-")
+			const latestVersionNumber = highest.startsWith('QC-') ? highest.substring(3) : highest;
+
 			return {
 				hasUpdate: newer.length > 0,
 				changelog: newer.length > 0 ? changelog : '',
-				latestVersion: highest || '0.0.0'
+				latestVersion: latestVersionNumber || '0.0.0'
 			};
 		} catch (error) {
 			console.error('Error checking for updates:', error);

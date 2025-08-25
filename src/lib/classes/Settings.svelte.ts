@@ -12,7 +12,8 @@ export default class Settings extends SerializableBase {
 	// État UI persistant
 	persistentUiState = $state({
 		// Indique si on affiche le moniteur d'exportation
-		projectCardView: 'grid' as 'grid' | 'list'
+		projectCardView: 'grid' as 'grid' | 'list',
+		showWaveforms: true
 	});
 
 	// Shortcut categories metadata
