@@ -82,8 +82,6 @@
 		(await getAllWindows()).find((w) => w.label === 'main')!.emit('export-progress-main', progress);
 	}
 
-	function cancelExport() {}
-
 	onMount(async () => {
 		// Écoute les événements de progression d'export donné par Rust
 		listen('export-progress', exportProgress);
@@ -157,6 +155,8 @@
 					timingsToTakeScreenshots.push(Math.round(t));
 				}
 
+				let duplicateScreenshots: { [duplicated: number]: number } = {};
+
 				// --- Sous-titres ---
 				for (const clip of globalState.getSubtitleTrack.clips) {
 					// On limite aux types valides
@@ -174,7 +174,11 @@
 
 					// Début du fade-out (fin - halfFade) si valable
 					const fadeOutStart = endTime - halfFade;
-					if (fadeOutStart > startTime) add(fadeOutStart);
+					if (fadeOutStart > startTime) {
+						// pour éviter de prendre 2 fois la même image, on va juste prendre celle
+						// d'avant (qui est la meme, avec le sous-titre encore affiché)
+						duplicateScreenshots[fadeInEnd] = fadeOutStart;
+					}
 
 					// Fin du fade-out (fin du clip)
 					add(endTime);
@@ -223,8 +227,15 @@
 				for (const timing of uniqueSorted) {
 					globalState.getTimelineState.movePreviewTo = timing;
 					globalState.getTimelineState.cursorPosition = timing;
-					await new Promise((resolve) => setTimeout(resolve, 50));
-					await takeScreenshot(`${Math.round(timing - exportStart)}`);
+
+					// Si cette capture d'écran possède un duplicat, c'est que c'est une capture
+					// de texte, donc 100ms d'attente, sinon 10ms
+					if (duplicateScreenshots[timing])
+						await new Promise((resolve) => setTimeout(resolve, 100));
+					else await new Promise((resolve) => setTimeout(resolve, 10));
+
+					// Si on a déjà pris une capture à ce timing, on copie le fichier précédent
+					await takeScreenshot(`${Math.round(timing - exportStart)}`, duplicateScreenshots[timing]);
 
 					i++;
 					emitProgress({
@@ -293,7 +304,7 @@
 		}
 	});
 
-	async function takeScreenshot(fileName: string) {
+	async function takeScreenshot(fileName: string, duplicateScreenshot?: number) {
 		// L'élément à transformer en image
 		let node = document.getElementById('overlay')!;
 
@@ -338,6 +349,18 @@
 			}
 
 			await writeFile(filePathWithName, bytes, { baseDir: BaseDirectory.AppData });
+			console.log('Screenshot saved to:', filePathWithName);
+
+			if (duplicateScreenshot) {
+				// Réecris la meme image, met avec le nom duplicateScreenshot
+				const duplicateFilePathWithName = await join(
+					ExportService.exportFolder,
+					exportId,
+					duplicateScreenshot + '.png'
+				);
+				await writeFile(duplicateFilePathWithName, bytes, { baseDir: BaseDirectory.AppData });
+				console.log('Duplicate screenshot saved to:', duplicateFilePathWithName);
+			}
 		} catch (error: any) {
 			console.error('Error while taking screenshot: ', error);
 			toast.error('Error while taking screenshot: ' + error.message);

@@ -127,7 +127,6 @@
 	}
 
 	function toggleAlwaysShow(e: MouseEvent): void {
-		e.stopPropagation();
 		clip.setStyle('always-show', !clip.getAlwaysShow());
 	}
 </script>
