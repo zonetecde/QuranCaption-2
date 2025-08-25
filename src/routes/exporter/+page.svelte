@@ -114,7 +114,7 @@
 			// Prépare les paramètres pour exporter la vidéo
 			globalState.getVideoPreviewState.isFullscreen = true; // Met la vidéo en plein écran
 			globalState.getVideoPreviewState.isPlaying = false; // Met la vidéo en pause
-			globalState.getVideoPreviewState.isMuted = true; // Met la vidéo en sourdine
+			globalState.getVideoPreviewState.showVideosAndAudios = true; // Met la vidéo en sourdine
 			// Met le curseur au début du startTime voulu pour l'export
 			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime;
 			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;

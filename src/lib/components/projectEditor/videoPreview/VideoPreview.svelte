@@ -466,7 +466,7 @@
 			currentlyPlayingAudio = audioAsset.filePath; // Met à jour l'asset actuellement joué
 
 			audioHowl = new Howl({
-				mute: globalState.getVideoPreviewState.isMuted,
+				mute: globalState.getVideoPreviewState.showVideosAndAudios,
 				src: [convertFileSrc(audioAsset.filePath)],
 				html5: true, // Important pour les gros fichiers et le VBR (Variable Bit Rate)
 				rate: audioSpeed, // Vitesse de lecture initiale
@@ -693,19 +693,21 @@
 	>
 		<!-- Conteneur de la prévisualisation vidéo avec mise à l'échelle -->
 		<div class={'relative origin-top-left bg-black'} id="preview">
-			{#if currentVideo()}
-				<video
-					bind:this={videoElement}
-					src={convertFileSrc(currentVideo()!.filePath)}
-					muted
-					onended={goNextVideo}
-				></video>
-			{:else if currentImage()}
-				<img
-					src={convertFileSrc(currentImage()!.filePath)}
-					class="w-full h-full object-cover"
-					alt="Background"
-				/>
+			{#if !globalState.getVideoPreviewState.showVideosAndAudios}
+				{#if currentVideo()}
+					<video
+						bind:this={videoElement}
+						src={convertFileSrc(currentVideo()!.filePath)}
+						muted
+						onended={goNextVideo}
+					></video>
+				{:else if currentImage()}
+					<img
+						src={convertFileSrc(currentImage()!.filePath)}
+						class="w-full h-full object-cover"
+						alt="Background"
+					/>
+				{/if}
 			{/if}
 
 			<!-- Contient l'affichage des sous-titres et de tout les autres style -->

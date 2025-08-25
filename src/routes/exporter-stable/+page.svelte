@@ -119,7 +119,7 @@
 			// Prépare les paramètres pour exporter la vidéo
 			globalState.getVideoPreviewState.isFullscreen = true; // Met la vidéo en plein écran
 			globalState.getVideoPreviewState.isPlaying = false; // Met la vidéo en pause
-			globalState.getVideoPreviewState.isMuted = true; // Met la vidéo en sourdine
+			globalState.getVideoPreviewState.showVideosAndAudios = true; // Met la vidéo en sourdine
 			// Met le curseur au début du startTime voulu pour l'export
 			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime;
 			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;
@@ -274,6 +274,16 @@
 		// Qualité de l'image
 		let scale = 1.0;
 
+		// En sachant que node.clientWidth = 1920 et node.clientHeight = 1080,
+		// je veux pouvoir avoir la dimension trouver dans les paramètres d'export
+		const targetWidth = exportData!.videoDimensions.width;
+		const targetHeight = exportData!.videoDimensions.height;
+
+		// Calcul du scale
+		const scaleX = targetWidth / node.clientWidth;
+		const scaleY = targetHeight / node.clientHeight;
+		scale = Math.min(scaleX, scaleY);
+
 		// Utilisation de DomToImage pour transformer la div en image
 		try {
 			const dataUrl = await DomToImage.toPng(node, {
@@ -283,7 +293,8 @@
 					// Set de la qualité
 					transform: 'scale(' + scale + ')',
 					transformOrigin: 'top left'
-				}
+				},
+				quality: 1
 			});
 
 			// Si on est en mode portrait, on crop pour avoir un ratio 9:16
