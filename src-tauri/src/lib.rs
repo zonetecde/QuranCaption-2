@@ -443,11 +443,11 @@ async fn add_audio_to_video(file_name: String, final_file_path: String, audios: 
 }
 
 #[tauri::command]
-async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, final_file_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, final_file_path: String, fps: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
     println!("[start_export] ===== DÉBUT EXPORT {} =====", export_id);
     println!("[start_export] imgs_folder: {}", imgs_folder);
     println!("[start_export] start_time(ms): {} end_time(ms): {}", start_time, end_time);
-    println!("[start_export] audios fournis: {} | vidéos: {}", audios.len(), videos.len());
+    println!("[start_export] audios fournis: {} | vidéos: {} | fps: {}", audios.len(), videos.len(), fps);
     let export_dir = Path::new(&imgs_folder);
     if !export_dir.exists() { return Err(format!("Le dossier d'export n'existe pas: {}", export_dir.display())); }
 
@@ -597,17 +597,17 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
                 filter.push_str(&background_video_filter);
                 filter.push(';');
                 let bg_label = if videos.len() == 1 { "[bg0]" } else { "[bg_video]" };
-                filter.push_str(&format!("color=black:{}x{}:d={:.3}[black];[0:v]fps=30,format=yuva420p,setsar=1:1[overlay];{}[black]overlay[vout]", target_width, target_height, durations[0], bg_label));
+                filter.push_str(&format!("color=black:{}x{}:d={:.3}[black];[0:v]fps={},format=yuva420p,setsar=1:1[overlay];{}[black]overlay[vout]", target_width, target_height, durations[0], fps, bg_label));
             } else {
-                filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
+                filter.push_str(&format!("[0:v]fps={},format=yuv420p,setsar=1:1[vout]", fps));
             }
         } else {
-            filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
+            filter.push_str(&format!("[0:v]fps={},format=yuv420p,setsar=1:1[vout]", fps));
         }
     } else {
         // Préparation des inputs vidéo avec transparence
         for i in 0..entries.len() { 
-            filter.push_str(&format!("[{i}:v]fps=30,format=yuva420p,setsar=1:1[v{i}];"));
+            filter.push_str(&format!("[{i}:v]fps={},format=yuva420p,setsar=1:1[v{i}];", fps));
         }
         
         // Construction des transitions xfade basées sur les vrais timestamps
@@ -732,7 +732,7 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     cmd_args.push("-c:v".into()); cmd_args.push("libx264".into());
     cmd_args.push("-pix_fmt".into()); cmd_args.push("yuv420p".into());
     cmd_args.push("-movflags".into()); cmd_args.push("+faststart".into());
-    cmd_args.push("-r".into()); cmd_args.push("30".into());
+    cmd_args.push("-r".into()); cmd_args.push(fps.to_string());
     
     // Forcer la durée totale de la vidéo finale à être exactement end_time - start_time
     let max_duration = (end_time - start_time) / 1000.0;

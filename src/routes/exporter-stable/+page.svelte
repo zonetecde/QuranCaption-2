@@ -267,7 +267,8 @@
 						videos: videos,
 						targetWidth: exportData!.videoDimensions.width,
 						targetHeight: exportData!.videoDimensions.height,
-						finalFilePath: exportData!.finalFilePath
+						finalFilePath: exportData!.finalFilePath,
+						fps: exportData!.fps
 					});
 				} catch (e: any) {
 					emitProgress({

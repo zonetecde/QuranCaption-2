@@ -25,6 +25,7 @@ export default class Exportation extends SerializableBase {
 	percentageProgress: number;
 	currentTreatedTime: number;
 	errorLog: string;
+	fps: number;
 
 	constructor(
 		exportId: number,
@@ -35,6 +36,7 @@ export default class Exportation extends SerializableBase {
 		videoEndTime: number,
 		verseRange: string,
 		currentState: ExportState,
+		fps: number,
 		percentageProgress: number = 0,
 		currentTreatedTime: number = 0,
 		errorLog: string = ''
@@ -48,6 +50,7 @@ export default class Exportation extends SerializableBase {
 		this.videoEndTime = videoEndTime;
 		this.videoLength = videoEndTime - videoStartTime;
 		this.verseRange = verseRange;
+		this.fps = fps;
 		this.currentState = $state(currentState);
 		this.percentageProgress = $state(percentageProgress);
 		this.currentTreatedTime = $state(currentTreatedTime);

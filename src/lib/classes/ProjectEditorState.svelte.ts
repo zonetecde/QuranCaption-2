@@ -229,6 +229,7 @@ export class ExportState extends SerializableBase {
 	// Indique la partie de la vidéo à exporter
 	videoStartTime: number = $state(0);
 	videoEndTime: number = $state(0);
+	fps: number = $state(30);
 }
 
 SerializableBase.registerChildClass(ProjectEditorState, 'timeline', TimelineState);

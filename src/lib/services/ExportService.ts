@@ -69,7 +69,8 @@ export default class ExportService {
 					project.projectEditorState.export.videoStartTime,
 					project.projectEditorState.export.videoEndTime
 				).toString(),
-				mode === 'recording' ? ExportState.WaitingForRecord : ExportState.CapturingFrames
+				mode === 'recording' ? ExportState.WaitingForRecord : ExportState.CapturingFrames,
+				project.projectEditorState.export.fps
 			)
 		);
 
