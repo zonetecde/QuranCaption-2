@@ -16,6 +16,13 @@
 		) {
 			subtitlesEditorState().selectedVerse += 1;
 			resetFirstAndLastWordIndex();
+		} else {
+			// go next surah
+			if (subtitlesEditorState().selectedSurah < 114) {
+				subtitlesEditorState().selectedSurah += 1;
+				subtitlesEditorState().selectedVerse = 1;
+				resetFirstAndLastWordIndex();
+			}
 		}
 	}
 
@@ -32,6 +39,25 @@
 			if (previousVerse) {
 				subtitlesEditorState().startWordIndex = previousVerse.words.length - 1;
 				subtitlesEditorState().endWordIndex = previousVerse.words.length - 1;
+			}
+		} else {
+			// go previous surah
+			if (subtitlesEditorState().selectedSurah > 1) {
+				subtitlesEditorState().selectedSurah -= 1;
+				subtitlesEditorState().selectedVerse = Quran.getVerseCount(
+					subtitlesEditorState().selectedSurah
+				);
+
+				// Met le curseur à la fin du verset précédent
+				// Récupère le verset précédent
+				const previousVerse = await Quran.getVerse(
+					subtitlesEditorState().selectedSurah,
+					subtitlesEditorState().selectedVerse
+				);
+				if (previousVerse) {
+					subtitlesEditorState().startWordIndex = previousVerse.words.length - 1;
+					subtitlesEditorState().endWordIndex = previousVerse.words.length - 1;
+				}
 			}
 		}
 	}
@@ -77,6 +103,15 @@
 				subtitlesEditorState().endWordIndex = (await selectedVerse())!.getNextPunctuationMarkIndex(
 					subtitlesEditorState().endWordIndex
 				);
+			}
+		});
+		ShortcutService.registerShortcut({
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_START_TO_PREVIOUS,
+			onKeyDown: async () => {
+				subtitlesEditorState().startWordIndex =
+					(await selectedVerse())!.getPreviousPunctuationMarkIndex(
+						subtitlesEditorState().startWordIndex
+					);
 			}
 		});
 
@@ -133,6 +168,9 @@
 		);
 		ShortcutService.unregisterShortcut(
 			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_END_TO_LAST
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.SET_START_TO_PREVIOUS
 		);
 		ShortcutService.unregisterShortcut(
 			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_SUBTITLE

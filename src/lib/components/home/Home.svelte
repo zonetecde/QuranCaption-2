@@ -18,6 +18,7 @@
 	import { join, localDataDir } from '@tauri-apps/api/path';
 	import MigrationFromV2Modal from './modals/MigrationFromV2Modal.svelte';
 	import MigrationService from '$lib/services/MigrationService';
+	import Settings from '$lib/classes/Settings.svelte';
 
 	let migrationFromV2ModalVisibility = $state(false);
 	let createNewProjectModalVisible: boolean = $state(false);
@@ -216,11 +217,13 @@
 				<div class="relative">
 					<button
 						class="view-button btn text-sm p-2 btn-icon"
-						onclick={() =>
-							(globalState.settings!.persistentUiState.projectCardView =
+						onclick={() => {
+							globalState.settings!.persistentUiState.projectCardView =
 								globalState.settings!.persistentUiState.projectCardView === 'grid'
 									? 'list'
-									: 'grid')}
+									: 'grid';
+							Settings.save();
+						}}
 					>
 						<span class="material-icons-outlined">view_module</span>
 					</button>
@@ -263,10 +266,7 @@
 				>
 					{#each globalState.uiState.filteredProjects as project, index}
 						{#if globalState.uiState.searchQuery === '' || project.matchSearchQuery(globalState.uiState.searchQuery)}
-							<ProjectDetailCard
-								bind:projectDetail={globalState.uiState.filteredProjects[index]}
-								projectCardView={globalState.settings!.persistentUiState.projectCardView}
-							/>
+							<ProjectDetailCard bind:projectDetail={globalState.uiState.filteredProjects[index]} />
 						{/if}
 					{/each}
 				</div>

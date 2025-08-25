@@ -158,11 +158,14 @@ body {
 	border: 1px solid var(--border-color);
 	color: var(--text-secondary);
 	border-radius: 0.375rem;
-	cursor: pointer;
 	transition:
 		background-color 0.2s ease,
 		color 0.2s ease,
 		border-color 0.2s ease;
+}
+
+button {
+	cursor: pointer !important;
 }
 
 .btn:hover {
@@ -178,7 +181,6 @@ body {
 	color: black;
 	border: 1px solid black;
 	border-radius: 0.375rem;
-	cursor: pointer;
 	transition: scale 0.2s ease;
 	outline: none;
 }

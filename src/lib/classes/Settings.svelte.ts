@@ -81,8 +81,13 @@ export default class Settings extends SerializableBase {
 			},
 			SET_END_TO_LAST: {
 				keys: ['c'],
-				name: 'Set End to Last',
+				name: 'Set End to Next Punctuation',
 				description: 'Move end cursor to the next punctuation mark'
+			},
+			SET_START_TO_PREVIOUS: {
+				keys: ['x'],
+				name: 'Set Start to Previous Punctuation',
+				description: 'Move start cursor to the previous punctuation mark'
 			},
 			ADD_SUBTITLE: {
 				keys: ['enter'],
@@ -143,6 +148,11 @@ export default class Settings extends SerializableBase {
 	 * Charge les paramètres de l'application.
 	 */
 	static async load() {
+		if (globalState.settings) {
+			// Déjà chargé
+			return;
+		}
+
 		// Construis le chemin d'accès vers le projet
 		const filePath = await join(await appDataDir(), this.settingsFile);
 

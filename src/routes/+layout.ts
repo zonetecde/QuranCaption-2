@@ -23,7 +23,7 @@ QPCFontProvider.loadQPC2Data();
 ExportService.loadExports();
 
 // Charge les paramètres utilisateur
-Settings.load();
+await Settings.load();
 
 // Charge les traductions si pas déjà fait
 ProjectTranslation.loadAvailableTranslations();
