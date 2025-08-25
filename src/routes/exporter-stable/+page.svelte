@@ -255,13 +255,19 @@
 					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
 				);
 
+				// Récupère le chemin de fichier de tout les vidéos du projet
+				const videos = globalState.getVideoTrack.clips.map(
+					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
+				);
+
 				// Démarre l'export dans Rust
 				await invoke('start_export', {
 					exportId: exportId,
 					imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId),
 					startTime: globalState.getExportState.videoStartTime,
 					endTime: globalState.getExportState.videoEndTime,
-					audios: audios
+					audios: audios,
+					videos: videos
 				});
 			}
 		}

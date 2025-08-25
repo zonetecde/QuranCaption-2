@@ -35,8 +35,9 @@ window.addEventListener('error', (event) => {
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-	event.preventDefault();
-	showErrorDialog(event.reason as Error);
+	console.error(event);
+	// event.preventDefault();
+	// showErrorDialog(event.reason as Error);
 });
 
 function showErrorDialog(error: Error) {
