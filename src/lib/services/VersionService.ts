@@ -7,6 +7,14 @@ export interface UpdateInfo {
 }
 
 export default class VersionService {
+	static currentVersion: string | null = null;
+	static latestUpdate: UpdateInfo | null = null;
+
+	static async init() {
+		this.currentVersion = await this.getAppVersion();
+		this.latestUpdate = await this.checkForUpdates();
+	}
+
 	static async getAppVersion(): Promise<string> {
 		return (await getVersion()) || '0.0.0';
 	}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import ClickableLink from './ClickableLink.svelte';
+	import VersionService from '$lib/services/VersionService';
 </script>
 
 <footer class="w-screen border-t border-color py-8">
@@ -19,6 +20,6 @@
 			<ClickableLink url="https://ko-fi.com/vzero" label="Donate" />
 		</div>
 		<p class="mb-1">© 2025 Quran Caption. Made by Rayane STASZEWSKI.</p>
-		<p>Version 3.0.0</p>
+		<p>Version {VersionService.currentVersion}</p>
 	</div>
 </footer>

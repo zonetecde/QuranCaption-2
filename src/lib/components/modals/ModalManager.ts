@@ -3,6 +3,8 @@ import Confirm from './Confirm.svelte';
 import Input from './Input.svelte';
 import Error from './Error.svelte';
 import Settings from '../settings/Settings.svelte';
+import NewUpdateModal from '../home/modals/NewUpdateModal.svelte';
+import VersionService, { type UpdateInfo } from '$lib/services/VersionService';
 
 export default class ModalManager {
 	static async confirmModal(text: string): Promise<boolean> {
@@ -107,6 +109,29 @@ export default class ModalManager {
 						unmount(input);
 						document.body.removeChild(container);
 						resolve(result);
+					}
+				}
+			});
+		});
+	}
+
+	static async newUpdateModal(update: UpdateInfo): Promise<void> {
+		return new Promise<void>((resolve) => {
+			// Créer un conteneur pour le modal
+			const container = document.createElement('div');
+			container.classList.add('modal-wrapper');
+			document.body.appendChild(container);
+
+			// Monter le composant Svelte 5
+			const confirm = mount(NewUpdateModal, {
+				target: container,
+				props: {
+					update: update,
+					resolve: () => {
+						// Nettoyer et résoudre
+						unmount(confirm);
+						document.body.removeChild(container);
+						resolve();
 					}
 				}
 			});
