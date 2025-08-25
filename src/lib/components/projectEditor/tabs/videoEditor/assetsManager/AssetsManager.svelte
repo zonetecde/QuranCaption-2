@@ -4,7 +4,7 @@
 </script>
 
 <div
-	class="bg-secondary h-full border border-color rounded-lg py-6 px-2 space-y-6 relative overflow-hidden"
+	class="bg-secondary h-full border border-color rounded-lg py-6 px-2 space-y-6 relative overflow-auto"
 >
 	<!-- En-tête avec icône -->
 	<div class="flex gap-x-2 items-center justify-center mb-6">

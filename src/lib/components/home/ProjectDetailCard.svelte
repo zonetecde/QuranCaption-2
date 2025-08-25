@@ -66,7 +66,7 @@
 </script>
 
 <div
-	class="bg-[rgba(22,27,34,0.6)] backdrop-blur-[10px] border border-[var(--border-color)] rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col justify-between hover:shadow-2xl transition-all duration-300"
+	class="bg-secondary backdrop-blur-[10px] border border-[var(--border-color)] rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col justify-between hover:shadow-2xl transition-all duration-300"
 >
 	<div>
 		{#if globalState.settings!.persistentUiState.projectCardView === 'grid'}

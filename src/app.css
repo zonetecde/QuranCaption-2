@@ -49,6 +49,8 @@
 	--timeline-audio-clip-border: rgba(139, 92, 246, 0.7);
 	--timeline-video-clip-color: rgba(61, 124, 89, 0.6);
 	--timeline-video-clip-border: rgba(61, 124, 89, 0.8);
+	--timeline-customtext-clip-color: rgba(24, 175, 155, 0.6);
+	--timeline-customtext-clip-border: rgba(23, 131, 116, 0.8);
 	--timeline-subtitle-clip-color: rgba(88, 166, 255, 0.4);
 	--timeline-subtitle-clip-border: rgba(88, 166, 255, 0.7);
 	--highlight-color: #fbbf24;

@@ -133,7 +133,7 @@
 </script>
 
 <div
-	class="absolute inset-0 z-10 border border-[var(--timeline-clip-border)] bg-[var(--timeline-clip-color)] rounded-md group overflow-hidden {clip.getAlwaysShow()
+	class="absolute inset-0 z-10 border border-[var(--timeline-customtext-clip-border)] bg-[var(--timeline-customtext-clip-color)] rounded-md group overflow-hidden {clip.getAlwaysShow()
 		? ''
 		: 'cursor-move'}"
 	style="width: {clip.getWidth()}px; left: {positionLeft()}px;"
