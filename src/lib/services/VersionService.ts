@@ -64,10 +64,10 @@ export default class VersionService {
 				return { hasUpdate: false, changelog: '', latestVersion: '0.0.0' };
 			}
 
-			// filtrer seulement les releases qui commencent par "QC-"
+			// filtrer seulement les releases qui commencent par "QC-" et ne sont pas des pre-releases
 			const qcReleases = releases.filter((r: any) => {
 				const tag = r.tag_name || '';
-				return tag.startsWith('QC-');
+				return tag.startsWith('QC-') && !r.prerelease;
 			});
 
 			if (qcReleases.length === 0) {

@@ -88,7 +88,7 @@
 
 				<div class="relative">
 					<button
-						class="bg-transparent cursor-pointer text-xs flex items-center mr-0 duration-300 relative"
+						class="bg-transparent cursor-pointer text-xs group hover:-translate-x-3 flex items-center mr-0 duration-300 relative"
 						onclick={toggleStatusMenu}
 						type="button"
 					>
@@ -98,7 +98,7 @@
 						></span>
 						{projectDetail.status.status}
 						<span
-							class="material-icons-outlined text-[10px] w-10 duration-300 absolute left-full top-1/2 -translate-y-1/2 scale-75 pointer-events-none opacity-0 hover:opacity-60 hover:scale-100 hover:-translate-x-2"
+							class="material-icons-outlined text-[10px] w-10 duration-300 absolute left-full top-1/2 -translate-y-1/2 scale-75 pointer-events-none opacity-0 group-hover:opacity-60 group-hover:scale-100 group-hover:-translate-x-2"
 							aria-hidden="true">arrow_drop_down</span
 						>
 					</button>

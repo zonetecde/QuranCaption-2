@@ -6,6 +6,7 @@
 	import toast from 'svelte-5-french-toast';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import type { UpdateInfo } from '$lib/services/VersionService';
+	import { globalState } from '$lib/runes/main.svelte';
 
 	let { update, resolve }: { update: UpdateInfo; resolve: () => void } = $props();
 	let html = '<p>Loading...</p>';
@@ -75,7 +76,10 @@
 			<!-- Close button -->
 			<button
 				class="w-10 h-10 rounded-full hover:bg-[rgba(255,255,255,0.1)] flex items-center justify-center transition-all duration-200 text-white/80 hover:text-white group cursor-pointer"
-				onclick={resolve}
+				onclick={() => {
+					globalState.settings!.persistentUiState.lastClosedUpdateModal = new Date().toISOString();
+					resolve();
+				}}
 			>
 				<span
 					class="material-icons text-lg group-hover:rotate-90 transition-transform duration-200"
@@ -112,7 +116,10 @@
 		<div class="flex justify-end gap-3 mt-6 pt-4 border-t border-color">
 			<button
 				class="btn px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105"
-				onclick={resolve}
+				onclick={() => {
+					globalState.settings!.persistentUiState.lastClosedUpdateModal = new Date().toISOString();
+					resolve();
+				}}
 			>
 				Later
 			</button>

@@ -108,7 +108,13 @@
 	onMount(async () => {
 		// Vérifie les mises à jour
 		if (VersionService.latestUpdate?.hasUpdate) {
-			ModalManager.newUpdateModal(VersionService.latestUpdate);
+			// Vérifie que ça fait pas plus de 24h qu'on a fermé le modal
+			const lastClosed = new Date(
+				globalState.settings!.persistentUiState.lastClosedUpdateModal || 0
+			);
+			if (Date.now() - lastClosed.getTime() > 24 * 60 * 60 * 1000) {
+				ModalManager.newUpdateModal(VersionService.latestUpdate);
+			}
 		}
 
 		if (globalState.userProjectsDetails.length > 0) {
