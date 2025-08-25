@@ -51,7 +51,11 @@ export default class ExportService {
 		// Ajoute le projet à la liste des exports en cours
 
 		const fileName = project.detail.generateExportFileName() + '.mp4';
-		const filePath = await join(await this.getExportFolder(), fileName);
+		let filePath = await join(await this.getExportFolder(), fileName);
+
+		filePath = await this.checkIfFilePathTooLong(filePath);
+
+		console.log('Final export file path:', filePath);
 
 		globalState.exportations.unshift(
 			new Exportation(
@@ -73,6 +77,20 @@ export default class ExportService {
 		await this.saveExports();
 	}
 
+	private static async checkIfFilePathTooLong(filePath: string): Promise<string> {
+		// Si le chemin est trop long (> 250 caractères), on met `...` dans le nom du fichier (mais pas dans le chemin)
+		if (filePath.length > 250) {
+			const pathParts = filePath.split(/[/\\]/);
+			const fileName = pathParts.pop()!;
+			const dirPath = pathParts.join('/');
+
+			const newFileName = '...' + fileName.slice(-240); // Garde les 240 derniers caractères du nom de fichier
+			filePath = await join(dirPath, newFileName);
+		}
+
+		return filePath;
+	}
+
 	/**
 	 * Sauvegarde les exports en cours.
 	 */
@@ -81,7 +99,7 @@ export default class ExportService {
 		const exportsPath = await ProjectService.ensureFolder(this.exportFolder);
 
 		// Construis le chemin d'accès vers le fichier contenant tout les exports
-		const filePath = await join(exportsPath, `exports.json`);
+		const filePath = await join(await appDataDir(), `exports.json`);
 
 		await writeTextFile(
 			filePath,
@@ -94,7 +112,7 @@ export default class ExportService {
 	}
 
 	static async loadExports() {
-		const filePath = await join(await this.getExportFolder(), `exports.json`);
+		const filePath = await join(await appDataDir(), `exports.json`);
 
 		if ((await exists(filePath)) === false) {
 			// Aucun export trouvé

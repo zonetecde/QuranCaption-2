@@ -8,7 +8,7 @@
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { listen } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';
-	import { exists, BaseDirectory, mkdir, writeFile } from '@tauri-apps/plugin-fs';
+	import { exists, BaseDirectory, mkdir, writeFile, remove } from '@tauri-apps/plugin-fs';
 	import { LogicalPosition } from '@tauri-apps/api/dpi';
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
 	import { appDataDir, join } from '@tauri-apps/api/path';
@@ -64,11 +64,6 @@
 			progress: 100,
 			currentState: ExportState.Exported
 		} as ExportProgress);
-
-		// Ne fermer que si c'est NOTRE export qui est terminé
-		if (data.exportId === exportId) {
-			getCurrentWebviewWindow().close();
-		}
 	}
 
 	async function exportError(event: any) {
@@ -110,8 +105,7 @@
 			});
 
 			// Supprime le fichier projet JSON
-			// TODO: uncomment this when the export is fully working
-			// ExportService.deleteProjectFile(Number(id));
+			ExportService.deleteProjectFile(Number(id));
 
 			// Récupère les données d'export
 			exportData = ExportService.findExportById(Number(id))!;
@@ -260,17 +254,40 @@
 					(clip: any) => globalState.currentProject!.content.getAssetById(clip.assetId).filePath
 				);
 
-				// Démarre l'export dans Rust
-				await invoke('start_export', {
-					exportId: exportId,
-					imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId),
-					startTime: globalState.getExportState.videoStartTime,
-					endTime: globalState.getExportState.videoEndTime,
-					audios: audios,
-					videos: videos,
-					targetWidth: exportData!.videoDimensions.width,
-					targetHeight: exportData!.videoDimensions.height
-				});
+				console.log(exportData.finalFilePath);
+
+				try {
+					// Démarre l'export dans Rust
+					await invoke('start_export', {
+						exportId: exportId,
+						imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId),
+						startTime: globalState.getExportState.videoStartTime,
+						endTime: globalState.getExportState.videoEndTime,
+						audios: audios,
+						videos: videos,
+						targetWidth: exportData!.videoDimensions.width,
+						targetHeight: exportData!.videoDimensions.height,
+						finalFilePath: exportData!.finalFilePath
+					});
+				} catch (e: any) {
+					emitProgress({
+						exportId: Number(exportId),
+						progress: 100,
+						currentState: ExportState.Error,
+						errorLog: JSON.stringify(e, Object.getOwnPropertyNames(e))
+					} as ExportProgress);
+				} finally {
+					// supprime le dossier temporaire des images
+					await remove(await join(ExportService.exportFolder, exportId), {
+						baseDir: BaseDirectory.AppData,
+						recursive: true
+					});
+
+					console.log('Temporary images folder removed.');
+
+					// Ferme la fenêtre d'export
+					getCurrentWebviewWindow().close();
+				}
 			}
 		}
 	});

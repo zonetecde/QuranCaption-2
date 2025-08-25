@@ -443,7 +443,7 @@ async fn add_audio_to_video(file_name: String, final_file_path: String, audios: 
 }
 
 #[tauri::command]
-async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, final_file_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
     println!("[start_export] ===== DÉBUT EXPORT {} =====", export_id);
     println!("[start_export] imgs_folder: {}", imgs_folder);
     println!("[start_export] start_time(ms): {} end_time(ms): {}", start_time, end_time);
@@ -490,7 +490,16 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     // ffmpeg
     let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
     if !ffmpeg_path.exists() { return Err("ffmpeg introuvable dans ./binaries".to_string()); }
-    let output_path = export_dir.join("video_no_audio.mp4");
+    
+    // Utiliser le chemin de fichier final fourni par le frontend
+    let output_path = Path::new(&final_file_path);
+    
+    // Créer le dossier parent du fichier de sortie s'il n'existe pas
+    if let Some(parent_dir) = output_path.parent() {
+        if let Err(e) = fs::create_dir_all(parent_dir) {
+            return Err(format!("Unable to create output directory: {}", e));
+        }
+    }
 
     let mut cmd_args: Vec<String> = Vec::new();
     cmd_args.push("-y".into());
@@ -640,27 +649,78 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
         if filter.ends_with(';') { filter.pop(); }
     }
 
-    // --- Audio --- (similaire à add_audio_to_video)
+    // --- Audio --- (similaire à add_audio_to_video mais avec limitation de durée)
     if !audios.is_empty() {
+        // Calculer la durée totale des audios (durée maximale que l'audio doit avoir)
+        let audio_max_duration = (end_time - start_time) / 1000.0; // Durée de l'export en secondes
+        println!("[start_export] Durée max audio: {:.3}s (basée sur end_time - start_time)", audio_max_duration);
+        
         let audio_input_start = entries.len();
         let mut audio_durations = Vec::new();
         for (idx, audio_file) in audios.iter().enumerate() {
-            match get_duration(audio_file) { Ok(ms) => { let s = (ms.max(0) as f64)/1000.0; audio_durations.push(s); println!("[start_export] Durée audio {} = {:.3}s", idx, s); }, Err(e) => { println!("[start_export][WARN] Durée audio inconnue {}: {}", audio_file, e); audio_durations.push(0.0);} }
+            match get_duration(audio_file) { 
+                Ok(ms) => { 
+                    let s = (ms.max(0) as f64)/1000.0; 
+                    audio_durations.push(s); 
+                    println!("[start_export] Durée audio {} = {:.3}s", idx, s); 
+                }, 
+                Err(e) => { 
+                    println!("[start_export][WARN] Durée audio inconnue {}: {}", audio_file, e); 
+                    audio_durations.push(0.0);
+                } 
+            }
         }
+        
         let mut current_audio_time = 0.0;
         let mut audio_filters: Vec<String> = Vec::new();
         let mut input_index = audio_input_start; // index ffmpeg des audios
+        let mut remaining_duration = audio_max_duration;
+        
         for &audio_duration in audio_durations.iter() {
             let audio_end_time = current_audio_time + audio_duration;
-            if start_time_seconds >= audio_end_time { current_audio_time = audio_end_time; input_index += 1; continue; }
-            if start_time_seconds >= current_audio_time && start_time_seconds < audio_end_time { let skip = start_time_seconds - current_audio_time; audio_filters.push(format!("[{idx}:a]atrim=start={skip},asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index)); } else { audio_filters.push(format!("[{idx}:a]asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index)); }
-            current_audio_time = audio_end_time; input_index += 1;
+            if start_time_seconds >= audio_end_time { 
+                current_audio_time = audio_end_time; 
+                input_index += 1; 
+                continue; 
+            }
+            
+            if remaining_duration <= 0.0 {
+                break; // Plus besoin d'audios, on a atteint la durée max
+            }
+            
+            if start_time_seconds >= current_audio_time && start_time_seconds < audio_end_time { 
+                let skip = start_time_seconds - current_audio_time; 
+                let available_duration = audio_duration - skip;
+                let clip_duration = available_duration.min(remaining_duration);
+                audio_filters.push(format!("[{idx}:a]atrim=start={skip}:end={end},asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index, end=skip+clip_duration)); 
+                remaining_duration -= clip_duration;
+            } else { 
+                let clip_duration = audio_duration.min(remaining_duration);
+                audio_filters.push(format!("[{idx}:a]atrim=end={end},asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index, end=clip_duration)); 
+                remaining_duration -= clip_duration;
+            }
+            current_audio_time = audio_end_time; 
+            input_index += 1;
         }
-        if audio_filters.is_empty() { println!("[start_export][WARN] Aucun segment audio retenu"); }
+        
+        if audio_filters.is_empty() { 
+            println!("[start_export][WARN] Aucun segment audio retenu"); 
+        } else {
+            println!("[start_export] Audio configuré avec {} segment(s), durée limitée à {:.3}s", audio_filters.len(), audio_max_duration);
+        }
 
         if !audio_filters.is_empty() {
             if !filter.is_empty() && !filter.ends_with(';') { filter.push(';'); }
-            if audio_filters.len() == 1 { filter.push_str(&audio_filters[0]); } else { filter.push_str(&audio_filters.join(";")); filter.push(';'); for i in 0..audio_filters.len() { filter.push_str(&format!("[a{}]", i)); } filter.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len())); }
+            if audio_filters.len() == 1 { 
+                filter.push_str(&audio_filters[0]); 
+            } else { 
+                filter.push_str(&audio_filters.join(";")); 
+                filter.push(';'); 
+                for i in 0..audio_filters.len() { 
+                    filter.push_str(&format!("[a{}]", i)); 
+                } 
+                filter.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len())); 
+            }
         }
     }
 
@@ -673,6 +733,11 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     cmd_args.push("-pix_fmt".into()); cmd_args.push("yuv420p".into());
     cmd_args.push("-movflags".into()); cmd_args.push("+faststart".into());
     cmd_args.push("-r".into()); cmd_args.push("30".into());
+    
+    // Forcer la durée totale de la vidéo finale à être exactement end_time - start_time
+    let max_duration = (end_time - start_time) / 1000.0;
+    cmd_args.push("-t".into()); cmd_args.push(format!("{:.3}", max_duration));
+    
     cmd_args.push("-progress".into()); cmd_args.push("pipe:2".into());
     cmd_args.push(output_path.to_string_lossy().to_string());
 
@@ -680,12 +745,9 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
 
     let mut cmd = TokioCommand::new(&ffmpeg_path); cmd.args(&cmd_args); cmd.stderr(std::process::Stdio::piped()); cmd.stdout(std::process::Stdio::piped());
 
-    // Calculer la durée totale basée sur les vrais timestamps
-    let base_timestamp = entries[0].0;
-    let last_timestamp = entries.last().unwrap().0;
-    let last_image_duration = 2.0; // Durée par défaut de la dernière image
-    let total_video_duration = ((last_timestamp - base_timestamp) as f64 / 1000.0) + last_image_duration;
-    println!("[start_export] Durée vidéo estimée: {:.3}s (basée sur timestamps)", total_video_duration);
+    // Utiliser la durée exacte forcée par l'option -t
+    let total_video_duration = (end_time - start_time) / 1000.0;
+    println!("[start_export] Durée vidéo forcée: {:.3}s (end_time - start_time)", total_video_duration);
 
     let mut child = cmd.spawn().map_err(|e| format!("Echec lancement ffmpeg: {e}"))?;
     let mut collected_stderr: Vec<String> = Vec::new();
@@ -740,7 +802,17 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
 
     let output_str = output_path.to_string_lossy().to_string();
     println!("[start_export] ✓ Vidéo créée: {}", output_str);
-    let _ = app_handle.emit("export-complete", serde_json::json!({ "filename": output_path.file_name().and_then(|n| n.to_str()).unwrap_or("video_no_audio.mp4"), "exportId": export_id }));
+    
+    let output_file_name = output_path.file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("export.mp4")
+        .to_string();
+    
+    let _ = app_handle.emit("export-complete", serde_json::json!({ 
+        "filename": output_file_name, 
+        "exportId": export_id,
+        "fullPath": output_str
+    }));
     println!("[start_export] ===== FIN EXPORT {} =====", export_id);
     Ok(output_str)
 }

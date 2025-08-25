@@ -190,9 +190,6 @@ export default class Exporter {
 		const project = globalState.currentProject!.clone();
 		project.detail.id = Number(exportId); // L'ID du projet est l'ID d'export
 
-		// Récupère les dimensions de la fenêtre d'export (qui prend compte des limitations de taille de fenêtre)
-		const { width: windowWidth, height: windowHeight } = await Exporter.getRealExportDimensions();
-
 		// Créer le fichier du projet dans le dossier Export afin que l'Exporter le récupère
 		await ExportService.saveProject(project);
 
