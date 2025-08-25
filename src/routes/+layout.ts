@@ -24,9 +24,10 @@ QPCFontProvider.loadQPC2Data();
 ExportService.loadExports();
 
 // Charge les paramètres utilisateur
-await Settings.load();
+Settings.load();
 
-await VersionService.init();
+// Vérifie les mises à jour
+VersionService.init();
 
 // Charge les traductions si pas déjà fait
 ProjectTranslation.loadAvailableTranslations();

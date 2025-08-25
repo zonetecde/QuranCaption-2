@@ -42,7 +42,7 @@ export class Verse {
 			.join(' ');
 	}
 
-	getWordByWordTranslationBetweenTwoIndexes(startIndex: number, endIndex: number): string {
+	getWordByWordTranslationBetweenTwoIndexes(startIndex: number, endIndex: number): string[] {
 		if (startIndex < 0 || endIndex >= this.words.length || startIndex > endIndex) {
 			if (endIndex >= this.words.length) {
 				return this.getWordByWordTranslationBetweenTwoIndexes(startIndex, this.words.length - 1);
@@ -50,10 +50,7 @@ export class Verse {
 				throw new Error('Invalid index range');
 			}
 		}
-		return this.words
-			.slice(startIndex, endIndex + 1)
-			.map((word) => word.translation)
-			.join(' ');
+		return this.words.slice(startIndex, endIndex + 1).map((word) => word.translation);
 	}
 
 	getNextPunctuationMarkIndex(index: number): number {

@@ -180,7 +180,7 @@ export class SubtitleClip extends ClipWithTranslation {
 	verse: number;
 	startWordIndex: number;
 	endWordIndex: number;
-	wbwTranslation: string; // Traduction mot à mot
+	wbwTranslation: string[]; // Traduction mot à mot
 	isFullVerse: boolean; // Indique si ce clip contient l'intégralité du verset
 	isLastWordsOfVerse: boolean; // Indique si ce clip contient les derniers mots du verset
 
@@ -192,7 +192,7 @@ export class SubtitleClip extends ClipWithTranslation {
 		startWordIndex: number,
 		endWordIndex: number,
 		text: string,
-		wbwTranslation: string,
+		wbwTranslation: string[],
 		isFullVerse: boolean,
 		isLastWordsOfVerse: boolean,
 		translations: { [key: string]: Translation } = {}

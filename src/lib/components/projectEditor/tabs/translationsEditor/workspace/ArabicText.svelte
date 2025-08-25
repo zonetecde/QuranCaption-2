@@ -21,27 +21,6 @@
 				class="word group flex flex-col items-center gap-y-2 relative"
 				role="button"
 				tabindex="0"
-				onmouseenter={(e) => {
-					// Ne charge la traduction que si ce n'est pas le numéro de verset
-					if (i !== words.length - 1 || !subtitle.isLastWordsOfVerse) {
-						const target = e.currentTarget;
-						const tooltip = target.querySelector('.word-translation-tooltip') as HTMLElement;
-						if (tooltip && !tooltip.dataset.loaded) {
-							// Marque comme chargé pour éviter les rechargements
-							tooltip.dataset.loaded = 'true';
-							// Charge et affiche la traduction
-							Quran.getVerse(subtitle.surah, subtitle.verse).then((verse) => {
-								if (verse) {
-									const translation = verse.getWordByWordTranslationBetweenTwoIndexes(
-										wordIndex,
-										wordIndex
-									);
-									tooltip.textContent = translation;
-								}
-							});
-						}
-					}
-				}}
 			>
 				<span>{word + ' '}</span>
 
@@ -51,7 +30,7 @@
 						class="word-translation-tooltip group-hover:block hidden text-sm absolute top-10 w-max px-1.5 bg-slate-700 border-slate-800 border-2 rounded-lg text-center z-20"
 						dir="ltr"
 					>
-						<!-- Le contenu est chargé dynamiquement lors du survol -->
+						{subtitle.wbwTranslation[wordIndex - subtitle.startWordIndex] || ''}
 					</span>
 				{/if}
 			</div>
