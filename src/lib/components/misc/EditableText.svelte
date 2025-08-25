@@ -22,7 +22,7 @@
 		inputType?: 'text' | 'reciters';
 	} = $props();
 
-	async function projectNameClick() {
+	async function textClicked() {
 		const newName = await ModalManager.inputModal(text, value, maxLength, placeholder, inputType);
 		if (newName && newName.trim() !== '') {
 			value = newName.trim();
@@ -32,9 +32,8 @@
 </script>
 
 <button
-	onclick={projectNameClick}
-	class={'text-left text-nowrap project-name-container group/name flex items-center cursor-pointer ' +
-		parentClasses}
+	onclick={textClicked}
+	class={'text-left text-nowrap group/name flex items-center cursor-pointer ' + parentClasses}
 >
 	<h4 class={'group-hover/name:underline ' + textClasses}>{value}</h4>
 	<span

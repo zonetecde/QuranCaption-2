@@ -79,8 +79,8 @@
 					bind:value={projectDetail.name}
 					maxLength={ProjectDetail.NAME_MAX_LENGTH}
 					placeholder={projectDetail.name}
-					parentClasses="text-accent"
-					textClasses="text-lg font-semibold max-w-[310px] truncate"
+					parentClasses="text-accent max-w-[80%]"
+					textClasses="text-lg font-semibold truncate"
 					action={async () => {
 						await ProjectService.saveDetail(projectDetail); // Sauvegarde le projet
 					}}

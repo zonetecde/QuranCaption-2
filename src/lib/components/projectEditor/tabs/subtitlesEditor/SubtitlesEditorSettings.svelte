@@ -152,7 +152,7 @@
 		<div class="space-y-3">
 			<h3 class="text-sm font-medium text-secondary mb-3">Playback Speed</h3>
 			<div class="flex items-center justify-center gap-1 2xl:gap-2">
-				{#each [0.5, 1, 1.5, 2, 2.5] as speed}
+				{#each [0.75, 1, 1.5, 1.75, 2] as speed}
 					<button
 						class="px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer hover:scale-105 border {globalState
 							.currentProject!.projectEditorState.subtitlesEditor.playbackSpeed === speed

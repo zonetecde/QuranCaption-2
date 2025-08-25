@@ -150,6 +150,15 @@
 		return Math.max(0, timeInClip / 1000); // Convertit en secondes pour l'élément video HTML
 	}
 
+	onDestroy(() => {
+		if (audioHowl) {
+			audioHowl.unload(); // Libère les ressources audio
+			audioHowl = null;
+		}
+
+		window.removeEventListener('resize', resizeVideoToFitScreen);
+	});
+
 	// === CYCLE DE VIE DU COMPOSANT ===
 	onMount(() => {
 		resizeVideoToFitScreen(); // Redimensionne initial
@@ -186,7 +195,7 @@
 		ShortcutService.registerShortcut({
 			key: globalState.settings!.shortcuts.VIDEO_PREVIEW.INCREASE_SPEED,
 			onKeyDown: (e) => {
-				setPlaybackSpeed(getSpeed() * 2);
+				setPlaybackSpeed(getSpeed() + 1);
 			},
 			onKeyUp: (e) => {
 				setPlaybackSpeed(getSpeed());
@@ -315,6 +324,8 @@
 	 * La preview reste basée sur 1920x1080 mais avec le bon ratio de sortie
 	 */
 	function resizeVideoToFitScreen() {
+		if (!globalState.currentProject) return;
+
 		const previewContainer = document.getElementById('preview-container');
 		const preview = document.getElementById('preview');
 
