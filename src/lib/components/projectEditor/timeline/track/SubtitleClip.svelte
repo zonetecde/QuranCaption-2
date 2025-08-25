@@ -7,10 +7,14 @@
 
 	let {
 		clip = $bindable(),
-		track = $bindable()
+		track = $bindable(),
+		nextIsSameVerse = false,
+		previousIsSameVerse = false
 	}: {
 		clip: SubtitleClip;
 		track: Track;
+		nextIsSameVerse?: boolean;
+		previousIsSameVerse?: boolean;
 	} = $props();
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
@@ -177,6 +181,20 @@
 		class="h-full w-1 right-0 cursor-w-resize absolute top-0 bottom-0 z-10"
 		onmousedown={startRightDragging}
 	></div>
+
+	<!-- Indicateur de verset -->
+	<div class="absolute bottom-0 left-0 right-0 h-[20px] flex items-center">
+		<!-- Début du verset (si le précédent n'est pas le même verset) -->
+		{#if !previousIsSameVerse && clip.type !== 'Silence'}
+			<div class="w-3 h-full bg-black/50 clip-path-start"></div>
+		{/if}
+		<!-- Ligne du milieu -->
+		<div class="flex-1 h-[4px] bg-black/50"></div>
+		<!-- Fin du verset (si le suivant n'est pas le même verset) -->
+		{#if !nextIsSameVerse && clip.type !== 'Silence'}
+			<div class="w-3 h-full bg-black/50 clip-path-end"></div>
+		{/if}
+	</div>
 </div>
 
 <ContextMenu bind:this={contextMenu}>
@@ -205,3 +223,14 @@
 		</div></Item
 	>
 </ContextMenu>
+
+<style>
+	/* Formes pour l'indicateur de verset */
+	.clip-path-start {
+		clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+	}
+
+	.clip-path-end {
+		clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+	}
+</style>

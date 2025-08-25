@@ -12,6 +12,7 @@
 	import ClipComponent from './Clip.svelte';
 	import SubtitleClipComponent from './SubtitleClip.svelte';
 	import CustomTextClipComponent from './CustomTextClip.svelte';
+	import { SubtitleTrack } from '$lib/classes/Track.svelte';
 
 	let {
 		track = $bindable()
@@ -71,7 +72,19 @@
 			<div class="flex items-center h-full px-3 gap-2">
 				{#each track.clips as clip, index}
 					{#if track.type === TrackType.Subtitle}
-						<SubtitleClipComponent bind:clip={track.clips[index] as SubtitleClipType} {track} />
+						{@const nextIsSameVerse =
+							(track as SubtitleTrack).getSubtitleAfter(index)?.verse ===
+							(clip as SubtitleClipType).verse}
+						{@const previousIsSameVerse =
+							(track as SubtitleTrack).getSubtitleBefore(index)?.verse ===
+							(clip as SubtitleClipType).verse}
+
+						<SubtitleClipComponent
+							bind:clip={track.clips[index] as SubtitleClipType}
+							{track}
+							{nextIsSameVerse}
+							{previousIsSameVerse}
+						/>
 					{:else}
 						<ClipComponent {clip} {track} />
 					{/if}
