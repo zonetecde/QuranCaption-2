@@ -267,7 +267,9 @@
 					startTime: globalState.getExportState.videoStartTime,
 					endTime: globalState.getExportState.videoEndTime,
 					audios: audios,
-					videos: videos
+					videos: videos,
+					targetWidth: exportData!.videoDimensions.width,
+					targetHeight: exportData!.videoDimensions.height
 				});
 			}
 		}

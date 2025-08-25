@@ -443,11 +443,11 @@ async fn add_audio_to_video(file_name: String, final_file_path: String, audios: 
 }
 
 #[tauri::command]
-async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, app_handle: tauri::AppHandle) -> Result<String, String> {
+async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
     println!("[start_export] ===== DÉBUT EXPORT {} =====", export_id);
     println!("[start_export] imgs_folder: {}", imgs_folder);
     println!("[start_export] start_time(ms): {} end_time(ms): {}", start_time, end_time);
-    println!("[start_export] audios fournis: {}", audios.len());
+    println!("[start_export] audios fournis: {} | vidéos: {}", audios.len(), videos.len());
     let export_dir = Path::new(&imgs_folder);
     if !export_dir.exists() { return Err(format!("Le dossier d'export n'existe pas: {}", export_dir.display())); }
 
@@ -504,16 +504,101 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
 
     // Inputs audio
     for a in &audios { cmd_args.push("-i".into()); cmd_args.push(a.clone()); }
+    
+    // Inputs vidéo
+    for v in &videos { cmd_args.push("-i".into()); cmd_args.push(v.clone()); }
 
     // Construction filter_complex
     let mut filter = String::new();
-    // --- Vidéo ---
+    
+    // --- Vidéo de fond ---
+    let mut background_video_filter = String::new();
+    if !videos.is_empty() {
+        // Calculer la durée totale des images (durée maximale que la vidéo de fond doit avoir)
+        let video_max_duration = (end_time - start_time) / 1000.0; // Durée de l'export en secondes
+        println!("[start_export] Durée max vidéo de fond: {:.3}s (basée sur end_time - start_time)", video_max_duration);
+        
+        let video_input_start = entries.len() + audios.len();
+        let mut video_durations = Vec::new();
+        for (idx, video_file) in videos.iter().enumerate() {
+            match get_duration(video_file) { 
+                Ok(ms) => { 
+                    let s = (ms.max(0) as f64)/1000.0; 
+                    video_durations.push(s); 
+                    println!("[start_export] Durée vidéo {} = {:.3}s", idx, s); 
+                }, 
+                Err(e) => { 
+                    println!("[start_export][WARN] Durée vidéo inconnue {}: {}", video_file, e); 
+                    video_durations.push(0.0);
+                } 
+            }
+        }
+        
+        let mut current_video_time = 0.0;
+        let mut video_filters: Vec<String> = Vec::new();
+        let mut input_index = video_input_start;
+        let mut remaining_duration = video_max_duration;
+        
+        for &video_duration in video_durations.iter() {
+            let video_end_time = current_video_time + video_duration;
+            if start_time_seconds >= video_end_time { 
+                current_video_time = video_end_time; 
+                input_index += 1; 
+                continue; 
+            }
+            
+            if remaining_duration <= 0.0 {
+                break; // Plus besoin de vidéos, on a atteint la durée max
+            }
+            
+            if start_time_seconds >= current_video_time && start_time_seconds < video_end_time { 
+                let skip = start_time_seconds - current_video_time; 
+                let available_duration = video_duration - skip;
+                let clip_duration = available_duration.min(remaining_duration);
+                video_filters.push(format!("[{idx}:v]trim=start={skip}:end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=skip+clip_duration)); 
+                remaining_duration -= clip_duration;
+            } else { 
+                let clip_duration = video_duration.min(remaining_duration);
+                video_filters.push(format!("[{idx}:v]trim=end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=clip_duration)); 
+                remaining_duration -= clip_duration;
+            }
+            current_video_time = video_end_time; 
+            input_index += 1;
+        }
+        
+        if !video_filters.is_empty() {
+            if video_filters.len() == 1 { 
+                background_video_filter = video_filters[0].clone(); 
+            } else { 
+                background_video_filter = video_filters.join(";");
+                background_video_filter.push(';');
+                for i in 0..video_filters.len() { 
+                    background_video_filter.push_str(&format!("[bg{}]", i)); 
+                }
+                background_video_filter.push_str(&format!("concat=n={}:v=1:a=0[bg_video]", video_filters.len()));
+            }
+            println!("[start_export] Vidéo de fond configurée avec {} segment(s), durée limitée à {:.3}s", video_filters.len(), video_max_duration);
+        }
+    }
+    
+    // --- Images avec overlay sur vidéo de fond ---
     if entries.len() == 1 {
-        filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
+        if !videos.is_empty() {
+            if !background_video_filter.is_empty() {
+                filter.push_str(&background_video_filter);
+                filter.push(';');
+                let bg_label = if videos.len() == 1 { "[bg0]" } else { "[bg_video]" };
+                filter.push_str(&format!("color=black:{}x{}:d={:.3}[black];[0:v]fps=30,format=yuva420p,setsar=1:1[overlay];{}[black]overlay[vout]", target_width, target_height, durations[0], bg_label));
+            } else {
+                filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
+            }
+        } else {
+            filter.push_str("[0:v]fps=30,format=yuv420p,setsar=1:1[vout]");
+        }
     } else {
-        // Préparation des inputs vidéo
+        // Préparation des inputs vidéo avec transparence
         for i in 0..entries.len() { 
-            filter.push_str(&format!("[{i}:v]fps=30,format=yuv420p,setsar=1:1[v{i}];"));
+            filter.push_str(&format!("[{i}:v]fps=30,format=yuva420p,setsar=1:1[v{i}];"));
         }
         
         // Construction des transitions xfade basées sur les vrais timestamps
@@ -522,7 +607,7 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
         
         for i in 1..entries.len() {
             let next_input = format!("v{}", i);
-            let out_label = if i == entries.len() - 1 { "vout".to_string() } else { format!("vx{}", i) };
+            let out_label = if i == entries.len() - 1 { "overlay".to_string() } else { format!("vx{}", i) };
             
             // Calculer l'offset basé sur la différence réelle de timestamps
             let current_image_ts = entries[i].0;
@@ -540,6 +625,18 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
             
             current_label = out_label;
         }
+        
+        // Compositing avec vidéo de fond
+        if !videos.is_empty() && !background_video_filter.is_empty() {
+            filter.push_str(&background_video_filter);
+            filter.push(';');
+            let bg_label = if videos.len() == 1 { "[bg0]" } else { "[bg_video]" };
+            filter.push_str(&format!("{}[overlay]overlay[vout]", bg_label));
+        } else {
+            // Pas de vidéo de fond, utiliser un fond noir
+            filter.push_str(&format!("color=black:{}x{}[black];[black][overlay]overlay[vout]", target_width, target_height));
+        }
+        
         if filter.ends_with(';') { filter.pop(); }
     }
 
