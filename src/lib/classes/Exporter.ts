@@ -7,6 +7,8 @@ import { Quran } from './Quran';
 import { Utilities } from './misc/Utilities';
 import type { Project } from '.';
 import ExportService from '$lib/services/ExportService';
+import { BaseDirectory, join } from '@tauri-apps/api/path';
+import { remove } from '@tauri-apps/plugin-fs';
 
 export default class Exporter {
 	/**
@@ -211,51 +213,21 @@ export default class Exporter {
 			title: 'QC - ' + exportId,
 			url: '/exporter?' + new URLSearchParams({ id: exportId }) // Met en paramètre l'ID de l'export pour que l'exportateur puisse le récupérer
 		});
-	}
 
-	static async getRealExportDimensions(): Promise<{ width: number; height: number }> {
-		const videoSize = globalState.getStyle('global', 'video-dimension')!.value as {
-			width: number;
-			height: number;
-		};
-
-		let screenWidth = 0;
-		let screenHeight = 0;
-
-		// Obtenir la taille de l'écran de l'utilisateur
-		const monitor = await currentMonitor();
-		if (!monitor) {
-			console.error('Could not get monitor information');
-			// Considère qu'il a un écran 1920x1080
-			screenWidth = 1920;
-			screenHeight = 1080;
-		} else {
-			screenWidth = monitor.size.width;
-			screenHeight = monitor.size.height;
-		}
-
-		// Calculer la taille de fenêtre optimale
-		let windowWidth = videoSize.width;
-		let windowHeight = videoSize.height;
-
-		// Si la vidéo dépasse les dimensions de l'écran, on redimensionne en gardant le ratio
-		if (windowHeight > screenHeight || windowWidth > screenWidth) {
-			const videoRatio = videoSize.width / videoSize.height;
-			const screenRatio = screenWidth / screenHeight;
-
-			if (windowHeight > screenHeight) {
-				// La hauteur dépasse, on ajuste selon la hauteur max
-				windowHeight = screenHeight;
-				windowWidth = Math.round(windowHeight * videoRatio);
+		// listen  to close
+		w.listen('tauri://close-requested', async (e) => {
+			try {
+				// Supprime le dossier temporaire des images
+				await remove(await join(ExportService.exportFolder, exportId), {
+					baseDir: BaseDirectory.AppData,
+					recursive: true
+				});
+			} catch (error) {
+				console.error('Error removing temporary images folder:', error);
+			} finally {
+				// ferme la fenêtre
+				await w.destroy();
 			}
-
-			if (windowWidth > screenWidth) {
-				// Après ajustement, si la largeur dépasse encore, on ajuste selon la largeur max
-				windowWidth = screenWidth;
-				windowHeight = Math.round(windowWidth / videoRatio);
-			}
-		}
-
-		return { width: windowWidth, height: windowHeight };
+		});
 	}
 }

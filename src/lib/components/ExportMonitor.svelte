@@ -125,7 +125,39 @@
 				class="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-track-gray-800 scrollbar-thumb-gray-600"
 			>
 				{#each globalState.exportations as exportation (exportation.exportId)}
-					<div class="p-4 border-b border-gray-800 last:border-b-0">
+					<div class="p-4 border-b border-gray-800 last:border-b-0 relative">
+						<!-- delete cross -->
+						<button
+							class="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+							onclick={async (e) => {
+								e.stopPropagation();
+
+								if (exportation.isOnGoing()) {
+									const resp = await ModalManager.confirmModal(
+										'Are you sure you want to cancel this export? This action cannot be undone.'
+									);
+
+									if (resp) {
+										await exportation.cancelExport();
+									}
+								} else {
+									// Remove from the list if not ongoing
+									globalState.exportations = globalState.exportations.filter(
+										(e) => e.exportId !== exportation.exportId
+									);
+								}
+							}}
+							title={exportation.isOnGoing() ? 'Cancel Export' : 'Remove from list'}
+						>
+							<span class="material-icons">
+								{#if exportation.isOnGoing()}
+									cancel
+								{:else}
+									delete
+								{/if}
+							</span>
+						</button>
+
 						<!-- Export Header -->
 						<div class="flex items-start justify-between mb-3">
 							<div class="flex-1 min-w-0">

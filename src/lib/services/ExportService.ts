@@ -162,6 +162,11 @@ function exportProgress(event: any): void {
 
 	const exportation = globalState.exportations.find((exp) => exp.exportId === data.exportId);
 	if (exportation) {
+		if (exportation.currentState === ExportState.Canceled) {
+			// Si l'exportation a été annulée, on ignore les mises à jour
+			return;
+		}
+
 		exportation.percentageProgress = data.progress;
 		exportation.currentState = data.currentState;
 		exportation.currentTreatedTime = data.currentTime;

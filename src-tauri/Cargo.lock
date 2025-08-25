@@ -96,6 +96,7 @@ version = "0.1.0"
 dependencies = [
  "dirs",
  "font-kit",
+ "lazy_static",
  "log",
  "regex",
  "serde",

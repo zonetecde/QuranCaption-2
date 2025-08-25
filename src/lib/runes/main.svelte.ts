@@ -41,7 +41,7 @@ class GlobalState {
 
 	uiState = $state({
 		// Indique si on affiche le moniteur d'exportation
-		showExportMonitor: true,
+		showExportMonitor: false,
 		selectedStatuses: Status.getAllStatuses(),
 		filteredProjects: [] as ProjectDetail[],
 		searchQuery: '',

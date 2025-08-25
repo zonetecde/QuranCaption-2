@@ -7,8 +7,6 @@
 	import ExportMonitor from './ExportMonitor.svelte';
 	import ModalManager from './modals/ModalManager';
 
-	globalState.uiState.showExportMonitor = false;
-
 	async function minimizeButtonClick() {
 		getCurrentWindow().minimize();
 	}

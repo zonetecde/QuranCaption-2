@@ -183,16 +183,16 @@
 	></div>
 
 	<!-- Indicateur de verset -->
-	<div class="absolute bottom-0 left-0 right-0 h-[20px] flex items-center">
+	<div class="absolute -bottom-1 left-0 right-0 h-[20px] flex items-center">
 		<!-- Début du verset (si le précédent n'est pas le même verset) -->
 		{#if !previousIsSameVerse && clip.type !== 'Silence'}
-			<div class="w-3 h-full bg-black/50 clip-path-start"></div>
+			<div class="w-3 h-full bg-black/40 clip-path-start"></div>
 		{/if}
 		<!-- Ligne du milieu -->
-		<div class="flex-1 h-[4px] bg-black/50"></div>
+		<div class="flex-1 -mx-3 mb-1 h-[4px] bg-black/40"></div>
 		<!-- Fin du verset (si le suivant n'est pas le même verset) -->
 		{#if !nextIsSameVerse && clip.type !== 'Silence'}
-			<div class="w-3 h-full bg-black/50 clip-path-end"></div>
+			<div class="w-3 h-full bg-black/40 clip-path-end"></div>
 		{/if}
 	</div>
 </div>
@@ -227,10 +227,10 @@
 <style>
 	/* Formes pour l'indicateur de verset */
 	.clip-path-start {
-		clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+		clip-path: polygon(0% 40%, 100% 50%, 0% 100%);
 	}
 
 	.clip-path-end {
-		clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+		clip-path: polygon(0% 50%, 100% 40%, 100% 100%);
 	}
 </style>

@@ -35,7 +35,8 @@
 	<div class="flex justify-end gap-3">
 		<button
 			class="btn px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105"
-			onclick={() => {
+			onclick={(e) => {
+				e.stopPropagation();
 				resolve(false);
 			}}
 		>
@@ -44,7 +45,8 @@
 		<button
 			class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105
 			       shadow-lg hover:shadow-xl"
-			onclick={() => {
+			onclick={(e) => {
+				e.stopPropagation();
 				resolve(true);
 			}}
 		>

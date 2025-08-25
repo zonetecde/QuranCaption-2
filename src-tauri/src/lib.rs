@@ -5,8 +5,15 @@ use tokio::process::Command as TokioCommand;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use regex::Regex;
 use tauri::Emitter;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use font_kit::source::SystemSource;
+
+// Stockage global des process IDs d'export en cours
+lazy_static::lazy_static! {
+    static ref EXPORT_PROCESS_IDS: Arc<Mutex<HashMap<String, u32>>> = Arc::new(Mutex::new(HashMap::new()));
+}
 
 #[tauri::command]
 async fn download_from_youtube(
@@ -20,7 +27,11 @@ async fn download_from_youtube(
     }
 
     // Chemin vers yt-dlp dans le dossier binaries (relatif au working directory)
-    let yt_dlp_path = Path::new("binaries").join("yt-dlp");
+    let yt_dlp_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("yt-dlp.exe")
+    } else {
+        Path::new("binaries").join("yt-dlp")
+    };
 
     // Configuration selon le type (audio ou vidéo)
     let mut args = vec!["--force-ipv4"];
@@ -115,7 +126,11 @@ fn get_duration(file_path: &str) -> Result<i64, String> {
         return Ok(-1);
     }
 
-    let ffprobe_path = Path::new("binaries").join("ffprobe");
+    let ffprobe_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffprobe.exe")
+    } else {
+        Path::new("binaries").join("ffprobe")
+    };
 
     let output = Command::new(&ffprobe_path)
         .args(&[
@@ -225,224 +240,6 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn add_audio_to_video(file_name: String, final_file_path: String, audios: Vec<String>, start_time: f64, export_id: String, video_duration: f64, target_width: i32, target_height: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
-    // Chemin vers ffmpeg dans le dossier binaries
-    let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
-    
-    // Obtenir le dossier de téléchargements de l'utilisateur
-    let downloads_dir = dirs::download_dir()
-        .ok_or_else(|| "Could not find downloads directory".to_string())?;
-    
-    let input_video_path = downloads_dir.join(&file_name);
-    
-    // Vérifier que le fichier vidéo existe
-    if !input_video_path.exists() {
-        return Err(format!("Video file not found: {}", input_video_path.display()));
-    }
-    
-    // Utiliser le chemin de fichier final fourni par le frontend avec l'extension .mp4
-    let output_video_path = Path::new(&final_file_path).with_extension("mp4");
-    
-    // Créer le dossier parent du fichier de sortie s'il n'existe pas
-    if let Some(parent_dir) = output_video_path.parent() {
-        if let Err(e) = fs::create_dir_all(parent_dir) {
-            return Err(format!("Unable to create output directory: {}", e));
-        }
-    }
-    
-    let output_file_name = output_video_path.file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("output.mp4")
-        .to_string();
-    
-    if audios.is_empty() {
-        return Err("No audio files provided".to_string());
-    }
-
-    // Convertir start_time de millisecondes en secondes
-    let start_time_seconds = start_time / 1000.0;
-    
-    // Obtenir les durées de tous les fichiers audio
-    let mut audio_durations = Vec::new();
-    for audio_file in &audios {
-        match get_duration(audio_file) {
-            Ok(duration_ms) => {
-                let duration_seconds = duration_ms as f64 / 1000.0; // Convertir ms en secondes
-                audio_durations.push(duration_seconds);
-            },
-            Err(e) => {
-                println!("Warning: Could not get duration for {}: {}", audio_file, e);
-                audio_durations.push(0.0); // Valeur par défaut si on ne peut pas obtenir la durée
-            }
-        }
-    }
-    
-    // Calculer quels fichiers audio utiliser et à partir de quel moment
-    let mut current_audio_time = 0.0;
-    let mut audio_filters = Vec::new();
-    let mut input_index = 1; // L'index 0 est la vidéo
-    
-    for &audio_duration in audio_durations.iter() {
-        let audio_end_time = current_audio_time + audio_duration;
-        
-        // Si le start_time est après la fin de ce fichier audio, on l'ignore complètement
-        if start_time_seconds >= audio_end_time {
-            current_audio_time = audio_end_time;
-            input_index += 1;
-            continue;
-        }
-        
-        // Si le start_time est dans ce fichier audio
-        if start_time_seconds >= current_audio_time && start_time_seconds < audio_end_time {
-            let skip_seconds = start_time_seconds - current_audio_time;
-            // Utiliser atrim avec asetpts pour repositionner l'audio au début
-            audio_filters.push(format!("[{}:a]atrim=start={},asetpts=PTS-STARTPTS[a{}]", input_index, skip_seconds, audio_filters.len()));
-            current_audio_time = audio_end_time;
-            input_index += 1;
-        } else {
-            // Ce fichier audio commence après le start_time, on le prend en entier mais repositionné au début
-            audio_filters.push(format!("[{}:a]asetpts=PTS-STARTPTS[a{}]", input_index, audio_filters.len()));
-            current_audio_time = audio_end_time;
-            input_index += 1;
-        }
-    }
-    
-    // Convertir video_duration de millisecondes en secondes
-    let video_duration_seconds = video_duration / 1000.0;
-    println!("Video duration: {:.2} seconds", video_duration_seconds);
-    
-    // Construire la commande ffmpeg
-    let mut cmd = TokioCommand::new(&ffmpeg_path);
-    
-    // Supprimer les 0.2 premières secondes de la vidéo car peut contenir l'écran de sélection de share
-    cmd.arg("-ss").arg("0.2");
-    
-    // Ajouter le fichier vidéo d'entrée
-    cmd.arg("-i").arg(&input_video_path);
-    
-    // Ajouter tous les fichiers audio comme inputs
-    for audio_file in &audios {
-        cmd.arg("-i").arg(audio_file);
-    }
-    
-    // Construire le filtre pour traiter les audios selon le start_time et les appliquer à la vidéo
-    if audio_filters.is_empty() {
-        return Err("No audio files match the specified start time".to_string());
-    } else if audio_filters.len() == 1 {
-        // Un seul fichier audio (ou segment) : utiliser le filtre créé + redimensionner la vidéo
-        let filter_complex = format!("[0:v]scale={}:{}[v_resized];{}", target_width, target_height, audio_filters[0]);
-        
-        cmd.arg("-filter_complex").arg(&filter_complex)
-           .arg("-map").arg("[v_resized]") // Vidéo redimensionnée
-           .arg("-map").arg("[a0]") // Audio filtré
-           .arg("-c:v").arg("libx264") // Re-encoder la vidéo en H.264 pour MP4
-           .arg("-c:a").arg("aac") // Encoder l'audio en AAC
-           .arg("-b:a").arg("128k") // Bitrate audio
-           .arg("-preset").arg("fast") // Preset rapide pour l'encodage H.264
-           .arg("-crf").arg("18") // Qualité vidéo (plus bas = meilleure qualité)
-           .arg("-shortest"); // Arrêter quand le flux le plus court se termine
-    } else {
-        // Plusieurs fichiers audio : les concaténer après les avoir filtrés + redimensionner la vidéo
-        let mut filter_complex = format!("[0:v]scale={}:{}[v_resized];", target_width, target_height);
-        filter_complex.push_str(&audio_filters.join(";"));
-        
-        // Ajouter la concaténation des audios filtrés
-        filter_complex.push(';');
-        for i in 0..audio_filters.len() {
-            filter_complex.push_str(&format!("[a{}]", i));
-        }
-        filter_complex.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len()));
-        
-        cmd.arg("-filter_complex").arg(&filter_complex)
-           .arg("-map").arg("[v_resized]") // Vidéo redimensionnée
-           .arg("-map").arg("[audio_out]") // Audio concaténé et filtré
-           .arg("-c:v").arg("libx264") // Re-encoder la vidéo en H.264 pour MP4
-           .arg("-c:a").arg("aac") // Encoder l'audio en AAC
-           .arg("-b:a").arg("128k") // Bitrate audio
-           .arg("-preset").arg("fast") // Preset rapide pour l'encodage H.264
-           .arg("-crf").arg("18") // Qualité vidéo (plus bas = meilleure qualité)
-           .arg("-shortest"); // Arrêter quand le flux le plus court se termine
-    }
-    
-    cmd.arg("-y") // Écraser le fichier de sortie s'il existe
-       .arg("-progress").arg("pipe:2") // Afficher la progression sur stderr
-       .stderr(std::process::Stdio::piped()) // Capturer stderr pour la progression
-       .stdout(std::process::Stdio::piped()); // Capturer stdout aussi
-    
-    // Fichier de sortie
-    cmd.arg(&output_video_path);
-    
-    // Démarrer le processus
-    let mut child = cmd.spawn().map_err(|e| format!("Failed to spawn ffmpeg: {}", e))?;
-    
-    // Lire la progression depuis stderr
-    if let Some(stderr) = child.stderr.take() {
-        let reader = BufReader::new(stderr);
-        let mut lines = reader.lines();
-        
-        // Regex pour extraire le temps actuel de la progression
-        let time_regex = Regex::new(r"out_time_ms=(\d+)").unwrap();
-        
-        while let Some(line) = lines.next_line().await.unwrap_or(None) {
-            if let Some(captures) = time_regex.captures(&line) {
-                if let Some(time_match) = captures.get(1) {
-                    if let Ok(time_us) = time_match.as_str().parse::<u64>() {
-                        let current_time = time_us as f64 / 1_000_000.0; // Convertir de microsecondes en secondes
-                        
-                        if video_duration_seconds > 0.0 {
-                            let progress = (current_time / video_duration_seconds * 100.0).min(100.0);
-                            println!("Progress: {:.1}% ({:.1}s / {:.1}s)", progress, current_time, video_duration_seconds);
-                            
-                            // Émettre l'événement vers le frontend
-                            let _ = app_handle.emit("export-progress", serde_json::json!({
-                                "progress": progress,
-                                "current_time": current_time,
-                                "total_time": video_duration_seconds
-                            }));
-                        } else {
-                            println!("Processing: {:.1}s elapsed", current_time);
-                            
-                            // Émettre l'événement vers le frontend sans pourcentage
-                            let _ = app_handle.emit("export-progress", serde_json::json!({
-                                "progress": null,
-                                "current_time": current_time,
-                                "total_time": null
-                            }));
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    // Attendre que le processus se termine
-    let status = child.wait().await.map_err(|e| format!("Failed to wait for ffmpeg: {}", e))?;
-    
-    if !status.success() {
-        let _ = app_handle.emit("export-error", "FFmpeg failed during processing");
-        return Err("FFmpeg failed during processing".to_string());
-    }
-    
-    println!("✓ Video with audio saved as: {}", output_file_name);
-    
-    // Supprimer la vidéo originale (sans audio)
-    if input_video_path.exists() {
-        match std::fs::remove_file(&input_video_path) {
-            Ok(_) => println!("✓ Original video file deleted: {}", file_name),
-            Err(e) => println!("⚠ Failed to delete original video file: {}", e),
-        }
-    }
-    
-    // Émettre l'événement de fin d'export
-    let _ = app_handle.emit("export-complete", serde_json::json!({
-        "filename": output_file_name,
-        "exportId": export_id
-    }));
-    
-    Ok(format!("Video with audio saved as: {}", output_file_name))
-}
-
-#[tauri::command]
 async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, final_file_path: String, fps: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
     println!("[start_export] ===== DÉBUT EXPORT {} =====", export_id);
     println!("[start_export] imgs_folder: {}", imgs_folder);
@@ -488,7 +285,11 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     println!("[start_export] start_time_seconds audio: {:.3}", start_time_seconds);
 
     // ffmpeg
-    let ffmpeg_path = Path::new("binaries").join("ffmpeg.exe");
+    let ffmpeg_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffmpeg.exe")
+    } else {
+        Path::new("binaries").join("ffmpeg")
+    };
     if !ffmpeg_path.exists() { return Err("ffmpeg introuvable dans ./binaries".to_string()); }
     
     // Utiliser le chemin de fichier final fourni par le frontend
@@ -741,7 +542,7 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     cmd_args.push("-progress".into()); cmd_args.push("pipe:2".into());
     cmd_args.push(output_path.to_string_lossy().to_string());
 
-    println!("[start_export] Commande:"); print!("  {}", ffmpeg_path.display()); for a in &cmd_args { print!(" {}", a); } println!("");
+    // println!("[start_export] Commande:"); print!("  {}", ffmpeg_path.display()); for a in &cmd_args { print!(" {}", a); } println!("");
 
     let mut cmd = TokioCommand::new(&ffmpeg_path); cmd.args(&cmd_args); cmd.stderr(std::process::Stdio::piped()); cmd.stdout(std::process::Stdio::piped());
 
@@ -750,6 +551,14 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     println!("[start_export] Durée vidéo forcée: {:.3}s (end_time - start_time)", total_video_duration);
 
     let mut child = cmd.spawn().map_err(|e| format!("Echec lancement ffmpeg: {e}"))?;
+    
+    // Stocker le PID du processus dans la HashMap globale
+    if let Some(pid) = child.id() {
+        let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
+        process_ids.insert(export_id.clone(), pid);
+        println!("[start_export] Processus ffmpeg démarré avec PID: {} pour export: {}", pid, export_id);
+    }
+    
     let mut collected_stderr: Vec<String> = Vec::new();
     
     if let Some(stderr) = child.stderr.take() {
@@ -798,7 +607,14 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     }
 
     let status = child.wait().await.map_err(|e| format!("Echec attente ffmpeg: {e}"))?;
-    if !status.success() { for l in collected_stderr.iter().rev().take(30).rev() { println!("  | {}", l); } let joined = collected_stderr.join("\n"); let _ = app_handle.emit("export-error", format!("ffmpeg a échoué lors de la génération vidéo\n{}", joined)); return Err("ffmpeg a échoué".to_string()); }
+    
+    // Nettoyer le PID de la HashMap une fois terminé
+    {
+        let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
+        process_ids.remove(&export_id);
+    }
+    
+    if !status.success() { for l in collected_stderr.iter().rev().take(30).rev() { println!("  | {}", l); } let joined = collected_stderr.join("\n"); let _ = app_handle.emit("export-error", format!("ffmpeg failed ruing video exportation\n{}", joined)); return Err("ffmpeg failed".to_string()); }
 
     let output_str = output_path.to_string_lossy().to_string();
     println!("[start_export] ✓ Vidéo créée: {}", output_str);
@@ -815,6 +631,71 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     }));
     println!("[start_export] ===== FIN EXPORT {} =====", export_id);
     Ok(output_str)
+}
+
+#[tauri::command]
+async fn cancel_export(export_id: String) -> Result<String, String> {
+    println!("[cancel_export] Tentative d'annulation de l'export {}", export_id);
+    
+    let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
+    
+    if let Some(pid) = process_ids.remove(&export_id) {
+        drop(process_ids); // Libérer le lock avant l'opération potentiellement bloquante
+        
+        println!("[cancel_export] Processus trouvé avec PID {} pour l'export {}, tentative de terminaison", pid, export_id);
+        
+        // Tuer le processus en utilisant le PID
+        #[cfg(target_os = "windows")]
+        {
+            let output = Command::new("taskkill")
+                .args(&["/F", "/PID", &pid.to_string()])
+                .output();
+            
+            match output {
+                Ok(result) => {
+                    if result.status.success() {
+                        println!("[cancel_export] ✓ Processus ffmpeg tué avec succès pour l'export {}", export_id);
+                        Ok(format!("Export {} canceled successfully", export_id))
+                    } else {
+                        let stderr = String::from_utf8_lossy(&result.stderr);
+                        println!("[cancel_export] ✗ Erreur taskkill: {}", stderr);
+                        Err(format!("Failed to kill process: {}", stderr))
+                    }
+                }
+                Err(e) => {
+                    println!("[cancel_export] ✗ Erreur lors de l'exécution de taskkill: {}", e);
+                    Err(format!("Failed to execute taskkill: {}", e))
+                }
+            }
+        }
+        
+        #[cfg(not(target_os = "windows"))]
+        {
+            let output = Command::new("kill")
+                .args(&["-TERM", &pid.to_string()])
+                .output();
+            
+            match output {
+                Ok(result) => {
+                    if result.status.success() {
+                        println!("[cancel_export] ✓ Processus ffmpeg tué avec succès pour l'export {}", export_id);
+                        Ok(format!("Export {} canceled successfully", export_id))
+                    } else {
+                        let stderr = String::from_utf8_lossy(&result.stderr);
+                        println!("[cancel_export] ✗ Erreur kill: {}", stderr);
+                        Err(format!("Failed to kill process: {}", stderr))
+                    }
+                }
+                Err(e) => {
+                    println!("[cancel_export] ✗ Erreur lors de l'exécution de kill: {}", e);
+                    Err(format!("Failed to execute kill: {}", e))
+                }
+            }
+        }
+    } else {
+        println!("[cancel_export] ✗ Aucun processus trouvé pour l'export {}", export_id);
+        Err(format!("No active export found with ID: {}", export_id))
+    }
 }
 
 #[tauri::command]
@@ -938,9 +819,9 @@ pub fn run() {
             get_new_file_path,
             move_file,
             get_system_fonts,
-            add_audio_to_video,
             open_explorer_with_file_selected,
-            start_export
+            start_export,
+            cancel_export
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
