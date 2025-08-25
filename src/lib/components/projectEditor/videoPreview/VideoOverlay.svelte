@@ -171,88 +171,93 @@
 	});
 </script>
 
-{#if overlaySettings().enable}
-	<div
-		class="absolute inset-0"
-		style="
-				background-color: {overlaySettings().color};
-				opacity: {overlaySettings().opacity};
-			"
-	></div>
+<div class="inset-0 absolute" style="" id="overlay">
+	{#if overlaySettings().enable}
+		<div
+			class="absolute inset-0"
+			style="
+					background-color: {overlaySettings().color};
+					opacity: {overlaySettings().opacity};
+				"
+		></div>
 
-	<div class="absolute inset-0" style="backdrop-filter: blur({overlaySettings().blur}px);"></div>
-{/if}
+		<div class="absolute inset-0" style="backdrop-filter: blur({overlaySettings().blur}px);"></div>
+	{/if}
 
-<div class="w-full h-full">
-	<div class="absolute inset-0 flex flex-col items-center justify-center" id="subtitles-container">
-		{#if currentSubtitle()}
-			{@const subtitle = currentSubtitle()}
-			{#if subtitle && subtitle.id}
-				<p
-					ondblclick={() => {
-						globalState.getVideoStyle.highlightCategory('arabic', 'general');
-					}}
-					use:verticalDrag={{
-						target: 'arabic',
-						styleId: 'vertical-position'
-					}}
-					class={'arabic absolute subtitle select-none ' +
-						getTailwind('arabic') +
-						helperStyles('arabic')}
-					style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', subtitle.id)};"
-					data-maxopacity={globalState.getVideoStyle
-						.getStylesOfTarget('arabic')
-						.getEffectiveValue('opacity', subtitle.id)}
-				>
-					{subtitle.getText()}
-				</p>
-			{/if}
-
-			{#each Object.keys(currentSubtitleTranslations()!) as edition}
-				{@const translation = (currentSubtitleTranslations()! as Record<string, Translation>)[
-					edition
-				]}
-
-				{#if globalState.getVideoStyle.doesTargetStyleExist(edition)}
+	<div class="w-full h-full">
+		<div
+			class="absolute inset-0 flex flex-col items-center justify-center"
+			id="subtitles-container"
+		>
+			{#if currentSubtitle()}
+				{@const subtitle = currentSubtitle()}
+				{#if subtitle && subtitle.id}
 					<p
 						ondblclick={() => {
-							globalState.getVideoStyle.highlightCategory(
-								'translation',
-								edition as StyleCategoryName
-							);
+							globalState.getVideoStyle.highlightCategory('arabic', 'general');
 						}}
 						use:verticalDrag={{
-							target: edition,
+							target: 'arabic',
 							styleId: 'vertical-position'
 						}}
-						class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
-						style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id)}`}
+						class={'arabic absolute subtitle select-none ' +
+							getTailwind('arabic') +
+							helperStyles('arabic')}
+						style="opacity: {subtitleOpacity('arabic')}; {getCss('arabic', subtitle.id)};"
 						data-maxopacity={globalState.getVideoStyle
-							.getStylesOfTarget(edition)
-							.getEffectiveValue('opacity', subtitle!.id)}
+							.getStylesOfTarget('arabic')
+							.getEffectiveValue('opacity', subtitle.id)}
 					>
-						{#if translation.type === 'verse'}
-							{translation.getText(edition, (subtitle as SubtitleClip)!)}
-						{:else}
-							{translation.getText()}
-						{/if}
+						{subtitle.getText()}
 					</p>
 				{/if}
+
+				{#each Object.keys(currentSubtitleTranslations()!) as edition}
+					{@const translation = (currentSubtitleTranslations()! as Record<string, Translation>)[
+						edition
+					]}
+
+					{#if globalState.getVideoStyle.doesTargetStyleExist(edition)}
+						<p
+							ondblclick={() => {
+								globalState.getVideoStyle.highlightCategory(
+									'translation',
+									edition as StyleCategoryName
+								);
+							}}
+							use:verticalDrag={{
+								target: edition,
+								styleId: 'vertical-position'
+							}}
+							class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
+							style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id)}`}
+							data-maxopacity={globalState.getVideoStyle
+								.getStylesOfTarget(edition)
+								.getEffectiveValue('opacity', subtitle!.id)}
+						>
+							{#if translation.type === 'verse'}
+								{translation.getText(edition, (subtitle as SubtitleClip)!)}
+							{:else}
+								{translation.getText()}
+							{/if}
+						</p>
+					{/if}
+				{/each}
+			{/if}
+
+			<SurahName />
+			<ReciterName />
+
+			{#if currentSubtitle() && currentSubtitle() instanceof SubtitleClip}
+				<VerseNumber
+					currentSurah={(currentSubtitle() as SubtitleClip).surah}
+					currentVerse={(currentSubtitle() as SubtitleClip).verse}
+				/>
+			{/if}
+
+			{#each currentCustomTexts() as customText}
+				<CustomText customText={(customText as CustomTextClip).category!} />
 			{/each}
-		{/if}
-
-		<SurahName />
-		<ReciterName />
-
-		{#if currentSubtitle() && currentSubtitle() instanceof SubtitleClip}
-			<VerseNumber
-				currentSurah={(currentSubtitle() as SubtitleClip).surah}
-				currentVerse={(currentSubtitle() as SubtitleClip).verse}
-			/>
-		{/if}
-
-		{#each currentCustomTexts() as customText}
-			<CustomText customText={(customText as CustomTextClip).category!} />
-		{/each}
+		</div>
 	</div>
 </div>

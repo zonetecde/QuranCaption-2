@@ -269,7 +269,7 @@
 
 	async function takeScreenshot(fileName: string) {
 		// L'élément à transformer en image
-		let node = document.getElementById('preview')!;
+		let node = document.getElementById('overlay')!;
 
 		// Qualité de l'image
 		let scale = 1.0;
