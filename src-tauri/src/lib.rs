@@ -53,6 +53,11 @@ async fn download_from_youtube(
         Path::new("binaries").join("yt-dlp")
     };
 
+    // Vérifier que le binaire existe
+    if !yt_dlp_path.exists() {
+        return Err(format!("yt-dlp binary not found at: {}", yt_dlp_path.display()));
+    }
+
     // Configuration selon le type (audio ou vidéo)
     let mut args = vec!["--force-ipv4"];
 
@@ -154,6 +159,11 @@ fn get_duration(file_path: &str) -> Result<i64, String> {
     } else {
         Path::new("binaries").join("ffprobe")
     };
+
+    // Vérifier que le binaire existe
+    if !ffprobe_path.exists() {
+        return Ok(-1); // Si ffprobe n'existe pas, retourner -1
+    }
 
     let mut cmd = Command::new(&ffprobe_path);
     cmd.args(&[
@@ -314,7 +324,7 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     } else {
         Path::new("binaries").join("ffmpeg")
     };
-    if !ffmpeg_path.exists() { return Err("ffmpeg introuvable dans ./binaries".to_string()); }
+    if !ffmpeg_path.exists() { return Err(format!("ffmpeg not found at: {}", ffmpeg_path.display())); }
     
     // Utiliser le chemin de fichier final fourni par le frontend
     let output_path = Path::new(&final_file_path);

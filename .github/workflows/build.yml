@@ -86,6 +86,8 @@ jobs:
           # GTK/WebKit deps (try 4.1 first, fallback to 4.0)
           sudo apt-get install -y libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf
           sudo apt-get install -y libwebkit2gtk-4.1-dev || sudo apt-get install -y libwebkit2gtk-4.0-dev
+          # Additional dependencies for better Linux compatibility
+          sudo apt-get install -y xdg-utils desktop-file-utils
 
       - name: Download yt-dlp (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -114,16 +116,12 @@ jobs:
       - name: Build the app
         run: npm run tauri build --verbose
 
-      - name: Zip macOS App
-        if: matrix.os == 'macos-latest'
-        run: |
-          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/release/bundle/macos/Quran Caption.app" "Quran.Caption.MacOS.zip"
-      - name: Upload macOS artifact
+      - name: Upload macOS DMG
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifact
-          path: Quran.Caption.MacOS.zip
+          path: 'src-tauri/target/release/bundle/dmg/*.dmg'
 
       - name: Upload Windows Installer
         if: matrix.os == 'windows-latest'
@@ -162,7 +160,8 @@ jobs:
           WIN_FILE=$(find . -name "Quran Caption_*_x64-setup.exe")
           mv "$WIN_FILE" ../../release-assets/Quran.Caption.Windows.exe
           cd ../../artifacts/macos-artifact
-          mv Quran.Caption.MacOS.zip ../../release-assets/Quran.Caption.MacOS.zip
+          DMG_FILE=$(find . -name "*.dmg")
+          mv "$DMG_FILE" ../../release-assets/Quran.Caption.MacOS.dmg
           cd ../../artifacts/linux-artifact || true
           if [ -d . ]; then
             find . -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.tar.*" \) -exec mv {} ../../release-assets/ \;

@@ -42,6 +42,20 @@
 			"icons/128x128@2x.png",
 			"icons/icon.icns",
 			"icons/icon.ico"
-		]
+		],
+		"macOS": {
+			"entitlements": null,
+			"exceptionDomain": "",
+			"frameworks": [],
+			"providerShortName": null,
+			"signingIdentity": null,
+			"hardenedRuntime": true,
+			"minimumSystemVersion": "10.13"
+		},
+		"linux": {
+			"deb": {
+				"depends": ["libc6", "libgtk-3-0", "libwebkit2gtk-4.0-37"]
+			}
+		}
 	}
 }
