@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
+	import toast from 'svelte-5-french-toast';
 
 	let {
 		label,
@@ -23,7 +24,12 @@
 
 	// Apply new time value
 	function applyValue(newValue: number) {
-		value = newValue;
+		// Make sure que start time < end time
+		if (label === 'Start Time' && newValue >= globalState.getExportState.videoEndTime) {
+			toast.error('Start time must be before end time');
+		} else if (label === 'End Time' && newValue <= globalState.getExportState.videoStartTime) {
+			toast.error('End time must be after start time');
+		} else value = newValue;
 	}
 </script>
 
