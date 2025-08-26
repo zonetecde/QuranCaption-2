@@ -293,6 +293,8 @@ export class ProjectTranslation extends SerializableBase {
 		await this.removeTranslation(edition, true);
 
 		await this.addTranslation(edition, translations);
+
+		globalState.currentProject!.detail.updatePercentageTranslated(edition);
 	}
 
 	async removeTranslation(edition: Edition, force: boolean = false) {
@@ -314,6 +316,8 @@ export class ProjectTranslation extends SerializableBase {
 				delete subtitle.translations[edition.name];
 			}
 		}
+
+		globalState.currentProject!.detail.updatePercentageTranslated(edition);
 	}
 
 	/**
