@@ -44,10 +44,6 @@ jobs:
         run: |
           # 7zip is already available on Windows runners
 
-      # Create binaries directory
-      - name: Create binaries directory
-        run: mkdir -p src-tauri/binaries
-
       # Download yt-dlp for each OS
       - name: Download yt-dlp (Linux)
         if: matrix.os == 'ubuntu-latest'
