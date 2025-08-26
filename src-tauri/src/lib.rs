@@ -10,9 +10,29 @@ use std::sync::{Arc, Mutex};
 
 use font_kit::source::SystemSource;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 // Stockage global des process IDs d'export en cours
 lazy_static::lazy_static! {
     static ref EXPORT_PROCESS_IDS: Arc<Mutex<HashMap<String, u32>>> = Arc::new(Mutex::new(HashMap::new()));
+}
+
+// Fonction utilitaire pour configurer les commandes et cacher les fenêtres CMD sur Windows
+fn configure_command_no_window(cmd: &mut Command) {
+    #[cfg(target_os = "windows")]
+    {
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+}
+
+fn configure_tokio_command_no_window(cmd: &mut TokioCommand) {
+    #[cfg(target_os = "windows")]
+    {
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
 }
 
 #[tauri::command]
@@ -76,7 +96,10 @@ async fn download_from_youtube(
     args.push(&url);
 
     // Exécuter yt-dlp
-    let output = Command::new(&yt_dlp_path).args(&args).output();
+    let mut cmd = Command::new(&yt_dlp_path);
+    cmd.args(&args);
+    configure_command_no_window(&mut cmd);
+    let output = cmd.output();
 
     match output {
         Ok(result) => {
@@ -132,17 +155,18 @@ fn get_duration(file_path: &str) -> Result<i64, String> {
         Path::new("binaries").join("ffprobe")
     };
 
-    let output = Command::new(&ffprobe_path)
-        .args(&[
-            "-v",
-            "quiet",
-            "-show_entries",
-            "format=duration",
-            "-of",
-            "csv=p=0",
-            file_path,
-        ])
-        .output();
+    let mut cmd = Command::new(&ffprobe_path);
+    cmd.args(&[
+        "-v",
+        "quiet",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "csv=p=0",
+        file_path,
+    ]);
+    configure_command_no_window(&mut cmd);
+    let output = cmd.output();
 
     match output {
         Ok(result) => {
@@ -544,7 +568,11 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
 
     // println!("[start_export] Commande:"); print!("  {}", ffmpeg_path.display()); for a in &cmd_args { print!(" {}", a); } println!("");
 
-    let mut cmd = TokioCommand::new(&ffmpeg_path); cmd.args(&cmd_args); cmd.stderr(std::process::Stdio::piped()); cmd.stdout(std::process::Stdio::piped());
+    let mut cmd = TokioCommand::new(&ffmpeg_path);
+    cmd.args(&cmd_args);
+    cmd.stderr(std::process::Stdio::piped());
+    cmd.stdout(std::process::Stdio::piped());
+    configure_tokio_command_no_window(&mut cmd);
 
     // Utiliser la durée exacte forcée par l'option -t
     let total_video_duration = (end_time - start_time) / 1000.0;
@@ -647,9 +675,10 @@ async fn cancel_export(export_id: String) -> Result<String, String> {
         // Tuer le processus en utilisant le PID
         #[cfg(target_os = "windows")]
         {
-            let output = Command::new("taskkill")
-                .args(&["/F", "/PID", &pid.to_string()])
-                .output();
+            let mut cmd = Command::new("taskkill");
+            cmd.args(&["/F", "/PID", &pid.to_string()]);
+            configure_command_no_window(&mut cmd);
+            let output = cmd.output();
             
             match output {
                 Ok(result) => {
@@ -671,9 +700,10 @@ async fn cancel_export(export_id: String) -> Result<String, String> {
         
         #[cfg(not(target_os = "windows"))]
         {
-            let output = Command::new("kill")
-                .args(&["-TERM", &pid.to_string()])
-                .output();
+            let mut cmd = Command::new("kill");
+            cmd.args(&["-TERM", &pid.to_string()]);
+            configure_command_no_window(&mut cmd);
+            let output = cmd.output();
             
             match output {
                 Ok(result) => {
@@ -711,9 +741,10 @@ fn open_explorer_with_file_selected(file_path: String) -> Result<(), String> {
     {
         // Sur Windows, utiliser explorer.exe avec /select pour sélectionner le fichier
         // Note: explorer.exe peut retourner un code de sortie non-zéro même en cas de succès
-        let output = Command::new("explorer")
-            .args(&["/select,", &file_path])
-            .output();
+        let mut cmd = Command::new("explorer");
+        cmd.args(&["/select,", &file_path]);
+        configure_command_no_window(&mut cmd);
+        let output = cmd.output();
 
         match output {
             Ok(_) => {

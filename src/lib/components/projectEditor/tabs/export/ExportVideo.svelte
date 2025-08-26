@@ -113,7 +113,7 @@
 			</p>
 			<input
 				type="number"
-				min="1"
+				min="5"
 				max="60"
 				step="1"
 				class="input w-full"
