@@ -1,0 +1,193 @@
+name: Build Tauri Apps
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      # Linux setup
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf p7zip-full
+
+      # macOS setup
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install p7zip
+
+      # Windows setup
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          # 7zip is already available on Windows runners
+
+      # Create binaries directory
+      - name: Create binaries directory
+        run: mkdir -p src-tauri/binaries
+
+      # Download yt-dlp for each OS
+      - name: Download yt-dlp (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux
+          chmod +x yt-dlp
+          mv yt-dlp src-tauri/binaries/yt-dlp
+
+      - name: Download yt-dlp (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos
+          chmod +x yt-dlp
+          mv yt-dlp src-tauri/binaries/yt-dlp
+
+      - name: Download yt-dlp (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+          mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
+
+      # Download FFmpeg and FFprobe for Linux
+      - name: Download and extract FFmpeg and FFprobe (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+          tar -xf ffmpeg.tar.xz --strip-components=1 --wildcards '*/ffmpeg' '*/ffprobe'
+          chmod +x ffmpeg ffprobe
+          mv ffmpeg src-tauri/binaries/ffmpeg
+          mv ffprobe src-tauri/binaries/ffprobe
+
+      # Download FFmpeg and FFprobe for macOS
+      - name: Download and extract FFmpeg and FFprobe (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          curl -L -o ffmpeg.7z https://evermeet.cx/ffmpeg/ffmpeg-7.1.7z
+          curl -L -o ffprobe.7z https://evermeet.cx/ffmpeg/ffprobe-7.1.7z
+          7z e -y ffmpeg.7z -osrc-tauri/binaries
+          7z e -y ffprobe.7z -osrc-tauri/binaries
+          chmod +x src-tauri/binaries/ffmpeg
+          chmod +x src-tauri/binaries/ffprobe
+
+      # Download FFmpeg and FFprobe for Windows
+      - name: Download and extract FFmpeg and FFprobe (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
+          7z e -y ffmpeg.7z -i"!*/bin/ffprobe.exe" -osrc-tauri/binaries
+          7z e -y ffmpeg.7z -i"!*/bin/ffmpeg.exe" -osrc-tauri/binaries
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Build the app
+        run: npm run tauri build
+
+      # Upload artifacts for each OS
+      - name: Upload Linux AppImage
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifact
+          path: src-tauri/target/release/bundle/appimage/*.AppImage
+
+      - name: Upload macOS App
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifact
+          path: src-tauri/target/release/bundle/macos/*.app
+
+      - name: Upload Windows Installer
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifact
+          path: src-tauri/target/release/bundle/nsis/*.exe
+
+  release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Prepare release assets
+        run: |
+          mkdir release-assets
+
+          # Process Linux artifacts
+          if [ -d "artifacts/linux-artifact" ]; then
+            cd artifacts/linux-artifact
+            LINUX_FILE=$(find . -name "*.AppImage" | head -1)
+            if [ -n "$LINUX_FILE" ]; then
+              mv "$LINUX_FILE" ../../release-assets/Quran.Caption.Linux.AppImage
+            fi
+            cd ../..
+          fi
+
+          # Process Windows artifacts
+          if [ -d "artifacts/windows-artifact" ]; then
+            cd artifacts/windows-artifact
+            WIN_FILE=$(find . -name "*.exe" | head -1)
+            if [ -n "$WIN_FILE" ]; then
+              mv "$WIN_FILE" ../../release-assets/Quran.Caption.Windows.exe
+            fi
+            cd ../..
+          fi
+
+          # Process macOS artifacts
+          if [ -d "artifacts/macos-artifact" ]; then
+            cd artifacts/macos-artifact
+            MAC_APP=$(find . -name "*.app" | head -1)
+            if [ -n "$MAC_APP" ]; then
+              # Create a zip of the .app bundle for macOS
+              ditto -c -k --sequesterRsrc --keepParent "$MAC_APP" ../../release-assets/Quran.Caption.macOS.zip
+            fi
+            cd ../..
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: release-assets/*
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: |
+            ## Quran Caption Release
+
+            ### Downloads:
+            - **Windows**: Quran.Caption.Windows.exe
+            - **macOS**: Quran.Caption.macOS.zip
+            - **Linux**: Quran.Caption.Linux.AppImage
+
+            ### Changes:
+            - Built with Tauri v2 and Svelte 5
+            - Includes FFmpeg, FFprobe, and yt-dlp binaries for all platforms
