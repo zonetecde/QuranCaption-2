@@ -60,7 +60,6 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/download/2025.05.22/yt-dlp.exe
-          mkdir src-tauri/binaries 2>$null || true
           mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
       # FFprobe and FFmpeg extraction for Windows
       - name: Download and extract ffprobe.exe and ffmpeg.exe
