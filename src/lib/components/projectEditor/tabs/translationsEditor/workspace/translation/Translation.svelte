@@ -50,16 +50,23 @@
 			// Alors on highlight toute la traduction du sous-titre précédent
 			const verseTrans = previousSubtitle.getTranslation(edition) as VerseTranslation;
 
+			// Met à jour les indices de début et de fin de la traduction du sous-titre précédent
+			if (
+				!(
+					verseTrans.startWordIndex === 0 &&
+					verseTrans.endWordIndex === originalTranslation.split(' ').length - 1
+				)
+			) {
+				previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
+				previousSubtitleTranslationEndIndex = verseTrans.endWordIndex;
+			}
+
 			// Si c'est la continuité du verset précédent, on met à jour la traduction
 			if (
 				previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex && // Vérifie que le sous-titre précédent se termine juste avant le début du sous-titre actuel
 				verseTrans.status === 'reviewed' && // vérifie que la traduction du sous-titre précédent n'est pas vide
 				!verseTrans.isBruteForce // vérifie que la traduction du sous-titre précédent a été trimmed via l'outil
 			) {
-				// Met à jour les indices de début et de fin de la traduction du sous-titre précédent
-				previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
-				previousSubtitleTranslationEndIndex = verseTrans.endWordIndex;
-
 				// Commence la sélection de la traduction du verset actuel à celle de fin de la traduction du sous-titre précédent
 				if (translation().status !== 'reviewed') {
 					translation().startWordIndex = previousSubtitleTranslationEndIndex + 1;
@@ -219,12 +226,12 @@
 						i <= previousSubtitleTranslationEndIndex}
 					<button
 						class="translation-word text-sm cursor-pointer px-1 py-1 transition-all duration-200 border-2 border-transparent
-						{isPreviousSubtitleTranslation
+						{isPreviousSubtitleTranslation && !isSelected
 							? 'bg-yellow-500/10 hover:bg-yellow-500/20! hover:border-yellow-400/20! rounded-none border-yellow-400/10'
 							: ''}
 						{isSelected
 							? // Effet jaune si le mot est sélectionné alors que pourtant il ne devrait pas comme c'est la suite de la traduction du verset précédent
-								`translation-word-selected ${isPreviousSubtitleTranslation ? 'bg-yellow-500/70! border-yellow-400/70! hover:bg-yellow-500/80! hover:border-yellow-400/80!' : ''} text-white ${
+								`translation-word-selected ${isPreviousSubtitleTranslation ? 'bg-purple-500/30! border-purple-400/70! hover:bg-purple-500/80! hover:border-purple-400/80!' : ''} text-white ${
 									isSingleSelected
 										? 'translation-word-first-selected translation-word-last-selected'
 										: isLastSelected

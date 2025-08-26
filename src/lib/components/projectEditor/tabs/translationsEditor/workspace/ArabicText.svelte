@@ -38,7 +38,7 @@
 	</div>
 
 	<p class="text-sm text-thirdly text-left mt-1" dir="rtl">
-		{subtitle.wbwTranslation}
+		{subtitle.wbwTranslation.join(' ')}
 	</p>
 {:else if subtitle instanceof PredefinedSubtitleClip}
 	<p class="text-3xl arabic text-right" dir="rtl">{subtitle.text}</p>
