@@ -355,79 +355,106 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
     // Construction filter_complex
     let mut filter = String::new();
     
-    // --- Vidéo de fond ---
+    // --- Vidéo/Image de fond ---
     let mut background_video_filter = String::new();
-    if !videos.is_empty() {
-        // Calculer la durée totale des images (durée maximale que la vidéo de fond doit avoir)
-        let video_max_duration = (end_time - start_time) / 1000.0; // Durée de l'export en secondes
-        println!("[start_export] Durée max vidéo de fond: {:.3}s (basée sur end_time - start_time)", video_max_duration);
-        
+    let has_background = !videos.is_empty();
+    
+    if has_background {
+        let background_max_duration = (end_time - start_time) / 1000.0; // Durée de l'export en secondes
         let video_input_start = entries.len() + audios.len();
-        let mut video_durations = Vec::new();
-        for (idx, video_file) in videos.iter().enumerate() {
-            match get_duration(video_file) { 
-                Ok(ms) => { 
-                    let s = (ms.max(0) as f64)/1000.0; 
-                    video_durations.push(s); 
-                    println!("[start_export] Durée vidéo {} = {:.3}s", idx, s); 
-                }, 
-                Err(e) => { 
-                    println!("[start_export][WARN] Durée vidéo inconnue {}: {}", video_file, e); 
-                    video_durations.push(0.0);
-                } 
-            }
-        }
         
-        let mut current_video_time = 0.0;
-        let mut video_filters: Vec<String> = Vec::new();
-        let mut input_index = video_input_start;
-        let mut remaining_duration = video_max_duration;
-        
-        for &video_duration in video_durations.iter() {
-            let video_end_time = current_video_time + video_duration;
-            if start_time_seconds >= video_end_time { 
-                current_video_time = video_end_time; 
-                input_index += 1; 
-                continue; 
-            }
+        // Vérifier si c'est une seule image (extensions communes d'images)
+        let is_single_image = videos.len() == 1 && {
+            let video_path = &videos[0];
+            let extension = Path::new(video_path)
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .map(|ext| ext.to_lowercase());
             
-            if remaining_duration <= 0.0 {
-                break; // Plus besoin de vidéos, on a atteint la durée max
-            }
-            
-            if start_time_seconds >= current_video_time && start_time_seconds < video_end_time { 
-                let skip = start_time_seconds - current_video_time; 
-                let available_duration = video_duration - skip;
-                let clip_duration = available_duration.min(remaining_duration);
-                video_filters.push(format!("[{idx}:v]trim=start={skip}:end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=skip+clip_duration)); 
-                remaining_duration -= clip_duration;
-            } else { 
-                let clip_duration = video_duration.min(remaining_duration);
-                video_filters.push(format!("[{idx}:v]trim=end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=clip_duration)); 
-                remaining_duration -= clip_duration;
-            }
-            current_video_time = video_end_time; 
-            input_index += 1;
-        }
+            matches!(extension.as_deref(), Some("jpg") | Some("jpeg") | Some("png") | Some("bmp") | Some("gif") | Some("tiff") | Some("webp"))
+        };
         
-        if !video_filters.is_empty() {
-            if video_filters.len() == 1 { 
-                background_video_filter = video_filters[0].clone(); 
-            } else { 
-                background_video_filter = video_filters.join(";");
-                background_video_filter.push(';');
-                for i in 0..video_filters.len() { 
-                    background_video_filter.push_str(&format!("[bg{}]", i)); 
+        if is_single_image {
+            // Image statique en fond (object-cover style)
+            println!("[start_export] Image de fond statique détectée: {}", videos[0]);
+            background_video_filter = format!(
+                "[{idx}:v]scale=iw*max({width}/iw\\,{height}/ih):ih*max({width}/iw\\,{height}/ih),crop={width}:{height},loop=-1:1:0,fps={fps}[bg0]",
+                idx = video_input_start,
+                width = target_width,
+                height = target_height,
+                fps = fps
+            );
+            println!("[start_export] Image de fond configurée avec style object-cover, durée: {:.3}s", background_max_duration);
+        } else {
+            // Vidéos de fond (logique existante)
+            println!("[start_export] Durée max vidéo de fond: {:.3}s (basée sur end_time - start_time)", background_max_duration);
+            
+            let mut video_durations = Vec::new();
+            for (idx, video_file) in videos.iter().enumerate() {
+                match get_duration(video_file) { 
+                    Ok(ms) => { 
+                        let s = (ms.max(0) as f64)/1000.0; 
+                        video_durations.push(s); 
+                        println!("[start_export] Durée vidéo {} = {:.3}s", idx, s); 
+                    }, 
+                    Err(e) => { 
+                        println!("[start_export][WARN] Durée vidéo inconnue {}: {}", video_file, e); 
+                        video_durations.push(0.0);
+                    } 
                 }
-                background_video_filter.push_str(&format!("concat=n={}:v=1:a=0[bg_video]", video_filters.len()));
             }
-            println!("[start_export] Vidéo de fond configurée avec {} segment(s), durée limitée à {:.3}s", video_filters.len(), video_max_duration);
+            
+            let mut current_video_time = 0.0;
+            let mut video_filters: Vec<String> = Vec::new();
+            let mut input_index = video_input_start;
+            let mut remaining_duration = background_max_duration;
+            
+            for &video_duration in video_durations.iter() {
+                let video_end_time = current_video_time + video_duration;
+                if start_time_seconds >= video_end_time { 
+                    current_video_time = video_end_time; 
+                    input_index += 1; 
+                    continue; 
+                }
+                
+                if remaining_duration <= 0.0 {
+                    break; // Plus besoin de vidéos, on a atteint la durée max
+                }
+                
+                if start_time_seconds >= current_video_time && start_time_seconds < video_end_time { 
+                    let skip = start_time_seconds - current_video_time; 
+                    let available_duration = video_duration - skip;
+                    let clip_duration = available_duration.min(remaining_duration);
+                    video_filters.push(format!("[{idx}:v]trim=start={skip}:end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=skip+clip_duration)); 
+                    remaining_duration -= clip_duration;
+                } else { 
+                    let clip_duration = video_duration.min(remaining_duration);
+                    video_filters.push(format!("[{idx}:v]trim=end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=clip_duration)); 
+                    remaining_duration -= clip_duration;
+                }
+                current_video_time = video_end_time; 
+                input_index += 1;
+            }
+            
+            if !video_filters.is_empty() {
+                if video_filters.len() == 1 { 
+                    background_video_filter = video_filters[0].clone(); 
+                } else { 
+                    background_video_filter = video_filters.join(";");
+                    background_video_filter.push(';');
+                    for i in 0..video_filters.len() { 
+                        background_video_filter.push_str(&format!("[bg{}]", i)); 
+                    }
+                    background_video_filter.push_str(&format!("concat=n={}:v=1:a=0[bg_video]", video_filters.len()));
+                }
+                println!("[start_export] Vidéo de fond configurée avec {} segment(s), durée limitée à {:.3}s", video_filters.len(), background_max_duration);
+            }
         }
     }
     
-    // --- Images avec overlay sur vidéo de fond ---
+    // --- Images avec overlay sur vidéo/image de fond ---
     if entries.len() == 1 {
-        if !videos.is_empty() {
+        if has_background {
             if !background_video_filter.is_empty() {
                 filter.push_str(&background_video_filter);
                 filter.push(';');
@@ -470,14 +497,14 @@ async fn start_export(export_id: String, imgs_folder: String, start_time: f64, e
             current_label = out_label;
         }
         
-        // Compositing avec vidéo de fond
-        if !videos.is_empty() && !background_video_filter.is_empty() {
+        // Compositing avec vidéo/image de fond
+        if has_background && !background_video_filter.is_empty() {
             filter.push_str(&background_video_filter);
             filter.push(';');
             let bg_label = if videos.len() == 1 { "[bg0]" } else { "[bg_video]" };
             filter.push_str(&format!("{}[overlay]overlay[vout]", bg_label));
         } else {
-            // Pas de vidéo de fond, utiliser un fond noir
+            // Pas de vidéo/image de fond, utiliser un fond noir
             filter.push_str(&format!("color=black:{}x{}[black];[black][overlay]overlay[vout]", target_width, target_height));
         }
         
