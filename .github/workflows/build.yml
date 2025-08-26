@@ -24,7 +24,14 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          override: true
+          override:
+            true
+
+            # install 7zip for MacOS
+      - name: Install 7zip for MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install p7zip
 
       # macOS setup
       - name: Install dependencies (macOS)
