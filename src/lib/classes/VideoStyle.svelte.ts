@@ -127,6 +127,7 @@ export type CustomTextStyleName =
 	| 'time-disappearance'
 	| 'text'
 	| 'always-show'
+	| 'custom-css'
 	| 'custom-text-composite';
 
 export type VerseNumberStyleName =

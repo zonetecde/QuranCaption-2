@@ -49,6 +49,16 @@
 		"icon": "palette"
 	},
 	{
+		"id": "custom-css",
+		"name": "Custom CSS",
+		"description": "Write any custom CSS for custom text. Use !important if needed.",
+		"value": "",
+		"valueType": "text",
+		"css": "{value}",
+		"tailwind": false,
+		"icon": "code"
+	},
+	{
 		"id": "outline-enable",
 		"name": "Outline",
 		"description": "Enable or disable text outline",
