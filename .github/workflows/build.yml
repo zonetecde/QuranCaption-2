@@ -41,7 +41,7 @@ jobs:
       - name: Download yt-dlp (macos)
         if: matrix.os == 'macos-latest'
         run: |
-          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/download/2025.05.22/yt-dlp_macos
+          curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos
           chmod +x yt-dlp
           mkdir -p src-tauri/binaries
           mv yt-dlp src-tauri/binaries/yt-dlp
@@ -59,19 +59,30 @@ jobs:
       - name: Download yt-dlp (windows)
         if: matrix.os == 'windows-latest'
         run: |
-          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/download/2025.05.22/yt-dlp.exe
-          mv yt-dlp.exe src-tauri/binaries/yt-dlp.exe
-      # FFprobe and FFmpeg extraction for Windows
-      - name: Download and extract ffprobe.exe and ffmpeg.exe
+          New-Item -ItemType Directory -Path src-tauri/binaries -Force | Out-Null
+          curl -L -o yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+          Move-Item yt-dlp.exe src-tauri/binaries/yt-dlp.exe
+      # FFprobe and FFmpeg for Windows (latest)
+      - name: Download and extract ffprobe.exe and ffmpeg.exe (windows)
         if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
-          7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
-          7z e -y ffmpeg.7z -i'!*/bin/ffmpeg.exe' -osrc-tauri/binaries
+          $binDir = "src-tauri/binaries"
+          New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 
-      #   - name: Patch time crate
-      #     working-directory: src-tauri
-      #     run: cargo update -p time --precise 0.3.35
+          # Download latest static build zip from BtbN
+          $ffmpegZip = "ffmpeg.zip"
+          curl -L -o $ffmpegZip https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip
+
+          # Extract using built-in PowerShell
+          $extractDir = "ffmpeg-extracted"
+          if (Test-Path $extractDir) { Remove-Item -Recurse -Force $extractDir }
+          Expand-Archive -Path $ffmpegZip -DestinationPath $extractDir -Force
+
+          # Find extracted root (contains bin/ffmpeg.exe & bin/ffprobe.exe)
+          $rootDir = Get-ChildItem -Directory -Path $extractDir | Select-Object -First 1
+          Copy-Item -Path (Join-Path $rootDir.FullName "bin/ffmpeg.exe") -Destination $binDir -Force
+          Copy-Item -Path (Join-Path $rootDir.FullName "bin/ffprobe.exe") -Destination $binDir -Force
 
       - name: Install app dependencies
         run: npm install
