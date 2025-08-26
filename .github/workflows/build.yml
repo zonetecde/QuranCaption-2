@@ -93,10 +93,13 @@ jobs:
           curl -L -o ffmpeg.7z https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
           7z e -y ffmpeg.7z -i"!*/bin/ffprobe.exe" -osrc-tauri/binaries
           7z e -y ffmpeg.7z -i"!*/bin/ffmpeg.exe" -osrc-tauri/binaries
-      - name: Install app dependencies
+      - name: Clean package lock
         run: |
-          rm -f package-lock.json
-          npm install
+          if [ -f "package-lock.json" ]; then rm package-lock.json; fi
+        shell: bash
+
+      - name: Install app dependencies
+        run: npm install
 
       - name: Build the app
         run: npm run tauri build
