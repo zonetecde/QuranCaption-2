@@ -117,13 +117,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir -p src-tauri/binaries
-          curl -L -o ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-linux64-gpl.tar.xz
+          curl -L -o ffmpeg.tar.xz "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
           rm -rf ffmpeg-extracted
           mkdir ffmpeg-extracted
           tar -xJf ffmpeg.tar.xz -C ffmpeg-extracted
           rootdir=$(find ffmpeg-extracted -maxdepth 1 -mindepth 1 -type d | head -n 1)
-          cp "$rootdir/bin/ffmpeg" src-tauri/binaries/ffmpeg
-          cp "$rootdir/bin/ffprobe" src-tauri/binaries/ffprobe
+          cp "$rootdir/ffmpeg" src-tauri/binaries/ffmpeg
+          cp "$rootdir/ffprobe" src-tauri/binaries/ffprobe
           chmod +x src-tauri/binaries/ffmpeg src-tauri/binaries/ffprobe
 
       - name: Install app dependencies
