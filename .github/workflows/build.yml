@@ -69,9 +69,9 @@ jobs:
           7z e -y ffmpeg.7z -i'!*/bin/ffprobe.exe' -osrc-tauri/binaries
           7z e -y ffmpeg.7z -i'!*/bin/ffmpeg.exe' -osrc-tauri/binaries
 
-      - name: Patch time crate
-        working-directory: src-tauri
-        run: cargo update -p time --precise 0.3.35
+      #   - name: Patch time crate
+      #     working-directory: src-tauri
+      #     run: cargo update -p time --precise 0.3.35
 
       - name: Install app dependencies
         run: npm install
