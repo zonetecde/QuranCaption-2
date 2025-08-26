@@ -234,6 +234,8 @@
 					{#each category.styles as style, styleIndex}
 						{#if globalState.getStylesState.searchQuery === '' || style.name
 								.toLowerCase()
+								.includes(globalState.getStylesState.searchQuery.toLowerCase()) || category.name
+								.toLowerCase()
 								.includes(globalState.getStylesState.searchQuery.toLowerCase())}
 							<!-- 
 							Cas spécial : on ne peut pas avoir de séparateur entre le numéro de verset et le verset
