@@ -6,6 +6,11 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import ModalManager from './modals/ModalManager';
 	import { slide } from 'svelte/transition';
+	import { onMount, onDestroy } from 'svelte';
+
+	// Variable réactive pour forcer les mises à jour
+	let currentTime = $state(Date.now());
+	let intervalId: number | undefined;
 
 	// Fonction pour formater la durée en format lisible
 	function formatDuration(ms: number): string {
@@ -92,6 +97,21 @@
 			);
 		}
 	}
+
+	// Lifecycle hooks pour gérer l'intervalle
+	onMount(() => {
+		// Mettre à jour le temps actuel toutes les secondes
+		intervalId = setInterval(() => {
+			currentTime = Date.now();
+		}, 1000);
+	});
+
+	onDestroy(() => {
+		// Nettoyer l'intervalle quand le composant est détruit
+		if (intervalId) {
+			clearInterval(intervalId);
+		}
+	});
 </script>
 
 {#if globalState.uiState.showExportMonitor}
@@ -188,13 +208,20 @@
 										style="width: {Math.max(0, Math.min(100, exportation.percentageProgress))}%"
 									></div>
 								</div>
-								{#if exportation.currentTreatedTime > 0}
-									<div class="text-xs text-gray-400 mt-1">
-										Processed time: {formatCurrentTime(exportation.currentTreatedTime)} / {formatDuration(
-											exportation.videoLength
+								<div class="flex justify-between text-xs text-gray-400 mt-1">
+									{#if exportation.currentTreatedTime > 0}
+										<div>
+											Processed time: {formatCurrentTime(exportation.currentTreatedTime)} / {formatDuration(
+												exportation.videoLength
+											)}
+										</div>
+									{/if}
+									<div class="ml-auto">
+										Export Time: {formatCurrentTime(
+											currentTime - new Date(exportation.date).getTime()
 										)}
 									</div>
-								{/if}
+								</div>
 							</div>
 						{/if}
 
