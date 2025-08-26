@@ -9,7 +9,17 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        include:
+          - os: macos-13 # Intel Mac for x86_64 build
+            target: x86_64-apple-darwin
+            arch: intel
+          - os: macos-latest # ARM Mac for M1/M2/M3 build
+            target: aarch64-apple-darwin
+            arch: arm
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -34,7 +44,7 @@ jobs:
 
       # macOS setup
       - name: Download yt-dlp (macOS)
-        if: matrix.os == 'macos-latest'
+        if: startsWith(matrix.os, 'macos')
         run: |
           curl -L -o yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos
           chmod +x yt-dlp
@@ -42,7 +52,7 @@ jobs:
           mv yt-dlp src-tauri/binaries/yt-dlp
 
       - name: Install ffmpeg and copy binaries (macOS)
-        if: matrix.os == 'macos-latest'
+        if: startsWith(matrix.os, 'macos')
         run: |
           brew update
           brew install ffmpeg
@@ -124,10 +134,10 @@ jobs:
         timeout-minutes: 45
 
       - name: Upload macOS DMG
-        if: matrix.os == 'macos-latest'
+        if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v4
         with:
-          name: macos-artifact
+          name: macos-artifact-${{ matrix.arch || 'x64' }}
           path: 'src-tauri/target/release/bundle/dmg/*.dmg'
 
       - name: Upload Windows Installer
@@ -164,9 +174,25 @@ jobs:
           cd artifacts/windows-artifact
           WIN_FILE=$(find . -name "Quran Caption_*_x64-setup.exe")
           mv "$WIN_FILE" ../../release-assets/QuranCaption.Windows.exe
-          cd ../../artifacts/macos-artifact
-          DMG_FILE=$(find . -name "*.dmg")
-          mv "$DMG_FILE" ../../release-assets/QuranCaption.MacOS.dmg
+
+          # macOS Intel
+          cd ../../artifacts/macos-artifact-intel || true
+          if [ -d . ]; then
+            DMG_FILE=$(find . -name "*.dmg")
+            if [ -n "$DMG_FILE" ]; then
+              mv "$DMG_FILE" ../../release-assets/QuranCaption.MacOS.Intel.dmg
+            fi
+          fi
+
+          # macOS ARM (M1/M2/M3)
+          cd ../../artifacts/macos-artifact-arm || true
+          if [ -d . ]; then
+            DMG_FILE=$(find . -name "*.dmg")
+            if [ -n "$DMG_FILE" ]; then
+              mv "$DMG_FILE" ../../release-assets/QuranCaption.MacOS.ARM.dmg
+            fi
+          fi
+
           cd ../../artifacts/linux-artifact || true
           if [ -d . ]; then
             # Renommer les fichiers Linux avec des noms plus simples
