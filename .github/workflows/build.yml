@@ -26,6 +26,12 @@ jobs:
           toolchain: stable
           override: true
 
+      # Set up build environment variables for faster builds
+      - name: Configure build environment
+        run: |
+          echo "CARGO_BUILD_JOBS=2" >> $GITHUB_ENV
+          echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> $GITHUB_ENV
+
       # macOS setup
       - name: Download yt-dlp (macOS)
         if: matrix.os == 'macos-latest'
@@ -115,6 +121,7 @@ jobs:
 
       - name: Build the app
         run: npm run tauri build --verbose
+        timeout-minutes: 45
 
       - name: Upload macOS DMG
         if: matrix.os == 'macos-latest'
@@ -138,8 +145,6 @@ jobs:
           path: |
             src-tauri/target/release/bundle/appimage/*.AppImage
             src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/rpm/*.rpm
-            src-tauri/target/release/bundle/**/*.tar.*
 
   release:
     name: Create Draft Release
@@ -164,7 +169,9 @@ jobs:
           mv "$DMG_FILE" ../../release-assets/Quran.Caption.MacOS.dmg
           cd ../../artifacts/linux-artifact || true
           if [ -d . ]; then
-            find . -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.tar.*" \) -exec mv {} ../../release-assets/ \;
+            # Renommer les fichiers Linux avec des noms plus simples
+            find . -name "*.AppImage" -exec mv {} ../../release-assets/Quran.Caption.Linux.AppImage \;
+            find . -name "*.deb" -exec mv {} ../../release-assets/Quran.Caption.Linux.deb \;
           fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

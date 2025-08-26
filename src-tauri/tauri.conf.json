@@ -34,7 +34,7 @@
 	},
 	"bundle": {
 		"active": true,
-		"targets": "all",
+		"targets": ["deb", "appimage", "dmg", "msi"],
 		"resources": ["binaries/**/*"],
 		"icon": [
 			"icons/32x32.png",
