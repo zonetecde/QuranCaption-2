@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -99,7 +98,9 @@ jobs:
           7z e -y ffmpeg.7z -i"!*/bin/ffprobe.exe" -osrc-tauri/binaries
           7z e -y ffmpeg.7z -i"!*/bin/ffmpeg.exe" -osrc-tauri/binaries
       - name: Install app dependencies
-        run: npm ci
+        run: |
+          rm -f package-lock.json
+          npm install
 
       - name: Build the app
         run: npm run tauri build
