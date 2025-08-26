@@ -7,6 +7,7 @@
 	import AutocompleteInput from '$lib/components/misc/AutocompleteInput.svelte';
 	import type Reciter from '$lib/classes/Reciter';
 	import RecitersManager from '$lib/classes/Reciter';
+	import { telemetry } from '$lib/services/Telemetry';
 
 	let { close } = $props();
 
@@ -23,6 +24,14 @@
 		let project = new Project(
 			new ProjectDetail(name.trim(), reciter.trim()),
 			await ProjectContent.getDefaultProjectContent()
+		);
+
+		await telemetry(
+			'QC3 | New Project Created with Name "' +
+				name.trim() +
+				'" and Reciter "' +
+				reciter.trim() +
+				'"'
 		);
 
 		// Sauvegarde le projet sur le disque
