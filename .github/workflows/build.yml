@@ -80,7 +80,7 @@ jobs:
 
           # Download latest static build zip from BtbN
           $ffmpegZip = "ffmpeg.zip"
-          curl -L -o $ffmpegZip https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip
+          curl -L -o $ffmpegZip "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
 
           # Extract using built-in PowerShell
           $extractDir = "ffmpeg-extracted"
