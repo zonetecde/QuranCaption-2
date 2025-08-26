@@ -48,7 +48,7 @@
 	});
 
 	onDestroy(() => {
-		unlisten();
+		if (unlisten) unlisten();
 	});
 
 	async function addAssetButtonClick() {

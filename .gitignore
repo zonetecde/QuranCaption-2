@@ -25,3 +25,4 @@ src-tauri/2
 
 # Special
 src-tauri/binaries/*.exe
+*.bak
