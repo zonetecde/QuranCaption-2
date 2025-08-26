@@ -163,15 +163,15 @@ jobs:
           mkdir release-assets
           cd artifacts/windows-artifact
           WIN_FILE=$(find . -name "Quran Caption_*_x64-setup.exe")
-          mv "$WIN_FILE" ../../release-assets/Quran.Caption.Windows.exe
+          mv "$WIN_FILE" ../../release-assets/QuranCaption.Windows.exe
           cd ../../artifacts/macos-artifact
           DMG_FILE=$(find . -name "*.dmg")
-          mv "$DMG_FILE" ../../release-assets/Quran.Caption.MacOS.dmg
+          mv "$DMG_FILE" ../../release-assets/QuranCaption.MacOS.dmg
           cd ../../artifacts/linux-artifact || true
           if [ -d . ]; then
             # Renommer les fichiers Linux avec des noms plus simples
-            find . -name "*.AppImage" -exec mv {} ../../release-assets/Quran.Caption.Linux.AppImage \;
-            find . -name "*.deb" -exec mv {} ../../release-assets/Quran.Caption.Linux.deb \;
+            find . -name "*.AppImage" -exec mv {} ../../release-assets/QuranCaption.Linux.AppImage \;
+            find . -name "*.deb" -exec mv {} ../../release-assets/QuranCaption.Linux.deb \;
           fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
