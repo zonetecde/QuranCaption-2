@@ -178,9 +178,10 @@ def _build_and_run_ffmpeg_filter_complex(
     imgs_cwd: Optional[str] = None,
 ) -> None:
     """Construit et exécute une commande ffmpeg filter_complex pour composer PNG + crossfade, vidéo de fond et audio.
+    - Une seule entrée vidéo via le concat demuxer (fichier .ffconcat) pour éviter d’ouvrir N inputs -> RAM faible
     - Écrit le filtergraph dans un fichier temporaire dans le dossier images et utilise -filter_complex_script
-    - Utilise cwd=imgs_cwd pour référencer les PNG par leur nom de fichier simple
-    - Gère la transparence via alphaextract/alphamerge (pas d’option alpha sur xfade)
+    - Utilise cwd=imgs_cwd pour référencer les PNG par leur nom simple
+    - Gère la transparence via extractplanes/alphamerge (pas d’option alpha sur xfade)
     """
     W, H = target_size
     fade_s = max(0.0, float(fade_duration_ms) / 1000.0)
@@ -201,6 +202,13 @@ def _build_and_run_ffmpeg_filter_complex(
             durations_s.append(max(0.001, tail_ms / 1000.0))
     total_by_ts = (timestamps_ms[-1] + tail_ms) / 1000.0
     duration_s = total_by_ts
+
+    # Offsets cumulés pour trim/xfade
+    starts_s: List[float] = []
+    acc = 0.0
+    for d in durations_s:
+        starts_s.append(acc)
+        acc += d
 
     # Détection codec
     vcodec, vparams, vextra = _choose_best_codec(prefer_hw=prefer_hw)
@@ -224,19 +232,39 @@ def _build_and_run_ffmpeg_filter_complex(
             total_audio_s += _ffprobe_duration_sec(p)
     have_audio = bool(audio_paths) and (start_s < total_audio_s - 1e-6)
 
+    # Préparer le fichier concat (une seule entrée vidéo)
+    concat_path: Optional[Path] = None
+    try:
+        base_dir = Path(imgs_cwd) if imgs_cwd else Path(tempfile.gettempdir())
+        base_dir.mkdir(parents=True, exist_ok=True)
+        concat_path = base_dir / ("images-" + hashlib.md5("|".join(image_paths).encode("utf-8")).hexdigest()[:8] + ".ffconcat")
+        with open(concat_path, "w", encoding="utf-8") as f:
+            f.write("ffconcat version 1.0\n")
+            for i, p in enumerate(image_paths):
+                f.write(f"file '{p}'\n")
+                f.write(f"duration {durations_s[i]:.6f}\n")
+            # Pour que la durée du dernier soit respectée
+            f.write(f"file '{image_paths[-1]}'\n")
+        print(f"[concat] Fichier ffconcat -> {concat_path}")
+    except Exception as e:
+        print("[concat][WARN] Échec écriture ffconcat:", repr(e))
+        concat_path = None
+
     cmd: List[str] = []
     ffmpeg_exe = _resolve_ffmpeg_binary() or "ffmpeg"
     cmd += [ffmpeg_exe, "-y", "-hide_banner", "-loglevel", "info", "-stats"]
 
-    # Suivi explicite des indices d’entrées
     current_idx = 0
 
-    # Entrées images (une par PNG, en "loop" avec durée de segment)
-    image_input_indices: List[int] = []
-    for p, dur in zip(image_paths, durations_s):
-        cmd += ["-loop", "1", "-t", f"{dur:.6f}", "-i", p]
-        image_input_indices.append(current_idx)
-        current_idx += 1
+    # Entrée unique: concat demuxer
+    if concat_path is not None:
+        cmd += ["-safe", "0", "-f", "concat", "-i", (concat_path.name if imgs_cwd else str(concat_path))]
+    else:
+        # Fallback: garder anciens multiples inputs (peu probable)
+        for p, dur in zip(image_paths, durations_s):
+            cmd += ["-loop", "1", "-t", f"{dur:.6f}", "-i", p]
+            current_idx += 1
+    current_idx = 1  # une seule entrée vidéo
 
     # Entrées vidéos de fond
     bg_start_idx = current_idx
@@ -258,12 +286,16 @@ def _build_and_run_ffmpeg_filter_complex(
 
     filter_lines: List[str] = []
 
-    # Pour chaque segment, préparer un couple (couleur sans alpha, alpha) aligné
+    # Base: préparer le flux vidéo unique [0:v]
+    filter_lines.append(
+        f"[0:v]format=rgba,scale=w={W}:h={H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black@0,fps={fps},setsar=1,format=yuva444p,split={n}" + "".join(f"[b{i}]" for i in range(n))
+    )
+
+    # Pour chaque segment, extraire la fenêtre temporelle et séparer couleur/alpha
     for i in range(n):
-        # Convertit en yuva444p (planar YUV + alpha), split -> extractplanes=a (alpha) -> couleur en yuv444p
-        filter_lines.append(
-            f"[{image_input_indices[i]}:v]format=rgba,scale=w={W}:h={H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black@0,fps={fps},setsar=1,format=yuva444p,split=2[s{i}witha][s{i}foralpha]"
-        )
+        s = starts_s[i]
+        e = s + durations_s[i]
+        filter_lines.append(f"[b{i}]trim=start={s:.6f}:end={e:.6f},setpts=PTS-STARTPTS,split=2[s{i}witha][s{i}foralpha]")
         filter_lines.append(f"[s{i}foralpha]extractplanes=a[s{i}a]")
         filter_lines.append(f"[s{i}witha]format=yuv444p[s{i}c]")
 
@@ -356,7 +388,7 @@ def _build_and_run_ffmpeg_filter_complex(
         print("[ffmpeg][WARN] Échec écriture filtergraph:", repr(e))
         fg_path = None
 
-    # Ajoute le script via -filter_complex_script (plus fiable)
+    # Ajoute le script via -filter_complex_script (chemin relatif si cwd=imgs_cwd)
     if fg_path is not None:
         cmd += ["-filter_complex_script", str(fg_path.name if imgs_cwd else fg_path)]
     else:
@@ -378,12 +410,20 @@ def _build_and_run_ffmpeg_filter_complex(
     # Assure la durée exacte
     cmd += ["-t", f"{duration_s:.6f}"]
 
+    # Faststart pour formats MP4/MOV
+    try:
+        ext = os.path.splitext(out_path)[1].lower()
+    except Exception:
+        ext = ""
+    if ext in (".mp4", ".mov", ".m4v"):
+        cmd += ["-movflags", "+faststart"]
+
     # Fichier de sortie
     cmd += [out_path]
 
     print("[ffmpeg] Commande:")
     try:
-        preview = " ".join(cmd[:12]) + " ..."  # évite d’imprimer toute la commande
+        preview = " ".join(cmd[:14]) + " ..."
         print("  ", preview)
     except Exception:
         pass
@@ -489,12 +529,13 @@ async def start_export(
 # --- Exécution directe ---
 if __name__ == "__main__":
     async def main():
-        img_folder = r"C:\Users\zonedetec\AppData\Roaming\com.qurancaption\exports\1756319549551230"
+        img_folder = r"C:\Users\zonedetec\AppData\Roaming\com.qurancaption\exports\1756312363384407"
         fade_duration = 500
         fps = 30
         final_file_path = "./output.mp4"
         audios=[r"F:\Annexe\Montage vidéo\quran.al.luhaidan\196\تلاوة أحمد ديبان رواية ورش عام 1443 سورة 003  آل عمران.mp3"]
         videos=[r"F:\Annexe\Montage vidéo\quran.al.luhaidan\199\video_4027.mp4"]
+        #videos = []
         start_time = 4000
         export_id = "0"
         try:
