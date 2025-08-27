@@ -33,6 +33,14 @@ def _resolve_ffmpeg_binary() -> Optional[str]:
     return None
 
 
+def _resolve_ffprobe_binary() -> str:
+    """Retourne le chemin de ffprobe embarqué si présent, sinon 'ffprobe'."""
+    local_bin = Path(__file__).resolve().parent.parent / "binaries" / ("ffprobe.exe" if os.name == "nt" else "ffprobe")
+    if local_bin.exists():
+        return str(local_bin)
+    return "ffprobe"
+
+
 def _probe_hw_encoders(ffmpeg_path: Optional[str]) -> List[str]:
     """Retourne la liste des encodeurs matériels h264 disponibles par ordre de préférence."""
     try:
@@ -139,6 +147,251 @@ def _preprocess_background_videos(video_paths: List[str], w: int, h: int, fps: i
     return out_paths
 
 
+def _ffprobe_duration_sec(path: str) -> float:
+    """Retourne la durée en secondes d’un média via ffprobe, ou 0.0 si inconnu."""
+    try:
+        exe = _resolve_ffprobe_binary()
+        out = subprocess.check_output([
+            exe,
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=nokey=1:noprint_wrappers=1",
+            path,
+        ], stderr=subprocess.STDOUT, timeout=10)
+        txt = out.decode(errors="ignore").strip()
+        return float(txt) if txt else 0.0
+    except Exception:
+        return 0.0
+
+
+def _build_and_run_ffmpeg_filter_complex(
+    out_path: str,
+    image_paths: List[str],
+    timestamps_ms: List[int],
+    target_size: Tuple[int, int],
+    fps: int,
+    fade_duration_ms: int,
+    start_time_ms: int,
+    audio_paths: Optional[List[str]],
+    bg_videos: Optional[List[str]],
+    prefer_hw: bool = True,
+    imgs_cwd: Optional[str] = None,
+) -> None:
+    """Construit et exécute une commande ffmpeg filter_complex pour composer PNG + crossfade, vidéo de fond et audio.
+    - Écrit le filtergraph dans un fichier temporaire dans le dossier images et utilise -filter_complex_script
+    - Utilise cwd=imgs_cwd pour référencer les PNG par leur nom de fichier simple
+    - Gère la transparence via alphaextract/alphamerge (pas d’option alpha sur xfade)
+    """
+    W, H = target_size
+    fade_s = max(0.0, float(fade_duration_ms) / 1000.0)
+    start_s = max(0.0, float(start_time_ms) / 1000.0)
+
+    # Durées de chaque segment image
+    n = len(image_paths)
+    assert n == len(timestamps_ms)
+    if n == 0:
+        raise ValueError("Aucune image fournie")
+
+    tail_ms = max(1000, fade_duration_ms)
+    durations_s: List[float] = []
+    for i in range(n):
+        if i < n - 1:
+            durations_s.append(max(0.001, (timestamps_ms[i + 1] - timestamps_ms[i]) / 1000.0))
+        else:
+            durations_s.append(max(0.001, tail_ms / 1000.0))
+    total_by_ts = (timestamps_ms[-1] + tail_ms) / 1000.0
+    duration_s = total_by_ts
+
+    # Détection codec
+    vcodec, vparams, vextra = _choose_best_codec(prefer_hw=prefer_hw)
+
+    # Pré-traitement/choix vidéos de fond + durée totale
+    pre_videos: List[str] = []
+    if bg_videos:
+        try:
+            pre_videos = _preprocess_background_videos(bg_videos, W, H, fps, prefer_hw=prefer_hw)
+        except Exception as e:
+            print("[video][preproc][ERREUR]", repr(e))
+            pre_videos = bg_videos
+    total_bg_s = 0.0
+    for p in (pre_videos or []):
+        total_bg_s += _ffprobe_duration_sec(p)
+
+    # Durée totale audio pour décider si l’on mappe l’audio
+    total_audio_s = 0.0
+    if audio_paths:
+        for p in audio_paths:
+            total_audio_s += _ffprobe_duration_sec(p)
+    have_audio = bool(audio_paths) and (start_s < total_audio_s - 1e-6)
+
+    cmd: List[str] = []
+    ffmpeg_exe = _resolve_ffmpeg_binary() or "ffmpeg"
+    cmd += [ffmpeg_exe, "-y", "-hide_banner", "-loglevel", "info", "-stats"]
+
+    # Suivi explicite des indices d’entrées
+    current_idx = 0
+
+    # Entrées images (une par PNG, en "loop" avec durée de segment)
+    image_input_indices: List[int] = []
+    for p, dur in zip(image_paths, durations_s):
+        cmd += ["-loop", "1", "-t", f"{dur:.6f}", "-i", p]
+        image_input_indices.append(current_idx)
+        current_idx += 1
+
+    # Entrées vidéos de fond
+    bg_start_idx = current_idx
+    if pre_videos:
+        for p in pre_videos:
+            cmd += ["-i", p]
+            current_idx += 1
+
+    # Éventuelles entrées couleur (lavfi)
+    color_full_idx: Optional[int] = None
+    color_pad_idx: Optional[int] = None
+
+    # Entrées audio
+    audio_start_idx = current_idx
+    if have_audio:
+        for p in audio_paths or []:
+            cmd += ["-i", p]
+            current_idx += 1
+
+    filter_lines: List[str] = []
+
+    # Pour chaque segment, préparer un couple (couleur sans alpha, alpha) aligné
+    for i in range(n):
+        # Convertit en yuva444p (planar YUV + alpha), split -> extractplanes=a (alpha) -> couleur en yuv444p
+        filter_lines.append(
+            f"[{image_input_indices[i]}:v]format=rgba,scale=w={W}:h={H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black@0,fps={fps},setsar=1,format=yuva444p,split=2[s{i}witha][s{i}foralpha]"
+        )
+        filter_lines.append(f"[s{i}foralpha]extractplanes=a[s{i}a]")
+        filter_lines.append(f"[s{i}witha]format=yuv444p[s{i}c]")
+
+    # Chaîne xfade pour couleur et alpha séparément
+    curr_c = "s0c"
+    curr_a = "s0a"
+    curr_duration = durations_s[0]
+    for i in range(n - 1):
+        fade_i = min(durations_s[i], fade_s)
+        if fade_i <= 1e-6:
+            out_c = f"cc{i}"
+            out_a = f"ca{i}"
+            filter_lines.append(f"[{curr_c}][s{i+1}c]concat=n=2:v=1:a=0[{out_c}]")
+            filter_lines.append(f"[{curr_a}][s{i+1}a]concat=n=2:v=1:a=0[{out_a}]")
+            curr_c, curr_a = out_c, out_a
+            curr_duration = curr_duration + durations_s[i + 1]
+        else:
+            out_c = f"xc{i}"
+            out_a = f"xa{i}"
+            offset = max(0.0, curr_duration - fade_i)
+            filter_lines.append(
+                f"[{curr_c}][s{i+1}c]xfade=transition=fade:duration={fade_i:.6f}:offset={offset:.6f}[{out_c}]"
+            )
+            filter_lines.append(
+                f"[{curr_a}][s{i+1}a]xfade=transition=fade:duration={fade_i:.6f}:offset={offset:.6f}[{out_a}]"
+            )
+            curr_c, curr_a = out_c, out_a
+            curr_duration = curr_duration + durations_s[i + 1] - fade_i
+
+    # Reconstituer RGBA pour l’overlay final
+    filter_lines.append(f"[{curr_c}][{curr_a}]alphamerge,format=yuva444p[overlay]")
+
+    # Construction de la vidéo de fond [bg]
+    bg_label: Optional[str] = None
+    avail_bg_after = max(0.0, total_bg_s - start_s)
+    need_black_full = (not pre_videos) or (avail_bg_after <= 1e-6)
+
+    if need_black_full:
+        color_full_idx = current_idx
+        cmd += ["-f", "lavfi", "-i", f"color=c=black:s={W}x{H}:r={fps}:d={duration_s:.6f}"]
+        current_idx += 1
+        bg_label = f"{color_full_idx}:v"
+    else:
+        if pre_videos and len(pre_videos) > 1:
+            ins = "".join(f"[{bg_start_idx + i}:v]" for i in range(len(pre_videos)))
+            filter_lines.append(f"{ins}concat=n={len(pre_videos)}:v=1:a=0[bgcat]")
+            prev = "bgcat"
+        else:
+            prev = f"{bg_start_idx}:v"
+        filter_lines.append(f"[{prev}]trim=start={start_s:.6f},setpts=PTS-STARTPTS[bgtrim]")
+        bg_label = "bgtrim"
+        if avail_bg_after + 1e-6 < duration_s:
+            remain = duration_s - avail_bg_after
+            color_pad_idx = current_idx
+            cmd += ["-f", "lavfi", "-i", f"color=c=black:s={W}x{H}:r={fps}:d={remain:.6f}"]
+            current_idx += 1
+            filter_lines.append(f"[bgtrim][{color_pad_idx}:v]concat=n=2:v=1:a=0[bg]")
+            bg_label = "bg"
+
+    # Superposition de l’overlay (avec alpha) sur le fond
+    filter_lines.append(f"[{bg_label}][overlay]overlay=shortest=1:x=0:y=0,format=yuv420p[vout]")
+
+    # Audio: concat, skip start_s, clamp à duration_s
+    if have_audio:
+        A = len(audio_paths or [])
+        if A == 1:
+            a0 = f"{audio_start_idx}:a"
+            filter_lines.append(f"[{a0}]aresample=48000[aa0]")
+            filter_lines.append(f"[aa0]atrim=start={start_s:.6f},asetpts=PTS-STARTPTS,atrim=end={duration_s:.6f}[aout]")
+        else:
+            for j in range(A):
+                idx = audio_start_idx + j
+                filter_lines.append(f"[{idx}:a]aresample=48000[aa{j}]")
+            ins = "".join(f"[aa{j}]" for j in range(A))
+            filter_lines.append(f"{ins}concat=n={A}:v=0:a=1[aacat]")
+            filter_lines.append(f"[aacat]atrim=start={start_s:.6f},asetpts=PTS-STARTPTS,atrim=end={duration_s:.6f}[aout]")
+
+    filter_complex = ";".join(filter_lines)
+
+    # Écrit le filtergraph dans un fichier temporaire situé dans le dossier des images
+    fg_path: Optional[Path] = None
+    try:
+        tmp_dir = Path(imgs_cwd) if imgs_cwd else Path(tempfile.gettempdir())
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        fg_path = tmp_dir / ("filter-" + hashlib.md5(filter_complex.encode("utf-8")).hexdigest()[:8] + ".ffgraph")
+        with open(fg_path, "w", encoding="utf-8") as f:
+            f.write(filter_complex)
+        print(f"[ffmpeg] filter_complex_script -> {fg_path}")
+    except Exception as e:
+        print("[ffmpeg][WARN] Échec écriture filtergraph:", repr(e))
+        fg_path = None
+
+    # Ajoute le script via -filter_complex_script (plus fiable)
+    if fg_path is not None:
+        cmd += ["-filter_complex_script", str(fg_path.name if imgs_cwd else fg_path)]
+    else:
+        cmd += ["-filter_complex", filter_complex]
+
+    # Mapping
+    cmd += ["-map", "[vout]"]
+    if have_audio:
+        cmd += ["-map", "[aout]"]
+
+    # Codec vidéo + audio
+    cmd += ["-r", str(fps), "-c:v", vcodec]
+    if vextra.get("preset") is not None:
+        cmd += ["-preset", str(vextra["preset"])]
+    cmd += vparams
+    if have_audio:
+        cmd += ["-c:a", "aac", "-b:a", "192k"]
+
+    # Assure la durée exacte
+    cmd += ["-t", f"{duration_s:.6f}"]
+
+    # Fichier de sortie
+    cmd += [out_path]
+
+    print("[ffmpeg] Commande:")
+    try:
+        preview = " ".join(cmd[:12]) + " ..."  # évite d’imprimer toute la commande
+        print("  ", preview)
+    except Exception:
+        pass
+
+    # Exécution, en se plaçant dans le dossier des images pour raccourcir les chemins
+    subprocess.run(cmd, check=True, cwd=(imgs_cwd or None))
+
+
 async def start_export(
     export_id: str,
     imgs_folder: str,
@@ -181,7 +434,8 @@ async def start_export(
     # Timeline et chemins
     ts: List[int] = [int(p.stem) for p in files]
     paths: List[Path] = files
-    path_strs: List[str] = [str(p) for p in paths]
+    # Utilise uniquement les noms de fichiers pour ffmpeg (nous allons cwd dans ce dossier)
+    path_strs: List[str] = [p.name for p in paths]
     print(f"[timeline] Premiers timestamps: {ts[:10]}{' ...' if len(ts) > 10 else ''}")
     print(f"[timeline] Nombre d'images: {len(ts)}")
 
@@ -192,7 +446,7 @@ async def start_export(
         target_size = im0.size
     print(f"[image] Taille cible: {target_size[0]}x{target_size[1]}")
 
-    # Durée totale (dernière image + queue)
+    # Durée totale
     fade_ms = int(fade_duration)
     tail_ms = max(1000, fade_ms)
     total_duration_ms = ts[-1] + tail_ms
@@ -200,357 +454,29 @@ async def start_export(
     print(f"[timeline] Durée totale: {total_duration_ms} ms ({duration_s:.3f} s)")
     print(f"[perf] Préparation terminée en {(time.time()-t0)*1000:.0f} ms")
 
-    # Cache LRU: garde 3 images chargées et prémultipliées en uint8 (plus rapide au rendu)
-    @lru_cache(maxsize=3)
-    def load_premultiplied_rgb_u8(path_str: str) -> np.ndarray:
-        # Charge PNG -> RGBA -> applique alpha en entier -> renvoie uint8 (H,W,3)
-        print(f"[cache] load (miss): {path_str}")
-        p = Path(path_str)
-        with Image.open(p) as im:
-            im = im.convert("RGBA")
-            if im.size != target_size:
-                print(f"[resize] Adaptation au canevas {target_size} (collage en 0,0, pas de redimensionnement)")
-                canvas = Image.new("RGBA", target_size, (0, 0, 0, 0))
-                canvas.paste(im, (0, 0))
-                im = canvas
-            arr = np.asarray(im, dtype=np.uint8)
-        rgb = arr[..., :3].astype(np.uint16)
-        a = arr[..., 3:4].astype(np.uint16)
-        # prémultiplication int: round((rgb * a) / 255)
-        premul = (rgb * a + 127) // 255
-        return premul.astype(np.uint8)
-
-    # Helpers pour overlay: cache image prémultipliée + alpha
-    @lru_cache(maxsize=3)
-    def load_premul_and_alpha_u8(path_str: str) -> Tuple[np.ndarray, np.ndarray]:
-        p = Path(path_str)
-        with Image.open(p) as im:
-            im = im.convert("RGBA")
-            if im.size != target_size:
-                canvas = Image.new("RGBA", target_size, (0, 0, 0, 0))
-                canvas.paste(im, (0, 0))
-                im = canvas
-            arr = np.asarray(im, dtype=np.uint8)
-        rgb = arr[..., :3].astype(np.uint16)
-        a = arr[..., 3:4].astype(np.uint16)
-        premul = (rgb * a + 127) // 255  # uint16
-        return premul.astype(np.uint8), a.astype(np.uint8)
-
-    def premul_to_rgb_u8(premul_u8: np.ndarray, a_u8: np.ndarray) -> np.ndarray:
-        a = a_u8.astype(np.uint16)
-        prem = premul_u8.astype(np.uint16)
-        # Éviter division par 0
-        rgb_u16 = np.where(a > 0, (prem * 255 + (a // 2)) // a, 0)
-        return np.clip(rgb_u16, 0, 255).astype(np.uint8)
-
-    # Mémo pour éviter double calcul des composantes overlay (premul + alpha)
-    last_comp: Dict[str, Optional[object]] = {"t_ms": None, "premul": None, "alpha": None}
-
-    def compute_overlay_components(t_ms: int) -> Tuple[np.ndarray, np.ndarray]:
-        # Cache par timestamp
-        if last_comp["t_ms"] == t_ms and last_comp["premul"] is not None and last_comp["alpha"] is not None:
-            return last_comp["premul"], last_comp["alpha"]  # type: ignore[return-value]
-        # Trouver image courante
-        i = max(0, bisect_right(ts, t_ms) - 1)
-        if i >= len(ts):
-            i = len(ts) - 1
-        # Crossfade éventuel
-        if i < len(ts) - 1:
-            delta_ms = ts[i + 1] - ts[i]
-            win_ms = min(delta_ms, fade_ms)
-            start_ms = ts[i + 1] - win_ms
-            if win_ms > 0 and start_ms <= t_ms < ts[i + 1]:
-                w_num = t_ms - start_ms
-                denom = win_ms
-                prem_a, a_a = load_premul_and_alpha_u8(path_strs[i])
-                prem_b, a_b = load_premul_and_alpha_u8(path_strs[i + 1])
-                a32 = a_a.astype(np.uint32)
-                b32 = a_b.astype(np.uint32)
-                prem32_a = prem_a.astype(np.uint32)
-                prem32_b = prem_b.astype(np.uint32)
-                prem_mix = ((prem32_a * (denom - w_num) + prem32_b * w_num) // denom).astype(np.uint8)
-                a_mix = ((a32 * (denom - w_num) + b32 * w_num) // denom).astype(np.uint8)
-                last_comp["t_ms"] = t_ms
-                last_comp["premul"] = prem_mix
-                last_comp["alpha"] = a_mix
-                return prem_mix, a_mix
-        # Pas de crossfade
-        prem, a = load_premul_and_alpha_u8(path_strs[i])
-        last_comp["t_ms"] = t_ms
-        last_comp["premul"] = prem
-        last_comp["alpha"] = a
-        return prem, a
-
-    # Etat de log pour éviter le spam
-    state = {"last_img_index": None, "last_cross_bucket": None, "last_second_printed": -1}
-
-    # Générateur de frames
-    def make_frame(t: float) -> np.ndarray:
-        t_ms = int(round(t * 1000.0))
-        if t_ms >= total_duration_ms:
-            t_ms = total_duration_ms - 1
-
-        # Log 1x/s
-        sec = t_ms // 1000
-        if sec != state["last_second_printed"]:
-            state["last_second_printed"] = sec
-            overall = int((t_ms / total_duration_ms) * 100)
-            print(f"[frame] t={t_ms} ms (sec {sec}) | progression ~{overall}%")
-
-        # Trouve i tel que ts[i] <= t < ts[i+1] (ou i = dernière)
-        i = max(0, bisect_right(ts, t_ms) - 1)
-        if i >= len(ts):
-            i = len(ts) - 1
-
-        if i != state["last_img_index"]:
-            state["last_img_index"] = i
-            if i < len(ts) - 1:
-                print(f"[image] -> index={i}, ts={ts[i]} ms (vers {ts[i+1]} ms)")
-            else:
-                print(f"[image] -> dernière index={i}, ts={ts[i]} ms")
-
-        img_a = load_premultiplied_rgb_u8(path_strs[i])
-
-        # Crossfade entre toutes les images: fondu sur la fenêtre min(delta, fade_ms) avant l'image suivante
-        if i < len(ts) - 1:
-            delta_ms = ts[i + 1] - ts[i]
-            win_ms = min(delta_ms, fade_ms)
-            start_ms = ts[i + 1] - win_ms
-            if win_ms > 0 and start_ms <= t_ms < ts[i + 1]:
-                w_num = t_ms - start_ms  # numérateur entier
-                denom = win_ms           # dénominateur
-                w = w_num / float(denom)
-                bucket = int(w * 10)
-                if bucket != state["last_cross_bucket"]:
-                    state["last_cross_bucket"] = bucket
-                    print(f"[crossfade] i={i}->{i+1} ~{w*100:.0f}% t={t_ms} ms (fenêtre {win_ms} ms)")
-                img_b = load_premultiplied_rgb_u8(path_strs[i + 1])
-                # Mixage entier (évite le float) avec précision suffisante
-                a32 = img_a.astype(np.uint32)
-                b32 = img_b.astype(np.uint32)
-                mix = ((a32 * (denom - w_num) + b32 * w_num) // denom).astype(np.uint8)
-                return mix
-            else:
-                state["last_cross_bucket"] = None
-                return img_a
-        else:
-            state["last_cross_bucket"] = None
-            return img_a
-
-    # Générateur de frames overlay (RGB non prémultiplié)
-    state = {"last_img_index": None, "last_cross_bucket": None, "last_second_printed": -1}
-    def overlay_make_frame(t: float) -> np.ndarray:
-        t_ms = int(round(t * 1000.0))
-        if t_ms >= total_duration_ms:
-            t_ms = total_duration_ms - 1
-
-        # Logs 1x/s
-        sec = t_ms // 1000
-        if sec != state["last_second_printed"]:
-            state["last_second_printed"] = sec
-            overall = int((t_ms / total_duration_ms) * 100)
-            print(f"[frame] t={t_ms} ms (sec {sec}) | progression ~{overall}%")
-
-        # Index/logs
-        i = max(0, bisect_right(ts, t_ms) - 1)
-        if i >= len(ts):
-            i = len(ts) - 1
-
-        if i != state["last_img_index"]:
-            state["last_img_index"] = i
-            if i < len(ts) - 1:
-                print(f"[image] -> index={i}, ts={ts[i]} ms (vers {ts[i+1]} ms)")
-            else:
-                print(f"[image] -> dernière index={i}, ts={ts[i]} ms")
-
-        # Crossfade bucket
-        if i < len(ts) - 1:
-            delta_ms = ts[i + 1] - ts[i]
-            win_ms = min(delta_ms, fade_ms)
-            start_ms = ts[i + 1] - win_ms
-            if win_ms > 0 and start_ms <= t_ms < ts[i + 1]:
-                w = (t_ms - start_ms) / float(win_ms)
-                bucket = int(w * 10)
-                if bucket != state["last_cross_bucket"]:
-                    state["last_cross_bucket"] = bucket
-                    print(f"[crossfade] i={i}->{i+1} ~{w*100:.0f}% t={t_ms} ms (fenêtre {win_ms} ms)")
-            else:
-                state["last_cross_bucket"] = None
-        else:
-            state["last_cross_bucket"] = None
-
-        prem, a = compute_overlay_components(t_ms)
-        return premul_to_rgb_u8(prem, a)
-
-    def overlay_make_mask(t: float) -> np.ndarray:
-        t_ms = int(round(t * 1000.0))
-        if t_ms >= total_duration_ms:
-            t_ms = total_duration_ms - 1
-        _, a = compute_overlay_components(t_ms)
-        # a est (H,W,1) -> mask attendu (H,W) float in [0,1]
-        return (a.squeeze(-1).astype(np.float32) / 255.0)
-
-    overlay_clip = VideoClip(make_frame=overlay_make_frame, duration=duration_s).set_fps(fps)
-    mask_clip = VideoClip(make_frame=overlay_make_mask, duration=duration_s, ismask=True).set_fps(fps)
-    overlay_clip = overlay_clip.set_mask(mask_clip)
-    print("[moviepy] Overlay (images) prêt.")
-
-    # Préparer la vidéo de fond si fournie
-    bg_clip = None
-    bg_loaded: List[VideoFileClip] = []
-    if videos:
-        try:
-            start_s = max(0.0, start_time / 1000.0)
-            # Prétraiter toutes les vidéos côté ffmpeg (scale+pad vers la taille cible et fps voulu)
-            pre_videos = _preprocess_background_videos(videos, target_size[0], target_size[1], fps, prefer_hw=prefer_hw)
-            bg_loaded = [VideoFileClip(p).without_audio() for p in pre_videos]
-            v_durs = [c.duration for c in bg_loaded]
-            total_v = float(sum(v_durs))
-            print(f"[video] total_video={total_v:.3f}s, start_s={start_s:.3f}s, video_s={duration_s:.3f}s")
-            if start_s < total_v - 1e-6:
-                rem = start_s
-                idx = 0
-                while idx < len(bg_loaded) and rem >= v_durs[idx] - 1e-6:
-                    rem -= v_durs[idx]
-                    idx += 1
-                parts: List[VideoFileClip] = []
-                if idx < len(bg_loaded):
-                    first = bg_loaded[idx].subclip(rem)
-                    parts.append(first)
-                    for j in range(idx + 1, len(bg_loaded)):
-                        parts.append(bg_loaded[j])
-                    bg = concatenate_videoclips(parts)
-                    if bg.duration > duration_s + 1e-6:
-                        bg = bg.subclip(0, duration_s)
-                    # Les vidéos sont déjà à la bonne taille/fps
-                    bg_clip = bg
-                    print(f"[video] fond attaché: {bg_clip.duration:.3f}s")
-                else:
-                    print("[video] start_time dépasse la durée totale des vidéos -> pas de fond")
-            else:
-                print("[video] start_time >= total_video -> pas de fond")
-        except Exception as e:
-            print("[video][ERREUR]", repr(e))
-            bg_clip = None
-
-    # Composer le résultat final
-    if bg_clip is not None:
-        final_clip = CompositeVideoClip([bg_clip, overlay_clip], size=target_size)
-        final_clip = final_clip.set_duration(duration_s)
-    else:
-        final_clip = overlay_clip
-
-    print("[moviepy] Clip prêt.")
-
-    # Construction de l'audio (concat, skip start_time, clamp à la durée vidéo)
-    audio_clip: Optional[AudioFileClip] = None
-    loaded_audio_clips: List[AudioFileClip] = []
-    if audios:
-        try:
-            start_s = max(0.0, start_time / 1000.0)
-            loaded_audio_clips = [AudioFileClip(p) for p in audios]
-            durations = [c.duration for c in loaded_audio_clips]
-            total_audio = float(sum(durations))
-            print(f"[audio] total_audio={total_audio:.3f}s, start_s={start_s:.3f}s, video_s={duration_s:.3f}s")
-            if start_s < total_audio - 1e-6:
-                rem = start_s
-                idx = 0
-                while idx < len(loaded_audio_clips) and rem >= durations[idx] - 1e-6:
-                    rem -= durations[idx]
-                    idx += 1
-                parts_a: List[AudioFileClip] = []
-                if idx < len(loaded_audio_clips):
-                    first = loaded_audio_clips[idx].subclip(rem)
-                    parts_a.append(first)
-                    for j in range(idx + 1, len(loaded_audio_clips)):
-                        parts_a.append(loaded_audio_clips[j])
-                    cat = concatenate_audioclips(parts_a)
-                    if cat.duration > duration_s + 1e-6:
-                        cat = cat.subclip(0, duration_s)
-                    audio_clip = cat
-                    final_clip = final_clip.set_audio(audio_clip)
-                    print(f"[audio] piste attachée: {audio_clip.duration:.3f}s")
-                else:
-                    print("[audio] start_time dépasse la durée totale des audios -> pas d'audio")
-            else:
-                print("[audio] start_time >= total_audio -> pas d'audio")
-        except Exception as e:
-            print("[audio][ERREUR]", repr(e))
-            audio_clip = None
-
-    # Sortie
-    out_path = Path(final_file_path)
+    out_path = Path(final_file_path).resolve()
     if out_path.parent:
         print(f"[fs] Création du dossier de sortie si besoin: {out_path.parent}")
         os.makedirs(out_path.parent, exist_ok=True)
 
-    logger = VeryVerboseFFmpegLogger()
-    print("[logger] Logger ffmpeg initialisé.")
-
-    # Choix du codec
-    codec, extra_params, extra_kwargs = _choose_best_codec(prefer_hw=prefer_hw)
-    print(f"[encode] Codec choisi: {codec}")
-
-    # Ecriture vidéo dans un thread (pour ne pas bloquer l'async)
-    def _write():
-        print("[encode] Démarrage encodage...")
-        t_enc = time.time()
-        ffmpeg_params = list(extra_params)
-        kwargs = dict(
-            codec=codec,
+    def _run():
+        _build_and_run_ffmpeg_filter_complex(
+            out_path=str(out_path),
+            image_paths=path_strs,  # noms simples
+            timestamps_ms=ts,
+            target_size=target_size,
             fps=fps,
-            audio=bool(audio_clip),
-            verbose=True,
-            logger=logger,
-            threads=os.cpu_count() or 0,
-            ffmpeg_params=ffmpeg_params,
+            fade_duration_ms=fade_ms,
+            start_time_ms=start_time,
+            audio_paths=audios or [],
+            bg_videos=videos or [],
+            prefer_hw=True,
+            imgs_cwd=str(folder.resolve()),
         )
-        if audio_clip is not None:
-            kwargs["audio_codec"] = "aac"
-            kwargs["audio_bitrate"] = "192k"
-        if extra_kwargs.get("preset") is not None:
-            kwargs["preset"] = extra_kwargs["preset"]
-        final_clip.write_videofile(str(out_path), **kwargs)
-        print(f"[encode] Terminé en {time.time()-t_enc:.2f}s -> {out_path}")
 
-    print("[async] Lancement de l'encodage dans un thread...")
-    await asyncio.to_thread(_write)
+    print("[ffmpeg] Lancement de la commande (thread)...")
+    await asyncio.to_thread(_run)
 
-    # Fermeture des ressources audio/vidéo
-    try:
-        try:
-            overlay_clip.close()
-        except Exception:
-            pass
-        try:
-            if bg_clip is not None:
-                bg_clip.close()
-        except Exception:
-            pass
-        try:
-            if audio_clip is not None:
-                audio_clip.close()
-        except Exception:
-            pass
-        for c in bg_loaded:
-            try:
-                c.close()
-            except Exception:
-                pass
-        for c in loaded_audio_clips:
-            try:
-                c.close()
-            except Exception:
-                pass
-        try:
-            if 'final_clip' in locals() and final_clip is not None:
-                final_clip.close()
-        except Exception:
-            pass
-    except Exception:
-        pass
-
-    # Calcul et exposition de la durée d'export
     export_time_s = time.time() - t0
     global LAST_EXPORT_TIME_S
     LAST_EXPORT_TIME_S = export_time_s
@@ -569,7 +495,7 @@ if __name__ == "__main__":
         final_file_path = "./output.mp4"
         audios=[r"F:\Annexe\Montage vidéo\quran.al.luhaidan\196\تلاوة أحمد ديبان رواية ورش عام 1443 سورة 003  آل عمران.mp3"]
         videos=[r"F:\Annexe\Montage vidéo\quran.al.luhaidan\199\video_4027.mp4"]
-        start_time = 0
+        start_time = 4000
         export_id = "0"
         try:
             print("[main] Démarrage start_export()")
