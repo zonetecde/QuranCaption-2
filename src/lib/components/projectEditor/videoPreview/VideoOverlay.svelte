@@ -102,6 +102,9 @@
 
 	let lastSubtitleId = 0;
 
+	// Variable pour stocker l'AbortController de l'exécution précédente
+	let currentAbortController: AbortController | null = null;
+
 	/**
 	 * Gère le max-height (fit on N lines) et la taille de police réactive des sous-titres
 	 */
@@ -120,46 +123,94 @@
 		globalState.getStyle('arabic', 'font-size').value;
 
 		untrack(async () => {
-			let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
+			// Annuler l'exécution précédente si elle existe
+			if (currentAbortController) {
+				currentAbortController.abort();
+			}
 
-			targets.forEach(async (target) => {
-				try {
-					if (
-						globalState.getStyle(target, 'max-height').value !== 'none' ||
-						currentSubtitle()!.id
-					) {
-						// Make the font-size responsive
-						const maxHeight = globalState.getStyle(target, 'max-height')!.value as string;
-						const maxHeightValue = parseFloat(maxHeight);
+			// Créer un nouveau AbortController pour cette exécution
+			currentAbortController = new AbortController();
+			const abortSignal = currentAbortController.signal;
 
-						let fontSize = globalState.getStyle(target, 'font-size').value as number;
+			try {
+				let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
 
-						globalState.getVideoStyle
-							.getStylesOfTarget(target)
-							.setStyle('reactive-font-size', fontSize);
+				// Utiliser for...of au lieu de forEach pour un meilleur contrôle async
+				for (const target of targets) {
+					// Vérifier si l'opération a été annulée
+					if (abortSignal.aborted) return;
 
-						await new Promise((resolve) => {
-							setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
-						});
+					try {
+						const maxHeightValue = globalState.getStyle(target, 'max-height').value;
+						if (maxHeightValue !== 0) {
+							// Make the font-size responsive
+							let fontSize = globalState.getStyle(target, 'font-size').value as number;
 
-						const subtitles = document.querySelectorAll('.' + CSS.escape(target) + '.subtitle');
-						subtitles.forEach(async (subtitle) => {
-							// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
-							while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
-								fontSize -= 5;
+							globalState.getVideoStyle
+								.getStylesOfTarget(target)
+								.setStyle('reactive-font-size', fontSize);
 
-								globalState.getVideoStyle
-									.getStylesOfTarget(target)
-									.setStyle('reactive-font-size', fontSize);
+							await new Promise((resolve, reject) => {
+								if (abortSignal.aborted) {
+									reject(new Error('Aborted'));
+									return;
+								}
+								setTimeout(() => {
+									if (abortSignal.aborted) {
+										reject(new Error('Aborted'));
+									} else {
+										resolve(undefined);
+									}
+								}, 1);
+							});
 
-								await new Promise((resolve) => {
-									setTimeout(resolve, 1); // Attendre un peu pour que le DOM se mette à jour
-								});
+							const subtitles = document.querySelectorAll('.' + CSS.escape(target) + '.subtitle');
+
+							// Utiliser for...of pour un meilleur contrôle async
+							for (const subtitle of subtitles) {
+								// Vérifier si l'opération a été annulée
+								if (abortSignal.aborted) return;
+
+								// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
+								while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
+									// Vérifier si l'opération a été annulée
+									if (abortSignal.aborted) return;
+
+									fontSize -= 5;
+
+									globalState.getVideoStyle
+										.getStylesOfTarget(target)
+										.setStyle('reactive-font-size', fontSize);
+
+									await new Promise((resolve, reject) => {
+										if (abortSignal.aborted) {
+											reject(new Error('Aborted'));
+											return;
+										}
+										setTimeout(() => {
+											if (abortSignal.aborted) {
+												reject(new Error('Aborted'));
+											} else {
+												resolve(undefined);
+											}
+										}, 1);
+									});
+								}
 							}
-						});
+						}
+					} catch (error) {
+						// Ignorer les erreurs d'annulation
+						if (error instanceof Error && error.message === 'Aborted') {
+							return;
+						}
 					}
-				} catch (error) {}
-			});
+				}
+			} catch (error) {
+				// Ignorer les erreurs d'annulation
+				if (error instanceof Error && error.message === 'Aborted') {
+					return;
+				}
+			}
 		});
 	});
 
