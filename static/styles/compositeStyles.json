@@ -49,6 +49,29 @@
 		"icon": "palette"
 	},
 	{
+		"id": "text-transform",
+		"name": "Text Transform",
+		"description": "Control the capitalization of the text",
+		"value": "none",
+		"valueType": "select",
+		"options": ["none", "capitalize", "uppercase", "lowercase"],
+		"css": "text-transform: {value};",
+		"tailwind": false,
+
+		"icon": "text_fields"
+	},
+	{
+		"id": "font-weight",
+		"name": "Font Weight",
+		"description": "Set the thickness of the font",
+		"value": "normal",
+		"valueType": "select",
+		"options": ["normal", "bold", "lighter", "bolder"],
+		"css": "font-weight: {value};",
+		"tailwind": false,
+		"icon": "format_bold"
+	},
+	{
 		"id": "custom-css",
 		"name": "Custom CSS",
 		"description": "Write any custom CSS for custom text. Use !important if needed.",
