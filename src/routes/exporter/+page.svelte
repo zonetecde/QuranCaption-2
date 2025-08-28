@@ -155,8 +155,6 @@
 					timingsToTakeScreenshots.push(Math.round(t));
 				}
 
-				let duplicateScreenshots: { [duplicated: number]: number } = {};
-
 				// --- Sous-titres ---
 				for (const clip of globalState.getSubtitleTrack.clips) {
 					// On limite aux types valides
@@ -168,17 +166,13 @@
 					const duration = endTime - startTime;
 					if (duration <= 0) continue;
 
-					// Fin du fade-in (début + halfFade) – clamp si clip trop court
-					const fadeInEnd = Math.min(startTime + halfFade, endTime);
+					// Fin du fade-in (début + fadeDuration) – clamp si clip trop court
+					const fadeInEnd = Math.min(startTime + fadeDuration, endTime);
 					add(fadeInEnd);
 
-					// Début du fade-out (fin - halfFade) si valable
-					const fadeOutStart = endTime - halfFade;
-					if (fadeOutStart > startTime) {
-						// pour éviter de prendre 2 fois la même image, on va juste prendre celle
-						// d'avant (qui est la meme, avec le sous-titre encore affiché)
-						duplicateScreenshots[fadeInEnd] = fadeOutStart;
-					}
+					// Début du fade-out (fin - fadeDuration) si valable
+					const fadeOutStart = endTime - fadeDuration;
+					if (fadeOutStart > startTime) add(fadeOutStart);
 
 					// Fin du fade-out (fin du clip)
 					add(endTime);
@@ -224,18 +218,13 @@
 				console.log('Timings détectés (calcul direct):', uniqueSorted);
 
 				let i = 0;
+				let base = 0;
 				for (const timing of uniqueSorted) {
 					globalState.getTimelineState.movePreviewTo = timing;
 					globalState.getTimelineState.cursorPosition = timing;
-
-					// Si cette capture d'écran possède un duplicat, c'est que c'est une capture
-					// de texte, donc 100ms d'attente, sinon 10ms
-					if (duplicateScreenshots[timing])
-						await new Promise((resolve) => setTimeout(resolve, 100));
-					else await new Promise((resolve) => setTimeout(resolve, 10));
-
-					// Si on a déjà pris une capture à ce timing, on copie le fichier précédent
-					await takeScreenshot(`${Math.round(timing - exportStart)}`, duplicateScreenshots[timing]);
+					await new Promise((resolve) => setTimeout(resolve, 50));
+					await takeScreenshot(`${Math.round(timing - exportStart + base)}`);
+					base += fadeDuration;
 
 					i++;
 					emitProgress({

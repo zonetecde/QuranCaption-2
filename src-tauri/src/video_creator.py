@@ -176,6 +176,7 @@ def _build_and_run_ffmpeg_filter_complex(
     bg_videos: Optional[List[str]],
     prefer_hw: bool = True,
     imgs_cwd: Optional[str] = None,
+    duration_ms: Optional[int] = None,
 ) -> None:
     """Construit et exécute une commande ffmpeg filter_complex pour composer PNG + crossfade, vidéo de fond et audio.
     - Une seule entrée vidéo via le concat demuxer (fichier .ffconcat) pour éviter d’ouvrir N inputs -> RAM faible
@@ -201,7 +202,12 @@ def _build_and_run_ffmpeg_filter_complex(
         else:
             durations_s.append(max(0.001, tail_ms / 1000.0))
     total_by_ts = (timestamps_ms[-1] + tail_ms) / 1000.0
-    duration_s = total_by_ts
+    
+    # Utilise duration_ms si fourni, sinon utilise le calcul basé sur les timestamps
+    if duration_ms is not None:
+        duration_s = duration_ms / 1000.0
+    else:
+        duration_s = total_by_ts
 
     # Offsets cumulés pour trim/xfade
     starts_s: List[float] = []
@@ -441,6 +447,7 @@ async def start_export(
     audios: Optional[List[str]] = None,
     start_time: int = 0,
     videos: Optional[List[str]] = None,
+    duration: Optional[int] = None,
 ) -> str:
     prefer_hw = True
     
@@ -512,6 +519,7 @@ async def start_export(
             bg_videos=videos or [],
             prefer_hw=True,
             imgs_cwd=str(folder.resolve()),
+            duration_ms=duration,
         )
 
     print("[ffmpeg] Lancement de la commande (thread)...")
@@ -529,7 +537,7 @@ async def start_export(
 # --- Exécution directe ---
 if __name__ == "__main__":
     async def main():
-        img_folder = r"C:\Users\zonedetec\AppData\Roaming\com.qurancaption\exports\1756312363384407"
+        img_folder = r"C:\Users\zonedetec\AppData\Roaming\com.qurancaption\exports\test3"
         fade_duration = 500
         fps = 30
         final_file_path = "./output.mp4"
@@ -537,10 +545,11 @@ if __name__ == "__main__":
         videos=[r"F:\Annexe\Montage vidéo\quran.al.luhaidan\199\video_4027.mp4"]
         #videos = []
         start_time = 4000
+        duration = 700000
         export_id = "0"
         try:
             print("[main] Démarrage start_export()")
-            path = await start_export(export_id, img_folder, final_file_path, fps, fade_duration, audios, start_time, videos)
+            path = await start_export(export_id, img_folder, final_file_path, fps, fade_duration, audios, start_time, videos, duration)
             print("[main] OK ->", path)
             # Affiche la durée depuis la variable de module pour vérification
             print("[main] LAST_EXPORT_TIME_S=", LAST_EXPORT_TIME_S)
