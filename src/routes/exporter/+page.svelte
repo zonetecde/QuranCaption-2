@@ -230,12 +230,12 @@
 				console.log('Timings détectés (calcul direct):', uniqueSorted);
 
 				let i = 0;
-				let base = 0;
+				let base = -fadeDuration; // Pour compenser le fade-in du début
 				for (const timing of uniqueSorted) {
 					globalState.getTimelineState.movePreviewTo = timing;
 					globalState.getTimelineState.cursorPosition = timing;
 					await new Promise((resolve) => setTimeout(resolve, 50));
-					await takeScreenshot(`${Math.round(timing - exportStart + base)}`);
+					await takeScreenshot(`${Math.max(Math.round(timing - exportStart + base), 0)}`);
 					base += fadeDuration;
 
 					i++;
