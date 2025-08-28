@@ -210,6 +210,22 @@ input[type='text'] {
 		box-shadow 0.2s ease;
 }
 
+textarea {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 0.5rem;
+	padding: 0.5rem 1rem 0.5rem 0.5rem;
+	font-size: 0.875rem;
+	outline: none;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+	resize: vertical;
+	min-height: 3rem;
+	max-height: 20rem;
+}
+
 input[type='text']:focus {
 	border-color: transparent;
 	box-shadow: 0 0 0 1px var(--accent-primary);

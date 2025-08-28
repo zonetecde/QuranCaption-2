@@ -435,14 +435,25 @@
 					</select>
 				</div>
 			{:else if style.valueType === 'text'}
-				<div class="relative">
-					<input
-						type="text"
-						value={String(inputValue)}
-						class="w-full mono"
-						oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
-					/>
-				</div>
+				{#if style.id.includes('css')}
+					<div class="relative">
+						<textarea
+							value={String(inputValue)}
+							class="w-full mono"
+							rows="5"
+							oninput={(e) => applyValue((e.target as HTMLTextAreaElement).value)}
+						></textarea>
+					</div>
+				{:else}
+					<div class="relative">
+						<input
+							type="text"
+							value={String(inputValue)}
+							class="w-full mono"
+							oninput={(e) => applyValue((e.target as HTMLInputElement).value)}
+						/>
+					</div>
+				{/if}
 			{:else if style.valueType === 'time'}
 				<div class="relative flex flex-row gap-x-2 items-center">
 					<input

@@ -106,6 +106,47 @@
 	let currentAbortController: AbortController | null = null;
 
 	/**
+	 * Détecte le target (arabic, traduction, etc.) d'un élément sous-titre
+	 * @param element L'élément HTML du sous-titre
+	 * @returns Le nom du target ou null si non trouvé
+	 */
+	function getTargetFromElement(element: HTMLElement): string | null {
+		// Chercher dans les classes CSS de l'élément
+		const classList = Array.from(element.classList);
+
+		// Vérifier si c'est un sous-titre arabe
+		if (classList.includes('arabic')) {
+			return 'arabic';
+		}
+
+		// Vérifier si c'est une traduction
+		const translationKeys = Object.keys(currentSubtitleTranslations() || {});
+		for (const translationKey of translationKeys) {
+			if (classList.includes(translationKey)) {
+				return translationKey;
+			}
+		}
+
+		return null;
+	}
+
+	async function wait(abortSignal: AbortSignal) {
+		await new Promise((resolve, reject) => {
+			if (abortSignal.aborted) {
+				reject(new Error('Aborted'));
+				return;
+			}
+			setTimeout(() => {
+				if (abortSignal.aborted) {
+					reject(new Error('Aborted'));
+				} else {
+					resolve(undefined);
+				}
+			}, 1);
+		});
+	}
+
+	/**
 	 * Gère le max-height (fit on N lines) et la taille de police réactive des sous-titres
 	 */
 	$effect(() => {
@@ -121,6 +162,7 @@
 		globalState.getTimelineState.movePreviewTo;
 		globalState.getStyle('arabic', 'max-height').value;
 		globalState.getStyle('arabic', 'font-size').value;
+		globalState.getStyle('global', 'spacing').value;
 
 		untrack(async () => {
 			// Annuler l'exécution précédente si elle existe
@@ -134,6 +176,16 @@
 
 			try {
 				let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
+
+				// Remettre à zéro toutes les positions réactives quand on change de sous-titre
+				for (const target of targets) {
+					globalState.getVideoStyle.getStylesOfTarget(target).setStyle('reactive-y-position', 0);
+				}
+
+				console.log('Positions réactives remises à zéro pour le nouveau sous-titre');
+
+				// Attendre un peu que le DOM se mette à jour après la remise à zéro
+				await wait(abortSignal);
 
 				// Utiliser for...of au lieu de forEach pour un meilleur contrôle async
 				for (const target of targets) {
@@ -150,19 +202,7 @@
 								.getStylesOfTarget(target)
 								.setStyle('reactive-font-size', fontSize);
 
-							await new Promise((resolve, reject) => {
-								if (abortSignal.aborted) {
-									reject(new Error('Aborted'));
-									return;
-								}
-								setTimeout(() => {
-									if (abortSignal.aborted) {
-										reject(new Error('Aborted'));
-									} else {
-										resolve(undefined);
-									}
-								}, 1);
-							});
+							await wait(abortSignal);
 
 							const subtitles = document.querySelectorAll('.' + CSS.escape(target) + '.subtitle');
 
@@ -182,19 +222,7 @@
 										.getStylesOfTarget(target)
 										.setStyle('reactive-font-size', fontSize);
 
-									await new Promise((resolve, reject) => {
-										if (abortSignal.aborted) {
-											reject(new Error('Aborted'));
-											return;
-										}
-										setTimeout(() => {
-											if (abortSignal.aborted) {
-												reject(new Error('Aborted'));
-											} else {
-												resolve(undefined);
-											}
-										}, 1);
-									});
+									await wait(abortSignal);
 								}
 							}
 						}
@@ -202,6 +230,118 @@
 						// Ignorer les erreurs d'annulation
 						if (error instanceof Error && error.message === 'Aborted') {
 							return;
+						}
+					}
+				}
+
+				// Une fois qu'on a traité tout les abaissements de taille de max-height, on gère les collisions
+				// Check si l'anti-collision est activé
+				if (globalState.getStyle('global', 'anti-collision').value) {
+					// Récupère tous les sous-titres visibles
+					const allSubtitles = document.querySelectorAll('.subtitle');
+					const subtitleElements = Array.from(allSubtitles) as HTMLElement[];
+
+					// Set pour suivre les paires de collisions déjà traitées
+					const processedPairs = new Set<string>();
+
+					// Vérifie les collisions pour chaque sous-titre
+					for (let i = 0; i < subtitleElements.length; i++) {
+						// Vérifie si l'opération a été annulée
+						if (abortSignal.aborted) return;
+
+						const currentElement = subtitleElements[i];
+
+						// Récupère son target
+						const currentTarget = getTargetFromElement(currentElement);
+
+						if (!currentTarget) continue;
+
+						const currentRect = currentElement.getBoundingClientRect();
+
+						// Chercher les collisions avec les autres sous-titres (seulement ceux après i pour éviter les doublons)
+						for (let j = i + 1; j < subtitleElements.length; j++) {
+							const otherElement = subtitleElements[j];
+							const otherRect = otherElement.getBoundingClientRect();
+
+							// Détecte son target
+							const otherTarget = getTargetFromElement(otherElement);
+
+							// Double check pour pas que ce soit le même élément
+							if (!otherTarget || currentTarget === otherTarget) continue;
+
+							// Créer un identifiant unique pour cette paire (ordre alphabétique pour éviter les doublons)
+							const pairId = [currentTarget, otherTarget].sort().join('-');
+
+							// Si cette paire a déjà été traitée, passer au suivant
+							if (processedPairs.has(pairId)) continue;
+
+							// Vérifier s'il y a une collision entre les deux
+							const isColliding = !(
+								currentRect.bottom < otherRect.top ||
+								currentRect.top > otherRect.bottom ||
+								currentRect.right < otherRect.left ||
+								currentRect.left > otherRect.right
+							);
+
+							if (isColliding) {
+								// Une collision est détectée entre currentElement et otherElement
+
+								// Marquer cette paire comme traitée
+								processedPairs.add(pairId);
+
+								// Déplacer le sous-titre le plus bas vers le bas
+								const targetToAdjust =
+									currentRect.top > otherRect.top ? currentTarget : otherTarget;
+
+								// Boucle jusqu'à ce qu'il n'y ait plus de collision ou qu'on atteigne la limite d'itérations
+								let stillColliding;
+								let iterationCount = 0;
+								const maxIterations = 10; // Sécurité pour éviter les boucles infinies
+
+								do {
+									iterationCount++;
+
+									// Vérifier si l'opération a été annulée
+									if (abortSignal.aborted) return;
+
+									// Recalculer les positions actuelles
+									const currentRectLoop = currentElement.getBoundingClientRect();
+									const otherRectLoop = otherElement.getBoundingClientRect();
+
+									let spacing = globalState.getStyle('global', 'spacing').value as number;
+
+									// Calculer l'ajustement nécessaire basé sur l'overlap actuel
+									const overlapHeight = Math.abs(currentRectLoop.bottom - otherRectLoop.top);
+									const adjustmentNeeded = overlapHeight + spacing;
+
+									// Vérifier la valeur actuelle avant modification
+									const currentValue = globalState.getStyle(targetToAdjust, 'reactive-y-position')
+										.value as number;
+
+									// Incrémenter la position réactive
+									const newValue = currentValue + adjustmentNeeded;
+
+									// Appliquer le nouvel ajustement
+									globalState.getVideoStyle
+										.getStylesOfTarget(targetToAdjust)
+										.setStyle('reactive-y-position', newValue);
+
+									// Attendre que le DOM se mette à jour
+									await wait(abortSignal);
+
+									// Vérifier les nouvelles positions après ajustement
+									const newCurrentRect = currentElement.getBoundingClientRect();
+									const newOtherRect = otherElement.getBoundingClientRect();
+
+									// Vérifier s'il y a encore collision
+									stillColliding = !(
+										newCurrentRect.bottom + spacing < newOtherRect.top ||
+										newCurrentRect.top - spacing > newOtherRect.bottom ||
+										newCurrentRect.right + spacing < newOtherRect.left ||
+										newCurrentRect.left - spacing > newOtherRect.right
+									);
+								} while (stillColliding && iterationCount < maxIterations);
+							}
 						}
 					}
 				}
@@ -219,7 +359,8 @@
 			enable: globalState.getStyle('global', 'overlay-enable')!.value,
 			blur: globalState.getStyle('global', 'overlay-blur')!.value,
 			opacity: globalState.getStyle('global', 'overlay-opacity')!.value,
-			color: globalState.getStyle('global', 'overlay-color')!.value
+			color: globalState.getStyle('global', 'overlay-color')!.value,
+			customCSS: globalState.getStyle('global', 'overlay-custom-css')!.value
 		};
 	});
 </script>
@@ -230,7 +371,7 @@
 			class="absolute inset-0"
 			style="
 					background-color: {overlaySettings().color};
-					opacity: {overlaySettings().opacity};
+					opacity: {overlaySettings().opacity}; {overlaySettings().customCSS};
 				"
 		></div>
 

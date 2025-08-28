@@ -30,6 +30,29 @@
 				"css": "",
 				"tailwind": false,
 				"icon": "blur_on"
+			},
+			{
+				"id": "anti-collision",
+				"name": "Subtitles Anti-Collision",
+				"description": "Prevent subtitle overlap",
+				"value": true,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "block"
+			},
+			{
+				"id": "spacing",
+				"name": "Subtitle Spacing",
+				"description": "Minimum spacing between subtitles (in pixels)",
+				"value": 10,
+				"valueType": "number",
+				"valueMin": -25,
+				"valueMax": 200,
+				"step": 1,
+				"css": "",
+				"tailwind": false,
+				"icon": "space_bar"
 			}
 		]
 	},
@@ -84,6 +107,16 @@
 				"css": "--overlay-blur: {value}px;",
 				"tailwind": false,
 				"icon": "blur_on"
+			},
+			{
+				"id": "overlay-custom-css",
+				"name": "Custom CSS",
+				"description": "Add custom CSS to the overlay (e.g., animations)",
+				"value": "",
+				"valueType": "text",
+				"css": "",
+				"tailwind": false,
+				"icon": "code"
 			}
 		]
 	},

@@ -180,6 +180,19 @@
 		"icon": "open_with",
 		"styles": [
 			{
+				"id": "reactive-y-position",
+				"name": "Reactive Y Position",
+				"description": "Used if the 'Make Text Fit' feature is not set to adjust Y position based on other subtitles positions so that they do not overlap",
+				"value": 0,
+				"valueType": "number",
+				"valueMin": -600,
+				"valueMax": 600,
+				"step": 1,
+				"css": "--reactive-y-position: {value}px;",
+				"tailwind": false,
+				"icon": "height"
+			},
+			{
 				"id": "vertical-position",
 				"name": "Vertical Position",
 				"description": "Change the vertical position of the text (pixels from center)",
@@ -187,7 +200,7 @@
 				"valueType": "number",
 				"valueMin": -540,
 				"valueMax": 540,
-				"css": "--translate-y: {value}px; transform: translate(var(--translate-x), var(--translate-y)) rotate(var(--rotation)) scale(var(--scale));",
+				"css": "--translate-y: calc({value}px + var(--reactive-y-position));",
 				"tailwind": false,
 				"icon": "vertical_align_center"
 			},
@@ -199,7 +212,7 @@
 				"valueType": "number",
 				"valueMin": -960,
 				"valueMax": 960,
-				"css": "--translate-x: {value}px;",
+				"css": "--translate-x: {value}px; transform: translate(var(--translate-x), var(--translate-y)) rotate(var(--rotation)) scale(var(--scale));",
 				"tailwind": false,
 				"icon": "horizontal_rule"
 			},

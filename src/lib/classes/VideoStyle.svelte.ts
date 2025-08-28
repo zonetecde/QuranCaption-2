@@ -46,7 +46,11 @@ export type GeneralStyleName =
 	| 'verse-number-format'
 	| 'verse-number-position';
 
-export type GlobalAnimationStyleName = 'video-dimension' | 'fade-duration';
+export type GlobalAnimationStyleName =
+	| 'video-dimension'
+	| 'fade-duration'
+	| 'anti-collision'
+	| 'spacing';
 
 export type TextStyleName =
 	| 'text-color'
@@ -58,7 +62,8 @@ export type TextStyleName =
 	| 'word-spacing'
 	| 'line-height'
 	| 'max-height'
-	| 'reactive-font-size';
+	| 'reactive-font-size'
+	| 'reactive-y-position';
 
 export type PositioningStyleName =
 	| 'vertical-position'
@@ -93,6 +98,7 @@ export type OverlayStyleName =
 	| 'overlay-enable'
 	| 'overlay-color'
 	| 'overlay-opacity'
+	| 'overlay-custom-css'
 	| 'overlay-blur';
 
 export type SurahNameStyleName =
@@ -405,6 +411,7 @@ export class StylesData extends SerializableBase {
 						let valeur = `rgba(${r}, ${g}, ${b}, var(--background-opacity))`;
 
 						css += 'background-color: ' + valeur + ';\n';
+						continue;
 					}
 				}
 
