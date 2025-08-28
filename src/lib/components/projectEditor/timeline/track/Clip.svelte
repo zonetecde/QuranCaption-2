@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TrackType, type AssetClip, type Clip, type Track } from '$lib/classes';
+	import { AssetType, TrackType, type AssetClip, type Clip, type Track } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { onMount } from 'svelte';
@@ -25,7 +25,11 @@
 	let file = $state(convertFileSrc(asset.filePath));
 
 	$effect(() => {
-		if (globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio) {
+		if (
+			globalState.settings?.persistentUiState.showWaveforms &&
+			track.type === TrackType.Audio &&
+			asset.getAssetType(asset.getFileExtension()) === AssetType.Audio
+		) {
 			const wavesurfer = WaveSurfer.create({
 				container: '#clip-' + clip.id,
 				waveColor: '#9d99cc',

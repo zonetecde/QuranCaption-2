@@ -209,7 +209,7 @@ export class Asset extends SerializableBase {
 		return '';
 	}
 
-	private getAssetType(extension: string): AssetType {
+	getAssetType(extension: string): AssetType {
 		switch (extension) {
 			case 'mp4':
 			case 'avi':

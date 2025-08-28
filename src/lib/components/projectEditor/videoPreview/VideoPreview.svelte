@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Asset, ProjectEditorTabs, TrackType } from '$lib/classes';
+	import { Asset, AssetType, ProjectEditorTabs, TrackType } from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 	import { mount, onDestroy, onMount, unmount, untrack } from 'svelte';
@@ -475,7 +475,6 @@
 
 		if (audioAsset) {
 			currentlyPlayingAudio = audioAsset.filePath; // Met à jour l'asset actuellement joué
-
 			audioHowl = new Howl({
 				mute: globalState.getVideoPreviewState.showVideosAndAudios,
 				src: [convertFileSrc(audioAsset.filePath)],
