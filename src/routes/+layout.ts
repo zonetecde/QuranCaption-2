@@ -54,9 +54,6 @@ function showErrorDialog(error: Error) {
 	);
 
 	if (import.meta.env.PROD) {
-		telemetry(
-			'Une erreur est survenue sur Quran Caption.' +
-				JSON.stringify(error, Object.getOwnPropertyNames(error), 2)
-		);
+		telemetry('Une erreur est survenue sur Quran Caption: ' + error.message);
 	}
 }

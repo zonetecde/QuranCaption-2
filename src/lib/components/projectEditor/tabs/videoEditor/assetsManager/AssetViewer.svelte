@@ -101,6 +101,11 @@
 		// Ajoute l'asset à la timeline
 		asset.addToTimeline(video, audio);
 	}
+
+	async function convertToCBR() {
+		// Convertir l'asset en CBR
+		await invoke('convert_to_cbr', { filePath: asset.filePath });
+	}
 </script>
 
 <div
@@ -187,6 +192,17 @@
 						<span class="material-icons text-lg">folder_open</span>
 						Open Directory
 					</button>
+					<!-- turn into constant bitrate -->
+					{#if asset.type === AssetType.Audio}
+						<button
+							class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+						       hover:scale-105 transition-all duration-200"
+							onclick={convertToCBR}
+						>
+							<span class="material-icons text-lg">speed</span>
+							Convert to CBR
+						</button>
+					{/if}
 
 					<button
 						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
