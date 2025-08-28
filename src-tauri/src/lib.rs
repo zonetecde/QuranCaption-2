@@ -275,73 +275,6 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-async fn cancel_export(export_id: String) -> Result<String, String> {
-    println!("[cancel_export] Tentative d'annulation de l'export {}", export_id);
-    
-    let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
-    
-    if let Some(pid) = process_ids.remove(&export_id) {
-        drop(process_ids); // Libérer le lock avant l'opération potentiellement bloquante
-        
-        println!("[cancel_export] Processus trouvé avec PID {} pour l'export {}, tentative de terminaison", pid, export_id);
-        
-        // Tuer le processus en utilisant le PID
-        #[cfg(target_os = "windows")]
-        {
-            let mut cmd = Command::new("taskkill");
-            cmd.args(&["/F", "/PID", &pid.to_string()]);
-            configure_command_no_window(&mut cmd);
-            let output = cmd.output();
-            
-            match output {
-                Ok(result) => {
-                    if result.status.success() {
-                        println!("[cancel_export] ✓ Processus ffmpeg tué avec succès pour l'export {}", export_id);
-                        Ok(format!("Export {} canceled successfully", export_id))
-                    } else {
-                        let stderr = String::from_utf8_lossy(&result.stderr);
-                        println!("[cancel_export] ✗ Erreur taskkill: {}", stderr);
-                        Err(format!("Failed to kill process: {}", stderr))
-                    }
-                }
-                Err(e) => {
-                    println!("[cancel_export] ✗ Erreur lors de l'exécution de taskkill: {}", e);
-                    Err(format!("Failed to execute taskkill: {}", e))
-                }
-            }
-        }
-        
-        #[cfg(not(target_os = "windows"))]
-        {
-            let mut cmd = Command::new("kill");
-            cmd.args(&["-TERM", &pid.to_string()]);
-            configure_command_no_window(&mut cmd);
-            let output = cmd.output();
-            
-            match output {
-                Ok(result) => {
-                    if result.status.success() {
-                        println!("[cancel_export] ✓ Processus ffmpeg tué avec succès pour l'export {}", export_id);
-                        Ok(format!("Export {} canceled successfully", export_id))
-                    } else {
-                        let stderr = String::from_utf8_lossy(&result.stderr);
-                        println!("[cancel_export] ✗ Erreur kill: {}", stderr);
-                        Err(format!("Failed to kill process: {}", stderr))
-                    }
-                }
-                Err(e) => {
-                    println!("[cancel_export] ✗ Erreur lors de l'exécution de kill: {}", e);
-                    Err(format!("Failed to execute kill: {}", e))
-                }
-            }
-        }
-    } else {
-        println!("[cancel_export] ✗ Aucun processus trouvé pour l'export {}", export_id);
-        Err(format!("No active export found with ID: {}", export_id))
-    }
-}
-
-#[tauri::command]
 fn open_explorer_with_file_selected(file_path: String) -> Result<(), String> {
     let path = Path::new(&file_path);
     
@@ -464,8 +397,8 @@ pub fn run() {
             move_file,
             get_system_fonts,
             open_explorer_with_file_selected,
-            cancel_export,
-            exporter::export_video
+            exporter::export_video,
+            exporter::cancel_export
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

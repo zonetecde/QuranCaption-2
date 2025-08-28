@@ -4,7 +4,7 @@ use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::Mutex;
+use std::sync::{Arc, LazyLock, Mutex};
 use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 use tauri::{async_runtime, Emitter};
@@ -12,6 +12,19 @@ use tokio::task;
 
 // Expose la dernière durée d'export terminée (en secondes)
 static LAST_EXPORT_TIME_S: Mutex<Option<f64>> = Mutex::new(None);
+
+// Gestionnaire des processus actifs pour pouvoir les annuler
+static ACTIVE_EXPORTS: LazyLock<Mutex<HashMap<String, Arc<Mutex<Option<std::process::Child>>>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+
+// Fonction utilitaire pour configurer les commandes et cacher les fenêtres CMD sur Windows
+fn configure_command_no_window(cmd: &mut Command) {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+}
 
 fn resolve_ffmpeg_binary() -> Option<String> {
     // Honorer un override externe si déjà fourni
@@ -156,6 +169,9 @@ fn ffmpeg_preprocess_video(src: &str, dst: &str, w: i32, h: i32, fps: i32, prefe
 
     cmd.arg(dst);
 
+    // Configurer la commande pour cacher les fenêtres CMD sur Windows
+    configure_command_no_window(&mut cmd);
+
     println!("[preproc] ffmpeg scale+pad -> {}", Path::new(dst).file_name().unwrap_or_default().to_string_lossy());
 
     let status = cmd.status()?;
@@ -213,6 +229,9 @@ fn create_video_from_image(image_path: &str, output_path: &str, w: i32, h: i32, 
             output_path
         ]);
     }
+
+    // Configurer la commande pour cacher les fenêtres CMD sur Windows
+    configure_command_no_window(&mut cmd);
 
     println!("[preproc][IMG] Création vidéo depuis image: {} -> {}", image_path, output_path);
     println!("[preproc][IMG] Commande: {:?}", cmd);
@@ -345,15 +364,18 @@ fn preprocess_background_videos(video_paths: &[String], w: i32, h: i32, fps: i32
 fn ffprobe_duration_sec(path: &str) -> f64 {
     let exe = resolve_ffprobe_binary();
     
-    let output = match Command::new(&exe)
-        .args(&[
-            "-v", "error",
-            "-show_entries", "format=duration",
-            "-of", "default=nokey=1:noprint_wrappers=1",
-            path,
-        ])
-        .output()
-    {
+    let mut cmd = Command::new(&exe);
+    cmd.args(&[
+        "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "default=nokey=1:noprint_wrappers=1",
+        path,
+    ]);
+    
+    // Configurer la commande pour cacher les fenêtres CMD sur Windows
+    configure_command_no_window(&mut cmd);
+    
+    let output = match cmd.output() {
         Ok(output) => output,
         Err(_) => return 0.0,
     };
@@ -364,6 +386,7 @@ fn ffprobe_duration_sec(path: &str) -> f64 {
 
 #[allow(clippy::too_many_arguments)]
 fn build_and_run_ffmpeg_filter_complex(
+    export_id: &str,
     out_path: &str,
     image_paths: &[String],
     timestamps_ms: &[i32],
@@ -696,12 +719,30 @@ fn build_and_run_ffmpeg_filter_complex(
     command.args(&cmd[1..]);
     command.stderr(Stdio::piped());
     
+    // Configurer la commande pour cacher les fenêtres CMD sur Windows
+    configure_command_no_window(&mut command);
+    
     if let Some(cwd) = imgs_cwd {
         command.current_dir(cwd);
     }
     
-    let mut child = command.spawn()?;
-    let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
+    let child = command.spawn()?;
+    
+    // Enregistrer le processus dans les exports actifs
+    let process_ref = Arc::new(Mutex::new(Some(child)));
+    {
+        let mut active_exports = ACTIVE_EXPORTS.lock().map_err(|_| "Failed to lock active exports")?;
+        active_exports.insert(export_id.to_string(), process_ref.clone());
+    }
+    
+    let stderr = {
+        let mut child_guard = process_ref.lock().map_err(|_| "Failed to lock child process")?;
+        if let Some(ref mut child) = child_guard.as_mut() {
+            child.stderr.take().ok_or("Failed to capture stderr")?
+        } else {
+            return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Process was cancelled")));
+        }
+    };
     
     // Lire la sortie stderr pour capturer la progression
     let reader = BufReader::new(stderr);
@@ -724,6 +765,7 @@ fn build_and_run_ffmpeg_filter_complex(
                     
                     // Émettre l'événement de progression vers le frontend
                     let _ = app_handle.emit("export-progress", serde_json::json!({
+                        "export_id": export_id,
                         "progress": progress,
                         "current_time": current_time_s,
                         "total_time": duration_s
@@ -733,10 +775,34 @@ fn build_and_run_ffmpeg_filter_complex(
         }
     }
     
-    let status = child.wait()?;
+    // Attendre la fin du processus
+    let status = {
+        let mut child_guard = process_ref.lock().map_err(|_| "Failed to lock child process")?;
+        if let Some(mut child) = child_guard.take() {
+            child.wait()?
+        } else {
+            // Le processus a été annulé
+            let error_msg = format!("Export {} was cancelled", export_id);
+            let _ = app_handle.emit("export-error", serde_json::json!({
+                "export_id": export_id,
+                "error": error_msg
+            }));
+            return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Interrupted, error_msg)));
+        }
+    };
+    
+    // Nettoyer les exports actifs
+    {
+        let mut active_exports = ACTIVE_EXPORTS.lock().map_err(|_| "Failed to lock active exports")?;
+        active_exports.remove(export_id);
+    }
+    
     if !status.success() {
         let error_msg = format!("ffmpeg failed during video exportation");
-        let _ = app_handle.emit("export-error", &error_msg);
+        let _ = app_handle.emit("export-error", serde_json::json!({
+            "export_id": export_id,
+            "error": error_msg
+        }));
         return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, error_msg)));
     }
     
@@ -870,9 +936,11 @@ pub async fn export_video(
     let audios_vec = audios.unwrap_or_default();
     let videos_vec = videos.unwrap_or_default();
     let app_handle = app.clone();
+    let export_id_clone = export_id.clone();
     
     task::spawn_blocking(move || {
         build_and_run_ffmpeg_filter_complex(
+            &export_id_clone,
             &out_path_str,
             &path_strs,
             &ts,
@@ -955,4 +1023,37 @@ fn parse_ffmpeg_time(time_str: &str) -> f64 {
         }
     }
     0.0
+}
+
+#[tauri::command]
+pub fn cancel_export(export_id: String) -> Result<String, String> {
+    println!("[cancel_export] Demande d'annulation pour export_id: {}", export_id);
+    
+    let mut active_exports = ACTIVE_EXPORTS.lock().map_err(|_| "Failed to lock active exports")?;
+    
+    if let Some(process_ref) = active_exports.remove(&export_id) {
+        if let Ok(mut process_guard) = process_ref.lock() {
+            if let Some(mut child) = process_guard.take() {
+                match child.kill() {
+                    Ok(_) => {
+                        println!("[cancel_export] Processus FFmpeg tué avec succès pour export_id: {}", export_id);
+                        let _ = child.wait(); // Nettoyer le processus zombie
+                        Ok(format!("Export {} annulé avec succès", export_id))
+                    },
+                    Err(e) => {
+                        println!("[cancel_export] Erreur lors de l'arrêt du processus: {:?}", e);
+                        Err(format!("Erreur lors de l'annulation: {}", e))
+                    }
+                }
+            } else {
+                println!("[cancel_export] Aucun processus actif trouvé pour export_id: {}", export_id);
+                Err(format!("Aucun processus actif pour l'export {}", export_id))
+            }
+        } else {
+            Err("Failed to lock process".to_string())
+        }
+    } else {
+        println!("[cancel_export] Export_id non trouvé dans les exports actifs: {}", export_id);
+        Err(format!("Export {} non trouvé ou déjà terminé", export_id))
+    }
 }

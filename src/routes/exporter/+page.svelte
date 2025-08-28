@@ -37,7 +37,11 @@
 			progress?: number;
 			current_time: number;
 			total_time?: number;
+			export_id: string;
 		};
+
+		// Vérifie que c'est bien pour cette exportation
+		if (data.export_id !== exportId) return;
 
 		if (data.progress !== null && data.progress !== undefined) {
 			console.log(
@@ -57,6 +61,10 @@
 
 	async function exportComplete(event: any) {
 		const data = event.payload as { filename: string; exportId: string };
+
+		// Vérifie que c'est bien pour cette exportation
+		if (data.exportId !== exportId) return;
+
 		console.log(`✅ Export complete! File saved as: ${data.filename}`);
 
 		await emitProgress({
@@ -67,14 +75,16 @@
 	}
 
 	async function exportError(event: any) {
-		const error = event.payload as string;
+		const error = event.payload as { error: string; export_id: string };
 		console.error(`❌ Export failed: ${error}`);
+
+		if (error.export_id !== exportId) return;
 
 		emitProgress({
 			exportId: Number(exportId),
 			progress: 100,
 			currentState: ExportState.Error,
-			errorLog: error
+			errorLog: error.error
 		} as ExportProgress);
 	}
 
