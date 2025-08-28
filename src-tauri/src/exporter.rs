@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use std::env;
 use std::fs;
+use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
-use std::io::Write;
 use serde::{Deserialize, Serialize};
-use tauri::async_runtime;
+use tauri::{async_runtime, Emitter};
 use tokio::task;
 
 // Expose la dernière durée d'export terminée (en secondes)
@@ -376,6 +376,7 @@ fn build_and_run_ffmpeg_filter_complex(
     prefer_hw: bool,
     imgs_cwd: Option<&str>,
     duration_ms: Option<i32>,
+    app_handle: tauri::AppHandle,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let (w, h) = target_size;
     let fade_s = (fade_duration_ms as f64 / 1000.0).max(0.0);
@@ -462,6 +463,7 @@ fn build_and_run_ffmpeg_filter_complex(
         "-hide_banner".to_string(),
         "-loglevel".to_string(), "info".to_string(),
         "-stats".to_string(),
+        "-progress".to_string(), "pipe:2".to_string(),
     ]);
     
     let mut current_idx = 0;
@@ -689,17 +691,53 @@ fn build_and_run_ffmpeg_filter_complex(
     };
     println!("  {}", preview);
     
-    // Exécution
+    // Exécution avec capture de la progression
     let mut command = Command::new(&cmd[0]);
     command.args(&cmd[1..]);
+    command.stderr(Stdio::piped());
     
     if let Some(cwd) = imgs_cwd {
         command.current_dir(cwd);
     }
     
-    let status = command.status()?;
+    let mut child = command.spawn()?;
+    let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
+    
+    // Lire la sortie stderr pour capturer la progression
+    let reader = BufReader::new(stderr);
+    
+    for line in reader.lines() {
+        if let Ok(line) = line {
+            println!("[ffmpeg] {}", line); // Debug: afficher toutes les lignes
+            
+            // Chercher les lignes de progression FFmpeg qui contiennent "time=" ou "out_time_ms="
+            if line.contains("time=") || line.contains("out_time_ms=") {
+                if let Some(time_str) = extract_time_from_ffmpeg_line(&line) {
+                    let current_time_s = parse_ffmpeg_time(&time_str);
+                    let progress = if duration_s > 0.0 {
+                        (current_time_s / duration_s * 100.0).min(100.0)
+                    } else {
+                        0.0
+                    };
+                    
+                    println!("[progress] {}% ({:.1}s / {:.1}s)", progress.round(), current_time_s, duration_s);
+                    
+                    // Émettre l'événement de progression vers le frontend
+                    let _ = app_handle.emit("export-progress", serde_json::json!({
+                        "progress": progress,
+                        "current_time": current_time_s,
+                        "total_time": duration_s
+                    }));
+                }
+            }
+        }
+    }
+    
+    let status = child.wait()?;
     if !status.success() {
-        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "FFmpeg command failed")));
+        let error_msg = format!("ffmpeg failed during video exportation");
+        let _ = app_handle.emit("export-error", &error_msg);
+        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, error_msg)));
     }
     
     Ok(())
@@ -716,6 +754,7 @@ pub async fn export_video(
     duration: Option<i32>,
     audios: Option<Vec<String>>,
     videos: Option<Vec<String>>,
+    app: tauri::AppHandle,
 ) -> Result<String, String> {
     let t0 = Instant::now();
     
@@ -830,6 +869,7 @@ pub async fn export_video(
     let out_path_str = out_path.to_string_lossy().to_string();
     let audios_vec = audios.unwrap_or_default();
     let videos_vec = videos.unwrap_or_default();
+    let app_handle = app.clone();
     
     task::spawn_blocking(move || {
         build_and_run_ffmpeg_filter_complex(
@@ -845,6 +885,7 @@ pub async fn export_video(
             true,
             Some(&imgs_folder_resolved),
             duration,
+            app_handle,
         )
     }).await
     .map_err(|e| format!("Erreur tâche: {}", e))?
@@ -855,5 +896,63 @@ pub async fn export_video(
     println!("[done] Export terminé en {:.2}s", export_time_s);
     println!("[metric] export_time_seconds={:.3}", export_time_s);
     
+    // Extraire le nom de fichier de sortie
+    let output_file_name = Path::new(&final_file_path)
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
+    
+    // Émettre l'événement de succès
+    let _ = app.emit("export-complete", serde_json::json!({
+        "filename": output_file_name,
+        "exportId": export_id,
+        "fullPath": final_file_path
+    }));
+    
     Ok(final_file_path)
+}
+
+// Fonctions utilitaires pour parser la progression FFmpeg
+fn extract_time_from_ffmpeg_line(line: &str) -> Option<String> {
+    // Chercher "time=" dans la ligne et extraire la valeur
+    if let Some(start) = line.find("time=") {
+        let start = start + 5; // Longueur de "time="
+        if let Some(end) = line[start..].find(char::is_whitespace) {
+            return Some(line[start..start + end].to_string());
+        } else {
+            // Si pas d'espace trouvé, prendre jusqu'à la fin
+            return Some(line[start..].to_string());
+        }
+    }
+    
+    // Aussi chercher le format "out_time_ms=" pour -progress pipe
+    if let Some(start) = line.find("out_time_ms=") {
+        let start = start + 12; // Longueur de "out_time_ms="
+        if let Some(end) = line[start..].find(char::is_whitespace) {
+            if let Ok(ms) = line[start..start + end].parse::<i64>() {
+                let seconds = ms as f64 / 1_000_000.0; // microseconds to seconds
+                return Some(format!("{:.3}", seconds));
+            }
+        }
+    }
+    
+    None
+}
+
+fn parse_ffmpeg_time(time_str: &str) -> f64 {
+    // Si c'est déjà en secondes (format décimal)
+    if let Ok(seconds) = time_str.parse::<f64>() {
+        return seconds;
+    }
+    
+    // Format FFmpeg : HH:MM:SS.mmm
+    let parts: Vec<&str> = time_str.split(':').collect();
+    if parts.len() == 3 {
+        if let (Ok(hours), Ok(minutes), Ok(seconds)) = 
+            (parts[0].parse::<f64>(), parts[1].parse::<f64>(), parts[2].parse::<f64>()) {
+            return hours * 3600.0 + minutes * 60.0 + seconds;
+        }
+    }
+    0.0
 }
