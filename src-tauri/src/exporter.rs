@@ -1,13 +1,11 @@
 use std::collections::HashMap;
-use std::env;
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::{Arc, LazyLock, Mutex};
-use std::time::{Duration, Instant};
-use serde::{Deserialize, Serialize};
-use tauri::{async_runtime, Emitter};
+use std::time::Instant;
+use tauri::Emitter;
 use tokio::task;
 
 // Expose la dernière durée d'export terminée (en secondes)
@@ -27,46 +25,31 @@ fn configure_command_no_window(cmd: &mut Command) {
 }
 
 fn resolve_ffmpeg_binary() -> Option<String> {
-    // Honorer un override externe si déjà fourni
-    if let Ok(exe) = env::var("IMAGEIO_FFMPEG_EXE") {
-        if Path::new(&exe).exists() {
-            return Some(exe);
-        }
+    let ffmpeg_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffmpeg.exe")
+    } else {
+        Path::new("binaries").join("ffmpeg")
+    };
+
+    if ffmpeg_path.exists() {
+        Some(ffmpeg_path.to_string_lossy().to_string())
+    } else {
+        None
     }
-    
-    // Binaire embarqué (Windows)
-    let current_exe = env::current_exe().ok()?;
-    let local_bin = current_exe
-        .parent()?
-        .parent()?
-        .join("binaries")
-        .join(if cfg!(windows) { "ffmpeg.exe" } else { "ffmpeg" });
-    
-    if local_bin.exists() {
-        let path_str = local_bin.to_string_lossy().to_string();
-        env::set_var("IMAGEIO_FFMPEG_EXE", &path_str);
-        return Some(path_str);
-    }
-    
-    None
 }
 
 fn resolve_ffprobe_binary() -> String {
-    let current_exe = env::current_exe().ok();
-    if let Some(exe) = current_exe {
-        let local_bin = exe
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|p| p.join("binaries").join(if cfg!(windows) { "ffprobe.exe" } else { "ffprobe" }));
-        
-        if let Some(bin) = local_bin {
-            if bin.exists() {
-                return bin.to_string_lossy().to_string();
-            }
-        }
+    let ffprobe_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffprobe.exe")
+    } else {
+        Path::new("binaries").join("ffprobe")
+    };
+
+    if ffprobe_path.exists() {
+        ffprobe_path.to_string_lossy().to_string()
+    } else {
+        "ffprobe".to_string()
     }
-    
-    "ffprobe".to_string()
 }
 
 fn probe_hw_encoders(ffmpeg_path: Option<&str>) -> Vec<String> {

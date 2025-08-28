@@ -384,6 +384,74 @@ fn open_explorer_with_file_selected(file_path: String) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+fn get_video_dimensions(file_path: &str) -> Result<serde_json::Value, String> {
+    // Vérifier que le fichier existe
+    if !std::path::Path::new(file_path).exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    let ffprobe_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffprobe.exe")
+    } else {
+        Path::new("binaries").join("ffprobe")
+    };
+
+    // Vérifier que le binaire existe
+    if !ffprobe_path.exists() {
+        return Err(format!("ffprobe binary not found at: {}", ffprobe_path.display()));
+    }
+
+    let mut cmd = Command::new(&ffprobe_path);
+    cmd.args(&[
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
+        "-show_streams",
+        "-select_streams",
+        "v:0", // Sélectionner le premier stream vidéo
+        file_path,
+    ]);
+    configure_command_no_window(&mut cmd);
+    let output = cmd.output();
+
+    match output {
+        Ok(result) => {
+            if result.status.success() {
+                let output_str = String::from_utf8_lossy(&result.stdout);
+                
+                // Parser le JSON de ffprobe
+                let json_value: serde_json::Value = serde_json::from_str(&output_str)
+                    .map_err(|e| format!("Failed to parse ffprobe JSON output: {}", e))?;
+                
+                // Extraire les dimensions du premier stream vidéo
+                if let Some(streams) = json_value.get("streams") {
+                    if let Some(stream) = streams.get(0) {
+                        let width = stream.get("width")
+                            .and_then(|w| w.as_i64())
+                            .unwrap_or(0);
+                        let height = stream.get("height")
+                            .and_then(|h| h.as_i64())
+                            .unwrap_or(0);
+                        
+                        return Ok(serde_json::json!({
+                            "width": width,
+                            "height": height
+                        }));
+                    }
+                }
+                
+                Err("No video stream found in file".to_string())
+            } else {
+                let stderr = String::from_utf8_lossy(&result.stderr);
+                Err(format!("ffprobe error: {}", stderr))
+            }
+        }
+        Err(e) => Err(format!("Unable to execute ffprobe: {}", e)),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -397,6 +465,7 @@ pub fn run() {
             move_file,
             get_system_fonts,
             open_explorer_with_file_selected,
+            get_video_dimensions,
             exporter::export_video,
             exporter::cancel_export
         ])

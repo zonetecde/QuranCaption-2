@@ -656,7 +656,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Set les styles par défaut pour l'arabe
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'QPC2');
-		videoStyle.getStylesOfTarget('arabic').setStyle('max-height', 220); // Une ligne max
+		// videoStyle.getStylesOfTarget('arabic').setStyle('max-height', 220); // Une ligne max
 		videoStyle.getStylesOfTarget('arabic').setStyle('line-height', 1.6);
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
 		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -110);
@@ -716,7 +716,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Styles par défaut pour les traductions
 		stylesData.setStyle('font-family', 'Georgia'); // Définit la police par défaut
-		stylesData.setStyle('max-height', 280); // 3 lignes max
+		// stylesData.setStyle('max-height', 280); // 3 lignes max
 		stylesData.setStyle('font-size', 60); // Définit la taille de police par défaut
 		stylesData.setStyle('vertical-position', 70); // Définit la hauteur de ligne par défaut
 
