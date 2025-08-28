@@ -79,7 +79,7 @@
 			<!-- Grille des filtres -->
 			<div class="bg-accent border border-color rounded-lg p-4">
 				<div class="grid grid-cols-1 gap-3">
-					{#each ['to review', 'ai error', 'ai trimmed', 'automatically trimmed', 'reviewed', 'completed by default'] as filter}
+					{#each ['to review', 'ai error', 'ai trimmed', 'automatically trimmed', 'fetched', 'reviewed', 'completed by default'] as filter}
 						<label
 							class="flex items-center gap-3 cursor-pointer p-2 rounded-md hover:bg-secondary transition-all duration-200"
 							for="filter-checkbox-{filter}"

@@ -24,8 +24,8 @@ export class ProjectDetail extends SerializableBase {
 	percentageCaptioned: number;
 	status: Status;
 
-	// Format : language: percentage
-	translations: { [language: string]: number };
+	// Format : author: percentage
+	translations: { [author: string]: number };
 
 	/**
 	 * Crée une nouvelle instance de ProjectDetail

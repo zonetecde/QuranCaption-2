@@ -188,6 +188,8 @@
 							Completed by default
 						{:else if status === 'automatically trimmed'}
 							Automatically trimmed
+						{:else if status === 'fetched'}
+							Fetched
 						{:else if status === 'to review'}
 							To review
 						{:else if status === 'reviewed'}
@@ -257,7 +259,7 @@
 			{#if translation().type === 'verse'}
 				<!-- toggle: brute force -->
 				<label
-					class="absolute top-1.5 right-2 text-primary opacity-40 hover:opacity-100 duration-200 cursor-pointer"
+					class="absolute top-1 right-1.75 text-primary opacity-40 hover:opacity-100 duration-200 cursor-pointer"
 				>
 					<span class="text-xs">Manually edit</span>
 					<!-- prettier-ignore -->

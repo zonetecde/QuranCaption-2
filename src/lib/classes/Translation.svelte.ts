@@ -11,6 +11,7 @@ export type TranslationStatus =
 	| 'to review'
 	| 'reviewed'
 	| 'ai error'
+	| 'fetched'
 	| 'undefined';
 
 export class Translation extends SerializableBase {
@@ -34,7 +35,8 @@ export class Translation extends SerializableBase {
 			this.status === 'completed by default' ||
 			this.status === 'reviewed' ||
 			this.status === 'automatically trimmed' ||
-			this.status === 'ai trimmed'
+			this.status === 'ai trimmed' ||
+			this.status === 'fetched'
 		);
 	}
 
