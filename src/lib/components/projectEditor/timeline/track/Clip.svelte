@@ -64,7 +64,7 @@
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
 	{:else if asset.duration.ms >= 45 * 60 * 1000 && globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio}
 		<div class="h-full w-full" onclick={() => (showWaveform = true)}>
-			Click to generate waveform (disabled by default for long audio to save RAM)
+			Click to generate waveform (disabled by default for long audio to save memory)
 		</div>
 	{:else}
 		<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">
