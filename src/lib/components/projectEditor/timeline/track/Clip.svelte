@@ -23,12 +23,13 @@
 
 	let asset = globalState.currentProject?.content.getAssetById((clip as AssetClip).assetId)!;
 	let file = $state(convertFileSrc(asset.filePath));
+	let showWaveform = $state(false);
 
 	$effect(() => {
 		if (
+			(asset.duration.ms < 45 * 60 * 1000 || showWaveform) &&
 			globalState.settings?.persistentUiState.showWaveforms &&
-			track.type === TrackType.Audio &&
-			asset.getAssetType(asset.getFileExtension()) === AssetType.Audio
+			track.type === TrackType.Audio
 		) {
 			const wavesurfer = WaveSurfer.create({
 				container: '#clip-' + clip.id,
@@ -59,8 +60,12 @@
 		contextMenu!.show(e);
 	}}
 >
-	{#if globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio}
+	{#if (asset.duration.ms < 45 * 60 * 1000 || showWaveform) && globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio}
 		<div class="h-full w-full" id={'clip-' + clip.id}></div>
+	{:else if asset.duration.ms >= 45 * 60 * 1000 && globalState.settings?.persistentUiState.showWaveforms && track.type === TrackType.Audio}
+		<div class="h-full w-full" onclick={() => (showWaveform = true)}>
+			Click to generate waveform (disabled by default for long audio to save RAM)
+		</div>
 	{:else}
 		<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">
 			<span class="text-xs text-[var(--text-secondary)] font-medium">{asset.fileName}</span>
