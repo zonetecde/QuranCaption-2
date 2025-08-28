@@ -452,6 +452,112 @@ fn get_video_dimensions(file_path: &str) -> Result<serde_json::Value, String> {
     }
 }
 
+#[tauri::command]
+fn convert_audio_to_cbr(file_path: String) -> Result<(), String> {
+    // Vérifier que le fichier existe
+    if !std::path::Path::new(&file_path).exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    let ffmpeg_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffmpeg.exe")
+    } else {
+        Path::new("binaries").join("ffmpeg")
+    };
+
+    // Vérifier que le binaire existe
+    if !ffmpeg_path.exists() {
+        return Err(format!("ffmpeg binary not found at: {}", ffmpeg_path.display()));
+    }
+
+    // Extraire l'extension du fichier d'origine
+    let path = Path::new(&file_path);
+    let extension = path.extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("mp4");
+    
+    // Créer un fichier temporaire avec la même extension
+    let file_stem = path.file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or("temp");
+    let parent_dir = path.parent()
+        .map(|p| p.to_str().unwrap_or(""))
+        .unwrap_or("");
+    
+    let temp_path = if parent_dir.is_empty() {
+        format!("{}_temp.{}", file_stem, extension)
+    } else {
+        format!("{}\\{}_temp.{}", parent_dir, file_stem, extension)
+    };
+
+    // Commande ffmpeg pour convertir en CBR - adapter selon le type de fichier
+    let mut cmd = Command::new(&ffmpeg_path);
+    
+    // Détecter si c'est un fichier audio ou vidéo basé sur l'extension
+    let is_audio_only = matches!(extension.to_lowercase().as_str(), "mp3" | "wav" | "flac" | "aac" | "ogg" | "m4a");
+    
+    if is_audio_only {
+        // Pour les fichiers audio seulement - paramètres identiques à Audacity
+        cmd.args(&[
+            "-i", &file_path,
+            "-codec:a", "libmp3lame",    // Encodeur LAME comme Audacity
+            "-b:a", "192k",              // Bitrate constant 192k comme dans l'image
+            "-cbr", "1",                 // Force CBR (Constant Bitrate)
+            "-ar", "44100",              // Sample rate 44100 Hz comme Audacity
+            "-ac", "2",                  // Stéréo comme Audacity
+            "-f", "mp3",                 // Format MP3
+            "-y",                        // Overwrite output file
+            &temp_path,
+        ]);
+    } else {
+        // Pour les fichiers vidéo
+        cmd.args(&[
+            "-i", &file_path,
+            "-b:v", "1200k",         // Bitrate vidéo
+            "-minrate", "1200k",     // Bitrate minimum
+            "-maxrate", "1200k",     // Bitrate maximum
+            "-bufsize", "1200k",     // Buffer size
+            "-b:a", "64k",           // Bitrate audio
+            "-vcodec", "libx264",    // Codec vidéo
+            "-acodec", "aac",        // Codec audio
+            "-strict", "-2",         // Strict mode
+            "-ac", "2",              // Canaux audio (stéréo)
+            "-ar", "44100",          // Sample rate
+            "-s", "320x240",         // Résolution vidéo
+            "-y",                    // Overwrite output file
+            &temp_path,
+        ]);
+    }
+    configure_command_no_window(&mut cmd);
+    
+    let output = cmd.output();
+
+    match output {
+        Ok(result) => {
+            if result.status.success() {
+                // Remplacer le fichier original par le fichier converti
+                if let Err(e) = std::fs::remove_file(&file_path) {
+                    return Err(format!("Failed to remove original file: {}", e));
+                }
+                if let Err(e) = std::fs::rename(&temp_path, &file_path) {
+                    return Err(format!("Failed to replace original file: {}", e));
+                }
+                Ok(())
+            } else {
+                // Nettoyer le fichier temporaire en cas d'erreur
+                let _ = std::fs::remove_file(&temp_path);
+                let stderr = String::from_utf8_lossy(&result.stderr);
+                Err(format!("ffmpeg error: {}", stderr))
+            }
+        }
+        Err(e) => {
+            // Nettoyer le fichier temporaire en cas d'erreur
+            let _ = std::fs::remove_file(&temp_path);
+            Err(format!("Unable to execute ffmpeg: {}", e))
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -467,7 +573,8 @@ pub fn run() {
             open_explorer_with_file_selected,
             get_video_dimensions,
             exporter::export_video,
-            exporter::cancel_export
+            exporter::cancel_export,
+            convert_audio_to_cbr
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -104,7 +104,18 @@
 
 	async function convertToCBR() {
 		// Convertir l'asset en CBR
-		await invoke('convert_to_cbr', { filePath: asset.filePath });
+		toast.promise(
+			invoke('convert_audio_to_cbr', { filePath: asset.filePath }),
+			{
+				loading: 'Converting to CBR...',
+				success:
+					'Asset converted to CBR successfully! Please restart Quran Caption to see the changes.',
+				error: 'Error converting asset to CBR.'
+			},
+			{
+				duration: 4000
+			}
+		);
 	}
 </script>
 
@@ -193,16 +204,14 @@
 						Open Directory
 					</button>
 					<!-- turn into constant bitrate -->
-					{#if asset.type === AssetType.Audio}
-						<button
-							class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+					<button
+						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
 						       hover:scale-105 transition-all duration-200"
-							onclick={convertToCBR}
-						>
-							<span class="material-icons text-lg">speed</span>
-							Convert to CBR
-						</button>
-					{/if}
+						onclick={convertToCBR}
+					>
+						<span class="material-icons text-lg">speed</span>
+						Convert to CBR
+					</button>
 
 					<button
 						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
