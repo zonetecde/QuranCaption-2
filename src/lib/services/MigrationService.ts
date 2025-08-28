@@ -214,7 +214,7 @@ export default class MigrationService {
 					for (const [key, value] of Object.entries(clip.translations)) {
 						const tr = new VerseTranslation(value as string, 'reviewed');
 						translations[formatTranslationName(key)] = tr;
-						(translations[formatTranslationName(key)] as VerseTranslation).isBruteForce = false;
+						(translations[formatTranslationName(key)] as VerseTranslation).isBruteForce = true;
 
 						// Télécharge la traduction en ligne
 						const edition = projectContent.projectTranslation.addedTranslationEditions.find(
