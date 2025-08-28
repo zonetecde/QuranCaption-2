@@ -8,7 +8,7 @@
 	import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 	import { listen } from '@tauri-apps/api/event';
 	import { onMount } from 'svelte';
-	import { exists, BaseDirectory, mkdir, writeFile, remove } from '@tauri-apps/plugin-fs';
+	import { exists, BaseDirectory, mkdir, writeFile, remove, readFile } from '@tauri-apps/plugin-fs';
 	import { LogicalPosition } from '@tauri-apps/api/dpi';
 	import { getCurrentWebview } from '@tauri-apps/api/webview';
 	import { appDataDir, join } from '@tauri-apps/api/path';
@@ -18,7 +18,7 @@
 	import toast from 'svelte-5-french-toast';
 	import DomToImage from 'dom-to-image';
 	import SubtitleClip from '$lib/components/projectEditor/timeline/track/SubtitleClip.svelte';
-	import { ClipWithTranslation } from '$lib/classes/Clip.svelte';
+	import { ClipWithTranslation, CustomTextClip, SilenceClip } from '$lib/classes/Clip.svelte';
 
 	// Indique si l'enregistrement a commencé
 	let readyToExport = $state(false);
@@ -168,6 +168,9 @@
 				}
 
 				// --- Sous-titres ---
+				let imgWithNothingShown: number = -1; // Nom d'une image à la fin d'un fade ou il n'y a rien d'affiché afin de la dupliquer
+				let blankImgs: number[] = []; // Liste des images à dupliquer (car rien n'est affiché dessus)
+
 				for (const clip of globalState.getSubtitleTrack.clips) {
 					// On limite aux types valides
 					// if (!(clip.type === 'Subtitle' || clip.type === 'Pre-defined Subtitle')) continue;
@@ -178,16 +181,55 @@
 					const duration = endTime - startTime;
 					if (duration <= 0) continue;
 
-					// Fin du fade-in (début + fadeDuration) – clamp si clip trop court
-					const fadeInEnd = Math.min(startTime + fadeDuration, endTime);
-					add(fadeInEnd);
+					if (!(clip instanceof SilenceClip)) {
+						// Fin du fade-in (début + fadeDuration) – clamp si clip trop court
+						const fadeInEnd = Math.min(startTime + fadeDuration, endTime);
+						add(fadeInEnd);
 
-					// Début du fade-out (fin - fadeDuration) si valable
-					const fadeOutStart = endTime - fadeDuration;
-					if (fadeOutStart > startTime) add(fadeOutStart);
+						// Début du fade-out (fin - fadeDuration) si valable
+						const fadeOutStart = endTime - fadeDuration;
+						if (fadeOutStart > startTime) add(fadeOutStart);
 
-					// Fin du fade-out (fin du clip)
-					add(endTime);
+						// Fin du fade-out (fin du clip)
+						add(endTime);
+					} else {
+						console.log('Silence clip detected, skipping fade-in/out timings.');
+
+						// Si on a pas d'image blank
+						if (imgWithNothingShown === -1) {
+							// Ajoute l'image normalement
+							add(endTime);
+						} else {
+							// Sinon on ajoute à la liste des images à dupliquer
+							blankImgs.push(Math.round(endTime));
+						}
+					}
+
+					// endTime = on voit rien, rien est affiché.
+					// si imgWithNothingShown est vide et au'aucun custom text limité dans le temps n'est actuellement affiché
+					if (
+						!globalState.getCustomTextTrack?.clips.find((ctClip) => {
+							// @ts-ignore
+							const clip = ctClip as CustomTextClip;
+							const alwaysShow = clip.category!.getStyle('always-show')!.value as boolean;
+
+							// Si le clip est toujours visible, on passe (ne bloque pas la condition)
+							if (alwaysShow) {
+								return false;
+							}
+
+							// Si le clip n'est pas toujours visible, vérifier que endTime n'est PAS dans l'intervalle
+							return clip.startTime! <= endTime && clip.endTime! >= endTime;
+						})
+					) {
+						// Alors soit on set l'image blank si on l'a pas encore
+						if (imgWithNothingShown === -1) {
+							imgWithNothingShown = Math.round(endTime);
+						} else {
+							// Sinon on ajoute à la liste des images à dupliquer
+							blankImgs.push(Math.round(endTime));
+						}
+					}
 				}
 
 				// --- Custom Texts --- (fade-in/out utilisent fadeDuration complète)
@@ -229,13 +271,38 @@
 
 				console.log('Timings détectés (calcul direct):', uniqueSorted);
 
+				console.log(
+					'Image(s) à dupliquer (blank):',
+					blankImgs,
+					'Image choisie:',
+					imgWithNothingShown
+				);
+
 				let i = 0;
 				let base = -fadeDuration; // Pour compenser le fade-in du début
 				for (const timing of uniqueSorted) {
-					globalState.getTimelineState.movePreviewTo = timing;
-					globalState.getTimelineState.cursorPosition = timing;
-					await new Promise((resolve) => setTimeout(resolve, 50));
-					await takeScreenshot(`${Math.max(Math.round(timing - exportStart + base), 0)}`);
+					if (blankImgs.includes(timing) && imgWithNothingShown !== -1) {
+						// On duplique l'image imgWithNothingShown
+						await duplicateScreenshot(
+							'blank',
+							Math.max(Math.round(timing - exportStart + base), 0)
+						);
+
+						console.log('Duplicating screenshot instead of taking new one at', timing);
+					} else {
+						globalState.getTimelineState.movePreviewTo = timing;
+						globalState.getTimelineState.cursorPosition = timing;
+
+						await new Promise((resolve) => setTimeout(resolve, 50));
+
+						await takeScreenshot(`${Math.max(Math.round(timing - exportStart + base), 0)}`);
+
+						// si c'est l'img blank
+						if (timing === imgWithNothingShown) {
+							await takeScreenshot('blank'); // La sauvegarde en tant que "blank.png"
+						}
+					}
+
 					base += fadeDuration;
 
 					i++;
@@ -365,6 +432,31 @@
 			console.error('Error while taking screenshot: ', error);
 			toast.error('Error while taking screenshot: ' + error.message);
 		}
+	}
+
+	async function duplicateScreenshot(sourceFileName: string, targetFileName: number) {
+		const sourceFilePathWithName = await join(
+			ExportService.exportFolder,
+			exportId,
+			sourceFileName + '.png'
+		);
+		const targetFilePathWithName = await join(
+			ExportService.exportFolder,
+			exportId,
+			targetFileName + '.png'
+		);
+
+		// Vérifie que le fichier source existe
+		if (!(await exists(sourceFilePathWithName, { baseDir: BaseDirectory.AppData }))) {
+			console.error('Source screenshot does not exist:', sourceFilePathWithName);
+			return;
+		}
+
+		// Lit le fichier source
+		const data = await readFile(sourceFilePathWithName, { baseDir: BaseDirectory.AppData });
+		// Écrit le fichier cible
+		await writeFile(targetFilePathWithName, data, { baseDir: BaseDirectory.AppData });
+		console.log('Duplicate screenshot saved to:', targetFilePathWithName);
 	}
 </script>
 
