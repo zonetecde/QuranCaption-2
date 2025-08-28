@@ -450,7 +450,7 @@
 		position: absolute;
 		top: 0;
 		bottom: 0;
-		background: rgba(34, 197, 94, 0.15);
+		background: rgba(34, 197, 94, 0.3);
 		border: 1px solid rgba(34, 197, 94, 0.4);
 		border-radius: 4px;
 		z-index: 0;
