@@ -197,7 +197,7 @@ export class Style extends SerializableBase {
 	 * Génère le CSS d'un style composite
 	 * @returns Le CSS de ce style composite
 	 */
-	generateCSSForComposite() {
+	generateCSSForComposite(onlyStyles: string[] = []): string {
 		// Récupère tous les styles composites pour un style donné
 		const compositeStyles = this.value as Style[];
 
@@ -205,12 +205,28 @@ export class Style extends SerializableBase {
 		for (let i = 0; i < compositeStyles.length; i++) {
 			const element = compositeStyles[i];
 
-			if (!element.id || (element.id.includes('enable') && !element.value)) {
-				// Si on désactive le style, on ne génère pas le CSS (c'est toute la partie outline là qui est concernée)
-				break;
+			// Si onlyStyles est fourni, alors on skip les styles qui ne sont pas dans la liste
+			if (onlyStyles.length > 0 && !onlyStyles.includes(element.id)) {
+				continue;
 			}
 
-			css += element.css.replaceAll('{value}', String(element.value)) + '\n';
+			if (!element.id || (element.id === 'outline-enable' && !element.value)) {
+				// Si on désactive l'outline, alors on skip les 3 styles concernant l'outline
+				// (en comptant celui là)
+				i += 2;
+				continue;
+			}
+
+			if (!element.id || (element.id === 'text-glow-enable' && !element.value)) {
+				// Si on désactive le glow, alors on skip les 3 styles concernant le glow
+				// (en comptant celui là)
+				i += 2;
+				continue;
+			}
+
+			if (onlyStyles.length > 0 && element.valueType === 'number')
+				css += element.css.replaceAll('{value}', String((element.value as number) * 3)) + '\n';
+			else css += element.css.replaceAll('{value}', String(element.value)) + '\n';
 		}
 
 		return css;

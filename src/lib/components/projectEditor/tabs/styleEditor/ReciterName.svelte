@@ -55,7 +55,7 @@
 		{#if reciter().number !== -1}
 			<p
 				class="reciters-font"
-				style={`opacity: ${reciterNameSettings().showArabic && reciter().number !== -1 ? 1 : 0}; font-size: ${reciterNameSettings().size}rem;`}
+				style={`opacity: ${reciterNameSettings().showArabic && reciter().number !== -1 ? 1 : 0}; font-size: ${reciterNameSettings().size}rem !important; ${globalState.getStyle('global', 'reciter-latin-text-style')!.generateCSSForComposite()}; font-family: 'Reciters' !important;`}
 			>
 				{reciter().number}
 			</p>
