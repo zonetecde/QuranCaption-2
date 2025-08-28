@@ -197,18 +197,13 @@ export class Style extends SerializableBase {
 	 * Génère le CSS d'un style composite
 	 * @returns Le CSS de ce style composite
 	 */
-	generateCSSForComposite(onlyStyles: string[] = []): string {
+	generateCSSForComposite(): string {
 		// Récupère tous les styles composites pour un style donné
 		const compositeStyles = this.value as Style[];
 
 		let css = '';
 		for (let i = 0; i < compositeStyles.length; i++) {
 			const element = compositeStyles[i];
-
-			// Si onlyStyles est fourni, alors on skip les styles qui ne sont pas dans la liste
-			if (onlyStyles.length > 0 && !onlyStyles.includes(element.id)) {
-				continue;
-			}
 
 			if (!element.id || (element.id === 'outline-enable' && !element.value)) {
 				// Si on désactive l'outline, alors on skip les 3 styles concernant l'outline
@@ -224,9 +219,7 @@ export class Style extends SerializableBase {
 				continue;
 			}
 
-			if (onlyStyles.length > 0 && element.valueType === 'number')
-				css += element.css.replaceAll('{value}', String((element.value as number) * 3)) + '\n';
-			else css += element.css.replaceAll('{value}', String(element.value)) + '\n';
+			css += element.css.replaceAll('{value}', String(element.value)) + '\n';
 		}
 
 		return css;
