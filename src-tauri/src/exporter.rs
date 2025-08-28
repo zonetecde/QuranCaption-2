@@ -113,72 +113,136 @@ fn choose_best_codec(prefer_hw: bool) -> (String, Vec<String>, HashMap<String, O
     (codec, params, extra)
 }
 
-fn ffmpeg_preprocess_video(src: &str, dst: &str, w: i32, h: i32, fps: i32, prefer_hw: bool) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+fn ffmpeg_preprocess_video(src: &str, dst: &str, w: i32, h: i32, fps: i32, prefer_hw: bool, start_ms: Option<i32>, duration_ms: Option<i32>) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let (codec, params, extra) = choose_best_codec(prefer_hw);
     let exe = resolve_ffmpeg_binary().unwrap_or_else(|| "ffmpeg".to_string());
-    
+
     let vf = format!(
         "scale=w={}:h={}:force_original_aspect_ratio=decrease,pad={}:{}:(ow-iw)/2:(oh-ih)/2:color=black,fps={}",
         w, h, w, h, fps
     );
-    
+
     let mut cmd = Command::new(&exe);
-    cmd.args(&[
-        "-y",
-        "-hide_banner",
-        "-loglevel", "error",
-        "-i", src,
-        "-an",
-        "-vf", &vf,
-        "-pix_fmt", "yuv420p",
-        "-c:v", &codec,
-    ]);
-    
-    if let Some(Some(preset)) = extra.get("preset") {
-        cmd.args(&["-preset", preset]);
+
+    // Si un offset de début est fourni, l'ajouter avant -i pour seek rapide
+    if let Some(sms) = start_ms {
+        let s = format!("{:.3}", (sms as f64) / 1000.0);
+        cmd.arg("-ss").arg(s);
     }
-    
+
+    cmd.arg("-y")
+        .arg("-hide_banner")
+        .arg("-loglevel").arg("error")
+        .arg("-i").arg(src);
+
+    // Si une durée de découpe est fournie, la limiter
+    if let Some(dms) = duration_ms {
+        let d = format!("{:.3}", (dms as f64) / 1000.0);
+        cmd.arg("-t").arg(d);
+    }
+
+    cmd.arg("-an")
+        .arg("-vf").arg(&vf)
+        .arg("-pix_fmt").arg("yuv420p")
+        .arg("-c:v").arg(&codec);
+
+    if let Some(Some(preset)) = extra.get("preset") {
+        cmd.arg("-preset").arg(preset);
+    }
+
     for param in params {
         cmd.arg(param);
     }
-    
+
     cmd.arg(dst);
-    
+
     println!("[preproc] ffmpeg scale+pad -> {}", Path::new(dst).file_name().unwrap_or_default().to_string_lossy());
-    
+
     let status = cmd.status()?;
     if !status.success() {
         return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "FFmpeg preprocessing failed")));
     }
-    
+
     Ok(())
 }
 
-fn preprocess_background_videos(video_paths: &[String], w: i32, h: i32, fps: i32, prefer_hw: bool) -> Vec<String> {
+fn preprocess_background_videos(video_paths: &[String], w: i32, h: i32, fps: i32, prefer_hw: bool, start_time_ms: i32, duration_ms: Option<i32>) -> Vec<String> {
     let mut out_paths = Vec::new();
     let cache_dir = std::env::temp_dir().join("qurancaption-preproc");
     fs::create_dir_all(&cache_dir).ok();
-    
+
+    // Calculer les durées (ms) de chaque vidéo
+    let mut video_durations_ms: Vec<i64> = Vec::new();
     for p in video_paths {
-        let hash_input = format!("{}-{}x{}-{}", p, w, h, fps);
+        let d = (ffprobe_duration_sec(p) * 1000.0).round() as i64;
+        video_durations_ms.push(d);
+    }
+
+    // Limite de la plage demandée
+    let limit_ms: i64 = if let Some(dur) = duration_ms { dur as i64 } else { i64::MAX };
+
+    // Parcourir les vidéos et extraire uniquement les segments pertinents
+    let mut cum_start: i64 = 0;
+    for (idx, p) in video_paths.iter().enumerate() {
+        let vid_len = video_durations_ms.get(idx).cloned().unwrap_or(0);
+        let cum_end = cum_start + vid_len;
+
+        // Si la vidéo se termine avant le début recherché, on l'ignore complètement
+        if cum_end <= start_time_ms as i64 {
+            cum_start = cum_end;
+            continue;
+        }
+
+        // Si on a déjà dépassé la limite demandée, on arrête
+        let elapsed_so_far = cum_start - (start_time_ms as i64);
+        if elapsed_so_far >= limit_ms {
+            break;
+        }
+
+        // Déterminer le début à l'intérieur de cette vidéo
+        let start_within = if start_time_ms as i64 > cum_start { (start_time_ms as i64 - cum_start) } else { 0 };
+
+        // Durée restante à prendre dans cette vidéo
+        let elapsed_from_start = (cum_start + start_within) - (start_time_ms as i64);
+        let remaining_needed = (limit_ms - elapsed_from_start).max(0);
+        let take_ms = remaining_needed.min(vid_len - start_within);
+
+        if take_ms <= 0 {
+            cum_start = cum_end;
+            continue;
+        }
+
+        // Construire un nom de cache unique qui inclut les offsets
+        let hash_input = format!("{}-{}x{}-{}-start{}-len{}", p, w, h, fps, start_within, take_ms);
         let stem_hash = format!("{:x}", md5::compute(hash_input.as_bytes()));
         let stem_hash = &stem_hash[..10.min(stem_hash.len())];
         let dst = cache_dir.join(format!("bg-{}-{}x{}-{}.mp4", stem_hash, w, h, fps));
-        
+
         if !dst.exists() {
-            match ffmpeg_preprocess_video(p, &dst.to_string_lossy(), w, h, fps, prefer_hw) {
+            // Appeler ffmpeg_preprocess_video avec les offsets locaux
+            match ffmpeg_preprocess_video(p, &dst.to_string_lossy(), w, h, fps, prefer_hw, Some(start_within as i32), Some(take_ms as i32)) {
                 Ok(_) => {},
                 Err(e) => {
                     println!("[preproc][ERREUR] {:?}", e);
+                    // En cas d'échec, utiliser la vidéo originale (et laisser ffmpeg final gérer le trim)
                     out_paths.push(p.clone());
+                    cum_start = cum_end;
                     continue;
                 }
             }
         }
-        
+
         out_paths.push(dst.to_string_lossy().to_string());
+
+        // Si on a atteint la limite, on arrête
+        let elapsed_total = (cum_start + start_within + take_ms) - (start_time_ms as i64);
+        if elapsed_total >= limit_ms {
+            break;
+        }
+
+        cum_start = cum_end;
     }
-    
+
     out_paths
 }
 
@@ -258,7 +322,7 @@ fn build_and_run_ffmpeg_filter_complex(
     
     let mut pre_videos = Vec::new();
     if !bg_videos.is_empty() {
-        pre_videos = preprocess_background_videos(bg_videos, w, h, fps, prefer_hw);
+        pre_videos = preprocess_background_videos(bg_videos, w, h, fps, prefer_hw, start_time_ms, duration_ms);
     }
     
     let mut total_bg_s = 0.0;
@@ -398,7 +462,7 @@ fn build_and_run_ffmpeg_filter_complex(
     filter_lines.push(format!("[{}][{}]alphamerge,format=yuva444p[overlay]", curr_c, curr_a));
     
     // Construction de la vidéo de fond [bg]
-    let avail_bg_after = (total_bg_s - start_s).max(0.0);
+    let avail_bg_after = total_bg_s;
     let need_black_full = pre_videos.is_empty() || avail_bg_after <= 1e-6;
     
     let bg_label = if need_black_full {
@@ -421,7 +485,7 @@ fn build_and_run_ffmpeg_filter_complex(
             format!("{}:v", bg_start_idx)
         };
         
-        filter_lines.push(format!("[{}]trim=start={:.6},setpts=PTS-STARTPTS[bgtrim]", prev, start_s));
+        filter_lines.push(format!("[{}]setpts=PTS-STARTPTS[bgtrim]", prev));
         let mut bg_label = "bgtrim".to_string();
         
         if avail_bg_after + 1e-6 < duration_s {

@@ -140,7 +140,9 @@
 			// - 10 frames avant le début du fade-out
 			// - Fin du fade-out
 			if (exportData) {
-				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number; // ms
+				const fadeDuration = Math.round(
+					globalState.getStyle('global', 'fade-duration')!.value as number
+				); // ms
 				// Sous-titres: fade-in/out = fadeDuration/2 ; CustomText: fadeDuration complète
 				const halfFade = fadeDuration / 2;
 
@@ -258,17 +260,16 @@
 
 				try {
 					// Démarre l'export dans Rust
-					await invoke('start_export', {
+					await invoke('export_video', {
 						exportId: exportId,
 						imgsFolder: await join(await appDataDir(), ExportService.exportFolder, exportId),
-						startTime: globalState.getExportState.videoStartTime,
-						endTime: globalState.getExportState.videoEndTime,
-						audios: audios,
-						videos: videos,
-						targetWidth: exportData!.videoDimensions.width,
-						targetHeight: exportData!.videoDimensions.height,
 						finalFilePath: exportData!.finalFilePath,
-						fps: exportData!.fps
+						fps: exportData!.fps,
+						fadeDuration: fadeDuration,
+						startTime: Math.round(globalState.getExportState.videoStartTime),
+						duration: Math.round(exportData!.videoEndTime - exportData!.videoStartTime),
+						audios: audios,
+						videos: videos
 					});
 				} catch (e: any) {
 					emitProgress({
