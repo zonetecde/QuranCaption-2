@@ -166,10 +166,106 @@ fn ffmpeg_preprocess_video(src: &str, dst: &str, w: i32, h: i32, fps: i32, prefe
     Ok(())
 }
 
+fn create_video_from_image(image_path: &str, output_path: &str, w: i32, h: i32, fps: i32, duration_s: f64, prefer_hw: bool) -> Result<(), Box<dyn std::error::Error>> {
+    let ffmpeg_exe = resolve_ffmpeg_binary().unwrap_or_else(|| "ffmpeg".to_string());
+    
+    // Filtres pour imiter object-cover CSS :
+    // 1. scale pour ajuster la taille en gardant le ratio
+    // 2. crop pour centrer et recadrer si nécessaire
+    let scale_filter = format!("scale={}:{}:force_original_aspect_ratio=increase", w, h);
+    let crop_filter = format!("crop={}:{}:(in_w-{})/2:(in_h-{})/2", w, h, w, h);
+    let video_filter = format!("{},{}", scale_filter, crop_filter);
+    
+    let mut cmd = Command::new(&ffmpeg_exe);
+    cmd.args(&[
+        "-y",
+        "-hide_banner", 
+        "-loglevel", "info",
+        "-loop", "1",
+        "-i", image_path,
+        "-vf", &video_filter,
+        "-c:v", "libx264",
+        "-preset", "medium",
+        "-crf", "23",
+        "-pix_fmt", "yuv420p",
+        "-r", &fps.to_string(),
+        "-t", &format!("{:.6}", duration_s),
+        output_path
+    ]);
+
+    // Utiliser l'encodage hardware si disponible et demandé
+    if prefer_hw {
+        // Remplacer libx264 par l'encodeur hardware
+        cmd = Command::new(&ffmpeg_exe);
+        cmd.args(&[
+            "-y",
+            "-hide_banner", 
+            "-loglevel", "info",
+            "-loop", "1",
+            "-i", image_path,
+            "-vf", &video_filter,
+            "-c:v", "h264_nvenc", // ou h264_amf pour AMD, h264_videotoolbox pour macOS
+            "-preset", "medium",
+            "-cq", "23",
+            "-pix_fmt", "yuv420p",
+            "-r", &fps.to_string(),
+            "-t", &format!("{:.6}", duration_s),
+            output_path
+        ]);
+    }
+
+    println!("[preproc][IMG] Création vidéo depuis image: {} -> {}", image_path, output_path);
+    println!("[preproc][IMG] Commande: {:?}", cmd);
+
+    let status = cmd.status()?;
+    if !status.success() {
+        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "FFmpeg image-to-video failed")));
+    }
+
+    Ok(())
+}
+
+fn is_image_file(path: &str) -> bool {
+    let path_lower = path.to_lowercase();
+    path_lower.ends_with(".jpg") || path_lower.ends_with(".jpeg") || 
+    path_lower.ends_with(".png") || path_lower.ends_with(".bmp") || 
+    path_lower.ends_with(".gif") || path_lower.ends_with(".webp") ||
+    path_lower.ends_with(".tiff") || path_lower.ends_with(".tif")
+}
+
 fn preprocess_background_videos(video_paths: &[String], w: i32, h: i32, fps: i32, prefer_hw: bool, start_time_ms: i32, duration_ms: Option<i32>) -> Vec<String> {
     let mut out_paths = Vec::new();
     let cache_dir = std::env::temp_dir().join("qurancaption-preproc");
     fs::create_dir_all(&cache_dir).ok();
+
+    // Cas spécial : une seule image
+    if video_paths.len() == 1 && is_image_file(&video_paths[0]) {
+        let image_path = &video_paths[0];
+        let duration_s = if let Some(dur_ms) = duration_ms { 
+            dur_ms as f64 / 1000.0 
+        } else { 
+            30.0 // Durée par défaut si non spécifiée
+        };
+
+        // Construire un nom de cache unique pour l'image
+        let hash_input = format!("{}-{}x{}-{}-dur{}", image_path, w, h, fps, duration_s);
+        let stem_hash = format!("{:x}", md5::compute(hash_input.as_bytes()));
+        let stem_hash = &stem_hash[..10.min(stem_hash.len())];
+        let dst = cache_dir.join(format!("img-bg-{}-{}x{}-{}.mp4", stem_hash, w, h, fps));
+
+        if !dst.exists() {
+            match create_video_from_image(image_path, &dst.to_string_lossy(), w, h, fps, duration_s, prefer_hw) {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("[preproc][ERREUR] Impossible de créer la vidéo à partir de l'image: {:?}", e);
+                    return vec![];
+                }
+            }
+        }
+
+        out_paths.push(dst.to_string_lossy().to_string());
+        return out_paths;
+    }
 
     // Calculer les durées (ms) de chaque vidéo
     let mut video_durations_ms: Vec<i64> = Vec::new();
