@@ -39,7 +39,7 @@ export class Translation extends SerializableBase {
 	}
 
 	getText(edition?: string, subtitle?: SubtitleClip): string {
-		return this.text;
+		return this.text.replaceAll('— ', '—'); // Enlève l'espace après le tiret long qu'on a ajouté pour pouvoir sélectionner les mots avant et après le tiret
 	}
 
 	updateStatus(status: TranslationStatus, edition: Edition) {
@@ -91,7 +91,7 @@ export class VerseTranslation extends Translation {
 			return format;
 		}
 
-		return this.text;
+		return super.getText();
 	}
 }
 

@@ -176,7 +176,9 @@ export class ProjectTranslation extends SerializableBase {
 				.replaceAll(' ]', ']')
 				.replaceAll('[ ', '[')
 				.replaceAll(' )', ')')
-				.replaceAll('( ', '(');
+				.replaceAll('( ', '(')
+				//hyphem - pour pouvoir sélectionner le mot avant et après le tiret
+				.replaceAll('—', '— ');
 		}
 
 		return processed.trim();
