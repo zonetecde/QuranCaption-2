@@ -225,7 +225,8 @@ export class Style extends SerializableBase {
 				continue;
 			}
 
-			css += element.css.replaceAll('{value}', String(element.value)) + '\n';
+			if (element.id && element.css)
+				css += element.css.replaceAll('{value}', String(element.value)) + '\n';
 		}
 
 		return css;
