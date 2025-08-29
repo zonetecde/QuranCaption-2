@@ -711,9 +711,6 @@ fn build_and_run_ffmpeg_filter_complex(
     
     let mut child = command.spawn()?;
     
-    // Capturer stderr pour diagnostiquer les erreurs
-    let stderr_handle = child.stderr.take();
-    
     // Enregistrer le processus dans les exports actifs
     let process_ref = Arc::new(Mutex::new(Some(child)));
     {
@@ -732,10 +729,15 @@ fn build_and_run_ffmpeg_filter_complex(
     
     // Lire la sortie stderr pour capturer la progression
     let reader = BufReader::new(stderr);
+    let mut stderr_content = String::new();
     
     for line in reader.lines() {
         if let Ok(line) = line {
             println!("[ffmpeg] {}", line); // Debug: afficher toutes les lignes
+            
+            // Sauvegarder toutes les lignes stderr pour le debugging
+            stderr_content.push_str(&line);
+            stderr_content.push('\n');
             
             // Chercher les lignes de progression FFmpeg qui contiennent "time=" ou "out_time_ms="
             if line.contains("time=") || line.contains("out_time_ms=") {
@@ -784,20 +786,6 @@ fn build_and_run_ffmpeg_filter_complex(
     }
     
     if !status.success() {
-        // Capturer stderr si possible
-        let stderr_output = if let Some(mut stderr_reader) = stderr_handle {
-            let mut stderr_content = String::new();
-            use std::io::Read;
-            let _ = stderr_reader.read_to_string(&mut stderr_content);
-            if !stderr_content.is_empty() {
-                Some(stderr_content)
-            } else {
-                None
-            }
-        } else {
-            None
-        };
-        
         // Créer un fichier de log avec la date d'aujourd'hui
         let now = std::time::SystemTime::now();
         let timestamp = now.duration_since(std::time::UNIX_EPOCH)
@@ -821,7 +809,11 @@ fn build_and_run_ffmpeg_filter_complex(
             export_id,
             status.code(),
             cmd.join(" "),
-            stderr_output.unwrap_or_else(|| "No stderr output captured".to_string())
+            if stderr_content.is_empty() {
+                "No stderr output captured".to_string()
+            } else {
+                stderr_content
+            }
         );
         
         // Écrire le fichier de log
