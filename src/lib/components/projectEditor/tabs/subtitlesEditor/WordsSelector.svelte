@@ -268,6 +268,8 @@
 
 			globalState.getSubtitlesEditorState.editSubtitle = null; // Reset l'édition après modification
 			toast.success('Subtitle updated successfully!');
+			await selectNextWord();
+			subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
 			return;
 		}
 
