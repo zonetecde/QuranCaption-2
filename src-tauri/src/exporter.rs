@@ -52,6 +52,104 @@ fn resolve_ffprobe_binary() -> String {
     }
 }
 
+/// Teste si NVENC est réellement disponible en essayant un encodage rapide
+fn test_nvenc_availability(ffmpeg_path: Option<&str>) -> bool {
+    let exe = ffmpeg_path.unwrap_or("ffmpeg");
+    
+    println!("[nvenc_test] Test de disponibilité NVENC...");
+    
+    // Créer une entrée vidéo de test très courte (1 frame noir)
+    // NVENC nécessite une résolution minimale (généralement 128x128 ou plus)
+    let mut cmd = Command::new(exe);
+    cmd.args(&[
+        "-y",
+        "-hide_banner",
+        "-loglevel", "error",
+        "-f", "lavfi",
+        "-i", "color=c=black:s=128x128:r=1:d=0.04", // Résolution minimum NVENC, très courte
+        "-c:v", "h264_nvenc",
+        "-preset", "fast",
+        "-pix_fmt", "yuv420p",
+        "-frames:v", "1",
+        "-f", "null", // Sortie nulle pour éviter d'écrire un fichier
+        "-"
+    ]);
+    
+    configure_command_no_window(&mut cmd);
+    
+    match cmd.output() {
+        Ok(output) => {
+            let success = output.status.success();
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            
+            if success {
+                println!("[nvenc_test] ✓ NVENC disponible et fonctionnel");
+                true
+            } else {
+                // Analyser les erreurs pour distinguer "pas disponible" vs "erreur de config"
+                let stderr_lower = stderr.to_lowercase();
+                
+                if stderr_lower.contains("cannot load nvcuda.dll") || 
+                   stderr_lower.contains("no nvidia devices") ||
+                   stderr_lower.contains("cuda") ||
+                   stderr_lower.contains("driver") {
+                    println!("[nvenc_test] ✗ NVENC non disponible (pas de GPU NVIDIA ou drivers manquants)");
+                    false
+                } else if stderr_lower.contains("frame dimension") {
+                    // Si c'est juste un problème de dimensions, essayer avec une plus grande résolution
+                    println!("[nvenc_test] Retry avec résolution plus grande...");
+                    test_nvenc_with_larger_resolution(ffmpeg_path)
+                } else {
+                    println!("[nvenc_test] ✗ NVENC erreur: {}", stderr.trim());
+                    false
+                }
+            }
+        }
+        Err(e) => {
+            println!("[nvenc_test] ✗ Erreur lors du test NVENC: {}", e);
+            false
+        }
+    }
+}
+
+fn test_nvenc_with_larger_resolution(ffmpeg_path: Option<&str>) -> bool {
+    let exe = ffmpeg_path.unwrap_or("ffmpeg");
+    
+    let mut cmd = Command::new(exe);
+    cmd.args(&[
+        "-y",
+        "-hide_banner",
+        "-loglevel", "error",
+        "-f", "lavfi",
+        "-i", "color=c=black:s=256x256:r=1:d=0.04", // Résolution encore plus grande
+        "-c:v", "h264_nvenc",
+        "-preset", "fast",
+        "-pix_fmt", "yuv420p",
+        "-frames:v", "1",
+        "-f", "null",
+        "-"
+    ]);
+    
+    configure_command_no_window(&mut cmd);
+    
+    match cmd.output() {
+        Ok(output) => {
+            let success = output.status.success();
+            if success {
+                println!("[nvenc_test] ✓ NVENC disponible avec résolution 256x256");
+            } else {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                println!("[nvenc_test] ✗ NVENC toujours non disponible: {}", stderr.trim());
+            }
+            success
+        }
+        Err(e) => {
+            println!("[nvenc_test] ✗ Erreur test résolution plus grande: {}", e);
+            false
+        }
+    }
+}
+
 fn probe_hw_encoders(ffmpeg_path: Option<&str>) -> Vec<String> {
     let exe = ffmpeg_path.unwrap_or("ffmpeg");
     
@@ -88,14 +186,31 @@ fn choose_best_codec(prefer_hw: bool) -> (String, Vec<String>, HashMap<String, O
     };
     
     if !hw.is_empty() {
-        let codec = hw[0].clone();
-        let params = vec!["-pix_fmt".to_string(), "yuv420p".to_string()];
-        let mut extra = HashMap::new();
-        extra.insert("preset".to_string(), None);
-        return (codec, params, extra);
+        // Tester spécifiquement NVENC s'il est détecté
+        if hw[0] == "h264_nvenc" {
+            if test_nvenc_availability(ffmpeg_exe.as_deref()) {
+                println!("[codec] Utilisation de NVENC (accélération GPU NVIDIA)");
+                let codec = hw[0].clone();
+                let params = vec!["-pix_fmt".to_string(), "yuv420p".to_string()];
+                let mut extra = HashMap::new();
+                extra.insert("preset".to_string(), Some("fast".to_string()));
+                return (codec, params, extra);
+            } else {
+                println!("[codec] NVENC détecté mais non fonctionnel, fallback vers libx264");
+            }
+        } else {
+            // Pour les autres encodeurs hardware (QSV, AMF), utiliser directement
+            println!("[codec] Utilisation de l'encodeur hardware: {}", hw[0]);
+            let codec = hw[0].clone();
+            let params = vec!["-pix_fmt".to_string(), "yuv420p".to_string()];
+            let mut extra = HashMap::new();
+            extra.insert("preset".to_string(), None);
+            return (codec, params, extra);
+        }
     }
     
     // Fallback libx264
+    println!("[codec] Utilisation de libx264 (encodage logiciel)");
     let codec = "libx264".to_string();
     let params = vec![
         "-pix_fmt".to_string(), "yuv420p".to_string(),
@@ -175,6 +290,9 @@ fn create_video_from_image(image_path: &str, output_path: &str, w: i32, h: i32, 
     let crop_filter = format!("crop={}:{}:(in_w-{})/2:(in_h-{})/2", w, h, w, h);
     let video_filter = format!("{},{}", scale_filter, crop_filter);
     
+    // Choisir le meilleur codec avec détection automatique
+    let (codec, codec_params, codec_extra) = choose_best_codec(prefer_hw);
+    
     let mut cmd = Command::new(&ffmpeg_exe);
     cmd.args(&[
         "-y",
@@ -183,35 +301,29 @@ fn create_video_from_image(image_path: &str, output_path: &str, w: i32, h: i32, 
         "-loop", "1",
         "-i", image_path,
         "-vf", &video_filter,
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "23",
-        "-pix_fmt", "yuv420p",
+        "-c:v", &codec,
         "-r", &fps.to_string(),
         "-t", &format!("{:.6}", duration_s),
-        output_path
     ]);
-
-    // Utiliser l'encodage hardware si disponible et demandé
-    if prefer_hw {
-        // Remplacer libx264 par l'encodeur hardware
-        cmd = Command::new(&ffmpeg_exe);
-        cmd.args(&[
-            "-y",
-            "-hide_banner", 
-            "-loglevel", "info",
-            "-loop", "1",
-            "-i", image_path,
-            "-vf", &video_filter,
-            "-c:v", "h264_nvenc", // ou h264_amf pour AMD, h264_videotoolbox pour macOS
-            "-preset", "medium",
-            "-cq", "23",
-            "-pix_fmt", "yuv420p",
-            "-r", &fps.to_string(),
-            "-t", &format!("{:.6}", duration_s),
-            output_path
-        ]);
+    
+    // Ajouter le preset si disponible
+    if let Some(Some(preset)) = codec_extra.get("preset") {
+        cmd.arg("-preset").arg(preset);
     }
+    
+    // Ajouter les paramètres du codec
+    for param in codec_params {
+        cmd.arg(param);
+    }
+    
+    // Ajouter des paramètres de qualité selon le codec
+    if codec == "libx264" {
+        cmd.args(&["-crf", "23"]);
+    } else if codec.contains("nvenc") {
+        cmd.args(&["-cq", "23"]);
+    }
+    
+    cmd.arg(output_path);
 
     // Configurer la commande pour cacher les fenêtres CMD sur Windows
     configure_command_no_window(&mut cmd);
