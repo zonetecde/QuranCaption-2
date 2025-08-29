@@ -426,14 +426,7 @@ export class StylesData extends SerializableBase {
 				// Remplace {value} par la valeur effective
 				let cssRule = '';
 
-				// Cas spécifique: certains styles sont différents pour l'arabe, comme par ex
-				// le contour du texte (outline) qui nécessite du CSS différent.
-				if (this.target === 'arabic' && 'cssarabic' in style) {
-					//@ts-ignore
-					cssRule = style.cssarabic.replaceAll(/{value}/g, String(effectiveValue));
-				} else {
-					cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
-				}
+				cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
 
 				if (cssRule.trim()) {
 					css += cssRule + '\n';

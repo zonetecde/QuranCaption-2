@@ -464,8 +464,6 @@
 				"valueMax": 10,
 				"step": 0.01,
 				"css": "filter: drop-shadow({value}px 0 0 var(--text-outline-color)) drop-shadow(-{value}px 0 0 var(--text-outline-color)) drop-shadow(0 {value}px 0 var(--text-outline-color)) drop-shadow(0 -{value}px 0 var(--text-outline-color)) drop-shadow({value}px {value}px 0 var(--text-outline-color)) drop-shadow(-{value}px -{value}px 0 var(--text-outline-color)) drop-shadow({value}px -{value}px 0 var(--text-outline-color)) drop-shadow(-{value}px {value}px 0 var(--text-outline-color)) !important;",
-
-				"cssarabic": "filter: drop-shadow({value}px 0 0 var(--text-outline-color)) drop-shadow(-{value}px 0 0 var(--text-outline-color)) drop-shadow(0 {value}px 0 var(--text-outline-color)) drop-shadow(0 -{value}px 0 var(--text-outline-color)) drop-shadow({value}px {value}px 0 var(--text-outline-color)) drop-shadow(-{value}px -{value}px 0 var(--text-outline-color)) drop-shadow({value}px -{value}px 0 var(--text-outline-color)) drop-shadow(-{value}px {value}px 0 var(--text-outline-color)) !important;",
 				"tailwind": false,
 				"icon": "line_weight"
 			},

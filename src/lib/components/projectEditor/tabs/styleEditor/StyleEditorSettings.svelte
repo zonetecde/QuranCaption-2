@@ -279,7 +279,12 @@
 			{#if globalState.getStylesState.currentSelection === 'global'}
 				{#each globalState.getCustomTextTrack.clips as customTextClip, i}
 					{@const category = (customTextClip as CustomTextClip).category!}
-					<Section name={category.name} icon={category.icon} classes="-mb-1">
+					<Section
+						name={category.name}
+						icon={category.icon}
+						contentClasses="border-x border-b border-[var(--border-color)] rounded-b-lg -mt-1 pt-1"
+						classes="-mb-1 bg-white/10 pl-0.5 rounded-t-lg"
+					>
 						{#each category.styles as style, styleIndex}
 							{#if globalState.getStylesState.searchQuery === '' || style.name
 									.toLowerCase()

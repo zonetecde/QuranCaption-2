@@ -21,7 +21,7 @@ export async function telemetry(msg: string) {
 
 	try {
 		const url = 'https://rayanestaszewski.fr/telemetry-quran-caption';
-		const res = await fetch(url, {
+		fetch(url, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ msg: msg })
@@ -29,12 +29,6 @@ export async function telemetry(msg: string) {
 
 		// Mettre à jour le timestamp seulement si la requête a été tentée
 		lastRequestTime = now;
-
-		if (!res.ok) {
-			console.warn('telemetry request failed', res.status, await res.text());
-		} else {
-			console.log('telemetry request succeeded', await res.text());
-		}
 	} catch (err) {
 		console.warn('telemetry failed', err);
 	}

@@ -96,12 +96,12 @@
 		"id": "text-outline",
 		"name": "Outline Thickness",
 		"description": "Set the width of the text outline",
-		"value": 1,
+		"value": 4,
 		"valueType": "number",
 		"valueMin": 0,
-		"valueMax": 2.5,
+		"valueMax": 20,
 		"step": 0.01,
-		"css": "filter: drop-shadow(calc({value} * 1.5)px 0 0 var(--text-outline-color)) drop-shadow(calc(-{value} * 1.5)px 0 0 var(--text-outline-color)) drop-shadow(0 calc({value} * 1.5)px 0 var(--text-outline-color)) drop-shadow(0 calc(-{value} * 1.5)px 0 var(--text-outline-color)) drop-shadow(calc({value} * 1.5)px calc({value} * 1.5)px 0 var(--text-outline-color)) drop-shadow(calc(-{value} * 1.5)px calc(-{value} * 1.5)px 0 var(--text-outline-color)) drop-shadow(calc({value} * 1.5)px calc(-{value} * 1.5)px 0 var(--text-outline-color)) drop-shadow(calc(-{value} * 1.5)px calc({value} * 1.5)px 0 var(--text-outline-color)) !important;",
+		"css": "text-shadow: -{value}px -{value}px 0 var(--text-outline-color), {value}px -{value}px 0 var(--text-outline-color), -{value}px {value}px 0 var(--text-outline-color), {value}px {value}px 0 var(--text-outline-color), -{value}px 0 0 var(--text-outline-color), {value}px 0 0 var(--text-outline-color), 0 -{value}px 0 var(--text-outline-color), 0 {value}px 0 var(--text-outline-color), calc(-{value}px * 0.707) calc(-{value}px * 0.707) 0 var(--text-outline-color), calc({value}px * 0.707) calc(-{value}px * 0.707) 0 var(--text-outline-color), calc(-{value}px * 0.707) calc({value}px * 0.707) 0 var(--text-outline-color), calc({value}px * 0.707) calc({value}px * 0.707) 0 var(--text-outline-color), calc(-{value}px * 0.5) calc(-{value}px * 0.866) 0 var(--text-outline-color), calc({value}px * 0.5) calc(-{value}px * 0.866) 0 var(--text-outline-color), calc(-{value}px * 0.866) calc(-{value}px * 0.5) 0 var(--text-outline-color), calc({value}px * 0.866) calc(-{value}px * 0.5) 0 var(--text-outline-color), calc(-{value}px * 0.5) calc({value}px * 0.866) 0 var(--text-outline-color), calc({value}px * 0.5) calc({value}px * 0.866) 0 var(--text-outline-color), calc(-{value}px * 0.866) calc({value}px * 0.5) 0 var(--text-outline-color), calc({value}px * 0.866) calc({value}px * 0.5) 0 var(--text-outline-color) !important;",
 		"tailwind": false,
 
 		"icon": "line_weight"

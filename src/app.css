@@ -18,8 +18,19 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'Surahs';
+	src: url('/Surahs.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
 .reciters-font {
 	font-family: 'Reciters', sans-serif;
+}
+
+.surahs-font {
+	font-family: 'Surahs', sans-serif;
 }
 
 .arabic {
