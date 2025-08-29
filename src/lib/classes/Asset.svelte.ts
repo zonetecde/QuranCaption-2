@@ -84,7 +84,8 @@ export class Asset extends SerializableBase {
 					assetDimensions.width +
 					'x' +
 					assetDimensions.height +
-					')'
+					')',
+				true
 			);
 
 			if (confirm) {

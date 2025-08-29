@@ -3,9 +3,11 @@
 
 	let {
 		text,
+		yesNo = false,
 		resolve
 	}: {
 		text: string;
+		yesNo?: boolean;
 		resolve: (result: boolean) => void;
 	} = $props();
 </script>
@@ -20,7 +22,7 @@
 		<div class="flex items-center justify-center w-10 h-10 bg-accent rounded-full">
 			<span class="material-icons text-lg text-accent">help_outline</span>
 		</div>
-		<h2 class="text-lg font-semibold text-primary">Confirmation</h2>
+		<h2 class="text-lg font-semibold text-primary">{yesNo ? 'Confirmation' : 'Question'}</h2>
 	</div>
 
 	<!-- Divider -->
@@ -40,7 +42,7 @@
 				resolve(false);
 			}}
 		>
-			Cancel
+			{yesNo ? 'No' : 'Cancel'}
 		</button>
 		<button
 			class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105
@@ -50,7 +52,7 @@
 				resolve(true);
 			}}
 		>
-			Confirm
+			{yesNo ? 'Yes' : 'Confirm'}
 		</button>
 	</div>
 </div>

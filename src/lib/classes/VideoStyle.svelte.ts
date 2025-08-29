@@ -866,7 +866,8 @@ export class VideoStyle extends SerializableBase {
 			for (const projectTranslation of projectTranslations) {
 				if (!projectTranslations.find((e) => e.name === style.target)) {
 					const confirm = await ModalManager.confirmModal(
-						`Your project does not have the "${style.target}" translation. Would you like to apply the styles from that translation to your project translation "${projectTranslation.name}"?`
+						`Your project does not have the "${style.target}" translation. Would you like to apply the styles from that translation to your project translation "${projectTranslation.name}"?`,
+						false
 					);
 
 					if (confirm) {
@@ -917,7 +918,8 @@ export class VideoStyle extends SerializableBase {
 
 	async resetStyles() {
 		const confirmation = await ModalManager.confirmModal(
-			'Are you sure you want to reset all styles to their default values?'
+			'Are you sure you want to reset all styles to their default values?',
+			false
 		);
 		if (!confirmation) return;
 
