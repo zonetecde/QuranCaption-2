@@ -245,12 +245,34 @@ fn get_new_file_path(start_time: u64, asset_name: &str) -> Result<String, String
 
 #[tauri::command]
 fn move_file(source: String, destination: String) -> Result<(), String> {
+    use std::path::Path;
+    
+    let source_path = Path::new(&source);
+    let dest_path = Path::new(&destination);
+    
     // If destination exists, remove it first to force the move
-    if std::path::Path::new(&destination).exists() {
+    if dest_path.exists() {
         std::fs::remove_file(&destination).map_err(|e| e.to_string())?;
     }
-    std::fs::rename(source, destination).map_err(|e| e.to_string())
+    
+    // Try rename first (works if on same drive/filesystem)
+    match std::fs::rename(&source, &destination) {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            // If rename fails with cross-device error (Windows: 17, Unix: 18), do copy + delete
+            if e.raw_os_error() == Some(17) || e.raw_os_error() == Some(18) {
+                // Copy the file
+                std::fs::copy(&source, &destination).map_err(|e| e.to_string())?;
+                // Remove the original
+                std::fs::remove_file(&source).map_err(|e| e.to_string())?;
+                Ok(())
+            } else {
+                Err(e.to_string())
+            }
+        }
+    }
 }
+
 #[tauri::command]
 fn get_system_fonts() -> Result<Vec<String>, String> {
     let source = SystemSource::new();

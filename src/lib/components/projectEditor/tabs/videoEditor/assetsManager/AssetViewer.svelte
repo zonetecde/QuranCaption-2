@@ -53,6 +53,7 @@
 						assetName: asset.getFileNameWithoutExtension()
 					});
 
+					console.log('New file path:', newFilePath);
 					if (newFilePath) {
 						// move le fichier newFilePath dans le dossier parent du fichier de l'asset
 						const parentDir = asset.getParentDirectory();
@@ -70,6 +71,8 @@
 					}
 				} catch (error) {
 					// Aucun fichier trouvé - probablement l'utilisateur a fermé la fenêtre sans télécharger de fichier
+					console.log('No new file detected or error occurred:', error);
+					console.log(JSON.stringify(error, Object.getOwnPropertyNames(error)));
 				}
 
 				webview.close();
