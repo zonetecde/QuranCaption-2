@@ -6,21 +6,21 @@ export interface UpdateInfo {
 	latestVersion: string;
 }
 
-export default class VersionService {
-	static currentVersion: string | null = null;
-	static latestUpdate: UpdateInfo | null = null;
+class VersionService {
+	currentVersion: string | null = $state(null);
+	latestUpdate: UpdateInfo | null = $state(null);
 
-	static async init() {
+	async init() {
 		this.currentVersion = await this.getAppVersion();
 		this.latestUpdate = await this.checkForUpdates();
 	}
 
-	static async getAppVersion(): Promise<string> {
+	async getAppVersion(): Promise<string> {
 		return (await getVersion()) || '0.0.0';
 	}
 
 	// normalise "v1.2.3" -> "1.2.3", garde 3 segments
-	private static normalizeVersion(v: string): string {
+	private normalizeVersion(v: string): string {
 		if (!v) return '0.0.0';
 		let s = v
 			.trim()
@@ -38,7 +38,7 @@ export default class VersionService {
 	}
 
 	// retourne -1 si a<b, 0 si égal, 1 si a>b
-	private static compareSemver(a: string, b: string): number {
+	private compareSemver(a: string, b: string): number {
 		const pa = this.normalizeVersion(a).split('.').map(Number);
 		const pb = this.normalizeVersion(b).split('.').map(Number);
 		for (let i = 0; i < 3; i++) {
@@ -48,7 +48,7 @@ export default class VersionService {
 		return 0;
 	}
 
-	static async checkForUpdates(): Promise<UpdateInfo> {
+	async checkForUpdates(): Promise<UpdateInfo> {
 		const currentVersion = (await this.getAppVersion()) || '0.0.0';
 
 		try {
@@ -112,3 +112,6 @@ export default class VersionService {
 		}
 	}
 }
+
+const versionService = new VersionService();
+export { versionService as VersionService };

@@ -182,8 +182,6 @@
 					globalState.getVideoStyle.getStylesOfTarget(target).setStyle('reactive-y-position', 0);
 				}
 
-				console.log('Positions réactives remises à zéro pour le nouveau sous-titre');
-
 				// Attendre un peu que le DOM se mette à jour après la remise à zéro
 				await wait(abortSignal);
 

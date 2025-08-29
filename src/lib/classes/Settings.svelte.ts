@@ -6,7 +6,7 @@ import { readDir, remove, writeTextFile, readTextFile, exists, mkdir } from '@ta
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { globalState } from '$lib/runes/main.svelte';
 import { telemetry } from '$lib/services/Telemetry';
-import VersionService from '$lib/services/VersionService';
+import { VersionService } from '$lib/services/VersionService.svelte';
 
 export default class Settings extends SerializableBase {
 	private static settingsFile: string = 'settings.json';

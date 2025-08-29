@@ -89,8 +89,6 @@ export class Asset extends SerializableBase {
 			);
 
 			if (confirm) {
-				console.log('Asset dimensions:', assetDimensions);
-
 				if (assetDimensions.width > 0 && assetDimensions.height > 0) {
 					globalState.getStyle('global', 'video-dimension').value = {
 						width: assetDimensions.width,
