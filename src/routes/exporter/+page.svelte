@@ -33,7 +33,7 @@
 	let exportData: Exportation | undefined;
 
 	// Constante pour la durée de chunk (2min30 minutes en millisecondes)
-	const CHUNK_DURATION = 0.5 * 60 * 1000;
+	const CHUNK_DURATION = 2.5 * 60 * 1000;
 
 	async function exportProgress(event: any) {
 		const data = event.payload as {
