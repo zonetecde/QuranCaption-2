@@ -26,3 +26,4 @@ src-tauri/2
 # Special
 src-tauri/binaries/*.exe
 *.bak
+ffmpeg_failed_*.txt

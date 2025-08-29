@@ -119,7 +119,8 @@
 		if (translation().type === 'verse') {
 			event.preventDefault();
 			isDragging = true;
-			dragStartIndex = i;
+			if (!(translation().status === 'to review' && translation().startWordIndex !== 0))
+				dragStartIndex = i;
 			wordClicked(i);
 		}
 	}

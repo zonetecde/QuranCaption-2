@@ -382,6 +382,7 @@ fn build_and_run_ffmpeg_filter_complex(
     prefer_hw: bool,
     imgs_cwd: Option<&str>,
     duration_ms: Option<i32>,
+    chunk_index: Option<i32>,
     app_handle: tauri::AppHandle,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let (w, h) = target_size;
@@ -751,13 +752,21 @@ fn build_and_run_ffmpeg_filter_complex(
                     
                     println!("[progress] {}% ({:.1}s / {:.1}s)", progress.round(), current_time_s, duration_s);
                     
-                    // Émettre l'événement de progression vers le frontend
-                    let _ = app_handle.emit("export-progress", serde_json::json!({
+                    // Préparer les données de progression
+                    let mut progress_data = serde_json::json!({
                         "export_id": export_id,
                         "progress": progress,
                         "current_time": current_time_s,
                         "total_time": duration_s
-                    }));
+                    });
+                    
+                    // Ajouter chunk_index si fourni
+                    if let Some(chunk_idx) = chunk_index {
+                        progress_data["chunk_index"] = serde_json::Value::Number(serde_json::Number::from(chunk_idx));
+                    }
+                    
+                    // Émettre l'événement de progression vers le frontend
+                    let _ = app_handle.emit("export-progress", progress_data);
                 }
             }
         }
@@ -771,10 +780,17 @@ fn build_and_run_ffmpeg_filter_complex(
         } else {
             // Le processus a été annulé
             let error_msg = format!("Export {} was cancelled", export_id);
-            let _ = app_handle.emit("export-error", serde_json::json!({
+            let mut error_data = serde_json::json!({
                 "export_id": export_id,
                 "error": error_msg
-            }));
+            });
+            
+            // Ajouter chunk_index si fourni
+            if let Some(chunk_idx) = chunk_index {
+                error_data["chunk_index"] = serde_json::Value::Number(serde_json::Number::from(chunk_idx));
+            }
+            
+            let _ = app_handle.emit("export-error", error_data);
             return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Interrupted, error_msg)));
         }
     };
@@ -824,10 +840,17 @@ fn build_and_run_ffmpeg_filter_complex(
         }
         
         let error_msg = format!("ffmpeg failed during video exportation (exit code: {:?})", status.code());
-        let _ = app_handle.emit("export-error", serde_json::json!({
+        let mut error_data = serde_json::json!({
             "export_id": export_id,
             "error": error_msg
-        }));
+        });
+        
+        // Ajouter chunk_index si fourni
+        if let Some(chunk_idx) = chunk_index {
+            error_data["chunk_index"] = serde_json::Value::Number(serde_json::Number::from(chunk_idx));
+        }
+        
+        let _ = app_handle.emit("export-error", error_data);
         return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, error_msg)));
     }
     
@@ -845,6 +868,7 @@ pub async fn export_video(
     duration: Option<i32>,
     audios: Option<Vec<String>>,
     videos: Option<Vec<String>>,
+    chunk_index: Option<i32>,
     app: tauri::AppHandle,
 ) -> Result<String, String> {
     let t0 = Instant::now();
@@ -978,6 +1002,7 @@ pub async fn export_video(
             true,
             Some(&imgs_folder_resolved),
             duration,
+            chunk_index,
             app_handle,
         )
     }).await
@@ -996,12 +1021,20 @@ pub async fn export_video(
         .to_string_lossy()
         .to_string();
     
-    // Émettre l'événement de succès
-    let _ = app.emit("export-complete", serde_json::json!({
+    // Préparer les données de completion
+    let mut completion_data = serde_json::json!({
         "filename": output_file_name,
         "exportId": export_id,
         "fullPath": final_file_path
-    }));
+    });
+    
+    // Ajouter chunk_index si fourni
+    if let Some(chunk_idx) = chunk_index {
+        completion_data["chunkIndex"] = serde_json::Value::Number(serde_json::Number::from(chunk_idx));
+    }
+    
+    // Émettre l'événement de succès
+    let _ = app.emit("export-complete", completion_data);
     
     Ok(final_file_path)
 }
@@ -1081,4 +1114,103 @@ pub fn cancel_export(export_id: String) -> Result<String, String> {
         println!("[cancel_export] Export_id non trouvé dans les exports actifs: {}", export_id);
         Err(format!("Export {} non trouvé ou déjà terminé", export_id))
     }
+}
+
+#[tauri::command]
+pub async fn concat_videos(
+    video_paths: Vec<String>,
+    output_path: String,
+) -> Result<String, String> {
+    println!("[concat_videos] Début de la concaténation de {} vidéos", video_paths.len());
+    println!("[concat_videos] Fichier de sortie: {}", output_path);
+    
+    if video_paths.is_empty() {
+        return Err("Aucune vidéo fournie pour la concaténation".to_string());
+    }
+    
+    if video_paths.len() == 1 {
+        // Si une seule vidéo, on peut simplement la copier ou la renommer
+        println!("[concat_videos] Une seule vidéo, copie vers le fichier final");
+        std::fs::copy(&video_paths[0], &output_path)
+            .map_err(|e| format!("Erreur lors de la copie: {}", e))?;
+        return Ok(output_path);
+    }
+    
+    // Créer le dossier de sortie si nécessaire
+    if let Some(parent) = Path::new(&output_path).parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Erreur création dossier de sortie: {}", e))?;
+    }
+    
+    // Créer un fichier de liste temporaire pour FFmpeg
+    let temp_dir = std::env::temp_dir();
+    let list_file_path = temp_dir.join(format!("concat_list_{}.txt", 
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs()));
+    
+    // Écrire la liste des fichiers à concaténer
+    let mut list_content = String::new();
+    for video_path in &video_paths {
+        // Vérifier que le fichier existe
+        if !Path::new(video_path).exists() {
+            return Err(format!("Fichier vidéo non trouvé: {}", video_path));
+        }
+        list_content.push_str(&format!("file '{}'\n", video_path));
+    }
+    
+    fs::write(&list_file_path, list_content)
+        .map_err(|e| format!("Erreur écriture fichier liste: {}", e))?;
+    
+    println!("[concat_videos] Fichier liste créé: {:?}", list_file_path);
+    
+    // Préparer la commande FFmpeg
+    let ffmpeg_exe = resolve_ffmpeg_binary().unwrap_or_else(|| "ffmpeg".to_string());
+    
+    let mut cmd = Command::new(&ffmpeg_exe);
+    cmd.args(&[
+        "-y",                           // Écraser le fichier de sortie
+        "-hide_banner",                 // Masquer le banner FFmpeg
+        "-loglevel", "info",           // Niveau de log
+        "-f", "concat",                // Format d'entrée concat
+        "-safe", "0",                  // Permettre les chemins absolus
+        "-i", &list_file_path.to_string_lossy(), // Fichier de liste
+        "-c", "copy",                  // Copier sans réencodage
+        &output_path                   // Fichier de sortie
+    ]);
+    
+    // Configurer la commande pour cacher les fenêtres CMD sur Windows
+    configure_command_no_window(&mut cmd);
+    
+    println!("[concat_videos] Exécution de FFmpeg...");
+    
+    let output = cmd.output()
+        .map_err(|e| format!("Erreur exécution FFmpeg: {}", e))?;
+    
+    // Nettoyer le fichier temporaire
+    let _ = fs::remove_file(&list_file_path);
+    
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        
+        println!("[concat_videos] Erreur FFmpeg:");
+        println!("STDOUT: {}", stdout);
+        println!("STDERR: {}", stderr);
+        
+        return Err(format!(
+            "FFmpeg a échoué lors de la concaténation (code: {:?})\nSTDERR: {}",
+            output.status.code(),
+            stderr
+        ));
+    }
+    
+    // Vérifier que le fichier de sortie a été créé
+    if !Path::new(&output_path).exists() {
+        return Err("Le fichier de sortie n'a pas été créé".to_string());
+    }
+    
+    println!("[concat_videos] ✅ Concaténation réussie: {}", output_path);
+    Ok(output_path)
 }

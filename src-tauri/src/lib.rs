@@ -574,6 +574,7 @@ pub fn run() {
             get_video_dimensions,
             exporter::export_video,
             exporter::cancel_export,
+            exporter::concat_videos,
             convert_audio_to_cbr
         ])
         .setup(|app| {
