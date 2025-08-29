@@ -848,6 +848,10 @@
 	 * @param uniqueSorted
 	 */
 	async function wait(timing: number, i: number, uniqueSorted: number[]) {
+		await new Promise((resolve) => setTimeout(resolve, 1));
+
+		globalState.updateVideoPreviewUI();
+
 		// si la difference entre timing et celui juste avant est grand, attendre un peu plus
 		if (i > 0) {
 			const prevTiming = uniqueSorted[i - 1];
@@ -855,12 +859,14 @@
 			if (diff > 6500) {
 				// sous-titre de 6.5 seconde ça commence a faire long,
 				// histoire de s'assurer que max-height et autre soit bien appliqué
-				await new Promise((resolve) => setTimeout(resolve, 100));
+				await new Promise((resolve) => setTimeout(resolve, 250));
 				console.log('Attente plus longue pour timing espacé:', diff);
 			} else {
 				console.log('Attente normale pour timing rapproché:', diff);
 			}
 		}
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
 	}
 </script>
 
