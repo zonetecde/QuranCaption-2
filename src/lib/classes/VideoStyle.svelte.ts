@@ -939,12 +939,6 @@ export class VideoStyle extends SerializableBase {
 						break; // Arrêter dès qu'un style est appliqué
 					}
 				}
-
-				// Si l'utilisateur a dit non à tous les styles proposés, créer un style par défaut
-				if (!styleApplied) {
-					await this.addStylesForEdition(projectTranslation.name);
-					toast.success(`Default styles created for "${projectTranslation.name}"`);
-				}
 			}
 		}
 
