@@ -22,7 +22,7 @@
 		<div class="flex items-center justify-center w-10 h-10 bg-accent rounded-full">
 			<span class="material-icons text-lg text-accent">help_outline</span>
 		</div>
-		<h2 class="text-lg font-semibold text-primary">{yesNo ? 'Confirmation' : 'Question'}</h2>
+		<h2 class="text-lg font-semibold text-primary">{!yesNo ? 'Confirmation' : 'Question'}</h2>
 	</div>
 
 	<!-- Divider -->

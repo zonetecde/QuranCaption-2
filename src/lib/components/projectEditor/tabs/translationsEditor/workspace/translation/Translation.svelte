@@ -96,10 +96,13 @@
 				// Si le mot est après la fin de la traduction, on étend la sélection
 				translation().endWordIndex = i;
 			} else {
-				// Si le mot est déjà sélectionné, on le désélectionne
+				// Si le mot est déjà sélectionné, on arrête la traduction à ce mot SI
+				// il nécessite review, sinon reset les curseurs sur ce mot
 				if (i >= translation().startWordIndex && i <= translation().endWordIndex) {
-					translation().startWordIndex = i;
 					translation().endWordIndex = i;
+					if (translation().status !== 'to review') {
+						translation().startWordIndex = i;
+					}
 				}
 			}
 
@@ -119,8 +122,7 @@
 		if (translation().type === 'verse') {
 			event.preventDefault();
 			isDragging = true;
-			if (!(translation().status === 'to review' && translation().startWordIndex !== 0))
-				dragStartIndex = i;
+			dragStartIndex = i;
 			wordClicked(i);
 		}
 	}
