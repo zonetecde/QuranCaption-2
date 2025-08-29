@@ -333,7 +333,8 @@
 				globalState.getTimelineState.movePreviewTo = timing;
 				globalState.getTimelineState.cursorPosition = timing;
 
-				await new Promise((resolve) => setTimeout(resolve, 150));
+				// si la difference entre timing et celui juste avant est grand, attendre un peu plus
+				await wait(timing, i, chunkTimings.uniqueSorted);
 
 				await takeScreenshot(`${imageIndex}`, chunkImageFolder);
 
@@ -482,7 +483,7 @@
 				globalState.getTimelineState.movePreviewTo = timing;
 				globalState.getTimelineState.cursorPosition = timing;
 
-				await new Promise((resolve) => setTimeout(resolve, 50));
+				await wait(timing, i, timings.uniqueSorted);
 
 				await takeScreenshot(`${Math.max(Math.round(timing - exportStart + base), 0)}`);
 
@@ -840,7 +841,27 @@
 		return { chunks, fadeOutEndTimes: sortedFadeOutEnds };
 	}
 
-	// ...existing code...
+	/**
+	 * Attendre un peu plus longtemps si le timing est très espacé du précédent (sous-titre long)
+	 * @param timing
+	 * @param i
+	 * @param uniqueSorted
+	 */
+	async function wait(timing: number, i: number, uniqueSorted: number[]) {
+		// si la difference entre timing et celui juste avant est grand, attendre un peu plus
+		if (i > 0) {
+			const prevTiming = uniqueSorted[i - 1];
+			const diff = timing - prevTiming;
+			if (diff > 6500) {
+				// sous-titre de 6.5 seconde ça commence a faire long,
+				// histoire de s'assurer que max-height et autre soit bien appliqué
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				console.log('Attente plus longue pour timing espacé:', diff);
+			} else {
+				console.log('Attente normale pour timing rapproché:', diff);
+			}
+		}
+	}
 </script>
 
 {#if globalState.currentProject}
