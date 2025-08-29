@@ -185,23 +185,24 @@
 				<NoTranslationsToShow />
 			{:else}
 				{#each allowedSubtitleIndices().slice(0, visibleCount) as clipIndex, i}
+					{@const _clipIndex = clipIndex}
 					<!-- clipIndex est l'index réel dans clips -->
-					{#if allowedTranslations[globalState.getSubtitleTrack.clips[clipIndex].id]}
-						{#if isNewVerse(clipIndex) && clipIndex > 0 && globalState.getSubtitleTrack.clips
-								.slice(0, clipIndex)
+					{#if allowedTranslations[globalState.getSubtitleTrack.clips[_clipIndex].id]}
+						{#if isNewVerse(_clipIndex) && _clipIndex > 0 && globalState.getSubtitleTrack.clips
+								.slice(0, _clipIndex)
 								.some((clip) => allowedTranslations[clip.id])}
 							<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
 						{/if}
 
 						<section class="border border-color rounded px-4 py-4 text-primary relative">
-							<ArabicText subtitle={globalState.getSubtitleTrack.clips[clipIndex]} />
+							<ArabicText subtitle={globalState.getSubtitleTrack.clips[_clipIndex]} />
 							{#each editionsToShowInEditor() as edition, j}
-								{#if allowedTranslations[globalState.getSubtitleTrack.clips[clipIndex].id].includes(edition.name)}
+								{#if allowedTranslations[globalState.getSubtitleTrack.clips[_clipIndex].id].includes(edition.name)}
 									<Translation
 										{edition}
-										bind:subtitle={globalState.getSubtitleTrack.clips[clipIndex] as SubtitleClip}
-										previousSubtitle={clipIndex > 0
-											? (globalState.getSubtitleTrack.getSubtitleBefore(clipIndex) as SubtitleClip)
+										bind:subtitle={globalState.getSubtitleTrack.clips[_clipIndex] as SubtitleClip}
+										previousSubtitle={_clipIndex > 0
+											? (globalState.getSubtitleTrack.getSubtitleBefore(_clipIndex) as SubtitleClip)
 											: undefined}
 									/>
 								{/if}
