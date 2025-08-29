@@ -7,6 +7,7 @@ import { appDataDir, join } from '@tauri-apps/api/path';
 import { globalState } from '$lib/runes/main.svelte';
 import { telemetry } from '$lib/services/Telemetry';
 import { VersionService } from '$lib/services/VersionService.svelte';
+import MigrationService from '$lib/services/MigrationService';
 
 export default class Settings extends SerializableBase {
 	private static settingsFile: string = 'settings.json';
@@ -127,6 +128,11 @@ export default class Settings extends SerializableBase {
 				keys: ['a'],
 				description: `Add a subtitle with the isti'adhah ("أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ")`,
 				name: "Add Isti'adhah"
+			},
+			ADD_CUSTOM_TEXT_CLIP: {
+				keys: ['t'],
+				description: 'Add a custom text clip between the last subtitle and the current position',
+				name: 'Add Custom Text Clip'
 			}
 		}
 	};
@@ -195,6 +201,9 @@ export default class Settings extends SerializableBase {
 			// Sauvegarde les paramètres mis à jour
 			await this.save();
 		}
+
+		// Migration des paramètres si besoin
+		MigrationService.FromQC310ToQC311();
 	}
 }
 

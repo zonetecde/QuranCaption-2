@@ -752,7 +752,7 @@ export class VideoStyle extends SerializableBase {
 	/**
 	 * Ajoute un texte personnalisé au projet dans les styles globaux
 	 */
-	async addCustomText() {
+	async addCustomText(startTime?: number, endTime?: number): Promise<void> {
 		// Ajoute la track Custom Text si non existante
 		if (!globalState.currentProject!.content.timeline.doesTrackExist(TrackType.CustomText)) {
 			globalState.currentProject!.content.timeline.addTrack(new CustomTextTrack());
@@ -767,7 +767,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Ajoute le custom text au projet
 		const customTextCategory = await this.getDefaultCustomTextCategory();
-		globalState.getCustomTextTrack.addCustomText(customTextCategory);
+		globalState.getCustomTextTrack.addCustomText(customTextCategory, startTime, endTime);
 
 		setTimeout(() => {
 			globalState.updateVideoPreviewUI();

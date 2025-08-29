@@ -546,8 +546,22 @@ export class CustomTextTrack extends Track {
 		super(TrackType.CustomText);
 	}
 
-	async addCustomText(customTextCategory: Category) {
+	async addCustomText(customTextCategory: Category, startTime?: number, endTime?: number) {
+		// Si des durées sont spécifiées, alors on désactive l'option "always show"
+		if (startTime !== undefined && endTime !== undefined) {
+			customTextCategory.getStyle('always-show')!.value = false;
+			customTextCategory.getStyle('time-appearance')!.value = startTime;
+			customTextCategory.getStyle('time-disappearance')!.value = endTime;
+		}
+
 		const clip = new CustomTextClip(customTextCategory);
+
+		// Set les temps si spécifiés
+		if (startTime !== undefined && endTime !== undefined) {
+			clip.startTime = startTime;
+			clip.endTime = endTime;
+		}
+
 		this.clips.push(clip);
 	}
 

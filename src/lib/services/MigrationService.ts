@@ -14,6 +14,7 @@ import {
 } from '$lib/classes';
 import { AssetClip, SilenceClip } from '$lib/classes/Clip.svelte';
 import { Quran } from '$lib/classes/Quran';
+import Settings from '$lib/classes/Settings.svelte';
 import type { AssetTrack, SubtitleTrack } from '$lib/classes/Track.svelte';
 import { VerseTranslation } from '$lib/classes/Translation.svelte';
 import { globalState } from '$lib/runes/main.svelte';
@@ -21,6 +22,21 @@ import { join, localDataDir } from '@tauri-apps/api/path';
 import { exists, readDir, readFile, readTextFile } from '@tauri-apps/plugin-fs';
 
 export default class MigrationService {
+	/**
+	 * Migre les données de Quran Caption 3.1.0 à Quran Caption 3.1.1
+	 * > Ajout d'un shortcut pour ajouter un custom text clip facilement.
+	 */
+	static FromQC310ToQC311() {
+		if (
+			globalState.settings &&
+			!globalState.settings.shortcuts.SUBTITLES_EDITOR.ADD_CUSTOM_TEXT_CLIP
+		) {
+			globalState.settings.shortcuts.SUBTITLES_EDITOR.ADD_CUSTOM_TEXT_CLIP =
+				new Settings().shortcuts.SUBTITLES_EDITOR.ADD_CUSTOM_TEXT_CLIP;
+			Settings.save();
+		}
+	}
+
 	/**
 	 * Vérifie si des données de Quran Caption 2 sont présentes
 	 * @returns true si des données sont trouvées, sinon false
