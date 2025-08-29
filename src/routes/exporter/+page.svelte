@@ -125,6 +125,8 @@
 			// Met le curseur au début du startTime voulu pour l'export
 			globalState.getTimelineState.cursorPosition = globalState.getExportState.videoStartTime;
 			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;
+			// Hide waveform: consomme des ressources inutilement
+			if (globalState.settings) globalState.settings.persistentUiState.showWaveforms = false;
 
 			// Enlève tout les styles de position de la vidéo
 			let videoElement: HTMLElement;

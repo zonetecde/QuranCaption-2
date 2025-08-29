@@ -709,7 +709,10 @@ fn build_and_run_ffmpeg_filter_complex(
         command.current_dir(cwd);
     }
     
-    let child = command.spawn()?;
+    let mut child = command.spawn()?;
+    
+    // Capturer stderr pour diagnostiquer les erreurs
+    let stderr_handle = child.stderr.take();
     
     // Enregistrer le processus dans les exports actifs
     let process_ref = Arc::new(Mutex::new(Some(child)));
@@ -781,7 +784,54 @@ fn build_and_run_ffmpeg_filter_complex(
     }
     
     if !status.success() {
-        let error_msg = format!("ffmpeg failed during video exportation");
+        // Capturer stderr si possible
+        let stderr_output = if let Some(mut stderr_reader) = stderr_handle {
+            let mut stderr_content = String::new();
+            use std::io::Read;
+            let _ = stderr_reader.read_to_string(&mut stderr_content);
+            if !stderr_content.is_empty() {
+                Some(stderr_content)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        
+        // Créer un fichier de log avec la date d'aujourd'hui
+        let now = std::time::SystemTime::now();
+        let timestamp = now.duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let log_filename = format!("ffmpeg_failed_{}.txt", timestamp);
+        
+        let log_content = format!(
+            "FFmpeg Export Failure Log\n\
+             =========================\n\
+             Timestamp: {}\n\
+             Export ID: {}\n\
+             Exit Code: {:?}\n\
+             \n\
+             FFmpeg Command:\n\
+             {}\n\
+             \n\
+             Standard Error Output:\n\
+             {}\n",
+            timestamp,
+            export_id,
+            status.code(),
+            cmd.join(" "),
+            stderr_output.unwrap_or_else(|| "No stderr output captured".to_string())
+        );
+        
+        // Écrire le fichier de log
+        if let Err(log_err) = std::fs::write(&log_filename, log_content) {
+            eprintln!("Failed to write log file {}: {}", log_filename, log_err);
+        } else {
+            println!("FFmpeg error details saved to: {}", log_filename);
+        }
+        
+        let error_msg = format!("ffmpeg failed during video exportation (exit code: {:?})", status.code());
         let _ = app_handle.emit("export-error", serde_json::json!({
             "export_id": export_id,
             "error": error_msg

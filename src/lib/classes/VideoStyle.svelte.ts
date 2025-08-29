@@ -211,14 +211,14 @@ export class Style extends SerializableBase {
 		for (let i = 0; i < compositeStyles.length; i++) {
 			const element = compositeStyles[i];
 
-			if (!element.id || (element.id === 'outline-enable' && !element.value)) {
+			if (element.id === 'outline-enable' && !element.value) {
 				// Si on désactive l'outline, alors on skip les 3 styles concernant l'outline
 				// (en comptant celui là)
 				i += 2;
 				continue;
 			}
 
-			if (!element.id || (element.id === 'text-glow-enable' && !element.value)) {
+			if (element.id === 'text-glow-enable' && !element.value) {
 				// Si on désactive le glow, alors on skip les 3 styles concernant le glow
 				// (en comptant celui là)
 				i += 2;
