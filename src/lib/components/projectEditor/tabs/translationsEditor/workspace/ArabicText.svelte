@@ -37,7 +37,7 @@
 		{/each}
 	</div>
 
-	<p class="text-sm text-thirdly text-left mt-1" dir="rtl">
+	<p class="text-sm text-thirdly text-left mt-1">
 		{subtitle.wbwTranslation.join(' ')}
 	</p>
 {:else if subtitle instanceof PredefinedSubtitleClip}
