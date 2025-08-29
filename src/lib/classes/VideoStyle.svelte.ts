@@ -857,29 +857,96 @@ export class VideoStyle extends SerializableBase {
 	async importStyles(json: videoStyleFileData) {
 		// Crée une nouvelle instance VideoStyle à partir des données JSON
 		const importedVideoStyle = VideoStyle.fromJSON(json.videoStyle);
+		const currentProjectTranslations = globalState.getProjectTranslation.addedTranslationEditions;
 
-		// Si une traduction existe dans le projet mais que ce n'est pas celle du fichier style exporté,
-		// alors on demande à l'utilisateur s'il veut l'appliquer à sa traduction
-		const projectTranslations = globalState.getProjectTranslation.addedTranslationEditions;
-		for (const style of importedVideoStyle.styles) {
-			if (style.target === 'arabic' || style.target === 'global') continue;
-
-			for (const projectTranslation of projectTranslations) {
-				if (!projectTranslations.find((e) => e.name === style.target)) {
-					const confirm = await ModalManager.confirmModal(
-						`Your project does not have the "${style.target}" translation. Would you like to apply the styles from that translation to your project translation "${projectTranslation.name}"?`,
-						false
-					);
-
-					if (confirm) {
-						style.target = projectTranslation.name;
+		// Gérer l'import des styles 'arabic' et 'global' (toujours override)
+		for (const importedStyle of importedVideoStyle.styles) {
+			if (importedStyle.target === 'arabic' || importedStyle.target === 'global') {
+				// Override automatiquement les styles arabic et global
+				const existingStyle = this.getStylesOfTarget(importedStyle.target);
+				if (existingStyle) {
+					// Remplace complètement les styles existants
+					const index = this.styles.findIndex((s) => s.target === importedStyle.target);
+					if (index !== -1) {
+						this.styles[index] = importedStyle;
 					}
+				} else {
+					this.styles.push(importedStyle);
 				}
 			}
 		}
 
-		// Remplace les styles du projet actuel par les nouveaux
-		globalState.currentProject!.content.videoStyle = importedVideoStyle;
+		// Gérer l'import des traductions
+		for (const importedStyle of importedVideoStyle.styles) {
+			if (importedStyle.target === 'arabic' || importedStyle.target === 'global') continue;
+
+			// Chercher si cette traduction existe déjà dans le projet
+			const existingProjectTranslation = currentProjectTranslations.find(
+				(t) => t.name === importedStyle.target
+			);
+
+			if (existingProjectTranslation) {
+				// 1. Même traduction trouvée -> override automatiquement
+				const existingStyleIndex = this.styles.findIndex((s) => s.target === importedStyle.target);
+				if (existingStyleIndex !== -1) {
+					this.styles[existingStyleIndex] = importedStyle;
+				} else {
+					this.styles.push(importedStyle);
+				}
+			}
+		}
+
+		// 3. Gérer les traductions du projet qui n'existent PAS dans le fichier importé
+		for (const projectTranslation of currentProjectTranslations) {
+			const existsInImported = importedVideoStyle.styles.some(
+				(importedStyle) =>
+					importedStyle.target === projectTranslation.name &&
+					importedStyle.target !== 'arabic' &&
+					importedStyle.target !== 'global'
+			);
+
+			if (!existsInImported) {
+				// Cette traduction du projet n'existe pas dans le fichier importé
+				// Proposer d'appliquer les styles disponibles dans le fichier importé
+				let styleApplied = false;
+
+				const availableImportedTranslations = importedVideoStyle.styles.filter(
+					(s) => s.target !== 'arabic' && s.target !== 'global'
+				);
+
+				for (const importedStyle of availableImportedTranslations) {
+					const confirm = await ModalManager.confirmModal(
+						`Your project translation "${projectTranslation.name}" doesn't have styles yet. Would you like to apply the styles from "${importedStyle.target}" (from the imported file) to "${projectTranslation.name}"?`,
+						true
+					);
+
+					if (confirm) {
+						// Créer une copie du style importé avec le nouveau target
+						const newStyle = JSON.parse(JSON.stringify(importedStyle));
+						newStyle.target = projectTranslation.name;
+
+						// Ajouter ou remplacer le style pour cette traduction
+						const existingStyleIndex = this.styles.findIndex(
+							(s) => s.target === projectTranslation.name
+						);
+						if (existingStyleIndex !== -1) {
+							this.styles[existingStyleIndex] = StylesData.fromJSON(newStyle);
+						} else {
+							this.styles.push(StylesData.fromJSON(newStyle));
+						}
+
+						styleApplied = true;
+						break; // Arrêter dès qu'un style est appliqué
+					}
+				}
+
+				// Si l'utilisateur a dit non à tous les styles proposés, créer un style par défaut
+				if (!styleApplied) {
+					await this.addStylesForEdition(projectTranslation.name);
+					toast.success(`Default styles created for "${projectTranslation.name}"`);
+				}
+			}
+		}
 
 		// Ajoute les customs text clips en créant des instances correctes
 		for (const clipData of json.customTextClips) {
