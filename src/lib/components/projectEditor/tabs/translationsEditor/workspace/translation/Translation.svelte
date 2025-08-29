@@ -86,6 +86,8 @@
 		}
 	});
 
+	let lastClickedWordIndex = $state(-1);
+
 	function wordClicked(i: number): any {
 		if (translation().type === 'verse') {
 			if (i < translation().startWordIndex) {
@@ -100,11 +102,13 @@
 				// il nécessite review, sinon reset les curseurs sur ce mot
 				if (i >= translation().startWordIndex && i <= translation().endWordIndex) {
 					translation().endWordIndex = i;
-					if (translation().status !== 'to review') {
+					if (lastClickedWordIndex === i) {
 						translation().startWordIndex = i;
 					}
 				}
 			}
+
+			lastClickedWordIndex = i;
 
 			updateTranslationText();
 			translation().updateStatus('reviewed', edition);
