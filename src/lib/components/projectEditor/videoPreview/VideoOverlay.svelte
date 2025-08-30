@@ -169,7 +169,6 @@
 			// sélectionne l'élément d'id subtitles-container
 			const subtitlesContainer = document.getElementById('subtitles-container');
 			if (subtitlesContainer) {
-				console.log('Cache les sous-titres pour recalcul');
 				subtitlesContainer.style.opacity = '0';
 			}
 

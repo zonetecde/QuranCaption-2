@@ -851,25 +851,20 @@
 	 * @param uniqueSorted
 	 */
 	async function wait(timing: number, i: number, uniqueSorted: number[]) {
-		await new Promise((resolve) => setTimeout(resolve, 1));
+		// globalState.updateVideoPreviewUI();
 
-		globalState.updateVideoPreviewUI();
+		// Attend que l'élément `subtitles-container` est une opacité de 1 (visible) (car il est caché pendant que max-height s'applique)
+		let subtitlesContainer: HTMLElement;
+		subtitlesContainer = document.getElementById('subtitles-container') as HTMLElement;
 
-		// si la difference entre timing et celui juste avant est grand, attendre un peu plus
-		if (i > 0) {
-			const prevTiming = uniqueSorted[i - 1];
-			const diff = timing - prevTiming;
-			if (diff > 6500) {
-				// sous-titre de 6.5 seconde ça commence a faire long,
-				// histoire de s'assurer que max-height et autre soit bien appliqué
-				await new Promise((resolve) => setTimeout(resolve, 250));
-				console.log('Attente plus longue pour timing espacé:', diff);
-			} else {
-				console.log('Attente normale pour timing rapproché:', diff);
-			}
+		if (!subtitlesContainer) {
+			await new Promise((resolve) => setTimeout(resolve, 200));
+			return;
 		}
 
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		do {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		} while (subtitlesContainer.style.opacity !== '1');
 	}
 </script>
 
