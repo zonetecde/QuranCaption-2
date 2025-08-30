@@ -74,20 +74,25 @@ export class VerseTranslation extends Translation {
 
 	override getText(edition: string, subtitle: SubtitleClip): string {
 		// Ajoute le numéro de verset si demandé dans les styles
-		if (subtitle.startWordIndex === 0 && globalState.getStyle(edition, 'show-verse-number').value) {
+		const position = globalState.getStyle(edition, 'verse-number-position').value;
+
+		if (
+			((subtitle.startWordIndex === 0 && position === 'before') ||
+				(subtitle.isLastWordsOfVerse && position === 'after')) &&
+			globalState.getStyle(edition, 'show-verse-number').value
+		) {
 			// Le format contient par ex. `<number>. `
 			let format: string = (
 				globalState.getStyle(edition, 'verse-number-format').value as string
 			).replace('<number>', subtitle.verse.toString());
 
 			// Ajoute le texte de la traduction au bon endroit
-			switch (globalState.getStyle(edition, 'verse-number-position')!.value) {
-				case 'before':
-					format = format + super.getText();
-					break;
-				case 'after':
-					format = super.getText() + format;
-					break;
+			if (position === 'before' && subtitle.startWordIndex === 0) {
+				format = format + super.getText();
+			} else if (position === 'after' && subtitle.isLastWordsOfVerse) {
+				format = super.getText() + format;
+			} else {
+				format = super.getText();
 			}
 
 			return format;
