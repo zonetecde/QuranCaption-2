@@ -54,7 +54,8 @@
 			if (
 				!(
 					verseTrans.startWordIndex === 0 &&
-					verseTrans.endWordIndex === originalTranslation.split(' ').length - 1
+					verseTrans.endWordIndex === originalTranslation.split(' ').length - 1 &&
+					!verseTrans.isBruteForce
 				)
 			) {
 				previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
