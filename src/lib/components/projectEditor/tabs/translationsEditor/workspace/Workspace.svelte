@@ -81,8 +81,6 @@
 		return filteredGroups;
 	});
 
-	$inspect(subtitlesInGroups());
-
 	// Réinitialise le compteur si les filtres changent et qu'on a moins d'éléments
 	$effect(() => {
 		const total = allowedSubtitleIndices().length;
