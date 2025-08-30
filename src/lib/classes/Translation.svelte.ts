@@ -72,10 +72,17 @@ export class VerseTranslation extends Translation {
 		this.type = 'verse';
 	}
 
+	/**
+	 * Retourne le texte de la traduction en ajoutant le numéro de verset si demandé dans les styles
+	 * @param edition L'édition de la traduction
+	 * @param subtitle Le clip de sous-titre associé à la traduction
+	 * @returns Le texte de la traduction avec le numéro de verset si demandé
+	 */
 	override getText(edition: string, subtitle: SubtitleClip): string {
 		// Ajoute le numéro de verset si demandé dans les styles
 		const position = globalState.getStyle(edition, 'verse-number-position').value;
 
+		// Si on doit afficher le numéro de verset et que c'est le début ou la fin du verset (en fonction de où on veut l'afficher)
 		if (
 			((subtitle.startWordIndex === 0 && position === 'before') ||
 				(subtitle.isLastWordsOfVerse && position === 'after')) &&
@@ -98,6 +105,7 @@ export class VerseTranslation extends Translation {
 			return format;
 		}
 
+		// Sinon, retourne juste le texte de la traduction
 		return super.getText();
 	}
 }

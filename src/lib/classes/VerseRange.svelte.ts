@@ -74,4 +74,25 @@ export class VerseRange extends SerializableBase {
 	public toStringForExportFile(): string {
 		return this.toString().replaceAll(':', '').replaceAll('Surah ', '');
 	}
+
+	public getRangeForSurah(surahNumber: number): { verseStart: number; verseEnd: number } {
+		const part = this.parts.find((p) => p.surah === surahNumber);
+		if (!part) return { verseStart: 1, verseEnd: Quran.getVerseCount(surahNumber) };
+
+		return {
+			verseStart: part.verseStart,
+			verseEnd: part.verseEnd
+		};
+	}
+
+	/**
+	 * Récupère la plage de versets pour l'exportation
+	 * @returns La plage de versets pour l'exportation
+	 */
+	static getExportVerseRange() {
+		return VerseRange.getVerseRange(
+			globalState.getExportState.videoStartTime,
+			globalState.getExportState.videoEndTime || Infinity
+		);
+	}
 }

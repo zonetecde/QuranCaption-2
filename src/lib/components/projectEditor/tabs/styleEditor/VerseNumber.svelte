@@ -6,6 +6,7 @@
 	import { draw, fade } from 'svelte/transition';
 	import CompositeText from './CompositeText.svelte';
 	import RecitersManager from '$lib/classes/Reciter';
+	import { VerseRange } from '$lib/classes';
 
 	let {
 		currentSurah,
@@ -45,7 +46,15 @@
 			<CompositeText compositeStyle={globalState.getStyle('global', 'verse-number-text-style')!}>
 				{verseNumberSettings()
 					.verseNumberFormat.replace('<surah>', currentSurah.toString())
-					.replace('<verse>', currentVerse.toString())}
+					.replace('<verse>', currentVerse.toString())
+					.replace(
+						'<min-range>',
+						VerseRange.getExportVerseRange().getRangeForSurah(currentSurah).verseStart.toString()
+					)
+					.replace(
+						'<max-range>',
+						VerseRange.getExportVerseRange().getRangeForSurah(currentSurah).verseEnd.toString()
+					)}
 			</CompositeText>
 		</div>
 	</div>

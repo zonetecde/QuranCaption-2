@@ -164,7 +164,7 @@
 			{
 				"id": "surah-name-format",
 				"name": "Latin Text Format",
-				"description": "Format of the Surah name display. Use <number>, <transliteration> and <translation> tags to customize.",
+				"description": "Format of the Surah name display. Use <number>, <transliteration>, <translation>, <min-range> and <max-range> tags to customize.",
 				"value": "Surah <transliteration>",
 				"valueType": "text",
 				"css": "",
@@ -424,7 +424,7 @@
 			{
 				"id": "verse-number-format",
 				"name": "Format",
-				"description": "Change the format of the Verse number display. Use <surah> and <verse> tags to customize.",
+				"description": "Change the format of the Verse number display. Use <surah>, <verse>, <min-range> and <max-range> tags to customize.",
 				"value": "<surah>:<verse>",
 				"valueType": "text",
 				"css": "",

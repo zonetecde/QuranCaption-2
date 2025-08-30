@@ -5,6 +5,7 @@
 	import { verticalDrag } from '$lib/services/verticalDrag';
 	import { draw, fade } from 'svelte/transition';
 	import CompositeText from './CompositeText.svelte';
+	import { VerseRange } from '$lib/classes';
 
 	const currentSurah = $derived(() => {
 		return globalState.getSubtitleTrack.getCurrentSurah();
@@ -74,7 +75,15 @@
 				{surahNameSettings()
 					.surahNameFormat.replace('<number>', currentSurah().toString())
 					.replace('<transliteration>', Quran.surahs[currentSurah() - 1].name)
-					.replace('<translation>', Quran.surahs[currentSurah() - 1].translation)}
+					.replace('<translation>', Quran.surahs[currentSurah() - 1].translation)
+					.replace(
+						'<min-range>',
+						VerseRange.getExportVerseRange().getRangeForSurah(currentSurah()).verseStart.toString()
+					)
+					.replace(
+						'<max-range>',
+						VerseRange.getExportVerseRange().getRangeForSurah(currentSurah()).verseEnd.toString()
+					)}
 			</CompositeText>
 		</div>
 	</div>
