@@ -165,6 +165,9 @@
 			globalState.getTimelineState.movePreviewTo = globalState.getExportState.videoStartTime;
 			// Hide waveform: consomme des ressources inutilement
 			if (globalState.settings) globalState.settings.persistentUiState.showWaveforms = false;
+			// Divise par 2 le fade duration pour l'export (car l'export le rallonge par deux, ne pas demander pourquoi)
+			globalState.getStyle('global', 'fade-duration')!.value =
+				(globalState.getStyle('global', 'fade-duration')!.value as number) / 2;
 
 			// Enlève tout les styles de position de la vidéo
 			let videoElement: HTMLElement;
