@@ -664,10 +664,10 @@
 	async function finalCleanup() {
 		try {
 			// Supprime le dossier temporaire des images
-			// await remove(await join(ExportService.exportFolder, exportId), {
-			// 	baseDir: BaseDirectory.AppData,
-			// 	recursive: true
-			// });
+			await remove(await join(ExportService.exportFolder, exportId), {
+				baseDir: BaseDirectory.AppData,
+				recursive: true
+			});
 
 			console.log('Temporary images folder removed.');
 		} catch (e) {
