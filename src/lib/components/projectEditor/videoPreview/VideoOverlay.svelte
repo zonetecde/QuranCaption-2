@@ -150,206 +150,222 @@
 	 * Gère le max-height (fit on N lines) et la taille de police réactive des sous-titres
 	 */
 	$effect(() => {
-		if (!currentSubtitle()) return;
+		(async () => {
+			if (!currentSubtitle()) return;
 
-		currentSubtitle()!.id;
+			currentSubtitle()!.id;
 
-		// si le sous-titre actuel n'a pas changé (pendant la lecture vidéo)
-		if (currentSubtitle()!.id === lastSubtitleId && globalState.getVideoPreviewState.isPlaying)
-			return;
-		lastSubtitleId = currentSubtitle()!.id;
+			// si le sous-titre actuel n'a pas changé (pendant la lecture vidéo)
+			if (currentSubtitle()!.id === lastSubtitleId && globalState.getVideoPreviewState.isPlaying)
+				return;
+			lastSubtitleId = currentSubtitle()!.id;
 
-		globalState.getTimelineState.movePreviewTo;
-		globalState.getStyle('arabic', 'max-height').value;
-		globalState.getStyle('arabic', 'font-size').value;
-		globalState.getStyle('global', 'spacing').value;
+			globalState.getTimelineState.movePreviewTo;
+			globalState.getStyle('arabic', 'max-height').value;
+			globalState.getStyle('arabic', 'font-size').value;
+			globalState.getStyle('global', 'spacing').value;
 
-		untrack(async () => {
-			// Annuler l'exécution précédente si elle existe
-			if (currentAbortController) {
-				currentAbortController.abort();
+			// Cache tout les sous-titres pendant le recalcul pour éviter les sauts visuels
+			// sélectionne l'élément d'id subtitles-container
+			const subtitlesContainer = document.getElementById('subtitles-container');
+			if (subtitlesContainer) {
+				console.log('Cache les sous-titres pour recalcul');
+				subtitlesContainer.style.opacity = '0';
 			}
 
-			// Créer un nouveau AbortController pour cette exécution
-			currentAbortController = new AbortController();
-			const abortSignal = currentAbortController.signal;
-
-			try {
-				let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
-
-				// Remettre à zéro toutes les positions réactives quand on change de sous-titre
-				for (const target of targets) {
-					globalState.getVideoStyle.getStylesOfTarget(target).setStyle('reactive-y-position', 0);
+			await untrack(async () => {
+				// Annuler l'exécution précédente si elle existe
+				if (currentAbortController) {
+					currentAbortController.abort();
 				}
 
-				// Attendre un peu que le DOM se mette à jour après la remise à zéro
-				await wait(abortSignal);
+				// Créer un nouveau AbortController pour cette exécution
+				currentAbortController = new AbortController();
+				const abortSignal = currentAbortController.signal;
 
-				// Utiliser for...of au lieu de forEach pour un meilleur contrôle async
-				for (const target of targets) {
-					// Vérifier si l'opération a été annulée
-					if (abortSignal.aborted) return;
+				try {
+					let targets = ['arabic', ...Object.keys(currentSubtitleTranslations()!)];
 
-					try {
-						const maxHeightValue = globalState.getStyle(target, 'max-height').value;
-						if (maxHeightValue !== 0) {
-							// Make the font-size responsive
-							let fontSize = globalState.getStyle(target, 'font-size').value as number;
+					// Remettre à zéro toutes les positions réactives quand on change de sous-titre
+					for (const target of targets) {
+						globalState.getVideoStyle.getStylesOfTarget(target).setStyle('reactive-y-position', 0);
+					}
 
-							globalState.getVideoStyle
-								.getStylesOfTarget(target)
-								.setStyle('reactive-font-size', fontSize);
+					// Attendre un peu que le DOM se mette à jour après la remise à zéro
+					await wait(abortSignal);
 
-							await wait(abortSignal);
+					// Utiliser for...of au lieu de forEach pour un meilleur contrôle async
+					for (const target of targets) {
+						// Vérifier si l'opération a été annulée
+						if (abortSignal.aborted) return;
 
-							const subtitles = document.querySelectorAll('.' + CSS.escape(target) + '.subtitle');
+						try {
+							const maxHeightValue = globalState.getStyle(target, 'max-height').value;
+							if (maxHeightValue !== 0) {
+								// Make the font-size responsive
+								let fontSize = globalState.getStyle(target, 'font-size').value as number;
 
-							// Utiliser for...of pour un meilleur contrôle async
-							for (const subtitle of subtitles) {
-								// Vérifier si l'opération a été annulée
-								if (abortSignal.aborted) return;
+								globalState.getVideoStyle
+									.getStylesOfTarget(target)
+									.setStyle('reactive-font-size', fontSize);
 
-								// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
-								while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
+								await wait(abortSignal);
+
+								const subtitles = document.querySelectorAll('.' + CSS.escape(target) + '.subtitle');
+
+								// Utiliser for...of pour un meilleur contrôle async
+								for (const subtitle of subtitles) {
 									// Vérifier si l'opération a été annulée
 									if (abortSignal.aborted) return;
 
-									fontSize -= 5;
+									// Tant que la hauteur du texte est supérieure à la hauteur maximale, on réduit la taille de la police
+									while (subtitle.scrollHeight > maxHeightValue && fontSize > 1) {
+										// Vérifier si l'opération a été annulée
+										if (abortSignal.aborted) return;
 
-									globalState.getVideoStyle
-										.getStylesOfTarget(target)
-										.setStyle('reactive-font-size', fontSize);
+										fontSize -= 5;
 
-									await wait(abortSignal);
+										globalState.getVideoStyle
+											.getStylesOfTarget(target)
+											.setStyle('reactive-font-size', fontSize);
+
+										await wait(abortSignal);
+									}
+								}
+							}
+						} catch (error) {
+							// Ignorer les erreurs d'annulation
+							if (error instanceof Error && error.message === 'Aborted') {
+								return;
+							}
+						}
+					}
+
+					// Une fois qu'on a traité tout les abaissements de taille de max-height, on gère les collisions
+					// Check si l'anti-collision est activé
+					if (globalState.getStyle('global', 'anti-collision').value) {
+						// Récupère tous les sous-titres visibles
+						const allSubtitles = document.querySelectorAll('.subtitle');
+						const subtitleElements = Array.from(allSubtitles) as HTMLElement[];
+
+						// Set pour suivre les paires de collisions déjà traitées
+						const processedPairs = new Set<string>();
+
+						// Vérifie les collisions pour chaque sous-titre
+						for (let i = 0; i < subtitleElements.length; i++) {
+							// Vérifie si l'opération a été annulée
+							if (abortSignal.aborted) return;
+
+							const currentElement = subtitleElements[i];
+
+							// Récupère son target
+							const currentTarget = getTargetFromElement(currentElement);
+
+							if (!currentTarget) continue;
+
+							const currentRect = currentElement.getBoundingClientRect();
+
+							// Chercher les collisions avec les autres sous-titres (seulement ceux après i pour éviter les doublons)
+							for (let j = i + 1; j < subtitleElements.length; j++) {
+								const otherElement = subtitleElements[j];
+								const otherRect = otherElement.getBoundingClientRect();
+
+								// Détecte son target
+								const otherTarget = getTargetFromElement(otherElement);
+
+								// Double check pour pas que ce soit le même élément
+								if (!otherTarget || currentTarget === otherTarget) continue;
+
+								// Créer un identifiant unique pour cette paire (ordre alphabétique pour éviter les doublons)
+								const pairId = [currentTarget, otherTarget].sort().join('-');
+
+								// Si cette paire a déjà été traitée, passer au suivant
+								if (processedPairs.has(pairId)) continue;
+
+								// Vérifier s'il y a une collision entre les deux
+								const isColliding = !(
+									currentRect.bottom < otherRect.top ||
+									currentRect.top > otherRect.bottom ||
+									currentRect.right < otherRect.left ||
+									currentRect.left > otherRect.right
+								);
+
+								if (isColliding) {
+									// Une collision est détectée entre currentElement et otherElement
+
+									// Marquer cette paire comme traitée
+									processedPairs.add(pairId);
+
+									// Déplacer le sous-titre le plus bas vers le bas
+									const targetToAdjust =
+										currentRect.top > otherRect.top ? currentTarget : otherTarget;
+
+									// Boucle jusqu'à ce qu'il n'y ait plus de collision ou qu'on atteigne la limite d'itérations
+									let stillColliding;
+									let iterationCount = 0;
+									const maxIterations = 10; // Sécurité pour éviter les boucles infinies
+
+									do {
+										iterationCount++;
+
+										// Vérifier si l'opération a été annulée
+										if (abortSignal.aborted) return;
+
+										// Recalculer les positions actuelles
+										const currentRectLoop = currentElement.getBoundingClientRect();
+										const otherRectLoop = otherElement.getBoundingClientRect();
+
+										let spacing = globalState.getStyle('global', 'spacing').value as number;
+
+										// Calculer l'ajustement nécessaire basé sur l'overlap actuel
+										const overlapHeight = Math.abs(currentRectLoop.bottom - otherRectLoop.top);
+										const adjustmentNeeded = overlapHeight + spacing;
+
+										// Vérifier la valeur actuelle avant modification
+										const currentValue = globalState.getStyle(targetToAdjust, 'reactive-y-position')
+											.value as number;
+
+										// Incrémenter la position réactive
+										const newValue = currentValue + adjustmentNeeded;
+
+										// Appliquer le nouvel ajustement
+										globalState.getVideoStyle
+											.getStylesOfTarget(targetToAdjust)
+											.setStyle('reactive-y-position', newValue);
+
+										// Attendre que le DOM se mette à jour
+										await wait(abortSignal);
+
+										// Vérifier les nouvelles positions après ajustement
+										const newCurrentRect = currentElement.getBoundingClientRect();
+										const newOtherRect = otherElement.getBoundingClientRect();
+
+										// Vérifier s'il y a encore collision
+										stillColliding = !(
+											newCurrentRect.bottom + spacing < newOtherRect.top ||
+											newCurrentRect.top - spacing > newOtherRect.bottom ||
+											newCurrentRect.right + spacing < newOtherRect.left ||
+											newCurrentRect.left - spacing > newOtherRect.right
+										);
+									} while (stillColliding && iterationCount < maxIterations);
 								}
 							}
 						}
-					} catch (error) {
-						// Ignorer les erreurs d'annulation
-						if (error instanceof Error && error.message === 'Aborted') {
-							return;
-						}
+					}
+				} catch (error) {
+					// Ignorer les erreurs d'annulation
+					if (error instanceof Error && error.message === 'Aborted') {
+						return;
 					}
 				}
+			});
 
-				// Une fois qu'on a traité tout les abaissements de taille de max-height, on gère les collisions
-				// Check si l'anti-collision est activé
-				if (globalState.getStyle('global', 'anti-collision').value) {
-					// Récupère tous les sous-titres visibles
-					const allSubtitles = document.querySelectorAll('.subtitle');
-					const subtitleElements = Array.from(allSubtitles) as HTMLElement[];
-
-					// Set pour suivre les paires de collisions déjà traitées
-					const processedPairs = new Set<string>();
-
-					// Vérifie les collisions pour chaque sous-titre
-					for (let i = 0; i < subtitleElements.length; i++) {
-						// Vérifie si l'opération a été annulée
-						if (abortSignal.aborted) return;
-
-						const currentElement = subtitleElements[i];
-
-						// Récupère son target
-						const currentTarget = getTargetFromElement(currentElement);
-
-						if (!currentTarget) continue;
-
-						const currentRect = currentElement.getBoundingClientRect();
-
-						// Chercher les collisions avec les autres sous-titres (seulement ceux après i pour éviter les doublons)
-						for (let j = i + 1; j < subtitleElements.length; j++) {
-							const otherElement = subtitleElements[j];
-							const otherRect = otherElement.getBoundingClientRect();
-
-							// Détecte son target
-							const otherTarget = getTargetFromElement(otherElement);
-
-							// Double check pour pas que ce soit le même élément
-							if (!otherTarget || currentTarget === otherTarget) continue;
-
-							// Créer un identifiant unique pour cette paire (ordre alphabétique pour éviter les doublons)
-							const pairId = [currentTarget, otherTarget].sort().join('-');
-
-							// Si cette paire a déjà été traitée, passer au suivant
-							if (processedPairs.has(pairId)) continue;
-
-							// Vérifier s'il y a une collision entre les deux
-							const isColliding = !(
-								currentRect.bottom < otherRect.top ||
-								currentRect.top > otherRect.bottom ||
-								currentRect.right < otherRect.left ||
-								currentRect.left > otherRect.right
-							);
-
-							if (isColliding) {
-								// Une collision est détectée entre currentElement et otherElement
-
-								// Marquer cette paire comme traitée
-								processedPairs.add(pairId);
-
-								// Déplacer le sous-titre le plus bas vers le bas
-								const targetToAdjust =
-									currentRect.top > otherRect.top ? currentTarget : otherTarget;
-
-								// Boucle jusqu'à ce qu'il n'y ait plus de collision ou qu'on atteigne la limite d'itérations
-								let stillColliding;
-								let iterationCount = 0;
-								const maxIterations = 10; // Sécurité pour éviter les boucles infinies
-
-								do {
-									iterationCount++;
-
-									// Vérifier si l'opération a été annulée
-									if (abortSignal.aborted) return;
-
-									// Recalculer les positions actuelles
-									const currentRectLoop = currentElement.getBoundingClientRect();
-									const otherRectLoop = otherElement.getBoundingClientRect();
-
-									let spacing = globalState.getStyle('global', 'spacing').value as number;
-
-									// Calculer l'ajustement nécessaire basé sur l'overlap actuel
-									const overlapHeight = Math.abs(currentRectLoop.bottom - otherRectLoop.top);
-									const adjustmentNeeded = overlapHeight + spacing;
-
-									// Vérifier la valeur actuelle avant modification
-									const currentValue = globalState.getStyle(targetToAdjust, 'reactive-y-position')
-										.value as number;
-
-									// Incrémenter la position réactive
-									const newValue = currentValue + adjustmentNeeded;
-
-									// Appliquer le nouvel ajustement
-									globalState.getVideoStyle
-										.getStylesOfTarget(targetToAdjust)
-										.setStyle('reactive-y-position', newValue);
-
-									// Attendre que le DOM se mette à jour
-									await wait(abortSignal);
-
-									// Vérifier les nouvelles positions après ajustement
-									const newCurrentRect = currentElement.getBoundingClientRect();
-									const newOtherRect = otherElement.getBoundingClientRect();
-
-									// Vérifier s'il y a encore collision
-									stillColliding = !(
-										newCurrentRect.bottom + spacing < newOtherRect.top ||
-										newCurrentRect.top - spacing > newOtherRect.bottom ||
-										newCurrentRect.right + spacing < newOtherRect.left ||
-										newCurrentRect.left - spacing > newOtherRect.right
-									);
-								} while (stillColliding && iterationCount < maxIterations);
-							}
-						}
-					}
-				}
-			} catch (error) {
-				// Ignorer les erreurs d'annulation
-				if (error instanceof Error && error.message === 'Aborted') {
-					return;
-				}
+			// Une fois tout ça fait, on remet l'opacité normale
+			// sélectionne l'élément d'id subtitles-container
+			if (subtitlesContainer) {
+				subtitlesContainer.style.opacity = '1';
 			}
-		});
+		})();
 	});
 
 	let overlaySettings = $derived(() => {
@@ -376,13 +392,13 @@
 		<div class="absolute inset-0" style="backdrop-filter: blur({overlaySettings().blur}px);"></div>
 	{/if}
 
-	<div class="w-full h-full">
-		<div
-			class="absolute inset-0 flex flex-col items-center justify-center"
-			id="subtitles-container"
-		>
-			{#if currentSubtitle()}
-				{@const subtitle = currentSubtitle()}
+	<div class="w-full h-full absolute inset-0 flex flex-col items-center justify-center">
+		{#if currentSubtitle()}
+			{@const subtitle = currentSubtitle()}
+			<div
+				id="subtitles-container"
+				class="absolute inset-0 flex flex-col items-center justify-center"
+			>
 				{#if subtitle && subtitle.id}
 					<!-- Background du sous-titre -->
 					<div
@@ -451,21 +467,21 @@
 						</p>
 					{/if}
 				{/each}
-			{/if}
+			</div>
+		{/if}
 
-			<SurahName />
-			<ReciterName />
+		<SurahName />
+		<ReciterName />
 
-			{#if currentSubtitle() && currentSubtitle() instanceof SubtitleClip}
-				<VerseNumber
-					currentSurah={(currentSubtitle() as SubtitleClip).surah}
-					currentVerse={(currentSubtitle() as SubtitleClip).verse}
-				/>
-			{/if}
+		{#if currentSubtitle() && currentSubtitle() instanceof SubtitleClip}
+			<VerseNumber
+				currentSurah={(currentSubtitle() as SubtitleClip).surah}
+				currentVerse={(currentSubtitle() as SubtitleClip).verse}
+			/>
+		{/if}
 
-			{#each currentCustomTexts() as customText}
-				<CustomText customText={(customText as CustomTextClip).category!} />
-			{/each}
-		</div>
+		{#each currentCustomTexts() as customText}
+			<CustomText customText={(customText as CustomTextClip).category!} />
+		{/each}
 	</div>
 </div>
