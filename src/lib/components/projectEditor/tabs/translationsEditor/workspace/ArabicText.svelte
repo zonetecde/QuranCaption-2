@@ -7,13 +7,6 @@
 {#if subtitle instanceof SubtitleClip}
 	{@const words = subtitle.getTextWithVerseNumber().split(' ')}
 
-	<!-- Affiche le numéro de verset en haut à gauche -->
-	<div
-		class="absolute top-0 left-0 bg-white/10 px-1 py-1 rounded-br-lg border-color border-l-0 border-t-0 border-1 text-sm"
-	>
-		{subtitle.surah}:{subtitle.verse}
-	</div>
-
 	<div class="text-3xl flex flex-row arabic text-right gap-x-2 flex-wrap gap-y-2" dir="rtl">
 		{#each words as word, i}
 			{@const wordIndex = subtitle.startWordIndex + i}
