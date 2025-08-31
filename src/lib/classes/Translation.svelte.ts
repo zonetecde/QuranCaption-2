@@ -11,6 +11,7 @@ export type TranslationStatus =
 	| 'to review'
 	| 'reviewed'
 	| 'ai error'
+	| 'fetched'
 	| 'undefined';
 
 export class Translation extends SerializableBase {
@@ -34,12 +35,13 @@ export class Translation extends SerializableBase {
 			this.status === 'completed by default' ||
 			this.status === 'reviewed' ||
 			this.status === 'automatically trimmed' ||
-			this.status === 'ai trimmed'
+			this.status === 'ai trimmed' ||
+			this.status === 'fetched'
 		);
 	}
 
 	getText(edition?: string, subtitle?: SubtitleClip): string {
-		return this.text;
+		return this.text.replaceAll('— ', '—'); // Enlève l'espace après le tiret long qu'on a ajouté pour pouvoir sélectionner les mots avant et après le tiret
 	}
 
 	updateStatus(status: TranslationStatus, edition: Edition) {
@@ -70,28 +72,41 @@ export class VerseTranslation extends Translation {
 		this.type = 'verse';
 	}
 
+	/**
+	 * Retourne le texte de la traduction en ajoutant le numéro de verset si demandé dans les styles
+	 * @param edition L'édition de la traduction
+	 * @param subtitle Le clip de sous-titre associé à la traduction
+	 * @returns Le texte de la traduction avec le numéro de verset si demandé
+	 */
 	override getText(edition: string, subtitle: SubtitleClip): string {
 		// Ajoute le numéro de verset si demandé dans les styles
-		if (subtitle.startWordIndex === 0 && globalState.getStyle(edition, 'show-verse-number').value) {
+		const position = globalState.getStyle(edition, 'verse-number-position').value;
+
+		// Si on doit afficher le numéro de verset et que c'est le début ou la fin du verset (en fonction de où on veut l'afficher)
+		if (
+			((subtitle.startWordIndex === 0 && position === 'before') ||
+				(subtitle.isLastWordsOfVerse && position === 'after')) &&
+			globalState.getStyle(edition, 'show-verse-number').value
+		) {
 			// Le format contient par ex. `<number>. `
 			let format: string = (
 				globalState.getStyle(edition, 'verse-number-format').value as string
 			).replace('<number>', subtitle.verse.toString());
 
 			// Ajoute le texte de la traduction au bon endroit
-			switch (globalState.getStyle(edition, 'verse-number-position')!.value) {
-				case 'before':
-					format = format + super.getText();
-					break;
-				case 'after':
-					format = super.getText() + format;
-					break;
+			if (position === 'before' && subtitle.startWordIndex === 0) {
+				format = format + super.getText();
+			} else if (position === 'after' && subtitle.isLastWordsOfVerse) {
+				format = super.getText() + format;
+			} else {
+				format = super.getText();
 			}
 
 			return format;
 		}
 
-		return this.text;
+		// Sinon, retourne juste le texte de la traduction
+		return super.getText();
 	}
 }
 

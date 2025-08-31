@@ -46,7 +46,11 @@ export type GeneralStyleName =
 	| 'verse-number-format'
 	| 'verse-number-position';
 
-export type GlobalAnimationStyleName = 'video-dimension' | 'fade-duration';
+export type GlobalAnimationStyleName =
+	| 'video-dimension'
+	| 'fade-duration'
+	| 'anti-collision'
+	| 'spacing';
 
 export type TextStyleName =
 	| 'text-color'
@@ -58,7 +62,8 @@ export type TextStyleName =
 	| 'word-spacing'
 	| 'line-height'
 	| 'max-height'
-	| 'reactive-font-size';
+	| 'reactive-font-size'
+	| 'reactive-y-position';
 
 export type PositioningStyleName =
 	| 'vertical-position'
@@ -93,6 +98,7 @@ export type OverlayStyleName =
 	| 'overlay-enable'
 	| 'overlay-color'
 	| 'overlay-opacity'
+	| 'overlay-custom-css'
 	| 'overlay-blur';
 
 export type SurahNameStyleName =
@@ -197,7 +203,7 @@ export class Style extends SerializableBase {
 	 * Génère le CSS d'un style composite
 	 * @returns Le CSS de ce style composite
 	 */
-	generateCSSForComposite() {
+	generateCSSForComposite(): string {
 		// Récupère tous les styles composites pour un style donné
 		const compositeStyles = this.value as Style[];
 
@@ -205,12 +211,22 @@ export class Style extends SerializableBase {
 		for (let i = 0; i < compositeStyles.length; i++) {
 			const element = compositeStyles[i];
 
-			if (!element.id || (element.id.includes('enable') && !element.value)) {
-				// Si on désactive le style, on ne génère pas le CSS (c'est toute la partie outline là qui est concernée)
-				break;
+			if (element.id === 'outline-enable' && !element.value) {
+				// Si on désactive l'outline, alors on skip les 3 styles concernant l'outline
+				// (en comptant celui là)
+				i += 2;
+				continue;
 			}
 
-			css += element.css.replaceAll('{value}', String(element.value)) + '\n';
+			if (element.id === 'text-glow-enable' && !element.value) {
+				// Si on désactive le glow, alors on skip les 3 styles concernant le glow
+				// (en comptant celui là)
+				i += 2;
+				continue;
+			}
+
+			if (element.id && element.css)
+				css += element.css.replaceAll('{value}', String(element.value)) + '\n';
 		}
 
 		return css;
@@ -396,6 +412,7 @@ export class StylesData extends SerializableBase {
 						let valeur = `rgba(${r}, ${g}, ${b}, var(--background-opacity))`;
 
 						css += 'background-color: ' + valeur + ';\n';
+						continue;
 					}
 				}
 
@@ -409,14 +426,7 @@ export class StylesData extends SerializableBase {
 				// Remplace {value} par la valeur effective
 				let cssRule = '';
 
-				// Cas spécifique: certains styles sont différents pour l'arabe, comme par ex
-				// le contour du texte (outline) qui nécessite du CSS différent.
-				if (this.target === 'arabic' && 'cssarabic' in style) {
-					//@ts-ignore
-					cssRule = style.cssarabic.replaceAll(/{value}/g, String(effectiveValue));
-				} else {
-					cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
-				}
+				cssRule = style.css.replaceAll(/{value}/g, String(effectiveValue));
 
 				if (cssRule.trim()) {
 					css += cssRule + '\n';
@@ -656,7 +666,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Set les styles par défaut pour l'arabe
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-family', 'QPC2');
-		videoStyle.getStylesOfTarget('arabic').setStyle('max-height', 220); // Une ligne max
+		// videoStyle.getStylesOfTarget('arabic').setStyle('max-height', 220); // Une ligne max
 		videoStyle.getStylesOfTarget('arabic').setStyle('line-height', 1.6);
 		videoStyle.getStylesOfTarget('arabic').setStyle('font-size', 90);
 		videoStyle.getStylesOfTarget('arabic').setStyle('vertical-position', -110);
@@ -716,7 +726,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Styles par défaut pour les traductions
 		stylesData.setStyle('font-family', 'Georgia'); // Définit la police par défaut
-		stylesData.setStyle('max-height', 280); // 3 lignes max
+		// stylesData.setStyle('max-height', 280); // 3 lignes max
 		stylesData.setStyle('font-size', 60); // Définit la taille de police par défaut
 		stylesData.setStyle('vertical-position', 70); // Définit la hauteur de ligne par défaut
 
@@ -742,7 +752,7 @@ export class VideoStyle extends SerializableBase {
 	/**
 	 * Ajoute un texte personnalisé au projet dans les styles globaux
 	 */
-	async addCustomText() {
+	async addCustomText(startTime?: number, endTime?: number): Promise<void> {
 		// Ajoute la track Custom Text si non existante
 		if (!globalState.currentProject!.content.timeline.doesTrackExist(TrackType.CustomText)) {
 			globalState.currentProject!.content.timeline.addTrack(new CustomTextTrack());
@@ -757,7 +767,7 @@ export class VideoStyle extends SerializableBase {
 
 		// Ajoute le custom text au projet
 		const customTextCategory = await this.getDefaultCustomTextCategory();
-		globalState.getCustomTextTrack.addCustomText(customTextCategory);
+		globalState.getCustomTextTrack.addCustomText(customTextCategory, startTime, endTime);
 
 		setTimeout(() => {
 			globalState.updateVideoPreviewUI();
@@ -840,28 +850,90 @@ export class VideoStyle extends SerializableBase {
 	async importStyles(json: videoStyleFileData) {
 		// Crée une nouvelle instance VideoStyle à partir des données JSON
 		const importedVideoStyle = VideoStyle.fromJSON(json.videoStyle);
+		const currentProjectTranslations = globalState.getProjectTranslation.addedTranslationEditions;
 
-		// Si une traduction existe dans le projet mais que ce n'est pas celle du fichier style exporté,
-		// alors on demande à l'utilisateur s'il veut l'appliquer à sa traduction
-		const projectTranslations = globalState.getProjectTranslation.addedTranslationEditions;
-		for (const style of importedVideoStyle.styles) {
-			if (style.target === 'arabic' || style.target === 'global') continue;
-
-			for (const projectTranslation of projectTranslations) {
-				if (!projectTranslations.find((e) => e.name === style.target)) {
-					const confirm = await ModalManager.confirmModal(
-						`Your project does not have the "${style.target}" translation. Would you like to apply the styles from that translation to your project translation "${projectTranslation.name}"?`
-					);
-
-					if (confirm) {
-						style.target = projectTranslation.name;
+		// Gérer l'import des styles 'arabic' et 'global' (toujours override)
+		for (const importedStyle of importedVideoStyle.styles) {
+			if (importedStyle.target === 'arabic' || importedStyle.target === 'global') {
+				// Override automatiquement les styles arabic et global
+				const existingStyle = this.getStylesOfTarget(importedStyle.target);
+				if (existingStyle) {
+					// Remplace complètement les styles existants
+					const index = this.styles.findIndex((s) => s.target === importedStyle.target);
+					if (index !== -1) {
+						this.styles[index] = importedStyle;
 					}
+				} else {
+					this.styles.push(importedStyle);
 				}
 			}
 		}
 
-		// Remplace les styles du projet actuel par les nouveaux
-		globalState.currentProject!.content.videoStyle = importedVideoStyle;
+		// Gérer l'import des traductions
+		for (const importedStyle of importedVideoStyle.styles) {
+			if (importedStyle.target === 'arabic' || importedStyle.target === 'global') continue;
+
+			// Chercher si cette traduction existe déjà dans le projet
+			const existingProjectTranslation = currentProjectTranslations.find(
+				(t) => t.name === importedStyle.target
+			);
+
+			if (existingProjectTranslation) {
+				// 1. Même traduction trouvée -> override automatiquement
+				const existingStyleIndex = this.styles.findIndex((s) => s.target === importedStyle.target);
+				if (existingStyleIndex !== -1) {
+					this.styles[existingStyleIndex] = importedStyle;
+				} else {
+					this.styles.push(importedStyle);
+				}
+			}
+		}
+
+		// 3. Gérer les traductions du projet qui n'existent PAS dans le fichier importé
+		for (const projectTranslation of currentProjectTranslations) {
+			const existsInImported = importedVideoStyle.styles.some(
+				(importedStyle) =>
+					importedStyle.target === projectTranslation.name &&
+					importedStyle.target !== 'arabic' &&
+					importedStyle.target !== 'global'
+			);
+
+			if (!existsInImported) {
+				// Cette traduction du projet n'existe pas dans le fichier importé
+				// Proposer d'appliquer les styles disponibles dans le fichier importé
+				let styleApplied = false;
+
+				const availableImportedTranslations = importedVideoStyle.styles.filter(
+					(s) => s.target !== 'arabic' && s.target !== 'global'
+				);
+
+				for (const importedStyle of availableImportedTranslations) {
+					const confirm = await ModalManager.confirmModal(
+						`Your project translation "${projectTranslation.name}" doesn't have styles yet. Would you like to apply the styles from "${importedStyle.target}" (from the imported file) to "${projectTranslation.name}"?`,
+						true
+					);
+
+					if (confirm) {
+						// Créer une copie du style importé avec le nouveau target
+						const newStyle = JSON.parse(JSON.stringify(importedStyle));
+						newStyle.target = projectTranslation.name;
+
+						// Ajouter ou remplacer le style pour cette traduction
+						const existingStyleIndex = this.styles.findIndex(
+							(s) => s.target === projectTranslation.name
+						);
+						if (existingStyleIndex !== -1) {
+							this.styles[existingStyleIndex] = StylesData.fromJSON(newStyle);
+						} else {
+							this.styles.push(StylesData.fromJSON(newStyle));
+						}
+
+						styleApplied = true;
+						break; // Arrêter dès qu'un style est appliqué
+					}
+				}
+			}
+		}
 
 		// Ajoute les customs text clips en créant des instances correctes
 		for (const clipData of json.customTextClips) {
@@ -901,7 +973,8 @@ export class VideoStyle extends SerializableBase {
 
 	async resetStyles() {
 		const confirmation = await ModalManager.confirmModal(
-			'Are you sure you want to reset all styles to their default values?'
+			'Are you sure you want to reset all styles to their default values?',
+			false
 		);
 		if (!confirmation) return;
 

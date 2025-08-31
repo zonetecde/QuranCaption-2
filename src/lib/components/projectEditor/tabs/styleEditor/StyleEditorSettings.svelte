@@ -250,9 +250,9 @@
 							Empêche donc l'affichage de ces deux styles si on a une sélection de sous-titre en cours.
 
 							Troisième cas :
-							On empêche l'affichage du style "reactive-font-size" qui est un style utilitaire censé être non-visible. 
+							On empêche l'affichage du style "reactive-font-size" et "reactive-y-position" qui sont des styles utilitaire censé être non-visible. 
 								  -->
-							{#if !(globalState.getStylesState.currentSelection === 'arabic' && (style.id === 'verse-number-format' || style.id === 'verse-number-position')) && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-subtitles' || style.id === 'show-verse-number' || style.id === 'verse-number-format' || style.id === 'max-height' || style.id === 'verse-number-position')) && style.id !== 'reactive-font-size'}
+							{#if !(globalState.getStylesState.currentSelection === 'arabic' && (style.id === 'verse-number-format' || style.id === 'verse-number-position')) && !(globalState.getStylesState.selectedSubtitles.length > 0 && (style.id === 'show-subtitles' || style.id === 'show-verse-number' || style.id === 'verse-number-format' || style.id === 'max-height' || style.id === 'verse-number-position')) && style.id !== 'reactive-font-size' && style.id !== 'reactive-y-position'}
 								<!-- On veut désactiver certains style, comme par exemple
 							 - Si on a le style "Always Show" pour les customs text d'enable, alors on disable les styles permettant
 							 de set les propriétés de temps de début d'affichage et de fin d'affichage -->
@@ -279,7 +279,12 @@
 			{#if globalState.getStylesState.currentSelection === 'global'}
 				{#each globalState.getCustomTextTrack.clips as customTextClip, i}
 					{@const category = (customTextClip as CustomTextClip).category!}
-					<Section name={category.name} icon={category.icon} classes="-mb-1">
+					<Section
+						name={category.name}
+						icon={category.icon}
+						contentClasses="border-x border-b border-[var(--border-color)] rounded-b-lg -mt-1 pt-1"
+						classes="-mb-1 bg-white/10 pl-0.5 rounded-t-lg"
+					>
 						{#each category.styles as style, styleIndex}
 							{#if globalState.getStylesState.searchQuery === '' || style.name
 									.toLowerCase()

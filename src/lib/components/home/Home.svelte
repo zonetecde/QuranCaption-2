@@ -20,7 +20,7 @@
 	import MigrationService from '$lib/services/MigrationService';
 	import Settings from '$lib/classes/Settings.svelte';
 	import NewUpdateModal from './modals/NewUpdateModal.svelte';
-	import VersionService from '$lib/services/VersionService';
+	import { VersionService } from '$lib/services/VersionService.svelte';
 
 	let migrationFromV2ModalVisibility = $state(false);
 	let createNewProjectModalVisible: boolean = $state(false);
@@ -106,6 +106,8 @@
 	let promise: Promise<any> | undefined = $state(undefined);
 
 	onMount(async () => {
+		await VersionService.init();
+
 		// Vérifie les mises à jour
 		if (VersionService.latestUpdate?.hasUpdate) {
 			// Vérifie que ça fait pas plus de 24h qu'on a fermé le modal

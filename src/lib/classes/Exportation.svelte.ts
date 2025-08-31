@@ -73,16 +73,7 @@ export default class Exportation extends SerializableBase {
 	}
 
 	async cancelExport() {
-		if (this.currentState === ExportState.CapturingFrames) {
-			// Ferme la fenêtre d'exportation si elle est ouverte
-			(await getAllWindows()).forEach((win) => {
-				console.log(win.label, this.exportId.toString());
-				if (win.label === this.exportId.toString()) {
-					win.close();
-					// La fenêtre d'exportation va supprimer le dossier temporaire des images à sa fermeture
-				}
-			});
-		} else if (
+		if (
 			this.currentState === ExportState.Initializing ||
 			this.currentState === ExportState.CreatingVideo
 		) {
@@ -90,6 +81,15 @@ export default class Exportation extends SerializableBase {
 			// Envoie à rust de tuer le processus ffmpeg pour cette exportation
 			await invoke('cancel_export', { exportId: this.exportId.toString() });
 		}
+
+		// Ferme la fenêtre d'exportation si elle est ouverte
+		(await getAllWindows()).forEach((win) => {
+			console.log(win.label, this.exportId.toString());
+			if (win.label === this.exportId.toString()) {
+				win.close();
+				// La fenêtre d'exportation va supprimer le dossier temporaire des images à sa fermeture
+			}
+		});
 
 		// Set state to canceled
 		this.currentState = ExportState.Canceled;

@@ -4,10 +4,10 @@ import Input from './Input.svelte';
 import Error from './Error.svelte';
 import Settings from '../settings/Settings.svelte';
 import NewUpdateModal from '../home/modals/NewUpdateModal.svelte';
-import VersionService, { type UpdateInfo } from '$lib/services/VersionService';
+import { type UpdateInfo } from '$lib/services/VersionService.svelte';
 
 export default class ModalManager {
-	static async confirmModal(text: string): Promise<boolean> {
+	static async confirmModal(text: string, yesNo: boolean = false): Promise<boolean> {
 		return new Promise<boolean>((resolve) => {
 			// Créer un conteneur pour le modal
 			const container = document.createElement('div');
@@ -19,6 +19,7 @@ export default class ModalManager {
 				target: container,
 				props: {
 					text: text,
+					yesNo: yesNo,
 					resolve: (result: boolean) => {
 						// Nettoyer et résoudre
 						unmount(confirm);

@@ -55,6 +55,15 @@
 			<span class="text-sm font-medium text-[var(--text-primary)]">Import/Export Styles</span>
 		</div>
 
+		<div class="flex mb-4 items-center justify-center">
+			<button
+				class="btn px-3 py-2"
+				onclick={async () => await globalState.getVideoStyle.resetStyles()}
+			>
+				Reset Project Styles
+			</button>
+		</div>
+
 		<!-- Contenu du menu Import/Export -->
 		<div class="space-y-4">
 			<!-- Section Import -->
@@ -133,15 +142,6 @@
 					}}
 				>
 					Export to File
-				</button>
-			</div>
-
-			<div class="flex items-center justify-center">
-				<button
-					class="btn px-3 py-2"
-					onclick={async () => await globalState.getVideoStyle.resetStyles()}
-				>
-					Reset to Default Styles
 				</button>
 			</div>
 		</div>

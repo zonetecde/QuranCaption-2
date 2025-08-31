@@ -43,6 +43,44 @@
 		}, [] as number[])
 	);
 
+	let subtitlesInGroups = $derived(() => {
+		// Prends tout les sous-titres du projet et les groupes par verset (même surah:verse)
+		// Seulement ceux qui sont à la suite l'un à l'autre, sinon on crée un nouveau groupe
+		const groups: number[][] = [];
+		let currentGroup: number[] = [];
+		let lastSurah = -1;
+		let lastVerse = -1;
+
+		for (let index = 0; index < globalState.getSubtitleTrack.clips.length; index++) {
+			const subtitle = globalState.getSubtitleTrack.clips[index];
+			if (subtitle.type === 'Subtitle') {
+				const subtitleClip = subtitle as SubtitleClip;
+				// Si ce n'est pas le même verset que le précédent, on crée un nouveau groupe
+				if (subtitleClip.surah !== lastSurah || lastVerse !== subtitleClip.verse) {
+					if (currentGroup.length > 0) groups.push(currentGroup);
+					currentGroup = [index];
+					lastSurah = subtitleClip.surah;
+					lastVerse = subtitleClip.verse;
+				} else {
+					currentGroup.push(index);
+				}
+			} else if (subtitle.type === 'Pre-defined Subtitle') {
+				// Pour les Pre-defined Subtitle, on les ajoute à un nouveau groupe isolé
+				groups.push([index]);
+			}
+		}
+
+		// Ajoute le dernier groupe s'il n'est pas vide
+		if (currentGroup.length > 0) groups.push(currentGroup);
+
+		// Une fois ça, on garde que les groupes qui ont au moins un sous-titre autorisé
+		const filteredGroups = groups.filter((group) =>
+			group.some((index) => allowedTranslations[globalState.getSubtitleTrack.clips[index].id])
+		);
+
+		return filteredGroups;
+	});
+
 	// Réinitialise le compteur si les filtres changent et qu'on a moins d'éléments
 	$effect(() => {
 		const total = allowedSubtitleIndices().length;
@@ -75,6 +113,11 @@
 		// Aussi lorsqu'on ajoute/supprime une édition de traduction
 		for (const edition of globalState.currentProject!.content.projectTranslation
 			.addedTranslationEditions) {
+			const _ = edition.name;
+		}
+
+		// Lorsqu'on cache/montre une édition dans l'éditeur
+		for (const edition of editionsToShowInEditor()) {
 			const _ = edition.name;
 		}
 
@@ -184,32 +227,42 @@
 			{#if Object.keys(allowedTranslations).length === 0}
 				<NoTranslationsToShow />
 			{:else}
-				{#each allowedSubtitleIndices().slice(0, visibleCount) as clipIndex, i}
-					<!-- clipIndex est l'index réel dans clips -->
-					{#if allowedTranslations[globalState.getSubtitleTrack.clips[clipIndex].id]}
-						{#if isNewVerse(clipIndex) && clipIndex > 0 && globalState.getSubtitleTrack.clips
-								.slice(0, clipIndex)
-								.some((clip) => allowedTranslations[clip.id])}
-							<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
+				{#each subtitlesInGroups().slice(0, visibleCount) as group, i}
+					{@const firstClipInGroup = globalState.getSubtitleTrack.clips[group[0]] as
+						| SubtitleClip
+						| PredefinedSubtitleClip}
+					<div class="border border-color rounded px-4 py-4 text-primary relative space-y-7">
+						{#if firstClipInGroup instanceof SubtitleClip}
+							<!-- Affiche le numéro de verset en haut à gauche -->
+							<div
+								class="absolute top-0 left-0 bg-white/10 px-1 py-1 rounded-br-lg border-color border-l-0 border-t-0 border-1 text-sm"
+							>
+								{firstClipInGroup.surah}:{firstClipInGroup.verse}
+							</div>
 						{/if}
 
-						<section class="border border-color rounded px-4 py-4 text-primary relative">
-							<ArabicText subtitle={globalState.getSubtitleTrack.clips[clipIndex]} />
-							{#each editionsToShowInEditor() as edition, j}
-								{#if allowedTranslations[globalState.getSubtitleTrack.clips[clipIndex].id].includes(edition.name)}
+						{#each group as clipIndex}
+							{@const _clipIndex = clipIndex}
+							<!-- clipIndex est l'index réel dans clips -->
+							<section class="relative">
+								<ArabicText subtitle={globalState.getSubtitleTrack.clips[_clipIndex]} />
+								{#each editionsToShowInEditor() as edition, j}
 									<Translation
 										{edition}
-										bind:subtitle={globalState.getSubtitleTrack.clips[clipIndex] as SubtitleClip}
-										previousSubtitle={clipIndex > 0
-											? (globalState.getSubtitleTrack.getSubtitleBefore(clipIndex) as SubtitleClip)
+										bind:subtitle={globalState.getSubtitleTrack.clips[_clipIndex] as SubtitleClip}
+										previousSubtitle={_clipIndex > 0
+											? (globalState.getSubtitleTrack.getSubtitleBefore(_clipIndex) as SubtitleClip)
 											: undefined}
 									/>
-								{/if}
-							{/each}
-						</section>
-					{/if}
+								{/each}
+							</section>
+						{/each}
+					</div>
+
+					<!-- Séparateur entre chaque groupe du verset -->
+					<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
 				{/each}
-				{#if visibleCount < allowedSubtitleIndices().length}
+				{#if visibleCount < subtitlesInGroups().length}
 					<div class="text-center py-4 text-thirdly text-sm">Scrolling to load more...</div>
 				{/if}
 			{/if}

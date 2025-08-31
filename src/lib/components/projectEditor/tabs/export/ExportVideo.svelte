@@ -76,10 +76,7 @@
 				<div class="flex items-center justify-between text-sm">
 					<span class="text-secondary min-w-[150px]">Export Verse Range:</span>
 					<span class="text-accent-primary font-medium">
-						{VerseRange.getVerseRange(
-							globalState.getExportState.videoStartTime,
-							globalState.getExportState.videoEndTime
-						).toString()}
+						{VerseRange.getExportVerseRange().toString()}
 					</span>
 				</div>
 			</div>

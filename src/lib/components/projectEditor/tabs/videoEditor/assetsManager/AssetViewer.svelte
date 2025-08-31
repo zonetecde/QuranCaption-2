@@ -53,6 +53,7 @@
 						assetName: asset.getFileNameWithoutExtension()
 					});
 
+					console.log('New file path:', newFilePath);
 					if (newFilePath) {
 						// move le fichier newFilePath dans le dossier parent du fichier de l'asset
 						const parentDir = asset.getParentDirectory();
@@ -70,6 +71,8 @@
 					}
 				} catch (error) {
 					// Aucun fichier trouvé - probablement l'utilisateur a fermé la fenêtre sans télécharger de fichier
+					console.log('No new file detected or error occurred:', error);
+					console.log(JSON.stringify(error, Object.getOwnPropertyNames(error)));
 				}
 
 				webview.close();
@@ -100,6 +103,22 @@
 
 		// Ajoute l'asset à la timeline
 		asset.addToTimeline(video, audio);
+	}
+
+	async function convertToCBR() {
+		// Convertir l'asset en CBR
+		toast.promise(
+			invoke('convert_audio_to_cbr', { filePath: asset.filePath }),
+			{
+				loading: 'Converting to CBR...',
+				success:
+					'Asset converted to CBR successfully! Please restart Quran Caption to see the changes.',
+				error: 'Error converting asset to CBR.'
+			},
+			{
+				duration: 4000
+			}
+		);
 	}
 </script>
 
@@ -186,6 +205,15 @@
 					>
 						<span class="material-icons text-lg">folder_open</span>
 						Open Directory
+					</button>
+					<!-- turn into constant bitrate -->
+					<button
+						class="btn flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg
+						       hover:scale-105 transition-all duration-200"
+						onclick={convertToCBR}
+					>
+						<span class="material-icons text-lg">speed</span>
+						Convert to CBR
 					</button>
 
 					<button

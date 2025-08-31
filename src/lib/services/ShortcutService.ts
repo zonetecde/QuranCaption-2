@@ -114,6 +114,8 @@ class ShortcutService {
 	 * Supprime un raccourci
 	 */
 	static unregisterShortcut(key: { keys: string[]; description: string }): boolean {
+		if (!key) return false;
+
 		const normalizedKeys = this.normalizeKeys(key.keys);
 		let hasDeleted = false;
 

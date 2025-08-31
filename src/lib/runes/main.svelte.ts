@@ -120,7 +120,11 @@ class GlobalState {
 	}
 
 	getStyle(t: 'arabic' | 'translation' | string, s: StyleName): any {
-		if (this.currentProject) return this.getVideoStyle.getStylesOfTarget(t).findStyle(s)!;
+		if (this.currentProject) {
+			const style = this.getVideoStyle.getStylesOfTarget(t).findStyle(s);
+			if (style) return style;
+			else return { value: '' };
+		}
 	}
 
 	updateVideoPreviewUI() {

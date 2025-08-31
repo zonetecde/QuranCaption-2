@@ -8,7 +8,7 @@
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-5-french-toast';
 
-	onMount(() => {
+	onMount(async () => {
 		// Init le gestionnaire de shortcuts
 		ShortcutService.init();
 	});

@@ -5,7 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import toast from 'svelte-5-french-toast';
 	import { openUrl } from '@tauri-apps/plugin-opener';
-	import type { UpdateInfo } from '$lib/services/VersionService';
+	import type { UpdateInfo } from '$lib/services/VersionService.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 
 	let { update, resolve }: { update: UpdateInfo; resolve: () => void } = $props();

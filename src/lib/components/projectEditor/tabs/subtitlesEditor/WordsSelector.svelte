@@ -150,6 +150,11 @@
 			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_ISTIADHAH,
 			onKeyDown: () => addPredefinedSubtitle('Istiadhah')
 		});
+
+		ShortcutService.registerShortcut({
+			key: globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_CUSTOM_TEXT_CLIP,
+			onKeyDown: () => addCustomTextClip()
+		});
 	});
 
 	onDestroy(() => {
@@ -192,6 +197,9 @@
 		);
 		ShortcutService.unregisterShortcut(
 			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_ISTIADHAH
+		);
+		ShortcutService.unregisterShortcut(
+			globalState.settings!.shortcuts.SUBTITLES_EDITOR.ADD_CUSTOM_TEXT_CLIP
 		);
 	});
 
@@ -260,6 +268,8 @@
 
 			globalState.getSubtitlesEditorState.editSubtitle = null; // Reset l'édition après modification
 			toast.success('Subtitle updated successfully!');
+			await selectNextWord();
+			subtitlesEditorState().startWordIndex = subtitlesEditorState().endWordIndex;
 			return;
 		}
 
@@ -363,6 +373,16 @@
 			}
 		});
 	});
+
+	/**
+	 * Ajoute un custom text clip à la timeline entre le dernier sous-titre et la position actuelle du curseur.
+	 */
+	function addCustomTextClip(): void {
+		globalState.getVideoStyle.addCustomText(
+			globalState.getSubtitleTrack.getLastClip()?.endTime ?? 0,
+			globalState.getTimelineState.cursorPosition
+		);
+	}
 </script>
 
 <section

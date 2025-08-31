@@ -18,8 +18,19 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'Surahs';
+	src: url('/Surahs.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
 .reciters-font {
 	font-family: 'Reciters', sans-serif;
+}
+
+.surahs-font {
+	font-family: 'Surahs', sans-serif;
 }
 
 .arabic {
@@ -208,6 +219,22 @@ input[type='text'] {
 	transition:
 		border-color 0.2s ease,
 		box-shadow 0.2s ease;
+}
+
+textarea {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	border-radius: 0.5rem;
+	padding: 0.5rem 1rem 0.5rem 0.5rem;
+	font-size: 0.875rem;
+	outline: none;
+	transition:
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+	resize: vertical;
+	min-height: 3rem;
+	max-height: 20rem;
 }
 
 input[type='text']:focus {

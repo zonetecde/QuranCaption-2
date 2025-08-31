@@ -6,6 +6,7 @@ import { openPath } from '@tauri-apps/plugin-opener';
 import { exists, open, remove } from '@tauri-apps/plugin-fs';
 import { globalState } from '$lib/runes/main.svelte.js';
 import { Duration } from './index.js';
+import ModalManager from '$lib/components/modals/ModalManager.js';
 
 export class Asset extends SerializableBase {
 	id: number = $state(0);
@@ -51,9 +52,51 @@ export class Asset extends SerializableBase {
 		}
 	}
 
-	addToTimeline(asVideo: boolean, asAudio: boolean) {
+	async addToTimeline(asVideo: boolean, asAudio: boolean) {
 		if (asVideo) globalState.getVideoTrack.addAsset(this);
 		if (asAudio) globalState.getAudioTrack.addAsset(this);
+
+		if (asVideo && this.type === AssetType.Video) {
+			// Demande à l'utilisateur s'il veut que le format de les dimensions de la vidéo soient appliquées au projet
+			// Récupère les dimensions de la vidéo
+			const assetDimensions = (await invoke('get_video_dimensions', {
+				filePath: this.filePath
+			})) as {
+				width: number;
+				height: number;
+			};
+			// Si les dimensions sont invalides, on ne fait rien
+			if (assetDimensions.width <= 0 || assetDimensions.height <= 0) {
+				return;
+			}
+			// Si les dimensions sont déjà les mêmes, on ne fait rien non plus
+			const currentProjectDimensions = globalState.getStyle('global', 'video-dimension').value;
+			if (
+				assetDimensions.width === currentProjectDimensions.width &&
+				assetDimensions.height === currentProjectDimensions.height
+			) {
+				return;
+			}
+
+			// Demande confirmation à l'utilisateur
+			const confirm = await ModalManager.confirmModal(
+				'Would you like to set the project dimensions to match this video? (' +
+					assetDimensions.width +
+					'x' +
+					assetDimensions.height +
+					')',
+				true
+			);
+
+			if (confirm) {
+				if (assetDimensions.width > 0 && assetDimensions.height > 0) {
+					globalState.getStyle('global', 'video-dimension').value = {
+						width: assetDimensions.width,
+						height: assetDimensions.height
+					};
+				}
+			}
+		}
 	}
 
 	private normalizeFilePath(filePath: string): string {
@@ -165,7 +208,7 @@ export class Asset extends SerializableBase {
 		return '';
 	}
 
-	private getAssetType(extension: string): AssetType {
+	getAssetType(extension: string): AssetType {
 		switch (extension) {
 			case 'mp4':
 			case 'avi':

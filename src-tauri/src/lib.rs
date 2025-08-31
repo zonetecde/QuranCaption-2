@@ -7,6 +7,7 @@ use regex::Regex;
 use tauri::Emitter;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+mod exporter;
 
 use font_kit::source::SystemSource;
 
@@ -244,12 +245,34 @@ fn get_new_file_path(start_time: u64, asset_name: &str) -> Result<String, String
 
 #[tauri::command]
 fn move_file(source: String, destination: String) -> Result<(), String> {
+    use std::path::Path;
+    
+    let source_path = Path::new(&source);
+    let dest_path = Path::new(&destination);
+    
     // If destination exists, remove it first to force the move
-    if std::path::Path::new(&destination).exists() {
+    if dest_path.exists() {
         std::fs::remove_file(&destination).map_err(|e| e.to_string())?;
     }
-    std::fs::rename(source, destination).map_err(|e| e.to_string())
+    
+    // Try rename first (works if on same drive/filesystem)
+    match std::fs::rename(&source, &destination) {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            // If rename fails with cross-device error (Windows: 17, Unix: 18), do copy + delete
+            if e.raw_os_error() == Some(17) || e.raw_os_error() == Some(18) {
+                // Copy the file
+                std::fs::copy(&source, &destination).map_err(|e| e.to_string())?;
+                // Remove the original
+                std::fs::remove_file(&source).map_err(|e| e.to_string())?;
+                Ok(())
+            } else {
+                Err(e.to_string())
+            }
+        }
+    }
 }
+
 #[tauri::command]
 fn get_system_fonts() -> Result<Vec<String>, String> {
     let source = SystemSource::new();
@@ -271,498 +294,6 @@ fn get_system_fonts() -> Result<Vec<String>, String> {
     // Sort the font names alphabetically for better usability
     font_names.sort();
     Ok(font_names)
-}
-
-#[tauri::command]
-async fn start_export(export_id: String, imgs_folder: String, start_time: f64, end_time: f64, audios: Vec<String>, videos: Vec<String>, target_width: i32, target_height: i32, final_file_path: String, fps: i32, app_handle: tauri::AppHandle) -> Result<String, String> {
-    println!("[start_export] ===== DÉBUT EXPORT {} =====", export_id);
-    println!("[start_export] imgs_folder: {}", imgs_folder);
-    println!("[start_export] start_time(ms): {} end_time(ms): {}", start_time, end_time);
-    println!("[start_export] audios fournis: {} | vidéos: {} | fps: {}", audios.len(), videos.len(), fps);
-    let export_dir = Path::new(&imgs_folder);
-    if !export_dir.exists() { return Err(format!("Le dossier d'export n'existe pas: {}", export_dir.display())); }
-
-    // Collecte images
-    let mut entries: Vec<(u64, std::path::PathBuf)> = Vec::new();
-    for entry in fs::read_dir(&export_dir).map_err(|e| format!("Impossible de lire le dossier export: {e}"))? {
-        if let Ok(e) = entry { let p = e.path(); if p.extension().and_then(|e| e.to_str()).map(|e| e.eq_ignore_ascii_case("png")).unwrap_or(false) { if let Some(stem) = p.file_stem().and_then(|s| s.to_str()) { if let Ok(ts) = stem.parse::<u64>() { entries.push((ts, p.clone())); } else { println!("[start_export][WARN] Nom non parsé: {}", p.display()); } } } }
-    }
-    if entries.is_empty() { return Err("Aucune image trouvée pour l'export".to_string()); }
-    entries.sort_by_key(|(ts, _)| *ts);
-    println!("[start_export] {} images", entries.len());
-
-    // Calcul des durées d'affichage pour chaque image
-    let mut durations: Vec<f64> = Vec::new();
-    let crossfade = 0.3; // Durée de transition fixe
-    
-    // Pour chaque image, calculer sa durée d'affichage réelle
-    for i in 0..entries.len() {
-        let (current_ts, _) = entries[i];
-        
-        if i == entries.len() - 1 {
-            // Dernière image : durée par défaut
-            durations.push(2.0);
-        } else {
-            let (next_ts, _) = entries[i + 1];
-            let time_gap = (next_ts.saturating_sub(current_ts)) as f64 / 1000.0;
-            
-            // La durée d'affichage doit être au moins égale au temps jusqu'à la prochaine image + crossfade
-            let min_duration = time_gap + crossfade;
-            durations.push(min_duration.max(crossfade * 2.0)); // Au minimum 2x la durée de crossfade
-        }
-    }
-    
-    println!("[start_export] Durées images calculées: {:?} crossfade={:.3}", durations, crossfade);
-
-    // Audio handling
-    let start_time_seconds = start_time / 1000.0;
-    println!("[start_export] start_time_seconds audio: {:.3}", start_time_seconds);
-
-    // ffmpeg
-    let ffmpeg_path = if cfg!(target_os = "windows") {
-        Path::new("binaries").join("ffmpeg.exe")
-    } else {
-        Path::new("binaries").join("ffmpeg")
-    };
-    if !ffmpeg_path.exists() { return Err(format!("ffmpeg not found at: {}", ffmpeg_path.display())); }
-    
-    // Utiliser le chemin de fichier final fourni par le frontend
-    let output_path = Path::new(&final_file_path);
-    
-    // Créer le dossier parent du fichier de sortie s'il n'existe pas
-    if let Some(parent_dir) = output_path.parent() {
-        if let Err(e) = fs::create_dir_all(parent_dir) {
-            return Err(format!("Unable to create output directory: {}", e));
-        }
-    }
-
-    let mut cmd_args: Vec<String> = Vec::new();
-    cmd_args.push("-y".into());
-
-    // Inputs images
-    for (i, (_ts, path)) in entries.iter().enumerate() {
-        cmd_args.push("-loop".into()); cmd_args.push("1".into());
-        cmd_args.push("-t".into()); cmd_args.push(format!("{:.3}", durations[i]));
-        cmd_args.push("-i".into()); cmd_args.push(path.to_string_lossy().to_string());
-    }
-
-    // Inputs audio
-    for a in &audios { cmd_args.push("-i".into()); cmd_args.push(a.clone()); }
-    
-    // Inputs vidéo
-    for v in &videos { cmd_args.push("-i".into()); cmd_args.push(v.clone()); }
-
-    // Construction filter_complex
-    let mut filter = String::new();
-    
-    // --- Vidéo/Image de fond ---
-    let mut background_video_filter = String::new();
-    let has_background = !videos.is_empty();
-    
-    if has_background {
-        let background_max_duration = (end_time - start_time) / 1000.0; // Durée de l'export en secondes
-        let video_input_start = entries.len() + audios.len();
-        
-        // Vérifier si c'est une seule image (extensions communes d'images)
-        let is_single_image = videos.len() == 1 && {
-            let video_path = &videos[0];
-            let extension = Path::new(video_path)
-                .extension()
-                .and_then(|ext| ext.to_str())
-                .map(|ext| ext.to_lowercase());
-            
-            matches!(extension.as_deref(), Some("jpg") | Some("jpeg") | Some("png") | Some("bmp") | Some("gif") | Some("tiff") | Some("webp"))
-        };
-        
-        if is_single_image {
-            // Image statique en fond (object-cover style)
-            println!("[start_export] Image de fond statique détectée: {}", videos[0]);
-            background_video_filter = format!(
-                "[{idx}:v]scale=iw*max({width}/iw\\,{height}/ih):ih*max({width}/iw\\,{height}/ih),crop={width}:{height},loop=-1:1:0,fps={fps}[bg0]",
-                idx = video_input_start,
-                width = target_width,
-                height = target_height,
-                fps = fps
-            );
-            println!("[start_export] Image de fond configurée avec style object-cover, durée: {:.3}s", background_max_duration);
-        } else {
-            // Vidéos de fond (logique existante)
-            println!("[start_export] Durée max vidéo de fond: {:.3}s (basée sur end_time - start_time)", background_max_duration);
-            
-            let mut video_durations = Vec::new();
-            for (idx, video_file) in videos.iter().enumerate() {
-                match get_duration(video_file) { 
-                    Ok(ms) => { 
-                        let s = (ms.max(0) as f64)/1000.0; 
-                        video_durations.push(s); 
-                        println!("[start_export] Durée vidéo {} = {:.3}s", idx, s); 
-                    }, 
-                    Err(e) => { 
-                        println!("[start_export][WARN] Durée vidéo inconnue {}: {}", video_file, e); 
-                        video_durations.push(0.0);
-                    } 
-                }
-            }
-            
-            let mut current_video_time = 0.0;
-            let mut video_filters: Vec<String> = Vec::new();
-            let mut input_index = video_input_start;
-            let mut remaining_duration = background_max_duration;
-            
-            for &video_duration in video_durations.iter() {
-                let video_end_time = current_video_time + video_duration;
-                if start_time_seconds >= video_end_time { 
-                    current_video_time = video_end_time; 
-                    input_index += 1; 
-                    continue; 
-                }
-                
-                if remaining_duration <= 0.0 {
-                    break; // Plus besoin de vidéos, on a atteint la durée max
-                }
-                
-                if start_time_seconds >= current_video_time && start_time_seconds < video_end_time { 
-                    let skip = start_time_seconds - current_video_time; 
-                    let available_duration = video_duration - skip;
-                    let clip_duration = available_duration.min(remaining_duration);
-                    video_filters.push(format!("[{idx}:v]trim=start={skip}:end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=skip+clip_duration)); 
-                    remaining_duration -= clip_duration;
-                } else { 
-                    let clip_duration = video_duration.min(remaining_duration);
-                    video_filters.push(format!("[{idx}:v]trim=end={end},setpts=PTS-STARTPTS,scale=iw*min({width}/iw\\,{height}/ih):ih*min({width}/iw\\,{height}/ih),pad={width}:{height}:({width}-iw)/2:({height}-ih)/2[bg{}]", video_filters.len(), idx=input_index, width=target_width, height=target_height, end=clip_duration)); 
-                    remaining_duration -= clip_duration;
-                }
-                current_video_time = video_end_time; 
-                input_index += 1;
-            }
-            
-            if !video_filters.is_empty() {
-                if video_filters.len() == 1 { 
-                    background_video_filter = video_filters[0].clone(); 
-                } else { 
-                    background_video_filter = video_filters.join(";");
-                    background_video_filter.push(';');
-                    for i in 0..video_filters.len() { 
-                        background_video_filter.push_str(&format!("[bg{}]", i)); 
-                    }
-                    background_video_filter.push_str(&format!("concat=n={}:v=1:a=0[bg_video]", video_filters.len()));
-                }
-                println!("[start_export] Vidéo de fond configurée avec {} segment(s), durée limitée à {:.3}s", video_filters.len(), background_max_duration);
-            }
-        }
-    }
-    
-    // --- Images avec overlay sur vidéo/image de fond ---
-    if entries.len() == 1 {
-        if has_background {
-            if !background_video_filter.is_empty() {
-                filter.push_str(&background_video_filter);
-                filter.push(';');
-                let bg_label = if videos.len() == 1 { "[bg0]" } else { "[bg_video]" };
-                filter.push_str(&format!("color=black:{}x{}:d={:.3}[black];[0:v]fps={},format=yuva420p,setsar=1:1[overlay];{}[black]overlay[vout]", target_width, target_height, durations[0], fps, bg_label));
-            } else {
-                filter.push_str(&format!("[0:v]fps={},format=yuv420p,setsar=1:1[vout]", fps));
-            }
-        } else {
-            filter.push_str(&format!("[0:v]fps={},format=yuv420p,setsar=1:1[vout]", fps));
-        }
-    } else {
-        // Préparation des inputs vidéo avec transparence
-        for i in 0..entries.len() { 
-            filter.push_str(&format!("[{i}:v]fps={},format=yuva420p,setsar=1:1[v{i}];", fps));
-        }
-        
-        // Construction des transitions xfade basées sur les vrais timestamps
-        let mut current_label = String::from("v0");
-        let base_timestamp = entries[0].0; // Timestamp de la première image comme référence
-        
-        for i in 1..entries.len() {
-            let next_input = format!("v{}", i);
-            let out_label = if i == entries.len() - 1 { "overlay".to_string() } else { format!("vx{}", i) };
-            
-            // Calculer l'offset basé sur la différence réelle de timestamps
-            let current_image_ts = entries[i].0;
-            let offset = ((current_image_ts - base_timestamp) as f64 / 1000.0) - crossfade;
-            let offset = offset.max(0.0); // Ne pas avoir d'offset négatif
-            
-            filter.push_str(&format!(
-                "[{curr}][{next}]xfade=transition=fade:duration={dur}:offset={off}[{out}];", 
-                curr=current_label, 
-                next=next_input, 
-                dur=format!("{:.3}", crossfade), 
-                off=format!("{:.3}", offset), 
-                out=out_label
-            ));
-            
-            current_label = out_label;
-        }
-        
-        // Compositing avec vidéo/image de fond
-        if has_background && !background_video_filter.is_empty() {
-            filter.push_str(&background_video_filter);
-            filter.push(';');
-            let bg_label = if videos.len() == 1 { "[bg0]" } else { "[bg_video]" };
-            filter.push_str(&format!("{}[overlay]overlay[vout]", bg_label));
-        } else {
-            // Pas de vidéo/image de fond, utiliser un fond noir
-            filter.push_str(&format!("color=black:{}x{}[black];[black][overlay]overlay[vout]", target_width, target_height));
-        }
-        
-        if filter.ends_with(';') { filter.pop(); }
-    }
-
-    // --- Audio --- (similaire à add_audio_to_video mais avec limitation de durée)
-    if !audios.is_empty() {
-        // Calculer la durée totale des audios (durée maximale que l'audio doit avoir)
-        let audio_max_duration = (end_time - start_time) / 1000.0; // Durée de l'export en secondes
-        println!("[start_export] Durée max audio: {:.3}s (basée sur end_time - start_time)", audio_max_duration);
-        
-        let audio_input_start = entries.len();
-        let mut audio_durations = Vec::new();
-        for (idx, audio_file) in audios.iter().enumerate() {
-            match get_duration(audio_file) { 
-                Ok(ms) => { 
-                    let s = (ms.max(0) as f64)/1000.0; 
-                    audio_durations.push(s); 
-                    println!("[start_export] Durée audio {} = {:.3}s", idx, s); 
-                }, 
-                Err(e) => { 
-                    println!("[start_export][WARN] Durée audio inconnue {}: {}", audio_file, e); 
-                    audio_durations.push(0.0);
-                } 
-            }
-        }
-        
-        let mut current_audio_time = 0.0;
-        let mut audio_filters: Vec<String> = Vec::new();
-        let mut input_index = audio_input_start; // index ffmpeg des audios
-        let mut remaining_duration = audio_max_duration;
-        
-        for &audio_duration in audio_durations.iter() {
-            let audio_end_time = current_audio_time + audio_duration;
-            if start_time_seconds >= audio_end_time { 
-                current_audio_time = audio_end_time; 
-                input_index += 1; 
-                continue; 
-            }
-            
-            if remaining_duration <= 0.0 {
-                break; // Plus besoin d'audios, on a atteint la durée max
-            }
-            
-            if start_time_seconds >= current_audio_time && start_time_seconds < audio_end_time { 
-                let skip = start_time_seconds - current_audio_time; 
-                let available_duration = audio_duration - skip;
-                let clip_duration = available_duration.min(remaining_duration);
-                audio_filters.push(format!("[{idx}:a]atrim=start={skip}:end={end},asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index, end=skip+clip_duration)); 
-                remaining_duration -= clip_duration;
-            } else { 
-                let clip_duration = audio_duration.min(remaining_duration);
-                audio_filters.push(format!("[{idx}:a]atrim=end={end},asetpts=PTS-STARTPTS[a{}]", audio_filters.len(), idx=input_index, end=clip_duration)); 
-                remaining_duration -= clip_duration;
-            }
-            current_audio_time = audio_end_time; 
-            input_index += 1;
-        }
-        
-        if audio_filters.is_empty() { 
-            println!("[start_export][WARN] Aucun segment audio retenu"); 
-        } else {
-            println!("[start_export] Audio configuré avec {} segment(s), durée limitée à {:.3}s", audio_filters.len(), audio_max_duration);
-        }
-
-        if !audio_filters.is_empty() {
-            if !filter.is_empty() && !filter.ends_with(';') { filter.push(';'); }
-            if audio_filters.len() == 1 { 
-                filter.push_str(&audio_filters[0]); 
-            } else { 
-                filter.push_str(&audio_filters.join(";")); 
-                filter.push(';'); 
-                for i in 0..audio_filters.len() { 
-                    filter.push_str(&format!("[a{}]", i)); 
-                } 
-                filter.push_str(&format!("concat=n={}:v=0:a=1[audio_out]", audio_filters.len())); 
-            }
-        }
-    }
-
-    println!("[start_export] filter_complex final: {}", filter);
-
-    cmd_args.push("-filter_complex".into()); cmd_args.push(filter.clone());
-    cmd_args.push("-map".into()); cmd_args.push("[vout]".into());
-    if !audios.is_empty() { cmd_args.push("-map".into()); cmd_args.push(if audios.len()==1 { "[a0]".into() } else { "[audio_out]".into() }); cmd_args.push("-c:a".into()); cmd_args.push("aac".into()); cmd_args.push("-b:a".into()); cmd_args.push("128k".into()); }
-    cmd_args.push("-c:v".into()); cmd_args.push("libx264".into());
-    cmd_args.push("-pix_fmt".into()); cmd_args.push("yuv420p".into());
-    cmd_args.push("-movflags".into()); cmd_args.push("+faststart".into());
-    cmd_args.push("-r".into()); cmd_args.push(fps.to_string());
-    
-    // Forcer la durée totale de la vidéo finale à être exactement end_time - start_time
-    let max_duration = (end_time - start_time) / 1000.0;
-    cmd_args.push("-t".into()); cmd_args.push(format!("{:.3}", max_duration));
-    
-    cmd_args.push("-progress".into()); cmd_args.push("pipe:2".into());
-    cmd_args.push(output_path.to_string_lossy().to_string());
-
-    // println!("[start_export] Commande:"); print!("  {}", ffmpeg_path.display()); for a in &cmd_args { print!(" {}", a); } println!("");
-
-    let mut cmd = TokioCommand::new(&ffmpeg_path);
-    cmd.args(&cmd_args);
-    cmd.stderr(std::process::Stdio::piped());
-    cmd.stdout(std::process::Stdio::piped());
-    configure_tokio_command_no_window(&mut cmd);
-
-    // Utiliser la durée exacte forcée par l'option -t
-    let total_video_duration = (end_time - start_time) / 1000.0;
-    println!("[start_export] Durée vidéo forcée: {:.3}s (end_time - start_time)", total_video_duration);
-
-    let mut child = cmd.spawn().map_err(|e| format!("Echec lancement ffmpeg: {e}"))?;
-    
-    // Stocker le PID du processus dans la HashMap globale
-    if let Some(pid) = child.id() {
-        let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
-        process_ids.insert(export_id.clone(), pid);
-        println!("[start_export] Processus ffmpeg démarré avec PID: {} pour export: {}", pid, export_id);
-    }
-    
-    let mut collected_stderr: Vec<String> = Vec::new();
-    
-    if let Some(stderr) = child.stderr.take() {
-        let reader = BufReader::new(stderr);
-        let mut lines = reader.lines();
-        
-        // Regex pour extraire le temps actuel de la progression (correction: un seul backslash)
-        let time_regex = Regex::new(r"out_time_ms=(\d+)").unwrap();
-        
-        while let Some(line) = lines.next_line().await.unwrap_or(None) {
-            let line_trimmed = line.trim().to_string();
-            if !line_trimmed.is_empty() {
-                collected_stderr.push(line_trimmed.clone());
-            }
-            
-            // Chercher les informations de progression
-            if let Some(captures) = time_regex.captures(&line_trimmed) {
-                if let Some(time_match) = captures.get(1) {
-                    if let Ok(time_us) = time_match.as_str().parse::<u64>() {
-                        let current_time = time_us as f64 / 1_000_000.0; // Convertir de microsecondes en secondes
-                        
-                        if total_video_duration > 0.0 {
-                            let progress = (current_time / total_video_duration * 100.0).min(100.0);
-                            println!("Export Progress: {:.1}% ({:.1}s / {:.1}s)", progress, current_time, total_video_duration);
-                            
-                            // Émettre l'événement de progression vers le frontend
-                            let _ = app_handle.emit("export-progress", serde_json::json!({
-                                "progress": progress,
-                                "current_time": current_time,
-                                "total_time": total_video_duration
-                            }));
-                        } else {
-                            println!("Export Processing: {:.1}s elapsed", current_time);
-                            
-                            // Émettre l'événement sans pourcentage
-                            let _ = app_handle.emit("export-progress", serde_json::json!({
-                                "progress": null,
-                                "current_time": current_time,
-                                "total_time": null
-                            }));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    let status = child.wait().await.map_err(|e| format!("Echec attente ffmpeg: {e}"))?;
-    
-    // Nettoyer le PID de la HashMap une fois terminé
-    {
-        let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
-        process_ids.remove(&export_id);
-    }
-    
-    if !status.success() { for l in collected_stderr.iter().rev().take(30).rev() { println!("  | {}", l); } let joined = collected_stderr.join("\n"); let _ = app_handle.emit("export-error", format!("ffmpeg failed ruing video exportation\n{}", joined)); return Err("ffmpeg failed".to_string()); }
-
-    let output_str = output_path.to_string_lossy().to_string();
-    println!("[start_export] ✓ Vidéo créée: {}", output_str);
-    
-    let output_file_name = output_path.file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("export.mp4")
-        .to_string();
-    
-    let _ = app_handle.emit("export-complete", serde_json::json!({ 
-        "filename": output_file_name, 
-        "exportId": export_id,
-        "fullPath": output_str
-    }));
-    println!("[start_export] ===== FIN EXPORT {} =====", export_id);
-    Ok(output_str)
-}
-
-#[tauri::command]
-async fn cancel_export(export_id: String) -> Result<String, String> {
-    println!("[cancel_export] Tentative d'annulation de l'export {}", export_id);
-    
-    let mut process_ids = EXPORT_PROCESS_IDS.lock().unwrap();
-    
-    if let Some(pid) = process_ids.remove(&export_id) {
-        drop(process_ids); // Libérer le lock avant l'opération potentiellement bloquante
-        
-        println!("[cancel_export] Processus trouvé avec PID {} pour l'export {}, tentative de terminaison", pid, export_id);
-        
-        // Tuer le processus en utilisant le PID
-        #[cfg(target_os = "windows")]
-        {
-            let mut cmd = Command::new("taskkill");
-            cmd.args(&["/F", "/PID", &pid.to_string()]);
-            configure_command_no_window(&mut cmd);
-            let output = cmd.output();
-            
-            match output {
-                Ok(result) => {
-                    if result.status.success() {
-                        println!("[cancel_export] ✓ Processus ffmpeg tué avec succès pour l'export {}", export_id);
-                        Ok(format!("Export {} canceled successfully", export_id))
-                    } else {
-                        let stderr = String::from_utf8_lossy(&result.stderr);
-                        println!("[cancel_export] ✗ Erreur taskkill: {}", stderr);
-                        Err(format!("Failed to kill process: {}", stderr))
-                    }
-                }
-                Err(e) => {
-                    println!("[cancel_export] ✗ Erreur lors de l'exécution de taskkill: {}", e);
-                    Err(format!("Failed to execute taskkill: {}", e))
-                }
-            }
-        }
-        
-        #[cfg(not(target_os = "windows"))]
-        {
-            let mut cmd = Command::new("kill");
-            cmd.args(&["-TERM", &pid.to_string()]);
-            configure_command_no_window(&mut cmd);
-            let output = cmd.output();
-            
-            match output {
-                Ok(result) => {
-                    if result.status.success() {
-                        println!("[cancel_export] ✓ Processus ffmpeg tué avec succès pour l'export {}", export_id);
-                        Ok(format!("Export {} canceled successfully", export_id))
-                    } else {
-                        let stderr = String::from_utf8_lossy(&result.stderr);
-                        println!("[cancel_export] ✗ Erreur kill: {}", stderr);
-                        Err(format!("Failed to kill process: {}", stderr))
-                    }
-                }
-                Err(e) => {
-                    println!("[cancel_export] ✗ Erreur lors de l'exécution de kill: {}", e);
-                    Err(format!("Failed to execute kill: {}", e))
-                }
-            }
-        }
-    } else {
-        println!("[cancel_export] ✗ Aucun processus trouvé pour l'export {}", export_id);
-        Err(format!("No active export found with ID: {}", export_id))
-    }
 }
 
 #[tauri::command]
@@ -875,6 +406,180 @@ fn open_explorer_with_file_selected(file_path: String) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+fn get_video_dimensions(file_path: &str) -> Result<serde_json::Value, String> {
+    // Vérifier que le fichier existe
+    if !std::path::Path::new(file_path).exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    let ffprobe_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffprobe.exe")
+    } else {
+        Path::new("binaries").join("ffprobe")
+    };
+
+    // Vérifier que le binaire existe
+    if !ffprobe_path.exists() {
+        return Err(format!("ffprobe binary not found at: {}", ffprobe_path.display()));
+    }
+
+    let mut cmd = Command::new(&ffprobe_path);
+    cmd.args(&[
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
+        "-show_streams",
+        "-select_streams",
+        "v:0", // Sélectionner le premier stream vidéo
+        file_path,
+    ]);
+    configure_command_no_window(&mut cmd);
+    let output = cmd.output();
+
+    match output {
+        Ok(result) => {
+            if result.status.success() {
+                let output_str = String::from_utf8_lossy(&result.stdout);
+                
+                // Parser le JSON de ffprobe
+                let json_value: serde_json::Value = serde_json::from_str(&output_str)
+                    .map_err(|e| format!("Failed to parse ffprobe JSON output: {}", e))?;
+                
+                // Extraire les dimensions du premier stream vidéo
+                if let Some(streams) = json_value.get("streams") {
+                    if let Some(stream) = streams.get(0) {
+                        let width = stream.get("width")
+                            .and_then(|w| w.as_i64())
+                            .unwrap_or(0);
+                        let height = stream.get("height")
+                            .and_then(|h| h.as_i64())
+                            .unwrap_or(0);
+                        
+                        return Ok(serde_json::json!({
+                            "width": width,
+                            "height": height
+                        }));
+                    }
+                }
+                
+                Err("No video stream found in file".to_string())
+            } else {
+                let stderr = String::from_utf8_lossy(&result.stderr);
+                Err(format!("ffprobe error: {}", stderr))
+            }
+        }
+        Err(e) => Err(format!("Unable to execute ffprobe: {}", e)),
+    }
+}
+
+#[tauri::command]
+fn convert_audio_to_cbr(file_path: String) -> Result<(), String> {
+    // Vérifier que le fichier existe
+    if !std::path::Path::new(&file_path).exists() {
+        return Err(format!("File not found: {}", file_path));
+    }
+
+    let ffmpeg_path = if cfg!(target_os = "windows") {
+        Path::new("binaries").join("ffmpeg.exe")
+    } else {
+        Path::new("binaries").join("ffmpeg")
+    };
+
+    // Vérifier que le binaire existe
+    if !ffmpeg_path.exists() {
+        return Err(format!("ffmpeg binary not found at: {}", ffmpeg_path.display()));
+    }
+
+    // Extraire l'extension du fichier d'origine
+    let path = Path::new(&file_path);
+    let extension = path.extension()
+        .and_then(|ext| ext.to_str())
+        .unwrap_or("mp4");
+    
+    // Créer un fichier temporaire avec la même extension
+    let file_stem = path.file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or("temp");
+    let parent_dir = path.parent()
+        .map(|p| p.to_str().unwrap_or(""))
+        .unwrap_or("");
+    
+    let temp_path = if parent_dir.is_empty() {
+        format!("{}_temp.{}", file_stem, extension)
+    } else {
+        format!("{}\\{}_temp.{}", parent_dir, file_stem, extension)
+    };
+
+    // Commande ffmpeg pour convertir en CBR - adapter selon le type de fichier
+    let mut cmd = Command::new(&ffmpeg_path);
+    
+    // Détecter si c'est un fichier audio ou vidéo basé sur l'extension
+    let is_audio_only = matches!(extension.to_lowercase().as_str(), "mp3" | "wav" | "flac" | "aac" | "ogg" | "m4a");
+    
+    if is_audio_only {
+        // Pour les fichiers audio seulement - paramètres identiques à Audacity
+        cmd.args(&[
+            "-i", &file_path,
+            "-codec:a", "libmp3lame",    // Encodeur LAME comme Audacity
+            "-b:a", "192k",              // Bitrate constant 192k comme dans l'image
+            "-cbr", "1",                 // Force CBR (Constant Bitrate)
+            "-ar", "44100",              // Sample rate 44100 Hz comme Audacity
+            "-ac", "2",                  // Stéréo comme Audacity
+            "-f", "mp3",                 // Format MP3
+            "-y",                        // Overwrite output file
+            &temp_path,
+        ]);
+    } else {
+        // Pour les fichiers vidéo
+        cmd.args(&[
+            "-i", &file_path,
+            "-b:v", "1200k",         // Bitrate vidéo
+            "-minrate", "1200k",     // Bitrate minimum
+            "-maxrate", "1200k",     // Bitrate maximum
+            "-bufsize", "1200k",     // Buffer size
+            "-b:a", "64k",           // Bitrate audio
+            "-vcodec", "libx264",    // Codec vidéo
+            "-acodec", "aac",        // Codec audio
+            "-strict", "-2",         // Strict mode
+            "-ac", "2",              // Canaux audio (stéréo)
+            "-ar", "44100",          // Sample rate
+            "-s", "320x240",         // Résolution vidéo
+            "-y",                    // Overwrite output file
+            &temp_path,
+        ]);
+    }
+    configure_command_no_window(&mut cmd);
+    
+    let output = cmd.output();
+
+    match output {
+        Ok(result) => {
+            if result.status.success() {
+                // Remplacer le fichier original par le fichier converti
+                if let Err(e) = std::fs::remove_file(&file_path) {
+                    return Err(format!("Failed to remove original file: {}", e));
+                }
+                if let Err(e) = std::fs::rename(&temp_path, &file_path) {
+                    return Err(format!("Failed to replace original file: {}", e));
+                }
+                Ok(())
+            } else {
+                // Nettoyer le fichier temporaire en cas d'erreur
+                let _ = std::fs::remove_file(&temp_path);
+                let stderr = String::from_utf8_lossy(&result.stderr);
+                Err(format!("ffmpeg error: {}", stderr))
+            }
+        }
+        Err(e) => {
+            // Nettoyer le fichier temporaire en cas d'erreur
+            let _ = std::fs::remove_file(&temp_path);
+            Err(format!("Unable to execute ffmpeg: {}", e))
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -888,8 +593,11 @@ pub fn run() {
             move_file,
             get_system_fonts,
             open_explorer_with_file_selected,
-            start_export,
-            cancel_export
+            get_video_dimensions,
+            exporter::export_video,
+            exporter::cancel_export,
+            exporter::concat_videos,
+            convert_audio_to_cbr
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -176,7 +176,9 @@ export class ProjectTranslation extends SerializableBase {
 				.replaceAll(' ]', ']')
 				.replaceAll('[ ', '[')
 				.replaceAll(' )', ')')
-				.replaceAll('( ', '(');
+				.replaceAll('( ', '(')
+				//hyphem - pour pouvoir sélectionner le mot avant et après le tiret
+				.replaceAll('—', '— ');
 		}
 
 		return processed.trim();
@@ -268,7 +270,7 @@ export class ProjectTranslation extends SerializableBase {
 
 	getPredefinedSubtitleTranslation(edition: Edition, type: string): PredefinedSubtitleTranslation {
 		const lang = globalState.availableTranslations[edition.language];
-		console.log(lang, globalState.availableTranslations, edition.language);
+
 		switch (type) {
 			case 'Basmala':
 				return new PredefinedSubtitleTranslation(lang.basmala);

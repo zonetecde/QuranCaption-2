@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import ClickableLink from './ClickableLink.svelte';
-	import VersionService from '$lib/services/VersionService';
 </script>
 
 <footer class="w-screen border-t border-color py-8">

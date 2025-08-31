@@ -48,24 +48,27 @@
 			previousSubtitle.surah === subtitle.surah
 		) {
 			// Alors on highlight toute la traduction du sous-titre précédent
-			const verseTrans = previousSubtitle.getTranslation(edition) as VerseTranslation;
+			const previousSubtitleTranslation = previousSubtitle.getTranslation(
+				edition
+			) as VerseTranslation;
 
 			// Met à jour les indices de début et de fin de la traduction du sous-titre précédent
 			if (
 				!(
-					verseTrans.startWordIndex === 0 &&
-					verseTrans.endWordIndex === originalTranslation.split(' ').length - 1
+					previousSubtitleTranslation.startWordIndex === 0 &&
+					previousSubtitleTranslation.endWordIndex === originalTranslation.split(' ').length - 1 &&
+					!previousSubtitleTranslation.isBruteForce
 				)
 			) {
-				previousSubtitleTranslationStartIndex = verseTrans.startWordIndex;
-				previousSubtitleTranslationEndIndex = verseTrans.endWordIndex;
+				previousSubtitleTranslationStartIndex = previousSubtitleTranslation.startWordIndex;
+				previousSubtitleTranslationEndIndex = previousSubtitleTranslation.endWordIndex;
 			}
 
 			// Si c'est la continuité du verset précédent, on met à jour la traduction
 			if (
 				previousSubtitle.endWordIndex + 1 === subtitle.startWordIndex && // Vérifie que le sous-titre précédent se termine juste avant le début du sous-titre actuel
-				verseTrans.status === 'reviewed' && // vérifie que la traduction du sous-titre précédent n'est pas vide
-				!verseTrans.isBruteForce // vérifie que la traduction du sous-titre précédent a été trimmed via l'outil
+				previousSubtitleTranslation.status === 'reviewed' && // vérifie que la traduction du sous-titre précédent n'est pas vide
+				!previousSubtitleTranslation.isBruteForce // vérifie que la traduction du sous-titre précédent a été trimmed via l'outil
 			) {
 				// Commence la sélection de la traduction du verset actuel à celle de fin de la traduction du sous-titre précédent
 				if (translation().status !== 'reviewed') {
@@ -82,9 +85,22 @@
 						translation().updateStatus('automatically trimmed', edition);
 					else translation().updateStatus('to review', edition);
 				}
+			} else if (
+				previousSubtitleTranslation.status === 'reviewed' &&
+				subtitle.startWordIndex === previousSubtitle.startWordIndex &&
+				subtitle.endWordIndex === previousSubtitle.endWordIndex
+			) {
+				// Si c'est exactement la même sélection que le sous-titre précédent, alors on applique la même traduction que lui
+				translation().startWordIndex = previousSubtitleTranslation.startWordIndex;
+				translation().endWordIndex = previousSubtitleTranslation.endWordIndex;
+				translation().isBruteForce = previousSubtitleTranslation.isBruteForce;
+				translation().text = previousSubtitleTranslation.text;
+				translation().updateStatus('reviewed', edition);
 			}
 		}
 	});
+
+	let lastClickedWordIndex = $state(-1);
 
 	function wordClicked(i: number): any {
 		if (translation().type === 'verse') {
@@ -96,12 +112,17 @@
 				// Si le mot est après la fin de la traduction, on étend la sélection
 				translation().endWordIndex = i;
 			} else {
-				// Si le mot est déjà sélectionné, on le désélectionne
+				// Si le mot est déjà sélectionné, on arrête la traduction à ce mot SI
+				// il nécessite review, sinon reset les curseurs sur ce mot
 				if (i >= translation().startWordIndex && i <= translation().endWordIndex) {
-					translation().startWordIndex = i;
 					translation().endWordIndex = i;
+					if (lastClickedWordIndex === i) {
+						translation().startWordIndex = i;
+					}
 				}
 			}
+
+			lastClickedWordIndex = i;
 
 			updateTranslationText();
 			translation().updateStatus('reviewed', edition);
@@ -188,6 +209,8 @@
 							Completed by default
 						{:else if status === 'automatically trimmed'}
 							Automatically trimmed
+						{:else if status === 'fetched'}
+							Fetched
 						{:else if status === 'to review'}
 							To review
 						{:else if status === 'reviewed'}
@@ -257,7 +280,7 @@
 			{#if translation().type === 'verse'}
 				<!-- toggle: brute force -->
 				<label
-					class="absolute top-1.5 right-2 text-primary opacity-40 hover:opacity-100 duration-200 cursor-pointer"
+					class="absolute top-1 right-1.75 text-primary opacity-40 hover:opacity-100 duration-200 cursor-pointer"
 				>
 					<span class="text-xs">Manually edit</span>
 					<!-- prettier-ignore -->

@@ -1,55 +1,30 @@
-# Quran Caption 3 - Development in Progress
+# Quran Caption — Quranic Video Editor
 
-⚠️ **Notice**: Quran Caption 3 is currently under active development and is expected to be released by the end of August - early September 2025.
+I am pleased to announce, after months of hard work, that Quran Caption 3 is now officially available to the public.
 
-## What's New in Version 3
+With its brand-new interface, refined algorithms, and hundreds of customization options, Quran Caption 3 makes it simple and fast to create unique Quran recitation videos — easily shareable on platforms like YouTube, TikTok, and Instagram.
 
-Quran Caption 3 represents a complete rewrite and modernization of the application, bringing significant improvements in performance, user experience, and functionality.
+Quran Caption is the result of countless hours of coding, debugging, and testing — but above all, it is the fruit of the continuous support and collaboration of the [Discord community](https://discord.gg/Hxfqq2QA2J). I sincerely thank everyone who helped bring this project to life, and I pray that Allah grants them ḥasanāt for every video generated and viewed through this software.
 
-### Key Features Coming Soon:
-- Complete UI/UX redesign for better usability
-- Enhanced video processing capabilities
-- Improved Arabic text rendering and styling
-- Better translation management system
-- Advanced customization options for subtitles
-- Optimized performance and stability
+🌙 Don’t wait any longer — download Quran Caption 3 today!
 
-## Preview Images
-
-<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/90cbfe2d-00d3-4e9e-9f26-82a950fbd2f5" />
-
-<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/7d9f469a-5b2b-4434-a7f1-ddd01f78fa9b" />
-
-<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/a311e681-4374-428c-aca2-bf85b3debff8" />
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/3875c5c9-2537-414c-a7cc-973e306fb302" />
 
 ---
 
-## Legacy Version (Quran Caption 2)
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/f2ec1ddc-14bc-4b54-8a2d-5e7aea83458f" />
 
-**Note**: The information below refers to the previous version (Quran Caption 2) which is now obsolete.
+---
 
-Official website : https://qurancaption-project.vercel.app/
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/0119f716-f918-48d6-9b23-38530a65ae51" />
 
-Documentation : https://qurancaption-project.vercel.app/documentation
 
-### The easy way to make Quran recitation videos!
-
-With the legacy Quran Caption you could import any video by your favorite reciter and add Arabic subtitles in a fun way, without having to write anything.
-
-You could add translations in over 10 languages, and completely customize text placement and colors.
-
-You can still download the latest version of the legacy Quran Caption here : [Releases](https://github.com/zonetecde/QuranCaption-2/releases/latest)
-
-![image](https://qurancaption-project.vercel.app/software.png)
-
-![image](https://qurancaption-project.vercel.app/wbw.png)
-
-![image](https://qurancaption-project.vercel.app/translations-tab.png)
+---
 
 ### Note for Developers:
 
-After cloning the repository, ensure that you add the `ffprobe`, `ffmpeg`, and `yt-dlp` files, and compile the `video_creator.py` script so the app can run properly.
+After cloning the repository, ensure that you add the `ffprobe`, `ffmpeg`, and `yt-dlp` files to the `src-tauri/binaries` folder.
 
 ###### 🔧 How to do that?
 
-You can find instructions and download links in the `src-tauri/binaries/readme.md` file.
+You can find instructions and download links in the `src-tauri/binaries/README.md` file.

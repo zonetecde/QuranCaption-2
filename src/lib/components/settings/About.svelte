@@ -1,5 +1,5 @@
 <script lang="ts">
-	import VersionService from '$lib/services/VersionService';
+	import { VersionService } from '$lib/services/VersionService.svelte';
 	import { stat } from '@tauri-apps/plugin-fs';
 	import { openUrl } from '@tauri-apps/plugin-opener';
 	import { onMount } from 'svelte';
