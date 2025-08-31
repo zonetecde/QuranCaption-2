@@ -135,7 +135,7 @@
 			<p class="text-xs text-[var(--text-secondary)] mb-1">
 				Duration: {projectDetail.duration.getFormattedTime(false)}
 			</p>
-			<p class="text-xs text-[var(--text-secondary)] mb-3">
+			<p class="text-xs text-[var(--text-secondary)] mb-3 verserange">
 				Verses: <span class="font-medium text-[var(--text-primary)]"
 					>{projectDetail.verseRange.toString()}</span
 				>
@@ -225,5 +225,13 @@
 <style>
 	.rotate-180 {
 		transform: rotate(180deg);
+	}
+
+	.verserange {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 </style>
