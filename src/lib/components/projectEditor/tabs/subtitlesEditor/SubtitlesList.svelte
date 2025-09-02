@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Clip, Duration, SubtitleClip, TrackType } from '$lib/classes';
+	import { ClipWithTranslation, SilenceClip } from '$lib/classes/Clip.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 
 	$effect(() => {
@@ -27,9 +28,22 @@
 			{@const clip = _clip as Clip}
 			{@const subtitleClip = clip as SubtitleClip}
 			<div
-				class="subtitle-card"
+				onclick={() => {
+					const s = globalState.currentProject!.projectEditorState.subtitlesEditor;
+					if (s.editSubtitle && s.editSubtitle.id === clip.id) {
+						// Si on reclique sur le même, on désélectionne
+						s.editSubtitle = null;
+						return;
+					}
+					if (clip instanceof SilenceClip || clip instanceof ClipWithTranslation) {
+						s.editSubtitle = clip;
+					}
+				}}
+				class="subtitle-card cursor-pointer hover:border-blue-500 hover:bg-opacity-80! hover:-translate-y-0.5! transition-all duration-200"
 				class:silence={subtitleClip.type === 'Silence'}
 				class:predefined={subtitleClip.type === 'Pre-defined Subtitle'}
+				class:selected={globalState.currentProject!.projectEditorState.subtitlesEditor.editSubtitle
+					?.id === clip.id}
 			>
 				<div class="card-header">
 					<div class="timing-info">
@@ -54,7 +68,7 @@
 				</div>
 
 				{#if subtitleClip.type === 'Silence'}
-					<div class="silence-indicator">
+					<div class="silence-indicator h-0">
 						<div class="silence-icon">🔇</div>
 						<span class="silence-text text-thirdly">Silent segment</span>
 					</div>
@@ -138,14 +152,16 @@
 		border: 1px solid var(--border-color);
 		border-radius: 0.75rem;
 		padding: 1rem;
-		transition: all 0.2s ease;
 		position: relative;
 	}
 
-	.subtitle-card:hover {
-		border-color: var(--accent-primary);
-		background-color: var(--bg-accent);
-		transform: translateY(-1px);
+	.subtitle-card.selected {
+		border-color: orange !important;
+		border-width: 1.5px;
+	}
+	.subtitle-card.selected:hover {
+		border-color: orange !important;
+		border-width: 1.5px;
 	}
 
 	.subtitle-card.silence {
