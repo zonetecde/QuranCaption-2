@@ -259,7 +259,7 @@
 
 		if (subtitlesEditorState().editSubtitle) {
 			await subtitleTrack.editSubtitle(
-				subtitlesEditorState().editSubtitle,
+				subtitlesEditorState().editSubtitle as SubtitleClip | PredefinedSubtitleClip,
 				verse,
 				subtitlesEditorState().startWordIndex,
 				subtitlesEditorState().endWordIndex,

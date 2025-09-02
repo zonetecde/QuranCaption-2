@@ -175,8 +175,13 @@ export class SubtitlesEditorState extends SerializableBase {
 	showWordTransliteration: boolean = $state(false);
 
 	// Indique le sous-titre à éditer dans l'éditeur de sous-titres (null si aucun)
-	editSubtitle: SubtitleClip | PredefinedSubtitleClip | ClipWithTranslation | SilenceClip | null =
-		$state(null);
+	editSubtitle:
+		| SubtitleClip
+		| PredefinedSubtitleClip
+		| ClipWithTranslation
+		| SilenceClip
+		| ClipWithTranslation
+		| null = $state(null);
 }
 
 export class TranslationsEditorState extends SerializableBase {

@@ -23,6 +23,11 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 src-tauri/2
 
+# Tauri Signing Keys
+*.key
+*.key.pub
+QuranCaption.key*
+
 # Special
 src-tauri/binaries/*.exe
 *.bak

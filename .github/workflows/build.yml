@@ -132,6 +132,8 @@ jobs:
       - name: Build the app
         run: npm run tauri build --verbose
         timeout-minutes: 45
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.QURANCAPTION_BUILD_KEY }}
 
       - name: Upload macOS DMG
         if: startsWith(matrix.os, 'macos')
@@ -199,8 +201,20 @@ jobs:
             find . -name "*.AppImage" -exec mv {} ../../release-assets/QuranCaption.Linux.AppImage \;
             find . -name "*.deb" -exec mv {} ../../release-assets/QuranCaption.Linux.deb \;
           fi
+
+          # Copier le fichier latest.json généré par Tauri (pour les mises à jour automatiques)
+          cd ../..
+          # Le fichier latest.json est généré lors du build sur chaque OS, on prend celui de Windows
+          find artifacts/windows-artifact -name "latest.json" -exec cp {} release-assets/ \; || echo "Fichier latest.json non trouvé"
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           files: release-assets/*
+          body: |
+            ## QuranCaption Release
+            This is an auto-generated draft release containing the latest build artifacts for QuranCaption.
+            ### Download the appropriate installer for your OS.
+            - For Windows, use the EXE installer.
+            - For macOS, choose the DMG file matching your architecture (Intel or ARM).
+            - For Linux, choose between the AppImage or DEB package.

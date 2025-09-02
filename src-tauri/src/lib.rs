@@ -1,10 +1,6 @@
 use std::fs;
 use std::path::{Path};
 use std::process::Command;
-use tokio::process::Command as TokioCommand;
-use tokio::io::{AsyncBufReadExt, BufReader};
-use regex::Regex;
-use tauri::Emitter;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 mod exporter;
@@ -21,14 +17,6 @@ lazy_static::lazy_static! {
 
 // Fonction utilitaire pour configurer les commandes et cacher les fenêtres CMD sur Windows
 fn configure_command_no_window(cmd: &mut Command) {
-    #[cfg(target_os = "windows")]
-    {
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-}
-
-fn configure_tokio_command_no_window(cmd: &mut TokioCommand) {
     #[cfg(target_os = "windows")]
     {
         const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -586,7 +574,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_opener::init())        .invoke_handler(tauri::generate_handler![
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())        .invoke_handler(tauri::generate_handler![
             download_from_youtube,
             get_duration,
             get_new_file_path,

@@ -57,5 +57,13 @@
 				"depends": ["libc6", "libgtk-3-0", "libwebkit2gtk-4.0-37"]
 			}
 		}
+	},
+	"plugins": {
+		"updater": {
+			"endpoints": [
+				"https://github.com/zonetecde/QuranCaption/releases/latest/download/latest.json"
+			],
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE2RUI4NzI4REYyQjJDRgpSV1RQc3ZLTmNyaHVBVFkvVzV4Q2N4aTBoSXBVNWNmV0lPS1FzWkVCUGVPOWxZWklWZEMxNEY3Lwo="
+		}
 	}
 }

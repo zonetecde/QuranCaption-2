@@ -4,7 +4,8 @@
 	import anchor from 'markdown-it-anchor';
 	import { slide } from 'svelte/transition';
 	import toast from 'svelte-5-french-toast';
-	import { openUrl } from '@tauri-apps/plugin-opener';
+	import { check } from '@tauri-apps/plugin-updater';
+	import { relaunch } from '@tauri-apps/plugin-process';
 	import type { UpdateInfo } from '$lib/services/VersionService.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 
@@ -12,6 +13,9 @@
 	let html = '<p>Loading...</p>';
 	let sanitized = $state('<p>Loading...</p>');
 	let DOMPurify: any | undefined;
+	let isDownloading = $state(false);
+	let downloadProgress = $state(0);
+	let updateCompleted = $state(false);
 
 	// markdown-it configuré avec plugins utiles
 	const md = new MarkdownIt({ html: true, linkify: true, typographer: true }).use(anchor);
@@ -44,12 +48,55 @@
 		}
 	}
 
-	async function openUpdateUrl() {
+	async function downloadAndInstallUpdate() {
 		try {
-			await openUrl('https://github.com/zonetecde/QuranCaption/releases/latest');
+			isDownloading = true;
+			downloadProgress = 0;
+
+			toast.success('Vérification de la mise à jour...');
+
+			// Vérifier la mise à jour avec Tauri updater
+			const tauriUpdate = await check();
+
+			if (!tauriUpdate?.available) {
+				toast.error('Aucune mise à jour trouvée via Tauri updater');
+				return;
+			}
+
+			toast.success(`Téléchargement de la version ${tauriUpdate.version}...`);
+
+			// Simuler le progrès (Tauri updater ne fournit pas de callback de progrès pour le moment)
+			const progressInterval = setInterval(() => {
+				if (downloadProgress < 90) {
+					downloadProgress += Math.random() * 10;
+				}
+			}, 200);
+
+			// Télécharger et installer la mise à jour
+			await tauriUpdate.downloadAndInstall();
+
+			clearInterval(progressInterval);
+			downloadProgress = 100;
+			updateCompleted = true;
+
+			toast.success('Mise à jour téléchargée avec succès !');
+
+			// Demander confirmation avant redémarrage
+			const shouldRestart = confirm(
+				'Mise à jour installée avec succès !\n\nVoulez-vous redémarrer maintenant pour appliquer les changements ?'
+			);
+
+			if (shouldRestart) {
+				await relaunch();
+			} else {
+				toast.success("L'application redémarrera la prochaine fois que vous la lancerez.");
+				resolve();
+			}
 		} catch (error) {
-			console.error('Failed to open URL:', error);
-			toast.error('Failed to open release page');
+			console.error('Erreur lors de la mise à jour:', error);
+			toast.error('Erreur lors de la mise à jour: ' + (error as Error).message);
+		} finally {
+			isDownloading = false;
 		}
 	}
 </script>
@@ -114,22 +161,61 @@
 
 		<!-- Action buttons -->
 		<div class="flex justify-end gap-3 mt-6 pt-4 border-t border-color">
+			<!-- Progress bar when downloading -->
+			{#if isDownloading}
+				<div class="flex-1 mr-4">
+					<div class="flex items-center gap-3 mb-2">
+						<span class="text-sm text-white/80">Téléchargement...</span>
+						<span class="text-sm font-mono text-accent-primary"
+							>{Math.round(downloadProgress)}%</span
+						>
+					</div>
+					<div class="w-full bg-white/10 rounded-full h-2">
+						<div
+							class="bg-gradient-to-r from-accent-primary to-accent-secondary h-2 rounded-full transition-all duration-300"
+							style="width: {downloadProgress}%"
+						></div>
+					</div>
+				</div>
+			{/if}
+
 			<button
 				class="btn px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105"
+				disabled={isDownloading}
 				onclick={() => {
-					globalState.settings!.persistentUiState.lastClosedUpdateModal = new Date().toISOString();
-					resolve();
+					if (!isDownloading) {
+						globalState.settings!.persistentUiState.lastClosedUpdateModal =
+							new Date().toISOString();
+						resolve();
+					}
 				}}
 			>
-				Later
+				{isDownloading ? 'Téléchargement...' : 'Plus tard'}
 			</button>
-			<button
-				class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
-				onclick={openUpdateUrl}
-			>
-				<span class="material-icons text-sm">download</span>
-				Update Now
-			</button>
+
+			{#if updateCompleted}
+				<button
+					class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
+					onclick={async () => await relaunch()}
+				>
+					<span class="material-icons text-sm">restart_alt</span>
+					Redémarrer
+				</button>
+			{:else}
+				<button
+					class="btn-accent px-6 py-2.5 text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
+					disabled={isDownloading}
+					onclick={downloadAndInstallUpdate}
+				>
+					{#if isDownloading}
+						<span class="material-icons text-sm animate-spin">refresh</span>
+						Téléchargement...
+					{:else}
+						<span class="material-icons text-sm">download</span>
+						Mettre à jour
+					{/if}
+				</button>
+			{/if}
 		</div>
 	</div>
 </div>
