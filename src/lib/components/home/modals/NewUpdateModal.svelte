@@ -53,17 +53,17 @@
 			isDownloading = true;
 			downloadProgress = 0;
 
-			toast.success('Vérification de la mise à jour...');
+			toast.success('Checking for updates...');
 
 			// Vérifier la mise à jour avec Tauri updater
 			const tauriUpdate = await check();
 
-			if (!tauriUpdate?.available) {
-				toast.error('Aucune mise à jour trouvée via Tauri updater');
+			if (tauriUpdate === null) {
+				toast.error('No update found via Tauri updater');
 				return;
 			}
 
-			toast.success(`Téléchargement de la version ${tauriUpdate.version}...`);
+			toast.success(`Downloading version ${tauriUpdate.version}...`);
 
 			// Simuler le progrès (Tauri updater ne fournit pas de callback de progrès pour le moment)
 			const progressInterval = setInterval(() => {
@@ -79,22 +79,22 @@
 			downloadProgress = 100;
 			updateCompleted = true;
 
-			toast.success('Mise à jour téléchargée avec succès !');
+			toast.success('Update downloaded successfully!');
 
 			// Demander confirmation avant redémarrage
 			const shouldRestart = confirm(
-				'Mise à jour installée avec succès !\n\nVoulez-vous redémarrer maintenant pour appliquer les changements ?'
+				'Update installed successfully!\n\nDo you want to restart now to apply the changes?'
 			);
 
 			if (shouldRestart) {
 				await relaunch();
 			} else {
-				toast.success("L'application redémarrera la prochaine fois que vous la lancerez.");
+				toast.success('The application will restart the next time you launch it.');
 				resolve();
 			}
 		} catch (error) {
-			console.error('Erreur lors de la mise à jour:', error);
-			toast.error('Erreur lors de la mise à jour: ' + (error as Error).message);
+			console.error('Error during update:', error);
+			toast.error('Error during update: ' + (error as Error).message);
 		} finally {
 			isDownloading = false;
 		}
