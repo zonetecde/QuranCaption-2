@@ -141,14 +141,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifact-${{ matrix.arch || 'x64' }}
-          path: 'src-tauri/target/release/bundle/dmg/*.dmg'
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/macos/*.app.tar.gz
 
       - name: Upload Windows Installer
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: windows-artifact
-          path: 'src-tauri/target/release/bundle/nsis/Quran Caption_*_x64-setup.exe'
+          path: |
+            src-tauri/target/release/bundle/nsis/Quran Caption_*_x64-setup.exe
+            src-tauri/target/release/bundle/nsis/*.exe.sig
 
       - name: Upload Linux Artifacts
         if: matrix.os == 'ubuntu-latest'
@@ -158,6 +162,9 @@ jobs:
           path: |
             src-tauri/target/release/bundle/appimage/*.AppImage
             src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz
+            src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz.sig
+            src-tauri/target/release/bundle/deb/*.deb.sig
 
   release:
     name: Create Draft Release
@@ -166,67 +173,150 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
-      - name: Prepare release assets
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Prepare release assets and generate latest.json
         run: |
           mkdir release-assets
+
+          # Extract version from package.json
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Initialize latest.json structure
+          cat > release-assets/latest.json << EOF
+          {
+            "version": "$VERSION",
+            "notes": "Release version $VERSION with latest improvements and bug fixes",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {}
+          }
+          EOF
+
+          # Function to add platform to latest.json
+          add_platform() {
+            local platform=$1
+            local signature=$2
+            local url=$3
+            
+            # Create temporary JSON with the new platform
+            jq --arg platform "$platform" --arg signature "$signature" --arg url "$url" \
+               '.platforms[$platform] = {"signature": $signature, "url": $url}' \
+               release-assets/latest.json > temp.json && mv temp.json release-assets/latest.json
+          }
+
+          # Process Windows artifacts
           cd artifacts/windows-artifact
           WIN_FILE=$(find . -name "Quran Caption_*_x64-setup.exe")
-          mv "$WIN_FILE" ../../release-assets/QuranCaption.Windows.exe
+          SIG_FILE=$(find . -name "*.exe.sig")
+          if [ -n "$WIN_FILE" ] && [ -n "$SIG_FILE" ]; then
+            WIN_SIGNATURE=$(cat "$SIG_FILE")
+            mv "$WIN_FILE" ../../release-assets/QuranCaption.Windows.exe
+            cd ../..
+            add_platform "windows-x86_64" "$WIN_SIGNATURE" "https://github.com/zonetecde/QuranCaption/releases/download/v$VERSION/QuranCaption.Windows.exe"
+          fi
 
-          # macOS Intel
-          cd ../../artifacts/macos-artifact-intel || true
+          # Process macOS Intel artifacts
+          cd artifacts/macos-artifact-intel || true
           if [ -d . ]; then
             DMG_FILE=$(find . -name "*.dmg")
             if [ -n "$DMG_FILE" ]; then
               mv "$DMG_FILE" ../../release-assets/QuranCaption.MacOS.Intel.dmg
+              # Check for signature file
+              TAR_GZ=$(find . -name "*.app.tar.gz")
+              SIG_FILE=$(find . -name "*.tar.gz.sig")
+              if [ -n "$SIG_FILE" ]; then
+                MACOS_INTEL_SIG=$(cat "$SIG_FILE")
+                cd ../..
+                add_platform "darwin-x86_64" "$MACOS_INTEL_SIG" "https://github.com/zonetecde/QuranCaption/releases/download/v$VERSION/QuranCaption.MacOS.Intel.dmg"
+              fi
             fi
           fi
 
-          # macOS ARM (M1/M2/M3)
+          # Process macOS ARM artifacts
           cd ../../artifacts/macos-artifact-arm || true
           if [ -d . ]; then
             DMG_FILE=$(find . -name "*.dmg")
             if [ -n "$DMG_FILE" ]; then
               mv "$DMG_FILE" ../../release-assets/QuranCaption.MacOS.ARM.dmg
+              # Check for signature file
+              SIG_FILE=$(find . -name "*.tar.gz.sig")
+              if [ -n "$SIG_FILE" ]; then
+                MACOS_ARM_SIG=$(cat "$SIG_FILE")
+                cd ../..
+                add_platform "darwin-aarch64" "$MACOS_ARM_SIG" "https://github.com/zonetecde/QuranCaption/releases/download/v$VERSION/QuranCaption.MacOS.ARM.dmg"
+              fi
             fi
           fi
 
+          # Process Linux artifacts
           cd ../../artifacts/linux-artifact || true
           if [ -d . ]; then
-            # Renommer les fichiers Linux avec des noms plus simples
-            find . -name "*.AppImage" -exec mv {} ../../release-assets/QuranCaption.Linux.AppImage \;
-            find . -name "*.deb" -exec mv {} ../../release-assets/QuranCaption.Linux.deb \;
+            # AppImage
+            APPIMAGE_FILE=$(find . -name "*.AppImage")
+            if [ -n "$APPIMAGE_FILE" ]; then
+              mv "$APPIMAGE_FILE" ../../release-assets/QuranCaption.Linux.AppImage
+              # Check for AppImage signature
+              APPIMAGE_SIG_FILE=$(find . -name "*.AppImage.tar.gz.sig")
+              if [ -n "$APPIMAGE_SIG_FILE" ]; then
+                APPIMAGE_SIG=$(cat "$APPIMAGE_SIG_FILE")
+                cd ../..
+                add_platform "linux-x86_64" "$APPIMAGE_SIG" "https://github.com/zonetecde/QuranCaption/releases/download/v$VERSION/QuranCaption.Linux.AppImage"
+                cd artifacts/linux-artifact
+              fi
+            fi
+            
+            # DEB package
+            DEB_FILE=$(find . -name "*.deb")
+            if [ -n "$DEB_FILE" ]; then
+              mv "$DEB_FILE" ../../release-assets/QuranCaption.Linux.deb
+            fi
           fi
 
-          # Copier le fichier latest.json généré par Tauri (pour les mises à jour automatiques)
           cd ../..
-          # Chercher le fichier latest.json dans tous les artifacts
-          echo "Recherche du fichier latest.json..."
-          find artifacts/ -name "latest.json" -type f 2>/dev/null | head -1 | xargs -I {} cp {} release-assets/latest.json || echo "⚠️ Fichier latest.json non trouvé dans les artifacts"
 
-          # Vérifier si on a trouvé le fichier
-          if [ -f "release-assets/latest.json" ]; then
-            echo "✅ Fichier latest.json trouvé et copié"
-            ls -la release-assets/latest.json
+          # Verify and format latest.json
+          if command -v jq >/dev/null 2>&1; then
+            jq '.' release-assets/latest.json > temp.json && mv temp.json release-assets/latest.json
+            echo "✅ Fichier latest.json généré avec succès:"
+            cat release-assets/latest.json
           else
-            echo "❌ Échec: fichier latest.json introuvable"
-            echo "Contenu des artifacts:"
-            find artifacts/ -type f -name "*.json" 2>/dev/null || echo "Aucun fichier JSON trouvé"
+            echo "⚠️  jq non disponible, latest.json créé mais non formaté"
           fi
+
+          echo "📁 Contenu du dossier release-assets:"
+          ls -la release-assets/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           files: release-assets/*
+          tag_name: v${{ steps.version.outputs.version }}
           body: |
-            ## QuranCaption Release
-            This is an auto-generated draft release containing the latest build artifacts for QuranCaption.
-            ### Download the appropriate installer for your OS.
-            - For Windows, use the EXE installer.
-            - For macOS, choose the DMG file matching your architecture (Intel or ARM).
-            - For Linux, choose between the AppImage or DEB package.
+            ## QuranCaption Release v${{ steps.version.outputs.version }}
+
+            Cette version contient les dernières améliorations et corrections de bugs.
+
+            ### 📥 Téléchargements par plateforme
+
+            - **Windows** : `QuranCaption.Windows.exe`
+            - **macOS Intel** : `QuranCaption.MacOS.Intel.dmg` 
+            - **macOS Apple Silicon (M1/M2/M3)** : `QuranCaption.MacOS.ARM.dmg`
+            - **Linux AppImage** : `QuranCaption.Linux.AppImage`
+            - **Linux DEB** : `QuranCaption.Linux.deb`
+
+            ### 🔄 Mise à jour automatique
+
+            Le fichier `latest.json` est inclus pour permettre les mises à jour automatiques depuis l'application.
