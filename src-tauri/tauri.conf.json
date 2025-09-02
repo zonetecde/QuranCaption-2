@@ -34,6 +34,7 @@
 	},
 	"bundle": {
 		"active": true,
+		"createUpdaterArtifacts": true,
 		"targets": ["deb", "appimage", "dmg", "nsis"],
 		"resources": ["binaries/**/*"],
 		"icon": [

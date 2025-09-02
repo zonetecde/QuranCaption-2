@@ -134,6 +134,7 @@ jobs:
         timeout-minutes: 45
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.QURANCAPTION_BUILD_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.QURANCAPTION_BUILD_KEY_PASSWORD }}
 
       - name: Upload macOS DMG
         if: startsWith(matrix.os, 'macos')
@@ -204,8 +205,19 @@ jobs:
 
           # Copier le fichier latest.json généré par Tauri (pour les mises à jour automatiques)
           cd ../..
-          # Le fichier latest.json est généré lors du build sur chaque OS, on prend celui de Windows
-          find artifacts/windows-artifact -name "latest.json" -exec cp {} release-assets/ \; || echo "Fichier latest.json non trouvé"
+          # Chercher le fichier latest.json dans tous les artifacts
+          echo "Recherche du fichier latest.json..."
+          find artifacts/ -name "latest.json" -type f 2>/dev/null | head -1 | xargs -I {} cp {} release-assets/latest.json || echo "⚠️ Fichier latest.json non trouvé dans les artifacts"
+
+          # Vérifier si on a trouvé le fichier
+          if [ -f "release-assets/latest.json" ]; then
+            echo "✅ Fichier latest.json trouvé et copié"
+            ls -la release-assets/latest.json
+          else
+            echo "❌ Échec: fichier latest.json introuvable"
+            echo "Contenu des artifacts:"
+            find artifacts/ -type f -name "*.json" 2>/dev/null || echo "Aucun fichier JSON trouvé"
+          fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
