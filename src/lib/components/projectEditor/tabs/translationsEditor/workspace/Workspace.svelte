@@ -227,44 +227,52 @@
 			{#if Object.keys(allowedTranslations).length === 0}
 				<NoTranslationsToShow />
 			{:else}
-				{#each subtitlesInGroups().slice(0, visibleCount) as group, i}
-					{@const firstClipInGroup = globalState.getSubtitleTrack.clips[group[0]] as
-						| SubtitleClip
-						| PredefinedSubtitleClip}
-					<div class="border border-color rounded px-4 py-4 text-primary relative space-y-7">
-						{#if firstClipInGroup instanceof SubtitleClip}
-							<!-- Affiche le numéro de verset en haut à gauche -->
-							<div
-								class="absolute top-0 left-0 bg-white/10 px-1 py-1 rounded-br-lg border-color border-l-0 border-t-0 border-1 text-sm"
-							>
-								{firstClipInGroup.surah}:{firstClipInGroup.verse}
-							</div>
-						{/if}
+				{#key visibleCount}
+					{#each subtitlesInGroups().slice(0, visibleCount) as group, i}
+						{@const firstClipInGroup = globalState.getSubtitleTrack.clips[group[0]] as
+							| SubtitleClip
+							| PredefinedSubtitleClip}
+						<div class="border border-color rounded px-4 py-4 text-primary relative space-y-7">
+							{#if firstClipInGroup instanceof SubtitleClip}
+								<!-- Affiche le numéro de verset en haut à gauche -->
+								<div
+									class="absolute top-0 left-0 bg-white/10 px-1 py-1 rounded-br-lg border-color border-l-0 border-t-0 border-1 text-sm"
+								>
+									{firstClipInGroup.surah}:{firstClipInGroup.verse}
+								</div>
+							{/if}
 
-						{#each group as clipIndex}
-							{@const _clipIndex = clipIndex}
-							<!-- clipIndex est l'index réel dans clips -->
-							<section class="relative">
-								<ArabicText subtitle={globalState.getSubtitleTrack.clips[_clipIndex]} />
-								{#each editionsToShowInEditor() as edition, j}
-									<Translation
-										{edition}
-										bind:subtitle={globalState.getSubtitleTrack.clips[_clipIndex] as SubtitleClip}
-										previousSubtitle={_clipIndex > 0
-											? (globalState.getSubtitleTrack.getSubtitleBefore(_clipIndex) as SubtitleClip)
-											: undefined}
-									/>
-								{/each}
-							</section>
-						{/each}
-					</div>
+							{#each group as clipIndex}
+								{@const _clipIndex = clipIndex}
+								<!-- clipIndex est l'index réel dans clips -->
+								<section class="relative">
+									<ArabicText subtitle={globalState.getSubtitleTrack.clips[_clipIndex]} />
+									{#each editionsToShowInEditor() as edition, j}
+										{#key edition.name}
+											<Translation
+												{edition}
+												bind:subtitle={
+													globalState.getSubtitleTrack.clips[_clipIndex] as SubtitleClip
+												}
+												previousSubtitle={_clipIndex > 0
+													? (globalState.getSubtitleTrack.getSubtitleBefore(
+															_clipIndex
+														) as SubtitleClip)
+													: undefined}
+											/>
+										{/key}
+									{/each}
+								</section>
+							{/each}
+						</div>
 
-					<!-- Séparateur entre chaque groupe du verset -->
-					<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
-				{/each}
-				{#if visibleCount < subtitlesInGroups().length}
-					<div class="text-center py-4 text-thirdly text-sm">Scrolling to load more...</div>
-				{/if}
+						<!-- Séparateur entre chaque groupe du verset -->
+						<div class="w-full min-h-0.5 bg-[var(--accent-primary)]/40 my-2"></div>
+					{/each}
+					{#if visibleCount < subtitlesInGroups().length}
+						<div class="text-center py-4 text-thirdly text-sm">Scrolling to load more...</div>
+					{/if}
+				{/key}
 			{/if}
 		</div>
 	{/if}
