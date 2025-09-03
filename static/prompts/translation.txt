@@ -1,5 +1,23 @@
 **Task**:  
-Map **Arabic segments** from Quranic verses to their corresponding **word indices** in pre-existing indexed translations. For each verse, identify which words in the translation correspond to each Arabic segment and return the index ranges.
+Map **Arabic segments** from Quranic verses to their corresponding **word indices** in pre-existing indexed translations. For each verse, identify which words in the translation correspond to each Arabic segment and return#### **Example 7: Strategic Overlapping for Complete Coverage**
+- **Input**:  
+  ```json
+  [
+    {
+      "index": 0,
+      "verseKey": "2:255",
+      "segments": ["اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ", "الْحَيُّ الْقَيُّومُ"],
+      "translation": "0:Allah 1:- 2:there 3:is 4:no 5:deity 6:except 7:Him, 8:the 9:Ever-Living, 10:the 11:Sustainer 12:of 13:existence."
+    }
+  ]
+  ```  
+- **Output**:  
+  ```json
+  {
+    "0": [[0, 7], [8, 13]]
+  }
+  ```  
+- **Coverage Check**: Translation has words 0-13 (14 words). Output covers all 0-13 ✓ Complete coverage.
 
 ---
 
@@ -21,6 +39,12 @@ An array of objects, where each object contains:
   }
 ]
 ```
+
+**IMPORTANT PARSING NOTE**:  
+- **Punctuation as separate words**: Pay attention that punctuation marks can be separate indexed words.
+- **Example**: `"1:: 2:\"Il"` means index 1 is ":" (colon) and index 2 is "Il".
+- **Do NOT ignore punctuation indices** - they must be included in ranges to ensure complete coverage.
+- **Format parsing**: Split by spaces first, then by first colon to separate index from word.
 
 ---
 
@@ -139,7 +163,28 @@ An array of objects, where each object contains:
 - **Coverage Check**: Translation has words 0-16 (17 words). Output covers all indices 0-16 ✓ Complete coverage.
 - **Overlapping Check**: The last segment overlaps with the second and third, and it is OK and it should overlap to ensure full coverage.
 
-#### **Example 4: Single Word Segments**
+#### **Example 4: Punctuation as Separate Words** ⚠️ **CRITICAL CASE**
+- **Input**:  
+  ```json
+  [
+    {
+      "index": 0,
+      "verseKey": "112:1",
+      "segments": ["قُلۡ", "هُوَ", "ٱللَّهُ", "أَحَدٌ"],
+      "translation": "0:Dis 1:: 2:\"Il 3:est 4:Allah, 5:Unique."
+    }
+  ]
+  ```  
+- **Output**:  
+  ```json
+  {
+    "0": [[0, 1], [2, 2], [3, 4], [5, 5]]
+  }
+  ```  
+- **Coverage Check**: Translation has words 0-5 (6 words). Output covers 0,1,2,3,4,5 ✓ Complete coverage.
+- **Parsing Note**: Index 1 is ":" (colon punctuation), index 2 is "Il" - both must be included in ranges.
+
+#### **Example 5: Single Word Segments**
 - **Input**:  
   ```json
   [
@@ -159,7 +204,7 @@ An array of objects, where each object contains:
   ```  
 - **Coverage Check**: Translation has words 0-4 (5 words). Output covers 0,1,2,3,4 ✓ Complete coverage.
 
-#### **Example 5: Multiple Verses**
+#### **Example 6: Multiple Verses**
 - **Input**:  
   ```json
   [
@@ -187,6 +232,7 @@ An array of objects, where each object contains:
 - **Coverage Check**: 
   - Verse 0: Translation has words 0-10 (11 words). Output covers all 0-10 ✓
   - Verse 1: Translation has words 0-8 (9 words). Output covers all 0-8 ✓
+
 
 #### **Example 6: Strategic Overlapping for Complete Coverage**
 - **Input**:  

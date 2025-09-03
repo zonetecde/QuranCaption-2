@@ -119,6 +119,37 @@
 
 				let verseHasError = false;
 
+				// Vérification de la couverture complète des indices
+				const coveredIndices = new Set<number>();
+				const totalWords = translationWords.length;
+
+				// Collecte tous les indices couverts par les segments valides
+				for (const range of segmentRanges) {
+					if (range !== null && Array.isArray(range) && range.length === 2) {
+						const [start, end] = range;
+						if (start >= 0 && end >= 0 && start <= end && end < totalWords) {
+							for (let i = start; i <= end; i++) {
+								coveredIndices.add(i);
+							}
+						}
+					}
+				}
+
+				// Vérifie si tous les indices de 0 à totalWords-1 sont couverts
+				const incompleteCoverage = coveredIndices.size !== totalWords;
+				if (incompleteCoverage) {
+					const missingIndices = [];
+					for (let i = 0; i < totalWords; i++) {
+						if (!coveredIndices.has(i)) {
+							missingIndices.push(i);
+						}
+					}
+					errorMessages.push(
+						`Verse ${verseKey}: Incomplete word coverage - missing indices ${missingIndices.join(', ')} (covered ${coveredIndices.size}/${totalWords} words)`
+					);
+					verseHasError = true;
+				}
+
 				// Applique chaque range à son sous-titre correspondant
 				for (let segmentIndex = 0; segmentIndex < segmentRanges.length; segmentIndex++) {
 					const range = segmentRanges[segmentIndex];
@@ -184,10 +215,18 @@
 					verseTranslation.text = translationText;
 					verseTranslation.startWordIndex = startIndex;
 					verseTranslation.endWordIndex = endIndex;
-					verseTranslation.updateStatus('ai trimmed', edition);
+
+					// Met le statut approprié : 'ai error' si couverture incomplète, sinon 'ai trimmed'
+					if (incompleteCoverage) {
+						verseTranslation.updateStatus('ai error', edition);
+					} else {
+						verseTranslation.updateStatus('ai trimmed', edition);
+					}
 				}
 
-				if (!verseHasError) {
+				// Même en cas d'erreur de couverture, on considère le verset comme traité avec succès
+				// car les sous-titres ont été appliqués (même s'ils sont marqués 'ai error')
+				if (!verseHasError || incompleteCoverage) {
 					successfulVerses++;
 				}
 			}
