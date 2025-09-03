@@ -30,6 +30,16 @@
 
 			const aiResponse = JSON.parse(aiResponseStr);
 
+			// Parser la traduction compacte "index:word index:word..."
+			const parseCompactTranslation = (translationStr: string) => {
+				return translationStr.split(' ').map((item) => {
+					const colonIndex = item.indexOf(':');
+					const index = parseInt(item.substring(0, colonIndex));
+					const word = item.substring(colonIndex + 1);
+					return { i: index, w: word };
+				});
+			};
+
 			// Error tracking
 			const errorMessages: string[] = [];
 			let processedVerses = 0;
@@ -63,11 +73,14 @@
 				const verseData = filteredArray[i];
 				const verseKey = verseData.verseKey;
 
+				// Convertir le format compact en objets
+				const translationWords = parseCompactTranslation(verseData.translation);
+
 				if (verses[verseKey]) {
 					indexToSubtitleMapping[i] = {
 						subtitles: verses[verseKey],
 						verseKey: verseKey,
-						translation: verseData.translation
+						translation: translationWords
 					};
 				}
 			}
@@ -254,22 +267,18 @@
 			const verse = verses[verseKey];
 			const translation = globalState.getProjectTranslation.getVerseTranslation(edition, verseKey);
 
-			let translationWords = [];
-
-			for (let i = 0; i < translation.split(' ').length; i++) {
-				const element = translation.split(' ')[i];
-				translationWords.push({
-					i: i,
-					w: element
-				});
-			}
+			// Format compact : "index:word index:word..."
+			let translationString = translation
+				.split(' ')
+				.map((word, index) => `${index}:${word}`)
+				.join(' ');
 
 			if (verse.length > 0) {
 				array.push({
 					index: index++,
 					verseKey: verseKey,
 					segments: verse.map((subtitle) => subtitle.text),
-					translation: translationWords
+					translation: translationString
 				});
 			}
 		}

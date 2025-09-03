@@ -8,7 +8,7 @@ An array of objects, where each object contains:
 1. `index` (number): Sequential index of the verse.
 2. `verseKey` (string): The surah and verse number in the format "s:v" (e.g., "1:5").  
 3. `segments` (array of strings): Arabic phrases to map from the verse.  
-4. `translation` (array of objects): Indexed translation where each word has an index `i` and word `w`.
+4. `translation` (string): Compact indexed translation format "index:word index:word..."
 
 **Input Structure**:  
 ```json
@@ -17,19 +17,7 @@ An array of objects, where each object contains:
     "index": 0,
     "verseKey": "1:5",
     "segments": ["إِيَّاكَ نَعْبُدُ", "وَإِيَّاكَ نَسْتَعِينُ"],
-    "translation": [
-      {"i": 0, "w": "You"},
-      {"i": 1, "w": "˹alone˺"},
-      {"i": 2, "w": "we"},
-      {"i": 3, "w": "worship"},
-      {"i": 4, "w": "and"},
-      {"i": 5, "w": "You"},
-      {"i": 6, "w": "˹alone˺"},
-      {"i": 7, "w": "we"},
-      {"i": 8, "w": "ask"},
-      {"i": 9, "w": "for"},
-      {"i": 10, "w": "help."}
-    ]
+    "translation": "0:You 1:˹alone˺ 2:we 3:worship 4:and 5:You 6:˹alone˺ 7:we 8:ask 9:for 10:help."
   }
 ]
 ```
@@ -56,24 +44,25 @@ An array of objects, where each object contains:
 
 **Core Rules**:
 
-1. **Index Range Mapping**:
+1. **COMPLETE COVERAGE REQUIREMENT**:
+   - **CRITICAL**: Every word index in the translation MUST appear in at least one segment range.
+   - If a translation has 14 words (indices 0-13), ALL indices from 0 to 13 must be covered by the output ranges.
+   - No translation word can be left unmapped. This is the most important rule.
+
+2. **Index Range Mapping**:
    - Map each Arabic segment to the **continuous range of word indices** in the translation that best represents the segment's meaning.
    - Ranges are **inclusive** - `[2, 4]` means indices 2, 3, and 4.
    - Ensure the mapped words form a **contiguous sequence** in the translation array.
 
-2. **Accurate Correspondence**:
+3. **Accurate Correspondence**:
    - Each segment's mapped indices must accurately represent the **complete meaning** of the Arabic segment.
    - Include all necessary words to capture the full semantic content of the segment.
    - Do not truncate or omit words that are essential to the segment's meaning.
 
-3. **Overlapping Segments Allowed**:
+4. **Overlapping Segments Allowed**:
    - Arabic segments can overlap, and their corresponding index ranges can also overlap.
    - If two segments share Arabic words, their index ranges can share translation word indices.
-   - Example: segments `["إِيَّاكَ نَعْبُدُ", "نَعْبُدُ وَإِيَّاكَ"]` might map to `[[0, 3], [2, 6]]` where index 3 (worship) is shared.
-
-4. **Complete Coverage Priority**:
-   - Prioritize mapping that ensures all important translation words are covered by at least one segment.
-   - Each segment should capture its full semantic meaning, even if this creates overlaps.
+   - Use overlaps strategically to ensure complete coverage of all translation words.
 
 5. **Contiguous Requirement**:
    - Each index range must represent **consecutive** indices in the translation array.
@@ -82,13 +71,14 @@ An array of objects, where each object contains:
 
 6. **Handle Non-Mappable Cases**:
    - If an Arabic segment cannot be mapped to any contiguous sequence of translation words, return `null`.
-   - This may occur when the translation structure doesn't allow for direct correspondence.
+   - However, ensure other segments compensate to maintain complete coverage.
+   - Only use `null` if absolutely no reasonable mapping exists for that segment.
 
 ---
 
 **Examples**:  
 
-#### **Example 1: Basic Mapping**  
+#### **Example 1: Basic Sequential Mapping**
 - **Input**:  
   ```json
   [
@@ -96,19 +86,7 @@ An array of objects, where each object contains:
       "index": 0,
       "verseKey": "1:5",
       "segments": ["إِيَّاكَ نَعْبُدُ", "وَإِيَّاكَ نَسْتَعِينُ"],
-      "translation": [
-        {"i": 0, "w": "You"},
-        {"i": 1, "w": "˹alone˺"},
-        {"i": 2, "w": "we"},
-        {"i": 3, "w": "worship"},
-        {"i": 4, "w": "and"},
-        {"i": 5, "w": "You"},
-        {"i": 6, "w": "˹alone˺"},
-        {"i": 7, "w": "we"},
-        {"i": 8, "w": "ask"},
-        {"i": 9, "w": "for"},
-        {"i": 10, "w": "help."}
-      ]
+      "translation": "0:You 1:˹alone˺ 2:we 3:worship 4:and 5:You 6:˹alone˺ 7:we 8:ask 9:for 10:help."
     }
   ]
   ```  
@@ -118,7 +96,7 @@ An array of objects, where each object contains:
     "0": [[0, 3], [4, 10]]
   }
   ```  
-- **Explanation**: First segment maps to "You ˹alone˺ we worship" (indices 0-3), second to "and You ˹alone˺ we ask for help." (indices 4-10).
+- **Coverage Check**: Translation has words 0-10 (11 words). Output covers 0,1,2,3,4,5,6,7,8,9,10 ✓ Complete coverage.
 
 #### **Example 2: Overlapping Segments**  
 - **Input**:  
@@ -128,14 +106,7 @@ An array of objects, where each object contains:
       "index": 0,
       "verseKey": "1:6",
       "segments": ["اهْدِنَا الصِّرَاطَ", "الصِّرَاطَ الْمُسْتَقِيمَ"],
-      "translation": [
-        {"i": 0, "w": "Guide"},
-        {"i": 1, "w": "us"},
-        {"i": 2, "w": "along"},
-        {"i": 3, "w": "the"},
-        {"i": 4, "w": "Straight"},
-        {"i": 5, "w": "Path,"}
-      ]
+      "translation": "0:Guide 1:us 2:along 3:the 4:Straight 5:Path,"
     }
   ]
   ```  
@@ -145,76 +116,98 @@ An array of objects, where each object contains:
     "0": [[0, 3], [3, 5]]
   }
   ```  
-- **Explanation**: First segment "اهْدِنَا الصِّرَاطَ" maps to "Guide us along the" (indices 0-3), second segment "الصِّرَاطَ الْمُسْتَقِيمَ" maps to "the Straight Path," (indices 3-5), with overlap at index 3 ("the").
+- **Coverage Check**: Translation has words 0-5 (6 words). Output covers 0,1,2,3,3,4,5 → unique: 0,1,2,3,4,5 ✓ Complete coverage.
 
-#### **Example 3: Multiple Verses**  
+#### **Example 3: Complex Structure with Complete Coverage**
 - **Input**:  
   ```json
   [
     {
       "index": 0,
-      "verseKey": "1:6",
-      "segments": ["اهْدِنَا", "الصِّرَاطَ الْمُسْتَقِيمَ"],
-      "translation": [
-        {"i": 0, "w": "Guide"},
-        {"i": 1, "w": "us"},
-        {"i": 2, "w": "along"},
-        {"i": 3, "w": "the"},
-        {"i": 4, "w": "Straight"},
-        {"i": 5, "w": "Path,"}
-      ]
+      "verseKey": "2:2",
+      "segments": ["ذَٰلِكَ الْكِتَابُ", "لَا رَيْبَ فِيهِ", "هُدًى لِّلْمُتَّقِينَ", "لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ"],
+      "translation": "0:This 1:is 2:the 3:Book 4:about 5:which 6:there 7:is 8:no 9:doubt, 10:a 11:guidance 12:for 13:those 14:conscious 15:of 16:Allah."
+    }
+  ]
+  ```  
+- **Output**:  
+  ```json
+  {
+    "0": [[0, 3], [4, 9], [10, 16], [4, 16]]
+  }
+  ```  
+- **Coverage Check**: Translation has words 0-16 (17 words). Output covers all indices 0-16 ✓ Complete coverage.
+- **Overlapping Check**: The last segment overlaps with the second and third, and it is OK and it should overlap to ensure full coverage.
+
+#### **Example 4: Single Word Segments**
+- **Input**:  
+  ```json
+  [
+    {
+      "index": 0,
+      "verseKey": "112:1",
+      "segments": ["قُلْ", "هُوَ", "اللَّهُ", "أَحَدٌ"],
+      "translation": "0:Say, 1:He 2:is 3:Allah, 4:One."
+    }
+  ]
+  ```  
+- **Output**:  
+  ```json
+  {
+    "0": [[0, 0], [1, 1], [2, 3], [4, 4]]
+  }
+  ```  
+- **Coverage Check**: Translation has words 0-4 (5 words). Output covers 0,1,2,3,4 ✓ Complete coverage.
+
+#### **Example 5: Multiple Verses**
+- **Input**:  
+  ```json
+  [
+    {
+      "index": 0,
+      "verseKey": "1:1",
+      "segments": ["بِسْمِ اللَّهِ", "الرَّحْمَٰنِ الرَّحِيمِ"],
+      "translation": "0:In 1:the 2:name 3:of 4:Allah, 5:the 6:Entirely 7:Merciful, 8:the 9:Especially 10:Merciful."
     },
     {
       "index": 1,
-      "verseKey": "1:7",
-      "segments": ["صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ"],
-      "translation": [
-        {"i": 0, "w": "the"},
-        {"i": 1, "w": "Path"},
-        {"i": 2, "w": "of"},
-        {"i": 3, "w": "those"},
-        {"i": 4, "w": "You"},
-        {"i": 5, "w": "have"},
-        {"i": 6, "w": "blessed"}
-      ]
+      "verseKey": "1:2",
+      "segments": ["الْحَمْدُ لِلَّهِ", "رَبِّ الْعَالَمِينَ"],
+      "translation": "0:Praise 1:is 2:due 3:to 4:Allah, 5:Lord 6:of 7:the 8:worlds."
     }
   ]
   ```  
 - **Output**:  
   ```json
   {
-    "0": [[0, 1], [3, 5]],
-    "1": [[0, 6]]
+    "0": [[0, 4], [5, 10]],
+    "1": [[0, 4], [5, 8]]
   }
   ```  
-- **Explanation**: For verse 0: "اهْدِنَا" maps to "Guide us" (0-1), "الصِّرَاطَ الْمُسْتَقِيمَ" to "the Straight Path," (3-5). For verse 1: the entire segment maps to all words (0-6).
+- **Coverage Check**: 
+  - Verse 0: Translation has words 0-10 (11 words). Output covers all 0-10 ✓
+  - Verse 1: Translation has words 0-8 (9 words). Output covers all 0-8 ✓
 
-#### **Example 4: Non-Mappable Segment**  
+#### **Example 6: Strategic Overlapping for Complete Coverage**
 - **Input**:  
   ```json
   [
     {
       "index": 0,
-      "verseKey": "20:114",
-      "segments": ["رَبِّ زِدْنِي عِلْمًا"],
-      "translation": [
-        {"i": 0, "w": "My"},
-        {"i": 1, "w": "Lord,"},
-        {"i": 2, "w": "increase"},
-        {"i": 3, "w": "me"},
-        {"i": 4, "w": "in"},
-        {"i": 5, "w": "knowledge."}
-      ]
+      "verseKey": "2:255",
+      "segments": ["اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ", "إِلَّا هُوَ الْحَيُّ الْقَيُّومُ "],
+      "translation": "0:Allah 1:- 2:there 3:is 4:no 5:deity 6:except 7:Him, 8:the 9:Ever-Living, 10:the 11:Sustainer 12:of 13:existence."
     }
   ]
   ```  
 - **Output**:  
   ```json
   {
-    "0": [null]
+    "0": [[0, 7], [6, 13]]
   }
   ```  
-- **Explanation**: The segment cannot be mapped to a contiguous sequence due to word order differences, so it returns `null`.
+- **Coverage Check**: Translation has words 0-13 (14 words). Output covers all 0-13 ✓ Complete coverage.
+- **Overlapping Check**: "إِلَّا هُوَ" is repeated in both segments, so it should overlap in indices [6,7].
 
 ---
 
