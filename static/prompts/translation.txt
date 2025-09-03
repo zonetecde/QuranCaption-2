@@ -80,7 +80,9 @@ An array of objects, where each object contains:
 
 3. **Accurate Correspondence**:
    - Each segment's mapped indices must accurately represent the **complete meaning** of the Arabic segment.
-   - Include all necessary words to capture the full semantic content of the segment.
+   - **CRITICAL**: Map ONLY the words that correspond to the Arabic segment - DO NOT extend beyond the segment boundary.
+   - **Example**: If Arabic segment ends with "إِلَّا" (except), the translation must stop at "except" and NOT continue to following words.
+   - Include all necessary words to capture the full semantic content of the segment, but do not include words from subsequent segments.
    - Do not truncate or omit words that are essential to the segment's meaning.
 
 4. **Overlapping Segments Allowed**:
@@ -234,7 +236,33 @@ An array of objects, where each object contains:
   - Verse 1: Translation has words 0-8 (9 words). Output covers all 0-8 ✓
 
 
-#### **Example 6: Strategic Overlapping for Complete Coverage**
+#### **Example 7: Precise Segment Boundaries** ⚠️ **CRITICAL - DO NOT OVERSTEP**
+- **Input**:  
+  ```json
+  [
+    {
+      "index": 0,
+      "verseKey": "38:24",
+      "segments": ["قَالَ لَقَدْ ظَلَمَكَ بِسُؤَالِ نَعْجَتِكَ إِلَىٰ نِعَاجِهِۦ", "وَإِنَّ كَثِيرًا مِّنَ ٱلْخُلَطَآءِ لَيَبْغِى بَعْضُهُمْ عَلَىٰ بَعْضٍ إِلَّا", "إِلَّا ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّٰلِحَٰتِ وَقَلِيلٌ مَّا هُمْ", "وَظَنَّ دَاوُۥدُ أَنَّمَا فَتَنَّٰهُ فَٱسْتَغْفَرَ رَبَّهُۥ وَخَرَّ رَاكِعًا وَأَنَابَ"],
+      "translation": "0:[David] 1:said, 2:\"He 3:has 4:certainly 5:wronged 6:you 7:in 8:demanding 9:your 10:ewe 11:[in 12:addition] 13:to 14:his 15:ewes. 16:And 17:indeed, 18:many 19:associates 20:oppress 21:one 22:another, 23:except 24:for 25:those 26:who 27:believe 28:and 29:do 30:righteous 31:deeds 32:– 33:and 34:few 35:are 36:they.\" 37:And 38:David 39:became 40:certain 41:that 42:We 43:had 44:tried 45:him, 46:and 47:he 48:asked 49:forgiveness 50:of 51:his 52:Lord 53:and 54:fell 55:down 56:bowing 57:[in 58:prostration] 59:and 60:turned 61:in 62:repentance 63:[to 64:Allah]."
+    }
+  ]
+  ```  
+- **Output**:  
+  ```json
+  {
+    "0": [[0, 15], [16, 23], [23, 36], [37, 64]]
+  }
+  ```  
+- **Coverage Check**: Translation has words 0-64 (65 words). Output covers all 0-64 ✓ Complete coverage.
+- **Boundary Check**: 
+  - Segment 2 ends with "إِلَّا" (except) → Maps to [16, 23] stopping at "except" (index 23)
+  - **WRONG would be**: [16, 27] which includes "for those who believe" from the next Arabic segment
+  - **CORRECT**: Each segment maps to its exact boundary without overstepping into the next segment
+  - **Segment 3**: "ٱلَّذِينَ ءَامَنُوا۟..." correctly starts at [24] with "for those who believe"
+- **Overlapping Check**: Segment 2 and 3 overlap at index 23 ("إِلَّا" / "except"), which is correct.
+
+#### **Example 8: Strategic Overlapping for Complete Coverage**
 - **Input**:  
   ```json
   [
@@ -254,6 +282,11 @@ An array of objects, where each object contains:
   ```  
 - **Coverage Check**: Translation has words 0-13 (14 words). Output covers all 0-13 ✓ Complete coverage.
 - **Overlapping Check**: "إِلَّا هُوَ" is repeated in both segments, so it should overlap in indices [6,7].
+
+**SEGMENT BOUNDARY RULE**: 
+- **NEVER extend a segment mapping beyond its Arabic boundary**
+- **Each Arabic segment has precise start/end points - respect them exactly**
+- **If Arabic ends with "إِلَّا" (except), translation must stop at "except", not continue to "those who..."**
 
 ---
 
