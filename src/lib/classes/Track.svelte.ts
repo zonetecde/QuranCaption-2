@@ -19,6 +19,7 @@ import toast from 'svelte-5-french-toast';
 import { VerseTranslation } from './Translation.svelte.js';
 import ModalManager from '$lib/components/modals/ModalManager.js';
 import type { Category } from './VideoStyle.svelte.js';
+import { open } from '@tauri-apps/plugin-dialog';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -565,6 +566,28 @@ export class CustomTextTrack extends Track {
 		let clip: any;
 		if (clipType === 'image') {
 			// Ajoute un clip image
+
+			// Ouvre la modale de sélection d'image
+			let imagePath = '';
+
+			const result = await open({
+				multiple: false,
+				directory: false,
+				filters: [
+					{
+						name: 'Image Files',
+						extensions: ['png', 'jpg', 'jpeg', 'gif']
+					}
+				]
+			});
+
+			if (result) {
+				imagePath = result as string;
+				customClipCategory.getStyle('filepath')!.value = imagePath;
+			} else {
+				return; // Annule l'ajout du clip si aucun fichier n'est sélectionné
+			}
+
 			clip = new CustomImageClip(customClipCategory);
 		} else {
 			clip = new CustomTextClip(customClipCategory);
@@ -577,6 +600,9 @@ export class CustomTextTrack extends Track {
 		}
 
 		this.clips.push(clip);
+
+		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
+		globalState.updateVideoPreviewUI();
 	}
 
 	getCurrentClips(): CustomClip[] {

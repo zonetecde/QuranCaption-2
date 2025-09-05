@@ -789,6 +789,7 @@ export class VideoStyle extends SerializableBase {
 			clipType === 'text'
 				? await this.getDefaultCustomTextCategory()
 				: await this.getDefaultCustomImageCategory();
+
 		globalState.getCustomClipTrack.addCustomClip(customTextCategory, clipType, startTime, endTime);
 
 		setTimeout(() => {
