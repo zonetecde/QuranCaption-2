@@ -66,9 +66,9 @@ class GlobalState {
 		return this.currentProject!.content.timeline.getFirstTrack(TrackType.Video)! as AssetTrack;
 	}
 
-	get getCustomTextTrack() {
+	get getCustomClipTrack() {
 		return this.currentProject!.content.timeline.getFirstTrack(
-			TrackType.CustomText
+			TrackType.CustomClip
 		)! as CustomTextTrack;
 	}
 

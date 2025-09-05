@@ -277,7 +277,7 @@
 
 			<!-- Ajoute maintenant les customs texts -->
 			{#if globalState.getStylesState.currentSelection === 'global'}
-				{#each globalState.getCustomTextTrack.clips as customTextClip, i}
+				{#each globalState.getCustomClipTrack.clips as customTextClip, i}
 					{@const category = (customTextClip as CustomTextClip).category!}
 					<Section
 						name={category.name}
@@ -304,10 +304,10 @@
 									// Pour time-appearance et time-disappearance on modifie le clip lui-même
 									// en plus du style. 
 									if (style.id === 'time-appearance') {
-										globalState.getCustomTextTrack.getCustomTextWithId(category.id)!.setStartTime(v);
+										globalState.getCustomClipTrack.getCustomTextWithId(category.id)!.setStartTime(v);
 									}
 									if (style.id === 'time-disappearance') {
-										globalState.getCustomTextTrack.getCustomTextWithId(category.id)!.setEndTime(v);
+										globalState.getCustomClipTrack.getCustomTextWithId(category.id)!.setEndTime(v);
 									}
 									style.value = v;
 								}}

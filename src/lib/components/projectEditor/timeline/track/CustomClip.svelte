@@ -149,7 +149,7 @@
 			<span class="text-xs text-[var(--text-secondary)] font-medium"
 				>{clip.type === 'Custom Text'
 					? (clip as CustomTextClip).getText()
-					: (clip as CustomImageClip).getFilePath().split('\\').pop()}</span
+					: (clip as CustomImageClip).getFilePath().split('\\').pop() || 'No Image'}</span
 			>
 		</div>
 	</div>

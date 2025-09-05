@@ -81,8 +81,8 @@ export class Track extends SerializableBase {
 				return 'Audio';
 			case TrackType.Subtitle:
 				return 'Subtitles';
-			case TrackType.CustomText:
-				return 'Custom Texts';
+			case TrackType.CustomClip:
+				return 'Custom Clips';
 			default:
 				return 'Unknown Track';
 		}
@@ -96,7 +96,7 @@ export class Track extends SerializableBase {
 				return 'music_note';
 			case TrackType.Subtitle:
 				return 'subtitles';
-			case TrackType.CustomText:
+			case TrackType.CustomClip:
 				return 'text_fields';
 			default:
 				return 'help_outline';
@@ -546,7 +546,7 @@ export class SubtitleTrack extends Track {
 
 export class CustomTextTrack extends Track {
 	constructor() {
-		super(TrackType.CustomText);
+		super(TrackType.CustomClip);
 	}
 
 	async addCustomClip(

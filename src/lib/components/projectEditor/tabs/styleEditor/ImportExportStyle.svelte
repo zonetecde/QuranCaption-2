@@ -99,14 +99,14 @@
 							Arabic text style, and all translation styles.
 						</p>
 
-						{#if globalState.getCustomTextTrack.clips.length > 0}
+						{#if globalState.getCustomClipTrack.clips.length > 0}
 							<p class="mb-2">
 								You can optionally include custom text clips in the export. Select the clips you
 								want to include below:
 							</p>
 
 							<div class="flex flex-col gap-2 px-2">
-								{#each globalState.getCustomTextTrack.clips as customClip}
+								{#each globalState.getCustomClipTrack.clips as customClip}
 									{#if customClip instanceof CustomClip}
 										<label class="flex items-center gap-x-2 cursor-pointer">
 											<input

@@ -569,7 +569,7 @@
 	function getCustomClipStateAt(timing: number): string {
 		const visibleCustomClips: string[] = [];
 
-		for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+		for (const ctClip of globalState.getCustomClipTrack?.clips || []) {
 			// @ts-ignore
 			const category = ctClip.category;
 			if (!category) continue;
@@ -659,7 +659,7 @@
 			}
 
 			if (
-				!globalState.getCustomTextTrack?.clips.find((ctClip) => {
+				!globalState.getCustomClipTrack?.clips.find((ctClip) => {
 					// @ts-ignore
 					const clip = ctClip as CustomTextClip;
 					const alwaysShow = clip.category!.getStyle('always-show')!.value as boolean;
@@ -680,7 +680,7 @@
 		}
 
 		// --- Custom Texts ---
-		for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+		for (const ctClip of globalState.getCustomClipTrack?.clips || []) {
 			// @ts-ignore
 			const category = ctClip.category;
 			if (!category) continue;
@@ -896,7 +896,7 @@
 		}
 
 		// --- Custom Texts ---
-		for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+		for (const ctClip of globalState.getCustomClipTrack?.clips || []) {
 			// @ts-ignore
 			const category = ctClip.category;
 			if (!category) continue;

@@ -10,6 +10,7 @@ import QPCFontProvider from '$lib/services/FontProvider';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readFile, readTextFile } from '@tauri-apps/plugin-fs';
 import ModalManager from '$lib/components/modals/ModalManager';
+import { CustomImageClip } from './Clip.svelte';
 
 export type StyleValueType =
 	| 'color'
@@ -707,7 +708,7 @@ export class VideoStyle extends SerializableBase {
 		value: string | number | boolean
 	): void {
 		// Trouve donc le clip correspondant pour update sa valeur
-		const clip = globalState.getCustomTextTrack.clips.find(
+		const clip = globalState.getCustomClipTrack.clips.find(
 			(c) => (c as CustomTextClip).category?.id === customTextId
 		) as CustomTextClip | undefined;
 		if (clip) {
@@ -772,7 +773,7 @@ export class VideoStyle extends SerializableBase {
 		endTime?: number
 	): Promise<void> {
 		// Ajoute la track Custom Text si non existante
-		if (!globalState.currentProject!.content.timeline.doesTrackExist(TrackType.CustomText)) {
+		if (!globalState.currentProject!.content.timeline.doesTrackExist(TrackType.CustomClip)) {
 			globalState.currentProject!.content.timeline.addTrack(new CustomTextTrack());
 		}
 
@@ -788,7 +789,7 @@ export class VideoStyle extends SerializableBase {
 			clipType === 'text'
 				? await this.getDefaultCustomTextCategory()
 				: await this.getDefaultCustomImageCategory();
-		globalState.getCustomTextTrack.addCustomClip(customTextCategory, clipType, startTime, endTime);
+		globalState.getCustomClipTrack.addCustomClip(customTextCategory, clipType, startTime, endTime);
 
 		setTimeout(() => {
 			globalState.updateVideoPreviewUI();
@@ -815,7 +816,7 @@ export class VideoStyle extends SerializableBase {
 	 * @returns
 	 */
 	getCustomTextCompositeStyles(customTextId: string): any {
-		for (const clip of globalState.getCustomTextTrack.clips) {
+		for (const clip of globalState.getCustomClipTrack.clips) {
 			if (!(clip instanceof CustomTextClip)) continue;
 			const style = clip.category!.getStyle(customTextId as StyleName);
 			if (style) return style.value as Style[];
@@ -830,17 +831,17 @@ export class VideoStyle extends SerializableBase {
 	exportStyles(includedExportClips: Set<number>): string {
 		let exportData: videoStyleFileData = {
 			videoStyle: JSON.parse(JSON.stringify(this)),
-			customTextClips: []
+			customClips: []
 		};
 		// Enlève tout les overrides
 		for (const style of exportData.videoStyle.styles) {
 			style.overrides = {};
 		}
 		// Ajoute les customs texts clips
-		for (const clip of globalState.getCustomTextTrack.clips) {
+		for (const clip of globalState.getCustomClipTrack.clips) {
 			if (includedExportClips.has(clip.id)) {
 				const _clip = JSON.parse(JSON.stringify(clip));
-				exportData.customTextClips.push(_clip);
+				exportData.customClips.push(_clip);
 			}
 		}
 		// Retourne le JSON
@@ -957,12 +958,16 @@ export class VideoStyle extends SerializableBase {
 		}
 
 		// Ajoute les customs text clips en créant des instances correctes
-		for (const clipData of json.customTextClips) {
+		//@ts-ignore - `json.customTextClips` pour les fichiers styles de l'ancienne version (3.1.3->3.1.4)
+		for (const clipData of json.customClips || json.customTextClips) {
 			clipData.id = Utilities.randomId(); // Assure qu'il a un ID unique
 
 			// Crée une nouvelle instance CustomTextClip à partir des données JSON
-			const clip = CustomTextClip.fromJSON(clipData);
-			globalState.getCustomTextTrack.clips.push(clip);
+			const clip =
+				clipData.type === 'Custom Text'
+					? CustomTextClip.fromJSON(clipData)
+					: CustomImageClip.fromJSON(clipData);
+			globalState.getCustomClipTrack.clips.push(clip);
 		}
 	}
 
@@ -1006,7 +1011,7 @@ export class VideoStyle extends SerializableBase {
 
 interface videoStyleFileData {
 	videoStyle: VideoStyle;
-	customTextClips: CustomTextClip[];
+	customClips: CustomTextClip[];
 }
 
 SerializableBase.registerChildClass(VideoStyle, 'styles', StylesData);

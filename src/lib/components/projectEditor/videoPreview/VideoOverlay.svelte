@@ -35,7 +35,7 @@
 	let currentCustomClips = $derived(() => {
 		const _ = getTimelineSettings().cursorPosition;
 		return untrack(() => {
-			return globalState.getCustomTextTrack.getCurrentClips();
+			return globalState.getCustomClipTrack.getCurrentClips();
 		});
 	});
 

@@ -53,7 +53,7 @@
 		{/if}
 	</div>
 	<div class="absolute left-[180px] top-0 bottom-0 right-0 z-[5]">
-		{#if track.type === TrackType.CustomText}
+		{#if track.type === TrackType.CustomClip}
 			{@const total = track.clips.length}
 			<!-- Container relatif pour positionner chaque lane -->
 			<div class="absolute inset-0">

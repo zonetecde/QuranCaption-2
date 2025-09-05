@@ -9,6 +9,7 @@
 	import { slide } from 'svelte/transition';
 	import RecitersManager from '$lib/classes/Reciter';
 	import AutocompleteInput from '../misc/AutocompleteInput.svelte';
+	import MigrationService from '$lib/services/MigrationService';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -34,6 +35,9 @@
 	async function openProjectButtonClick() {
 		// Ouvre le projet
 		globalState.currentProject = await ProjectService.load(projectDetail.id);
+
+		// Migration si besoin
+		MigrationService.FromQC313ToQC314();
 	}
 
 	// Gestion du menu de statut

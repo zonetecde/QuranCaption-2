@@ -220,7 +220,7 @@
 				<div class="track-lanes">
 					{#each globalState.currentProject!.content.timeline.tracks as track, i}
 						<!-- N'affiche pas la track des customs texts s'il y en a pas dans le projet -->
-						{#if !(track.type === TrackType.CustomText && track.clips.length === 0)}
+						{#if !(track.type === TrackType.CustomClip && track.clips.length === 0)}
 							<Track bind:track={globalState.currentProject!.content.timeline.tracks[i]} />
 						{/if}
 					{/each}
