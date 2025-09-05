@@ -8,6 +8,7 @@
 	import { Status } from '$lib/classes/Status';
 	import { slide } from 'svelte/transition';
 	import MigrationService from '$lib/services/MigrationService';
+	import { discordService } from '$lib/services/DiscordService';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -36,6 +37,9 @@
 
 		// Migration si besoin
 		MigrationService.FromQC313ToQC314();
+
+		// Discord Rich Presence
+		discordService.setEditingState();
 	}
 
 	// Gestion du menu de statut

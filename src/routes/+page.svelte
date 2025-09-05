@@ -14,12 +14,14 @@
 		ShortcutService.init();
 
 		// Initialiser Discord Rich Presence
-		try {
-			await discordService.init();
-			await discordService.setIdleState();
-		} catch (e) {
-			console.error("Erreur lors de l'initialisation de Discord Rich Presence :", e);
-		}
+		discordService
+			.init()
+			.then(() => {
+				discordService.setIdleState();
+			})
+			.catch((err) => {
+				console.error('Failed to initialize Discord Rich Presence:', err);
+			});
 	});
 </script>
 

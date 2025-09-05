@@ -1,3 +1,4 @@
+import { globalState } from '$lib/runes/main.svelte';
 import { invoke } from '@tauri-apps/api/core';
 
 interface DiscordActivity {
@@ -14,14 +15,16 @@ class DiscordService {
 	private readonly APP_ID = '1413639399584956486';
 
 	async init(): Promise<void> {
-		try {
-			await invoke('init_discord_rpc', { appId: this.APP_ID });
-			this.isInitialized = true;
-			console.log('Discord Rich Presence initialisé');
-		} catch (error) {
-			console.error('Erreur lors de l\'initialisation Discord RPC:', error);
-			throw error;
-		}
+		if (this.isInitialized) return;
+
+		invoke('init_discord_rpc', { appId: this.APP_ID })
+			.then(() => {
+				this.isInitialized = true;
+				console.log('Discord Rich Presence initialisé');
+			})
+			.catch((error) => {
+				console.error("Erreur lors de l'initialisation Discord RPC:", error);
+			});
 	}
 
 	async updateActivity(activity: DiscordActivity): Promise<void> {
@@ -61,45 +64,25 @@ class DiscordService {
 	// Méthodes prédéfinies pour différents états
 	async setIdleState(): Promise<void> {
 		await this.updateActivity({
-			details: 'Utilise Quran Caption',
-			state: 'En attente',
+			details: 'Use Quran Caption',
+			state: 'In the home menu',
 			large_image_key: 'logo',
 			large_image_text: 'Quran Caption',
 			small_image_key: 'idle',
-			small_image_text: 'Inactif'
+			small_image_text: 'Idle'
 		});
 	}
 
-	async setEditingState(projectName?: string): Promise<void> {
+	async setEditingState(): Promise<void> {
 		await this.updateActivity({
-			details: 'Utilise Quran Caption',
-			state: projectName ? `Éditant: ${projectName}` : 'Éditant une vidéo',
+			details: 'Captioning Quran Recitation',
+			state: globalState.currentProject
+				? `Working on: ${globalState.currentProject.detail.name + (globalState.currentProject.detail.reciter ? ' (' + globalState.currentProject.detail.reciter + ')' : '')}`
+				: 'Editing a video',
 			large_image_key: 'logo',
 			large_image_text: 'Quran Caption',
 			small_image_key: 'edit',
-			small_image_text: 'Sous-titrage'
-		});
-	}
-
-	async setExportingState(): Promise<void> {
-		await this.updateActivity({
-			details: 'Utilise Quran Caption',
-			state: 'Exportation en cours',
-			large_image_key: 'logo',
-			large_image_text: 'Quran Caption',
-			small_image_key: 'export',
-			small_image_text: 'Export'
-		});
-	}
-
-	async setPreviewState(): Promise<void> {
-		await this.updateActivity({
-			details: 'Utilise Quran Caption',
-			state: 'Prévisualisation',
-			large_image_key: 'logo',
-			large_image_text: 'Quran Caption',
-			small_image_key: 'preview',
-			small_image_text: 'Aperçu'
+			small_image_text: 'Captioning'
 		});
 	}
 }
