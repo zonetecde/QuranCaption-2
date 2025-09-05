@@ -947,13 +947,18 @@ fn build_and_run_ffmpeg_filter_complex(
         );
         
         // Écrire le fichier de log
-        if let Err(log_err) = std::fs::write(&log_filename, log_content) {
+        if let Err(log_err) = std::fs::write(&log_filename, &log_content) {
             eprintln!("Failed to write log file {}: {}", log_filename, log_err);
         } else {
             println!("FFmpeg error details saved to: {}", log_filename);
         }
         
-        let error_msg = format!("ffmpeg failed during video exportation (exit code: {:?})", status.code());
+        let error_msg = format!(
+            "ffmpeg failed during video exportation (exit code: {:?})\n\nLog details:\n{}\n\nSee the log file: {}", 
+            status.code(), 
+            log_content,
+            log_filename
+        );
         let mut error_data = serde_json::json!({
             "export_id": export_id,
             "error": error_msg
