@@ -563,11 +563,11 @@
 	}
 
 	/**
-	 * Analyser l'état des custom texts à un moment donné
-	 * Retourne un identifiant unique basé sur quels custom texts sont visibles
+	 * Analyser l'état des custom clips à un moment donné
+	 * Retourne un identifiant unique basé sur quels custom clips sont visibles
 	 */
-	function getCustomTextStateAt(timing: number): string {
-		const visibleCustomTexts: string[] = [];
+	function getCustomClipStateAt(timing: number): string {
+		const visibleCustomClips: string[] = [];
 
 		for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
 			// @ts-ignore
@@ -586,12 +586,12 @@
 			if (timing >= startTime && timing <= endTime) {
 				// Créer une clé unique basée sur l'ID du clip et ses propriétés temporelles
 				const uniqueKey = `${ctClip.id}-${startTime}-${endTime}`;
-				visibleCustomTexts.push(uniqueKey);
+				visibleCustomClips.push(uniqueKey);
 			}
 		}
 
 		// Retourner un hash des custom texts visibles, triés pour la cohérence
-		const stateSignature = visibleCustomTexts.sort().join('|');
+		const stateSignature = visibleCustomClips.sort().join('|');
 		return stateSignature;
 	}
 
@@ -625,15 +625,15 @@
 				const fadeOutStart = endTime - fadeDuration;
 
 				// Vérifier si on peut optimiser les captures pour ce sous-titre
-				// L'idée : si les custom texts visibles sont identiques entre fadeInEnd et fadeOutStart,
+				// L'idée : si les custom clips visibles sont identiques entre fadeInEnd et fadeOutStart,
 				// on peut prendre une seule capture et la dupliquer, économisant du temps
 				if (fadeOutStart > startTime && fadeInEnd !== fadeOutStart) {
-					// Récupère les customs texts visibles aux deux timings pour voir si possibilité de duplication
-					const customTextStateAtFadeInEnd = getCustomTextStateAt(fadeInEnd);
-					const customTextStateAtFadeOutStart = getCustomTextStateAt(fadeOutStart);
+					// Récupère les customs clips visibles aux deux timings pour voir si possibilité de duplication
+					const customClipStateAtFadeInEnd = getCustomClipStateAt(fadeInEnd);
+					const customClipStateAtFadeOutStart = getCustomClipStateAt(fadeOutStart);
 
-					// Si l'état des custom texts est identique, on peut dupliquer
-					if (customTextStateAtFadeInEnd === customTextStateAtFadeOutStart) {
+					// Si l'état des custom clips est identique, on peut dupliquer
+					if (customClipStateAtFadeInEnd === customClipStateAtFadeOutStart) {
 						add(fadeInEnd);
 						// Ajoute à la map de duplication
 						duplicableTimings.set(Math.round(fadeOutStart), Math.round(fadeInEnd));

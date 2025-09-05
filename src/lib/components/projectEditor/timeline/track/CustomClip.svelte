@@ -3,12 +3,13 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import { fade, slide } from 'svelte/transition';
 	import ContextMenu, { Item, Divider, Settings } from 'svelte-contextmenu';
+	import type { CustomClip, CustomImageClip } from '$lib/classes/Clip.svelte';
 
 	let {
 		clip = $bindable(),
 		track = $bindable()
 	}: {
-		clip: CustomTextClip;
+		clip: CustomClip;
 		track: Track;
 	} = $props();
 
@@ -145,7 +146,11 @@
 >
 	<div class="absolute inset-0 z-5 flex overflow-hidden px-2 py-2">
 		<div class="flex items-center w-full">
-			<span class="text-xs text-[var(--text-secondary)] font-medium">{clip.getText()}</span>
+			<span class="text-xs text-[var(--text-secondary)] font-medium"
+				>{clip.type === 'Custom Text'
+					? (clip as CustomTextClip).getText()
+					: (clip as CustomImageClip).getFilePath().split('\\').pop()}</span
+			>
 		</div>
 	</div>
 

@@ -2,6 +2,9 @@ import { AssetType, TrackType } from './enums.js';
 import {
 	AssetClip,
 	Clip,
+	ClipWithTranslation,
+	CustomClip,
+	CustomImageClip,
 	CustomTextClip,
 	PredefinedSubtitleClip,
 	SilenceClip,
@@ -239,7 +242,7 @@ export class SubtitleTrack extends Track {
 	 * @param surah Le nouveau numéro de la sourate du sous-titre.
 	 */
 	async editSubtitle(
-		subtitle: SubtitleClip | PredefinedSubtitleClip | null,
+		subtitle: SubtitleClip | PredefinedSubtitleClip | ClipWithTranslation | null,
 		verse: Verse,
 		firstWordIndex: number,
 		lastWordIndex: number,
@@ -546,15 +549,26 @@ export class CustomTextTrack extends Track {
 		super(TrackType.CustomText);
 	}
 
-	async addCustomText(customTextCategory: Category, startTime?: number, endTime?: number) {
+	async addCustomClip(
+		customClipCategory: Category,
+		clipType: 'text' | 'image',
+		startTime?: number,
+		endTime?: number
+	) {
 		// Si des durées sont spécifiées, alors on désactive l'option "always show"
 		if (startTime !== undefined && endTime !== undefined) {
-			customTextCategory.getStyle('always-show')!.value = false;
-			customTextCategory.getStyle('time-appearance')!.value = startTime;
-			customTextCategory.getStyle('time-disappearance')!.value = endTime;
+			customClipCategory.getStyle('always-show')!.value = false;
+			customClipCategory.getStyle('time-appearance')!.value = startTime;
+			customClipCategory.getStyle('time-disappearance')!.value = endTime;
 		}
 
-		const clip = new CustomTextClip(customTextCategory);
+		let clip: any;
+		if (clipType === 'image') {
+			// Ajoute un clip image
+			clip = new CustomImageClip(customClipCategory);
+		} else {
+			clip = new CustomTextClip(customClipCategory);
+		}
 
 		// Set les temps si spécifiés
 		if (startTime !== undefined && endTime !== undefined) {
@@ -565,13 +579,13 @@ export class CustomTextTrack extends Track {
 		this.clips.push(clip);
 	}
 
-	getCurrentClips(): CustomTextClip[] {
+	getCurrentClips(): CustomClip[] {
 		// Retourne tout les clips à afficher
 		const currentTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition ?? 0;
-		let clips: CustomTextClip[] = [];
+		let clips: CustomClip[] = [];
 
 		for (let index = 0; index < this.clips.length; index++) {
-			const element = this.clips[index] as CustomTextClip;
+			const element = this.clips[index] as CustomClip;
 			if (
 				element.getAlwaysShow() ||
 				(currentTime >= element.startTime && currentTime <= element.endTime)

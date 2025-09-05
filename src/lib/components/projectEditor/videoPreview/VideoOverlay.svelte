@@ -8,6 +8,8 @@
 	import SurahName from '../tabs/styleEditor/SurahName.svelte';
 	import VerseNumber from '../tabs/styleEditor/VerseNumber.svelte';
 	import CustomText from '../tabs/styleEditor/CustomText.svelte';
+	import CustomImage from '../tabs/styleEditor/CustomImage.svelte';
+	import { CustomImageClip } from '$lib/classes/Clip.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getStyle('global', 'fade-duration').value as number;
@@ -30,7 +32,7 @@
 	});
 
 	// Contient les textes custom à afficher à ce moment précis
-	let currentCustomTexts = $derived(() => {
+	let currentCustomClips = $derived(() => {
 		const _ = getTimelineSettings().cursorPosition;
 		return untrack(() => {
 			return globalState.getCustomTextTrack.getCurrentClips();
@@ -479,8 +481,12 @@
 			/>
 		{/if}
 
-		{#each currentCustomTexts() as customText}
-			<CustomText customText={(customText as CustomTextClip).category!} />
+		{#each currentCustomClips() as customText}
+			{#if customText.type === 'Custom Text'}
+				<CustomText customText={(customText as CustomTextClip).category!} />
+			{:else if customText.type === 'Custom Image'}
+				<CustomImage customImage={(customText as CustomImageClip).category!} />
+			{/if}
 		{/each}
 	</div>
 </div>

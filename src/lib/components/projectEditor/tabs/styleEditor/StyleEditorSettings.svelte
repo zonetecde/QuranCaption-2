@@ -321,17 +321,30 @@
 		{/if}
 
 		{#if globalState.getStylesState.getCurrentSelection() === 'global'}
-			<!-- Bouton pour ajouter un texte custom -->
-			<button
-				class="btn-accent w-2/3 mx-auto mt-4 px-2 py-2 rounded-md flex items-center justify-center gap-1"
-				onclick={async () => {
-					await globalState.getVideoStyle.addCustomText();
-				}}
-				title="Add custom text"
-			>
-				<span class="material-icons-outlined text-sm">add</span>
-				Add Custom Text
-			</button>
+			<div class="grid grid-cols-2 mb-20 gap-x-1.5 mt-4 pr-2">
+				<!-- Bouton pour ajouter un texte custom -->
+				<button
+					class="btn-accent mx-auto px-2 py-2 rounded-md flex items-center justify-center gap-1"
+					onclick={async () => {
+						await globalState.getVideoStyle.addCustomClip('text');
+					}}
+					title="Add custom text"
+				>
+					<span class="material-icons-outlined text-sm">add</span>
+					Custom Text
+				</button>
+				<!-- Bouton pour ajouter un texte custom -->
+				<button
+					class="btn-accent mx-auto px-2 py-2 rounded-md flex items-center justify-center gap-1"
+					onclick={async () => {
+						await globalState.getVideoStyle.addCustomClip('image');
+					}}
+					title="Add custom text"
+				>
+					<span class="material-icons-outlined text-sm">add</span>
+					Custom Image
+				</button>
+			</div>
 		{/if}
 	</div>
 </div>

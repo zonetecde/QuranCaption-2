@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { globalState } from '$lib/runes/main.svelte';
 	import { invoke } from '@tauri-apps/api/core';
+	import { open } from '@tauri-apps/plugin-dialog';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import type { Style, StyleCategoryName, StyleName } from '$lib/classes/VideoStyle.svelte';
@@ -42,11 +43,36 @@
 		if (style.valueType === 'reciter') {
 			inputValue = globalState.currentProject!.detail.reciter;
 		}
+
+		// Si le style est un file, bind la valeur actuelle
+		if (style.valueType === 'file' && style.value) {
+			selectedFilePath = style.value as string;
+		}
 	});
 
 	let extended = $state(false);
 	let selectedOrientation = $state('landscape');
 	let selectedQuality = $state('1080p');
+	let selectedFilePath = $state('');
+
+	// Function to open file selector
+	async function selectFile() {
+		const result = await open({
+			multiple: false,
+			directory: false,
+			filters: [
+				{
+					name: 'Image Files',
+					extensions: ['png', 'jpg', 'jpeg', 'gif']
+				}
+			]
+		});
+
+		if (result) {
+			selectedFilePath = result as string;
+			applyValueSimple(selectedFilePath);
+		}
+	}
 
 	$effect(() => {
 		globalState.getSectionsState[style.id] = {
@@ -318,12 +344,12 @@
 						/>
 						<div
 							class="relative w-11 h-6 rounded-full border border-white/10 bg-white/5
-           transition-colors duration-150 peer-checked:bg-blue-500
-           peer-checked:[&>span]:translate-x-5"
+			transition-colors duration-150 peer-checked:bg-blue-500
+			peer-checked:[&>span]:translate-x-5"
 						>
 							<span
 								class="absolute left-1 top-0.75 w-4 h-4 bg-white rounded-full shadow
-             transition-transform duration-150"
+				transition-transform duration-150"
 							>
 							</span>
 						</div>
@@ -507,6 +533,27 @@
 							<span class="material-icons align-middle text-[18px]!">block</span>
 							Arabic calligraphy is not available for this reciter.
 						</p>
+					{/if}
+				</div>
+			{:else if style.valueType === 'file'}
+				<div class="flex flex-col gap-4">
+					<div class="flex flex-col gap-2">
+						<button
+							type="button"
+							onclick={selectFile}
+							class="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-sm cursor-pointer transition-colors duration-200"
+							{disabled}
+						>
+							<span class="material-icons mr-2 text-base">folder_open</span>
+							Pick an image
+						</button>
+					</div>
+					{#if selectedFilePath}
+						<div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-md">
+							<p class="text-sm text-gray-700 dark:text-gray-300 font-mono break-all">
+								{selectedFilePath}
+							</p>
+						</div>
 					{/if}
 				</div>
 			{:else if style.valueType === 'dimension'}

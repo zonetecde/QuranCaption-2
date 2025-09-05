@@ -20,7 +20,8 @@ export type StyleValueType =
 	| 'time'
 	| 'dimension'
 	| 'composite'
-	| 'reciter';
+	| 'reciter'
+	| 'file';
 
 // Types spécifiques pour les catégories de styles
 export type StyleCategoryName =
@@ -132,6 +133,7 @@ export type CustomTextStyleName =
 	| 'time-appearance'
 	| 'time-disappearance'
 	| 'text'
+	| 'filepath'
 	| 'always-show'
 	| 'custom-css'
 	| 'custom-text-composite';
@@ -749,10 +751,26 @@ export class VideoStyle extends SerializableBase {
 		return category;
 	}
 
+	async getDefaultCustomImageCategory(): Promise<Category> {
+		// Récupère le JSON brut
+		const raw = await (await fetch('./styles/customImage.json')).json();
+		// Instancie correctement la catégorie (ce constructeur instancie aussi les Style internes)
+		const category = new Category(raw);
+		// Ajoute un suffixe unique pour éviter collisions lorsque plusieurs custom texts sont ajoutés
+		const randomId = Utilities.randomId();
+		category.id += '-' + randomId;
+
+		return category;
+	}
+
 	/**
-	 * Ajoute un texte personnalisé au projet dans les styles globaux
+	 * Ajoute un clip personnalisé au projet dans les styles globaux
 	 */
-	async addCustomText(startTime?: number, endTime?: number): Promise<void> {
+	async addCustomClip(
+		clipType: 'text' | 'image',
+		startTime?: number,
+		endTime?: number
+	): Promise<void> {
 		// Ajoute la track Custom Text si non existante
 		if (!globalState.currentProject!.content.timeline.doesTrackExist(TrackType.CustomText)) {
 			globalState.currentProject!.content.timeline.addTrack(new CustomTextTrack());
@@ -766,8 +784,11 @@ export class VideoStyle extends SerializableBase {
 		}
 
 		// Ajoute le custom text au projet
-		const customTextCategory = await this.getDefaultCustomTextCategory();
-		globalState.getCustomTextTrack.addCustomText(customTextCategory, startTime, endTime);
+		const customTextCategory =
+			clipType === 'text'
+				? await this.getDefaultCustomTextCategory()
+				: await this.getDefaultCustomImageCategory();
+		globalState.getCustomTextTrack.addCustomClip(customTextCategory, clipType, startTime, endTime);
 
 		setTimeout(() => {
 			globalState.updateVideoPreviewUI();

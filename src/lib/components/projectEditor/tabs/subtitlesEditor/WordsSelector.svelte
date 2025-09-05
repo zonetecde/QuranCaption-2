@@ -259,7 +259,7 @@
 
 		if (subtitlesEditorState().editSubtitle) {
 			await subtitleTrack.editSubtitle(
-				subtitlesEditorState().editSubtitle,
+				subtitlesEditorState().editSubtitle as any,
 				verse,
 				subtitlesEditorState().startWordIndex,
 				subtitlesEditorState().endWordIndex,
@@ -378,7 +378,8 @@
 	 * Ajoute un custom text clip à la timeline entre le dernier sous-titre et la position actuelle du curseur.
 	 */
 	function addCustomTextClip(): void {
-		globalState.getVideoStyle.addCustomText(
+		globalState.getVideoStyle.addCustomClip(
+			'text',
 			globalState.getSubtitleTrack.getLastClip()?.endTime ?? 0,
 			globalState.getTimelineState.cursorPosition
 		);
