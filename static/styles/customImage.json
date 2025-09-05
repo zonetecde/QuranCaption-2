@@ -20,9 +20,9 @@
 			"description": "Change the scale of the image",
 			"valueType": "number",
 			"value": 1,
-			"valueMin": 0.1,
-			"valueMax": 10,
-			"step": 0.1,
+			"valueMin": 0.05,
+			"valueMax": 4,
+			"step": 0.05,
 			"css": "",
 			"tailwind": false,
 			"icon": "zoom_in"
