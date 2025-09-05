@@ -2,7 +2,7 @@
 	import { Quran } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
-	import { verticalDrag } from '$lib/services/verticalDrag';
+	import { mouseDrag } from '$lib/services/verticalDrag';
 	import { draw, fade } from 'svelte/transition';
 	import CompositeText from './CompositeText.svelte';
 	import RecitersManager from '$lib/classes/Reciter';
@@ -45,9 +45,10 @@
 		ondblclick={() => {
 			globalState.getVideoStyle.highlightCategory('global', 'reciter-name');
 		}}
-		use:verticalDrag={{
+		use:mouseDrag={{
 			target: 'global',
-			styleId: 'reciter-name-vertical-position'
+			verticalStyleId: 'reciter-name-vertical-position',
+			horizontalStyleId: 'reciter-name-horizontal-position'
 		}}
 		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
 		style={`transform: translateY(${reciterNameSettings().verticalPosition}px) translateX(${reciterNameSettings().horizontalPosition}px); opacity: ${reciterNameSettings().opacity};`}

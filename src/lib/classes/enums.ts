@@ -2,7 +2,7 @@ export enum TrackType {
 	Video = 'Video',
 	Audio = 'Audio',
 	Subtitle = 'Subtitle',
-	CustomText = 'CustomText',
+	CustomClip = 'CustomClip',
 	Unknown = 'Unknown'
 }
 

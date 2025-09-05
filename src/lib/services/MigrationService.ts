@@ -38,6 +38,29 @@ export default class MigrationService {
 	}
 
 	/**
+	 * Migre les données de Quran Caption 3.1.3 à Quran Caption 3.1.4
+	 * > Renommage des tracks "CustomText" à "CustomClip"
+	 */
+	static FromQC313ToQC314() {
+		if (globalState.currentProject) {
+			const timeline: Timeline = globalState.currentProject.content.timeline;
+
+			let hasChanges = false;
+
+			timeline.tracks.forEach((track) => {
+				if (track.type.toString() === 'CustomText') {
+					track.type = TrackType.CustomClip;
+					hasChanges = true;
+				}
+			});
+
+			if (hasChanges) {
+				globalState.currentProject.save();
+			}
+		}
+	}
+
+	/**
 	 * Vérifie si des données de Quran Caption 2 sont présentes
 	 * @returns true si des données sont trouvées, sinon false
 	 */

@@ -520,6 +520,46 @@
 		]
 	},
 	{
+		"id": "text-neon",
+		"name": "Neon Effect",
+		"description": "Add a neon light effect to the text",
+		"icon": "light_mode",
+		"styles": [
+			{
+				"id": "text-neon-enable",
+				"name": "Enable Neon Effect",
+				"description": "Enable or disable neon effect",
+				"value": false,
+				"valueType": "boolean",
+				"css": "",
+				"tailwind": false,
+				"icon": "toggle_on"
+			},
+			{
+				"id": "text-neon-color",
+				"name": "Neon Color",
+				"description": "Set the color of the neon effect",
+				"value": "#00ff00",
+				"valueType": "color",
+				"css": "--text-neon-color: {value};",
+				"tailwind": false,
+				"icon": "palette"
+			},
+			{
+				"id": "text-intensity",
+				"name": "Neon Intensity",
+				"description": "Set the intensity of the neon effect",
+				"value": 10,
+				"valueType": "number",
+				"valueMin": 0,
+				"valueMax": 50,
+				"css": "--text-neon-size: {value}px; color: var(--text-neon-color); text-shadow: 0 0 calc(var(--text-neon-size) * 0.5) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 1) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 2) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 4) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 8) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 9) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 10) var(--text-neon-color), 0 0 calc(var(--text-neon-size) * 15) var(--text-neon-color);",
+				"tailwind": false,
+				"icon": "blur_on"
+			}
+		]
+	},
+	{
 		"id": "effects",
 		"name": "Visual Effects",
 		"description": "Add visual effects and filters to enhance subtitle appearance",

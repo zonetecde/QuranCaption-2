@@ -3,18 +3,20 @@
 	import { globalState } from '$lib/runes/main.svelte';
 	import CompositeText from './CompositeText.svelte';
 	import { mouseDrag } from '$lib/services/verticalDrag';
+	import { convertFileSrc } from '@tauri-apps/api/core';
 
-	let { customText }: { customText: Category } = $props();
+	let { customImage: customImage }: { customImage: Category } = $props();
 
-	let customTextSettings = $derived(() => {
+	let customImageSettings = $derived(() => {
 		return {
-			verticalPosition: customText.getStyle('vertical-position')?.value as number,
-			horizontalPosition: customText.getStyle('horizontal-position')?.value as number,
-			text: customText.getStyle('text')?.value as string,
+			verticalPosition: customImage.getStyle('vertical-position')?.value as number,
+			horizontalPosition: customImage.getStyle('horizontal-position')?.value as number,
+			filepath: customImage.getStyle('filepath')?.value as string,
+			scale: customImage.getStyle('scale')?.value as number,
 
 			opacity: () => {
-				const alwaysShow = customText.getStyle('always-show')?.value as number;
-				const maxOpacity = Number(customText.getStyle('opacity')?.value ?? 1);
+				const alwaysShow = customImage.getStyle('always-show')?.value as number;
+				const maxOpacity = Number(customImage.getStyle('opacity')?.value ?? 1);
 
 				// Si on veut toujours qu'il soit affiché, alors on retourne l'opacité max
 				if (alwaysShow) return maxOpacity;
@@ -22,8 +24,8 @@
 				const fadeDuration = globalState.getStyle('global', 'fade-duration')!.value as number;
 				const currentTime = globalState.getTimelineState.cursorPosition;
 
-				const startTime = customText.getStyle('time-appearance')?.value as number;
-				const endTime = customText.getStyle('time-disappearance')?.value as number;
+				const startTime = customImage.getStyle('time-appearance')?.value as number;
+				const endTime = customImage.getStyle('time-disappearance')?.value as number;
 
 				// Avant l'apparition
 				if (currentTime < startTime) return 0;
@@ -56,8 +58,8 @@
 		};
 	});
 
-	const verticalStyle = customText.getStyle('vertical-position')!;
-	const horizontalStyle = customText.getStyle('horizontal-position')!;
+	const verticalStyle = customImage.getStyle('vertical-position')!;
+	const horizontalStyle = customImage.getStyle('horizontal-position')!;
 </script>
 
 <div
@@ -72,9 +74,7 @@
 		horizontalMin: horizontalStyle.valueMin
 	}}
 	class="absolute customtext cursor-move select-none"
-	style={`transform: translateY(${customTextSettings().verticalPosition}px) translateX(${customTextSettings().horizontalPosition}px); opacity: ${customTextSettings().opacity()}; `}
+	style={`transform: translateY(${customImageSettings().verticalPosition}px) translateX(${customImageSettings().horizontalPosition}px) scale(${customImageSettings().scale}); opacity: ${customImageSettings().opacity()}; `}
 >
-	<CompositeText compositeStyle={customText.getCompositeStyle()!}>
-		{customTextSettings().text}
-	</CompositeText>
+	<img src={convertFileSrc(customImageSettings().filepath)} alt={customImageSettings().filepath} />
 </div>

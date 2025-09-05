@@ -2,6 +2,9 @@ import { AssetType, TrackType } from './enums.js';
 import {
 	AssetClip,
 	Clip,
+	ClipWithTranslation,
+	CustomClip,
+	CustomImageClip,
 	CustomTextClip,
 	PredefinedSubtitleClip,
 	SilenceClip,
@@ -16,6 +19,7 @@ import toast from 'svelte-5-french-toast';
 import { VerseTranslation } from './Translation.svelte.js';
 import ModalManager from '$lib/components/modals/ModalManager.js';
 import type { Category } from './VideoStyle.svelte.js';
+import { open } from '@tauri-apps/plugin-dialog';
 
 export class Track extends SerializableBase {
 	type: TrackType = $state(TrackType.Unknown);
@@ -78,8 +82,8 @@ export class Track extends SerializableBase {
 				return 'Audio';
 			case TrackType.Subtitle:
 				return 'Subtitles';
-			case TrackType.CustomText:
-				return 'Custom Texts';
+			case TrackType.CustomClip:
+				return 'Custom Clips';
 			default:
 				return 'Unknown Track';
 		}
@@ -93,7 +97,7 @@ export class Track extends SerializableBase {
 				return 'music_note';
 			case TrackType.Subtitle:
 				return 'subtitles';
-			case TrackType.CustomText:
+			case TrackType.CustomClip:
 				return 'text_fields';
 			default:
 				return 'help_outline';
@@ -239,7 +243,7 @@ export class SubtitleTrack extends Track {
 	 * @param surah Le nouveau numéro de la sourate du sous-titre.
 	 */
 	async editSubtitle(
-		subtitle: SubtitleClip | PredefinedSubtitleClip | null,
+		subtitle: SubtitleClip | PredefinedSubtitleClip | ClipWithTranslation | null,
 		verse: Verse,
 		firstWordIndex: number,
 		lastWordIndex: number,
@@ -543,18 +547,51 @@ export class SubtitleTrack extends Track {
 
 export class CustomTextTrack extends Track {
 	constructor() {
-		super(TrackType.CustomText);
+		super(TrackType.CustomClip);
 	}
 
-	async addCustomText(customTextCategory: Category, startTime?: number, endTime?: number) {
+	async addCustomClip(
+		customClipCategory: Category,
+		clipType: 'text' | 'image',
+		startTime?: number,
+		endTime?: number
+	) {
 		// Si des durées sont spécifiées, alors on désactive l'option "always show"
 		if (startTime !== undefined && endTime !== undefined) {
-			customTextCategory.getStyle('always-show')!.value = false;
-			customTextCategory.getStyle('time-appearance')!.value = startTime;
-			customTextCategory.getStyle('time-disappearance')!.value = endTime;
+			customClipCategory.getStyle('always-show')!.value = false;
+			customClipCategory.getStyle('time-appearance')!.value = startTime;
+			customClipCategory.getStyle('time-disappearance')!.value = endTime;
 		}
 
-		const clip = new CustomTextClip(customTextCategory);
+		let clip: any;
+		if (clipType === 'image') {
+			// Ajoute un clip image
+
+			// Ouvre la modale de sélection d'image
+			let imagePath = '';
+
+			const result = await open({
+				multiple: false,
+				directory: false,
+				filters: [
+					{
+						name: 'Image Files',
+						extensions: ['png', 'jpg', 'jpeg', 'gif']
+					}
+				]
+			});
+
+			if (result) {
+				imagePath = result as string;
+				customClipCategory.getStyle('filepath')!.value = imagePath;
+			} else {
+				return; // Annule l'ajout du clip si aucun fichier n'est sélectionné
+			}
+
+			clip = new CustomImageClip(customClipCategory);
+		} else {
+			clip = new CustomTextClip(customClipCategory);
+		}
 
 		// Set les temps si spécifiés
 		if (startTime !== undefined && endTime !== undefined) {
@@ -563,15 +600,18 @@ export class CustomTextTrack extends Track {
 		}
 
 		this.clips.push(clip);
+
+		// Trigger la réactivé dans la videopreview pour afficher le clip ajouté (si le curseur est dessus)
+		globalState.updateVideoPreviewUI();
 	}
 
-	getCurrentClips(): CustomTextClip[] {
+	getCurrentClips(): CustomClip[] {
 		// Retourne tout les clips à afficher
 		const currentTime = globalState.currentProject?.projectEditorState.timeline.cursorPosition ?? 0;
-		let clips: CustomTextClip[] = [];
+		let clips: CustomClip[] = [];
 
 		for (let index = 0; index < this.clips.length; index++) {
-			const element = this.clips[index] as CustomTextClip;
+			const element = this.clips[index] as CustomClip;
 			if (
 				element.getAlwaysShow() ||
 				(currentTime >= element.startTime && currentTime <= element.endTime)

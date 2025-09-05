@@ -256,8 +256,10 @@
 									<span class="material-icons text-sm">error</span>
 									<span class="font-medium">Export Error</span>
 								</div>
-								<div class="text-red-300 text-xs font-mono bg-red-950/50 p-2 rounded">
-									{exportation.errorLog}
+								<div
+									class="text-red-300 text-xs font-mono bg-red-950/50 p-2 rounded overflow-auto max-h-[100px]"
+								>
+									{@html exportation.errorLog.replaceAll('\\n', '<br>')}
 								</div>
 							</div>
 						{/if}

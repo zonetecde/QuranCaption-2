@@ -30,6 +30,16 @@
 
 			const aiResponse = JSON.parse(aiResponseStr);
 
+			// Parser la traduction compacte "index:word index:word..."
+			const parseCompactTranslation = (translationStr: string) => {
+				return translationStr.split(' ').map((item) => {
+					const colonIndex = item.indexOf(':');
+					const index = parseInt(item.substring(0, colonIndex));
+					const word = item.substring(colonIndex + 1);
+					return { i: index, w: word };
+				});
+			};
+
 			// Error tracking
 			const errorMessages: string[] = [];
 			let processedVerses = 0;
@@ -63,11 +73,14 @@
 				const verseData = filteredArray[i];
 				const verseKey = verseData.verseKey;
 
+				// Convertir le format compact en objets
+				const translationWords = parseCompactTranslation(verseData.translation);
+
 				if (verses[verseKey]) {
 					indexToSubtitleMapping[i] = {
 						subtitles: verses[verseKey],
 						verseKey: verseKey,
-						translation: verseData.translation
+						translation: translationWords
 					};
 				}
 			}
@@ -105,6 +118,37 @@
 				}
 
 				let verseHasError = false;
+
+				// Vérification de la couverture complète des indices
+				const coveredIndices = new Set<number>();
+				const totalWords = translationWords.length;
+
+				// Collecte tous les indices couverts par les segments valides
+				for (const range of segmentRanges) {
+					if (range !== null && Array.isArray(range) && range.length === 2) {
+						const [start, end] = range;
+						if (start >= 0 && end >= 0 && start <= end && end < totalWords) {
+							for (let i = start; i <= end; i++) {
+								coveredIndices.add(i);
+							}
+						}
+					}
+				}
+
+				// Vérifie si tous les indices de 0 à totalWords-1 sont couverts
+				const incompleteCoverage = coveredIndices.size !== totalWords;
+				if (incompleteCoverage) {
+					const missingIndices = [];
+					for (let i = 0; i < totalWords; i++) {
+						if (!coveredIndices.has(i)) {
+							missingIndices.push(i);
+						}
+					}
+					errorMessages.push(
+						`Verse ${verseKey}: Incomplete word coverage - missing indices ${missingIndices.join(', ')} (covered ${coveredIndices.size}/${totalWords} words)`
+					);
+					verseHasError = true;
+				}
 
 				// Applique chaque range à son sous-titre correspondant
 				for (let segmentIndex = 0; segmentIndex < segmentRanges.length; segmentIndex++) {
@@ -171,10 +215,18 @@
 					verseTranslation.text = translationText;
 					verseTranslation.startWordIndex = startIndex;
 					verseTranslation.endWordIndex = endIndex;
-					verseTranslation.updateStatus('ai trimmed', edition);
+
+					// Met le statut approprié : 'ai error' si couverture incomplète, sinon 'ai trimmed'
+					if (incompleteCoverage) {
+						verseTranslation.updateStatus('ai error', edition);
+					} else {
+						verseTranslation.updateStatus('ai trimmed', edition);
+					}
 				}
 
-				if (!verseHasError) {
+				// Même en cas d'erreur de couverture, on considère le verset comme traité avec succès
+				// car les sous-titres ont été appliqués (même s'ils sont marqués 'ai error')
+				if (!verseHasError || incompleteCoverage) {
 					successfulVerses++;
 				}
 			}
@@ -254,22 +306,18 @@
 			const verse = verses[verseKey];
 			const translation = globalState.getProjectTranslation.getVerseTranslation(edition, verseKey);
 
-			let translationWords = [];
-
-			for (let i = 0; i < translation.split(' ').length; i++) {
-				const element = translation.split(' ')[i];
-				translationWords.push({
-					i: i,
-					w: element
-				});
-			}
+			// Format compact : "index:word index:word..."
+			let translationString = translation
+				.split(' ')
+				.map((word, index) => `${index}:${word}`)
+				.join(' ');
 
 			if (verse.length > 0) {
 				array.push({
 					index: index++,
 					verseKey: verseKey,
 					segments: verse.map((subtitle) => subtitle.text),
-					translation: translationWords
+					translation: translationString
 				});
 			}
 		}

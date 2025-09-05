@@ -9,7 +9,13 @@ import { PredefinedSubtitleTranslation, type VerseTranslation } from './Translat
 import type { Category, StyleName, TextStyleName } from './VideoStyle.svelte';
 import QPCFontProvider from '$lib/services/FontProvider';
 
-type ClipType = 'Silence' | 'Pre-defined Subtitle' | 'Subtitle' | 'Custom Text' | 'Asset';
+type ClipType =
+	| 'Silence'
+	| 'Pre-defined Subtitle'
+	| 'Subtitle'
+	| 'Custom Text'
+	| 'Custom Image'
+	| 'Asset';
 
 export class Clip extends SerializableBase {
 	id: number;
@@ -334,20 +340,12 @@ export class PredefinedSubtitleClip extends ClipWithTranslation {
 	}
 }
 
-export class CustomTextClip extends Clip {
+export class CustomClip extends Clip {
 	category: Category | undefined = $state(undefined);
 
-	constructor(category: Category) {
-		// Déserialization
-		if (category === undefined) {
-			super(0, 0, 'Custom Text');
-			return;
-		}
-
-		let startTime = category.getStyle('time-appearance')!.value as number;
-		let endTime = category.getStyle('time-disappearance')!.value as number;
-
+	constructor(startTime: number, endTime: number, type: 'text' | 'image', category: Category) {
 		super(startTime, endTime, 'Custom Text');
+		this.type = type === 'text' ? 'Custom Text' : 'Custom Image';
 		this.category = category;
 	}
 
@@ -365,10 +363,6 @@ export class CustomTextClip extends Clip {
 		return this.category?.getStyle('always-show')!.value as boolean;
 	}
 
-	getText() {
-		return this.category?.getStyle('text')!.value as string;
-	}
-
 	override getWidth(): number {
 		// Si le custom text s'affiche sur toute la durée de la vidéo, alors retourne le temps
 		// total de la vidéo
@@ -381,6 +375,46 @@ export class CustomTextClip extends Clip {
 			// Appel du getWidth du parent
 			return super.getWidth();
 		}
+	}
+}
+
+export class CustomTextClip extends CustomClip {
+	constructor(category: Category) {
+		// Déserialization
+		if (category === undefined) {
+			super(0, 0, 'text', category);
+			return;
+		}
+
+		let startTime = category.getStyle('time-appearance')!.value as number;
+		let endTime = category.getStyle('time-disappearance')!.value as number;
+
+		super(startTime, endTime, 'text', category);
+		this.category = category;
+	}
+
+	getText() {
+		return this.category?.getStyle('text')!.value as string;
+	}
+}
+
+export class CustomImageClip extends CustomClip {
+	constructor(category: Category) {
+		// Déserialization
+		if (category === undefined) {
+			super(0, 0, 'image', category);
+			return;
+		}
+
+		let startTime = category.getStyle('time-appearance')!.value as number;
+		let endTime = category.getStyle('time-disappearance')!.value as number;
+
+		super(startTime, endTime, 'image', category);
+		this.category = category;
+	}
+
+	getFilePath() {
+		return this.category?.getStyle('filepath')!.value as string;
 	}
 }
 

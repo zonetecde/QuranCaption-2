@@ -2,12 +2,14 @@
 	import { CustomTextClip, ProjectEditorTabs, SubtitleClip, Translation } from '$lib/classes';
 	import type { StyleCategoryName } from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { verticalDrag } from '$lib/services/verticalDrag';
+	import { mouseDrag } from '$lib/services/verticalDrag';
 	import { untrack } from 'svelte';
 	import ReciterName from '../tabs/styleEditor/ReciterName.svelte';
 	import SurahName from '../tabs/styleEditor/SurahName.svelte';
 	import VerseNumber from '../tabs/styleEditor/VerseNumber.svelte';
 	import CustomText from '../tabs/styleEditor/CustomText.svelte';
+	import CustomImage from '../tabs/styleEditor/CustomImage.svelte';
+	import { CustomImageClip } from '$lib/classes/Clip.svelte';
 
 	const fadeDuration = $derived(() => {
 		return globalState.getStyle('global', 'fade-duration').value as number;
@@ -30,10 +32,10 @@
 	});
 
 	// Contient les textes custom à afficher à ce moment précis
-	let currentCustomTexts = $derived(() => {
+	let currentCustomClips = $derived(() => {
 		const _ = getTimelineSettings().cursorPosition;
 		return untrack(() => {
-			return globalState.getCustomTextTrack.getCurrentClips();
+			return globalState.getCustomClipTrack.getCurrentClips();
 		});
 	});
 
@@ -411,9 +413,10 @@
 						ondblclick={() => {
 							globalState.getVideoStyle.highlightCategory('arabic', 'general');
 						}}
-						use:verticalDrag={{
+						use:mouseDrag={{
 							target: 'arabic',
-							styleId: 'vertical-position'
+							verticalStyleId: 'vertical-position',
+							horizontalStyleId: 'horizontal-position'
 						}}
 						class={'arabic absolute subtitle select-none ' +
 							getTailwind('arabic') +
@@ -448,9 +451,10 @@
 									edition as StyleCategoryName
 								);
 							}}
-							use:verticalDrag={{
+							use:mouseDrag={{
 								target: edition,
-								styleId: 'vertical-position'
+								verticalStyleId: 'vertical-position',
+								horizontalStyleId: 'horizontal-position'
 							}}
 							class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
 							style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id, [
@@ -479,8 +483,12 @@
 			/>
 		{/if}
 
-		{#each currentCustomTexts() as customText}
-			<CustomText customText={(customText as CustomTextClip).category!} />
+		{#each currentCustomClips() as customText}
+			{#if customText.type === 'Custom Text'}
+				<CustomText customText={(customText as CustomTextClip).category!} />
+			{:else if customText.type === 'Custom Image'}
+				<CustomImage customImage={(customText as CustomImageClip).category!} />
+			{/if}
 		{/each}
 	</div>
 </div>

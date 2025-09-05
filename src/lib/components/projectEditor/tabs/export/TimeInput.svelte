@@ -26,9 +26,11 @@
 	function applyValue(newValue: number) {
 		// Make sure que start time < end time
 		if (label === 'Start Time' && newValue >= globalState.getExportState.videoEndTime) {
-			toast.error('Start time must be before end time');
+			value = newValue;
+			globalState.getExportState.videoEndTime = newValue + 1000; // Ensure
 		} else if (label === 'End Time' && newValue <= globalState.getExportState.videoStartTime) {
-			toast.error('End time must be after start time');
+			value = newValue;
+			globalState.getExportState.videoStartTime = Math.max(0, newValue - 1000); // Ensure at least 1 second duration
 		} else value = newValue;
 	}
 </script>

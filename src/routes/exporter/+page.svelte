@@ -32,8 +32,9 @@
 	// Récupère les données d'export de la vidéo
 	let exportData: Exportation | undefined;
 
-	// Constante pour la durée de chunk (2min30 minutes en millisecondes)
-	const CHUNK_DURATION = 2.5 * 60 * 1000;
+	// Durée de chunk calculée dynamiquement basée sur chunkSize (1-200)
+	// chunkSize = 1 -> 30s, chunkSize = 50 -> 2min30, chunkSize = 200 -> 10min
+	let CHUNK_DURATION = 0; // Sera calculé dans onMount
 
 	async function exportProgress(event: any) {
 		const data = event.payload as {
@@ -168,6 +169,17 @@
 			// Divise par 2 le fade duration pour l'export (car l'export le rallonge par deux, ne pas demander pourquoi)
 			globalState.getStyle('global', 'fade-duration')!.value =
 				(globalState.getStyle('global', 'fade-duration')!.value as number) / 2;
+
+			// Calculer CHUNK_DURATION basé sur chunkSize (1-200)
+			// Formule linéaire: chunkSize=1 -> 30s, chunkSize=50 -> 2min30, chunkSize=200 -> 10min
+			const chunkSize = globalState.getExportState.chunkSize;
+			const minDuration = 30 * 1000; // 30 secondes en ms
+			const maxDuration = 10 * 60 * 1000; // 10 minutes en ms
+			CHUNK_DURATION = minDuration + ((chunkSize - 1) / (200 - 1)) * (maxDuration - minDuration);
+
+			console.log(
+				`Chunk size: ${chunkSize}, Chunk duration: ${CHUNK_DURATION}ms (${CHUNK_DURATION / 1000}s)`
+			);
 
 			// Enlève tout les styles de position de la vidéo
 			let videoElement: HTMLElement;
@@ -326,7 +338,24 @@
 			// Calculer l'index de l'image dans ce chunk (recommence à 0)
 			const imageIndex = Math.max(Math.round(timing - chunkStart + base), 0);
 
-			if (chunkTimings.blankImgs.includes(timing) && chunkTimings.imgWithNothingShown !== -1) {
+			// Vérifie si ce timing doit être dupliqué depuis un autre
+			const sourceTimingForDuplication = Array.from(chunkTimings.duplicableTimings.entries()).find(
+				([target, source]) => target === timing // target = timing qui doit être dupliqué
+			)?.[1];
+
+			// Si c'est dupliquable
+			if (sourceTimingForDuplication !== undefined) {
+				// Ce timing peut être dupliqué depuis sourceTimingForDuplication
+				const sourceIndex = Math.max(
+					Math.round(sourceTimingForDuplication - chunkStart - fadeDuration),
+					0
+				);
+				// Prend que un seul screenshot et le duplique
+				await duplicateScreenshot(`${sourceIndex}`, imageIndex, chunkImageFolder);
+			} else if (
+				chunkTimings.blankImgs.includes(timing) &&
+				chunkTimings.imgWithNothingShown !== -1
+			) {
 				// On duplique l'image imgWithNothingShown
 				await duplicateScreenshot('blank', imageIndex, chunkImageFolder);
 				console.log(
@@ -479,8 +508,25 @@
 		let base = -fadeDuration;
 
 		for (const timing of timings.uniqueSorted) {
-			if (timings.blankImgs.includes(timing) && timings.imgWithNothingShown !== -1) {
-				await duplicateScreenshot('blank', Math.max(Math.round(timing - exportStart + base), 0));
+			const imageIndex = Math.max(Math.round(timing - exportStart + base), 0);
+
+			// Vérifier si ce timing peut être dupliqué depuis un autre
+			const sourceTimingForDuplication = Array.from(timings.duplicableTimings.entries()).find(
+				([target, source]) => target === timing
+			)?.[1];
+
+			if (sourceTimingForDuplication !== undefined) {
+				// Ce timing peut être dupliqué depuis sourceTimingForDuplication
+				const sourceIndex = Math.max(
+					Math.round(sourceTimingForDuplication - exportStart - fadeDuration),
+					0
+				);
+				await duplicateScreenshot(`${sourceIndex}`, imageIndex);
+				console.log(
+					`Optimisation - Duplicating screenshot from timing ${sourceTimingForDuplication} (image ${sourceIndex}) to timing ${timing} (image ${imageIndex})`
+				);
+			} else if (timings.blankImgs.includes(timing) && timings.imgWithNothingShown !== -1) {
+				await duplicateScreenshot('blank', imageIndex);
 				console.log('Duplicating screenshot instead of taking new one at', timing);
 			} else {
 				globalState.getTimelineState.movePreviewTo = timing;
@@ -488,11 +534,13 @@
 
 				await wait(timing, i, timings.uniqueSorted);
 
-				await takeScreenshot(`${Math.max(Math.round(timing - exportStart + base), 0)}`);
+				await takeScreenshot(`${imageIndex}`);
 
 				if (timing === timings.imgWithNothingShown) {
 					await takeScreenshot('blank');
 				}
+
+				console.log(`Normal export: Screenshot taken at timing ${timing} -> image ${imageIndex}`);
 			}
 
 			base += fadeDuration;
@@ -514,15 +562,49 @@
 		await finalCleanup();
 	}
 
+	/**
+	 * Analyser l'état des custom clips à un moment donné
+	 * Retourne un identifiant unique basé sur quels custom clips sont visibles
+	 */
+	function getCustomClipStateAt(timing: number): string {
+		const visibleCustomClips: string[] = [];
+
+		for (const ctClip of globalState.getCustomClipTrack?.clips || []) {
+			// @ts-ignore
+			const category = ctClip.category;
+			if (!category) continue;
+
+			const alwaysShow = (category.getStyle('always-show')?.value as number) || 0;
+			// Ignorer les custom texts always visible comme demandé
+			if (alwaysShow) continue;
+
+			const startTime = category.getStyle('time-appearance')?.value as number;
+			const endTime = category.getStyle('time-disappearance')?.value as number;
+			if (startTime == null || endTime == null) continue;
+
+			// Vérifier si ce custom text est visible au timing donné (inclusive des bornes)
+			if (timing >= startTime && timing <= endTime) {
+				// Créer une clé unique basée sur l'ID du clip et ses propriétés temporelles
+				const uniqueKey = `${ctClip.id}-${startTime}-${endTime}`;
+				visibleCustomClips.push(uniqueKey);
+			}
+		}
+
+		// Retourner un hash des custom texts visibles, triés pour la cohérence
+		const stateSignature = visibleCustomClips.sort().join('|');
+		return stateSignature;
+	}
+
 	function calculateTimingsForRange(rangeStart: number, rangeEnd: number) {
 		const fadeDuration = Math.round(
 			globalState.getStyle('global', 'fade-duration')!.value as number
 		);
-		const halfFade = fadeDuration / 2;
 
 		let timingsToTakeScreenshots: number[] = [rangeStart, rangeEnd];
 		let imgWithNothingShown: number = -1;
 		let blankImgs: number[] = [];
+		// Map pour stocker les timings qui peuvent être dupliqués
+		let duplicableTimings: Map<number, number> = new Map(); // source -> target
 
 		function add(t: number | undefined) {
 			if (t === undefined) return;
@@ -532,7 +614,6 @@
 
 		// --- Sous-titres ---
 		for (const clip of globalState.getSubtitleTrack.clips) {
-			// @ts-ignore
 			const { startTime, endTime } = clip as any;
 			if (startTime == null || endTime == null) continue;
 			if (endTime < rangeStart || startTime > rangeEnd) continue;
@@ -541,10 +622,30 @@
 
 			if (!(clip instanceof SilenceClip)) {
 				const fadeInEnd = Math.min(startTime + fadeDuration, endTime);
-				add(fadeInEnd);
-
 				const fadeOutStart = endTime - fadeDuration;
-				if (fadeOutStart > startTime) add(fadeOutStart);
+
+				// Vérifier si on peut optimiser les captures pour ce sous-titre
+				// L'idée : si les custom clips visibles sont identiques entre fadeInEnd et fadeOutStart,
+				// on peut prendre une seule capture et la dupliquer, économisant du temps
+				if (fadeOutStart > startTime && fadeInEnd !== fadeOutStart) {
+					// Récupère les customs clips visibles aux deux timings pour voir si possibilité de duplication
+					const customClipStateAtFadeInEnd = getCustomClipStateAt(fadeInEnd);
+					const customClipStateAtFadeOutStart = getCustomClipStateAt(fadeOutStart);
+
+					// Si l'état des custom clips est identique, on peut dupliquer
+					if (customClipStateAtFadeInEnd === customClipStateAtFadeOutStart) {
+						add(fadeInEnd);
+						// Ajoute à la map de duplication
+						duplicableTimings.set(Math.round(fadeOutStart), Math.round(fadeInEnd));
+					} else {
+						// États différents, prendre les deux captures
+						add(fadeInEnd);
+						add(fadeOutStart);
+					}
+				} else {
+					add(fadeInEnd);
+					if (fadeOutStart > startTime) add(fadeOutStart);
+				}
 
 				add(endTime);
 			} else {
@@ -558,7 +659,7 @@
 			}
 
 			if (
-				!globalState.getCustomTextTrack?.clips.find((ctClip) => {
+				!globalState.getCustomClipTrack?.clips.find((ctClip) => {
 					// @ts-ignore
 					const clip = ctClip as CustomTextClip;
 					const alwaysShow = clip.category!.getStyle('always-show')!.value as boolean;
@@ -579,7 +680,7 @@
 		}
 
 		// --- Custom Texts ---
-		for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+		for (const ctClip of globalState.getCustomClipTrack?.clips || []) {
 			// @ts-ignore
 			const category = ctClip.category;
 			if (!category) continue;
@@ -610,7 +711,7 @@
 			.filter((t) => t >= rangeStart && t <= rangeEnd)
 			.sort((a, b) => a - b);
 
-		return { uniqueSorted, imgWithNothingShown, blankImgs };
+		return { uniqueSorted, imgWithNothingShown, blankImgs, duplicableTimings };
 	}
 
 	async function generateNormalVideo(exportStart: number, duration: number) {
@@ -734,8 +835,14 @@
 		}
 	}
 
+	/**
+	 * Duplique un screenshot existant vers un nouveau fichier
+	 * @param sourceFileName Le nom du fichier source (sans extension)
+	 * @param targetFileName Le nom du fichier cible (sans extension)
+	 * @param subfolder Le sous-dossier où se trouvent les fichiers (optionnel)
+	 */
 	async function duplicateScreenshot(
-		sourceFileName: string,
+		sourceFileName: string | number,
 		targetFileName: number,
 		subfolder: string | null = null
 	) {
@@ -789,7 +896,7 @@
 		}
 
 		// --- Custom Texts ---
-		for (const ctClip of globalState.getCustomTextTrack?.clips || []) {
+		for (const ctClip of globalState.getCustomClipTrack?.clips || []) {
 			// @ts-ignore
 			const category = ctClip.category;
 			if (!category) continue;

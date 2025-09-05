@@ -7,6 +7,7 @@
 	import ModalManager from '../modals/ModalManager';
 	import { Status } from '$lib/classes/Status';
 	import { slide } from 'svelte/transition';
+	import MigrationService from '$lib/services/MigrationService';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -33,7 +34,8 @@
 		// Ouvre le projet
 		globalState.currentProject = await ProjectService.load(projectDetail.id);
 
-		// Update le status discord
+		// Migration si besoin
+		MigrationService.FromQC313ToQC314();
 	}
 
 	// Gestion du menu de statut
@@ -135,7 +137,7 @@
 			<p class="text-xs text-[var(--text-secondary)] mb-1">
 				Duration: {projectDetail.duration.getFormattedTime(false)}
 			</p>
-			<p class="text-xs text-[var(--text-secondary)] mb-3">
+			<p class="text-xs text-[var(--text-secondary)] mb-3 verserange">
 				Verses: <span class="font-medium text-[var(--text-primary)]"
 					>{projectDetail.verseRange.toString()}</span
 				>
@@ -225,5 +227,13 @@
 <style>
 	.rotate-180 {
 		transform: rotate(180deg);
+	}
+
+	.verserange {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 </style>

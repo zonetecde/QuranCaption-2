@@ -229,7 +229,7 @@ fn ffmpeg_preprocess_video(src: &str, dst: &str, w: i32, h: i32, fps: i32, prefe
     let exe = resolve_ffmpeg_binary().unwrap_or_else(|| "ffmpeg".to_string());
 
     let vf = format!(
-        "scale=w={}:h={}:force_original_aspect_ratio=decrease,pad={}:{}:(ow-iw)/2:(oh-ih)/2:color=black,fps={}",
+        "scale=w={}:h={}:force_original_aspect_ratio=decrease,pad={}:{}:(ow-iw)/2:(oh-ih)/2:color=black,fps={},setsar=1",
         w, h, w, h, fps
     );
 
@@ -702,7 +702,7 @@ fn build_and_run_ffmpeg_filter_complex(
             format!("{}:v", bg_start_idx)
         };
         
-        filter_lines.push(format!("[{}]setpts=PTS-STARTPTS[bgtrim]", prev));
+        filter_lines.push(format!("[{}]setpts=PTS-STARTPTS,setsar=1[bgtrim]", prev));
         let mut bg_label = "bgtrim".to_string();
         
         if avail_bg_after + 1e-6 < duration_s {
@@ -713,7 +713,8 @@ fn build_and_run_ffmpeg_filter_complex(
                 "-i".to_string(), format!("color=c=black:s={}x{}:r={}:d={:.6}", w, h, fps, remain),
             ]);
             current_idx += 1;
-            filter_lines.push(format!("[bgtrim][{}:v]concat=n=2:v=1:a=0[bg]", color_pad_idx));
+            filter_lines.push(format!("[{}:v]setsar=1[colorpad]", color_pad_idx));
+            filter_lines.push(format!("[bgtrim][colorpad]concat=n=2:v=1:a=0[bg]"));
             bg_label = "bg".to_string();
         }
         
@@ -721,7 +722,8 @@ fn build_and_run_ffmpeg_filter_complex(
     };
     
     // Superposition de l'overlay (avec alpha) sur le fond
-    filter_lines.push(format!("[{}][overlay]overlay=shortest=1:x=0:y=0,format=yuv420p[vout]", bg_label));
+    filter_lines.push(format!("[{}]setsar=1[bg_normalized]", bg_label));
+    filter_lines.push(format!("[bg_normalized][overlay]overlay=shortest=1:x=0:y=0,format=yuv420p[vout]"));
     
     // Audio: concat, skip start_s, clamp à duration_s
     if have_audio {
@@ -945,13 +947,18 @@ fn build_and_run_ffmpeg_filter_complex(
         );
         
         // Écrire le fichier de log
-        if let Err(log_err) = std::fs::write(&log_filename, log_content) {
+        if let Err(log_err) = std::fs::write(&log_filename, &log_content) {
             eprintln!("Failed to write log file {}: {}", log_filename, log_err);
         } else {
             println!("FFmpeg error details saved to: {}", log_filename);
         }
         
-        let error_msg = format!("ffmpeg failed during video exportation (exit code: {:?})", status.code());
+        let error_msg = format!(
+            "ffmpeg failed during video exportation (exit code: {:?})\n\nSee the log file: {}\n\nLog details:\n{}", 
+            status.code(), 
+            log_filename,
+            log_content
+        );
         let mut error_data = serde_json::json!({
             "export_id": export_id,
             "error": error_msg

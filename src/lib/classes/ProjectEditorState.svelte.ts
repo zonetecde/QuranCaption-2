@@ -1,6 +1,11 @@
 import type SubtitlesEditor from '$lib/components/projectEditor/tabs/subtitlesEditor/SubtitlesEditor.svelte';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { PredefinedSubtitleClip, SubtitleClip } from './Clip.svelte';
+import {
+	ClipWithTranslation,
+	PredefinedSubtitleClip,
+	SilenceClip,
+	SubtitleClip
+} from './Clip.svelte';
 import { ProjectEditorTabs } from './enums';
 import { SerializableBase } from './misc/SerializableBase';
 import { globalState } from '$lib/runes/main.svelte';
@@ -170,7 +175,8 @@ export class SubtitlesEditorState extends SerializableBase {
 	showWordTransliteration: boolean = $state(false);
 
 	// Indique le sous-titre à éditer dans l'éditeur de sous-titres (null si aucun)
-	editSubtitle: SubtitleClip | PredefinedSubtitleClip | null = $state(null);
+	editSubtitle: SubtitleClip | PredefinedSubtitleClip | ClipWithTranslation | SilenceClip | null =
+		$state(null);
 }
 
 export class TranslationsEditorState extends SerializableBase {
@@ -227,6 +233,7 @@ export class ExportState extends SerializableBase {
 	videoStartTime: number = $state(0);
 	videoEndTime: number = $state(0);
 	fps: number = $state(30);
+	chunkSize: number = $state(50);
 }
 
 SerializableBase.registerChildClass(ProjectEditorState, 'timeline', TimelineState);

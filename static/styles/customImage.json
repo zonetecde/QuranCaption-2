@@ -1,0 +1,85 @@
+{
+	"id": "custom-image",
+	"name": "Custom Image",
+	"description": "Add an image on the video",
+	"icon": "image",
+	"styles": [
+		{
+			"id": "filepath",
+			"name": "File Path",
+			"description": "Path to the image file",
+			"value": "",
+			"valueType": "file",
+			"css": "",
+			"tailwind": false,
+			"icon": "text_fields"
+		},
+		{
+			"id": "scale",
+			"name": "Scale",
+			"description": "Change the scale of the image",
+			"valueType": "number",
+			"value": 1,
+			"valueMin": 0.05,
+			"valueMax": 4,
+			"step": 0.05,
+			"css": "",
+			"tailwind": false,
+			"icon": "zoom_in"
+		},
+		{
+			"id": "vertical-position",
+			"name": "Vertical Position",
+			"description": "Change the vertical position of the image (pixels from center)",
+			"value": 300,
+			"valueType": "number",
+			"valueMin": -540,
+			"valueMax": 540,
+			"css": "",
+			"tailwind": false,
+			"icon": "vertical_align_center"
+		},
+		{
+			"id": "horizontal-position",
+			"name": "Horizontal Position",
+			"description": "Change the horizontal position of the image (pixels from center)",
+			"value": 0,
+			"valueType": "number",
+			"valueMin": -960,
+			"valueMax": 960,
+			"css": "",
+			"tailwind": false,
+			"icon": "horizontal_rule"
+		},
+		{
+			"id": "always-show",
+			"name": "Always Show",
+			"description": "Always show the text (ignore timing)",
+			"value": true,
+			"valueType": "boolean",
+			"css": "",
+			"tailwind": false,
+			"icon": "visibility"
+		},
+		{
+			"id": "time-appearance",
+			"name": "Time Appearance",
+			"description": "Change the time where the text appears",
+			"value": 0,
+			"valueType": "time",
+			"css": "",
+			"tailwind": false,
+			"icon": "access_time"
+		},
+		{
+			"id": "time-disappearance",
+			"name": "Time Disappearance",
+			"description": "Change the time where the text disappears",
+			"value": 10000,
+			"valueType": "time",
+			"css": "",
+			"tailwind": false,
+			"icon": "access_time"
+		}
+	]
+}

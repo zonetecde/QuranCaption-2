@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CustomTextClip } from '$lib/classes';
+	import { CustomClip } from '$lib/classes/Clip.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { slide } from 'svelte/transition';
 
@@ -98,27 +99,33 @@
 							Arabic text style, and all translation styles.
 						</p>
 
-						{#if globalState.getCustomTextTrack.clips.length > 0}
+						{#if globalState.getCustomClipTrack.clips.length > 0}
 							<p class="mb-2">
 								You can optionally include custom text clips in the export. Select the clips you
 								want to include below:
 							</p>
 
 							<div class="flex flex-col gap-2 px-2">
-								{#each globalState.getCustomTextTrack.clips as customTextClip}
-									{#if customTextClip instanceof CustomTextClip}
+								{#each globalState.getCustomClipTrack.clips as customClip}
+									{#if customClip instanceof CustomClip}
 										<label class="flex items-center gap-x-2 cursor-pointer">
 											<input
 												type="checkbox"
 												onchange={() => {
-													if (includedExportClips.has(customTextClip.id)) {
-														includedExportClips.delete(customTextClip.id);
+													if (includedExportClips.has(customClip.id)) {
+														includedExportClips.delete(customClip.id);
 													} else {
-														includedExportClips.add(customTextClip.id);
+														includedExportClips.add(customClip.id);
 													}
 												}}
 											/>
-											{customTextClip.category!.getStyle('text')?.value}
+											{customClip.type === 'Custom Text'
+												? customClip.category!.getStyle('text')?.value
+												: customClip
+														.category!.getStyle('filepath')
+														?.value.toString()
+														.split('\\')
+														.pop()}
 										</label>
 									{/if}
 								{/each}

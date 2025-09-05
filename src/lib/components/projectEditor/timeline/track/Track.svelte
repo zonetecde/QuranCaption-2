@@ -5,14 +5,14 @@
 		type Track,
 		type SubtitleClip as SubtitleClipType,
 		Clip,
-		SubtitleClip,
-		CustomTextClip
+		SubtitleClip
 	} from '$lib/classes';
 	import { globalState } from '$lib/runes/main.svelte';
 	import ClipComponent from './Clip.svelte';
 	import SubtitleClipComponent from './SubtitleClip.svelte';
-	import CustomTextClipComponent from './CustomTextClip.svelte';
+	import CustomClipComponent from './CustomClip.svelte';
 	import { SubtitleTrack } from '$lib/classes/Track.svelte';
+	import { CustomClip } from '$lib/classes/Clip.svelte';
 
 	let {
 		track = $bindable()
@@ -53,7 +53,7 @@
 		{/if}
 	</div>
 	<div class="absolute left-[180px] top-0 bottom-0 right-0 z-[5]">
-		{#if track.type === TrackType.CustomText}
+		{#if track.type === TrackType.CustomClip}
 			{@const total = track.clips.length}
 			<!-- Container relatif pour positionner chaque lane -->
 			<div class="absolute inset-0">
@@ -63,7 +63,7 @@
 						style="top: {((total - 1 - index) * 100) / total}%; height: {100 / total}%;"
 					>
 						<div class="relative h-full">
-							<CustomTextClipComponent bind:clip={track.clips[index] as CustomTextClip} {track} />
+							<CustomClipComponent bind:clip={track.clips[index] as CustomClip} {track} />
 						</div>
 					</div>
 				{/each}
