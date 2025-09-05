@@ -2,7 +2,7 @@
 	import type { Category } from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
 	import CompositeText from './CompositeText.svelte';
-	import { verticalDrag } from '$lib/services/verticalDrag';
+	import { mouseDrag } from '$lib/services/verticalDrag';
 	import { convertFileSrc } from '@tauri-apps/api/core';
 
 	let { customImage: customImage }: { customImage: Category } = $props();
@@ -59,14 +59,19 @@
 	});
 
 	const verticalStyle = customImage.getStyle('vertical-position')!;
+	const horizontalStyle = customImage.getStyle('horizontal-position')!;
 </script>
 
 <div
-	use:verticalDrag={{
-		getInitial: () => Number(verticalStyle.value),
-		apply: (v: number) => (verticalStyle.value = v),
-		min: verticalStyle.valueMin,
-		max: verticalStyle.valueMax
+	use:mouseDrag={{
+		getInitialVertical: () => Number(verticalStyle.value),
+		applyVertical: (v: number) => (verticalStyle.value = v),
+		applyHorizontal: (v: number) => (horizontalStyle.value = v),
+		getInitialHorizontal: () => Number(horizontalStyle.value),
+		verticalMin: verticalStyle.valueMin,
+		verticalMax: verticalStyle.valueMax,
+		horizontalMax: horizontalStyle.valueMax,
+		horizontalMin: horizontalStyle.valueMin
 	}}
 	class="absolute customtext cursor-move select-none"
 	style={`transform: translateY(${customImageSettings().verticalPosition}px) translateX(${customImageSettings().horizontalPosition}px) scale(${customImageSettings().scale}); opacity: ${customImageSettings().opacity()}; `}

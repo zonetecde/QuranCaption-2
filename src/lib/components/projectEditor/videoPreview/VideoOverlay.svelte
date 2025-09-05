@@ -2,7 +2,7 @@
 	import { CustomTextClip, ProjectEditorTabs, SubtitleClip, Translation } from '$lib/classes';
 	import type { StyleCategoryName } from '$lib/classes/VideoStyle.svelte';
 	import { globalState } from '$lib/runes/main.svelte';
-	import { verticalDrag } from '$lib/services/verticalDrag';
+	import { mouseDrag } from '$lib/services/verticalDrag';
 	import { untrack } from 'svelte';
 	import ReciterName from '../tabs/styleEditor/ReciterName.svelte';
 	import SurahName from '../tabs/styleEditor/SurahName.svelte';
@@ -413,9 +413,10 @@
 						ondblclick={() => {
 							globalState.getVideoStyle.highlightCategory('arabic', 'general');
 						}}
-						use:verticalDrag={{
+						use:mouseDrag={{
 							target: 'arabic',
-							styleId: 'vertical-position'
+							verticalStyleId: 'vertical-position',
+							horizontalStyleId: 'horizontal-position'
 						}}
 						class={'arabic absolute subtitle select-none ' +
 							getTailwind('arabic') +
@@ -450,9 +451,10 @@
 									edition as StyleCategoryName
 								);
 							}}
-							use:verticalDrag={{
+							use:mouseDrag={{
 								target: edition,
-								styleId: 'vertical-position'
+								verticalStyleId: 'vertical-position',
+								horizontalStyleId: 'horizontal-position'
 							}}
 							class={`translation absolute subtitle select-none ${edition} ${getTailwind(edition)} ${helperStyles(edition)}`}
 							style={`opacity: ${subtitleOpacity(edition)}; ${getCss(edition, subtitle!.id, [

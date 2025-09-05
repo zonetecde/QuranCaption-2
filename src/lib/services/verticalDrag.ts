@@ -3,51 +3,83 @@ import type { StyleName } from '$lib/classes/VideoStyle.svelte';
 
 export interface VerticalDragOptions {
 	// Mode simple : fonction manuelle
-	getInitial?: () => number;
-	apply?: (value: number) => void;
-	min?: number;
-	max?: number;
+	getInitialVertical?: () => number;
+	getInitialHorizontal?: () => number;
+	applyVertical?: (value: number) => void;
+	applyHorizontal?: (value: number) => void;
+	verticalMin?: number;
+	verticalMax?: number;
+	horizontalMin?: number;
+	horizontalMax?: number;
 	round?: boolean;
 	classWhileDragging?: string;
 
 	// Mode automatique avec globalState
 	target?: string;
-	styleId?: StyleName;
+	verticalStyleId?: StyleName;
+	horizontalStyleId?: StyleName;
 }
 
-export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
+export function mouseDrag(node: HTMLElement, options: VerticalDragOptions) {
 	let startY = 0;
-	let origin = 0;
+	let startX = 0;
+	let originVertical = 0;
+	let originHorizontal = 0;
 	let dragging = false;
 	let opts = options;
+	let isStuckToZero = false; // Pour le sticky behavior horizontal
+	const HORIZONTAL_STICK_RANGE = 50; // Zone de stick autour de 0 (-50 à +50)
 
 	function mousedown(e: MouseEvent) {
 		if (e.button !== 0) return;
 		e.preventDefault();
 		startY = e.clientY;
+		startX = e.clientX;
+		isStuckToZero = false;
 
 		// Mode automatique avec globalState
-		if (opts.target && opts.styleId) {
+		if (opts.target && opts.verticalStyleId) {
 			const selectedIds =
 				globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
 					(s) => s.id
 				);
 			if (selectedIds.length > 0) {
 				// Si on a des clips sélectionnés, utilise la valeur effective du premier clip
-				origin = Number(
+				originVertical = Number(
 					globalState.getVideoStyle
 						.getStylesOfTarget(opts.target)
-						.getEffectiveValue(opts.styleId, selectedIds[0])
+						.getEffectiveValue(opts.verticalStyleId, selectedIds[0])
 				);
 			} else {
 				// Sinon, utilise la valeur du style global
-				origin = Number(
-					globalState.getVideoStyle.getStylesOfTarget(opts.target).findStyle(opts.styleId)!.value
+				originVertical = Number(
+					globalState.getVideoStyle.getStylesOfTarget(opts.target).findStyle(opts.verticalStyleId)!
+						.value
 				);
+			}
+
+			// Si le drag horizontal est activé, récupère aussi l'origine horizontale
+			if (opts.horizontalStyleId) {
+				if (selectedIds.length > 0) {
+					originHorizontal = Number(
+						globalState.getVideoStyle
+							.getStylesOfTarget(opts.target)
+							.getEffectiveValue(opts.horizontalStyleId, selectedIds[0])
+					);
+				} else {
+					originHorizontal = Number(
+						globalState.getVideoStyle
+							.getStylesOfTarget(opts.target)
+							.findStyle(opts.horizontalStyleId)!.value
+					);
+				}
 			}
 		} else {
 			// Mode manuel
-			origin = opts.getInitial!();
+			originVertical = opts.getInitialVertical!();
+			if (opts.getInitialHorizontal) {
+				originHorizontal = opts.getInitialHorizontal();
+			}
 		}
 
 		dragging = true;
@@ -59,47 +91,112 @@ export function verticalDrag(node: HTMLElement, options: VerticalDragOptions) {
 
 	function mousemove(e: MouseEvent) {
 		if (!dragging) return;
-		const delta = e.clientY - startY;
-		let val = origin + delta;
 
-		// Mode automatique avec globalState
-		if (opts.target && opts.styleId) {
+		// Gestion du drag vertical
+		const deltaY = e.clientY - startY;
+		let verticalVal = originVertical + deltaY;
+
+		// Mode automatique avec globalState pour le vertical
+		if (opts.target && opts.verticalStyleId) {
 			const style = globalState.getVideoStyle
 				.getStylesOfTarget(opts.target)
-				.findStyle(opts.styleId)!;
-			if (typeof style.valueMin === 'number') val = Math.max(style.valueMin, val);
-			if (typeof style.valueMax === 'number') val = Math.min(style.valueMax, val);
+				.findStyle(opts.verticalStyleId)!;
+			if (typeof style.valueMin === 'number') verticalVal = Math.max(style.valueMin, verticalVal);
+			if (typeof style.valueMax === 'number') verticalVal = Math.min(style.valueMax, verticalVal);
 		} else {
 			// Mode manuel
-			if (typeof opts.min === 'number') val = Math.max(opts.min, val);
-			if (typeof opts.max === 'number') val = Math.min(opts.max, val);
+			if (typeof opts.verticalMin === 'number')
+				verticalVal = Math.max(opts.verticalMin, verticalVal);
+			if (typeof opts.verticalMax === 'number')
+				verticalVal = Math.min(opts.verticalMax, verticalVal);
 		}
 
-		if (opts.round !== false) val = Math.round(val);
+		if (opts.round !== false) verticalVal = Math.round(verticalVal);
 
-		// Mode automatique avec globalState
-		if (opts.target && opts.styleId) {
+		// Application du vertical
+		if (opts.target && opts.verticalStyleId) {
 			const selectedIds =
 				globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
 					(s) => s.id
 				);
 			if (selectedIds.length > 0) {
-				// Si on a des clips sélectionnés, utilise setStyleForClips
 				globalState.getVideoStyle
 					.getStylesOfTarget(opts.target)
-					.setStyleForClips(selectedIds, opts.styleId, val);
+					.setStyleForClips(selectedIds, opts.verticalStyleId, verticalVal);
 			} else {
-				// Sinon, utilise setStyle pour le style global
-				globalState.getVideoStyle.getStylesOfTarget(opts.target).setStyle(opts.styleId, val);
-			}
-
-			// Déclenche un refresh si nécessaire pour certains styles
-			if (opts.styleId === 'vertical-position' || opts.styleId === 'horizontal-position') {
-				globalState.updateVideoPreviewUI();
+				globalState.getVideoStyle
+					.getStylesOfTarget(opts.target)
+					.setStyle(opts.verticalStyleId, verticalVal);
 			}
 		} else {
-			// Mode manuel
-			opts.apply!(val);
+			opts.applyVertical!(verticalVal);
+		}
+
+		// Gestion du drag horizontal (si activé)
+		if (opts.horizontalStyleId || opts.applyHorizontal) {
+			const deltaX = e.clientX - startX;
+			let horizontalVal = originHorizontal + deltaX;
+
+			// Sticky behavior près de zéro
+			// Si la valeur est dans la zone de stick (-50 à +50), on stick à 0
+			if (Math.abs(horizontalVal) <= HORIZONTAL_STICK_RANGE) {
+				// Si on n'était pas encore stuck, on devient stuck
+				if (!isStuckToZero) {
+					isStuckToZero = true;
+				}
+				horizontalVal = 0;
+			} else {
+				// Si on sort de la zone de stick, on n'est plus stuck
+				isStuckToZero = false;
+			}
+
+			// Mode automatique avec globalState pour l'horizontal
+			if (opts.target && opts.horizontalStyleId) {
+				const style = globalState.getVideoStyle
+					.getStylesOfTarget(opts.target)
+					.findStyle(opts.horizontalStyleId)!;
+				if (typeof style.valueMin === 'number')
+					horizontalVal = Math.max(style.valueMin, horizontalVal);
+				if (typeof style.valueMax === 'number')
+					horizontalVal = Math.min(style.valueMax, horizontalVal);
+			} else {
+				// Mode manuel
+				if (typeof opts.horizontalMin === 'number')
+					horizontalVal = Math.max(opts.horizontalMin, horizontalVal);
+				if (typeof opts.horizontalMax === 'number')
+					horizontalVal = Math.min(opts.horizontalMax, horizontalVal);
+			}
+
+			if (opts.round !== false) horizontalVal = Math.round(horizontalVal);
+
+			// Application de l'horizontal
+			if (opts.target && opts.horizontalStyleId) {
+				const selectedIds =
+					globalState.currentProject!.projectEditorState.stylesEditor.selectedSubtitles.map(
+						(s) => s.id
+					);
+				if (selectedIds.length > 0) {
+					globalState.getVideoStyle
+						.getStylesOfTarget(opts.target)
+						.setStyleForClips(selectedIds, opts.horizontalStyleId, horizontalVal);
+				} else {
+					globalState.getVideoStyle
+						.getStylesOfTarget(opts.target)
+						.setStyle(opts.horizontalStyleId, horizontalVal);
+				}
+			} else if (opts.applyHorizontal) {
+				opts.applyHorizontal(horizontalVal);
+			}
+		}
+
+		// Déclenche un refresh si nécessaire pour certains styles
+		if (
+			opts.verticalStyleId === 'vertical-position' ||
+			opts.verticalStyleId === 'horizontal-position' ||
+			opts.horizontalStyleId === 'vertical-position' ||
+			opts.horizontalStyleId === 'horizontal-position'
+		) {
+			globalState.updateVideoPreviewUI();
 		}
 	}
 

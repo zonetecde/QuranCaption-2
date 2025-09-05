@@ -2,7 +2,7 @@
 	import { Quran } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
-	import { verticalDrag } from '$lib/services/verticalDrag';
+	import { mouseDrag } from '$lib/services/verticalDrag';
 	import { draw, fade } from 'svelte/transition';
 	import CompositeText from './CompositeText.svelte';
 	import { VerseRange } from '$lib/classes';
@@ -54,9 +54,10 @@
 		ondblclick={() => {
 			globalState.getVideoStyle.highlightCategory('global', 'surah-name');
 		}}
-		use:verticalDrag={{
+		use:mouseDrag={{
 			target: 'global',
-			styleId: 'surah-name-vertical-position'
+			verticalStyleId: 'surah-name-vertical-position',
+			horizontalStyleId: 'surah-name-horizontal-position'
 		}}
 		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
 		style={`transform: translateY(${surahNameSettings().verticalPosition}px) translateX(${surahNameSettings().horizontalPosition}px); opacity: ${surahNameSettings().opacity}; `}

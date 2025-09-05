@@ -2,7 +2,7 @@
 	import { Quran } from '$lib/classes/Quran';
 	import { globalState } from '$lib/runes/main.svelte';
 	import { onMount, untrack } from 'svelte';
-	import { verticalDrag } from '$lib/services/verticalDrag';
+	import { mouseDrag } from '$lib/services/verticalDrag';
 	import { draw, fade } from 'svelte/transition';
 	import CompositeText from './CompositeText.svelte';
 	import RecitersManager from '$lib/classes/Reciter';
@@ -35,9 +35,10 @@
 		ondblclick={() => {
 			globalState.getVideoStyle.highlightCategory('global', 'verse-number');
 		}}
-		use:verticalDrag={{
+		use:mouseDrag={{
 			target: 'global',
-			styleId: 'verse-number-vertical-position'
+			verticalStyleId: 'verse-number-vertical-position',
+			horizontalStyleId: 'verse-number-horizontal-position'
 		}}
 		class="w-[100px] absolute flex flex-col items-center cursor-move select-none"
 		style={`transform: translateY(${verseNumberSettings().verticalPosition}px) translateX(${verseNumberSettings().horizontalPosition}px);`}
