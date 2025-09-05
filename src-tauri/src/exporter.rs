@@ -954,10 +954,10 @@ fn build_and_run_ffmpeg_filter_complex(
         }
         
         let error_msg = format!(
-            "ffmpeg failed during video exportation (exit code: {:?})\n\nLog details:\n{}\n\nSee the log file: {}", 
+            "ffmpeg failed during video exportation (exit code: {:?})\n\nSee the log file: {}\n\nLog details:\n{}", 
             status.code(), 
-            log_content,
-            log_filename
+            log_filename,
+            log_content
         );
         let mut error_data = serde_json::json!({
             "export_id": export_id,

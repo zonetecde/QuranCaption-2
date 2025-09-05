@@ -118,6 +118,23 @@
 			/>
 		</div>
 	</div>
+	<div class="mb-6">
+		<h4 class="text-base font-medium text-secondary mb-3">Chunk Size</h4>
+		<div class="bg-accent rounded-lg p-4 border border-color">
+			<p class="text-thirdly text-sm mb-4">
+				Chunk size for video processing (lower values use less memory). Range: 1-200 (1=30s,
+				50=2min30, 200=10min)
+			</p>
+			<input
+				type="number"
+				min="1"
+				max="200"
+				step="1"
+				class="input w-full"
+				bind:value={globalState.getExportState.chunkSize}
+			/>
+		</div>
+	</div>
 
 	<!-- Export Button -->
 	<div class="flex flex-col items-center">

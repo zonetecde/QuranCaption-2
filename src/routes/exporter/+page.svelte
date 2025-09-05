@@ -32,8 +32,9 @@
 	// Récupère les données d'export de la vidéo
 	let exportData: Exportation | undefined;
 
-	// Constante pour la durée de chunk (2min30 minutes en millisecondes)
-	const CHUNK_DURATION = 2.5 * 60 * 1000;
+	// Durée de chunk calculée dynamiquement basée sur chunkSize (1-200)
+	// chunkSize = 1 -> 30s, chunkSize = 50 -> 2min30, chunkSize = 200 -> 10min
+	let CHUNK_DURATION = 0; // Sera calculé dans onMount
 
 	async function exportProgress(event: any) {
 		const data = event.payload as {
@@ -168,6 +169,17 @@
 			// Divise par 2 le fade duration pour l'export (car l'export le rallonge par deux, ne pas demander pourquoi)
 			globalState.getStyle('global', 'fade-duration')!.value =
 				(globalState.getStyle('global', 'fade-duration')!.value as number) / 2;
+
+			// Calculer CHUNK_DURATION basé sur chunkSize (1-200)
+			// Formule linéaire: chunkSize=1 -> 30s, chunkSize=50 -> 2min30, chunkSize=200 -> 10min
+			const chunkSize = globalState.getExportState.chunkSize;
+			const minDuration = 30 * 1000; // 30 secondes en ms
+			const maxDuration = 10 * 60 * 1000; // 10 minutes en ms
+			CHUNK_DURATION = minDuration + ((chunkSize - 1) / (200 - 1)) * (maxDuration - minDuration);
+
+			console.log(
+				`Chunk size: ${chunkSize}, Chunk duration: ${CHUNK_DURATION}ms (${CHUNK_DURATION / 1000}s)`
+			);
 
 			// Enlève tout les styles de position de la vidéo
 			let videoElement: HTMLElement;
