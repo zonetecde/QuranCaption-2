@@ -6,7 +6,6 @@ import ModalManager from '$lib/components/modals/ModalManager';
 import ExportService from '$lib/services/ExportService';
 import QPCFontProvider from '$lib/services/FontProvider';
 import { telemetry } from '$lib/services/Telemetry';
-import { VersionService } from '$lib/services/VersionService.svelte';
 
 export const prerender = true;
 export const ssr = false;

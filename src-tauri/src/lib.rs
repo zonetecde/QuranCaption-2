@@ -8,6 +8,7 @@ use tauri::Emitter;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 mod exporter;
+use discord_rich_presence::{activity, DiscordIpc, DiscordIpcClient};
 
 use font_kit::source::SystemSource;
 
@@ -17,9 +18,20 @@ use std::os::windows::process::CommandExt;
 // Stockage global des process IDs d'export en cours
 lazy_static::lazy_static! {
     static ref EXPORT_PROCESS_IDS: Arc<Mutex<HashMap<String, u32>>> = Arc::new(Mutex::new(HashMap::new()));
+    static ref DISCORD_CLIENT: Arc<Mutex<Option<DiscordIpcClient>>> = Arc::new(Mutex::new(None));
 }
 
-// Fonction utilitaire pour configurer les commandes et cacher les fenêtres CMD sur Windows
+// Structure pour les paramètres Discord Rich Presence
+#[derive(serde::Deserialize)]
+struct DiscordActivity {
+    details: Option<String>,
+    state: Option<String>,
+    large_image_key: Option<String>,
+    large_image_text: Option<String>,
+    small_image_key: Option<String>,
+    small_image_text: Option<String>,
+}
+
 fn configure_command_no_window(cmd: &mut Command) {
     #[cfg(target_os = "windows")]
     {
@@ -580,6 +592,110 @@ fn convert_audio_to_cbr(file_path: String) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+async fn init_discord_rpc(app_id: String) -> Result<(), String> {
+    let mut client_guard = DISCORD_CLIENT.lock().map_err(|e| e.to_string())?;
+    
+    // Fermer la connexion existante si elle existe
+    if let Some(ref mut client) = *client_guard {
+        let _ = client.close();
+    }
+    
+    // Créer une nouvelle connexion
+    let mut client = DiscordIpcClient::new(&app_id).map_err(|e| e.to_string())?;
+    client.connect().map_err(|e| e.to_string())?;
+    
+    *client_guard = Some(client);
+    Ok(())
+}
+
+#[tauri::command]
+async fn update_discord_activity(activity_data: DiscordActivity) -> Result<(), String> {
+    let mut client_guard = DISCORD_CLIENT.lock().map_err(|e| e.to_string())?;
+    
+    if let Some(ref mut client) = *client_guard {
+        let mut activity_builder = activity::Activity::new();
+        
+        // Traiter les détails
+        if let Some(ref details) = activity_data.details {
+            activity_builder = activity_builder.details(details);
+        }
+        
+        // Traiter l'état
+        if let Some(ref state) = activity_data.state {
+            activity_builder = activity_builder.state(state);
+        }
+        
+        // Ajouter le timestamp de début
+        activity_builder = activity_builder.timestamps(
+            activity::Timestamps::new().start(
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs() as i64
+            )
+        );
+        
+        // Construire les assets si nécessaire
+        let has_large_image = activity_data.large_image_key.is_some();
+        let has_small_image = activity_data.small_image_key.is_some();
+        
+        if has_large_image || has_small_image {
+            let mut assets_builder = activity::Assets::new();
+            
+            if let Some(ref large_image_key) = activity_data.large_image_key {
+                assets_builder = assets_builder.large_image(large_image_key);
+                
+                if let Some(ref large_image_text) = activity_data.large_image_text {
+                    assets_builder = assets_builder.large_text(large_image_text);
+                }
+            }
+            
+            if let Some(ref small_image_key) = activity_data.small_image_key {
+                assets_builder = assets_builder.small_image(small_image_key);
+                
+                if let Some(ref small_image_text) = activity_data.small_image_text {
+                    assets_builder = assets_builder.small_text(small_image_text);
+                }
+            }
+            
+            activity_builder = activity_builder.assets(assets_builder);
+        }
+        
+        let activity = activity_builder;
+        client.set_activity(activity).map_err(|e| e.to_string())?;
+        
+        Ok(())
+    } else {
+        Err("Discord client not initialized. Call init_discord_rpc first.".to_string())
+    }
+}
+
+#[tauri::command]
+async fn clear_discord_activity() -> Result<(), String> {
+    let mut client_guard = DISCORD_CLIENT.lock().map_err(|e| e.to_string())?;
+    
+    if let Some(ref mut client) = *client_guard {
+        client.clear_activity().map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err("Discord client not initialized.".to_string())
+    }
+}
+
+#[tauri::command]
+async fn close_discord_rpc() -> Result<(), String> {
+    let mut client_guard = DISCORD_CLIENT.lock().map_err(|e| e.to_string())?;
+    
+    if let Some(ref mut client) = *client_guard {
+        client.close().map_err(|e| e.to_string())?;
+        *client_guard = None;
+        Ok(())
+    } else {
+        Ok(()) // Déjà fermé ou pas initialisé
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -597,7 +713,11 @@ pub fn run() {
             exporter::export_video,
             exporter::cancel_export,
             exporter::concat_videos,
-            convert_audio_to_cbr
+            convert_audio_to_cbr,
+            init_discord_rpc,
+            update_discord_activity,
+            clear_discord_activity,
+            close_discord_rpc
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

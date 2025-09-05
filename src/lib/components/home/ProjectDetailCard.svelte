@@ -7,8 +7,6 @@
 	import ModalManager from '../modals/ModalManager';
 	import { Status } from '$lib/classes/Status';
 	import { slide } from 'svelte/transition';
-	import RecitersManager from '$lib/classes/Reciter';
-	import AutocompleteInput from '../misc/AutocompleteInput.svelte';
 
 	let contextMenu: ContextMenu | undefined = $state(undefined); // Initialize context menu state
 
@@ -34,6 +32,8 @@
 	async function openProjectButtonClick() {
 		// Ouvre le projet
 		globalState.currentProject = await ProjectService.load(projectDetail.id);
+
+		// Update le status discord
 	}
 
 	// Gestion du menu de statut
