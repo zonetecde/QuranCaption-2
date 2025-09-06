@@ -1,17 +1,17 @@
 [package]
-name = "app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+name = "qurancaption"
+version = "3.1.4"
+description = "Transform Quranic recitations into stunning captioned videos with professional quality subtitles and translations in 40+ languages."
+authors = ["Rayane STASZEWSKI"]
+license = "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)"
+repository = "zonetecde/qurancaption"
 edition = "2021"
 rust-version = "1.77.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "app_lib"
+name = "qurancaption_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
