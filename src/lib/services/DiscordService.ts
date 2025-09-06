@@ -17,14 +17,10 @@ class DiscordService {
 	async init(): Promise<void> {
 		if (this.isInitialized) return;
 
-		invoke('init_discord_rpc', { appId: this.APP_ID })
-			.then(() => {
-				this.isInitialized = true;
-				console.log('Discord Rich Presence initialisé');
-			})
-			.catch((error) => {
-				console.error("Erreur lors de l'initialisation Discord RPC:", error);
-			});
+		invoke('init_discord_rpc', { appId: this.APP_ID }).then(() => {
+			this.isInitialized = true;
+			console.log('Discord Rich Presence initialisé');
+		});
 	}
 
 	async updateActivity(activity: DiscordActivity): Promise<void> {
@@ -34,10 +30,7 @@ class DiscordService {
 
 		try {
 			await invoke('update_discord_activity', { activityData: activity });
-		} catch (error) {
-			console.error('Erreur lors de la mise à jour Discord RPC:', error);
-			throw error;
-		}
+		} catch (error) {}
 	}
 
 	async clearActivity(): Promise<void> {
@@ -45,9 +38,7 @@ class DiscordService {
 
 		try {
 			await invoke('clear_discord_activity');
-		} catch (error) {
-			console.error('Erreur lors du nettoyage Discord RPC:', error);
-		}
+		} catch (error) {}
 	}
 
 	async close(): Promise<void> {
@@ -56,9 +47,7 @@ class DiscordService {
 		try {
 			await invoke('close_discord_rpc');
 			this.isInitialized = false;
-		} catch (error) {
-			console.error('Erreur lors de la fermeture Discord RPC:', error);
-		}
+		} catch (error) {}
 	}
 
 	// Méthodes prédéfinies pour différents états
