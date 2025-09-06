@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::error::Error;
 use std::fs;
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
@@ -285,8 +286,37 @@ fn choose_best_codec(prefer_hw: bool) -> (String, Vec<String>, HashMap<String, O
 }
 
 fn ffmpeg_preprocess_video(src: &str, dst: &str, w: i32, h: i32, fps: i32, prefer_hw: bool, start_ms: Option<i32>, duration_ms: Option<i32>) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    // Vérification préliminaire des binaires FFmpeg
+    println!("[ffmpeg] Vérification des binaires FFmpeg...");
+    
+    // Vérifier FFmpeg
+    match resolve_ffmpeg_binary() {
+        Some(path) => {
+            println!("[ffmpeg] ✓ FFmpeg trouvé: {}", path);
+            // Vérifier que le fichier est accessible
+            if let Err(e) = std::fs::metadata(&path) {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!("FFmpeg trouvé mais inaccessible: {} ({})", path, e)
+                )));
+            }
+        }
+        None => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "FFmpeg non trouvé. Veuillez installer FFmpeg dans le dossier 'binaries'."
+            )));
+        }
+    }
+
+
     let (codec, params, extra) = choose_best_codec(prefer_hw);
-    let exe = resolve_ffmpeg_binary().unwrap_or_else(|| "ffmpeg".to_string());
+    let exe = resolve_ffmpeg_binary().ok_or_else(|| {
+        Box::new(std::io::Error::new(
+            std::io::ErrorKind::NotFound, 
+            "FFmpeg binary not found. Please ensure ffmpeg is installed in the binaries folder."
+        )) as Box<dyn std::error::Error + Send + Sync + 'static>
+    })?;
 
     let vf = format!(
         "scale=w={}:h={}:force_original_aspect_ratio=decrease,pad={}:{}:(ow-iw)/2:(oh-ih)/2:color=black,fps={},setsar=1",
@@ -557,6 +587,39 @@ fn build_and_run_ffmpeg_filter_complex(
     chunk_index: Option<i32>,
     app_handle: tauri::AppHandle,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+    // Vérification préliminaire des binaires FFmpeg
+    println!("[ffmpeg] Vérification des binaires FFmpeg...");
+    
+    // Vérifier FFmpeg
+    match resolve_ffmpeg_binary() {
+        Some(path) => {
+            println!("[ffmpeg] ✓ FFmpeg trouvé: {}", path);
+            // Vérifier que le fichier est accessible
+            if let Err(e) = std::fs::metadata(&path) {
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!("FFmpeg trouvé mais inaccessible: {} ({})", path, e)
+                )));
+            }
+        }
+        None => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "FFmpeg non trouvé. Veuillez installer FFmpeg dans le dossier 'binaries'."
+            )));
+        }
+    }
+    
+    // Vérifier FFprobe si on a des audios ou des vidéos
+    if !audio_paths.is_empty() || !bg_videos.is_empty() {
+        let ffprobe_path = resolve_ffprobe_binary();
+        if ffprobe_path == "ffprobe" {
+            println!("[ffmpeg] ⚠️  FFprobe non trouvé dans binaries, utilisation du système");
+        } else {
+            println!("[ffmpeg] ✓ FFprobe trouvé: {}", ffprobe_path);
+        }
+    }
+
     let (w, h) = target_size;
     let fade_s = (fade_duration_ms as f64 / 1000.0).max(0.0);
     let start_s = (start_time_ms as f64 / 1000.0).max(0.0);
@@ -635,7 +698,70 @@ fn build_and_run_ffmpeg_filter_complex(
     println!("[concat] Fichier ffconcat -> {:?}", concat_path);
     
     let mut cmd = Vec::new();
-    let ffmpeg_exe = resolve_ffmpeg_binary().unwrap_or_else(|| "ffmpeg".to_string());
+    let ffmpeg_exe = match resolve_ffmpeg_binary() {
+        Some(path) => {
+            println!("[ffmpeg] FFmpeg trouvé: {}", path);
+            
+            // Vérifier que le fichier est exécutable sur Unix
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                if let Ok(metadata) = std::fs::metadata(&path) {
+                    let permissions = metadata.permissions();
+                    if permissions.mode() & 0o111 == 0 {
+                        println!("[ffmpeg] ⚠️  ATTENTION: FFmpeg n'est pas exécutable! Permissions: {:o}", permissions.mode());
+                        println!("[ffmpeg] Exécutez: chmod +x {}", path);
+                    } else {
+                        println!("[ffmpeg] ✓ FFmpeg est exécutable");
+                    }
+                } else {
+                    println!("[ffmpeg] ⚠️  Impossible de vérifier les permissions de FFmpeg");
+                }
+            }
+            
+            path
+        },
+        None => {
+            let cwd = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+            println!("[ffmpeg] ❌ FFmpeg NOT FOUND!");
+            println!("[ffmpeg] Répertoire de travail actuel: {:?}", cwd);
+            println!("[ffmpeg] Contenu du répertoire de travail:");
+            if let Ok(entries) = std::fs::read_dir(&cwd) {
+                for entry in entries.flatten() {
+                    println!("[ffmpeg]   - {:?}", entry.file_name());
+                }
+            }
+            
+            // Vérifier explicitement le dossier binaries
+            let binaries_dir = cwd.join("binaries");
+            println!("[ffmpeg] Vérification du dossier binaries: {:?}", binaries_dir);
+            if binaries_dir.exists() {
+                println!("[ffmpeg] Le dossier binaries existe!");
+                if let Ok(entries) = std::fs::read_dir(&binaries_dir) {
+                    for entry in entries.flatten() {
+                        println!("[ffmpeg]   - {:?}", entry.file_name());
+                    }
+                }
+                
+                // Vérifier explicitement ffmpeg
+                let ffmpeg_expected = if cfg!(target_os = "windows") {
+                    binaries_dir.join("ffmpeg.exe")
+                } else {
+                    binaries_dir.join("ffmpeg")
+                };
+                println!("[ffmpeg] Recherche de: {:?}", ffmpeg_expected);
+                if ffmpeg_expected.exists() {
+                    println!("[ffmpeg] ✓ Le fichier existe!");
+                } else {
+                    println!("[ffmpeg] ❌ Le fichier n'existe pas!");
+                }
+            } else {
+                println!("[ffmpeg] ❌ Le dossier binaries n'existe pas!");
+            }
+            
+            "ffmpeg".to_string()
+        }
+    };
     cmd.extend_from_slice(&[
         ffmpeg_exe.clone(),
         "-y".to_string(),
@@ -883,8 +1009,57 @@ fn build_and_run_ffmpeg_filter_complex(
     if let Some(cwd) = imgs_cwd {
         command.current_dir(cwd);
     }
+
+    println!("[ffmpeg] Tentative d'exécution de la commande: {}", &cmd[0]);
+    println!("[ffmpeg] Arguments: {:?}", &cmd[1..]);
+    if let Some(cwd) = imgs_cwd {
+        println!("[ffmpeg] Répertoire de travail: {}", cwd);
+    }
     
-    let mut child = command.spawn()?;
+    let mut child = command.spawn().map_err(|e| {
+        let detailed_error = format!(
+            "Impossible d'exécuter FFmpeg: {}\n\
+            Commande: {}\n\
+            Code d'erreur: {:?}\n\
+            Type d'erreur: {}\n\
+            Répertoire de travail: {:?}",
+            e,
+            &cmd[0],
+            e.kind(),
+            std::any::type_name_of_val(&e),
+            std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("unknown"))
+        );
+        
+        if e.kind() == std::io::ErrorKind::NotFound {
+            println!("[ERROR] FFmpeg non trouvé! Vérifications supplémentaires:");
+            
+            // Vérifier si le fichier existe
+            let ffmpeg_path = std::path::Path::new(&cmd[0]);
+            if ffmpeg_path.exists() {
+                println!("[ERROR] ✓ Le fichier existe: {}", &cmd[0]);
+                
+                // Sur Unix, vérifier les permissions
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+                    if let Ok(metadata) = std::fs::metadata(&cmd[0]) {
+                        let permissions = metadata.permissions();
+                        println!("[ERROR] Permissions du fichier: {:o}", permissions.mode());
+                        if permissions.mode() & 0o111 == 0 {
+                            println!("[ERROR] ❌ Le fichier n'est PAS exécutable!");
+                            println!("[ERROR] Exécutez: chmod +x {}", &cmd[0]);
+                        } else {
+                            println!("[ERROR] ✓ Le fichier est exécutable");
+                        }
+                    }
+                }
+            } else {
+                println!("[ERROR] ❌ Le fichier n'existe pas: {}", &cmd[0]);
+            }
+        }
+        
+        Box::new(std::io::Error::new(e.kind(), detailed_error))
+    })?;
     
     // Enregistrer le processus dans les exports actifs
     let process_ref = Arc::new(Mutex::new(Some(child)));
@@ -1186,7 +1361,24 @@ pub async fn export_video(
         )
     }).await
     .map_err(|e| format!("Erreur tâche: {}", e))?
-    .map_err(|e| format!("Erreur ffmpeg: {}", e))?;
+    .map_err(|e: Box<dyn Error + Send + Sync + 'static>| {
+        let error_msg = format!("Erreur ffmpeg: {}", e);
+        println!("[ERROR] {}", error_msg);
+        println!("[ERROR] Type d'erreur: {}", std::any::type_name_of_val(&*e));
+        
+        // Si c'est une erreur "No such file or directory", donner plus d'infos
+        let error_str = e.to_string();
+        if error_str.contains("No such file or directory") || error_str.contains("os error 2") {
+            println!("[ERROR] Cette erreur indique que le binaire FFmpeg n'a pas été trouvé ou n'est pas exécutable.");
+            println!("[ERROR] Solutions possibles:");
+            println!("[ERROR] 1. Téléchargez FFmpeg pour Linux depuis: https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz");
+            println!("[ERROR] 2. Extrayez les fichiers 'ffmpeg' et 'ffprobe' (sans extension) dans le dossier 'binaries'");
+            println!("[ERROR] 3. Rendez-les exécutables avec: chmod +x binaries/ffmpeg binaries/ffprobe");
+            println!("[ERROR] 4. Vérifiez que vous êtes dans le bon répertoire de travail");
+        }
+        
+        error_msg
+    })?;
     
     let export_time_s = t0.elapsed().as_secs_f64();
     *LAST_EXPORT_TIME_S.lock().unwrap() = Some(export_time_s);
