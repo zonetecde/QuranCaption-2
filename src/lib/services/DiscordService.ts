@@ -8,17 +8,20 @@ interface DiscordActivity {
 	large_image_text?: string;
 	small_image_key?: string;
 	small_image_text?: string;
+	start_timestamp?: number;
 }
 
 class DiscordService {
 	private isInitialized = false;
 	private readonly APP_ID = '1413639399584956486';
+	private startTimestamp: number | null = null;
 
 	async init(): Promise<void> {
 		if (this.isInitialized) return;
 
 		invoke('init_discord_rpc', { appId: this.APP_ID }).then(() => {
 			this.isInitialized = true;
+			this.startTimestamp = Math.floor(Date.now() / 1000); // Timestamp en secondes
 			console.log('Discord Rich Presence initialisé');
 		});
 	}
@@ -30,7 +33,9 @@ class DiscordService {
 
 		try {
 			await invoke('update_discord_activity', { activityData: activity });
-		} catch (error) {}
+		} catch (error) {
+			console.error("Erreur lors de la mise à jour de l'activité Discord:", error);
+		}
 	}
 
 	async clearActivity(): Promise<void> {
@@ -38,7 +43,9 @@ class DiscordService {
 
 		try {
 			await invoke('clear_discord_activity');
-		} catch (error) {}
+		} catch (error) {
+			console.error("Erreur lors de la suppression de l'activité Discord:", error);
+		}
 	}
 
 	async close(): Promise<void> {
@@ -47,7 +54,9 @@ class DiscordService {
 		try {
 			await invoke('close_discord_rpc');
 			this.isInitialized = false;
-		} catch (error) {}
+		} catch (error) {
+			console.error('Erreur lors de la fermeture de Discord RPC:', error);
+		}
 	}
 
 	// Méthodes prédéfinies pour différents états
@@ -58,21 +67,28 @@ class DiscordService {
 			large_image_key: 'logo',
 			large_image_text: 'Quran Caption',
 			small_image_key: 'idle',
-			small_image_text: 'Idle'
+			small_image_text: 'Idle',
+			start_timestamp: this.startTimestamp || undefined
 		});
 	}
 
 	async setEditingState(): Promise<void> {
+		if (!globalState.currentProject) return;
+
 		await this.updateActivity({
-			details: 'Captioning Quran Recitation',
-			state: globalState.currentProject
-				? `Working on: ${globalState.currentProject.detail.name + (globalState.currentProject.detail.reciter ? ' (' + globalState.currentProject.detail.reciter + ')' : '')}`
-				: 'Editing a video',
+			details: 'Creating Quran Video',
+			state: `${globalState.currentProject.detail.name + (globalState.currentProject.detail.reciter !== 'not set' ? ' (' + globalState.currentProject.detail.reciter + ')' : '')}`,
 			large_image_key: 'logo',
 			large_image_text: 'Quran Caption',
 			small_image_key: 'edit',
-			small_image_text: 'Captioning'
+			small_image_text: 'Captioning',
+			start_timestamp: this.startTimestamp || undefined
 		});
+	}
+
+	// Méthode pour réinitialiser le timer
+	resetTimer(): void {
+		this.startTimestamp = Math.floor(Date.now() / 1000);
 	}
 }
 

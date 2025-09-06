@@ -8,6 +8,7 @@
 	import type Reciter from '$lib/classes/Reciter';
 	import RecitersManager from '$lib/classes/Reciter';
 	import { telemetry } from '$lib/services/Telemetry';
+	import { discordService } from '$lib/services/DiscordService';
 
 	let { close } = $props();
 
@@ -39,6 +40,10 @@
 
 		// Ouvre le projet
 		globalState.currentProject = project;
+
+		// Discord Rich Presence
+		discordService.setEditingState();
+
 		close();
 	}
 </script>

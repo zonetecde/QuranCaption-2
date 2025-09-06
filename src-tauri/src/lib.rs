@@ -1,10 +1,6 @@
 use std::fs;
 use std::path::{Path};
 use std::process::Command;
-use tokio::process::Command as TokioCommand;
-use tokio::io::{AsyncBufReadExt, BufReader};
-use regex::Regex;
-use tauri::Emitter;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 mod exporter;
@@ -30,6 +26,9 @@ struct DiscordActivity {
     large_image_text: Option<String>,
     small_image_key: Option<String>,
     small_image_text: Option<String>,
+    party_size: Option<u32>,
+    party_max: Option<u32>,
+    start_timestamp: Option<i64>,
 }
 
 fn configure_command_no_window(cmd: &mut Command) {
@@ -628,14 +627,16 @@ async fn update_discord_activity(activity_data: DiscordActivity) -> Result<(), S
             activity_builder = activity_builder.state(state);
         }
         
-        // Ajouter le timestamp de début
+        // Ajouter le timestamp de début (utilise start_timestamp si fourni, sinon l'heure actuelle)
+        let start_time = activity_data.start_timestamp.unwrap_or_else(|| {
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs() as i64
+        });
+        
         activity_builder = activity_builder.timestamps(
-            activity::Timestamps::new().start(
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs() as i64
-            )
+            activity::Timestamps::new().start(start_time)
         );
         
         // Construire les assets si nécessaire
@@ -662,6 +663,12 @@ async fn update_discord_activity(activity_data: DiscordActivity) -> Result<(), S
             }
             
             activity_builder = activity_builder.assets(assets_builder);
+        }
+        
+        // Construire la party si nécessaire
+        if let (Some(party_size), Some(party_max)) = (activity_data.party_size, activity_data.party_max) {
+            let party = activity::Party::new().size([party_size as i32, party_max as i32]);
+            activity_builder = activity_builder.party(party);
         }
         
         let activity = activity_builder;

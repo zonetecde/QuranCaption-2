@@ -6,6 +6,7 @@
 	import ExportService from '$lib/services/ExportService';
 	import ExportMonitor from './ExportMonitor.svelte';
 	import ModalManager from './modals/ModalManager';
+	import { discordService } from '$lib/services/DiscordService';
 
 	async function minimizeButtonClick() {
 		getCurrentWindow().minimize();
@@ -59,6 +60,8 @@
 				// go home
 				await globalState.currentProject?.save();
 				globalState.currentProject = null;
+				// Discord Rich Presence
+				discordService.setIdleState();
 			}}
 		>
 			<img class="text-indigo-400 w-8 pb-0.25" alt="Logo" src="favicon.png" />

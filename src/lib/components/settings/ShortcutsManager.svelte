@@ -162,7 +162,7 @@
 </script>
 
 {#if !globalState.settings}
-	<div class="p-4 text-secondary">Chargement des raccourcis…</div>
+	<div class="p-4 text-secondary">Loading shortcuts…</div>
 {:else}
 	<div class="space-y-8">
 		{#each allCategories() as cat}
