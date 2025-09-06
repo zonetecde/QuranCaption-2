@@ -866,12 +866,13 @@ fn build_and_run_ffmpeg_filter_complex(
     ));
     
     // Pour chaque segment, extraire la fenêtre temporelle et séparer couleur/alpha
+    // IMPORTANT: Ajouter un setpts après trim pour assurer un framerate constant
     for i in 0..n {
         let s = starts_s[i];
         let e = s + durations_s[i];
         filter_lines.push(format!(
-            "[b{}]trim=start={:.6}:end={:.6},setpts=PTS-STARTPTS,split=2[s{}witha][s{}foralpha]",
-            i, s, e, i, i
+            "[b{}]trim=start={:.6}:end={:.6},setpts=PTS-STARTPTS,fps={},split=2[s{}witha][s{}foralpha]",
+            i, s, e, fps, i, i
         ));
         filter_lines.push(format!("[s{}foralpha]extractplanes=a[s{}a]", i, i));
         filter_lines.push(format!("[s{}witha]format=yuv444p[s{}c]", i, i));
