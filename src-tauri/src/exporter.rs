@@ -726,7 +726,7 @@ fn build_and_run_ffmpeg_filter_complex(
     }
     
     filter_lines.push(format!(
-        "[0:v]format=rgba,scale=w={}:h={}:force_original_aspect_ratio=decrease,pad={}:{}:(ow-iw)/2:(oh-ih)/2:color=black@0,fps={},setsar=1,format=yuva444p,split={}{}",
+        "[0:v]format=rgba,scale=w={}:h={}:force_original_aspect_ratio=decrease,pad={}:{}:(ow-iw)/2:(oh-ih)/2:color=black@0,fps={},setpts=PTS-STARTPTS,setsar=1,format=yuva444p,split={}{}",
         w, h, w, h, fps, n, split_outputs
     ));
     
@@ -735,8 +735,8 @@ fn build_and_run_ffmpeg_filter_complex(
         let s = starts_s[i];
         let e = s + durations_s[i];
         filter_lines.push(format!(
-            "[b{}]trim=start={:.6}:end={:.6},setpts=PTS-STARTPTS,split=2[s{}witha][s{}foralpha]",
-            i, s, e, i, i
+            "[b{}]trim=start={:.6}:end={:.6},setpts=PTS-STARTPTS,fps={},split=2[s{}witha][s{}foralpha]",
+            i, s, e, fps, i, i
         ));
         filter_lines.push(format!("[s{}foralpha]extractplanes=a[s{}a]", i, i));
         filter_lines.push(format!("[s{}witha]format=yuv444p[s{}c]", i, i));
