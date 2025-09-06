@@ -8,10 +8,14 @@
 	import { discordService } from '$lib/services/DiscordService';
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-5-french-toast';
+	import Settings from '$lib/classes/Settings.svelte';
 
 	onMount(async () => {
 		// Init le gestionnaire de shortcuts
 		ShortcutService.init();
+
+		// Charge les paramètres utilisateur (une seconde fois pour être sûr)
+		Settings.load();
 
 		// Initialiser Discord Rich Presence
 		discordService

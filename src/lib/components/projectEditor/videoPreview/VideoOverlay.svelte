@@ -91,6 +91,7 @@
 			// Si on a certains styles qu'on modifie, on ajoute des styles pour afficher ce qu'ils font
 			if (
 				globalState.getSectionsState['width'] &&
+				globalState.getSectionsState['max-height'] &&
 				(globalState.getSectionsState['width'].extended ||
 					globalState.getSectionsState['max-height'].extended)
 			) {

@@ -257,11 +257,12 @@ export class Style extends SerializableBase {
 	 */
 	getCompositeStyle(styleId: StyleName): Style | undefined {
 		if (this.valueType === 'composite' && this.value instanceof Array) {
-			return (this.value as Style[]).find((s) => s.id === styleId);
-		} else {
-			// Le style composite n'a toujours pas été chargé
-			return new Style({ id: styleId, value: 0 });
+			const v = (this.value as Style[]).find((s) => s.id === styleId);
+			if (v) return v;
 		}
+
+		// Le style composite n'a toujours pas été chargé
+		return new Style({ id: styleId, value: 0 });
 	}
 }
 

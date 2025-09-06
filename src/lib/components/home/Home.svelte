@@ -110,6 +110,8 @@
 
 		// Vérifie les mises à jour
 		if (VersionService.latestUpdate?.hasUpdate) {
+			if (!globalState.settings) return;
+
 			// Vérifie que ça fait pas plus de 24h qu'on a fermé le modal
 			const lastClosed = new Date(
 				globalState.settings!.persistentUiState.lastClosedUpdateModal || 0
@@ -233,6 +235,8 @@
 					<button
 						class="view-button btn text-sm p-2 btn-icon"
 						onclick={() => {
+							if (!globalState.settings) return;
+
 							globalState.settings!.persistentUiState.projectCardView =
 								globalState.settings!.persistentUiState.projectCardView === 'grid'
 									? 'list'
