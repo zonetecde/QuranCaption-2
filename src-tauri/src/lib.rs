@@ -40,14 +40,6 @@ fn configure_command_no_window(cmd: &mut Command) {
     }
 }
 
-fn configure_tokio_command_no_window(cmd: &mut TokioCommand) {
-    #[cfg(target_os = "windows")]
-    {
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-}
-
 #[tauri::command]
 async fn download_from_youtube(
     url: String,
