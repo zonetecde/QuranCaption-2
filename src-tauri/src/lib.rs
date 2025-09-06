@@ -71,8 +71,18 @@ async fn download_from_youtube(
         return Err(format!("yt-dlp binary not found at: {}", yt_dlp_path.display()));
     }
 
+    // Chemin vers le dossier contenant ffmpeg et ffprobe
+    let binaries_dir = Path::new("binaries");
+
+    // Convertir le chemin en String pour éviter les problèmes de lifetime
+    let binaries_dir_str = binaries_dir.to_string_lossy().to_string();
+
     // Configuration selon le type (audio ou vidéo)
     let mut args = vec!["--force-ipv4"];
+
+    // Ajouter le chemin vers le dossier contenant ffmpeg et ffprobe
+    args.push("--ffmpeg-location");
+    args.push(&binaries_dir_str);
 
     // Pattern de sortie avec le titre de la vidéo et le nom de la chaîne
     let output_pattern = format!("{}/%(title)s (%(uploader)s).%(ext)s", download_path);
