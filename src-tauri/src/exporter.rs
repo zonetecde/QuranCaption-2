@@ -677,11 +677,16 @@ fn build_and_run_ffmpeg_filter_complex(
     
     for i in 0..n {
         if i < n - 1 {
-            durations_s.push(((timestamps_ms[i + 1] - timestamps_ms[i]) as f64 / 1000.0).max(0.001));
+            let duration = ((timestamps_ms[i + 1] - timestamps_ms[i]) as f64 / 1000.0).max(0.001);
+            durations_s.push(duration);
         } else {
-            durations_s.push((tail_ms as f64 / 1000.0).max(0.001));
+            let duration = (tail_ms as f64 / 1000.0).max(0.001);
+            durations_s.push(duration);
         }
     }
+    
+    // Debug: afficher les durées calculées
+    println!("[timeline] Durées calculées: {:?}", durations_s);
     
     let total_by_ts = (timestamps_ms[n - 1] + tail_ms) as f64 / 1000.0;
     let duration_s = if let Some(dur_ms) = duration_ms {
@@ -729,10 +734,13 @@ fn build_and_run_ffmpeg_filter_complex(
     
     let mut concat_file = fs::File::create(&concat_path)?;
     writeln!(concat_file, "ffconcat version 1.0")?;
+    
+    // Pour des images statiques, on doit spécifier le framerate dans le ffconcat
     for (i, p) in image_paths.iter().enumerate() {
         writeln!(concat_file, "file '{}'", p)?;
         writeln!(concat_file, "duration {:.6}", durations_s[i])?;
     }
+    // Le dernier fichier doit être répété pour la durée finale
     writeln!(concat_file, "file '{}'", image_paths[n - 1])?;
     
     println!("[concat] Fichier ffconcat -> {:?}", concat_path);
@@ -823,6 +831,7 @@ fn build_and_run_ffmpeg_filter_complex(
     cmd.extend_from_slice(&[
         "-safe".to_string(), "0".to_string(),
         "-f".to_string(), "concat".to_string(),
+        "-r".to_string(), fps.to_string(), // Spécifier le framerate pour les images
         "-i".to_string(), concat_name,
     ]);
     current_idx = 1;
