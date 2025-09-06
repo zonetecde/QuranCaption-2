@@ -184,6 +184,29 @@ fn get_duration(file_path: &str) -> Result<i64, String> {
         return Ok(-1); // Si ffprobe n'existe pas, retourner -1
     }
     println!("✅ ffprobe binary found at: '{}'", ffprobe_path.display());
+    
+    // Vérifier les permissions sur Linux/Unix
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if let Ok(metadata) = std::fs::metadata(&ffprobe_path) {
+            let permissions = metadata.permissions();
+            let mode = permissions.mode();
+            println!("🔐 File permissions (octal): {:o}", mode);
+            println!("🔐 Is executable: {}", mode & 0o111 != 0);
+            
+            if mode & 0o111 == 0 {
+                println!("⚠️  ffprobe binary is not executable, trying to set execute permissions...");
+                if let Err(e) = std::fs::set_permissions(&ffprobe_path, std::fs::Permissions::from_mode(0o755)) {
+                    println!("❌ Failed to set execute permissions: {}", e);
+                } else {
+                    println!("✅ Execute permissions set successfully");
+                }
+            }
+        } else {
+            println!("❌ Could not read file metadata");
+        }
+    }
 
     let mut cmd = Command::new(&ffprobe_path);
     let args = [
@@ -201,6 +224,27 @@ fn get_duration(file_path: &str) -> Result<i64, String> {
     
     println!("⏳ Running ffprobe command...");
     let output = cmd.output();
+    
+    // Essayer une commande de test simple pour vérifier si ffprobe fonctionne
+    #[cfg(unix)]
+    {
+        println!("🧪 Testing ffprobe with --version...");
+        let mut test_cmd = Command::new(&ffprobe_path);
+        test_cmd.arg("--version");
+        configure_command_no_window(&mut test_cmd);
+        match test_cmd.output() {
+            Ok(test_result) => {
+                println!("🧪 Test command status: {}", test_result.status);
+                let test_stdout = String::from_utf8_lossy(&test_result.stdout);
+                let test_stderr = String::from_utf8_lossy(&test_result.stderr);
+                println!("🧪 Test stdout: '{}'", test_stdout.lines().take(3).collect::<Vec<_>>().join("\\n"));
+                println!("🧪 Test stderr: '{}'", test_stderr.lines().take(3).collect::<Vec<_>>().join("\\n"));
+            }
+            Err(e) => {
+                println!("🧪 Test command failed: {}", e);
+            }
+        }
+    }
 
     match output {
         Ok(result) => {
@@ -230,6 +274,22 @@ fn get_duration(file_path: &str) -> Result<i64, String> {
                 println!("❌ ffprobe failed with exit code: {}", result.status);
                 println!("❌ stderr: '{}'", stderr);
                 println!("❌ stdout: '{}'", stdout);
+                
+                // Essayer d'obtenir plus d'informations sur l'erreur
+                #[cfg(unix)]
+                {
+                    println!("🔍 Trying to get more error info...");
+                    let mut debug_cmd = Command::new(&ffprobe_path);
+                    debug_cmd.args(&["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file_path]);
+                    configure_command_no_window(&mut debug_cmd);
+                    if let Ok(debug_result) = debug_cmd.output() {
+                        let debug_stderr = String::from_utf8_lossy(&debug_result.stderr);
+                        let debug_stdout = String::from_utf8_lossy(&debug_result.stdout);
+                        println!("🔍 Debug stderr: '{}'", debug_stderr);
+                        println!("🔍 Debug stdout: '{}'", debug_stdout);
+                    }
+                }
+                
                 Err(format!("ffprobe error: {}", stderr))
             }
         }
