@@ -34,7 +34,12 @@ fn resolve_ffmpeg_binary() -> Option<String> {
     };
 
     if ffmpeg_path.exists() {
-        return Some(ffmpeg_path.to_string_lossy().to_string());
+        // Convertir en chemin absolu pour éviter les problèmes de working directory
+        if let Ok(absolute_path) = ffmpeg_path.canonicalize() {
+            return Some(absolute_path.to_string_lossy().to_string());
+        } else {
+            return Some(ffmpeg_path.to_string_lossy().to_string());
+        }
     }
 
     // Si le chemin relatif ne fonctionne pas, essayer depuis le dossier de l'executable
@@ -47,7 +52,11 @@ fn resolve_ffmpeg_binary() -> Option<String> {
             };
             
             if alt_path.exists() {
-                return Some(alt_path.to_string_lossy().to_string());
+                if let Ok(absolute_path) = alt_path.canonicalize() {
+                    return Some(absolute_path.to_string_lossy().to_string());
+                } else {
+                    return Some(alt_path.to_string_lossy().to_string());
+                }
             }
         }
     }
@@ -61,8 +70,19 @@ fn resolve_ffmpeg_binary() -> Option<String> {
         };
         
         if manifest_path.exists() {
-            return Some(manifest_path.to_string_lossy().to_string());
+            if let Ok(absolute_path) = manifest_path.canonicalize() {
+                return Some(absolute_path.to_string_lossy().to_string());
+            } else {
+                return Some(manifest_path.to_string_lossy().to_string());
+            }
         }
+    }
+
+    // En dernier recours, utiliser ffmpeg du PATH système
+    println!("[ffmpeg] Tentative d'utilisation de ffmpeg du système (PATH)");
+    if let Ok(_) = std::process::Command::new("ffmpeg").arg("-version").output() {
+        println!("[ffmpeg] ✓ FFmpeg trouvé dans le PATH système");
+        return Some("ffmpeg".to_string());
     }
 
     // Aucun binaire FFmpeg trouvé
@@ -78,7 +98,12 @@ fn resolve_ffprobe_binary() -> String {
     };
 
     if ffprobe_path.exists() {
-        return ffprobe_path.to_string_lossy().to_string();
+        // Convertir en chemin absolu pour éviter les problèmes de working directory
+        if let Ok(absolute_path) = ffprobe_path.canonicalize() {
+            return absolute_path.to_string_lossy().to_string();
+        } else {
+            return ffprobe_path.to_string_lossy().to_string();
+        }
     }
 
     // Si le chemin relatif ne fonctionne pas, essayer depuis le dossier de l'executable
@@ -91,7 +116,11 @@ fn resolve_ffprobe_binary() -> String {
             };
             
             if alt_path.exists() {
-                return alt_path.to_string_lossy().to_string();
+                if let Ok(absolute_path) = alt_path.canonicalize() {
+                    return absolute_path.to_string_lossy().to_string();
+                } else {
+                    return alt_path.to_string_lossy().to_string();
+                }
             }
         }
     }
@@ -105,8 +134,19 @@ fn resolve_ffprobe_binary() -> String {
         };
         
         if manifest_path.exists() {
-            return manifest_path.to_string_lossy().to_string();
+            if let Ok(absolute_path) = manifest_path.canonicalize() {
+                return absolute_path.to_string_lossy().to_string();
+            } else {
+                return manifest_path.to_string_lossy().to_string();
+            }
         }
+    }
+
+    // En dernier recours, utiliser ffprobe du PATH système
+    println!("[ffprobe] Tentative d'utilisation de ffprobe du système (PATH)");
+    if let Ok(_) = std::process::Command::new("ffprobe").arg("-version").output() {
+        println!("[ffprobe] ✓ FFprobe trouvé dans le PATH système");
+        return "ffprobe".to_string();
     }
 
     // Fallback vers le binaire système
